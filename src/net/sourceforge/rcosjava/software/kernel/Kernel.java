@@ -84,9 +84,7 @@ public class Kernel extends OSMessageHandler
   private Hashtable interruptHandlers = new Hashtable();
   private Schedule scheduleMessage = new Schedule(this);
   private RCOSProcess currentProcess;
-
-  private Context myContext;
-  private Memory myCodeMemory, myStackMemory;
+  private boolean runningProcess;
 
   /**
    * Initialise Kernel
@@ -96,6 +94,7 @@ public class Kernel extends OSMessageHandler
   {
     super(MESSENGING_ID, postOffice);
     myCPU = new CPU(this);
+    runningProcess = false;
   }
 
   /**
@@ -130,16 +129,6 @@ public class Kernel extends OSMessageHandler
   }
 
   /**
-   * @return whether there is a current process or not (null or not) currently
-   * being executed.
-   */
-  public boolean runningProcess()
-  {
-    return (myCPU.isNewContext()) && (myCPU.getProcessCode() != null) &&
-      (myCPU.getProcessStack() != null);
-  }
-
-  /**
    * @return the current PID that is executing in the Kernel
    */
   public int getCurrentProcessPID()
@@ -157,17 +146,54 @@ public class Kernel extends OSMessageHandler
   }
 
   /**
+   * @return whether there is a current process or not (null or not) currently
+   * being executed.
+   */
+  public boolean runningProcess()
+  {
+    return runningProcess;
+  }
+
+  /**
+   * Set that a process is running.
+   *
+   */
+  public void processRunning()
+  {
+    runningProcess = true;
+  }
+
+  public void processStopped()
+  {
+    runningProcess = false;
+  }
+
+  public void pause()
+  {
+    myCPU.pause();
+  }
+
+  public void unpause()
+  {
+    myCPU.unpause();
+  }
+
+  /**
    * Sets the current process and context as well as the code and stack segments
    * of the CPU to null.  That there is no currently running process.
    */
   public void nullProcess()
   {
-    myContext = new Context();
-    myCodeMemory = null;
-    myStackMemory = null;
-    setMemory();
+    processStopped();
+    myCPU.setContext(new Context());
+    myCPU.setProcessCode(null);
+    myCPU.setProcessStack(null);
   }
 
+  /**
+   * Sets the process as finished and handles the interrupt (should handle
+   * process finished interrupt).
+   */
   public void killProcess()
   {
     myCPU.setProcessFinished();
@@ -180,11 +206,16 @@ public class Kernel extends OSMessageHandler
    */
   public void performInstructionExecutionCycle()
   {
-    sendMessage(this.scheduleMessage);
-    myCPU.performInstructionExecutionCycle();
+    if (!myCPU.isPaused())
+    {
+      sendMessage(scheduleMessage);
+      myCPU.performInstructionExecutionCycle();
+    }
+
+    postOffice.deliverMessages();
 
     //Sends context and current instruction.
-    if (runningProcess())
+    if (!myCPU.isPaused() && runningProcess())
     {
       SetContext contextMsg = new SetContext(this, myCPU.getContext());
       sendMessage(contextMsg);
@@ -195,51 +226,38 @@ public class Kernel extends OSMessageHandler
   }
 
   /**
-   * Sets the current context of the CPU based on a given process.
    * Sets the process code (the non-changing executing program).
-   * Sets the process stacking (the working area of the executing program).
    *
-   * @param newProcess the process contains a contex that is accessed using
-   * getContext.
    * @param newProcessCode the value to set the process code to.
-   * @param newProcessStack the value to set the process stack to.
    */
-  private synchronized void setMemory()
-  {
-    if (myCodeMemory != null &&
-        myStackMemory != null &&
-        myContext.getBasePointer() != -1 &&
-        myContext.getProgramCounter() != -1 &&
-        myContext.getStackPointer() != -1)
-    {
-      myCPU.setMemory(myContext, myCodeMemory, myStackMemory);
-    }
-    if (myCodeMemory == null &&
-        myStackMemory == null &&
-        myContext.getBasePointer() != -1 &&
-        myContext.getProgramCounter() != -1 &&
-        myContext.getStackPointer() != -1)
-    {
-      myCPU.setMemory(myContext, myCodeMemory, myStackMemory);
-    }
-  }
-
   public void setProcessCode(Memory newProcessCode)
   {
-    myCodeMemory = newProcessCode;
-    setMemory();
+    myCPU.setProcessCode(newProcessCode);
   }
 
+  /**
+   * Sets the process stacking (the working area of the executing program).
+   *
+   * @param newProcessStack the value to set the process stack to.
+   */
   public void setProcessStack(Memory newProcessStack)
   {
-    myStackMemory = newProcessStack;
-    setMemory();
+    myCPU.setProcessStack(newProcessStack);
+    if ((newProcessStack != null) && (myCPU.getProcessCode() != null) &&
+      (myCPU.getContext() != null))
+    {
+      processRunning();
+    }
   }
 
+  /**
+   * Sets the current context of the CPU based on a given process.
+   *
+   * @param newContext the context that a process contains.
+   */
   public void setContext(Context newContext)
   {
-    myContext = newContext;
-    setMemory();
+    myCPU.setContext(newContext);
   }
 
   /**
@@ -328,12 +346,11 @@ public class Kernel extends OSMessageHandler
    *
    * @param value to set the process stack at the current stack pointer address.
    */
-  public synchronized void returnValue(short value)
+  public void returnValue(short value)
   {
     // place return value onto stack
     myCPU.getContext().incStackPointer();
-    myCPU.getProcessStack().write(
-      myCPU.getContext().getStackPointer(), value);
+    myCPU.getProcessStack().write(myCPU.getContext().getStackPointer(), value);
   }
 
   /**
@@ -342,8 +359,7 @@ public class Kernel extends OSMessageHandler
    *
    * @throws java.io.IOException
    */
-  public synchronized void handleSystemCall()
-    throws java.io.IOException
+  public void handleSystemCall() throws java.io.IOException
   {
     Instruction call = myCPU.getContext().getInstructionRegister();
 
@@ -360,7 +376,7 @@ public class Kernel extends OSMessageHandler
       ChOut message = new
         ChOut(this, getCurrentProcess().getTerminalId(),
         (char)
-        myCPU.getProcessStack().read(myCPU.getContext().getStackPointer()));
+          myCPU.getProcessStack().read(myCPU.getContext().getStackPointer()));
       sendMessage(message);
     }
     else if (call.isNumIn())
@@ -576,7 +592,7 @@ public class Kernel extends OSMessageHandler
    * if it is ignore<BR>
    * else update CPU ticks and do ProcessSwitch
   */
-  public synchronized void handleTimerInterrupt()
+  public void handleTimerInterrupt()
   {
     timerInterrupts++;
 
@@ -590,17 +606,13 @@ public class Kernel extends OSMessageHandler
         RCOSProcess oldProcess = getCurrentProcess();
         oldProcess.addToCPUTicks(getCurrentProcessTicks());
 
-        //Save memory if program hasn't terminated.
-        if (myCPU.hasCodeToExecute())
-        {
-          //Assume that the stack is the only thing worth writing back that the
-          //programs cannot modify their own memory?
-          MemoryRequest memSave = new MemoryRequest(getCurrentProcess().getPID(),
-            MemoryManager.STACK_SEGMENT, myCPU.getProcessStack().getSegmentSize(),
-            myCPU.getProcessStack());
-          WriteBytes msg = new WriteBytes(this, memSave);
-          sendMessage(msg);
-        }
+        //Assume that the stack is the only thing worth writing back that the
+        //programs cannot modify their own memory?
+        MemoryRequest memSave = new MemoryRequest(getCurrentProcess().getPID(),
+          MemoryManager.STACK_SEGMENT, myCPU.getProcessStack().getSegmentSize(),
+          myCPU.getProcessStack());
+        WriteBytes msg = new WriteBytes(this, memSave);
+        sendMessage(msg);
 
         //Set the current process to nothing
         NullProcess nullMsg = new NullProcess(this);

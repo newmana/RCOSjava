@@ -52,8 +52,7 @@ public class KillProcess extends UniversalMessageAdapter
 
   public void doMessage(Kernel theElement)
   {
-    if (theElement.runningProcess() &&
-      theElement.getCurrentProcessPID() == pid)
+    if (theElement.getCurrentProcessPID() == pid)
     {
       Interrupt processFinishedInterrupt = new Interrupt(-1,
         "ProcessFinished");

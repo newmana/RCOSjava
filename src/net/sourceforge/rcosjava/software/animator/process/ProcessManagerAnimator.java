@@ -16,7 +16,7 @@ import net.sourceforge.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import net.sourceforge.rcosjava.messaging.messages.MessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.universal.RequestProcessPriority;
 import net.sourceforge.rcosjava.messaging.messages.universal.Run;
-import net.sourceforge.rcosjava.messaging.messages.universal.Step;
+import net.sourceforge.rcosjava.messaging.messages.universal.Stop;
 import net.sourceforge.rcosjava.messaging.messages.universal.Kill;
 import net.sourceforge.rcosjava.software.process.RCOSProcess;
 import net.sourceforge.rcosjava.software.util.LIFOQueue;
@@ -172,9 +172,9 @@ public class ProcessManagerAnimator extends RCOSAnimator
    * Send a step message to the kernel.  Called by the Process Manager Frame to
    * step the execution of a process by one command.
    */
-  public void sendStepMessage()
+  public void sendStopMessage()
   {
-    Step newMsg = new Step(this);
+    Stop newMsg = new Stop(this);
     sendMessage(newMsg);
   }
 

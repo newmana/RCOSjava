@@ -22,7 +22,7 @@ public class GetNewFile extends OSMessageAdapter
 
   public void doMessage(ProgramManager theElement)
   {
-    theElement.startThread();
+    //theElement.startThread();
   }
 
   public boolean undoableMessage()

@@ -66,8 +66,11 @@ public class AnimatorOffice extends PostOffice
     theOSPostOffice.addPostOffice(this);
 
     LocalMessageSender internalSender = new LocalMessageSender();
+    internalSender.setName("AnimatorLocalOfficeThread");
     internalSender.start();
-    PostOfficeMessageSender poSender = new PostOfficeMessageSender();
+    PostOfficeMessageSender poSender = new
+        PostOfficeMessageSender();
+    poSender.setName("AnimatorPOOfficeThread");
     poSender.start();
   }
 
@@ -196,7 +199,6 @@ public class AnimatorOffice extends PostOffice
             MessageAdapter message = (MessageAdapter)
               AnimatorOffice.this.localMessages.retrieveCurrent();
 
-            System.out.println("Animator got: " + message);
             if (message.forPostOffice(AnimatorOffice.this))
             {
               //Go through the hashtable returning all the handlers

@@ -4,7 +4,6 @@ import java.awt.*;
 import java.net.*;
 import java.lang.Thread;
 
-import net.sourceforge.rcosjava.RCOS;
 import net.sourceforge.rcosjava.messaging.*;
 import net.sourceforge.rcosjava.messaging.messages.os.OSMessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.os.RegisterInterruptHandler;
@@ -21,6 +20,7 @@ import net.sourceforge.rcosjava.hardware.cpu.Interrupt;
 import net.sourceforge.rcosjava.pll2.FileClient;
 import net.sourceforge.rcosjava.software.interrupt.InterruptHandler;
 import net.sourceforge.rcosjava.software.interrupt.ProgManInterruptHandler;
+import net.sourceforge.rcosjava.software.kernel.Kernel;
 import net.sourceforge.rcosjava.hardware.memory.*;
 import net.sourceforge.rcosjava.software.memory.*;
 import net.sourceforge.rcosjava.software.util.*;
@@ -74,9 +74,9 @@ public class ProgramManager extends OSMessageHandler
   private ProgManInterruptHandler theIH;
 
   /**
-   * A reference to the instance of RCOS startup program.
+   * A reference to the kernel.
    */
-  private RCOS myRCOS;
+  private Kernel myKernel;
 
   /**
    * The name of the currently selected file.
@@ -94,14 +94,14 @@ public class ProgramManager extends OSMessageHandler
    * @param newPostOffice the post office to register to.
    * @param host the host that this should connect to.
    * @param port the port to connect to.
-   * @param newRCOS link to RCOS to control some of the threading stuff
+   * @param newKernel link to RCOS to control some of the threading stuff
    * directly.
    */
   public ProgramManager(OSOffice newPostOffice, String host, int port,
-    RCOS newRCOS)
+    Kernel newKernel)
   {
     super(MESSENGING_ID, newPostOffice);
-    myRCOS = newRCOS;
+    myKernel = newKernel;
 
     // Create a new client to get files and directory
     // information from the server.
@@ -155,15 +155,15 @@ public class ProgramManager extends OSMessageHandler
    */
   public void startThread()
   {
-    myRCOS.startThread();
+    myKernel.unpause();
   }
 
   /**
    * Step the program execution thread one place forward.
    */
-  public void stepThread()
+  public void stopThread()
   {
-    myRCOS.stepThread();
+    myKernel.pause();
   }
 
   /**
@@ -259,7 +259,7 @@ public class ProgramManager extends OSMessageHandler
     }
     else
     {
-      RCOS.updateStatusBar("Error! Unable to connect to server.");
+//      RCOS.updateStatusBar("Error! Unable to connect to server.");
     }
   }
 }

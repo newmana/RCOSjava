@@ -1,5 +1,6 @@
 package net.sourceforge.rcosjava.messaging.postoffices.os;
 
+import net.sourceforge.rcosjava.RCOS;
 import net.sourceforge.rcosjava.messaging.postoffices.PostOffice;
 import net.sourceforge.rcosjava.messaging.messages.MessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.os.OSMessageAdapter;
@@ -44,13 +45,6 @@ public class OSOffice extends PostOffice
   public OSOffice(String newId)
   {
     id = newId;
-
-//    LocalMessageSender internalSender = new LocalMessageSender();
-//    internalSender.setName("OSOfficeLocalThread");
-//    internalSender.start();
-    PostOfficeMessageSender poSender = new PostOfficeMessageSender();
-    poSender.setName("OSOfficePOThread");
-    poSender.start();
   }
 
   public void sendMessage(MessageAdapter message)
@@ -86,57 +80,8 @@ public class OSOffice extends PostOffice
 
   public void localSendMessage(MessageAdapter message)
   {
-//    localMessages.add(message);
-    if (message.forPostOffice(OSOffice.this))
-    {
-      //Go through the hashtable returning all the handlers
-      //registered.  Send the message to all of them.
-
-      Iterator tmpIter = OSOffice.this.getHandlers().values().iterator();
-
-      synchronized (OSOffice.this.getHandlers())
-      {
-        while(tmpIter.hasNext())
-        {
-          OSMessageHandler theDestination = (OSMessageHandler)
-            tmpIter.next();
-
-          //Send the message to the destination
-          try
-          {
-            Class[] classes = {message.getClass().getSuperclass()};
-            Method method = theDestination.getClass().getMethod(
-              "processMessage", classes);
-
-            Object[] args = {message};
-            method.invoke(theDestination, args);
-          }
-          catch (Exception e)
-          {
-            e.printStackTrace();
-          }
-        }
-      }
-    }
+    localMessages.add(message);
   }
-
-/*    if (message.forPostOffice(this))
-    {
-      //Go through the hashtable returning all the handlers
-      //registered.  Send the message to all of them.
-
-      Iterator tmpIter = this.getHandlers().values().iterator();
-
-      synchronized (this.getHandlers())
-      {
-        while(tmpIter.hasNext())
-        {
-          OSMessageHandler theDestination = (OSMessageHandler) tmpIter.next();
-          //Send the message to the destination
-          theDestination.processMessage(message);
-        }
-      }
-    }*/
 
   /**
    * To be done
@@ -146,43 +91,11 @@ public class OSOffice extends PostOffice
   public void localSendMessage(OSMessageAdapter message)
   {
     localSendMessage((MessageAdapter) message);
-
-/*    if (message.forPostOffice(this))
-    {
-      //Go through the hashtable returning all the handlers
-      //registered.  Send the message to all of them.
-
-      Iterator tmpIter = this.getHandlers().values().iterator();
-
-      synchronized (this.getHandlers())
-      {
-        while(tmpIter.hasNext())
-        {
-          OSMessageHandler theDestination = (OSMessageHandler) tmpIter.next();
-          //Send the message to the destination
-          theDestination.processMessage(message);
-        }
-      }
-    }*/
   }
 
   public void sendToPostOffices(MessageAdapter message)
   {
     postOfficeMessages.add(message);
-/*    PostOffice tmpPostOffice;
-
-    if (!postOffices.isEmpty())
-    {
-      int count;
-      for (count = 0; count < postOffices.size(); count++)
-      {
-        tmpPostOffice = getPostOffice(count);
-        if (message.forPostOffice(tmpPostOffice))
-        {
-          tmpPostOffice.localSendMessage(message);
-        }
-      }
-    }*/
   }
 
   public void processMessage(MessageAdapter message)
@@ -198,39 +111,70 @@ public class OSOffice extends PostOffice
     }
   }
 
-  private class PostOfficeMessageSender extends Thread
+  private void postOfficeDeliverMessage()
   {
-    public void run()
+    synchronized(postOfficeMessages)
     {
-      while (true)
+      if (OSOffice.this.postOfficeMessages.size() > 0)
       {
-        try
+        PostOffice tmpPostOffice;
+        //Retrieve first message off the blocks
+        MessageAdapter message = (MessageAdapter)
+          OSOffice.this.postOfficeMessages.retrieveCurrent();
+
+        if (!myPostOffices.isEmpty())
         {
-          Thread.sleep(5);
-        }
-        catch (java.lang.InterruptedException ie)
-        {
-        }
-        synchronized(postOfficeMessages)
-        {
-          if (OSOffice.this.postOfficeMessages.size() > 0)
+          int count;
+          for (count = 0; count < myPostOffices.size(); count++)
           {
-
-            PostOffice tmpPostOffice;
-            //Retrieve first message off the blocks
-            MessageAdapter message = (MessageAdapter)
-              OSOffice.this.postOfficeMessages.retrieveCurrent();
-
-            if (!myPostOffices.isEmpty())
+            tmpPostOffice = getPostOffice(count);
+            if (message.forPostOffice(tmpPostOffice))
             {
-              int count;
-              for (count = 0; count < myPostOffices.size(); count++)
+              tmpPostOffice.localSendMessage(message);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private void localDeliverMessage()
+  {
+    synchronized(localMessages)
+    {
+      if (localMessages.size() > 0)
+      {
+        //Retrieve first message off the blocks
+        MessageAdapter message = (MessageAdapter) localMessages.retrieveCurrent();
+
+        //System.out.println("OS got message: " + message);
+        if (message.forPostOffice(OSOffice.this))
+        {
+          //Go through the hashtable returning all the handlers
+          //registered.  Send the message to all of them.
+
+          Iterator tmpIter = OSOffice.this.getHandlers().values().iterator();
+
+          synchronized (OSOffice.this.getHandlers())
+          {
+            while(tmpIter.hasNext())
+            {
+              OSMessageHandler theDestination = (OSMessageHandler)
+                tmpIter.next();
+
+              //Send the message to the destination
+              try
               {
-                tmpPostOffice = getPostOffice(count);
-                if (message.forPostOffice(tmpPostOffice))
-                {
-                  tmpPostOffice.localSendMessage(message);
-                }
+                Class[] classes = {message.getClass().getSuperclass()};
+                Method method = theDestination.getClass().getMethod(
+                  "processMessage", classes);
+
+                Object[] args = {message};
+                method.invoke(theDestination, args);
+              }
+              catch (Exception e)
+              {
+                e.printStackTrace();
               }
             }
           }
@@ -239,63 +183,16 @@ public class OSOffice extends PostOffice
     }
   }
 
-  private class LocalMessageSender extends Thread
+  public void deliverMessages()
   {
-    public void run()
+    while (postOfficeMessages.size() > 0)
     {
-      while (true)
-      {
-        try
-        {
-          Thread.sleep(5);
-        }
-        catch (java.lang.InterruptedException ie)
-        {
-        }
-        synchronized(localMessages)
-        {
-          if (OSOffice.this.localMessages.size() > 0)
-          {
+      postOfficeDeliverMessage();
+    }
 
-            //Retrieve first message off the blocks
-            MessageAdapter message = (MessageAdapter)
-              OSOffice.this.localMessages.retrieveCurrent();
-
-            //System.out.println("OS got message: " + message);
-            if (message.forPostOffice(OSOffice.this))
-            {
-              //Go through the hashtable returning all the handlers
-              //registered.  Send the message to all of them.
-
-             Iterator tmpIter = OSOffice.this.getHandlers().values().iterator();
-
-              synchronized (OSOffice.this.getHandlers())
-              {
-                while(tmpIter.hasNext())
-                {
-                  OSMessageHandler theDestination = (OSMessageHandler)
-                    tmpIter.next();
-
-                  //Send the message to the destination
-                  try
-                  {
-                    Class[] classes = {message.getClass().getSuperclass()};
-                    Method method = theDestination.getClass().getMethod(
-                      "processMessage", classes);
-
-                    Object[] args = {message};
-                    method.invoke(theDestination, args);
-                  }
-                  catch (Exception e)
-                  {
-                    e.printStackTrace();
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+    while (localMessages.size() > 0)
+    {
+      localDeliverMessage();
     }
   }
 }

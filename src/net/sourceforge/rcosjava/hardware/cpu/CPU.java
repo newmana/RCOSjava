@@ -82,16 +82,16 @@ public class CPU
   private boolean interruptsEnabled;
 
   /**
-   * Internal flag which holds whether there is a process currently running
-   * with code to execute.
-   */
-  private boolean codeToExecute;
-
-  /**
    * Internal flag which holds whether the current process has finished
    * execution.
    */
   private boolean processFinished;
+
+  /**
+   * Internal flag which holds whether there is a process currently running
+   * with code to execute.
+   */
+  private boolean codeToExecute;
 
   /**
    * Keeps a track of the number of ticks (timer interrupts) have occurred.
@@ -140,41 +140,61 @@ public class CPU
     interruptsEnabled = true;
   }
 
-  public boolean setProcessFinished()
+  public boolean isPaused()
+  {
+    return paused;
+  }
+
+  public void pause()
+  {
+    paused = true;
+  }
+
+  public void unpause()
+  {
+    paused = false;
+  }
+
+  public void setProcessFinished()
   {
     Interrupt interrupt = new Interrupt(-1, "ProcessFinished");
     generateInterrupt(interrupt);
     processFinished = false;
-    return false;
   }
 
   /**
    * The new CPU context to set the CPU.  Currently, there is no protection
    * or error checking.  The kernel is assumed to know what it's doing.
-   * Overwrites the current process code.  Sets the code to exceute to true
-   * if the process code given is not null.  Again, the CPU has a variable
-   * storage system to hold all of the process code.  For simple implementation.
+   *
+   * @param newContext the new context.
+   */
+  public void setContext(Context newContext)
+  {
+    myContext = newContext;
+  }
+
+  /**
    * Overwrites the current process stack.  The stack is a fixed size and the
    * CPU holds this interally.  Not very realistic but easliy implemented.
    *
-   * @param newContext the program's context.
-   * @param newProcessMemory the new memory value of the process code.
-   * @param newMemory the new memory value of the process stack.
+   * @param newProcessStack the new memory value of the process stack.
    */
-  public void setMemory(Context newContext, Memory newProcessMemory,
-    Memory newProcessStack)
+  public void setProcessStack(Memory newProcessStack)
   {
-    myContext = newContext;
     processStack = newProcessStack;
-    codeToExecute = !(newProcessMemory == null);
-    processCode = newProcessMemory;
   }
 
-  public boolean isNewContext()
+  /**
+   * Overwrites the current process code.  Sets the code to exceute to true
+   * if the process code given is not null.  Again, the CPU has a variable
+   * storage system to hold all of the process code.  For simple implementation.
+   *
+   * @param newProcessCode the new memory value of the process code.
+   */
+  public void setProcessCode(Memory newProcessCode)
   {
-    return (myContext.getProgramCounter() == -1 &&
-            myContext.getStackPointer() == -1 &&
-            myContext.getBasePointer() == -1);
+    codeToExecute = !(newProcessCode == null);
+    processCode = newProcessCode;
   }
 
   /**
@@ -183,15 +203,6 @@ public class CPU
   public Context getContext()
   {
     return myContext;
-  }
-
-  /**
-   * Returns if the context given has completed (will return false) or if there
-   * is an active process with more code to execute.
-   */
-  public boolean hasCodeToExecute()
-  {
-    return (codeToExecute);
   }
 
   /**
@@ -226,6 +237,11 @@ public class CPU
     return processCode;
   }
 
+  public boolean hasCodeToExecute()
+  {
+    return codeToExecute;
+  }
+
   /**
    * Perform main Instruction Execution cycle.
    *
@@ -235,7 +251,7 @@ public class CPU
   public boolean performInstructionExecutionCycle()
   {
     boolean continueExecuting = true;
-    if (hasCodeToExecute())
+    if ((!isPaused()) && (hasCodeToExecute()))
     {
       // fetch and execute if we aren't on the NullProcess
       try
@@ -266,7 +282,8 @@ public class CPU
     //the last execution cycle.
     if (processFinished)
     {
-      continueExecuting = setProcessFinished();
+      setProcessFinished();
+      continueExecuting = processFinished;
     }
 
     handleInterrupts();
@@ -371,8 +388,7 @@ public class CPU
    *
    * @throws java.io.IOException TBD
    */
-  public void executeInstruction()
-    throws java.io.IOException
+  public void executeInstruction() throws java.io.IOException
   {
     Instruction instruction = getContext().getInstructionRegister();
 
@@ -487,8 +503,9 @@ public class CPU
         (processStack.read(getContext().getStackPointer()+2)));
       getContext().setProgramCounter((short)
         (processStack.read(getContext().getStackPointer()+3)));
-      codeToExecute = !(getContext().getBasePointer() <= 0);
+      //codeToExecute = !(getContext().getBasePointer() <= 0);
       processFinished = getContext().getBasePointer() <= 0;
+      codeToExecute = !processFinished;
     }
     else if (call.isNegative())
     {
@@ -701,11 +718,11 @@ public class CPU
       if (!interruptsQueue.queueEmpty())
       {
         //is there an interrupt for the current time?
-        Interrupt intCurrentInterrupt = interruptsQueue.getInterrupt(ticks);
-        while (intCurrentInterrupt != null)
+        Interrupt currentInterrupt = interruptsQueue.getInterrupt(ticks);
+        while (currentInterrupt != null)
         {
-          myKernel.handleInterrupt(intCurrentInterrupt);
-          intCurrentInterrupt = interruptsQueue.getInterrupt(ticks);
+          myKernel.handleInterrupt(currentInterrupt);
+          currentInterrupt = interruptsQueue.getInterrupt(ticks);
         }
       }
       //if ((ticks % TIMER_PERIOD == 0) && (runningProcess()))

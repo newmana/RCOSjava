@@ -19,7 +19,7 @@ public class SetContext extends UniversalMessageAdapter
     Context newContext)
   {
     super(theSource);
-    myContext = (Context) newContext.clone();
+    myContext = newContext;
   }
 
   /**

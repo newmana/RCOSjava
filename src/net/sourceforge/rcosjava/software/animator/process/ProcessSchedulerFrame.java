@@ -440,8 +440,11 @@ public class ProcessSchedulerFrame extends RCOSFrame
   synchronized void processFinished(int pid)
   {
     MTGO tmpMTGO = engine.returnMTGO("P" + pid);
-    tmpMTGO.isVisible = false;
-    engine.removeMTGO("P" + pid);
+    if (tmpMTGO != null)
+    {
+      tmpMTGO.isVisible = false;
+      engine.removeMTGO("P" + pid);
+    }
     syncPaint(delay);
   }
 

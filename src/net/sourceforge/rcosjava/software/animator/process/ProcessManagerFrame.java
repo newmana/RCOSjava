@@ -143,10 +143,10 @@ public class ProcessManagerFrame extends RCOSFrame
     constraints.gridwidth=1;
     constraints.anchor = GridBagConstraints.CENTER;
     tmpGButton = new GraphicButton (myImages[0], myImages[1],
-      "Step", defaultFont, buttonColour, true);
+      "Stop", defaultFont, buttonColour, true);
     gridBag.setConstraints(tmpGButton,constraints);
     mainPanel.add(tmpGButton);
-    tmpGButton.addMouseListener(new StepProcess());
+    tmpGButton.addMouseListener(new StopProcess());
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
@@ -198,11 +198,11 @@ public class ProcessManagerFrame extends RCOSFrame
   }
 
 
-  class StepProcess extends MouseAdapter
+  class StopProcess extends MouseAdapter
   {
     public void mouseClicked(MouseEvent e)
     {
-      myProcessManager.sendStepMessage();
+      myProcessManager.sendStopMessage();
     }
   }
 

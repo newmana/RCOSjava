@@ -82,7 +82,7 @@ public class RCOS extends java.applet.Applet implements Runnable
 
   // Main thread.
   private Thread kernelThread;
-  private volatile boolean running = false;
+  private static volatile boolean running = false;
 
   //Defaults, screen size, location, authors.
   public int smallX, smallY;
@@ -155,6 +155,7 @@ public class RCOS extends java.applet.Applet implements Runnable
     initialiseOperatingSystem();
     initialiseAnimators();
     initialiseScreen();
+    startThread();
   }
 
   /**
@@ -293,7 +294,7 @@ public class RCOS extends java.applet.Applet implements Runnable
     theIPC = new IPC(osPostOffice);
     theMemoryManager = new MemoryManager(osPostOffice);
     theProgramManager = new ProgramManager(osPostOffice, baseDomain, port,
-      this);
+      theKernel);
   }
 
   /**
@@ -536,15 +537,6 @@ public class RCOS extends java.applet.Applet implements Runnable
   }
 
   /**
-   * Stops the running of the thread a calls notify.
-   */
-  public synchronized void stepThread()
-  {
-    running = false;
-    notify();
-  }
-
-  /**
    * Executes the performInstructionExecutionCycle on the kernel.
    */
   public void run()
@@ -556,7 +548,9 @@ public class RCOS extends java.applet.Applet implements Runnable
         synchronized (this)
         {
           if (!running)
+          {
             this.wait();
+          }
         }
         theKernel.performInstructionExecutionCycle();
         kernelThread.sleep(50);
@@ -567,9 +561,14 @@ public class RCOS extends java.applet.Applet implements Runnable
     }
   }
 
+  public static boolean isRunning()
+  {
+    return running;
+  }
+
   public static void updateStatusBar (String statusBar)
   {
-      tsStatusBar.insert((statusBar.trim()) + "\n",0);
+    tsStatusBar.insert((statusBar.trim()) + "\n",0);
   }
 
   public void stop()

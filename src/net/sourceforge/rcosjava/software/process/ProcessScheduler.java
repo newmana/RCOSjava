@@ -587,7 +587,7 @@ public class ProcessScheduler extends OSMessageHandler
    * Executed every cycle to make sure that if there is not a currently
    * executing process that one is taken from the ready queue.
    */
-  public synchronized void schedule()
+  public void schedule()
   {
     //Make sure that there isn't a process currently running.
     //Check to see if there are processes ready to execute.
