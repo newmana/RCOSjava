@@ -86,8 +86,8 @@ directory.
 There are currently 10 examples that ship with RCOSjava:
 * mem.c, mem2.c - An example of semaphore use.
 * smem.c, smem2.c - An example of shared memory use.
-* test.c, test2.c, test3.c, test4.c test5.c, test6.c - These are basically
-  the test cases used against the compiler.  
+* test.c, test2.c, test3.c, test4.c test5.c, test6.c, test7.c, test8.c - These
+  are basically the test cases used against the compiler.  
 
 Anything not in these files probably will not work and some that does.  See
 known bugs for any issues with the the compiler. 
@@ -166,8 +166,6 @@ The currently known bugs are:
 * OS X has problems associated with the graphics.  For example, with 
 Lists (such as in the file load and semaphore value boxes).  Resizing the 
 window fixes these problems.
-* The compiler currently fails to compile do-while and arrays correctly. 
-This affects test3.c and test4.c.  
 * The compiler is not complete it doesn't handle functions and many other
 things.
 
@@ -180,4 +178,4 @@ newmana@users.sourceforge.net
 David Jones
 d.jones@cqu.edu.au
 
-Last Update: 28th April 2002
+Last Update: 26th May 2002
