@@ -60,9 +60,9 @@ import net.sourceforge.rcosjava.software.util.FIFOQueue;
     maxTerminals = newNumberOfTerminals+1;
     terminalOn = new boolean[maxTerminals];
 
-    for (int iCount = 1; iCount < maxTerminals; iCount++)
+    for (int count = 1; count < maxTerminals; count++)
     {
-      terminalOn[iCount] = false;
+      terminalOn[count] = false;
     }
   }
 
@@ -177,11 +177,20 @@ import net.sourceforge.rcosjava.software.util.FIFOQueue;
    * @param terminalIdStr the string name of the terminal.
    * @return whether the operation was successful.
    */
-  public boolean removeTerminal(String terminalIdStr)
+  public boolean releaseTerminal(String terminalIdStr)
   {
+    boolean succeeded = false;
     int terminalId = Integer.parseInt(
       terminalIdStr.substring(terminalPrefix.length()));
-    return(removeTerminal(terminalIdStr, terminalId));
+    HardwareTerminal tmpTerminal = (HardwareTerminal)
+      allocatedTerminals.retrieve(terminalIdStr, true);
+    if (tmpTerminal != null)
+    {
+      unallocatedTerminals.insert(tmpTerminal);
+      allocateWaitingProcesses();
+      succeeded = true;
+    }
+    return succeeded;
   }
 
   /**
@@ -355,7 +364,8 @@ import net.sourceforge.rcosjava.software.util.FIFOQueue;
     {
       if (terminalOn[terminalId])
       {
-        HardwareTerminal tmpTerminal = (HardwareTerminal)
+        HardwareTerminal tmpTerminal;
+        tmpTerminal = (HardwareTerminal)
           unallocatedTerminals.retrieve(terminalIdStr, true);
         if (tmpTerminal != null)
         {

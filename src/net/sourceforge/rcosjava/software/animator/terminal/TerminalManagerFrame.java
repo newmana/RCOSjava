@@ -1,15 +1,3 @@
-//***************************************************************************
-// FILE     : TerminalManagerAnimator.java
-// PACKAGE  : Animator
-// PURPOSE  : Class used to animate CPU
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 24/12/96  Created
-//            21/02/97  Repaint bugs fixed.
-//            25/08/98  Converted to Java 1.1.
-//
-//***************************************************************************/
-
 package net.sourceforge.rcosjava.software.animator.terminal;
 
 import java.awt.*;
@@ -18,31 +6,57 @@ import net.sourceforge.rcosjava.software.animator.RCOSFrame;
 import net.sourceforge.rcosjava.software.animator.support.GraphicButton;
 import net.sourceforge.rcosjava.software.animator.support.NewLabel;
 
+/**
+ * A simple array of terminals are displayed to the user.  It allows the user
+ * to turn on (allocate to the OS) or otherwise manipulate the basic terminals.
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 21/02/97  Repaint bugs fixed.
+ * </DD><DD>
+ * 25/08/98  Converted to Java 1.1.
+ * </DD></DT>
+ * <P>
+ * @author Andrew Newman
+ * @version 1.00 $Date$
+ * @created 24th December 1996
+ */
 public class TerminalManagerFrame extends RCOSFrame
 {
-  private int MaxTerminals;
-  private int MaxTerminalCols, MaxTerminalRows;
+  private int maxTerminals;
+  private int maxTerminalCols, maxTerminalRows;
   private GraphicButton[] terminals;
   private GraphicButton[] views;
   private Image myImages[];
   private TerminalManagerAnimator myTerminalManager;
 
-  public TerminalManagerFrame (int x, int y, Image[] tmImages, int mTerm,
-                               int mCols, int mRows,
-                               TerminalManagerAnimator thisTerminalManager)
+  /**
+   * Create an animator frame, set the size of it and the images to use to
+   * represent the processes and the buttons.
+   *
+   * @param x width of frame
+   * @param y height of frame
+   * @param noTerminals maximum number of terminals to display
+   * @param noTerminalColumns number of columns of terminals to display
+   * @param noTerminalRows number of rows of terminals to display
+   * @param thisTerminalManager my parent terminal manager
+   */
+  public TerminalManagerFrame (int x, int y, Image[] images, int noTerminals,
+    int noTerminalCols, int noTerminalRows,
+    TerminalManagerAnimator thisTerminalManager)
   {
     super();
     setTitle("Terminal Manager");
 
-    MaxTerminals = mTerm+1;
-    MaxTerminalCols = mCols;
-    MaxTerminalRows = mRows;
+    maxTerminals = noTerminals+1;
+    maxTerminalCols = noTerminalCols;
+    maxTerminalRows = noTerminalRows;
 
-    myImages = tmImages;
+    myImages = images;
     myTerminalManager = thisTerminalManager;
 
-    terminals = new GraphicButton[MaxTerminals];
-    views = new GraphicButton[MaxTerminals];
+    terminals = new GraphicButton[maxTerminals];
+    views = new GraphicButton[maxTerminals];
 
     setSize(x,y);
   }
@@ -65,15 +79,15 @@ public class TerminalManagerFrame extends RCOSFrame
 
     int currentTerminal = 0;
 
-    for (int countRows = 1; countRows <= MaxTerminalRows; countRows++)
+    for (int countRows = 1; countRows <= maxTerminalRows; countRows++)
     {
-      for (int countCols = 1; countCols <= MaxTerminalCols; countCols++)
+      for (int countCols = 1; countCols <= maxTerminalCols; countCols++)
       {
-        if (countCols == MaxTerminalCols)
+        if (countCols == maxTerminalCols)
         {
           constraints.gridwidth = GridBagConstraints.REMAINDER;
         }
-        else if (countCols == MaxTerminalCols - 1)
+        else if (countCols == maxTerminalCols - 1)
         {
           constraints.gridwidth = GridBagConstraints.RELATIVE;
         }
@@ -90,14 +104,14 @@ public class TerminalManagerFrame extends RCOSFrame
         pMain.add(terminals[currentTerminal]);
         terminals[currentTerminal].addMouseListener(new TerminalHandler());
       }
-      currentTerminal -= MaxTerminalCols;
-      for (int countCols = 1; countCols <= MaxTerminalCols; countCols++)
+      currentTerminal -= maxTerminalCols;
+      for (int countCols = 1; countCols <= maxTerminalCols; countCols++)
       {
-        if (countCols == MaxTerminalCols)
+        if (countCols == maxTerminalCols)
         {
           constraints.gridwidth = GridBagConstraints.REMAINDER;
         }
-        else if (countCols == MaxTerminalCols - 1)
+        else if (countCols == maxTerminalCols - 1)
         {
           constraints.gridwidth = GridBagConstraints.RELATIVE;
         }
@@ -125,36 +139,70 @@ public class TerminalManagerFrame extends RCOSFrame
     add("South", pClose);
   }
 
-  void terminalOn (int termNo)
+  /**
+   * The terminal was turned on (clicked on in terminal manager animator or
+   * an OS event occurred).  The image is changed, he button beneath it is
+   * change to Hide so that it can be clicked on to hide the button.
+   *
+   * @param terminalNo the terminal number is assumed to be a valid number
+   * between the range of existing terminals.
+   */
+  void terminalOn (int terminalNo)
   {
-    terminals[termNo].imgButtonUpPic = myImages[0];
-    terminals[termNo].imgButtonDownPic = myImages[0];
-    views[termNo].sTheButton = "Hide #" + termNo;
-    terminals[termNo].repaint();
-    views[termNo].repaint();
+    terminals[terminalNo].imgButtonUpPic = myImages[0];
+    terminals[terminalNo].imgButtonDownPic = myImages[0];
+    views[terminalNo].sTheButton = "Hide #" + terminalNo;
+    terminals[terminalNo].repaint();
+    views[terminalNo].repaint();
   }
 
-  void terminalOff (int termNo)
+  /**
+   * The terminal was turned off (clicked on or os event).  The image is changed
+   * and the terminal name is set to off.
+   *
+   * @param terminalNo the terminal number is assumed to be a valid number
+   * between the range of existing terminals.
+   */
+  void terminalOff(int terminalNo)
   {
-    terminals[termNo].imgButtonUpPic = myImages[1];
-    terminals[termNo].imgButtonDownPic = myImages[1];
-    views[termNo].sTheButton = "#" + termNo + " off";
-    terminals[termNo].repaint();
-    views[termNo].repaint();
+    terminals[terminalNo].imgButtonUpPic = myImages[1];
+    terminals[terminalNo].imgButtonDownPic = myImages[1];
+    views[terminalNo].sTheButton = "#" + terminalNo + " off";
+    terminals[terminalNo].repaint();
+    views[terminalNo].repaint();
   }
 
-  void terminalFront (int termNo)
+  /**
+   * The terminal front button was hit (i.e. view) which sets the view button
+   * to hide.
+   *
+   * @param terminalNo the terminal number is assumed to be a valid number
+   * between the range of existing terminals.
+   */
+  void terminalFront(int terminalNo)
   {
-    views[termNo].sTheButton = "Hide #" + termNo;
-    views[termNo].repaint();
+    views[terminalNo].sTheButton = "Hide #" + terminalNo;
+    views[terminalNo].repaint();
   }
 
-  void terminalBack (int termNo)
+  /**
+   * The terminal back button was hit (i.e. hide) which sets the hide button
+   * to view.
+   *
+   * @param terminalNo the terminal number is assumed to be a valid number
+   * between the range of existing terminals.
+   */
+  void terminalBack (int terminalNo)
   {
-    views[termNo].sTheButton = "View #" + termNo;
-    views[termNo].repaint();
+    views[terminalNo].sTheButton = "View #" + terminalNo;
+    views[terminalNo].repaint();
   }
 
+  /**
+   * Attached to each terminal screen and terminal button.  If a terminal is
+   * clicked on it will toggle the terminal off/on.  If the button was view it
+   * will bring it to the front and fouce and the hide will do the opposite.
+   */
   class TerminalHandler extends MouseAdapter
   {
     public void mouseClicked(MouseEvent e)
