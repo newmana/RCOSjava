@@ -32,18 +32,7 @@ public class NullProcess extends UniversalMessageAdapter
    */
   public void doMessage(Kernel theElement)
   {
-    theElement.nullProcess();
-  }
-
-  /**
-   * Calls setCurrentProcessNull on the Process Scheduler. Should remove all
-   * processes from the execution queue.
-   *
-   * @param theElement the Process Scheduler to do the work on.
-   */
-  public void doMessage(ProcessScheduler theElement)
-  {
-    theElement.nullProcess();
+    //theElement.nullProcess();
   }
 
   /**
