@@ -1,4 +1,5 @@
 package org.rcosjava.messaging.messages.universal;
+
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.software.animator.process.ProcessManagerAnimator;
 import org.rcosjava.software.animator.process.ProcessSchedulerAnimator;
@@ -50,7 +51,7 @@ public class ZombieCreated extends UniversalMessageAdapter
    */
   public void doMessage(ProcessManagerAnimator theElement)
   {
-    theElement.newProcess(zombieProcess.getPID());
+    theElement.newProcess(zombieProcess);
   }
 
   /**
@@ -60,6 +61,6 @@ public class ZombieCreated extends UniversalMessageAdapter
    */
   public void doMessage(ProcessSchedulerAnimator theElement)
   {
-    theElement.zombieCreated(zombieProcess.getPID());
+    theElement.zombieCreated(zombieProcess);
   }
 }

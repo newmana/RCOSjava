@@ -1,7 +1,9 @@
 package org.rcosjava.messaging.messages.universal;
+
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.software.animator.terminal.TerminalManagerAnimator;
 import org.rcosjava.software.process.ProcessScheduler;
+import org.rcosjava.software.process.RCOSProcess;
 
 /**
  * Used to assign a terminal to the next waiting process.
@@ -13,27 +15,28 @@ import org.rcosjava.software.process.ProcessScheduler;
 public class ProcessAllocatedTerminalMessage extends UniversalMessageAdapter
 {
   /**
-   * Description of the Field
+   * The terminal id allocated to the process.
    */
-  private String terminalId;
+  private String terminalID;
+
   /**
-   * Description of the Field
+   * The process allocated the terminal.
    */
-  private int pid;
+  private RCOSProcess process;
 
   /**
    * Create a new process allocated terminal message.
    *
    * @param newSource the source of the message.
    * @param newTerminalId the terminal id to assign to the process.
-   * @param newPID the process id that is assigned the terminal.
+   * @param newProcess the process that is assigned the terminal.
    */
   public ProcessAllocatedTerminalMessage(OSMessageHandler newSource,
-      String newTerminalId, int newPID)
+      String newTerminalID, RCOSProcess newProcess)
   {
     super(newSource);
-    terminalId = newTerminalId;
-    pid = newPID;
+    terminalID = newTerminalID;
+    process = newProcess;
   }
 
   /**
@@ -45,7 +48,8 @@ public class ProcessAllocatedTerminalMessage extends UniversalMessageAdapter
    */
   public void doMessage(TerminalManagerAnimator theElement)
   {
-    theElement.terminalOn(Integer.parseInt(terminalId.substring(terminalId.length() - 1)));
+    theElement.terminalOn(
+        Integer.parseInt(terminalID.substring(terminalID.length() - 1)));
   }
 
   /**
@@ -55,7 +59,7 @@ public class ProcessAllocatedTerminalMessage extends UniversalMessageAdapter
    */
   public void doMessage(ProcessScheduler theElement)
   {
-    theElement.processAllocatedTerminal(pid, terminalId);
+    theElement.processAllocatedTerminal(process, terminalID);
   }
 
   /**

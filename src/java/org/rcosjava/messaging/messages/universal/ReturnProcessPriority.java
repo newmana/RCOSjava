@@ -2,6 +2,8 @@ package org.rcosjava.messaging.messages.universal;
 
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.software.animator.process.ProcessManagerAnimator;
+import org.rcosjava.software.process.ProcessPriority;
+import org.rcosjava.software.process.RCOSProcess;
 
 /**
  * Sent from Process Scheduler to return a process' priority.
@@ -13,27 +15,27 @@ import org.rcosjava.software.animator.process.ProcessManagerAnimator;
 public class ReturnProcessPriority extends UniversalMessageAdapter
 {
   /**
-   * The id of the process.
+   * The process.
    */
-  private int processId;
+  private RCOSProcess process;
 
   /**
    * The priority of the process.
    */
-  private int priority;
+  private ProcessPriority priority;
 
   /**
    * Constructor for the ReturnProcessPriority object
    *
    * @param theSource who sent the message.
-   * @param newProcessId process id to get the priority for.
+   * @param newProcess process to get the priority for.
    * @param newPriority the priority of the process.
    */
-  public ReturnProcessPriority(OSMessageHandler theSource, int newProcessId,
-      int newPriority)
+  public ReturnProcessPriority(OSMessageHandler theSource,
+      RCOSProcess newProcess, ProcessPriority newPriority)
   {
     super(theSource);
-    processId = newProcessId;
+    process = newProcess;
     priority = newPriority;
   }
 
@@ -44,6 +46,6 @@ public class ReturnProcessPriority extends UniversalMessageAdapter
    */
   public void doMessage(ProcessManagerAnimator theElement)
   {
-    theElement.returnProcessPriority(processId, priority);
+    theElement.returnProcessPriority(process, priority);
   }
 }

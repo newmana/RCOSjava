@@ -49,7 +49,7 @@ public class ZombieToReady extends UniversalMessageAdapter
    */
   public void doMessage(ProcessSchedulerAnimator theElement)
   {
-    theElement.zombieToReady(zombieProcess.getPID());
+    theElement.zombieToReady(zombieProcess);
   }
 
   /**

@@ -22,10 +22,10 @@ public class RunningToBlocked extends UniversalMessageAdapter
   /**
    * The process moving from running to blocked.
    */
-  private RCOSProcess myProcess;
+  private RCOSProcess process;
 
   /**
-   * Constructor for the RunningToBlocked object
+   * Constructor for the RunningToBlocked message.
    *
    * @param newSource who sent the message.
    * @param newProcess the process moving from running to blocked.
@@ -33,7 +33,7 @@ public class RunningToBlocked extends UniversalMessageAdapter
   public RunningToBlocked(OSMessageHandler theSource, RCOSProcess newProcess)
   {
     super(theSource);
-    myProcess = newProcess;
+    process = newProcess;
   }
 
   /**
@@ -43,7 +43,7 @@ public class RunningToBlocked extends UniversalMessageAdapter
    */
   public void doMessage(ProcessScheduler theElement)
   {
-    theElement.runningToBlocked(myProcess);
+    theElement.runningToBlocked(process);
   }
 
   /**
@@ -53,6 +53,6 @@ public class RunningToBlocked extends UniversalMessageAdapter
    */
   public void doMessage(ProcessSchedulerAnimator theElement)
   {
-    theElement.cpuToBlocked(myProcess.getPID());
+    theElement.cpuToBlocked(process);
   }
 }

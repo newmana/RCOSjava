@@ -6,6 +6,7 @@ import org.rcosjava.software.animator.process.ProcessManagerAnimator;
 import org.rcosjava.software.animator.process.ProcessSchedulerAnimator;
 import org.rcosjava.software.kernel.Kernel;
 import org.rcosjava.software.process.ProcessScheduler;
+import org.rcosjava.software.process.RCOSProcess;
 
 /**
  * Sent by the user (control-C on the terminal) or by the process manager to
@@ -19,70 +20,71 @@ import org.rcosjava.software.process.ProcessScheduler;
 public class KillProcess extends UniversalMessageAdapter
 {
   /**
-   * Description of the Field
+   * The process to kill.
    */
-  private int pid;
+  private RCOSProcess process;
 
   /**
-   * Constructor for the KillProcess object
+   * Construct a new KillProcess message.
    *
-   * @param theSource Description of Parameter
-   * @param newPID Description of Parameter
+   * @param theSource the sender of the message.
+   * @param newProcess the process to kill.
    */
-  public KillProcess(OSMessageHandler theSource, int newPID)
+  public KillProcess(OSMessageHandler theSource, RCOSProcess newProcess)
   {
     super(theSource);
-    pid = newPID;
+    process = newProcess;
   }
 
   /**
-   * Sets the ProcessID attribute of the KillProcess object
+   * Sets a new process to kill.
    *
-   * @param newPID The new ProcessID value
+   * @param newProcess a new process to kill.
    */
-  public void setProcessID(int newPID)
+  public void setProcess(RCOSProcess newProcess)
   {
-    pid = newPID;
+    process = newProcess;
   }
 
   /**
-   * Description of the Method
+   * Call kill process on the process scheduler.
    *
-   * @param theElement Description of Parameter
+   * @param theElement the Process Scheduler to call kill on.
    */
   public void doMessage(ProcessScheduler theElement)
   {
-    theElement.killProcess(pid);
+    theElement.killProcess(process);
   }
 
   /**
-   * Description of the Method
+   * Call kill process on the process scheduler animator.
    *
-   * @param theElement Description of Parameter
+   * @param theElement the Process Scheduler Animator to call kill on.
    */
   public void doMessage(ProcessSchedulerAnimator theElement)
   {
-    theElement.killProcess(pid);
+    theElement.killProcess(process);
   }
 
   /**
-   * Description of the Method
+   * Call deleteProcess on the process manager animator.
    *
-   * @param theElement Description of Parameter
+   * @param theElement the Process Manager Animator to call delete on.
    */
   public void doMessage(ProcessManagerAnimator theElement)
   {
-    theElement.deleteProcess(pid);
+    theElement.deleteProcess(process);
   }
 
   /**
-   * Description of the Method
+   * Generate an interrupt that the process has finished if it's currently
+   * running in the Kernel.
    *
-   * @param theElement Description of Parameter
+   * @param theElement the Kernel to create the process finished interrupt.
    */
   public void doMessage(Kernel theElement)
   {
-    if (theElement.getCurrentProcessPID() == pid)
+    if (theElement.getCurrentProcessPID() == process.getPID())
     {
       Interrupt processFinishedInterrupt = new Interrupt(-1,
           "ProcessFinished");
@@ -92,4 +94,3 @@ public class KillProcess extends UniversalMessageAdapter
     }
   }
 }
-

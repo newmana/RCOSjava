@@ -8,10 +8,8 @@ import org.rcosjava.software.process.ProcessScheduler;
  * <P>
  * <DT> <B>History:</B>
  * <DD> 01/07/1997 Uses Memory </DD>
- * <DD> 03/08/97 Moved to message system </DD> </DT> <P>
- *
- *
- *
+ * <DD> 03/08/97 Moved to message system </DD> </DT>
+ * <P>
  * @author Andrew Newman.
  * @author David Jones.
  * @created 24th of March 1997

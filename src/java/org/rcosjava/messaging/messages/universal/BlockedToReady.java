@@ -2,6 +2,7 @@ package org.rcosjava.messaging.messages.universal;
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.software.animator.process.ProcessSchedulerAnimator;
 import org.rcosjava.software.process.ProcessScheduler;
+import org.rcosjava.software.process.RCOSProcess;
 
 /**
  * Process moves from blocked to ready.
@@ -13,31 +14,30 @@ import org.rcosjava.software.process.ProcessScheduler;
 public class BlockedToReady extends UniversalMessageAdapter
 {
   /**
-   * Description of the Field
+   * The process moving from the blocked queue to the ready queue.
    */
-  private int pid;
+  private RCOSProcess process;
 
   /**
-   * Constructor for the BlockedToReady object
+   * Constructor a new BlockedToReady message.
    *
-   * @param theSource Description of Parameter
-   * @param processId Description of Parameter
+   * @param theSource the sender of the message.
+   * @param newProcess the process moving from blocked to ready.
    */
-  public BlockedToReady(OSMessageHandler theSource,
-      int processId)
+  public BlockedToReady(OSMessageHandler theSource, RCOSProcess newProcess)
   {
     super(theSource);
-    pid = processId;
+    process = newProcess;
   }
 
   /**
-   * Sets the Values attribute of the BlockedToReady object
+   * Sets the process.
    *
-   * @param processId The new Values value
+   * @param newProcess the new process.
    */
-  public void setValues(int processId)
+  public void setProcess(RCOSProcess newProcess)
   {
-    pid = processId;
+    process = newProcess;
   }
 
   /**
@@ -47,7 +47,7 @@ public class BlockedToReady extends UniversalMessageAdapter
    */
   public void doMessage(ProcessScheduler theElement)
   {
-    theElement.blockedToReady(pid);
+    theElement.blockedToReady(process);
   }
 
   /**
@@ -57,6 +57,6 @@ public class BlockedToReady extends UniversalMessageAdapter
    */
   public void doMessage(ProcessSchedulerAnimator theElement)
   {
-    theElement.blockedToReady(pid);
+    theElement.blockedToReady(process);
   }
 }

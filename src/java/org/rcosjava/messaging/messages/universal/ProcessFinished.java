@@ -62,7 +62,7 @@ public class ProcessFinished extends UniversalMessageAdapter
    */
   public void doMessage(ProcessSchedulerAnimator theElement)
   {
-    theElement.processFinished(finishedProcess.getPID());
+    theElement.processFinished(finishedProcess);
   }
 
   /**
@@ -73,7 +73,7 @@ public class ProcessFinished extends UniversalMessageAdapter
    */
   public void doMessage(ProcessManagerAnimator theElement)
   {
-    theElement.deleteProcess(finishedProcess.getPID());
+    theElement.deleteProcess(finishedProcess);
   }
 }
 

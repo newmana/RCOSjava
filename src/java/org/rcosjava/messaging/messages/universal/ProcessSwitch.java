@@ -15,15 +15,15 @@ import org.rcosjava.software.process.RCOSProcess;
 public class ProcessSwitch extends UniversalMessageAdapter
 {
   /**
-   * Description of the Field
+   * The process being switched.
    */
   private RCOSProcess process;
 
   /**
-   * Constructor for the ProcessSwitch object
+   * Construct a new ProcessSwitch message.
    *
-   * @param theSource Description of Parameter
-   * @param newProcess Description of Parameter
+   * @param theSource the sender of the message.
+   * @param newProcess the process being switched.
    */
   public ProcessSwitch(OSMessageHandler theSource, RCOSProcess newProcess)
   {
@@ -61,7 +61,7 @@ public class ProcessSwitch extends UniversalMessageAdapter
    */
   public void doMessage(ProcessSchedulerAnimator theElement)
   {
-    theElement.readyToCPU(process.getPID());
+    theElement.readyToCPU(process);
   }
 }
 
