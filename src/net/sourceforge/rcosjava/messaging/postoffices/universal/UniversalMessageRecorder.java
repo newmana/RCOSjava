@@ -88,7 +88,7 @@ public class UniversalMessageRecorder
   public void recordOn(String newFileName)
   {
     fileName = newFileName;
-    System.out.println("Set filename: " + fileName);
+    //System.out.println("Set filename: " + fileName);
     osRecorder = new OSMessageRecorder(id, osPostOffice, this);
     animatorRecorder = new AnimatorMessageRecorder(id, animatorPostOffice,
       this);
