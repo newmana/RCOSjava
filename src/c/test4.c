@@ -25,7 +25,11 @@ int main()
     printf(" in array ten: ");
     printf("%i", ten[counter]);
     printf("\n");
-    ten[counter] = (ten[0]) + 1;
+    one = ten[counter];
+    printf("One is: ");
+    printf("%i", one);
+    printf("\n");
+    ten[counter] = (one + 1);
   }
 
   counter = 0;
@@ -39,8 +43,8 @@ int main()
     counter = (counter + 1);
   }
 
-  printf("Print out in reverse character by character\n");
-  index = 11;
+  printf("Print out in reverse character by character:");
+  index = 10;
   do
   {
     printf("%c", hello[index]);
