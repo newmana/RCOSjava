@@ -1,9 +1,7 @@
 <?xml version="1.0"?>
 <project name="RCOS.java" default="all" basedir=".">
   <property name="app.name" value="RCOSjava"/>
-  <property name="app.version" value="1.0"/>
-  <property name="username" value="newmana"/>
-  <property name=""/>
+  <property name="app.version" value="0.4"/>
   <property name="src.dir" value="src"/>
   <property name="gen.dir" value="gen"/>
   <property name="lib.dir" value="lib"/>
@@ -49,18 +47,18 @@
     </uptodate>
 
     <!-- Test whether to generate simple c grammar file-->
-    <uptodate property="sablecc.required" targetfile="${src.dir}/net/sourceforge/rcosjava/compiler/grammar/simplec.sablecc">
+    <uptodate property="sablecc.required" targetfile="${src.dir}/grammar/simplec/simplec.sablecc">
       <srcfiles dir="${lib.dir}" includes="${grammar.jar}"/>
     </uptodate>
   </target>
 
   <target name="sablecc" depends="clean, prepare"
    if="sablecc.required"
-   description="Creates SimpleC jar file to process C files">
-
+   description="Creates Simple C jar file to process C files">
+ 
     <echo message="Got: ${sablecc.required}"/>
 
-    <sablecc src="${src.dir}/net/sourceforge/rcosjava/compiler/grammar" outputDirectory="${gen.dir}/src"/>
+    <sablecc src="${src.dir}/grammar/simplec" outputDirectory="${gen.dir}/src"/>
 
     <javac 
      classpathref="jars"
@@ -85,11 +83,11 @@
      debug="off" optimize="on" deprecation="on"/>
 
     <!-- Move all the images and sounds too-->
-    <copy todir="${dist.dir}/net/sourceforge/rcosjava/software/animator/images">
-      <fileset dir="${src.dir}/net/sourceforge/rcosjava/software/animator/images"/>
+    <copy todir="${dist.dir}/org/rcosjava/software/animator/images">
+      <fileset dir="${src.dir}/java/org/rcosjava/software/animator/images"/>
     </copy>
-    <copy todir="${dist.dir}/net/sourceforge/rcosjava/software/animator/audio">
-      <fileset dir="${src.dir}/net/sourceforge/rcosjava/software/animator/audio"/>
+    <copy todir="${dist.dir}/org/rcosjava/software/animator/audio">
+      <fileset dir="${src.dir}/java//org/rcosjava/software/animator/audio"/>
     </copy>
   </target>
 
@@ -104,21 +102,22 @@
     </copy>
 
     <!-- Server side distribution -->
-    <copy todir="${dist.dir}/pll2">
-      <fileset dir="${src.dir}/pll2"/>
+    <copy todir="${dist.dir}/pll2/executable">
+      <fileset dir="${src.dir}/pcode"/>
     </copy>
 
+    <mkdir dir="${dist.dir}/pll2/recorded"/>
+
     <!-- Clean up dist directory -->
-    <delete dir="${dist.dir}/com"/>
+    <!--delete dir="${dist.dir}/com"/>
     <delete dir="${dist.dir}/fr"/>
-    <delete dir="${dist.dir}/net"/>
-    <delete dir="${dist.dir}/org"/>
+    <delete dir="${dist.dir}/org"/-->
   </target>
 
   <target name="javadoc" depends="dist"
    if="javadoc.required"
    description="Create Javadoc in javadoc directory">
-    <javadoc packagenames="net.sourceforge.rcosjava.*, pll2.*" sourcepath="${src.dir}"
+    <javadoc packagenames="org.rcosjava.*, pll2.*" sourcepath="${src.dir}"
       classpathref="jars"      
       destdir="${javadoc.dir}" author="true" version="true" use="true"/>
   </target>
