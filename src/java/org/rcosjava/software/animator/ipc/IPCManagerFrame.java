@@ -1,6 +1,7 @@
 package org.rcosjava.software.animator.ipc;
 
 import java.awt.*;
+import javax.swing.ImageIcon;
 import java.awt.event.*;
 import java.util.*;
 import org.rcosjava.software.animator.RCOSFrame;
@@ -123,12 +124,16 @@ public class IPCManagerFrame extends RCOSFrame
    * @param ipcImages images used in display of ui.
    * @param thisIPCManager animator used to receive and make messages.
    */
-  public IPCManagerFrame(int x, int y, Image[] ipcImages,
+  public IPCManagerFrame(int x, int y, ImageIcon[] images,
       IPCManagerAnimator thisIPCManager)
   {
     super();
     setTitle("IPC Manager Animator");
-    myImages = ipcImages;
+    myImages = new Image[images.length];
+    for (int index = 0; index < images.length; index++)
+    {
+      myImages[index] = images[index].getImage();
+    }
     windowWidth = x;
     windowHeight = y;
     myIPCManagerAnimator = thisIPCManager;

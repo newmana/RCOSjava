@@ -1,6 +1,7 @@
 package org.rcosjava.software.animator.ipc;
 
 import java.awt.*;
+import javax.swing.ImageIcon;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.software.animator.RCOSAnimator;
@@ -22,6 +23,7 @@ public class IPCManagerAnimator extends RCOSAnimator
    * Description of the Field
    */
   private final static String MESSENGING_ID = "IPCManagerAnimator";
+
   /**
    * Description of the Field
    */
@@ -36,7 +38,7 @@ public class IPCManagerAnimator extends RCOSAnimator
    * @param images Description of Parameter
    */
   public IPCManagerAnimator(AnimatorOffice postOffice, int x, int y,
-      Image[] images)
+      ImageIcon[] images)
   {
     super(MESSENGING_ID, postOffice);
     myFrame = new IPCManagerFrame(x, y, images, this);
