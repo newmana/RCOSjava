@@ -85,7 +85,6 @@ public class FileClient
   public FileClient(URL newHost, int newPort)
   {
     // Connect to server.
-    //System.err.print("Connecting to " + host + "..");
     this(String.valueOf(newHost), newPort);
   }
 
@@ -132,10 +131,10 @@ public class FileClient
   }
 
   /**
-   * Gets the ExeFile attribute of the FileClient object
+   * Gets an executable file from the server.
    *
-   * @param filename Description of Parameter
-   * @return The ExeFile value
+   * @param filename the file name to get.
+   * @return the contents of the executable file.
    */
   public Memory getExeFile(String filename)
   {
@@ -143,10 +142,10 @@ public class FileClient
   }
 
   /**
-   * Gets the RecFile attribute of the FileClient object
+   * Get a recordable file from the server and converts it to an object.
    *
-   * @param filename Description of Parameter
-   * @return The RecFile value
+   * @param filename the file name to get.
+   * @return the object representation of the file.
    */
   public Object getRecFile(String filename)
   {
@@ -156,7 +155,8 @@ public class FileClient
     {
       ObjectInputStream tmpBuffer = new
          ObjectInputStream(new ByteArrayInputStream(serializedObject.getBytes()));
-      return tmpBuffer.readObject();
+      Object tmpObject = tmpBuffer.readObject();
+      return tmpObject;
     }
     catch (Exception e)
     {
@@ -189,10 +189,10 @@ public class FileClient
   }
 
   /**
-   * Description of the Method
+   * Create a new recording directory.
    *
-   * @param directoryName Description of Parameter
-   * @return Description of the Returned Value
+   * @param directoryName the name of directory.
+   * @return true if successfully created.
    */
   public boolean createRecDir(String directoryName)
   {
@@ -213,11 +213,11 @@ public class FileClient
   }
 
   /**
-   * Description of the Method
+   * Write a new object to the record directory.
    *
-   * @param fileName Description of Parameter
-   * @param object Description of Parameter
-   * @exception Exception Description of Exception
+   * @param fileName the name of the file to store.
+   * @param object the object to record.
+   * @exception Exception if any error occurred during writing.
    */
   public void writeRecFile(String fileName, Object object)
     throws Exception
@@ -248,23 +248,23 @@ public class FileClient
   }
 
   /**
-   * Description of the Method
+   * Finds the size of a file in the executable directory.
    *
-   * @param fileName Description of Parameter
-   * @return Description of the Returned Value
+   * @param fileName the name of the file.
+   * @return the size of the file in bytes.
    */
-  public int statExeFile(String fileName)
+  public long statExeFile(String fileName)
   {
     return statFile(1, fileName);
   }
 
   /**
-   * Description of the Method
+   * Finds the size of the file in the recordable directory.
    *
-   * @param fileName Description of Parameter
-   * @return Description of the Returned Value
+   * @param fileName the name of the file.
+   * @return the size of the file in bytes.
    */
-  public int statRecFile(String fileName)
+  public long statRecFile(String fileName)
   {
     return statFile(2, fileName);
   }
@@ -373,9 +373,9 @@ public class FileClient
    * @param fileName Description of Parameter
    * @return the size of the file or 0 if there was an error.
    */
-  private int statFile(int directoryType, String fileName)
+  private long statFile(int directoryType, String fileName)
   {
-    int messageSize = 0;
+    long messageSize = 0;
 
     if (messages.askFileStats(directoryType, fileName))
     {
@@ -386,7 +386,7 @@ public class FileClient
         {
           try
           {
-            messageSize = Integer.parseInt(messages.getLastMessageData());
+            messageSize = Long.parseLong(messages.getLastMessageData());
           }
           catch (NumberFormatException e)
           {
