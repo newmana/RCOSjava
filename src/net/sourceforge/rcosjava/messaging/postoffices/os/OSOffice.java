@@ -44,7 +44,7 @@ public class OSOffice extends PostOffice
    */
   public OSOffice(String newId)
   {
-    id = newId;
+    super(newId);
   }
 
   public void sendMessage(MessageAdapter message)

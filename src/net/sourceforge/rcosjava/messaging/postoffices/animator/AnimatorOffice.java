@@ -64,7 +64,7 @@ public class AnimatorOffice extends PostOffice
    */
   public AnimatorOffice(String newId, OSOffice newPostOffice)
   {
-    id = newId;
+    super(newId);
     theOSPostOffice = newPostOffice;
     // Register OSPostOffice with Animator Office
     this.addPostOffice(theOSPostOffice);
@@ -74,8 +74,7 @@ public class AnimatorOffice extends PostOffice
     LocalMessageSender internalSender = new LocalMessageSender();
     internalSender.setName("AnimatorLocalOfficeThread");
     internalSender.start();
-    PostOfficeMessageSender poSender = new
-        PostOfficeMessageSender();
+    PostOfficeMessageSender poSender = new PostOfficeMessageSender();
     poSender.setName("AnimatorPOOfficeThread");
     poSender.start();
   }
