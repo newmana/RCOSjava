@@ -80,7 +80,7 @@ public class MultimediaFrame extends RCOSFrame
 
     Panel dialogPanel = new Panel();
     fileNameDialog = new
-      Dialog(MultimediaFrame.this , "Recording name", true);
+      Dialog(MultimediaFrame.this , "Recording Name", true);
     fileNameDialog.setBackground(defaultBgColour);
     fileNameDialog.setForeground(defaultFgColour);
     fileNameDialog.setFont(defaultFont);
