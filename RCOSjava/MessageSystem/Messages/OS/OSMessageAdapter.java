@@ -31,11 +31,11 @@ import Software.Animator.Process.StartProgram;
 
 public class OSMessageAdapter extends MessageAdapter implements OSMessage
 {
-	public OSMessageAdapter(OSMessageHandler theSource)
+  public OSMessageAdapter(OSMessageHandler theSource)
   {
     super((SimpleMessageHandler) theSource);
   }
-  
+
   public boolean forPostOffice(PostOffice myPostOffice)
   {
     return (myPostOffice.getID().compareTo(RCOS.sOSPostOfficeID) == 0);
@@ -81,10 +81,10 @@ public class OSMessageAdapter extends MessageAdapter implements OSMessage
   }
 
   public void doMessage(TerminalManager theElement)
-  {    
+  {
   }
-	
-	public void doMessage(DiskManager theElement)
-	{
-	}
+
+  public void doMessage(DiskManager theElement)
+  {
+  }
 }

@@ -10,8 +10,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.io.BufferedInputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UTFDataFormatException;
 import java.io.EOFException;
@@ -41,33 +39,31 @@ public final class GeneratorInputStream extends InputStream
 
     // the input stream
     InputStream in;
-
+    
     // the class description of the current object
     private ClassDescription currentClassDescription;
-
+    
     // manage all handles
     private Object[] handles = new Object[100];
     private int currentHandle = baseWireHandle;
-
+    
     // true if we are in a block data
     private boolean inBlockDataMode;
     // the length of the block data
     private int count;
-
+    
     // java.io.Serializable
     private static Class serializableClass;
     // java.io.Externalizable
     private static Class externalizableClass;
-
+    
     private static Hashtable fakeMethod;
     private Object[] argsMethod = new Object[1];
 
     private ObjectOutputHandler objectOutputHandler;
 
-    private BufferedReader disBuffered;
-
     private boolean hide = false;
-
+    
     /**
      * Creates an ObjectInputStream that reads from the specified InputStream.
      * The stream header containing the magic number and version number are
@@ -80,27 +76,27 @@ public final class GeneratorInputStream extends InputStream
      * @exception IOException An exception occurred in the underlying stream.
      * @see java.io.ObjectOutputStream
      */
-    public GeneratorInputStream(InputStream in)
+    public GeneratorInputStream(InputStream in) 
 	throws IOException, StreamCorruptedException {
 	this.in = new BufferedInputStream(in);
-
+	
         // Create a DataInputStream used to read primitive types.
-	disBuffered = new BufferedReader(new InputStreamReader(this));
-
+	this.dis = new DataInputStream(this);
+	
 	readHeader();
 	argsMethod[0] = this;
     }
-
+    
     /**
      * Assign an handler for all objects.
-     */
+     */    
     public void setObjectOuputHandler(ObjectOutputHandler arg) {
 	objectOutputHandler = arg;
     }
 
     /**
      * Returns the current object handler.
-     */
+     */    
     ObjectOutputHandler getObjectOutputHandler() {
 	return objectOutputHandler;
     }
@@ -114,7 +110,7 @@ public final class GeneratorInputStream extends InputStream
         if (KoalaDebug) {
             System.err.println("read Header");
         }
-
+	
 	short magic = (short)((readEOF() << 8) + (readEOF() << 0));
 	short version = (short)((readEOF() << 8) + (readEOF() << 0));
 	if (magic != STREAM_MAGIC) {
@@ -127,7 +123,7 @@ public final class GeneratorInputStream extends InputStream
 					       version);
 	}
     }
-
+    
     /**
      * Reads the non-static and non-transient fields of the current class
      * from this stream.  This may only be called from the readObject method
@@ -160,8 +156,8 @@ public final class GeneratorInputStream extends InputStream
 	    }
 	    setBlockData(prev);
 	}
-    }
-
+    }    
+    
     /**
      * Reads an object from the InputStream.
      * <p> The class of the object, the signature of the class, and the values
@@ -183,23 +179,23 @@ public final class GeneratorInputStream extends InputStream
      * @exception ClassNotFoundException The class is not readable.
      * @exception StreamCorruptedException Control information in the
      *     stream is inconsistent.
-     * @exception BlockDataException Primitive data was found in the
+     * @exception BlockDataException Primitive data was found in the 
      * stream instead of objects.
      * @exception IOException Any of the usual Input/Output related exceptions.
-     * @return an object (may be null)
+     * @return an object (may be null) 
      */
     public Object readObject()
 	    throws BlockDataException, ClassNotFoundException, IOException {
 	return readObjectInternal(null);
     }
-
+	
     private Object readObjectInternal(Field field)
 	throws BlockDataException, ClassNotFoundException, IOException {
         if (KoalaDebug) {
             System.err.println("enter readObject() count=" + count
 			       + " dataMode=" + inBlockDataMode);
         }
-
+	
 	if (inBlockDataMode) {
 	    if (count == 0) {
 		refill();
@@ -213,7 +209,7 @@ public final class GeneratorInputStream extends InputStream
 
 	boolean prevBlockDataMode = setBlockData(false);
         byte c = readCode();
-
+	
 	try {
 	    while (c == TC_RESET) {
 		resetContext();
@@ -244,14 +240,14 @@ public final class GeneratorInputStream extends InputStream
 	    case TC_BLOCKDATA:
 		throw new BlockDataException(readEOF());
 	    case TC_BLOCKDATALONG:
-		throw new BlockDataException(((readEOF() << 24)
-					      + (readEOF() << 16)
-					      + (readEOF() << 8)
+		throw new BlockDataException(((readEOF() << 24) 
+					      + (readEOF() << 16) 
+					      + (readEOF() << 8) 
 					      + (readEOF() << 0)));
 	    case TC_ENDBLOCKDATA:
 		if (inBlockDataMode) {
 		    pushbackCode(c);
-		    throw new
+		    throw new 
 			StreamCorruptedException("end of block data unexpected");
 		}
 		throw new BlockDataException();
@@ -268,8 +264,8 @@ public final class GeneratorInputStream extends InputStream
 		return null;
 	    default:
 		pushbackCode(c);
-		throw new StreamCorruptedException("Invalid byte "
-						   + Integer.toString((int) c,
+		throw new StreamCorruptedException("Invalid byte " 
+						   + Integer.toString((int) c, 
 								      16));
 	    }
 	} finally {
@@ -281,16 +277,16 @@ public final class GeneratorInputStream extends InputStream
 	}
 	return fakeObject;
     }
-
+    
     /**
      * Creates a new array instance from the input stream
-     */
+     */    
     void newArray(Field field) throws ClassNotFoundException, IOException {
         if (KoalaDebug) {
             System.err.println("enter newArray");
         }
-        ClassDescription _class = classDesc();
-        int size = ((readEOF() << 24) + (readEOF() << 16)
+        ClassDescription _class = classDesc();	
+        int size = ((readEOF() << 24) + (readEOF() << 16) 
 		    + (readEOF() << 8) + (readEOF() << 0));
 	Type type = null;
 
@@ -302,12 +298,12 @@ public final class GeneratorInputStream extends InputStream
 	// assign the handle before reading all values
 	// assign the new handle _after_ reading his class description
         int handle = assignHandle(fakeObject);
-
+	
         if (KoalaDebug) {
             System.err.println("read array values");
         }
 
-	getObjectOutputHandler().writeStartArray(handle, _class,
+	getObjectOutputHandler().writeStartArray(handle, _class, 
 						 size, false, field);
 	switch (type.getTypeDefinition()) {
         case Type.BYTE:
@@ -317,53 +313,53 @@ public final class GeneratorInputStream extends InputStream
 	    break;
         case Type.CHAR:
 	    for (int i = 0; i < size; i++) {
-		getObjectOutputHandler().write((char)((readEOF() << 8)
-						      + (readEOF() << 0)),
+		getObjectOutputHandler().write((char)((readEOF() << 8) 
+						      + (readEOF() << 0)), 
 					       false, null);
 	    }
 	    break;
         case Type.DOUBLE:
 	    for (int i = 0; i < size; i++) {
-		int i1 = ((readEOF() << 24) + (readEOF() << 16)
+		int i1 = ((readEOF() << 24) + (readEOF() << 16) 
 			  + (readEOF() << 8) + (readEOF() << 0));
-		int i2 = ((readEOF() << 24) + (readEOF() << 16)
+		int i2 = ((readEOF() << 24) + (readEOF() << 16) 
 			  + (readEOF() << 8) + (readEOF() << 0));
-		double d = Double.longBitsToDouble(((long) i1 << 32)
+		double d = Double.longBitsToDouble(((long) i1 << 32) 
 						   + (i2 & 0xFFFFFFFFL));
 		getObjectOutputHandler().write(d, false, null);
 	    }
 	    break;
         case Type.FLOAT:
 	    for (int i = 0; i < size; i++) {
-		int i1 = ((readEOF() << 24) + (readEOF() << 16)
+		int i1 = ((readEOF() << 24) + (readEOF() << 16) 
 			  + (readEOF() << 8) + (readEOF() << 0));
-		getObjectOutputHandler().write(Float.intBitsToFloat(i1),
+		getObjectOutputHandler().write(Float.intBitsToFloat(i1), 
 					       false, null);
 	    }
 	    break;
         case Type.INT:
 	    for (int i = 0; i < size; i++) {
-		getObjectOutputHandler().write(((readEOF() << 24)
-						+ (readEOF() << 16)
-						+ (readEOF() << 8)
-						+ (readEOF() << 0)),
+		getObjectOutputHandler().write(((readEOF() << 24) 
+						+ (readEOF() << 16) 
+						+ (readEOF() << 8) 
+						+ (readEOF() << 0)), 
 					       false, null);
 	    }
 	    break;
         case Type.LONG:
 	    for (int i = 0; i < size; i++) {
-		int i1 = ((readEOF() << 24) + (readEOF() << 16)
+		int i1 = ((readEOF() << 24) + (readEOF() << 16) 
 		      + (readEOF() << 8) + (readEOF() << 0));
-		int i2 = ((readEOF() << 24) + (readEOF() << 16)
+		int i2 = ((readEOF() << 24) + (readEOF() << 16) 
 		      + (readEOF() << 8) + (readEOF() << 0));
-		getObjectOutputHandler().write((((long) i1 << 32)
+		getObjectOutputHandler().write((((long) i1 << 32) 
 						+ (i2 & 0xFFFFFFFFL)),
 					       false, null);
 	    }
 	    break;
         case Type.SHORT:
-	    for (int i = 0; i < size; i++) {
-		getObjectOutputHandler().write((short)((readEOF() << 8)
+	    for (int i = 0; i < size; i++) {		
+		getObjectOutputHandler().write((short)((readEOF() << 8) 
 						       + (readEOF() << 0)),
 					       false, field);
 	    }
@@ -388,30 +384,30 @@ public final class GeneratorInputStream extends InputStream
 	    }
 	    break;
 	default:
-	    throw new StreamCorruptedException("Invalid type");
+	    throw new StreamCorruptedException("Invalid type"); 
 	}
 	getObjectOutputHandler().writeEndArray(handle, _class, field);
     }
-
+    
     /**
      * Creates a new exception from the input stream.
      * @@SEEME
      */
     Object newException() throws ClassNotFoundException, IOException {
 	byte code = peekCode();
-
+	
 	resetContext();
-
+	
 	readObject();
-
+	
 	resetContext();
 	return null;
     }
-
+    
     /**
      * Reads a new class description.
      */
-    ClassDescription newClassDesc()
+    ClassDescription newClassDesc() 
 	    throws ClassNotFoundException, IOException {
         ClassDescription nc;
         if (KoalaDebug) {
@@ -422,7 +418,7 @@ public final class GeneratorInputStream extends InputStream
 	if (KoalaDebug) {
             System.err.println("class name is " + name);
         }
-
+	
         nc = new ClassDescription(name);
 	// assign a new handle to this class description
         assignHandle(nc);
@@ -439,48 +435,48 @@ public final class GeneratorInputStream extends InputStream
 	}
 
 	// read the serial version UID
-	int i1 = ((readEOF() << 24) + (readEOF() << 16)
+	int i1 = ((readEOF() << 24) + (readEOF() << 16) 
 		  + (readEOF() << 8) + (readEOF() << 0));
-	int i2 = ((readEOF() << 24) + (readEOF() << 16)
+	int i2 = ((readEOF() << 24) + (readEOF() << 16) 
 		  + (readEOF() << 8) + (readEOF() << 0));
         nc.setSerialVersionUID((((long) i1 << 32) + (i2 & 0xFFFFFFFFL)));
 
 	if (KoalaDebug) {
 	    System.err.println("serial version is " + nc.getSerialVersionUID());
 	}
-
+	
 	// read flags (write method ? serializable ? externalizable ?)
         nc.setFlag(classDescFlags());
 
 	// read all fields description
         nc.setFields(fields());
-
+	
 	// Is there any extra annotation for this class description
         classAnnotation();
-
+	
 	// read the class description of his super class
         nc.setSuperClass(classDesc());
-
+	
         if (KoalaDebug) {
             System.err.println("leave newClassDesc " + nc);
         }
-
+	
 	getObjectOutputHandler().writeClassDescription(nc);
 
 	if (nc.hasWriteMethod()) {
-	    getMethod(nc, "readObject");
+	    getMethod(nc, "readObject");	    
 	}
         return nc;
     }
-
+    
     /**
      * Reads a class annotation from the input stream
-     */
+     */    
     void classAnnotation() throws ClassNotFoundException, IOException {
         if (KoalaDebug) {
             System.err.println("enter classAnnotation");
         }
-
+	
 	try {
 	    while (true) {
 		try {
@@ -496,22 +492,22 @@ public final class GeneratorInputStream extends InputStream
 	    }
 	} catch (BlockDataException e) {
 	}
-    }
-
+    }    
+    
     /**
      * Reads all class flags from the input stream
-     */
+     */    
     byte classDescFlags() throws IOException {
         if (KoalaDebug) {
             System.err.println("enter classDescFlags");
         }
-
+	
         byte c = (byte) readEOF();
-
+	
         if (KoalaDebug) {
             System.err.println("flag = " + c);
         }
-
+	
         switch (c) {
         case SC_WRITE_METHOD:
 	    if (KoalaDebug) {
@@ -538,7 +534,7 @@ public final class GeneratorInputStream extends InputStream
             throw new StreamCorruptedException("invalid classDescInfo " + c);
         }
     }
-
+    
     Field fieldDesc() throws ClassNotFoundException, IOException {
 	Type type;
 	String name;
@@ -546,9 +542,9 @@ public final class GeneratorInputStream extends InputStream
         if (KoalaDebug) {
             System.err.println("enter fieldDesc");
         }
-
+	
         byte code = (byte) readEOF();
-
+	
 	name = readUTFInternal();
         switch (code) {
         case BYTE_TYPE:
@@ -582,7 +578,7 @@ public final class GeneratorInputStream extends InputStream
 		Object className = readObject();
 		if ((className != null) && (className instanceof String)) {
 		    try {
-			type =
+			type = 
 			    TypeFactory.createTypeInternal(((String) className)
 							   .replace('/','.'));
 		    } catch (Exception e) {
@@ -590,7 +586,7 @@ public final class GeneratorInputStream extends InputStream
 							   + className);
 		    }
 		} else {
-		    throw new StreamCorruptedException("Attempt to find a new string "
+		    throw new StreamCorruptedException("Attempt to find a new string " 
 						       + className);
 		}
 	    } finally {
@@ -603,42 +599,42 @@ public final class GeneratorInputStream extends InputStream
 
 	return new Field(type, name);
     }
-
+    
     Field[] fields() throws ClassNotFoundException, IOException {
         int count = ((readEOF() << 8) + (readEOF() << 0));
         int i = 0;
         Field[] fields = new Field[count];
-
+	
         while (i < count) {
             fields[i] = fieldDesc();
 	    if (KoalaDebug) {
 		System.err.println("read field " + fields[i].getName());
 	    }
             i++;
-
+	    
         }
         if (KoalaDebug) {
             System.err.println("read " + count + " fields");
         }
-
+	
         return fields;
     }
-
+    
     /**
      * Reads a reference to an another handle
-     */
+     */    
     Object prevObject(Field field) throws IOException {
         int handle;
         if (KoalaDebug) {
             System.err.println("enter prevObject");
         }
 	// read the handle
-        handle = ((readEOF() << 24) + (readEOF() << 16)
+        handle = ((readEOF() << 24) + (readEOF() << 16) 
 		  + (readEOF() << 8) + (readEOF() << 0)) - baseWireHandle;
-
+	
 	// get the object in my array
 	Object ret = handles[handle];
-
+	
         if (ret == null) {
 	    // doesn't exist ! oups !
 	    throw new StreamCorruptedException("empty reference " + handle);
@@ -656,7 +652,7 @@ public final class GeneratorInputStream extends InputStream
 	// Yeah ! return it !
 	return ret;
     }
-
+    
     /**
      * Reads a class description
      *
@@ -664,14 +660,14 @@ public final class GeneratorInputStream extends InputStream
      *  - a new class description
      *  - a null reference
      *  - a reference to an another class description
-     */
+     */    
     ClassDescription classDesc() throws ClassNotFoundException, IOException {
         int c = read();
-
+        
         if (KoalaDebug) {
             System.err.println("enter classDesc");
         }
-
+	
         switch (c) {
         case TC_CLASSDESC:
 	    // a new one !
@@ -691,33 +687,33 @@ public final class GeneratorInputStream extends InputStream
 	    // ok, probably a null super class
             return null;
         default:
-            throw new StreamCorruptedException("Invalid byte "
+            throw new StreamCorruptedException("Invalid byte " 
 					       + Integer.toHexString((int) c));
         }
-
+	
     }
-
+    
     /**
      * Reads a new class
-     */
+     */    
     void newClass(Field field) throws ClassNotFoundException, IOException {
         if (KoalaDebug) {
             System.err.println("enter newClass");
         }
-
+	
 	// read his class description
         ClassDescription _class = classDesc();
-
+	
 	// assign his handle _after_ reading his class description
         int id = assignHandle(fakeObject);
-	getObjectOutputHandler().writeStartObjectClass(id, _class,
+	getObjectOutputHandler().writeStartObjectClass(id, _class, 
 						       false, field);
 	getObjectOutputHandler().writeEndObjectClass(id, _class, field);
     }
-
+    
     /**
      * Creates a new String
-     */
+     */    
     String newString() throws IOException {
         if (KoalaDebug) {
             System.err.println("enter newString");
@@ -726,41 +722,41 @@ public final class GeneratorInputStream extends InputStream
         String data = readUTFInternal();
 	// assign his new handle
         assignHandle(data);
-
+	
 	// return it
         if (KoalaDebug) {
             System.err.println("string is " + data);
         }
-
+	
         return data;
     }
-
+    
     /**
      * Reads a block data
-     */
+     */    
     void blockdata(int size) throws IOException {
         if (KoalaDebug) {
             System.err.println("enter blockdata " + size);
         }
-
+	
 	// if the size comes from an int, it may be negative
 	if (size < 0) {
 	    new StreamCorruptedException("negative size in blockdata");
 	}
-
+	
 	// all byte data
         byte[] data = new byte[size];
-
+	
 	// read the block
         readFullyInternal(data, 0, size);
-
+	
 	// return it (there is no handle for a block data)
 	// @@FIXME
     }
-
+    
     /**
      * Creates a new object
-     */
+     */    
     void newObject(Field field) throws ClassNotFoundException, IOException {
         if (KoalaDebug) {
             System.err.println("enter newObject");
@@ -778,11 +774,11 @@ public final class GeneratorInputStream extends InputStream
 
 	getObjectOutputHandler().writeEndObject(id, desc, field);
     }
-
+    
     /**
      * Reads data inside an object
-     */
-    private void readObjectData(ClassDescription desc)
+     */    
+    private void readObjectData(ClassDescription desc) 
 	    throws ClassNotFoundException, IOException {
         if (KoalaDebug) {
             System.err.println("enter readObjectData for " + desc);
@@ -795,7 +791,7 @@ public final class GeneratorInputStream extends InputStream
 	    readObjectData(_super);
 	    getObjectOutputHandler().writeEndSuper(_super);
 	}
-
+	
 	if (desc.hasWriteMethod()) {
 	    if (desc.method == null) {
 		try {
@@ -834,10 +830,10 @@ public final class GeneratorInputStream extends InputStream
 	    } else {
 		boolean prev = setBlockData(true);
 		ClassDescription previous = currentClassDescription;
-
+		
 		count = 0;
 		currentClassDescription = desc;
-
+		
 		try {
 		    if (KoalaDebug) {
 			System.err.println("invoke " + desc.method);
@@ -873,10 +869,10 @@ public final class GeneratorInputStream extends InputStream
 
         if (KoalaDebug) {
             System.err.println("leave readObjectData for " + desc);
-        }
+        }	
     }
 
-    private void skipData()
+    private void skipData() 
 	    throws ClassNotFoundException, IOException {
 	if (KoalaDebug) {
 	    System.err.println("Enter in skip data");
@@ -911,13 +907,13 @@ public final class GeneratorInputStream extends InputStream
 
     /**
      * Reads all values according to an array of field description
-     */
-    private void _readValues(ClassDescription _class)
+     */    
+    private void _readValues(ClassDescription _class) 
 	throws ClassNotFoundException, IOException {
 	int[] qfields = _class.fieldsQuick;
 	Field[] fields = _class.fields;
 	// read the size of value (or the number of values ? @@SEEME)
-
+	
         if (KoalaDebug) {
             System.err.println("enter _readValues " + qfields.length);
         }
@@ -929,17 +925,17 @@ public final class GeneratorInputStream extends InputStream
 					       fields[i]);
                 break;
             case Type.CHAR:
-		getObjectOutputHandler().write((char)((readEOF() << 8)
-						      + (readEOF() << 0)),
+		getObjectOutputHandler().write((char)((readEOF() << 8) 
+						      + (readEOF() << 0)), 
 					       false, fields[i]);
                 break;
             case Type.DOUBLE:
 		{
-		    int i1 = ((readEOF() << 24) + (readEOF() << 16)
+		    int i1 = ((readEOF() << 24) + (readEOF() << 16) 
 			      + (readEOF() << 8) + (readEOF() << 0));
-		    int i2 = ((readEOF() << 24) + (readEOF() << 16)
+		    int i2 = ((readEOF() << 24) + (readEOF() << 16) 
 			      + (readEOF() << 8) + (readEOF() << 0));
-		    double d = Double.longBitsToDouble(((long) i1 << 32)
+		    double d = Double.longBitsToDouble(((long) i1 << 32) 
 						       + (i2 & 0xFFFFFFFFL));
 
 		    getObjectOutputHandler().write(d, false, fields[i]);
@@ -947,27 +943,27 @@ public final class GeneratorInputStream extends InputStream
                 break;
             case Type.FLOAT:
 		{
-		    int i1 = ((readEOF() << 24) + (readEOF() << 16)
+		    int i1 = ((readEOF() << 24) + (readEOF() << 16) 
 			      + (readEOF() << 8) + (readEOF() << 0));
-		     getObjectOutputHandler().write(Float.intBitsToFloat(i1),
+		     getObjectOutputHandler().write(Float.intBitsToFloat(i1), 
 						    false, fields[i]);
 		}
                 break;
             case Type.INT:
-		getObjectOutputHandler().write(((readEOF() << 24)
-						+ (readEOF() << 16)
-						+ (readEOF() << 8)
-						+ (readEOF() << 0)),
+		getObjectOutputHandler().write(((readEOF() << 24) 
+						+ (readEOF() << 16) 
+						+ (readEOF() << 8) 
+						+ (readEOF() << 0)), 
 					       false, fields[i]);
                 break;
             case Type.LONG:
 		{
-		    int i1 = ((readEOF() << 24) + (readEOF() << 16)
+		    int i1 = ((readEOF() << 24) + (readEOF() << 16) 
 			      + (readEOF() << 8) + (readEOF() << 0));
-		    int i2 = ((readEOF() << 24) + (readEOF() << 16)
+		    int i2 = ((readEOF() << 24) + (readEOF() << 16) 
 			      + (readEOF() << 8) + (readEOF() << 0));
-		    getObjectOutputHandler().write((((long) i1 << 32)
-						    + (i2 & 0xFFFFFFFFL)),
+		    getObjectOutputHandler().write((((long) i1 << 32) 
+						    + (i2 & 0xFFFFFFFFL)), 
 						   false, fields[i]);
 		}
                 break;
@@ -978,7 +974,7 @@ public final class GeneratorInputStream extends InputStream
 					       false, fields[i]);
                 break;
             case Type.BOOLEAN:
-		getObjectOutputHandler().write((readEOF() != 0),
+		getObjectOutputHandler().write((readEOF() != 0), 
 					       false, fields[i]);
                 break;
             case Type.STRING:
@@ -995,17 +991,17 @@ public final class GeneratorInputStream extends InputStream
             }
         }
     }
-
+    
     /**
      * Returns the class description which has specified name.
      *
      * @param  name the name of the class
      * @return a class description or null otherwise
-     */
+     */    
     public ClassDescription getClassDescription(String name) {
 	int size = currentHandle - baseWireHandle;
 	int i = 0;
-
+	
 	while (i < size) {
 	    if (handles[i] instanceof ClassDescription
 		&& (((ClassDescription) handles[i]).getName().equals(name))) {
@@ -1015,7 +1011,7 @@ public final class GeneratorInputStream extends InputStream
 	}
 	return null;
     }
-
+    
     /**
      * Gets the class description for a specified class.
      *
@@ -1025,22 +1021,22 @@ public final class GeneratorInputStream extends InputStream
     public ClassDescription getClassDescription(Class c) throws IOException {
 	throw new IOException("unimplemented method");
     }
-
+    
     private byte currCode = 0;
-
+    
     /*
      * Peek at the next control code in the stream.
      * If the code has not been peeked at yet, read it from the stream.
      */
     private byte peekCode() throws IOException, StreamCorruptedException{
 	while (currCode == 0) {
-
+	    
 	    int newcode = in.read();	// Read byte from the underlying stream
 
 	    if (newcode < 0) {
 		throw new EOFException("Expecting code");
 	    }
-
+	    
 	    currCode = (byte)newcode;
 	    if ((currCode < TC_BASE) || (currCode > TC_MAX)) {
 		if (KoalaDebug) {
@@ -1050,11 +1046,11 @@ public final class GeneratorInputStream extends InputStream
 			}
 		    } catch (Exception e) {}
 		}
-		throw new StreamCorruptedException("Type code out of range, is "
+		throw new StreamCorruptedException("Type code out of range, is " 
 						   + currCode);
 	    }
-
-	    /*
+	    
+	    /* 
 	     * Handles reset as a hidden code and reset the stream.
 	     */
 	    if (currCode == TC_RESET) {
@@ -1073,7 +1069,7 @@ public final class GeneratorInputStream extends InputStream
 	}
 	return currCode;
     }
-
+    
     /*
      * Returns the next control code in the stream.
      * peekCode gets the next code.  readCode just consumes it.
@@ -1084,24 +1080,24 @@ public final class GeneratorInputStream extends InputStream
 	currCode = 0;
 	return tc;
     }
-
+    
     /*
      * Puts back the specified code to be peeked at next time.
      */
     private void pushbackCode(byte code) {
 	currCode = code;
     }
-
+    
     private void resetContext() {
 	System.err.println("** WARNING ** reset context not yet implemented");
 	System.err.println("**            stream may be corrupted");
-
+	
 	for (int i = 0; i < (currentHandle - baseWireHandle); i++) {
 	    handles[i] = null;
 	}
 	currentHandle = baseWireHandle;
     }
-
+    
     /*
      * Expect the next thing in the stream is a datablock, If its a
      * datablock, extract the count of bytes to allow.  If data is not
@@ -1110,7 +1106,7 @@ public final class GeneratorInputStream extends InputStream
     private void refill() throws IOException {
 	count = -1;		/*  No more data to read, EOF */
 	byte code;
-
+	
 	try {
 	    code = peekCode();
 	    if (KoalaDebug) {
@@ -1154,7 +1150,7 @@ public final class GeneratorInputStream extends InputStream
 	    count = c;
 	}
     }
-
+    
     /*
      * Sets the blockdata buffering mode.
      * If it is being set to false after being true there must
@@ -1171,10 +1167,10 @@ public final class GeneratorInputStream extends InputStream
 	    throw new StreamCorruptedException("Unread " + count
 					       + " bytes");
 	}
-
+	
 	/* Set count to allow reading or not */
 	count =  mode ? 0 : -1;
-
+	
 	inBlockDataMode = mode;
 	return !mode;
     }
@@ -1197,13 +1193,13 @@ public final class GeneratorInputStream extends InputStream
         handles[id] = obj;
 	return id;
     }
-
+    
     private final int reserveHandle() {
         return (currentHandle++ - baseWireHandle);
     }
-
+    
     /**
-     * Reads a byte of data. This method will block if no input is
+     * Reads a byte of data. This method will block if no input is 
      * available.
      * @return  the byte read, or -1 if the end of the
      *          stream is reached.
@@ -1211,7 +1207,7 @@ public final class GeneratorInputStream extends InputStream
      */
     public int read() throws IOException {
 	int data;
-
+	
 	if (inBlockDataMode) {
 	    while (count == 0) {
 		refill();
@@ -1228,9 +1224,9 @@ public final class GeneratorInputStream extends InputStream
 	}
 	return data;
     }
-
+    
     /**
-     * Reads a byte of data. This method will block if no input is
+     * Reads a byte of data. This method will block if no input is 
      * available.
      * @return  the byte read, or EOFException if the end of the
      *          stream is reached.
@@ -1238,7 +1234,7 @@ public final class GeneratorInputStream extends InputStream
      */
     private int readEOF() throws IOException {
 	int data;
-
+	
 	if (inBlockDataMode) {
 	    while (count == 0) {
 		refill();
@@ -1258,7 +1254,7 @@ public final class GeneratorInputStream extends InputStream
 	}
 	return data;
     }
-
+    
     /**
      * Reads into an array of bytes.  This method will
      * block until some input is available.
@@ -1306,7 +1302,10 @@ public final class GeneratorInputStream extends InputStream
     public void close() throws IOException {
         in.close();
     }
-
+    
+    // the input stream
+    private DataInputStream dis;    
+    
     /**
      * Reads in a boolean.
      * @return the boolean read.
@@ -1318,7 +1317,7 @@ public final class GeneratorInputStream extends InputStream
 	getObjectOutputHandler().write(b, true, null);
         return b;
     }
-
+    
     /**
      * Reads an 8 bit byte.
      * @return the 8 bit byte read.
@@ -1330,7 +1329,7 @@ public final class GeneratorInputStream extends InputStream
 	getObjectOutputHandler().write(b, true, null);
 	return b;
     }
-
+    
     /**
      * Reads an unsigned 8 bit byte.
      * @return the 8 bit byte read.
@@ -1342,7 +1341,7 @@ public final class GeneratorInputStream extends InputStream
 	getObjectOutputHandler().write((byte) i, true, null);
 	return i;
     }
-
+    
     /**
      * Reads a 16 bit short.
      * @return the 16 bit short read.
@@ -1354,7 +1353,7 @@ public final class GeneratorInputStream extends InputStream
 	getObjectOutputHandler().write(s, true, null);
 	return s;
     }
-
+    
     /**
      * Reads an unsigned 16 bit short.
      * @return the 16 bit short read.
@@ -1366,10 +1365,10 @@ public final class GeneratorInputStream extends InputStream
 	getObjectOutputHandler().write((short) i, true, null);
 	return i;
     }
-
+    
     /**
      * Reads a 16 bit char.
-     * @return the 16 bit char read.
+     * @return the 16 bit char read. 
      * @exception EOFException If end of file is reached.
      * @exception IOException If other I/O error has occurred.
      */
@@ -1378,7 +1377,7 @@ public final class GeneratorInputStream extends InputStream
 	getObjectOutputHandler().write(c, true, null);
 	return c;
     }
-
+    
     /**
      * Reads a 32 bit int.
      * @return the 32 bit integer read.
@@ -1386,12 +1385,12 @@ public final class GeneratorInputStream extends InputStream
      * @exception IOException If other I/O error has occurred.
      */
     public int readInt()  throws IOException {
-        int i = ((readEOF() << 24) + (readEOF() << 16)
+        int i = ((readEOF() << 24) + (readEOF() << 16) 
 		 + (readEOF() << 8) + (readEOF() << 0));
 	getObjectOutputHandler().write(i, true, null);
 	return i;
     }
-
+    
     /**
      * Reads a 64 bit long.
      * @return the read 64 bit long.
@@ -1399,16 +1398,16 @@ public final class GeneratorInputStream extends InputStream
      * @exception IOException If other I/O error has occurred.
      */
     public long readLong()  throws IOException {
-	int i1 = ((readEOF() << 24) + (readEOF() << 16)
+	int i1 = ((readEOF() << 24) + (readEOF() << 16) 
 		  + (readEOF() << 8) + (readEOF() << 0));
-	int i2 = ((readEOF() << 24) + (readEOF() << 16)
+	int i2 = ((readEOF() << 24) + (readEOF() << 16) 
 		  + (readEOF() << 8) + (readEOF() << 0));
         long l = (((long) i1 << 32) + (i2 & 0xFFFFFFFFL));
 	getObjectOutputHandler().write(l, true, null);
 	return l;
     }
-
-
+    
+    
     /**
      * Reads a 32 bit float.
      * @return the 32 bit float read.
@@ -1416,13 +1415,13 @@ public final class GeneratorInputStream extends InputStream
      * @exception IOException If other I/O error has occurred.
      */
     public float readFloat() throws IOException {
-	int i1 = ((readEOF() << 24) + (readEOF() << 16)
+	int i1 = ((readEOF() << 24) + (readEOF() << 16) 
 		  + (readEOF() << 8) + (readEOF() << 0));
         float f = Float.intBitsToFloat(i1);
 	getObjectOutputHandler().write(f, true, null);
 	return f;
     }
-
+    
     /**
      * Reads a 64 bit double.
      * @return the 64 bit double read.
@@ -1430,28 +1429,28 @@ public final class GeneratorInputStream extends InputStream
      * @exception IOException If other I/O error has occurred.
      */
     public double readDouble() throws IOException {
-	int i1 = ((readEOF() << 24) + (readEOF() << 16)
+	int i1 = ((readEOF() << 24) + (readEOF() << 16) 
 		  + (readEOF() << 8) + (readEOF() << 0));
-	int i2 = ((readEOF() << 24) + (readEOF() << 16)
+	int i2 = ((readEOF() << 24) + (readEOF() << 16) 
 		  + (readEOF() << 8) + (readEOF() << 0));
-        double d = Double.longBitsToDouble(((long) i1 << 32)
+        double d = Double.longBitsToDouble(((long) i1 << 32) 
 					   + (i2 & 0xFFFFFFFFL));
 	getObjectOutputHandler().write(d, true, null);
 	return d;
     }
-
+    
     private char lineBuffer[];
 
     /**
-     * Reads in a line that has been terminated by a \n, \r,
+     * Reads in a line that has been terminated by a \n, \r, 
      * \r\n or EOF.
      * @return a String copy of the line.
      */
     public String readLine() throws IOException {
 	System.err.println( "warning, this function is not handle yet!");
-	return disBuffered.readLine();
+	return dis.readLine();
     }
-
+    
     /**
      * Reads bytes, blocking until all bytes are read.
      * @param data the buffer into which the data is read
@@ -1462,7 +1461,7 @@ public final class GeneratorInputStream extends InputStream
         readFullyInternal(data, 0, data.length);
 	getObjectOutputHandler().writeRow(data, 0, data.length);
     }
-
+    
     /**
      * Reads bytes, blocking until all bytes are read.
      * @param data the buffer into which the data is read
@@ -1471,12 +1470,12 @@ public final class GeneratorInputStream extends InputStream
      * @exception EOFException If end of file is reached.
      * @exception IOException If other I/O error has occurred.
      */
-    private void readFullyInternal(byte[] data, int offset, int len)
+    private void readFullyInternal(byte[] data, int offset, int len) 
 	    throws IOException {
         if (len < 0) {
             throw new IndexOutOfBoundsException();
 	}
-
+        
         int n = 0;
         while (n < len) {
             int count = read(data, offset + n, len - n);
@@ -1485,7 +1484,7 @@ public final class GeneratorInputStream extends InputStream
             n += count;
         }
     }
-
+    
     /**
      * Skips bytes, block until all bytes are skipped.
      * @param n the number of bytes to be skipped
@@ -1510,7 +1509,7 @@ public final class GeneratorInputStream extends InputStream
         while (count < utflen) {
             int c = readEOF();
             int char2, char3;
-            switch (c >> 4) {
+            switch (c >> 4) { 
 	    case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
 		// 0xxxxxxx
 		count++;
@@ -1545,19 +1544,19 @@ public final class GeneratorInputStream extends InputStream
 		break;
 	    default:
 		// 10xx xxxx,  1111 xxxx
-		throw new UTFDataFormatException();
+		throw new UTFDataFormatException();           
 	    }
         }
         return new String(str, 0, strlen);
     }
-
+    
     private final void getMethod(ClassDescription desc,
-				 String name)
+				 String name) 
 	    throws ClassNotFoundException {
 	int i = 0;
 	Class cl = null;
 	Method m = (Method) fakeMethod.get(desc.getName());
-
+	
 	if (m != null) {
 	    desc.method = m;
 	    return;
@@ -1600,7 +1599,7 @@ public final class GeneratorInputStream extends InputStream
     }
 
     private static Class[] params;
-
+    
     /**
      * Add methods from properties.
      */
@@ -1608,7 +1607,7 @@ public final class GeneratorInputStream extends InputStream
 	for (Enumeration e = properties.keys(); e.hasMoreElements();) {
 	    String key = (String) e.nextElement();
 	    String value = (String) properties.get(key);
-
+	    
 	    try {
 		Class cl = Class.forName(value.trim());
 		fakeMethod.put(key, cl.getMethod("readObject", params));
@@ -1617,7 +1616,7 @@ public final class GeneratorInputStream extends InputStream
 	    }
 	}
     }
-
+	
     static {
 	params = new Class[1];
 	params[0] = GeneratorInputStream.class;
@@ -1627,17 +1626,17 @@ public final class GeneratorInputStream extends InputStream
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
-
+	
 	try {
-	    externalizableClass =
+	    externalizableClass = 
 		Class.forName("java.io.Externalizable");
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
-
+	
 	fakeMethod = new Hashtable();
 
-	try {
+	try {	    
 	    Class c = Class.forName("fr.dyade.koala.serialization.api.DefaultSerializer");
 	    Method m = c.getMethod("readObject", params);
 	    fakeMethod.put("java.awt.Menu", m);
@@ -1661,7 +1660,7 @@ public final class GeneratorInputStream extends InputStream
 	    fakeMethod.put("java.awt.Window", m);
 	    fakeMethod.put("java.awt.Checkbox", m);
 	    fakeMethod.put("java.awt.MenuItem", m);
-
+	    
 	    c = Class.forName("fr.dyade.koala.serialization.api.ChangeSupportListenerSerializer");
 	    m = c.getMethod("readObject", params);
 	    fakeMethod.put("java.beans.VetoableChangeSupport", m);
@@ -1684,7 +1683,7 @@ public final class GeneratorInputStream extends InputStream
 	    fakeMethod.put("java.util.Hashtable", m);
 	} catch (Exception e) {
 	}
-
+	
 	/*
 	try {
 	    url = GeneratorInputStream.class.getResource("XML.properties");
