@@ -70,10 +70,10 @@ public class CPU implements Serializable
    * Internal flag which holds whether the current process has finished
    * execution.
    */
-  private boolean processFinished;
+  private boolean codeFinished;
 
   /**
-   * Internal flag which holds whether there is a process currently running with
+   * Internal flag which holds whether there is a code currently running with
    * code to execute.
    */
   private boolean codeToExecute;
@@ -84,19 +84,19 @@ public class CPU implements Serializable
   private int ticks = 0;
 
   /**
-   * The context of the currently executing process (base pointer, etc).
+   * The context of the currently executing code (base pointer, etc).
    */
   private Context myContext = new Context();
 
   /**
-   * The currently executing process stack.
+   * The currently executing stack.
    */
-  private Memory processStack;
+  private Memory stack;
 
   /**
-   * The currently executing process code.
+   * The currently executing code.
    */
-  private Memory processCode;
+  private Memory code;
 
   /**
    * The queue of interrupts currently waiting to be handled.
@@ -104,9 +104,9 @@ public class CPU implements Serializable
   private InterruptQueue interruptsQueue;
 
   /**
-   * A reference to the kernel that is currently using this CPU.
+   * The kernel - used to call handle interrupts on.
    */
-  private transient Kernel myKernel;
+  private Kernel myKernel;
 
   /**
    * Initialise the CPU by making it aware that the kernel exists.
@@ -115,21 +115,20 @@ public class CPU implements Serializable
    */
   public CPU(Kernel newKernel)
   {
-    // Kernel
     myKernel = newKernel;
 
     // Interrupt Information
     interruptsQueue = new InterruptQueue(10, 10);
     paused = false;
     codeToExecute = false;
-    processFinished = false;
+    codeFinished = false;
     interruptsEnabled = true;
   }
 
   /**
-   * Allows you to set a new Kernel.
+   * Sets the Kernel.
    *
-   * @param newKernel new kernel to set.
+   * @param newKernel the kernel to call.
    */
   public void setKernel(Kernel newKernel)
   {
@@ -137,44 +136,50 @@ public class CPU implements Serializable
   }
 
   /**
-   * Returns the current kernel.
+   * Called by device drivers and other sources of interrupts passed an
+   * Interrupt which is added to the InterruptQueue
    *
-   * @return the current kernel.
+   * @param newInterrupt Description of Parameter
    */
-  public Kernel getKernel()
+  public void addInterrupt(Interrupt newInterrupt)
   {
-    return myKernel;
+    // if the interrupt should occur straight away time == -1
+    // change this to be the current time + 1
+    if (newInterrupt.getTime() == -1)
+    {
+      newInterrupt.setTime(ticks);
+    }
+    interruptsQueue.insert((Object) newInterrupt);
   }
 
   /**
-   * Sets the ProcessFinished attribute of the CPU object
+   * Sets the CodeFinished attribute of the CPU object
    */
-  public void setProcessFinished()
+  public void setCodeFinished()
   {
-    Interrupt interrupt = new Interrupt(-1, "ProcessFinished");
-
-    generateInterrupt(interrupt);
-    processFinished = false;
+    Interrupt interrupt = new Interrupt(-1, "CodeFinished");
+    addInterrupt(interrupt);
+    codeFinished = false;
   }
 
   /**
-   * Sets true or false to the current process finished.
+   * Sets true or false to the current code finished.
    *
-   * @param isProcessFinished if the process is finished or not.
+   * @param isCodeFinished if the code is finished or not.
    */
-  public void setProcessFinished(boolean isProcessFinished)
+  public void setCodeFinished(boolean isCodeFinished)
   {
-    processFinished = isProcessFinished;
+    codeFinished = isCodeFinished;
   }
 
   /**
-   * Returns if the process has finished or not.
+   * Returns if the code has finished or not.
    *
-   * @return if the process has finished or not.
+   * @return if the code has finished or not.
    */
-  public boolean processFinished()
+  public boolean codeFinished()
   {
-    return processFinished;
+    return codeFinished;
   }
 
   /**
@@ -199,27 +204,27 @@ public class CPU implements Serializable
   }
 
   /**
-   * Overwrites the current process stack. The stack is a fixed size and the CPU
+   * Overwrites the current stack. The stack is a fixed size and the CPU
    * holds this interally. Not very realistic but easliy implemented.
    *
-   * @param newProcessStack the new memory value of the process stack.
+   * @param newStack the new memory value of the stack.
    */
-  public void setProcessStack(Memory newProcessStack)
+  public void setStack(Memory newStack)
   {
-    processStack = newProcessStack;
+    stack = newStack;
   }
 
   /**
-   * Overwrites the current process code. Sets the code to exceute to true if
+   * Overwrites the current code. Sets the code to exceute to true if
    * the process code given is not null. Again, the CPU has a variable storage
    * system to hold all of the process code. For simple implementation.
    *
-   * @param newProcessCode the new memory value of the process code.
+   * @param newCode the new memory value of the process code.
    */
-  public void setProcessCode(Memory newProcessCode)
+  public void setCode(Memory newCode)
   {
-    codeToExecute = !(newProcessCode == null);
-    processCode = newProcessCode;
+    codeToExecute = !(newCode == null);
+    code = newCode;
   }
 
   /**
@@ -253,23 +258,23 @@ public class CPU implements Serializable
   }
 
   /**
-   * Returns the process stack (the actual real live stack not a copy).
+   * Returns the stack (the actual real live stack not a copy).
    *
-   * @return The ProcessStack value
+   * @return The Stack value
    */
-  public Memory getProcessStack()
+  public Memory getStack()
   {
-    return processStack;
+    return stack;
   }
 
   /**
-   * Returns the process code (the actual real live code not a copy).
+   * Returns the code (the actual real live code not a copy).
    *
-   * @return The ProcessCode value
+   * @return The Code value
    */
-  public Memory getProcessCode()
+  public Memory getCode()
   {
-    return processCode;
+    return code;
   }
 
   /**
@@ -304,6 +309,11 @@ public class CPU implements Serializable
   public void incTicks()
   {
     ticks++;
+
+    if (ticks % TIMER_PERIOD == 0)
+    {
+      addInterrupt(new Interrupt(ticks, "TimerInterrupt"));
+    }
   }
 
   /**
@@ -321,29 +331,50 @@ public class CPU implements Serializable
    *
    * @param ignorePaused ignore if the CPU is paused as to whether to execute
    *   an instruction
-   * @return true if the process ran an instruction correctly and not at the
-   *      end of a process
+   * @return true if it ran an instruction correctly and not at the
+   *      end of execution
    */
   public boolean performInstructionExecutionCycle(boolean ignorePaused)
   {
+    // Handle fetch and execute cycle.
     if (((!isPaused()) && (hasCodeToExecute())) ||
         (ignorePaused && hasCodeToExecute()))
     {
       executeCode();
     }
-    return checkProcess();
+
+    // Handle interrupt cycle.
+    if (interruptsEnabled)
+    {
+      handleInterrupts();
+    }
+
+    // Check to see if the current
+    return checkCode();
   }
 
   /**
-   * Description of the Method
+   * Handle system call.
+   *
+   * @throws IOException if there's an IOException.
    */
-  public void executeCode()
+  public void systemCall() throws IOException
   {
-    // fetch and execute if we aren't on the NullProcess
+    myKernel.systemCall();
+  }
+
+  /**
+   * Execution of code cycle.  Fetch and instruction, execute it, increment
+   * CPU ticks.
+   */
+  private void executeCode()
+  {
+    // fetch and execute code
     try
     {
       fetchInstruction();
       executeInstruction();
+      incTicks();
     }
     catch (java.io.IOException e)
     {
@@ -366,24 +397,34 @@ public class CPU implements Serializable
   }
 
   /**
-   * Description of the Method
-   *
-   * @return Description of the Returned Value
+   * Handle interrupts.  Calls the registered Kernel's handleInterrupt with the
+   * first interrupt on the queue.
    */
-  public boolean checkProcess()
+  private void handleInterrupts()
+  {
+    Interrupt tmpInterrupt = interruptsQueue.getInterrupt(ticks);
+    if (tmpInterrupt != null)
+    {
+      myKernel.handleInterrupt(tmpInterrupt);
+    }
+  }
+
+  /**
+   * Checks to see if the current code has finished executing.
+   *
+   * @return true if the current code has finished executing.
+   */
+  private boolean checkCode()
   {
     boolean continueExecuting = true;
 
     //Check again to see if we came to the end of the program during
     //the last execution cycle.
-    if (processFinished)
+    if (codeFinished)
     {
-      setProcessFinished();
-      continueExecuting = processFinished;
+      setCodeFinished();
+      continueExecuting = codeFinished;
     }
-
-    handleInterrupts();
-    incTicks();
 
     return continueExecuting;
   }
@@ -394,15 +435,16 @@ public class CPU implements Serializable
   public void initialiseCPU()
   {
     getContext().initialise();
-    processCode = new Memory();
-    processStack = new Memory();
+    code = new Memory();
+    stack = new Memory();
   }
 
   /**
    * Given a memory address obtain the matching instruction. Places the
-   * instruction into the rpCurrentProcess.context.InstructionRegister.
+   * instruction into the the current context's instruction register and
+   * increment the program counter.
    */
-  public void fetchInstruction()
+  private void fetchInstruction()
   {
     getContext().setInstructionRegister(
         getInstruction(getContext().getProgramCounter()));
@@ -415,56 +457,10 @@ public class CPU implements Serializable
    *
    * @throws java.io.IOException TBD
    */
-  public void executeInstruction() throws java.io.IOException
+  private void executeInstruction() throws java.io.IOException
   {
     getContext().getInstructionRegister().execute(this);
   }
-
-  /**
-   * Called by device drivers and other sources of interrupts passed an
-   * Interrupt which is added to the InterruptQueue
-   *
-   * @param newInterrupt Description of Parameter
-   */
-  public void generateInterrupt(Interrupt newInterrupt)
-  {
-    // if the interrupt should occur straight away time == -1
-    // change this to be the current time + 1
-    if (newInterrupt.getTime() == -1)
-    {
-      newInterrupt.setTime(ticks);
-    }
-    interruptsQueue.insert((Object) newInterrupt);
-  }
-
-  /**
-   * Execute once every instruction execution cycle if interruptsEnabled -
-   * checks InterruptQ to see if any Interrupts have occurred at the current
-   * time
-   */
-  public void handleInterrupts()
-  {
-    if (interruptsEnabled)
-    {
-      if (!interruptsQueue.queueEmpty())
-      {
-        //is there an interrupt for the current time?
-        Interrupt currentInterrupt = interruptsQueue.getInterrupt(ticks);
-
-        while (currentInterrupt != null)
-        {
-          myKernel.handleInterrupt(currentInterrupt);
-          currentInterrupt = interruptsQueue.getInterrupt(ticks);
-        }
-      }
-      //if ((ticks % TIMER_PERIOD == 0) && (runningProcess()))
-      if (ticks % TIMER_PERIOD == 0)
-      {
-        myKernel.handleTimerInterrupt();
-      }
-    }
-  }
-
   /**
    * Given a memory location return instruction.
    *
@@ -473,13 +469,13 @@ public class CPU implements Serializable
    */
   Instruction getInstruction(int address)
   {
-    short instr1 = (short) processCode.read(address * 8 + 5);
-    short instr2 = (short) processCode.read(address * 8 + 6);
+    short instr1 = (short) code.read(address * 8 + 5);
+    short instr2 = (short) code.read(address * 8 + 6);
     short loc = (short) ((256 * (instr1 & 255)) + (instr2 & 255));
 
     Instruction tmpInstruction = Instruction.INSTRUCTIONS[
-      processCode.read(address * 8) & 0xff];
-    tmpInstruction.setByteParameter(((byte) processCode.read(address * 8 + 4)));
+        code.read(address * 8) & 0xff];
+    tmpInstruction.setByteParameter(((byte) code.read(address * 8 + 4)));
     tmpInstruction.setWordParameter(loc);
 
     return tmpInstruction;
@@ -499,7 +495,7 @@ public class CPU implements Serializable
     while (level > 0)
     {
       // jump to next base down
-      base = processStack.read(base);
+      base = stack.read(base);
       level--;
     }
 
