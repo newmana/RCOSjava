@@ -14,11 +14,13 @@ import net.sourceforge.rcosjava.messaging.messages.animator.AnimatorMessageAdapt
 import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import net.sourceforge.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import net.sourceforge.rcosjava.messaging.messages.MessageAdapter;
+import net.sourceforge.rcosjava.messaging.messages.universal.RequestProcessPriority;
 import net.sourceforge.rcosjava.messaging.messages.universal.Run;
 import net.sourceforge.rcosjava.messaging.messages.universal.Step;
 import net.sourceforge.rcosjava.messaging.messages.universal.Kill;
 import net.sourceforge.rcosjava.software.process.RCOSProcess;
 import net.sourceforge.rcosjava.software.util.LIFOQueue;
+import net.sourceforge.rcosjava.messaging.messages.universal.SetProcessPriority;
 
 /**
  * Interface which sends messages to the Process Manager to execute a command
@@ -34,6 +36,7 @@ public class ProcessManagerAnimator extends RCOSAnimator
   private LIFOQueue currentProcesses;
   private ProcessManagerFrame myFrame;
   private static final String MESSENGING_ID = "ProcessManagerAnimator";
+  private int currentProcessId;
 
   /**
    * Create an animator office, register with the animator office, set the size
@@ -148,6 +151,14 @@ public class ProcessManagerAnimator extends RCOSAnimator
   }
 
   /**
+   * When the animator requests a priority of a certain process it returns
+   * it here to be displayed to the user to change.
+   */
+  public void returnProcessPriority(int priority)
+  {
+  }
+
+  /**
    * Send a run message to the kernel.  Called by the Process Manager Frame to
    * start the kernel running again.
    */
@@ -176,6 +187,33 @@ public class ProcessManagerAnimator extends RCOSAnimator
   {
     Kill newMsg = new Kill(this, processId);
     sendMessage(newMsg);
+  }
+
+  /**
+   * Request the priority values of the process so that they can be displayed
+   * and modified by the user.
+   */
+  public void getProcessPriority(int processId)
+  {
+    currentProcessId = processId;
+    RequestProcessPriority newMsg = new RequestProcessPriority(this, processId);
+    sendMessage(newMsg);
+  }
+
+  /**
+   * Display a given process Id and it's process priority so that the user may
+   * change it.  Calls promptProcessPriority in the frame.
+   */
+  public void returnProcessPriority(int processId, int processPriority)
+  {
+    myFrame.promptProcessPriority(processId, processPriority);
+  }
+
+  public void setProcessPriority(int processPriority)
+  {
+    SetProcessPriority tmpMessage = new SetProcessPriority(this,
+      currentProcessId, processPriority);
+    sendMessage(tmpMessage);
   }
 
   public void processMessage(AnimatorMessageAdapter message)

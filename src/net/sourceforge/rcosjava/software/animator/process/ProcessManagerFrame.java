@@ -35,6 +35,9 @@ public class ProcessManagerFrame extends RCOSFrame
   private Image myImages[];
   private Message msg;
   private RCOSList processList;
+  private Dialog changePriorityDialog;
+  private NewLabel processPrompt;
+  private TextField priorityTextField;
 
   public ProcessManagerFrame (int x, int y, Image[] images,
     ProcessManagerAnimator thisProcessManager)
@@ -65,6 +68,27 @@ public class ProcessManagerFrame extends RCOSFrame
   {
     super.setupLayout(c);
 
+    Panel dialogPanel = new Panel();
+    changePriorityDialog = new
+      Dialog(ProcessManagerFrame.this , "Change Priority", true);
+    changePriorityDialog.setBackground(defaultBgColour);
+    changePriorityDialog.setForeground(defaultFgColour);
+    changePriorityDialog.setFont(defaultFont);
+    changePriorityDialog.setSize(new Dimension(250,90));
+    processPrompt = new NewLabel("Priority of Process XX (1-100): ", titleFont);
+    dialogPanel.add(processPrompt);
+    priorityTextField = new TextField(2);
+    priorityTextField.setBackground(defaultBgColour);
+    priorityTextField.setForeground(defaultFgColour);
+    dialogPanel.add(priorityTextField);
+    Button tmpOkayButton = new Button("Ok");
+    tmpOkayButton.addMouseListener(new OkPriorityDialog());
+    dialogPanel.add(tmpOkayButton);
+    Button tmpCancelButton = new Button("Cancel");
+    tmpCancelButton.addMouseListener(new CancelPriorityDialog());
+    dialogPanel.add(tmpCancelButton);
+    changePriorityDialog.add(dialogPanel);
+
     Panel mainPanel = new Panel();
     Panel closePanel = new Panel();
     NewLabel tmpLabel;
@@ -82,15 +106,25 @@ public class ProcessManagerFrame extends RCOSFrame
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
-    tmpLabel = new NewLabel("Process to Kill", titleFont);
+    tmpLabel = new NewLabel("Processes", titleFont);
     gridBag.setConstraints(tmpLabel,constraints);
     mainPanel.add(tmpLabel);
 
     constraints.gridwidth=1;
+    constraints.gridheight=2;
     constraints.anchor = GridBagConstraints.CENTER;
-    processList = new RCOSList(this,3,false);
+    processList = new RCOSList(this,5,false);
     gridBag.setConstraints(processList,constraints);
     mainPanel.add(processList);
+
+    constraints.gridheight=1;
+    constraints.gridwidth=GridBagConstraints.REMAINDER;
+    constraints.anchor = GridBagConstraints.CENTER;
+    tmpGButton = new GraphicButton (myImages[0], myImages[1],
+      "Priority", defaultFont, buttonColour, true);
+    gridBag.setConstraints(tmpGButton,constraints);
+    mainPanel.add(tmpGButton);
+    tmpGButton.addMouseListener(new ChangePriority());
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
@@ -114,7 +148,7 @@ public class ProcessManagerFrame extends RCOSFrame
     mainPanel.add(tmpGButton);
     tmpGButton.addMouseListener(new StepProcess());
 
-    constraints.gridwidth=GridBagConstraints.REMAINDER;
+    constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
     tmpGButton = new GraphicButton (myImages[0], myImages[1],
       "Run", defaultFont, buttonColour, true);
@@ -131,6 +165,14 @@ public class ProcessManagerFrame extends RCOSFrame
     add("South",closePanel);
   }
 
+  public void promptProcessPriority(int processId, int processPriority)
+  {
+    processPrompt.setText("Priority of Process " + processId + " (1-100): ");
+    priorityTextField.setText(Integer.toString(processPriority));
+    changePriorityDialog.show();
+    priorityTextField.transferFocus();
+  }
+
   class KillProcess extends MouseAdapter
   {
     public void mouseClicked(MouseEvent e)
@@ -142,6 +184,19 @@ public class ProcessManagerFrame extends RCOSFrame
       }
     }
   }
+
+  class ChangePriority extends MouseAdapter
+  {
+    public void mouseClicked(MouseEvent e)
+    {
+      if (processList.getSelectedItem() != null)
+      {
+        int process = Integer.parseInt(processList.getSelectedItem());
+        myProcessManager.getProcessPriority(process);
+      }
+    }
+  }
+
 
   class StepProcess extends MouseAdapter
   {
@@ -156,6 +211,24 @@ public class ProcessManagerFrame extends RCOSFrame
     public void mouseClicked(MouseEvent e)
     {
       myProcessManager.run();
+    }
+  }
+
+  class OkPriorityDialog extends MouseAdapter
+  {
+    public void mouseClicked(MouseEvent e)
+    {
+      myProcessManager.setProcessPriority(
+        Integer.parseInt(priorityTextField.getText()));
+      changePriorityDialog.setVisible(false);
+    }
+  }
+
+  class CancelPriorityDialog extends MouseAdapter
+  {
+    public void mouseClicked(MouseEvent e)
+    {
+      changePriorityDialog.setVisible(false);
     }
   }
 }
