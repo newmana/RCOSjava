@@ -50,6 +50,11 @@ public class MemoryManager extends OSMessageHandler
   public final static byte STACK_SEGMENT = 2;
 
   /**
+   * SHARED_SEGMENT space designed for shared memory (read/write).
+   */
+  public final static byte SHARED_SEGMENT = 3;
+
+  /**
    * The name of the manager to register with the post office.
    */
   private static final String MESSENGING_ID = "MemoryManager";
