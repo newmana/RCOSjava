@@ -34,15 +34,12 @@ public class IPCManagerAnimator extends RCOSAnimator
    * Constructor for the IPCManagerAnimator object
    *
    * @param postOffice Description of Parameter
-   * @param x Description of Parameter
-   * @param y Description of Parameter
    * @param images Description of Parameter
    */
-  public IPCManagerAnimator(AnimatorOffice postOffice, int x, int y,
-      ImageIcon[] images)
+  public IPCManagerAnimator(AnimatorOffice postOffice, ImageIcon[] images)
   {
     super(MESSENGING_ID, postOffice);
-    panel = new IPCManagerPanel(x, y, images, this);
+    panel = new IPCManagerPanel(images, this);
   }
 
   /**

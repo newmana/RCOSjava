@@ -2,6 +2,7 @@ package org.rcosjava.software.animator.support.mtgos;
 
 import java.awt.*;
 import java.awt.image.*;
+import javax.swing.*;
 
 /**
  * This is the basic engine which uses the MTGO objects.
@@ -13,17 +14,17 @@ import java.awt.image.*;
  * @created 1st January 1997
  * @version 1.00 $Date$
  */
-public class GraphicsEngine extends Canvas
+public class GraphicsEngine extends JPanel
 {
   /**
-   * Background image (layer 0).
-   */
-  private Image background;
-
-  /**
-   * Offscreen buffer.
+   * Offscreen bufer
    */
   private Image buffer;
+
+  /**
+   * Painting object
+   */
+  private Graphics pad;
 
   /**
    * Background colour.
@@ -33,27 +34,12 @@ public class GraphicsEngine extends Canvas
   /**
    * Middle of screen X position.
    */
-  public int centerX = 0;
+  private int centerX = 0;
 
   /**
    * Middle of screen Y position.
    */
-  public int centerY = 0;
-
-  /**
-   * Width of screen.
-   */
-  public int width = 0;
-
-  /**
-   * Height of screen.
-   */
-  public int height = 0;
-
-  /**
-   * Graphics to write to.
-   */
-  public Graphics pad;
+  private int centerY = 0;
 
   /**
    * Objects to display.
@@ -61,79 +47,44 @@ public class GraphicsEngine extends Canvas
   Chain objectChain = null;
 
   /**
-   * Peer component.
+   * If we have setup the graphics objects (done at render time).
    */
-  private Component myComponent;
+  private boolean graphicsSetup = false;
 
   /**
-   * Creates a graphic engine. It requires a component to determine its size.
+   * Returns the center X co-ordinate.
    *
-   * @param c the component that has previously been created. This is what the
-   *      graphicsEngine lives in.
-   * @exception java.lang.IllegalArgumentException Description of Exception
-   * @throws java.lang.IllegalArgumentException when c is null.
+   * @return the center X co-ordinate.
    */
-  public GraphicsEngine(Component c) throws java.lang.IllegalArgumentException
+  public int getCenterX()
   {
-    super();
-    if (c == null)
-    {
-      throw new java.lang.IllegalArgumentException();
-    }
-    setGraphicsEngine(c, c.getSize().width, c.getSize().height);
+    return centerX;
   }
 
   /**
-   * Constructor for the GraphicsEngine object
+   * Returns the center Y co-ordinate.
    *
-   * @param c Description of Parameter
-   * @param x Description of Parameter
-   * @param y Description of Parameter
+   * @return the center Y co-ordinate.
    */
-  public GraphicsEngine(Component c, int x, int y)
+  public int getCenterY()
   {
-    super();
-    if (c == null)
-    {
-      throw new java.lang.IllegalArgumentException();
-    }
-    setGraphicsEngine(c, x, y);
+    return centerY;
   }
 
   /**
-   * Gets the MinimumSize attribute of the GraphicsEngine object
+   * Determines if an object is inside the give x and y co-ordinates.
    *
-   * @return The MinimumSize value
-   */
-  public Dimension getMinimumSize()
-  {
-    return getPreferredSize();
-  }
-
-  /**
-   * Gets the PreferredSize attribute of the GraphicsEngine object
-   *
-   * @return The PreferredSize value
-   */
-  public Dimension getPreferredSize()
-  {
-    return new Dimension(width, height);
-  }
-
-  /**
-   * Gets the Inside attribute of the GraphicsEngine object
-   *
-   * @param mx Description of Parameter
-   * @param my Description of Parameter
-   * @return The Inside value
+   * @param mx x position of object.
+   * @param my y position of object
+   * @return the name of the object at the given co-ordinates.
    */
   public String isInside(int mx, int my)
   {
     Chain tempObjectChain = sortMTGOsDescending();
     MTGO mob;
 
-    //find the MTGO with the highest priority in the
-    //given x and y co-ordinate.
+    // Find the MTGO with the highest priority in the
+    // given x and y co-ordinate.
     try
     {
       while (tempObjectChain != null)
@@ -179,7 +130,7 @@ public class GraphicsEngine extends Canvas
   }
 
   /**
-   * Remove MTGO based on sText.
+   * Remove MTGO based on its name
    *
    * @param mtgoText the text label to find in the chain and remove.
    */
@@ -199,7 +150,7 @@ public class GraphicsEngine extends Canvas
 
     while (tempObjectChain != null)
     {
-      // if the current one is the one we are looking
+      // If the current one is the one we are looking
       // for, skip the current one.
       if (mob.text.compareTo(mtgoText) == 0)
       {
@@ -258,57 +209,44 @@ public class GraphicsEngine extends Canvas
 
   /**
    * Description of the Method
-   */
-  public void drawBackground()
-  {
-    if (background != null)
-    {
-      pad.drawImage(background, 0, 0, this);
-    }
-    else
-    {
-      pad.setColor(backgroundColour);
-      pad.fillRect(0, 0, buffer.getWidth(this), buffer.getHeight(this));
-    }
-  }
-
-  /**
-   * Description of the Method
    *
    * @param g Description of Parameter
    */
-  public void paint(Graphics g)
+  public void paintComponent(Graphics g)
   {
-    update(g);
-  }
-
-  /**
-   * Description of the Method
-   *
-   * @param g Description of Parameter
-   */
-  public void update(Graphics g)
-  {
-    /* Sort MTGOs by priority */
-    Chain tempObjectChain = sortMTGOsAscending();
-    MTGO mob;
-
-    /* Draw MTGOs ms */
-    while (tempObjectChain != null)
+    super.paintComponent(g);
+    if (!graphicsSetup)
     {
-      mob = tempObjectChain.object;
-      if (mob.isVisible)
+      setGraphicsEngine();
+    }
+
+    // Sort MTGOs by priority
+    if (objectChain != null)
+    {
+
+      Chain tempObjectChain = sortMTGOsAscending();
+      MTGO mob;
+
+      // Draw MTGOs ms
+      while (tempObjectChain != null)
       {
-        pad = mob.paint(pad);
+        mob = tempObjectChain.object;
+        if (mob.isVisible)
+        {
+          pad = mob.paint(pad);
+        }
+        tempObjectChain = tempObjectChain.nextChain;
       }
-      tempObjectChain = tempObjectChain.nextChain;
     }
 
-    /* Draw completed buffer to g */
+    // Draw completed buffer to g
     g.drawImage(buffer, 0, 0, this);
   }
 
   /**
+   * Returns a chain object where they are sorted in ascending orber by
+   * priority.
+   *
    * @return a chain object where they are sorted in ascending order by
    *      priority.
    */
@@ -347,6 +285,9 @@ public class GraphicsEngine extends Canvas
   }
 
   /**
+   * Returns a chain object where they are sorted in descending order by
+   * priority.
+   *
    * @return a chain object where they are sorted in descending order by
    *      priority.
    */
@@ -385,49 +326,42 @@ public class GraphicsEngine extends Canvas
   }
 
   /**
-   * Description of the Method
+   * Returns the X position to place an object determined by its size.
    *
-   * @param theObject Description of Parameter
-   * @return Description of the Returned Value
+   * @param mgto the object to center.
+   * @return the X position to place the object.
    */
-  public int CenterX(MTGO theObject)
+  public int centerX(MTGO mtgo)
   {
-    float fTemp = theObject.imageWidth / 2;
-
-    return ((int) (centerX - fTemp));
+    float temp = mtgo.imageWidth / 2;
+    return ((int) (centerX - temp));
   }
 
   /**
-   * Description of the Method
+   * Returns the Y position to place an object determined by its size.
    *
-   * @param theObject Description of Parameter
-   * @return Description of the Returned Value
+   * @param mtgo the object to center.
+   * @return the Y position to place the object.
    */
-  public int CenterY(MTGO theObject)
+  public int centerY(MTGO mtgo)
   {
-    float fTemp = theObject.imageHeight / 2;
-
-    return ((int) (centerY - fTemp));
+    float temp = mtgo.imageHeight / 2;
+    return ((int) (centerY - temp));
   }
 
   /**
-   * Sets the GraphicsEngine attribute of the GraphicsEngine object
-   *
-   * @param c The new GraphicsEngine value
-   * @param x The new GraphicsEngine value
-   * @param y The new GraphicsEngine value
+   * Get the graphics object from the repaint manager for offscreen painting.
    */
-  private void setGraphicsEngine(Component c, int x, int y)
+  private synchronized void setGraphicsEngine()
   {
-    myComponent = c;
-    width = x;
-    height = y;
-    buffer = myComponent.createImage(width, height);
+    RepaintManager rm = RepaintManager.currentManager(this);
+    buffer = rm.getOffscreenBuffer(this, getWidth(), getHeight());
     pad = buffer.getGraphics();
-    setSize(width, height);
-    repaint();
-    centerX = (int) (width / 2);
-    centerY = (int) (height / 2);
+
+    centerX = (int) (getWidth() / 2);
+    centerY = (int) (getHeight() / 2);
+
+    graphicsSetup = true;
   }
 
   /**
@@ -438,5 +372,16 @@ public class GraphicsEngine extends Canvas
   public void setBackgroundColour(Color newBackgroundColour)
   {
     backgroundColour = newBackgroundColour;
+  }
+
+  /**
+   * Returns the offscreen graphics object or pad.
+   *
+   * @return the offscreen graphics object or pad.
+   */
+  public synchronized Graphics getPad()
+  {
+    if (pad == null) return null;
+    return pad;
   }
 }

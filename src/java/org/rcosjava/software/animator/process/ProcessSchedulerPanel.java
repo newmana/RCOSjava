@@ -31,8 +31,6 @@ import org.rcosjava.software.util.LIFOQueue;
  */
 public class ProcessSchedulerPanel extends RCOSPanel
 {
-  private JPanel optionsPanel;
-
   /**
    * The process scheduler display area.
    */
@@ -117,11 +115,6 @@ public class ProcessSchedulerPanel extends RCOSPanel
   /**
    * Description of the Field
    */
-  private int widthCount, heightCount;
-
-  /**
-   * Description of the Field
-   */
   private int leftIndent, rightIndent;
 
   /**
@@ -137,11 +130,6 @@ public class ProcessSchedulerPanel extends RCOSPanel
   /**
    * Description of the Field
    */
-  private int windowWidth, windowHeight;
-
-  /**
-   * Description of the Field
-   */
   private long delay;
 
   /**
@@ -149,15 +137,15 @@ public class ProcessSchedulerPanel extends RCOSPanel
    */
   private ProcessSchedulerAnimator myProcessScheduler;
 
+  private boolean movementSetup = false;
+
   /**
    * Constructor for the ProcessSchedulerFrame object
    *
-   * @param x Description of Parameter
-   * @param y Description of Parameter
    * @param images Description of Parameter
    * @param thisProcessScheduler Description of Parameter
    */
-  public ProcessSchedulerPanel(int x, int y, ImageIcon[] images,
+  public ProcessSchedulerPanel(ImageIcon[] images,
       ProcessSchedulerAnimator thisProcessScheduler)
   {
     myImages = new Image[images.length];
@@ -168,8 +156,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     ZombieQ = new LIFOQueue(10, 0);
     BlockedQ = new LIFOQueue(10, 0);
     ReadyQ = new LIFOQueue(10, 0);
-    windowWidth = x - 100;
-    windowHeight = y - 175;
+
     delay = 1;
     myProcessScheduler = thisProcessScheduler;
   }
@@ -183,25 +170,14 @@ public class ProcessSchedulerPanel extends RCOSPanel
    */
   public void setupLayout(Component c)
   {
-    super.setupLayout(c);
+    engine = new GraphicsEngine();
 
-    optionsPanel = new JPanel();
+    JPanel optionsPanel = new JPanel();
     JPanel processPanel = new JPanel();
-    JPanel main = new JPanel();
 
-    main.setBackground(defaultBgColour);
-    main.setForeground(defaultFgColour);
-    main.setLayout(new BorderLayout());
-
-    engine = new GraphicsEngine(this, windowWidth, windowHeight);
-    engine.setBackgroundColour(defaultBgColour);
-
-    width = engine.getWidth();
-    height = engine.getHeight() / 5;
-    leftIndent = 50;
-    rightIndent = width - leftIndent;
-
-    setupMovement();
+    setBackground(defaultBgColour);
+    setForeground(defaultFgColour);
+    setLayout(new BorderLayout());
 
     Choice speedOption = new Choice();
     Choice quantumOption = new Choice();
@@ -311,13 +287,12 @@ public class ProcessSchedulerPanel extends RCOSPanel
     optionsPanel.add(schedulerOption);
     schedulerOption.addItemListener(new SchedulerSelection());
 
-    processPanel.add(engine);
+    engine.setBackgroundColour(defaultBgColour);
     engine.addMouseListener(new MTGOSelection());
+    processPanel.add(engine);
 
-    main.add("Center", processPanel);
-    main.add("West", optionsPanel);
-
-    add("Center", main);
+    add(engine, BorderLayout.CENTER);
+    add(optionsPanel, BorderLayout.WEST);
   }
 
   /**
@@ -325,21 +300,18 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param g Description of Parameter
    */
-  public void paint(Graphics g)
+  public synchronized void paintComponent(Graphics g)
   {
-    update(g);
-  }
+    super.paintComponent(g);
 
-  /**
-   * Description of the Method
-   *
-   * @param g Description of Parameter
-   */
-  public synchronized void update(Graphics g)
-  {
-    drawBackground();
-    engine.repaint();
-    optionsPanel.repaint();
+    if (engine != null && engine.getPad() != null)
+    {
+      if (!movementSetup)
+      {
+        setupMovement();
+      }
+      drawBackground();
+    }
   }
 
   /**
@@ -366,24 +338,26 @@ public class ProcessSchedulerPanel extends RCOSPanel
    */
   void setupMovement()
   {
+
     // Create the animation area for the panel.
     cpuPic = new MTGO(myImages[2], "RCOS CPU", false);
     cpuPic.priority = 1;
     engine.addMTGO(cpuPic, this);
-    cpuPic.xPosition = engine.CenterX(cpuPic);
+    cpuPic.xPosition = engine.centerX(cpuPic);
     cpuPic.yPosition = 0;
     tmpPic = new MTGO(myImages[0], "TEMP", false);
     tmpPic.priority = 2;
     engine.addMTGO(tmpPic, this);
-    boxHeight = 30;
-    boxWidth = 30;
+    width = engine.getWidth();
+    height = (engine.getHeight() - cpuPic.imageHeight) / 3;
+    leftIndent = 50;
+    rightIndent = width - leftIndent;
+    boxHeight = 25;
+    boxWidth = 25;
 
     int count;
-
     int count2;
-
     int increment;
-
     int iArr;
 
     // Movement inside queues
@@ -403,17 +377,17 @@ public class ProcessSchedulerPanel extends RCOSPanel
         iArr = (count2 - 5) * -1;
         if (count == 1)
         {
-          readyPositions[iArr] = new Position(((count2 * boxHeight) + engine.centerX),
+          readyPositions[iArr] = new Position(((count2 * boxHeight) + engine.getCenterX()),
               ((count * height) + boxHeight), increment, 0);
         }
         if (count == 2)
         {
-          blockedPositions[iArr] = new Position(((count2 * boxHeight) + engine.centerX),
+          blockedPositions[iArr] = new Position(((count2 * boxHeight) + engine.getCenterX()),
               ((count * height) + boxHeight), increment, 0);
         }
         if (count == 3)
         {
-          zombiePositions[iArr] = new Position(((count2 * boxHeight) + engine.centerX),
+          zombiePositions[iArr] = new Position(((count2 * boxHeight) + engine.getCenterX()),
               ((count * height) + boxHeight), increment, 0);
         }
       }
@@ -421,42 +395,42 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
     // Movement of process from Zombie to Ready
 
-    zombieToReadyPositions[0] = new Position(engine.centerX - 180, (3 * height) + boxHeight, -2, 0);
+    zombieToReadyPositions[0] = new Position(engine.getCenterX() - 180, (3 * height) + boxHeight, -2, 0);
     zombieToReadyPositions[1] = new Position(leftIndent - (boxWidth / 2), (3 * height) + boxHeight, 0, -2);
     zombieToReadyPositions[2] = new Position(leftIndent - (boxWidth / 2), (2 * height) + 45 + (boxHeight / 2), 2, 0);
     zombieToReadyPositions[3] = new Position(rightIndent - (boxWidth / 2), (2 * height) + 45 + (boxHeight / 2), 0, -2);
     zombieToReadyPositions[4] = new Position(rightIndent - (boxWidth / 2), height + boxHeight, -2, 0);
-    zombieToReadyPositions[5] = new Position(engine.centerX + 150, height + boxHeight, 0, 0);
+    zombieToReadyPositions[5] = new Position(engine.getCenterX() + 150, height + boxHeight, 0, 0);
 
     // Movement of process from Blocked to Ready
 
-    blockedToReadyPositions[0] = new Position(engine.centerX - 180, (2 * height) + boxHeight, -2, 0);
+    blockedToReadyPositions[0] = new Position(engine.getCenterX() - 180, (2 * height) + boxHeight, -2, 0);
     blockedToReadyPositions[1] = new Position(leftIndent - (boxWidth / 2), (2 * height) + boxHeight, 0, -2);
     blockedToReadyPositions[2] = new Position(leftIndent - (boxWidth / 2), height + 45 + (boxHeight / 2), 2, 0);
     blockedToReadyPositions[3] = new Position(rightIndent - (boxWidth / 2), height + 45 + (boxHeight / 2), 0, -2);
     blockedToReadyPositions[4] = new Position(rightIndent - (boxWidth / 2), height + boxHeight, -2, 0);
-    blockedToReadyPositions[5] = new Position(engine.centerX + 150, height + boxHeight, 0, 0);
+    blockedToReadyPositions[5] = new Position(engine.getCenterX() + 150, height + boxHeight, 0, 0);
 
     // Movement of process from Ready to CPU
 
-    readyToCPUPositions[0] = new Position(engine.centerX - 180, height + boxHeight, -2, 0);
+    readyToCPUPositions[0] = new Position(engine.getCenterX() - 180, height + boxHeight, -2, 0);
     readyToCPUPositions[1] = new Position(leftIndent - (boxWidth / 2), height + boxHeight, 0, -2);
     readyToCPUPositions[2] = new Position(leftIndent - (boxWidth / 2), boxHeight / 2, 2, 0);
-    readyToCPUPositions[3] = new Position(engine.CenterX(tmpPic), boxHeight / 2, 0, 0);
+    readyToCPUPositions[3] = new Position(engine.centerX(tmpPic), boxHeight / 2, 0, 0);
 
     // Movement of process from CPU to Ready
 
-    cpuToReadyPositions[0] = new Position(engine.CenterX(tmpPic), boxHeight / 2, 2, 0);
+    cpuToReadyPositions[0] = new Position(engine.centerX(tmpPic), boxHeight / 2, 2, 0);
     cpuToReadyPositions[1] = new Position(rightIndent - (boxWidth / 2), boxHeight / 2, 0, 2);
     cpuToReadyPositions[2] = new Position(rightIndent - (boxWidth / 2), height + boxHeight, -2, 0);
-    cpuToReadyPositions[3] = new Position(engine.centerX + 150, height + boxHeight, 0, 0);
+    cpuToReadyPositions[3] = new Position(engine.getCenterX() + 150, height + boxHeight, 0, 0);
 
     // Movement of process from CPU to Blocked
 
-    cpuToBlockedPositions[0] = new Position(engine.CenterX(tmpPic), boxHeight / 2, 2, 0);
+    cpuToBlockedPositions[0] = new Position(engine.centerX(tmpPic), boxHeight / 2, 2, 0);
     cpuToBlockedPositions[1] = new Position(rightIndent - (boxWidth / 2), boxHeight / 2, 0, 2);
     cpuToBlockedPositions[2] = new Position(rightIndent - (boxWidth / 2), (2 * height) + boxHeight, -2, 0);
-    cpuToBlockedPositions[3] = new Position(engine.centerX + 150, (2 * height) + boxHeight, 0, 0);
+    cpuToBlockedPositions[3] = new Position(engine.getCenterX() + 150, (2 * height) + boxHeight, 0, 0);
 
     // Add all positions to create a movement.
 
@@ -489,6 +463,8 @@ public class ProcessSchedulerPanel extends RCOSPanel
       cpuToBlockedMovement.addPosition(cpuToBlockedPositions[count]);
     }
     engine.removeMTGO("TEMP");
+
+    movementSetup = true;
   }
 
   /**
@@ -621,7 +597,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
       tmpPic = new MTGO(myImages[1], "P" + pid, true, Color.darkGray);
     }
     tmpPic.priority = 2;
-    tmpPic.xPosition = engine.CenterX(tmpPic);
+    tmpPic.xPosition = engine.centerX(tmpPic);
     tmpPic.yPosition = height + boxHeight;
     engine.addMTGO(tmpPic, this);
   }
@@ -796,16 +772,16 @@ public class ProcessSchedulerPanel extends RCOSPanel
   private void drawBackground()
   {
     //Draw the black background or image (if it's set)
-    engine.drawBackground();
-
     int increment;
 
-    engine.pad.setColor(Color.lightGray);
-    engine.pad.setFont(defaultFont);
+    engine.getPad().setColor(Color.black);
+    engine.getPad().fillRect(0, 0, engine.getWidth(), engine.getHeight());
+    engine.getPad().setColor(Color.lightGray);
+    engine.getPad().setFont(defaultFont);
 
     FontMetrics fm = getFontMetrics(defaultFont);
 
-    for (heightCount = 1; heightCount <= 3; heightCount++)
+    for (int heightCount = 1; heightCount <= 3; heightCount++)
     {
       String title;
 
@@ -823,28 +799,42 @@ public class ProcessSchedulerPanel extends RCOSPanel
       }
 
       windowCenter = (width / 2) - (fm.stringWidth(title) / 2);
-      engine.pad.drawString(title, windowCenter, (heightCount * (height)) + 20);
+      engine.getPad().drawString(title, windowCenter,
+          (heightCount * height) + fm.getHeight());
 
-      for (widthCount = -5; widthCount < 5; widthCount++)
+      int boxIndentation = 50;
+      int halfNoBoxes = ((engine.getWidth() - (boxIndentation * 2))
+          / boxWidth) / 2;
+
+      for (int boxIndex = -halfNoBoxes; boxIndex < halfNoBoxes; boxIndex++)
       {
-        engine.pad.draw3DRect((engine.centerX) + widthCount * boxHeight, (heightCount * (height)) + boxHeight, boxHeight, boxHeight, true);
+        engine.getPad().drawRect(engine.getCenterX() + (boxWidth * boxIndex),
+            (heightCount * height) + fm.getHeight() + 5, boxWidth, boxHeight);
       }
+
+      int middleOfBox = (heightCount * height) + fm.getHeight() + 5 +
+          (boxHeight / 2);
+
       //Lines out of boxes.
-      engine.pad.drawLine(leftIndent, heightCount * (height) + 45, (engine.centerX) - 150, heightCount * (height) + 45);
-      engine.pad.drawLine(engine.centerX + 150, heightCount * (height) + 45, width - leftIndent, heightCount * (height) + 45);
+      engine.getPad().drawLine(leftIndent, middleOfBox,
+          engine.getCenterX() + (boxWidth * -halfNoBoxes), middleOfBox);
+      engine.getPad().drawLine(engine.getCenterX() + (boxWidth * (halfNoBoxes)),
+          middleOfBox, rightIndent, middleOfBox);
     }
 
     //Horizontal lines for zombie and blocked
-    engine.pad.drawLine(leftIndent, 2 * (height) - 5, rightIndent, 2 * (height) - 5);
-    engine.pad.drawLine(leftIndent, 3 * (height) - 5, rightIndent, 3 * (height) - 5);
+    engine.getPad().drawLine(leftIndent, 2 * (height) - 5, rightIndent, 2 * (height) - 5);
+    engine.getPad().drawLine(leftIndent, 3 * (height) - 5, rightIndent, 3 * (height) - 5);
 
     //Horizontal lines off CPU
-    engine.pad.drawLine(leftIndent, cpuPic.imageHeight / 2, engine.CenterX(cpuPic), cpuPic.imageHeight / 2);
-    engine.pad.drawLine(engine.CenterX(cpuPic) + cpuPic.imageWidth / 2, cpuPic.imageHeight / 2, rightIndent, cpuPic.imageHeight / 2);
+    engine.getPad().drawLine(leftIndent, cpuPic.imageHeight / 2, engine.centerX(cpuPic), cpuPic.imageHeight / 2);
+    engine.getPad().drawLine(engine.centerX(cpuPic) + cpuPic.imageWidth / 2, cpuPic.imageHeight / 2, rightIndent, cpuPic.imageHeight / 2);
 
     //2 Vertical lines
-    engine.pad.drawLine(leftIndent, cpuPic.imageHeight / 2, leftIndent, 3 * (height) + 45);
-    engine.pad.drawLine(rightIndent, cpuPic.imageHeight / 2, rightIndent, 3 * (height) + 45);
+    engine.getPad().drawLine(leftIndent, cpuPic.imageHeight / 2, leftIndent,
+        (3 * height) + fm.getHeight() + 5 + (boxHeight / 2));
+    engine.getPad().drawLine(rightIndent, cpuPic.imageHeight / 2, rightIndent,
+        (3 * height) + fm.getHeight() + 5 + (boxHeight / 2));
   }
 
   /**
@@ -856,7 +846,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
   private synchronized void refreshQueue(int queueType)
   {
     LIFOQueue tmpQ = new LIFOQueue();
-    int XPosition = engine.centerX - 150;
+    int XPosition = engine.getCenterX() - 150;
     int YPosition = queueType * height + boxHeight;
 
     switch (queueType)

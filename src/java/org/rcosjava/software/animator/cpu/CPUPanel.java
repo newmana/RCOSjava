@@ -58,13 +58,10 @@ public class CPUPanel extends RCOSPanel
   /**
    * Constructor for the CPUFrame object
    *
-   * @param x Description of Parameter
-   * @param y Description of Parameter
    * @param newImages Description of Parameter
    * @param newCPUAnimator Description of Parameter
    */
-  public CPUPanel(int x, int y, ImageIcon[] newImages,
-    CPUAnimator newCPUAnimator)
+  public CPUPanel(ImageIcon[] newImages, CPUAnimator newCPUAnimator)
   {
     super();
     if (images != null)
@@ -215,7 +212,6 @@ public class CPUPanel extends RCOSPanel
     codeList.setBackground(listColour);
     gridBag.setConstraints(codeList, constraints);
     JScrollPane codeListPane = new JScrollPane(codeList);
-    codeListPane.setMinimumSize(new Dimension(100, 200));
     main.add(codeListPane);
 
     // Add the two panels to the frame.

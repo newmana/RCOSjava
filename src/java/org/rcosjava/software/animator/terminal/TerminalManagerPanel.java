@@ -56,16 +56,14 @@ public class TerminalManagerPanel extends RCOSPanel
    * Create an animator frame, set the size of it and the images to use to
    * represent the processes and the buttons.
    *
-   * @param x width of frame
-   * @param y height of frame
    * @param noTerminals maximum number of terminals to display
    * @param noTerminalRows number of rows of terminals to display
    * @param thisTerminalManager my parent terminal manager
    * @param images Description of Parameter
    * @param noTerminalCols Description of Parameter
    */
-  public TerminalManagerPanel(int x, int y, ImageIcon[] newImages,
-      int noTerminals, int noTerminalCols, int noTerminalRows,
+  public TerminalManagerPanel(ImageIcon[] newImages, int noTerminals,
+      int noTerminalCols, int noTerminalRows,
       TerminalManagerAnimator thisTerminalManager)
   {
     super();
@@ -83,8 +81,6 @@ public class TerminalManagerPanel extends RCOSPanel
 
     terminals = new GraphicButton[maxTerminals];
     views = new GraphicButton[maxTerminals];
-
-    setSize(x, y);
   }
 
   /**

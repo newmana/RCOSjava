@@ -46,22 +46,17 @@ public class TerminalManagerAnimator extends RCOSAnimator
    * e.g. 2 rows, 4 columns but a maximum of 7 terminals.
    *
    * @param postOffice the post office to register to.
-   * @param x width of frame
-   * @param y height of frame
    * @param noTerminals maximum number of terminals to display
    * @param noTerminalColumns number of columns of terminals to display
    * @param noTerminalRows number of rows of terminals to display
    * @param images the images to use for process and buttons.
    */
-  public TerminalManagerAnimator(AnimatorOffice postOffice, int x, int y,
-      ImageIcon[] images, int noTerminals, int noTerminalColumns,
-      int noTerminalRows)
+  public TerminalManagerAnimator(AnimatorOffice postOffice, ImageIcon[] images,
+      int noTerminals, int noTerminalColumns, int noTerminalRows)
   {
     super(MESSENGING_ID, postOffice);
-//    myFrame = new TerminalManagerFrame(x, y, images, noTerminals,
-//        noTerminalColumns, noTerminalRows, this);
-    panel = new TerminalManagerPanel(x, y, images, noTerminals,
-      noTerminalColumns, noTerminalRows, this);
+    panel = new TerminalManagerPanel(images, noTerminals, noTerminalColumns,
+        noTerminalRows, this);
   }
 
   /**

@@ -24,7 +24,7 @@ public class AboutFrame extends RCOSFrame
   /**
    * Description of the Field
    */
-  private Image[] myImages = new Image[RCOS.numberPeople];
+  private Image[] myImages = new Image[RCOS.NUMBER_OF_PEOPLE];
 
   /**
    * Constructor for the AboutFrame object

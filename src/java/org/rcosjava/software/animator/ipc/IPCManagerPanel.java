@@ -116,13 +116,10 @@ public class IPCManagerPanel extends RCOSPanel
   /**
    * Constructor for the IPCManagerFrame object
    *
-   * @param x width of window.
-   * @param y height of window.
    * @param ipcImages images used in display of ui.
    * @param thisIPCManager animator used to receive and make messages.
    */
-  public IPCManagerPanel(int x, int y, ImageIcon[] images,
-      IPCManagerAnimator thisIPCManager)
+  public IPCManagerPanel(ImageIcon[] images, IPCManagerAnimator thisIPCManager)
   {
     super();
     myImages = new Image[images.length];
@@ -130,8 +127,8 @@ public class IPCManagerPanel extends RCOSPanel
     {
       myImages[index] = images[index].getImage();
     }
-    windowWidth = x;
-    windowHeight = y;
+    windowWidth = this.getWidth();
+    windowHeight = this.getHeight();
     myIPCManagerAnimator = thisIPCManager;
     semaphoreMap = new HashMap();
     sharedMemoryMap = new HashMap();

@@ -58,15 +58,13 @@ public class ProgramManagerAnimator extends RCOSAnimator
    * Constructor for the ProgramManagerAnimator object
    *
    * @param postOffice Description of Parameter
-   * @param x Description of Parameter
-   * @param y Description of Parameter
    * @param pmImages Description of Parameter
    */
   public ProgramManagerAnimator(AnimatorOffice postOffice,
-      int x, int y, ImageIcon[] pmImages)
+      ImageIcon[] pmImages)
   {
     super(MESSENGING_ID, postOffice);
-    pmFrame = new ProgramManagerFrame(x, y, pmImages, this);
+    pmFrame = new ProgramManagerFrame(200, 200, pmImages, this);
   }
 
   /**

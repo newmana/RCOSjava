@@ -52,15 +52,14 @@ public class ProcessManagerAnimator extends RCOSAnimator
    * buttons.
    *
    * @param postOffice the post office to register to.
-   * @param x width of frame
-   * @param y height of frame
    * @param images the images to use for process and buttons.
    */
-  public ProcessManagerAnimator(AnimatorOffice postOffice, int x, int y,
-      ImageIcon[] images)
+  public ProcessManagerAnimator(AnimatorOffice postOffice, ImageIcon[] images)
   {
     super(MESSENGING_ID, postOffice);
     currentProcesses = new LIFOQueue(5, 1);
+    int x = 200;
+    int y = 200;
     myFrame = new ProcessManagerFrame(x, y, images, this);
     myFrame.pack();
     myFrame.setSize(x, y);
