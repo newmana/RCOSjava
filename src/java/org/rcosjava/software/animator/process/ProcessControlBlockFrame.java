@@ -267,6 +267,7 @@ public class ProcessControlBlockFrame extends RCOSFrame
     tree.setCellRenderer(renderer);
     tree.getSelectionModel().setSelectionMode(
         TreeSelectionModel.SINGLE_TREE_SELECTION);
+    tree.setToggleClickCount(1);
 
     //Create the scroll pane and add the tree to it.
     JScrollPane treeView = new JScrollPane(tree);
