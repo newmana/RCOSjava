@@ -42,7 +42,7 @@
     <mkdir dir="${gen.dir}/classes"/>
 
     <!-- Test whether to generate javadoc file-->
-    <uptodate property="javadoc.required" targetfile="${src.dir}">
+    <uptodate property="javadoc.required" targetfile="${src.dir}/java">
       <srcfiles dir="${javadoc.dir}"/>
     </uptodate>
 
@@ -117,7 +117,7 @@
   <target name="javadoc" depends="dist"
    if="javadoc.required"
    description="Create Javadoc in javadoc directory">
-    <javadoc packagenames="org.rcosjava.*, pll2.*" sourcepath="${src.dir}"
+    <javadoc packagenames="org.rcosjava.*, pll2.*" sourcepath="${src.dir}/java"
       classpathref="jars"      
       destdir="${javadoc.dir}" author="true" version="true" use="true"/>
   </target>
