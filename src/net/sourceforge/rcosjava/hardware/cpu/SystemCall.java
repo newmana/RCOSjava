@@ -20,8 +20,15 @@ import java.util.*;
  */
 public class SystemCall extends WordParameter
 {
-  private static Hashtable allSystemCallsByName = new Hashtable();
-  private static Hashtable allSystemCallsByValue = new Hashtable();
+  /**
+   * The name of the system call.  The location in the list reflects its value.
+   */
+  private static HashMap allSystemCallsByName = new HashMap();
+
+  /**
+   * The value of the system call.  The location in the list reflects its name.
+   */
+  private static HashMap allSystemCallsByValue = new HashMap();
 
   /** Operation constant for system call (OPCODE_CSP) CHaracter IN */
   public static final SystemCall CHARACTER_IN = new SystemCall((short) 0, "CHIN");

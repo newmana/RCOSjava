@@ -19,8 +19,15 @@ import java.util.*;
  */
 public class Operator extends WordParameter
 {
-  private static Hashtable allOperatorsByName = new Hashtable();
-  private static Hashtable allOperatorsByValue = new Hashtable();
+  /**
+   * The name of the operator.  The location in the list reflects its value.
+   */
+  private static HashMap allOperatorsByName = new HashMap();
+
+  /**
+   * The value of the operator.  The location in the list reflects its name.
+   */
+  private static HashMap allOperatorsByValue = new HashMap();
 
   /** Operation constant (for OPCODE_OPR) RETurn */
   public static final Operator RETURN = new Operator((short) 0,"_RET");

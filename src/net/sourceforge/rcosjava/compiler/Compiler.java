@@ -56,8 +56,8 @@ public class Compiler extends DepthFirstAdapter
   private int variableStackPosition = 0;
   private int basePosition = 0;
   private int functionPosition = 0;
-  private Hashtable globalVarsTable = new Hashtable();
-  private Hashtable localVarsTable = new Hashtable();
+  private HashMap globalVarsTable = new HashMap();
+  private HashMap localVarsTable = new HashMap();
   boolean isInFunction = false;
 
   public Compiler()
@@ -278,7 +278,7 @@ public class Compiler extends DepthFirstAdapter
   {
     System.out.println("Out of function!");
     isInFunction = false;
-    localVarsTable = new Hashtable();
+    localVarsTable = new HashMap();
   }
 
   public void writePCode(Instruction newInstruction)

@@ -20,8 +20,15 @@ import java.util.*;
  */
 public class OpCode implements Serializable
 {
-  private static Hashtable allOpCodesByName = new Hashtable();
-  private static Hashtable allOpCodesByValue = new Hashtable();
+  /**
+   * The name of opcodes.  The location in the list reflects its value.
+   */
+  private static HashMap allOpCodesByName = new HashMap();
+
+  /**
+   * The value of opcodes.  The location in the list reflects its name.
+   */
+  private static HashMap allOpCodesByValue = new HashMap();
 
   /** Constant for LITeral call */
   public static final OpCode LITERAL = new OpCode(0x0, "LIT");
