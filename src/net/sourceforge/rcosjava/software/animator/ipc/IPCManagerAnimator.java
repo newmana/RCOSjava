@@ -137,7 +137,7 @@ public class IPCManagerAnimator extends RCOSAnimator
    myFrame.semQueueRemove();
   }
 
-  public void semaphoreWaiting()
+  public void semaphoreWaiting(String semaphoreId, int processId, int value)
   {
   }
 
