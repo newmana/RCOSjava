@@ -60,10 +60,11 @@ public class Semaphore implements Serializable
    * @param newValue a non-negative value indicating the value to set the
    *      semaphore.
    */
-  public Semaphore(String newSemaphoreName, int newId, int ownerPID,
+  public Semaphore(String newSemaphoreName, int newId, int newOwnerPID,
       int newValue)
   {
-    this.open(ownerPID);
+    ownerPID = newOwnerPID;
+    open(ownerPID);
     sempahoreName = newSemaphoreName;
     id = newId;
     value = newValue;
@@ -178,7 +179,6 @@ public class Semaphore implements Serializable
   public int close(int pid)
   {
     Integer oldPID = new Integer(pid);
-
     connectedProcesses.remove(oldPID);
 
     // IF there are no connections open to the sem, then the

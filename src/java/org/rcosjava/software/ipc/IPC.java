@@ -44,6 +44,11 @@ import org.apache.log4j.*;
 public class IPC extends OSMessageHandler
 {
   /**
+   * Serial id.
+   */
+  private static final long serialVersionUID = 735389059869325528L;
+
+  /**
    * Logging class.
    */
   private final static Logger log = Logger.getLogger(IPC.class);
