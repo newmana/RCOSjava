@@ -46,7 +46,6 @@ public class AddDiskRequest extends OSMessageAdapter
    */
   public void doMessage(DiskManager theElement)
   {
-    System.err.println("Doing addDiskRequest!");
     theElement.addDiskRequest(getSource().getId(), request);
   }
 }
