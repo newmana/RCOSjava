@@ -22,7 +22,7 @@ public class Compiler
 {
   private static ArrayList instructions = new ArrayList();
   private static short level = 0;
-  private static short instructionIndex;
+  private static short instructionIndex = 0;
   private static SymbolTable table;
   private static Lexer lexer;
   private static Parser parser;
@@ -32,7 +32,7 @@ public class Compiler
     if(args.length != 2)
     {
       System.out.println("usage:");
-      System.out.println("  java Compiler sourceFile outputFile");
+      System.out.println("  Compiler sourceFile outputFile");
       System.exit(1);
     }
 
@@ -53,10 +53,11 @@ public class Compiler
       // Write out jump position to main function
       table = SymbolTable.getInstance();
 
-      // Add header codes.
-      addInstruction(0, OpCode.JUMP.getValue(), (byte) 0,
-          stmtCompiler.mainPosition());
-      System.out.println("Main pos: " + stmtCompiler.mainPosition());
+      // Add jump to main function after the first INT (global vars).
+      addInstruction(1, OpCode.OPERATION.getValue(), (byte) 0,
+        Operator.RETURN.getValue());
+      addInstruction(1, OpCode.CALL.getValue(), (byte) 0,
+        (short) (stmtCompiler.mainPosition()+1));
 
       // Print out result to file
       Iterator tmpIter = instructions.iterator();
@@ -151,7 +152,7 @@ public class Compiler
   }
 
   /**
-   * Decrement an internal instruction index.  This is not fixed to the array
+   * Gets the instruction index.  This is not fixed to the array
    * of instructions.
    */
   public static short getInstructionIndex()
