@@ -236,10 +236,10 @@ public class OSOffice extends PostOffice
             //Send the message to the destination
             try
             {
-              Class[] classes = {message.getClass().getSuperclass()};
+              Class[] classes = { message.getClass().getSuperclass() };
               Method method = theDestination.getClass().getMethod(
                   "processMessage", classes);
-              Object[] args = {message};
+              Object[] args = { message };
               method.invoke(theDestination, args);
             }
             catch (Exception e)
