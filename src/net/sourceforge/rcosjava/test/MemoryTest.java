@@ -33,7 +33,7 @@ public class MemoryTest extends TestCase
       //Memory entries start at zero
       assertEquals("First free not 0", testMem.findFirstFree(), 0);
       //Allocating memory block 0, next one should be 1
-      testMem.allocateMemory(0);
+      testMem.allocateMemory(testMem.findFirstFree());
       assertEquals("First free after allocation was not 1", testMem.findFirstFree(), 1);
       //Allocating memory block 0 again, number of units should be the same as is
       //the first free unit
@@ -42,7 +42,9 @@ public class MemoryTest extends TestCase
       testMem.allocateMemory(0);
       assertEquals("Size after reallocation of same block not the same", testMem.getFreeUnits(),
         sizeBefore);
-      assertEquals("First free after same allocation was not 1", firstFreeBefore, 1);
+      assertEquals("First free after same allocation was 1", firstFreeBefore, 1);
+      testMem.allocateMemory(firstFreeBefore);
+      assertEquals("First free should now be 2", testMem.findFirstFree(), 2);
       //Deallocating already free memory should have no effect.
       testMem.freeMemory(1);
       assertEquals("Deallocating already freed memory", testMem.findFirstFree(), 1);
@@ -52,18 +54,34 @@ public class MemoryTest extends TestCase
       //Allocate/deallocate all.
       sizeBefore = testMem.getFreeUnits();
       firstFreeBefore = testMem.findFirstFree();
-      for (count = 0; count < 20; count++)
+      for (count = 0; count < 19; count++)
+      {
         testMem.allocateMemory(count);
-      assertEquals("First free after allocation was not -1", testMem.findFirstFree(), -1);
-      for (count = 0; count < 20; count++)
+      }
+      for (count = 0; count < 19; count++)
+      {
         testMem.freeMemory(count);
+      }
       assertEquals("Size change after mass de/allocation", testMem.getFreeUnits(), sizeBefore);
       assertEquals("First free after mass de/allocation", testMem.findFirstFree(), firstFreeBefore);
+
+      //Test find first free works
+      for (count = 0; count < 19; count++)
+      {
+        testMem.allocateMemory(testMem.findFirstFree());
+      }
+      assertEquals("After 20 find firsts should be none left", testMem.getFreeUnits(), 1);
+      for (count = 0; count < 19; count++)
+      {
+        testMem.freeMemory(count);
+      }
+
       //Test that the number of Units remains the same
       assertEquals("Total Units differ from start to end", testMem.getFreeUnits(), initialSize);
     }
     catch (NoFreeMemoryException e)
     {
+      e.printStackTrace();
     }
   }
 
