@@ -24,11 +24,12 @@ public class StatementCompiler extends DepthFirstAdapter
 // This will eventually be split into two.
   private VariableCompiler variableCompiler = new VariableCompiler();
   private SymbolTable table;
-  private int startIfStatement;
+  private Stack statementPosition;
 
   public StatementCompiler()
   {
     table = SymbolTable.getInstance();
+    statementPosition = new Stack();
   }
 
   /**
@@ -50,15 +51,17 @@ public class StatementCompiler extends DepthFirstAdapter
 
     // Record where the if statement finished so we can put the jump in if it
     // fails.
-    startIfStatement = Compiler.getInstructionIndex();
+    statementPosition.push(new Integer(Compiler.getInstructionIndex()));
   }
 
   public void outAIfStatement(AIfStatement node) {
 
 //    ArrayList tmpInstr = (ArrayList) previousInstruction.get(instructionIndex-1);
-    Compiler.addInstruction(startIfStatement+1,
+    int position = ((Integer) statementPosition.pop()).intValue();
+    Compiler.incInstructionIndex();
+    Compiler.addInstruction(position+1,
       new Instruction(OpCode.JUMP_ON_CONDITION.getValue(),
-      (byte) 0, (short) (Compiler.getInstructionIndex()+3)));
+      (byte) 0, (short) (Compiler.getInstructionIndex()+2)));
   }
 
   public void inAValueConditionalExpression(AValueConditionalExpression node)
