@@ -3,6 +3,7 @@ package org.rcosjava.software.animator.process;
 import java.applet.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.*;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.net.*;
@@ -127,6 +128,11 @@ public class ProcessSchedulerPanel extends RCOSPanel
    * The dimensions of the box.
    */
   private int boxHeight, boxWidth;
+
+  /**
+   * Metrics for the default font.
+   */
+  FontMetrics fm = getFontMetrics(defaultFont);
 
   /**
    * How long to delay between refreshes.
@@ -344,7 +350,26 @@ public class ProcessSchedulerPanel extends RCOSPanel
    */
   void setupMovement()
   {
-    // Create the animation area for the panel.
+    boxHeight = 25;
+    boxWidth = 25;
+
+    BufferedImage process;
+    Graphics processGraphics;
+
+    process = new BufferedImage(boxWidth, boxHeight,
+      BufferedImage.TYPE_INT_ARGB);
+    processGraphics = process.createGraphics();
+    processGraphics.setColor(new Color(51, 255, 153));
+    processGraphics.fillOval(0, 0, boxWidth, boxHeight);
+    myImages[0] = process;
+
+    process = new BufferedImage(boxWidth, boxHeight,
+      BufferedImage.TYPE_INT_ARGB);
+    processGraphics = process.createGraphics();
+    processGraphics.setColor(new Color(153, 153, 255));
+    processGraphics.fillOval(0, 0, boxWidth, boxHeight);
+    myImages[1] = process;
+
     cpuPic = new MTGO(myImages[2], "RCOS CPU", false);
     cpuPic.priority = 1;
     engine.addMTGO(cpuPic, this);
@@ -353,12 +378,11 @@ public class ProcessSchedulerPanel extends RCOSPanel
     tmpPic = new MTGO(myImages[0], "TEMP", false);
     tmpPic.priority = 2;
     engine.addMTGO(tmpPic, this);
+
     width = engine.getWidth();
     height = (engine.getHeight() - cpuPic.imageHeight) / 3;
     leftIndent = 50;
     rightIndent = width - leftIndent;
-    boxHeight = 25;
-    boxWidth = 25;
 
     int count;
     int count2;
@@ -366,9 +390,11 @@ public class ProcessSchedulerPanel extends RCOSPanel
     int arrayIndex;
 
     // Movement inside queues
-
     for (count = 1; count <= 3; count++)
     {
+
+      int bottomOfBox = (count * height) + (boxHeight / 2);
+
       for (count2 = 5; count2 > -6; count2--)
       {
         if (count2 > -5)
@@ -383,17 +409,17 @@ public class ProcessSchedulerPanel extends RCOSPanel
         if (count == 1)
         {
           readyPositions[arrayIndex] = new Position(((count2 * boxHeight) + engine.getCenterX()),
-              ((count * height) + boxHeight), increment, 0);
+              bottomOfBox, increment, 0);
         }
         if (count == 2)
         {
           blockedPositions[arrayIndex] = new Position(((count2 * boxHeight) + engine.getCenterX()),
-              ((count * height) + boxHeight), increment, 0);
+              bottomOfBox, increment, 0);
         }
         if (count == 3)
         {
           zombiePositions[arrayIndex] = new Position(((count2 * boxHeight) + engine.getCenterX()),
-              ((count * height) + boxHeight), increment, 0);
+              bottomOfBox, increment, 0);
         }
       }
     }
@@ -407,7 +433,6 @@ public class ProcessSchedulerPanel extends RCOSPanel
     zombieToReadyPositions[5] = new Position(engine.getCenterX() + 150, height + boxHeight, 0, 0);
 
     // Movement of process from Blocked to Ready
-
     blockedToReadyPositions[0] = new Position(engine.getCenterX() - 180, (2 * height) + boxHeight, -2, 0);
     blockedToReadyPositions[1] = new Position(leftIndent - (boxWidth / 2), (2 * height) + boxHeight, 0, -2);
     blockedToReadyPositions[2] = new Position(leftIndent - (boxWidth / 2), height + 45 + (boxHeight / 2), 2, 0);
@@ -416,28 +441,24 @@ public class ProcessSchedulerPanel extends RCOSPanel
     blockedToReadyPositions[5] = new Position(engine.getCenterX() + 150, height + boxHeight, 0, 0);
 
     // Movement of process from Ready to CPU
-
     readyToCPUPositions[0] = new Position(engine.getCenterX() - 180, height + boxHeight, -2, 0);
     readyToCPUPositions[1] = new Position(leftIndent - (boxWidth / 2), height + boxHeight, 0, -2);
     readyToCPUPositions[2] = new Position(leftIndent - (boxWidth / 2), boxHeight / 2, 2, 0);
     readyToCPUPositions[3] = new Position(engine.centerX(tmpPic), boxHeight / 2, 0, 0);
 
     // Movement of process from CPU to Ready
-
     cpuToReadyPositions[0] = new Position(engine.centerX(tmpPic), boxHeight / 2, 2, 0);
     cpuToReadyPositions[1] = new Position(rightIndent - (boxWidth / 2), boxHeight / 2, 0, 2);
     cpuToReadyPositions[2] = new Position(rightIndent - (boxWidth / 2), height + boxHeight, -2, 0);
     cpuToReadyPositions[3] = new Position(engine.getCenterX() + 150, height + boxHeight, 0, 0);
 
     // Movement of process from CPU to Blocked
-
     cpuToBlockedPositions[0] = new Position(engine.centerX(tmpPic), boxHeight / 2, 2, 0);
     cpuToBlockedPositions[1] = new Position(rightIndent - (boxWidth / 2), boxHeight / 2, 0, 2);
     cpuToBlockedPositions[2] = new Position(rightIndent - (boxWidth / 2), (2 * height) + boxHeight, -2, 0);
     cpuToBlockedPositions[3] = new Position(engine.getCenterX() + 150, (2 * height) + boxHeight, 0, 0);
 
     // Add all positions to create a movement.
-
     zombieToReadyMovement = new Movement();
     blockedToReadyMovement = new Movement();
     readyToCPUMovement = new Movement();
@@ -781,8 +802,6 @@ public class ProcessSchedulerPanel extends RCOSPanel
     engine.getPad().fillRect(0, 0, engine.getWidth(), engine.getHeight());
     engine.getPad().setColor(Color.lightGray);
     engine.getPad().setFont(defaultFont);
-
-    FontMetrics fm = getFontMetrics(defaultFont);
 
     for (int heightCount = 1; heightCount <= 3; heightCount++)
     {
