@@ -18,7 +18,6 @@ import org.sablecc.simplec.tool.Version;
  * @version 1.00 $Date$
  * @created 29th May 2001
  */
-
 public class Compiler extends DepthFirstAdapter
 {
   public static void main(String args[])
@@ -52,7 +51,6 @@ public class Compiler extends DepthFirstAdapter
   }
 
 // This will eventually be split into two.
-
   private int variableStackPosition = 0;
   private int basePosition = 0;
   private int functionPosition = 0;
@@ -70,9 +68,11 @@ public class Compiler extends DepthFirstAdapter
    * void test(void)
    * int test(int in1, int in2)
    */
-  public void inAIdentifierDirectFunctionDeclarator(AIdentifierDirectFunctionDeclarator node)
+  public void inAIdentifierDirectFunctionDeclarator(
+    AIdentifierDirectFunctionDeclarator node)
   {
-    //System.out.println("Identifier direct function declarator [" + node + "]");
+    //System.out.println("Identifier direct function declarator [" + node
+    //+ "]");
   }
 
   /**
@@ -127,7 +127,8 @@ public class Compiler extends DepthFirstAdapter
   {
     System.out.println("If stmt: " + node.getCompoundStatement());
 
-    ARelConditionalExpression expr = (ARelConditionalExpression) node.getConditionalExpression();
+    ARelConditionalExpression expr = (ARelConditionalExpression)
+        node.getConditionalExpression();
     System.out.println("LH: " + expr.getLeft());
     System.out.println("RH: " + expr.getRight());
   }
@@ -175,14 +176,17 @@ public class Compiler extends DepthFirstAdapter
   /**
    * Simple assignment statements
    */
-  public void inAModifyExpressionBasicStatement(AModifyExpressionBasicStatement node)
+  public void inAModifyExpressionBasicStatement(
+    AModifyExpressionBasicStatement node)
   {
     //Need to find the way of getting the =, lt and rh sides.
-    ADirectModifyExpression expr = (ADirectModifyExpression) node.getModifyExpression();
+    ADirectModifyExpression expr = (ADirectModifyExpression)
+      node.getModifyExpression();
 
     String varName = expr.getVarname().toString().trim();
     String varValue = expr.getRhs().toString().trim();
-    System.out.println("Varname: " + varName + " at: " + getVariableLocation(varName));
+    System.out.println("Varname: " + varName + " at: " +
+      getVariableLocation(varName));
 
     // Do string storage
     if ((varValue.indexOf("'") >= 0) || (varValue.indexOf("\"") >= 0))
@@ -236,12 +240,14 @@ public class Compiler extends DepthFirstAdapter
     name = name.trim();
     if (isInFunction)
     {
-      System.out.println("Allocating local: " + name + " position:" + variableStackPosition);
+      System.out.println("Allocating local: " + name + " position:" +
+        variableStackPosition);
       localVarsTable.put(name, new Integer(variableStackPosition));
     }
     else
     {
-      System.out.println("Allocating global: " + name + " position:" + variableStackPosition);
+      System.out.println("Allocating global: " + name + " position:" +
+        variableStackPosition);
       globalVarsTable.put(name, new Integer(variableStackPosition));
     }
     variableStackPosition += noBits * size;
@@ -267,7 +273,9 @@ public class Compiler extends DepthFirstAdapter
    */
   public void inAFunctionBody(AFunctionBody node)
   {
-    System.out.println("In a function!");
+//    System.out.println("In a function!");
+    writePCode(new Instruction(OpCode.JUMP.getValue(), (byte) 0,
+      (short) (basePosition+1)));
     isInFunction = true;
   }
 
@@ -276,13 +284,16 @@ public class Compiler extends DepthFirstAdapter
    */
   public void outAFunctionBody(AFunctionBody node)
   {
-    System.out.println("Out of function!");
+//    System.out.println("Out of function!");
+    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
+      Operator.RETURN.getValue()));
     isInFunction = false;
     localVarsTable = new HashMap();
   }
 
   public void writePCode(Instruction newInstruction)
   {
+    basePosition++;
     System.out.println("Instr: " + newInstruction);
   }
 }
