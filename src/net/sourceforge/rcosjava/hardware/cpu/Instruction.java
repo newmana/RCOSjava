@@ -218,6 +218,80 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
+   * Construct a complete Instruction from a string.  The expected format is
+   * opcode[space]byte_parameter[comma]word_param
+   */
+  public Instruction(String newInstruction)
+  {
+    newInstruction = newInstruction.trim();
+    int spaceLocation = newInstruction.indexOf(" ");
+    int commaLocation = newInstruction.indexOf(",");
+    String opStr = newInstruction.substring(0, spaceLocation);
+    String byteStr = newInstruction.substring(spaceLocation+1,
+      commaLocation).trim();
+    String wordStr = newInstruction.substring(commaLocation+1,
+      newInstruction.length()).trim();
+
+    if (opStr == ""  || byteStr == "" || wordStr == "")
+      throw new java.lang.IllegalArgumentException("Incorrect instruction");
+
+    for (int index = 0; index < opCodes.length; index++)
+    {
+      if (opStr.compareTo(opCodes[index]) == 0)
+      {
+        opCode = index;
+        break;
+      }
+    }
+
+    try
+    {
+      byteParam = Byte.parseByte(byteStr);
+    }
+    catch (NumberFormatException nfe)
+    {
+      throw new java.lang.IllegalArgumentException(
+      "Incorrect byte parameter: [" + byteStr + "]");
+    }
+
+    try
+    {
+      if ((opCode != OPCODE_CSP) &&
+          (opCode != OPCODE_OPR))
+      {
+        wordParam = Short.parseShort(wordStr);
+      }
+      else if (opCode == OPCODE_CSP)
+      {
+        for (short index = 0; index < systemCalls.length; index++)
+        {
+          if (wordStr.compareTo(systemCalls[index]) == 0)
+          {
+            wordParam = index;
+            break;
+          }
+        }
+      }
+      else if (opCode == OPCODE_OPR)
+      {
+        for (short index = 0; index < operators.length; index++)
+        {
+          if (wordStr.compareTo(operators[index]) == 0)
+          {
+            wordParam = index;
+            break;
+          }
+        }
+      }
+    }
+    catch (NumberFormatException nfe)
+    {
+      throw new java.lang.IllegalArgumentException(
+        "Incorrect word parameter: [" + wordStr + "]");
+    }
+  }
+
+  /**
    * Returns the opCode stored in the instruction.  Returns an OPCODE_ILLEGAL
    * if the opcode is wrong.
    */
@@ -303,6 +377,48 @@ public class Instruction implements Cloneable, Serializable
       }
     }
     return false;
+  }
+
+  /**
+   * Returns the binary value of the instruction dependant upon what the opCode
+   * that is currently stored.  8 bytes.
+   */
+  public byte[] toByte()
+  {
+    byte instructionBytes[] = new byte[8];
+    byte opCodeBytes[] = new byte[2];
+    byte paramByte;
+    byte wordBytes[] = new byte[2];
+
+    opCodeBytes = convertShortToBytes((short) opCode);
+    paramByte = byteParam;
+    wordBytes = convertShortToBytes(wordParam);
+
+    instructionBytes[0] = opCodeBytes[1];
+    instructionBytes[1] = opCodeBytes[0];
+    instructionBytes[2] = 0;
+    instructionBytes[3] = 0;
+    instructionBytes[4] = paramByte;
+    instructionBytes[5] = wordBytes[0];
+    instructionBytes[6] = wordBytes[1];
+
+    return instructionBytes;
+  }
+
+  /**
+   * Converts a short to an array of bytes.
+   *
+   * @param existingValue the short value to convert from.
+   * @param the two length byte to store the result in.
+   */
+  private byte[] convertShortToBytes(short existingValue)
+  {
+    byte newBytes[] = new byte[2];
+    for(int index = 0; index < 2; index++)
+    {
+      newBytes[index] = (byte) (existingValue >>> (1 - index) * 8);
+    }
+    return newBytes;
   }
 
   /**
