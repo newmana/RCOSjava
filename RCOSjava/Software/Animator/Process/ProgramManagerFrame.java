@@ -40,11 +40,11 @@ import Software.Util.FIFOQueue;
   private Image myImages[];
   private java.awt.List directoryListBox;
   private java.awt.List fileListBox;
-  private TextField tfFilename = new TextField(30);
-  private boolean bStartTerminal = true;
-  private Checkbox cbStartTerminal = new Checkbox();
+  private TextField fileNameTextField = new TextField(30);
+  private boolean startTerminal = true;
+  private Checkbox startTerminalCheckbox = new Checkbox();
 
-  public ProgramManagerFrame (int x, int y, Image[] pmImages,
+  public ProgramManagerFrame(int x, int y, Image[] pmImages,
     ProgramManagerAnimator thisProgramManager)
   {
     super();
@@ -54,10 +54,10 @@ import Software.Util.FIFOQueue;
     setSize(x,y);
   }
 
-  public void setVisible (boolean b)
+  public void setVisible(boolean visibility)
   {
-     super.setVisible(b);
-     if (b)
+     super.setVisible(visibility);
+     if (visibility)
      {
        myProgramManager.setCurrentFile("");
        myProgramManager.updateList();
@@ -67,33 +67,33 @@ import Software.Util.FIFOQueue;
   public void setupLayout(Component c)
   {
     super.setupLayout(c);
-    Panel pMain = new Panel();
-    Panel pFilename = new Panel();
-    Panel pTerminalOption = new Panel();
-    Panel pButtons = new Panel();
+    Panel mainPanel = new Panel();
+    Panel fileNamePanel = new Panel();
+    Panel terminOptionPanel = new Panel();
+    Panel buttonPanel = new Panel();
 
     GridBagConstraints constraints = new GridBagConstraints();
     GridBagLayout gridBag = new GridBagLayout();
-    pMain.setLayout(gridBag);
+    mainPanel.setLayout(gridBag);
     constraints.gridwidth=1;
     constraints.gridheight=1;
     constraints.weighty=1;
     constraints.weightx=1;
     constraints.insets= new Insets(1,15,1,15);
 
-    NewLabel lTmpLabel;
+    NewLabel tmpLabel;
 
     constraints.gridwidth=1;
     constraints.anchor = GridBagConstraints.CENTER;
-    lTmpLabel = new NewLabel("Directories", titleFont);
-    gridBag.setConstraints(lTmpLabel,constraints);
-    pMain.add(lTmpLabel);
+    tmpLabel = new NewLabel("Directories", titleFont);
+    gridBag.setConstraints(tmpLabel,constraints);
+    mainPanel.add(tmpLabel);
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
-    lTmpLabel = new NewLabel("Files", titleFont);
-    gridBag.setConstraints(lTmpLabel,constraints);
-    pMain.add(lTmpLabel);
+    tmpLabel = new NewLabel("Files", titleFont);
+    gridBag.setConstraints(tmpLabel,constraints);
+    mainPanel.add(tmpLabel);
 
     constraints.gridwidth=1;
     constraints.anchor = GridBagConstraints.CENTER;
@@ -101,7 +101,7 @@ import Software.Util.FIFOQueue;
     directoryListBox.setBackground(listColour);
     directoryListBox.setForeground(defaultFgColour);
     gridBag.setConstraints(directoryListBox,constraints);
-    pMain.add(directoryListBox);
+    mainPanel.add(directoryListBox);
     directoryListBox.addMouseListener(new directoryListBoxListener());
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
@@ -110,49 +110,49 @@ import Software.Util.FIFOQueue;
     fileListBox.setBackground(listColour);
     fileListBox.setForeground(defaultFgColour);
     gridBag.setConstraints(fileListBox,constraints);
-    pMain.add(fileListBox);
+    mainPanel.add(fileListBox);
     fileListBox.addMouseListener(new fileListBoxListener());
 
-    pFilename.add(new NewLabel("Filename: ", titleFont));
-    tfFilename.setFont(defaultFont);
-    tfFilename.setBackground(textBoxColour);
-    tfFilename.setForeground(defaultFgColour);
-    pFilename.add(tfFilename);
+    fileNamePanel.add(new NewLabel("Filename: ", titleFont));
+    fileNameTextField.setFont(defaultFont);
+    fileNameTextField.setBackground(textBoxColour);
+    fileNameTextField.setForeground(defaultFgColour);
+    fileNamePanel.add(fileNameTextField);
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
-    gridBag.setConstraints(pFilename,constraints);
-    pMain.add(pFilename);
+    gridBag.setConstraints(fileNamePanel,constraints);
+    mainPanel.add(fileNamePanel);
 
-    cbStartTerminal.setState(bStartTerminal);
-    pTerminalOption.add(cbStartTerminal);
-    cbStartTerminal.addItemListener(new startTerminalListener());
-    pTerminalOption.add(new NewLabel("Automatically start terminal.", defaultFont));
+    startTerminalCheckbox.setState(startTerminal);
+    terminOptionPanel.add(startTerminalCheckbox);
+    startTerminalCheckbox.addItemListener(new startTerminalListener());
+    terminOptionPanel.add(new NewLabel("Automatically start terminal.", defaultFont));
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
-    gridBag.setConstraints(pTerminalOption,constraints);
-    pMain.add(pTerminalOption);
+    gridBag.setConstraints(terminOptionPanel,constraints);
+    mainPanel.add(terminOptionPanel);
 
     Button tmpOpenAWTButton = new Button("Open");
-    pButtons.add(tmpOpenAWTButton);
-    pButtons.setLayout(new FlowLayout(FlowLayout.RIGHT));
+    buttonPanel.add(tmpOpenAWTButton);
+    buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
     tmpOpenAWTButton.addMouseListener(new okayButtonListener());
 
     Button tmpAWTButton = new Button("Close");
-    pButtons.add(tmpAWTButton);
+    buttonPanel.add(tmpAWTButton);
     tmpAWTButton.addMouseListener(new RCOSFrame.CloseAnimator());
 
-    add("Center",pMain);
-    add("South",pButtons);
+    add("Center",mainPanel);
+    add("South",buttonPanel);
   }
 
   void updateFileList(FIFOQueue data)
   {
     fileListBox.removeAll();
 
-    bStartTerminal = true;
-    cbStartTerminal.setState(true);
+    startTerminal = true;
+    startTerminalCheckbox.setState(true);
 
     while (data.peek() != null)
     {
@@ -172,7 +172,7 @@ import Software.Util.FIFOQueue;
 
   void updateSelected()
   {
-    tfFilename.setText(myProgramManager.getCurrentDirectory() +
+    fileNameTextField.setText(myProgramManager.getCurrentDirectory() +
       myProgramManager.getCurrentFile());
   }
 
@@ -181,9 +181,9 @@ import Software.Util.FIFOQueue;
     public void mouseClicked(MouseEvent e)
     {
       setVisible(false);
-      tfFilename.setText("");
+      fileNameTextField.setText("");
       fileListBox.deselect(fileListBox.getSelectedIndex());
-      myProgramManager.newProcess(bStartTerminal);
+      myProgramManager.newProcess(startTerminal);
     }
   }
 
@@ -191,9 +191,9 @@ import Software.Util.FIFOQueue;
   {
     public void itemStateChanged(ItemEvent e)
     {
-      if (e.getSource().equals(cbStartTerminal))
+      if (e.getSource().equals(startTerminalCheckbox))
       {
-        bStartTerminal = !bStartTerminal;
+        startTerminal = !startTerminal;
       }
     }
   }
@@ -212,9 +212,9 @@ import Software.Util.FIFOQueue;
         case 2:
           //File has been double clicked on.
           myProgramManager.setCurrentFile(fileListBox.getSelectedItem());
-          tfFilename.setText("");
+          fileNameTextField.setText("");
           fileListBox.deselect(fileListBox.getSelectedIndex());
-          myProgramManager.newProcess(bStartTerminal);
+          myProgramManager.newProcess(startTerminal);
           setVisible(false);
         break;
       }

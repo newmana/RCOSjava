@@ -32,13 +32,13 @@ public class ProgramManagerAnimator extends RCOSAnimator
 {
   private ProgramManagerFrame pmFrame;
   private String currentFile = "";
-  private String currentDirectory = "/";
+  private String currentDirectory = java.io.File.separator;
   private static final String MESSENGING_ID = "ProgramManagerAnimator";
 
-  public ProgramManagerAnimator (AnimatorOffice aPostOffice,
+  public ProgramManagerAnimator (AnimatorOffice postOffice,
                                  int x, int y, Image[] pmImages)
   {
-    super(MESSENGING_ID, aPostOffice);
+    super(MESSENGING_ID, postOffice);
     pmFrame = new ProgramManagerFrame(x, y, pmImages, this);
   }
 
@@ -67,9 +67,9 @@ public class ProgramManagerAnimator extends RCOSAnimator
     return currentFile;
   }
 
-  public void setCurrentFile(String sNewFile)
+  public void setCurrentFile(String newFile)
   {
-    currentFile = sNewFile;
+    currentFile = newFile;
   }
 
   public String getCurrentDirectory()
@@ -77,9 +77,9 @@ public class ProgramManagerAnimator extends RCOSAnimator
     return currentDirectory;
   }
 
-  public void setCurrentDirectory(String sNewDirectory)
+  public void setCurrentDirectory(String newDirectory)
   {
-    currentDirectory = sNewDirectory;
+    currentDirectory = newDirectory;
   }
 
   public ProgramManagerFrame getFrame()
@@ -87,15 +87,15 @@ public class ProgramManagerAnimator extends RCOSAnimator
     return pmFrame;
   }
 
-  public synchronized void processMessage(AnimatorMessageAdapter aMsg)
+  public synchronized void processMessage(AnimatorMessageAdapter message)
   {
   }
 
-  public synchronized void processMessage(UniversalMessageAdapter aMsg)
+  public synchronized void processMessage(UniversalMessageAdapter message)
   {
     try
     {
-      aMsg.doMessage(this);
+      message.doMessage(this);
     }
     catch (Exception e)
     {
@@ -104,27 +104,27 @@ public class ProgramManagerAnimator extends RCOSAnimator
     }
   }
 
-  public void newProcess(boolean bStartTerminal)
+  public void newProcess(boolean startTerminal)
   {
     // If the box is checked start a terminal before the process
     // is loaded.
     StartProgram myStartProgram = new StartProgram(this, postOffice,
-      getCurrentDirectory()+getCurrentFile(), bStartTerminal);
+      getCurrentDirectory()+getCurrentFile(), startTerminal);
   }
 
   public void upDirectory()
   {
     //Calculate the parent directory.
 
-    if (currentDirectory != "/")
+    if (currentDirectory != java.io.File.separator)
     {
       String tmp = currentDirectory;
       int location;
 
-      location = tmp.lastIndexOf('/',(tmp.length()-2));
+      location = tmp.lastIndexOf(java.io.File.separatorChar,(tmp.length()-2));
       if (location == -1)
       {
-        currentDirectory = "/";
+        currentDirectory = java.io.File.separator;
       }
       else
       {
@@ -152,7 +152,7 @@ public class ProgramManagerAnimator extends RCOSAnimator
   public void updateList()
   {
     UpdateList newMsg = new UpdateList(this,
-      getCurrentDirectory());
+      getCurrentDirectory(), 1);
     sendMessage(newMsg);
   }
 }
