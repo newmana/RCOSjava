@@ -2,96 +2,99 @@ package org.rcosjava.software.animator.memory;
 
 import java.awt.*;
 import java.awt.image.*;
+import javax.swing.*;
 import org.rcosjava.software.memory.MemoryReturn;
 
 /**
- * Graphical version of a single segment of memory.
+ * Represents a single segment of memory and its current status either being
+ * read, being written, allocated and deallocated.
  * <P>
  * @author Andrew Newman
- * @created 22nd July 2002
+ * @created 28th April 2002
  * @version 1.00 $Date$
  */
-public class MemoryGraphic extends Canvas
+public class MemoryGraphic extends JPanel
 {
   /**
-   * Default colour when reading memory.
+   * The colour of the graphic when it is being read.
    */
   public final static Color readingColour = Color.blue;
 
   /**
-   * Default colour when writing memory.
+   * The colour of the graphic when it is being written.
    */
   public final static Color writingColour = Color.red;
 
   /**
-   * Default colour when memory allocated.
+   * The colour of the graphic when it is allocated.
    */
   public final static Color allocatedColour = Color.gray;
 
   /**
-   * Default colour when memory is deallocated.
+   * The colour of the graphic when it is unallocated.
    */
-  public final static Color deallocatedColour = Color.black;
+  public final static Color unallocatedColour = Color.black;
 
   /**
-   * Unique identifier associated with memory (owner).
+   * The unique id of the memory graphic.
    */
   private int id;
 
   /**
-   * Type of memory either stack or code.
+   * The type of the memory as defined by the memory manager.
    */
   private byte memoryType;
 
   /**
-   * The size of the memory.
+   * The size in bytes of the memory.
    */
   private int memorySize;
 
   /**
-   * Width of the graphic.
+   * The default width of the memory graphic.  Usually determined by the image.
    */
   private int defaultWidth;
 
   /**
-   * Height of the graphic.
+   * The default height of the memory graphic.  Usually determined by the image.
    */
   private int defaultHeight;
 
   /**
-   * Background colour to write the name of the image.
+   * The current colour of the memory graphic.
    */
-  private Color currentColour = Color.gray;
+  private Color currentColour = unallocatedColour;
 
   /**
-   * Text colour to write out the owner of the memory.
+   * The colour of the text on the memory graphic.
    */
   private Color textColour = Color.yellow;
 
   /**
-   * Image of the memory.
+   * The graphical representation of the memory.
    */
   private Image memoryImage;
 
   /**
-   * Font to describe text.
+   * The font of the text to write on top of the memory graphic.
    */
   private Font textFont = new Font("TimesRoman", Font.PLAIN, 12);
 
   /**
-   * Assigned to a process or not.
+   * Whether the graphic is current allocated or not (determines the its
+   * colour).
    */
   private boolean allocated = false;
 
   /**
-   * Text to display on memory graphic.
+   * The text to display on the memory graphic.
    */
   private String text;
 
   /**
-   * Create a memory graphic with empty values.
+   * Create a new memory graphic image.
    *
-   * @param newImage image to display.
+   * @param newImage the image to use on the memory graphic.
    */
   public MemoryGraphic(Image newImage)
   {
@@ -100,13 +103,16 @@ public class MemoryGraphic extends Canvas
     memoryImage = newImage;
     defaultWidth = memoryImage.getWidth(getParent());
     defaultHeight = memoryImage.getHeight(getParent());
-    this.setSize(defaultWidth, defaultHeight);
+    System.out.println("Width:" + defaultWidth);
+    System.out.println("Height:" + defaultHeight);
+    setMinimumSize(new Dimension(defaultWidth, defaultHeight));
+    setSize(defaultWidth, defaultHeight);
   }
 
   /**
-   * Change the colour that is used to draw background of the process id.
+   * Sets the current colour of the memory object.
    *
-   * @param newColour the new current colour.
+   * @param newColour The new colour to set the text.
    */
   public void setCurrentColour(Color newColour)
   {
@@ -115,19 +121,20 @@ public class MemoryGraphic extends Canvas
   }
 
   /**
-   * Sets the memory to be allocated.
+   * Sets the memory graphic as being allocated with the values in the memory
+   * return object.
    *
-   * @param newMemoryReturn allocated return value.
+   * @param newMemoryReturn used to set the type, process id, size, etc.
    */
   public void setAllocated(MemoryReturn newMemoryReturn)
   {
-    setValues(newMemoryReturn);
     allocated = true;
+    setValues(newMemoryReturn);
   }
 
   /**
-   * Sets the memory to be deallocated i.e. text empty, allocated false, id = 0,
-   * memoryType and memorySize 0.
+   * Sets the memory graphic as being deallocated and resets the values to their
+   * defaults.
    */
   public void setDeallocated()
   {
@@ -140,11 +147,11 @@ public class MemoryGraphic extends Canvas
   }
 
   /**
-   * Returns if the given parameters are equal by both id and type.
+   * Returns if the memory is from the correct id and type given.
    *
-   * @param memoryId memory owner PID.
-   * @param memoryType memory type.
-   * @return if the given parameters are equal by both id and type.
+   * @param memoryId the id of the memory to be equal.
+   * @param memoryType the type of the memory to be equal.
+   * @return if the memory is from the correct id and type given.
    */
   public boolean isMemory(int memoryId, byte memoryType)
   {
@@ -152,30 +159,20 @@ public class MemoryGraphic extends Canvas
   }
 
   /**
-   * Paint the component.
+   * Paints the memory graphic.
    *
-   * @param g graphics object.
+   * @param g graphics object to paint to.
    */
-  public void paint(Graphics g)
+  public void paintComponent(Graphics g)
   {
-    update(g);
-  }
-
-  /**
-   * Update the component.
-   *
-   * @param g graphics object.
-   */
-  public void update(Graphics g)
-  {
+    super.paintComponent(g);
     FontMetrics fm = g.getFontMetrics();
 
     //Using image width and height and text size
     //center text (the program gets the font from
     //the current Graphics context).
-
-    int iX = (defaultWidth / 2) - (fm.stringWidth(text) / 2);
-    int iY = (defaultHeight / 2) + (fm.getAscent() / 2);
+    int x = (defaultWidth / 2) - (fm.stringWidth(text) / 2);
+    int y = (defaultHeight / 2) + (fm.getAscent() / 2);
 
     if (allocated)
     {
@@ -183,25 +180,26 @@ public class MemoryGraphic extends Canvas
     }
     else
     {
-      g.setColor(deallocatedColour);
+      g.setColor(unallocatedColour);
     }
 
     g.drawImage(memoryImage, 0, 0, this);
-
-    g.fillRect(((int) defaultWidth / 2) - 10, ((int) defaultHeight / 2) - 10, 20, 20);
+    g.fillRect(((int) defaultWidth / 2) - 10, ((int) defaultHeight / 2) - 10,
+        20, 20);
 
     //When drawing text to the screen the x,y co-ordinate
     //is of the baseline of the text.
-
     g.setColor(textColour);
     g.setFont(textFont);
-    g.drawString(text, iX, iY);
+    g.drawString(text, x, y);
   }
 
   /**
-   * Sets the text, id, type and size of memory.
+   * Sets the text, id, memory type and memory size of the memory object based
+   * on the given memory return object.
    *
-   * @param memoryReturn the return value of an allocated memory call.
+   * @param memoryReturn memory return object used to set the values of this
+   *     memory graphic object.
    */
   private void setValues(MemoryReturn memoryReturn)
   {

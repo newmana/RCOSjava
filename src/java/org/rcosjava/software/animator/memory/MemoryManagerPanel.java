@@ -102,6 +102,8 @@ public class MemoryManagerPanel extends RCOSPanel
     constraints.weightx = 1;
     constraints.insets = new Insets(1, 1, 0, 0);
     constraints.anchor = GridBagConstraints.CENTER;
+    constraints.gridheight = 85;
+    constraints.gridwidth = 48;
 
     int memRows, memCols;
 
@@ -137,7 +139,7 @@ public class MemoryManagerPanel extends RCOSPanel
     allocBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.allocatedColour,
         defaultFgColour);
     unallocBox = new RCOSRectangle(0, 0, 20, 20,
-        MemoryGraphic.deallocatedColour, defaultFgColour);
+        MemoryGraphic.unallocatedColour, defaultFgColour);
     readBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.readingColour,
         defaultFgColour);
     writeBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.writingColour,
