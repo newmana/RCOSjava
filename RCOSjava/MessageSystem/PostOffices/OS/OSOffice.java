@@ -136,7 +136,7 @@ public class OSOffice extends PostOffice
     }
     catch (Exception e)
     {
-      System.out.println("Error Processing Message: " + e.getMessage());
+      System.err.println("Error Processing Message: " + e.getMessage());
       e.printStackTrace();
     }
   }
