@@ -279,15 +279,14 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Construct an fully fledged Instruction. Should throw an exception if the
-   * opCode and parameters are invalid.
+   * Construct an Instruction. Byte param is -1 and Word param is illegal.
    *
    * @param newOpCode the index to the thirteen opcodes available.
    */
   public Instruction(OpCode newOpCode)
   {
     opCode = newOpCode;
-    byteParam = -1;
+    byteParam = (byte) -1;
     wordParam = WordParameter.ILLEGAL;
   }
 
