@@ -1,4 +1,5 @@
 package org.rcosjava.messaging.messages.os;
+
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.software.memory.MemoryManager;
 import org.rcosjava.software.memory.MemoryRequest;
@@ -19,11 +20,12 @@ public class AllocatePages extends OSMessageAdapter
   private MemoryRequest request;
 
   /**
-   * @param newSource Description of Parameter
-   * @param newRequest Description of Parameter
+   * Create a new allocate pages message.
+   *
+   * @param newSource the handler that sent the message.
+   * @param newRequest the new memory request (type, id, size, etc).
    */
-  public AllocatePages(OSMessageHandler newSource,
-      MemoryRequest newRequest)
+  public AllocatePages(OSMessageHandler newSource, MemoryRequest newRequest)
   {
     super(newSource);
     request = newRequest;
@@ -50,4 +52,3 @@ public class AllocatePages extends OSMessageAdapter
     theElement.allocatePages(request);
   }
 }
-

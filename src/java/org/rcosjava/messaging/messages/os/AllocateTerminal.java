@@ -1,4 +1,5 @@
 package org.rcosjava.messaging.messages.os;
+
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.software.terminal.TerminalManager;
 
@@ -22,8 +23,7 @@ public class AllocateTerminal extends OSMessageAdapter
    * @param newSource the source of the message.
    * @param newProcessId Description of Parameter
    */
-  public AllocateTerminal(OSMessageHandler newSource,
-      int newProcessId)
+  public AllocateTerminal(OSMessageHandler newSource, int newProcessId)
   {
     super(newSource);
     processId = newProcessId;
@@ -39,4 +39,3 @@ public class AllocateTerminal extends OSMessageAdapter
     theElement.allocateTerminal(processId);
   }
 }
-
