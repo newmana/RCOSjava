@@ -131,7 +131,7 @@ public class Context implements Cloneable, Serializable
    */
   public Instruction getInstructionRegister()
   {
-    return (Instruction) instructionRegister.clone();
+    return instructionRegister;
   }
 
   /**
