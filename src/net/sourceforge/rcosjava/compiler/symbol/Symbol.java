@@ -124,9 +124,10 @@ public abstract class Symbol
    *
    * @param compile the compiler calling this function.
    * @param newVarValue the value to handle.
+   * @param isSystemCall is the call a CSP based call.
    */
-  public void handleStringLiteral(StatementCompiler compiler, String
-    newVarValue)
+  public void handleStringLiteral(StatementCompiler compiler,
+    String newVarValue)
   {
   }
 

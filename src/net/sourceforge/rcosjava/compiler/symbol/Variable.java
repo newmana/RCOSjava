@@ -62,16 +62,16 @@ public class Variable extends Symbol
     }
   }
 
-  public void handleCharLiteral(StatementCompiler compiler,
-    String varValue)
+  public void handleCharLiteral(StatementCompiler compiler, String varValue)
   {
     compiler.writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
       (short) varValue.charAt(1)));
   }
 
-  public void handleStringLiteral(StatementCompiler compiler,
-    String varValue)
+  public void handleStringLiteral(StatementCompiler compiler, String varValue)
   {
+    byte byteParam = 0;
+
     int varStrLength = varValue.length()-1;
     //emit each element in the string
     int count = 1;
@@ -95,7 +95,7 @@ public class Variable extends Symbol
       }
     }
     //emit store a required pos
-    compiler.writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
+    compiler.writePCode(new Instruction(OpCode.LITERAL.getValue(), byteParam,
       (short) (count-1)));
   }
 
