@@ -13,25 +13,27 @@ import org.rcosjava.software.animator.ipc.IPCManagerAnimator;
 public class SemaphoreWaiting extends UniversalMessageAdapter
 {
   /**
-   * Description of the Field
+   * The name of the semaphore that the process is waiting on.
    */
   private String semaphoreId;
+
   /**
-   * Description of the Field
+   * The process that is waiting on the semaphore.
    */
   private int pid;
+
   /**
-   * Description of the Field
+   * The value of the semaphore.
    */
   private int value;
 
   /**
-   * Constructor for the SemaphoreWaiting object
+   * Create a new semaphore waiting object.
    *
-   * @param theSource Description of Parameter
-   * @param newSemaphoreId Description of Parameter
-   * @param newPID Description of Parameter
-   * @param newValue Description of Parameter
+   * @param theSource the sender of the message (usually IPC)
+   * @param newSemaphoreId the name of the semaphore.
+   * @param newPID the process id waiting on the semaphore.
+   * @param newValue the current value of the semaphore.
    */
   public SemaphoreWaiting(OSMessageHandler theSource, String newSemaphoreId,
       int newPID, int newValue)
@@ -43,9 +45,9 @@ public class SemaphoreWaiting extends UniversalMessageAdapter
   }
 
   /**
-   * Description of the Method
+   * Calls semaphoreWaiting on the IPCManagerAnimator.
    *
-   * @param theElement Description of Parameter
+   * @param theElement the instance of the IPCManagerAnimator to call.
    */
   public void doMessage(IPCManagerAnimator theElement)
   {

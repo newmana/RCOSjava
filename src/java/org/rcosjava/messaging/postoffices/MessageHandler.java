@@ -67,7 +67,7 @@ public interface MessageHandler extends Comparable
   /**
    * Returns the entire collection of preregistered handlers.
    *
-   * @return The Handlers value
+   * @return the handlers.
    */
   public TreeMap getHandlers();
 
