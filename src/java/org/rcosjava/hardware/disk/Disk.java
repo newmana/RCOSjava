@@ -56,8 +56,8 @@ public interface Disk
    * Calculates the whole number of sectors to read.
    *
    * @param bytesToRead the total number of bytes that are to be used to
-   *      calculate the number of sectors.
-   * @return Description of the Returned Value
+   *   calculate the number of sectors.
+   * @return the total number of sectors.
    */
   public int calcSectorsToRead(int bytesToRead);
 
@@ -65,8 +65,8 @@ public interface Disk
    * Calculates the whole number of tracks to read.
    *
    * @param bytesToRead the total number of bytes that are to be used to
-   *      calculate the number of tracks.
-   * @return Description of the Returned Value
+   *   calculate the number of tracks.
+   * @return the total number of tracks.
    */
   public int calcTracksToRead(int bytesToRead);
 
@@ -74,7 +74,7 @@ public interface Disk
    * Calculates the seek time based on the physical properties of the disk.
    *
    * @param tracks the number of tracks to read.
-   * @return Description of the Returned Value
+   * @return the number of ms taken for seeking the given number of tracks.
    */
   public float calcSeekTime(int tracks);
 
@@ -82,7 +82,7 @@ public interface Disk
    * Calculate the rotational delay of the disk or rather the time it takes for
    * the correct position of the disk to travel under the read head.
    *
-   * @return Description of the Returned Value
+   * @return the number of ms taken for reaching the correct position.
    */
   public float calcAverageRotationalDelay();
 
@@ -90,8 +90,8 @@ public interface Disk
    * Calculate the transfer speed that the data is taken from the disk. This is
    * usually a function of the rotation speed of the disk.
    *
-   * @param bytes Description of Parameter
-   * @return Description of the Returned Value
+   * @param bytes the number of bytes to read.
+   * @return the total number of ms taken to read the bytes.
    */
   public float calcTransferTime(int bytes);
 
@@ -101,17 +101,17 @@ public interface Disk
    * time of reading sectors (not track movement).
    *
    * @param bytesToRead the number of bytes to read from the sector(s).
-   * @return Description of the Returned Value
+   * @return the number of ms taken to read the given number of bytes.
    */
   public float calcSuccessiveSectorRead(int bytesToRead);
 
   /**
-   * Calculates the time taken to read a number of bytes from track(s) assumin
+   * Calculates the time taken to read a number of bytes from track(s) assuming
    * that they are stored contiguously. This does not include the time taken to
    * read the sector data.
    *
-   * @param bytesToRead Description of Parameter
-   * @return Description of the Returned Value
+   * @param bytesToRead the number of bytes to read.
+   * @return the number of ms taken to read the bytes.
    */
   public float calcSuccessiveTrackRead(int bytesToRead);
 
@@ -119,8 +119,8 @@ public interface Disk
    * Calculates the total time taken assuming that the data is contiguously
    * stored on the disk.
    *
-   * @param bytesToRead Description of Parameter
-   * @return Description of the Returned Value
+   * @param bytesToRead the number of bytes to read.
+   * @return the number of ms taken to read the bytes.
    */
   public float calcSequentialAccessTime(int bytesToRead);
 
@@ -128,10 +128,19 @@ public interface Disk
    * Calculates the total time taken assuming the data is randomly stored on the
    * disk media.
    *
-   * @param bytesToRead Description of Parameter
-   * @return Description of the Returned Value
+   * @param bytesToRead the number of bytes to read.
+   * @return the number of ms taken to read the bytes.
    */
   public float calcRandomAccessTime(int bytesToRead);
+
+  /**
+   * Physical access to the media of the disk. Read block of data
+   * (index).
+   *
+   * @param the index (absolute number of sectors) to read from.
+   * @return the value stored on the disk.
+   */
+  public byte[] readSector(int indexOffset);
 
   /**
    * Physical access to the media of the disk. Read block of data
@@ -152,4 +161,13 @@ public interface Disk
    * @param data the data to write to the disk.
    */
   public void writeSector(int track, int sector, byte[] data);
+
+  /**
+   * Physical access to the media of the disk. Write block of data
+   * (index).
+   *
+   * @param the index (absolute number of sectors) to read from.
+   * @param data the data to write to the disk.
+   */
+  public void writeSector(int indexOffset, byte[] data);
 }
