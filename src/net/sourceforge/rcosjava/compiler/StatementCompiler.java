@@ -45,6 +45,73 @@ public class StatementCompiler extends DepthFirstAdapter
     super.outAFunctionBody(node);
   }
 
+  public void inASemcloseRcosStatement(ASemcloseRcosStatement node)
+  {
+    handlePValueLoad(node.getHandle());
+    writeSemRest(node.getVarname(), null, SystemCall.SEMAPHORE_CLOSE);
+  }
+
+  public void inASemcreate1RcosStatement(ASemcreate1RcosStatement node)
+  {
+    handlePValueLoad(node.getHandle());
+    handleLiteralLoading("0");
+    writeSemRest(node.getVarname(), node.getHandle(),
+      SystemCall.SEMAPHORE_CREATE);
+  }
+
+  public void inASemcreate2RcosStatement(ASemcreate2RcosStatement node)
+  {
+    handlePValueLoad(node.getHandle());
+    handlePValueLoad(node.getInitValue());
+    writeSemRest(node.getVarname(), node.getHandle(),
+      SystemCall.SEMAPHORE_CREATE);
+  }
+
+  public void inASemopenRcosStatement(ASemopenRcosStatement node)
+  {
+    handlePValueLoad(node.getId());
+    writeSemRest(node.getVarname(), null, SystemCall.SEMAPHORE_OPEN);
+  }
+
+  public void inASemsignalRcosStatement(ASemsignalRcosStatement node)
+  {
+    handlePValueLoad(node.getHandle());
+    writeSemRest(node.getVarname(), null, SystemCall.SEMAPHORE_SIGNAL);
+  }
+
+  public void inASemwaitRcosStatement(ASemwaitRcosStatement node)
+  {
+    handlePValueLoad(node.getHandle());
+    writeSemRest(node.getVarname(), null, SystemCall.SEMAPHORE_WAIT);
+  }
+
+  private void writeSemRest(PVarname var, PValue value, SystemCall semType)
+  {
+    byte byteParam = 0;
+
+    writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
+      byteParam, semType.getValue()));
+
+    String varName = var.toString().trim();
+
+    try
+    {
+      if (isArray(varName))
+      {
+        currentSymbol = table.getArray(varName, Compiler.getLevel());
+      }
+      else
+      {
+        currentSymbol = table.getSymbol(varName, Compiler.getLevel());
+      }
+    }
+    catch (Exception e)
+    {
+    }
+
+    currentSymbol.handleStore(this);
+  }
+
   public void caseAVariableDeclaration(AVariableDeclaration node)
   {
     if (!inAFunction)
@@ -516,6 +583,11 @@ public class StatementCompiler extends DepthFirstAdapter
   }
 
   private void handleLiteralLoad(AConstantSimpleExpression literal)
+  {
+    handleLiteralLoading(literal.toString().trim());
+  }
+
+  private void handleLiteralLoad(PValue literal)
   {
     handleLiteralLoading(literal.toString().trim());
   }

@@ -3,7 +3,8 @@
  **/
 int main()
 {
-  int semValue, semResult;
+  int semValue;
+  int semResult;
 
   printf("I am sem2.c, based on sem2.pll\n");
   printf("I will signal sem.c.\n");
@@ -13,14 +14,14 @@ int main()
 
   if ((semValue < 0))
   {
-    printf("Semaphore not created. ERROR!");
+    printf("Semaphore not created. ERROR!\n");
   }
   else
   {
-    semResult = semsignal("sem1");
-    printf("Sent signal, sem.c should wake up.");
+    semResult = semsignal(semValue);
+    printf("Sent signal, sem.c should wake up.\n");
   }
 
-  printf("Closing semaphore");
+  printf("Closing semaphore\n");
   semResult = semclose("sem1");
 }
