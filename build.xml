@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project name="RCOS.java" default="all" basedir=".">
-  <property name="app.name" value="RCOSJava"/>
+  <property name="app.name" value="RCOSjava"/>
   <property name="username" value="newmana"/>
   <property name=""/>
   <property name="src.dir" value="src"/>
@@ -14,6 +14,7 @@
 
    <target name="clean">
      <delete dir="${deploy.dir}"/>
+     <delete dir="${javadoc.dir}"/>
    </target>
 
   <target name="prepare">
@@ -31,16 +32,20 @@
     <copy todir="${deploy.dir}/net/sourceforge/rcosjava/software/animator/images">
       <fileset dir="${src.dir}/net/sourceforge/rcosjava/software/animator/images"/>
     </copy>
-    <copy todir="${deploy.dir}/net/sourceforge/rcosjava/software/animator//audio">
+    <copy todir="${deploy.dir}/net/sourceforge/rcosjava/software/animator/audio">
       <fileset dir="${src.dir}/net/sourceforge/rcosjava/software/animator/audio"/>
     </copy>
   </target>
 
   <target name="dist" depends="compile">
-    <jar jarfile="${deploy.jar}" basedir="${deploy.dir}"/>
-    <copy todir="${deploy.dir}">
-      <fileset dir="RCOS.html"/>
+    <!-- Server side deployment -->
+    <copy todir="${deploy.dir}/pll2">
+      <fileset dir="${src.dir}/pll2"/>
     </copy>
+
+    <!-- Client Deployment -->
+    <jar jarfile="${deploy.jar}" basedir="${deploy.dir}"/>
+    <copy file="${src.dir}/RCOS.html" tofile="${deploy.dir}/RCOS.html"/>
   </target>
 
   <target name="javadoc" depends="dist">
