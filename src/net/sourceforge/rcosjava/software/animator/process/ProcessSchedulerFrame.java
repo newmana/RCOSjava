@@ -452,9 +452,12 @@ public class ProcessSchedulerFrame extends RCOSFrame
   synchronized void killProcess(int pid)
   {
     // Remove it from any queues.
+
     removeQueue(ProcessScheduler.READYQ, pid);
     removeQueue(ProcessScheduler.BLOCKEDQ, pid);
     removeQueue(ProcessScheduler.ZOMBIEQ, pid);
+    processFinished(pid);
+
     syncPaint(delay);
   }
 
@@ -475,7 +478,6 @@ public class ProcessSchedulerFrame extends RCOSFrame
       syncPaint(delay);
     }
   }
-
 
   /**
    * Move a given process from the Blocked Queue to the Ready Queue.
@@ -571,12 +573,12 @@ public class ProcessSchedulerFrame extends RCOSFrame
    * If a process has left or joined a queue then given the queue type (1-3)
    * redisplay all the processes that are in that queue.
    */
-  private synchronized void refreshQueue(int iQType)
+  private synchronized void refreshQueue(int queueType)
   {
     LIFOQueue tmpQ = new LIFOQueue();
     int XPosition = engine.centerX-150;
-    int YPosition = iQType*height+boxHeight;
-    switch (iQType)
+    int YPosition = queueType*height+boxHeight;
+    switch (queueType)
     {
       case ProcessScheduler.READYQ:
         tmpQ = ReadyQ;
@@ -643,10 +645,10 @@ public class ProcessSchedulerFrame extends RCOSFrame
     }
   }
 
-  synchronized void addQueue(int iQType, int pid)
+  synchronized void addQueue(int queueType, int pid)
   {
     String sProcessID = "P" + pid;
-    switch (iQType)
+    switch (queueType)
     {
       case ProcessScheduler.READYQ:
         ReadyQ.insert(sProcessID);
@@ -661,12 +663,12 @@ public class ProcessSchedulerFrame extends RCOSFrame
         moveZombieQ(pid);
         break;
     }
-    refreshQueue(iQType);
+    refreshQueue(queueType);
   }
 
-  synchronized void removeQueue(int iQType, int pid)
+  synchronized void removeQueue(int queueType, int pid)
   {
-    switch (iQType)
+    switch (queueType)
     {
       case ProcessScheduler.READYQ:
         ReadyQ = removeProcID(pid, ReadyQ);
@@ -678,7 +680,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
         ZombieQ = removeProcID(pid, ZombieQ);
         break;
     }
-    refreshQueue(iQType);
+    refreshQueue(queueType);
   }
 
   synchronized LIFOQueue removeProcID(int pid, LIFOQueue tmpQueue)

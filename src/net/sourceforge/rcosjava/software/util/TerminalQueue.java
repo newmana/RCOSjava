@@ -33,7 +33,7 @@ public class TerminalQueue extends FIFOQueue
    * @param remove is true if you want to remove the Hardware terminal from
    * the queue.
    */
-  public HardwareTerminal retrieve (String termId, boolean remove)
+  public HardwareTerminal retrieve(String termId, boolean remove)
   {
     if (queueEmpty())
       return null;
