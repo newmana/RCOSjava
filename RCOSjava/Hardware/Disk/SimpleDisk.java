@@ -1,18 +1,18 @@
-//*************************************************************************//
-// FILENAME : SimpleDisk.java
-// PACKAGE  : Hardware.Disk
-// PURPOSE  : General simulation of a disk (floppy or hard drive).  Extend
-//            this to implement specific implementations.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 10/08/99 Created
-//*************************************************************************//
-
 package Hardware.Disk;
 
+/**
+ * General simulation of a disk (floppy or hard drive).  Extend this to
+ * implement specific implementations.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 10th of August 1999
+ */
 public class SimpleDisk implements Disk
 {
-  private int tracks, sectorsPerTrack, bytesPerSector;
+  private int tracks;
+  private int sectorsPerTrack;
+  private int bytesPerSector;
   private float diskLatency;
   private int startupTime, rpm;
   private byte[] disk;
