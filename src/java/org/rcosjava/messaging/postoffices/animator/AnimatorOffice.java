@@ -1,7 +1,9 @@
 package org.rcosjava.messaging.postoffices.animator;
 
+import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
+
 import org.rcosjava.messaging.messages.MessageAdapter;
 import org.rcosjava.messaging.messages.animator.AnimatorMessageAdapter;
 import org.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
@@ -200,7 +202,7 @@ public class AnimatorOffice extends PostOffice
    * A simple class responsible for merely adding a message to each of the
    * OS Offices registered.
    */
-  private class PostOfficeMessageSender extends Thread
+  private class PostOfficeMessageSender extends Thread implements Serializable
   {
     /**
      * Main processing method for the PostOfficeMessageSender object
@@ -249,7 +251,7 @@ public class AnimatorOffice extends PostOffice
    * The class responsible for processing the message for each of the registered
    * handlers.
    */
-  private class LocalMessageSender extends Thread
+  private class LocalMessageSender extends Thread implements Serializable
   {
     /**
      * Main processing method for the LocalMessageSender object
