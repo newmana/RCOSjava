@@ -33,20 +33,6 @@ public class InstructionExecution extends UniversalMessageAdapter
     stack = (Memory) theStack.clone();
   }
 
-  // Koala XML serialization requirements
-  /**
-   * Description of the Method
-   *
-   * @param in Description of Parameter
-   * @exception IOException Description of Exception
-   * @exception ClassNotFoundException Description of Exception
-   */
-  public static void readObject(GeneratorInputStream in)
-    throws IOException, ClassNotFoundException
-  {
-    in.readObject();
-  }
-
   /**
    * Calls the updateStack on the CPU Animator.
    *
