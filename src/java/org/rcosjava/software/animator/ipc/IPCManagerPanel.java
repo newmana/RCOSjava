@@ -68,6 +68,16 @@ public class IPCManagerPanel extends RCOSPanel
   private JTextField semValue;
 
   /**
+   * Map of current semaphores.
+   */
+  private HashMap semaphoreMap = new HashMap();
+
+  /**
+   * Map of current shared memory segments.
+   */
+  private HashMap sharedMemoryMap = new HashMap();
+
+  /**
    * Semaphore queue to display.
    */
   private RCOSQueue semQueue;
@@ -320,39 +330,39 @@ public class IPCManagerPanel extends RCOSPanel
    * Creates a new semaphore graphic item of the given id and updates the
    * drop down of the current semaphores.
    *
-   * @param semaphoreId the unique id of the semaphore that created.
-   * @param processId the process id that created semaphore.
-   * @param value the initial value of the semaphore.
+   * @param semaphore that contains the semaphore id and other pertant details.
    */
-  void semaphoreCreated(String semaphoreId, int pid, int value)
+  void semaphoreCreated(Semaphore semaphore)
   {
+    SemaphoreSharedMemoryGraphic tmpGraphic = new SemaphoreSharedMemoryGraphic(
+        semaphore.getCreatorId(), new Integer(semaphore.getValue()));
+    semaphoreMap.put(semaphore.getName(), tmpGraphic);
+
     if (semOption.getItemCount() == 1)
     {
       semOption.removeAllItems();
       semOption.addItem(SOME);
       myAnimator.setSelectedSemaphoreName(SOME);
     }
-    semOption.addItem(semaphoreId);
-    myAnimator.setSemaphoreGraphic(semaphoreId,
-        new SemaphoreSharedMemoryGraphic(pid, new Integer(value)));
+    semOption.addItem(semaphore.getName());
+    myAnimator.setSelectedSemaphoreName(semaphore.getName());
     updateSemaphoreQueue();
   }
 
   /**
    * Gets the shared memory graphic and adds the given process to its queue.
    *
-   * @param semaphoreId the unique id of the semaphore that is opened.
-   * @param processId the process id that opened the semaphore.
-   * @param value the value of the semaphore.
+   * @param semaphore that contains the semaphore id and other pertant details.
+   * @param processId the semaphore that opened the semaphore.
    */
-  void semaphoreOpened(String semaphoreId, int pid, int value)
+  void semaphoreOpened(Semaphore semaphore, int processId)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic = myAnimator.getSemaphoreGraphic(
-        semaphoreId);
+    SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
+        semaphoreMap.get(semaphore.getName());
 
     if (tmpGraphic != null)
     {
-      tmpGraphic.addProcess(pid);
+      tmpGraphic.addProcess(processId);
     }
     updateSemaphoreQueue();
   }
@@ -360,36 +370,36 @@ public class IPCManagerPanel extends RCOSPanel
   /**
    * Sets the value of the shared memory graphic if it already exists.
    *
-   * @param semaphoreId the unique id of the semaphore to wait on.
-   * @param processId the process id that is waiting on the semaphore.
-   * @param value the value of the semaphore.
+   * @param semaphore that contains the semaphore id and other pertant details.
+   * @param waitingId the semaphore that is waiting to be added to the queue.
    */
-  void semaphoreWaiting(String semaphoreId, int pid, int value)
+  void semaphoreWaiting(Semaphore semaphore, int waitingId)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic = myAnimator.getSemaphoreGraphic(
-        semaphoreId);
+    SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
+        semaphoreMap.get(semaphore.getName());
 
     if (tmpGraphic != null)
     {
-      tmpGraphic.setValue(new Integer(value));
+      tmpGraphic.setValue(new Integer(waitingId));
     }
   }
 
   /**
    * Sets the new value of the semaphore graphic if it exists.
    *
-   * @param semaphoreId the unique id of the semaphore to signal on.
-   * @param processId the process id that is signalling the semaphore.
-   * @param value the value of the semaphore.
+   * @param semaphore that contains the semaphore id and other pertant details.
+   * @param signalledId the semaphore that was signalled remove from the queue.
    */
-  void semaphoreSignalled(String semaphoreId, int pid, int value)
+  void semaphoreSignalled(Semaphore semaphore, int signalledId)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic = myAnimator.getSemaphoreGraphic(
-        semaphoreId);
+    SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
+        semaphoreMap.get(semaphore.getName());
+
+    tmpGraphic.removeProcess(signalledId);
 
     if (tmpGraphic != null)
     {
-      tmpGraphic.setValue(new Integer(value));
+      tmpGraphic.setValue(new Integer(semaphore.getValue()));
     }
   }
 
@@ -397,14 +407,12 @@ public class IPCManagerPanel extends RCOSPanel
    * Removes the semaphore graphics if it exsts and then updates the drop downs
    * of current semaphores.
    *
-   * @param semaphoreId the unique id of the semaphore to close.
-   * @param processId the process id that is closing the semaphore.
-   * @param value the value of the semaphore.
+   * @param semaphore that contains the semaphore id and other pertant details.
    */
-  void semaphoreClosed(String semaphoreId, int pid, int value)
+  void semaphoreClosed(Semaphore semaphore)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic = myAnimator.getSemaphoreGraphic(
-        semaphoreId);
+    SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
+        semaphoreMap.get(semaphore.getName());
 
     if (tmpGraphic != null)
     {
@@ -412,7 +420,7 @@ public class IPCManagerPanel extends RCOSPanel
     }
     if (tmpGraphic.attachedProcesses() == 0)
     {
-      semOption.removeItem(semaphoreId);
+      semOption.removeItem(semaphore.getName());
       if (semOption.getItemCount() == 1)
       {
         semOption.removeAllItems();
@@ -444,9 +452,7 @@ public class IPCManagerPanel extends RCOSPanel
       shmOption.addItem(SOME);
       myAnimator.setSelectedSemaphoreName(SOME);
     }
-    myAnimator.setSharedMemoryGraphic(sharedMemoryId,
-        new SemaphoreSharedMemoryGraphic(memoryReturn.getPID(),
-        memory.toString()));
+    myAnimator.setSelectedSharedMemoryName(sharedMemoryId);
     shmOption.addItem(sharedMemoryId);
     updateSharedMemoryQueue();
   }
@@ -459,8 +465,8 @@ public class IPCManagerPanel extends RCOSPanel
    */
   void sharedMemoryOpened(String sharedMemoryId, int pid)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic =
-        myAnimator.getSharedMemoryGraphic(sharedMemoryId);
+    SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
+        sharedMemoryMap.get(sharedMemoryId);
 
     if (tmpGraphic != null)
     {
@@ -479,8 +485,8 @@ public class IPCManagerPanel extends RCOSPanel
    */
   void sharedMemoryClosed(String sharedMemoryId, int pid)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic =
-        myAnimator.getSharedMemoryGraphic(sharedMemoryId);
+    SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
+        sharedMemoryMap.get(sharedMemoryId);
 
     if (tmpGraphic != null)
     {
@@ -528,8 +534,8 @@ public class IPCManagerPanel extends RCOSPanel
    */
   void sharedMemoryWrote(String sharedMemoryId, Memory memory)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic =
-        myAnimator.getSharedMemoryGraphic(sharedMemoryId);
+    SemaphoreSharedMemoryGraphic tmpGraphic =(SemaphoreSharedMemoryGraphic)
+        sharedMemoryMap.get(sharedMemoryId);
 
     tmpGraphic.setValue(memory.toString());
     updateSharedMemoryQueue();
@@ -566,8 +572,8 @@ public class IPCManagerPanel extends RCOSPanel
     if (!myAnimator.getSelectedSemaphoreName().startsWith(NONE) &&
         !myAnimator.getSelectedSemaphoreName().startsWith(SOME))
     {
-      SemaphoreSharedMemoryGraphic tmpGraphic =
-          myAnimator.getCurrentSemaphore();
+      SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
+          semaphoreMap.get(myAnimator.getSelectedSemaphoreName());
 
       semValue.setText(((Integer) tmpGraphic.getValue()).toString());
 
@@ -594,8 +600,8 @@ public class IPCManagerPanel extends RCOSPanel
     if (!myAnimator.getSelectedSharedMemoryName().startsWith(NONE) &&
         !myAnimator.getSelectedSharedMemoryName().startsWith(SOME))
     {
-      SemaphoreSharedMemoryGraphic tmpGraphic =
-          myAnimator.getCurrentSharedMemory();
+      SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
+        sharedMemoryMap.get(myAnimator.getSelectedSharedMemoryName());
 
       String tmpValue = (String) tmpGraphic.getValue();
       shmList.setText(tmpValue);

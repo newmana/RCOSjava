@@ -1,6 +1,7 @@
 package org.rcosjava.software.animator.ipc;
 
 import java.awt.Component;
+import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.ImageIcon;
 
@@ -8,6 +9,7 @@ import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.software.animator.RCOSAnimator;
 import org.rcosjava.software.animator.RCOSPanel;
+import org.rcosjava.software.animator.support.RCOSQueue;
 import org.rcosjava.software.ipc.SharedMemory;
 import org.rcosjava.software.memory.MemoryRequest;
 import org.rcosjava.software.memory.MemoryReturn;
@@ -95,7 +97,10 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void semaphoreCreated(String semaphoreId, int processId, int value)
   {
-    panel.semaphoreCreated(semaphoreId, processId, value);
+    // Create the semaphore queue.
+    Semaphore tmpSemaphore = new Semaphore(semaphoreId, processId, value);
+    semaphoreMap.put(semaphoreId, tmpSemaphore);
+    panel.semaphoreCreated(tmpSemaphore);
   }
 
   /**
@@ -107,7 +112,9 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void semaphoreOpened(String semaphoreId, int processId, int value)
   {
-    panel.semaphoreOpened(semaphoreId, processId, value);
+    Semaphore tmpSemaphore = (Semaphore) semaphoreMap.get(semaphoreId);
+    tmpSemaphore.attachProcess(processId);
+    panel.semaphoreOpened(tmpSemaphore, processId);
   }
 
   /**
@@ -119,7 +126,9 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void semaphoreWaiting(String semaphoreId, int processId, int value)
   {
-    panel.semaphoreWaiting(semaphoreId, processId, value);
+    Semaphore tmpSemaphore = (Semaphore) semaphoreMap.get(semaphoreId);
+    tmpSemaphore.addWaitingProcess(processId);
+    panel.semaphoreWaiting(tmpSemaphore, processId);
   }
 
   /**
@@ -129,10 +138,15 @@ public class IPCManagerAnimator extends RCOSAnimator
    * @param semaphoreId the unique id of the semaphore to signal on.
    * @param processId the process id that is signalling the semaphore.
    * @param value the value of the semaphore.
+   * @param signalledId the process id of the process that was signalled.
    */
-  public void semaphoreSignalled(String semaphoreId, int processId, int value)
+  public void semaphoreSignalled(String semaphoreId, int processId, int value,
+      int signalledId)
   {
-    panel.semaphoreSignalled(semaphoreId, processId, value);
+    Semaphore tmpSemaphore = (Semaphore) semaphoreMap.get(semaphoreId);
+    tmpSemaphore.setValue(value);
+    tmpSemaphore.removeWaitingProcess(value);
+    panel.semaphoreSignalled(tmpSemaphore, signalledId);
   }
 
   /**
@@ -145,7 +159,8 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void semaphoreClosed(String semaphoreId, int processId, int value)
   {
-    panel.semaphoreClosed(semaphoreId, processId, value);
+    Semaphore tmpSemaphore = (Semaphore) semaphoreMap.remove(semaphoreId);
+    panel.semaphoreClosed(tmpSemaphore);
   }
 
   /**
@@ -249,73 +264,5 @@ public class IPCManagerAnimator extends RCOSAnimator
   void setSelectedSharedMemoryName(String newSelectedSharedMemoryName)
   {
     selectedSharedMemoryName = newSelectedSharedMemoryName;
-  }
-
-  /**
-   * Sets the semaphore map consisting of the name of the semaphore and a
-   * graphic object.
-   *
-   * @param semaphoreId the name of the semaphore.
-   * @param graphic the semaphore graphic.
-   */
-  void setSemaphoreGraphic(String semaphoreId,
-      SemaphoreSharedMemoryGraphic graphic)
-  {
-    semaphoreMap.put(semaphoreId, graphic);
-  }
-
-  /**
-   * Gets the semaphore graphic based on the semaphore id.
-   *
-   * @param semaphoreId the name of the semaphore.
-   * @return graphic the semaphore graphic.
-   */
-  SemaphoreSharedMemoryGraphic getSemaphoreGraphic(String semaphoreId)
-  {
-    return (SemaphoreSharedMemoryGraphic) semaphoreMap.get(semaphoreId);
-  }
-
-  /**
-   * Sets the shared memory map consisting of the name of the shared memory and
-   * a graphic object.
-   *
-   * @param sharedMemoryId the name of the shared memory.
-   * @param graphic the shared memory graphic.
-   */
-  void setSharedMemoryGraphic(String sharedMemoryId,
-      SemaphoreSharedMemoryGraphic graphic)
-  {
-    sharedMemoryMap.put(sharedMemoryId, graphic);
-  }
-
-  /**
-   * Gets the graphic based on the shared memory id.
-   *
-   * @param sharedMemoryId the name of the shared memory.
-   * @return graphic the semaphore graphic.
-   */
-  SemaphoreSharedMemoryGraphic getSharedMemoryGraphic(String sharedMemoryId)
-  {
-    return (SemaphoreSharedMemoryGraphic) sharedMemoryMap.get(sharedMemoryId);
-  }
-
-  /**
-   * Returns the currently selected semaphore.
-   *
-   * @return the currently selected semaphore.
-   */
-  SemaphoreSharedMemoryGraphic getCurrentSemaphore()
-  {
-    return getSemaphoreGraphic(getSelectedSemaphoreName());
-  }
-
-  /**
-   * Returns the currently selected shared memory.
-   *
-   * @return the currently selected shared memory.
-   */
-  SemaphoreSharedMemoryGraphic getCurrentSharedMemory()
-  {
-    return getSharedMemoryGraphic(getSelectedSharedMemoryName());
   }
 }
