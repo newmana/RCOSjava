@@ -701,6 +701,16 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   }
 
   /**
+   * Returns the IPC manager animator.
+   *
+   * @return the IPC manager animator.
+   */
+  public static IPCManagerAnimator getIPCManagerAnimator()
+  {
+    return ipcAnimator;
+  }
+
+  /**
    * Returns the memory manager animator.
    *
    * @return the memory manager animator.
