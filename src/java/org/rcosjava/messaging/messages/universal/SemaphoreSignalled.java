@@ -12,42 +12,51 @@ import org.rcosjava.software.animator.ipc.IPCManagerAnimator;
 public class SemaphoreSignalled extends UniversalMessageAdapter
 {
   /**
-   * Description of the Field
+   * The unique semaphore id.
    */
   private String semaphoreId;
+
   /**
-   * Description of the Field
+   * The PID of the process signalling.
    */
   private int pid;
+
   /**
-   * Description of the Field
+   * The value of the semaphore.
    */
   private int value;
 
   /**
-   * Constructor for the SemaphoreSignalled object
+   * The process that has been signalled.
+   */
+  private int signalledPID;
+
+  /**
+   * Create a new semaphore signalled message.
    *
-   * @param theSource Description of Parameter
-   * @param newSemaphoreId Description of Parameter
-   * @param newPID Description of Parameter
-   * @param newValue Description of Parameter
+   * @param theSource the objec that sent the message.
+   * @param newSemaphoreId the unique id of the process.
+   * @param newPID the process signalling.
+   * @param newValue the value of the semaphore.
+   * @param newSignalledPID the process signalled.
    */
   public SemaphoreSignalled(OSMessageHandler theSource, String newSemaphoreId,
-      int newPID, int newValue)
+      int newPID, int newValue, int newSignalledPID)
   {
     super(theSource);
     semaphoreId = newSemaphoreId;
     pid = newPID;
     value = newValue;
+    signalledPID = newSignalledPID;
   }
 
   /**
-   * Description of the Method
+   * Calls semaphoreSingalled on the IPC manager animator.
    *
-   * @param theElement Description of Parameter
+   * @param theElement the animator to call.
    */
   public void doMessage(IPCManagerAnimator theElement)
   {
-    theElement.semaphoreSignalled(semaphoreId, pid, value);
+    theElement.semaphoreSignalled(semaphoreId, pid, value, signalledPID);
   }
 }
