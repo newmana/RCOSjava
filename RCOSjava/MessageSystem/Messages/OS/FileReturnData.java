@@ -10,7 +10,7 @@
 
 package MessageSystem.Messages.OS;
 
-public class FileReturnData extends Object
+public class FileReturnData
 {
   public int PID;
   public int ReturnValue;

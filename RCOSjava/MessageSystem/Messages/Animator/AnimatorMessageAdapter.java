@@ -1,6 +1,5 @@
 package MessageSystem.Messages.Animator;
 
-import java.lang.Object;
 import Software.Animator.CPU.CPUAnimator;
 import Software.Animator.Disk.DiskSchedulerAnimator;
 import Software.Animator.FileSystem.FileSystemAnimator;
@@ -40,7 +39,7 @@ public class AnimatorMessageAdapter extends MessageAdapter
 
   public String getOSType()
   {
-    return ("OS");
+    return "OS";
   }
 
   public boolean forPostOffice(PostOffice myPostOffice)

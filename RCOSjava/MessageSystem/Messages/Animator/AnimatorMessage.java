@@ -1,12 +1,3 @@
-//******************************************************/
-// FILE     : AnimatorMessage.java
-// PURPOSE  : Interface for all animator messages.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 24/03/96   Created
-//          : 03/07/98   Used double dispatch
-//******************************************************/
-
 package MessageSystem.Messages.Animator;
 
 import java.lang.Object;
@@ -22,6 +13,15 @@ import Software.Animator.Terminal.TerminalManagerAnimator;
 import MessageSystem.Messages.Message;
 import MessageSystem.PostOffices.MessageHandler;
 
+/**
+ * Interface for all animator messages.
+ * <P>
+ * HISTORY:  03/07/1998   Used double dispatch
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 24th March 1997
+ */
 public abstract interface AnimatorMessage extends Message
 {
   public abstract String getOSType();

@@ -1,25 +1,21 @@
 package MessageSystem.Messages.OS;
 
-import java.lang.Object;
+import java.io.Serializable;
+import RCOS;
+import MessageSystem.Messages.MessageAdapter;
+import MessageSystem.PostOffices.OS.OSMessageHandler;
+import MessageSystem.PostOffices.PostOffice;
+import Software.Disk.DiskManager;
 import Software.Disk.DiskScheduler;
 import Software.FileSystem.FileSystemManager;
 import Software.IPC.IPC;
 import Software.Kernel.Kernel;
 import Software.Memory.MemoryManager;
-import MessageSystem.Messages.MessageAdapter;
-import Software.Animator.RCOSFrame;
 import Software.Process.ProcessScheduler;
 import Software.Process.ProgramManager;
-import RCOS;
 import Software.Terminal.SoftwareTerminal;
 import Software.Terminal.TerminalManager;
-import Software.Disk.DiskManager;
-import MessageSystem.PostOffices.MessageHandler;
 import MessageSystem.PostOffices.SimpleMessageHandler;
-import MessageSystem.PostOffices.OS.OSMessageHandler;
-import MessageSystem.PostOffices.PostOffice;
-import Software.Animator.Process.StartProgram;
-import java.io.Serializable;
 
 /**
  * An adapter for OSMessage.  This implements the OSMessage interface but with
@@ -30,18 +26,28 @@ import java.io.Serializable;
  * @author Andrew Newman.
  * @version 1.00 $Date$
  * @created 24th March 1997
- **/
- public class OSMessageAdapter extends MessageAdapter
+ */
+public class OSMessageAdapter extends MessageAdapter
   implements OSMessage, Serializable
 {
+  public OSMessageAdapter()
+  {
+    super();
+  }
+
   /**
    * Calls the MessageAdapters constructor.
    *
    * @theSource the object from which the object is from.
    */
-  public OSMessageAdapter(OSMessageHandler theSource)
+  public OSMessageAdapter(OSMessageHandler newSource)
   {
-    super((SimpleMessageHandler) theSource);
+    super(newSource);
+  }
+
+  public OSMessageAdapter(SimpleMessageHandler newSource)
+  {
+    super(newSource);
   }
 
   /**
@@ -62,7 +68,8 @@ import java.io.Serializable;
   {
     //This depends on the location of the message in the class.
     //Change the class, change how it returns the AnimatorMessage type.
-    return ("Animator." + super.getType());
+    //return ("Animator." + super.getType());
+    return "Animator";
   }
 
   /**

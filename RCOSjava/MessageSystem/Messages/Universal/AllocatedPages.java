@@ -1,11 +1,3 @@
-//******************************************************/
-// FILE     : AllocatedPagesMessage.java
-// PURPOSE  : MMU has successfully allocated pages to a Process.
-// AUTHOR   : Andrew Newman
-// MODIFIED : 
-// HISTORY  : 01/01/1998   Created
-//******************************************************/
-
 package MessageSystem.Messages.Universal;
 
 import MessageSystem.PostOffices.OS.OSMessageHandler;
@@ -13,25 +5,31 @@ import Software.Animator.IPC.IPCManagerAnimator;
 import Software.Memory.MemoryReturn;
 import Software.Memory.MemoryManager;
 
+/**
+ * MMU has successfully allocated pages to a Process.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 1st January 1998
+ */
 public class AllocatedPages extends UniversalMessageAdapter
 {
-  private MemoryReturn mrReturn;
+  private MemoryReturn memoryReturn;
 
-  public AllocatedPages(OSMessageHandler theSource, 
-    MemoryReturn mrNewMemoryReturn)
+  public AllocatedPages(OSMessageHandler newSource,
+    MemoryReturn newMemoryReturn)
   {
-    super(theSource);
-    mrReturn = mrNewMemoryReturn;
+    super(newSource);
+    memoryReturn = newMemoryReturn;
   }
 
-  public void setMemoryReturn(MemoryReturn mrNewReturn)
+  public void setMemoryReturn(MemoryReturn newMemoryReturn)
   {
-    mrReturn = mrNewReturn;
+    memoryReturn = newMemoryReturn;
   }
 
   public void doMessage(IPCManagerAnimator theElement)
   {
-    theElement.allocatedPages(mrReturn);
+    theElement.allocatedPages(memoryReturn);
   }
 }
-

@@ -9,7 +9,6 @@
 
 package MessageSystem.Messages.OS;
 
-import java.lang.Object;
 import Software.Disk.DiskScheduler;
 import Software.FileSystem.FileSystemManager;
 import Software.IPC.IPC;
@@ -21,16 +20,16 @@ import Software.Terminal.SoftwareTerminal;
 import Software.Terminal.TerminalManager;
 import MessageSystem.Messages.Message;
 
-public interface OSMessage extends Message
+public abstract interface OSMessage extends Message
 {
-	public String getAnimatorType();
-  public void doMessage(DiskScheduler theElement);
-  public void doMessage(FileSystemManager theElement);
-  public void doMessage(IPC theElement);
-  public void doMessage(Kernel theElement);
-  public void doMessage(MemoryManager theElement);
-  public void doMessage(ProcessScheduler theElement);
-  public void doMessage(ProgramManager theElement);
-  public void doMessage(SoftwareTerminal theElement);
-  public void doMessage(TerminalManager theElement);
+  public abstract String getAnimatorType();
+  public abstract void doMessage(DiskScheduler theElement);
+  public abstract void doMessage(FileSystemManager theElement);
+  public abstract void doMessage(IPC theElement);
+  public abstract void doMessage(Kernel theElement);
+  public abstract void doMessage(MemoryManager theElement);
+  public abstract void doMessage(ProcessScheduler theElement);
+  public abstract void doMessage(ProgramManager theElement);
+  public abstract void doMessage(SoftwareTerminal theElement);
+  public abstract void doMessage(TerminalManager theElement);
 }

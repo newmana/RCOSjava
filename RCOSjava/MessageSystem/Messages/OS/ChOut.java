@@ -17,10 +17,10 @@ public class ChOut extends OSMessageAdapter
   private String terminalId;
   private char ch;
 
-  public ChOut(OSMessageHandler theSource,
+  public ChOut(OSMessageHandler newSource,
     String newTerminalId, char newCh)
   {
-    super(theSource);
+    super(newSource);
     terminalId = newTerminalId;
     ch = newCh;
   }
