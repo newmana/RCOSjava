@@ -176,9 +176,27 @@ public class CPM14FIDTableEntry
    *
    * @return true if file is allocated.
    */
-  public boolean isAllocated()
+  public boolean hasBeenAllocated()
   {
     return mode == CPM14Mode.ALLOCATED;
+  }
+
+  /**
+   * Returns true if file is being created.
+   *
+   * @return true if file is being created.
+   */
+  public boolean isBeingCreated()
+  {
+    return mode == CPM14Mode.CREATING;
+  }
+
+  /**
+   * Sets the mode of the file to being created.
+   */
+  public void isCreated()
+  {
+    mode = CPM14Mode.CREATING;
   }
 
   /**
@@ -215,6 +233,24 @@ public class CPM14FIDTableEntry
   public void isWriting()
   {
     mode = CPM14Mode.WRITING;
+  }
+
+  /**
+   * Returns true if file is being closed.
+   *
+   * @return true if file is being closed.
+   */
+  public boolean isBeingClosed()
+  {
+    return mode == CPM14Mode.CLOSING;
+  }
+
+  /**
+   * Sets the mode of the file to being closed.
+   */
+  public void isClosing()
+  {
+    mode = CPM14Mode.CLOSING;
   }
 
   /**

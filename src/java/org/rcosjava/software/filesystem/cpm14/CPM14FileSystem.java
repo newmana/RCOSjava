@@ -192,7 +192,7 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
         (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.getDeviceNumber());
 
     // Check for spaces and necessary conditions
-    if ((!fidEntry.isAllocated()) ||
+    if ((!fidEntry.hasBeenAllocated()) ||
         (diskFull(fidEntry.getDeviceNumber())))
     {
       // Return an error
@@ -218,7 +218,8 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
     {
 //      System.err.println("Dir offset: " + (offset + CPM14TableOffset.FILENAME + counter));
 //      System.err.println("Byte offset: " + (counter));
-      device.setByteInEntry(offset + CPM14TableOffset.FILENAME + counter, byteFilename[counter]);
+      device.setByteInEntry(offset + CPM14TableOffset.FILENAME + counter,
+          byteFilename[counter]);
     }
 
     device.setByteInEntry(offset + CPM14TableOffset.EXTENT, (byte) 0);
@@ -255,7 +256,7 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
         (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.getDeviceNumber());
     int deviceNumber = fidEntry.getDeviceNumber();
 
-    if (fidEntry.isAllocated())
+    if (fidEntry.hasBeenAllocated())
     {
       int mvTheFile;
 
@@ -293,7 +294,6 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
     CPM14DeviceTableEntry device =
         (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.getDeviceNumber());
     int deviceNumber = fidEntry.getDeviceNumber();
-    int mvTheEntry;
 
     // Check the current mode.
     if (fidEntry.isBeingRead())
@@ -307,25 +307,25 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
            CPM14TableOffset.DATA_BLOCKS + 15))
         {
           //this.dumpToScreen("DIR",0,fidEntry.getFileNumber());
-          int mvNewEntry = getNextDirectoryEntry(fidEntry.getFileNumber(), deviceNumber);
+          int newEntry = getNextDirectoryEntry(fidEntry.getFileNumber(),
+              deviceNumber);
 
-          if (mvNewEntry == -1)
+          if (newEntry == -1)
           {
             return (new FileSystemReturnData(requestId, -1));
           }
-          fidEntry.setFileNumber(mvNewEntry);
+
+          fidEntry.setFileNumber(newEntry);
           fidEntry.setCurrentDiskBlock(SVB2I & device.getByteInEntry(
-              (mvNewEntry * DIR_ENTRY_SIZE) + CPM14TableOffset.DATA_BLOCKS));
+              (newEntry * DIR_ENTRY_SIZE) + CPM14TableOffset.DATA_BLOCKS));
         }
         else
         {
-          int mvNewBlock;
-
-          mvNewBlock = SVB2I & device.getByteInEntry(
+          int newBlock = SVB2I & device.getByteInEntry(
               (fidEntry.getFileNumber() * DIR_ENTRY_SIZE) +
               CPM14TableOffset.DATA_BLOCKS +
               (fidEntry.getCurrentPosition() / BLOCK_SIZE) % 16);
-          if (mvNewBlock == 0)
+          if (newBlock == 0)
           {
             // 0 is used as it is a directory block
             // using it here denotes the end of the data.
@@ -333,7 +333,7 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
           }
           else
           {
-            fidEntry.setCurrentDiskBlock(mvNewBlock);
+            fidEntry.setCurrentDiskBlock(newBlock);
           }
         }
 
@@ -343,19 +343,18 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
       else
       {
         // No need to swap buffer. Just returnt he next character.
-        int mvDataItem = SVB2I & fidEntry.getByteInBuffer(
+        int dataItem = SVB2I & fidEntry.getByteInBuffer(
             fidEntry.getCurrentPosition() % BLOCK_SIZE);
-
         fidEntry.incCurrentPosition();
-        if (mvDataItem == 0x1A)
+
+        if (dataItem == 0x1A)
         {
           // EOF
-
-          mvDataItem = -1;
+          dataItem = -1;
           fidEntry.decCurrentPosition();
         }
 
-        return (new FileSystemReturnData(requestId, mvDataItem));
+        return (new FileSystemReturnData(requestId, dataItem));
       }
     }
     else
@@ -482,9 +481,12 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
       {
         //Currentposition will already point to the place to write the  EOF
         // character
-        fidEntry.setByteInBuffer((fidEntry.getCurrentPosition() % 1024),
+        fidEntry.setByteInBuffer((fidEntry.getCurrentPosition() % BLOCK_SIZE),
           (byte) 0x1A);
       }
+
+      sendDiskRequest(CPM14RequestTableEntry.WRITE_BUFFER, fsFileNumber,
+          requestId, -1, fidEntry.getCurrentDiskBlock(), fidEntry.getBuffer());
 
 //      diskRequest(device.getName(), "FS_CLOSE::WRITE_BUFFER", "WRITING",
 //          fsFileNumber, requestId, -1,
@@ -496,7 +498,10 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
       {
         device.setFileClosed(fidEntry.getFileName());
       }
+
       fidTable.remove(fsFileNumber);
+      fidEntry.isClosing();
+
       // Clean up entries in FID table.
       return (new FileSystemReturnData(requestId, 0));
     }
@@ -524,10 +529,11 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
     if (fidEntry.isBeingRead())
     {
       // Check if in the middle of a block
-      if (((fidEntry.getCurrentPosition()) % 1024) != 0)
+      if (((fidEntry.getCurrentPosition()) % BLOCK_SIZE) != 0)
       {
         // Easy, check the current character for 0x1A, EOF.
-        if ((SVB2I & fidEntry.getByteInBuffer((fidEntry.getCurrentPosition() % 1024))) == 0x1A)
+        if ((SVB2I &
+            fidEntry.getByteInBuffer((fidEntry.getCurrentPosition() % BLOCK_SIZE))) == 0x1A)
         {
           mvReturnValue = EOF;
         }
@@ -544,7 +550,8 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
             CPM14TableOffset.DATA_BLOCKS + 16)))
         {
           // We are not in the last one.
-          int mvCurrentBlockPosition = (fidEntry.getCurrentPosition() / 1024) % 16;
+          int mvCurrentBlockPosition = (fidEntry.getCurrentPosition() /
+              BLOCK_SIZE) % 16;
 
           // Check if the next block in the list == 0. If it is, this is the
           // end of the file.
@@ -585,7 +592,7 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
         (CPM14FIDTableEntry) fidTable.getItem(fsFileNumber);
 
     // If file isn't at the allocated state
-    if (!fidEntry.isAllocated())
+    if (!fidEntry.hasBeenAllocated())
     {
       return (new FileSystemReturnData(requestId, -1));
     }
@@ -721,9 +728,8 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
       //System.out.println("datablocks :"+ DATA_BLOCKS); // DEBUG
       //System.out.println
       //     ((fidEntry.getFileNumber()*DIR_ENTRY_SIZE) + DATA_BLOCKS + 16); // DEBUG
-
-
       //System.out.println(fidEntry.getCurrentDiskBlock()); // DEBUG
+
       if (fileIdEntry.getCurrentDiskBlock() == lastBlock)
       {
 //        System.out.println("Setting up new DirEnt.");
@@ -775,16 +781,47 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
             fileIdEntry.getCurrentPosition() % BLOCK_SIZE,
             (byte) requestData.getData());
         fileIdEntry.incCurrentPosition();
-        //return(new FileSystemReturnData(requestId, 0));
-//          Dump( "DIR", 0,0); // DEBUG
+//        return(new FileSystemReturnData(requestId, 0));
+//        Dump( "DIR", 0,0); // DEBUG
       }
       else
       {
-        //return(new FileSystemReturnData(requestId, -1));
+//        return(new FileSystemReturnData(requestId, -1));
       }
 
       requestTable.remove(requestId);
     }
+  }
+
+  public void writeBuffer(DiskRequest request)
+  {
+    // Get the requested data from the request table.
+    int requestId = request.getRequestId();
+    CPM14RequestTableEntry requestData =
+              (CPM14RequestTableEntry) requestTable.getItem(requestId);
+
+    // Get the file id from the request data.
+    int fileId = requestData.getFileSystemNumber();
+    CPM14FIDTableEntry fileIdEntry = (CPM14FIDTableEntry)
+        fidTable.getItem(fileId);
+
+    // Get the device from the device table based on fid entry.
+    CPM14DeviceTableEntry device = (CPM14DeviceTableEntry)
+        deviceTable.getItem(fileIdEntry.getDeviceNumber());
+
+    //     System.out.println("Handle Write byffer return."); // DEBUG
+    //      mvRequestData.Type = "FS_CLOSE::WRITE_DIR1";
+
+    byte[] toWrite = new byte[BLOCK_SIZE];
+    for (int counter = 0; counter < BLOCK_SIZE; counter++)
+    {
+      toWrite[counter] = device.getByteInEntry(counter);
+    }
+
+    //DiskRequest mvNewReq = new DiskRequest(requestID, 0, mvToWrite);
+    //Message mvNewMessage = new Message ( id, devicedeviceName,
+    //                                      "DISKREQUEST", mvNewReq);
+    //SendMessage( mvNewMessage );
   }
 
   public void recordSystemFile()
@@ -868,7 +905,7 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
     CPM14FIDTableEntry fidEntry =
         (CPM14FIDTableEntry) fidTable.getItem(fsFileNumber);
 
-    for (int index = 0; index < 1024; index++)
+    for (int index = 0; index < BLOCK_SIZE; index++)
     {
       if ((SVB2I & fidEntry.getByteInBuffer(index)) == 0x1A)
       {
@@ -925,37 +962,18 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
     CPM14DeviceTableEntry device =
         (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.getDeviceNumber());
 
-    if (mvRequestData.getRequestType() == mvRequestData.WRITE_BUFFER)
-    {
-      //     System.out.println("Handle Write byffer return."); // DEBUG
-//      mvRequestData.Type = "FS_CLOSE::WRITE_DIR1";
-
-      byte[] mvToWrite = new byte[1024];
-
-      int counter;
-
-      for (counter = 0; counter < 1024; counter++)
-      {
-        mvToWrite[counter] = device.getByteInEntry(counter);
-      }
-
-      DiskRequest mvNewReq = new DiskRequest(mvRequestID, 0, mvToWrite);
-      //Message mvNewMessage = new Message ( id, devicedeviceName,
-      //                                      "DISKREQUEST", mvNewReq);
-      //SendMessage( mvNewMessage );
-    }
 //    else if (mvRequestData.Type.equalsIgnoreCase("FS_CLOSE::WRITE_DIR1"))
 //    {
 //      System.out.println("Handle Write dir1 return."); // DEBUG
 //      mvRequestData.Type = "FS_CLOSE::WRITE_DIR2";
 //
-//      byte[] mvToWrite = new byte[1024];
+//      byte[] mvToWrite = new byte[BLOCK_SIZE];
 //
 //      int counter;
 //
-//      for (counter = 0; counter < 1024; counter++)
+//      for (counter = 0; counter < BLOCK_SIZE; counter++)
 //      {
-//        mvToWrite[counter] = device.getByteInEntry(counter + 1024);
+//        mvToWrite[counter] = device.getByteInEntry(counter + BLOCK_SIZE);
 //      }
 //
 //
@@ -976,7 +994,7 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
 //      fidTable.remove(mvFID);
 //      requestTable.remove(mvRequestID);
 //    }
-    else if (mvRequestData.getRequestType() == mvRequestData.GET_BLOCK)
+    if (mvRequestData.getRequestType() == mvRequestData.GET_BLOCK)
     {
       if (mvMessageData.getDiskBlock() >= 0)
       {
@@ -1349,35 +1367,35 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
   /**
    * Returns the next directory entry for the dirent on the specified device
    *
-   * @param mvDirent Description of Parameter
+   * @param dirEntry Description of Parameter
    * @param deviceNumber Description of Parameter
    * @return The NextDirectoryEntry value
    */
-  private int getNextDirectoryEntry(int mvDirent, int deviceNumber)
+  private int getNextDirectoryEntry(int dirEntry, int deviceNumber)
   {
     CPM14DeviceTableEntry device =
         (CPM14DeviceTableEntry) deviceTable.getItem(deviceNumber);
 
-    int mvCurrentOffset = mvDirent * DIR_ENTRY_SIZE;
+    int currentOffset = dirEntry * DIR_ENTRY_SIZE;
 
     // First check if this entry is totally used. If so, look for next,
     // otherwise exit.
-    if ((SVB2I & device.getByteInEntry(mvCurrentOffset +
+    if ((SVB2I & device.getByteInEntry(currentOffset +
         CPM14TableOffset.RECORDS)) != 0x80)
     {
       return -1;
     }
 
     // Get the filename to a byte[] for the search.
-    byte[] mvByteFilename = new byte[11];
+    byte[] byteFilename = new byte[11];
 
-    byte mvCurrentExtent = device.getByteInEntry(mvCurrentOffset +
+    byte currentExtent = device.getByteInEntry(currentOffset +
         CPM14TableOffset.EXTENT);
 
     for (int counter = 0; counter < 11; counter++)
     {
-      mvByteFilename[counter] = device.getByteInEntry(
-        mvCurrentOffset + CPM14TableOffset.FILENAME + counter);
+      byteFilename[counter] = device.getByteInEntry(
+        currentOffset + CPM14TableOffset.FILENAME + counter);
     }
 
     // Search
@@ -1391,7 +1409,7 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
       mvIndex = 0;
       mvOffset = (counter * DIR_ENTRY_SIZE) + CPM14TableOffset.FILENAME;
       while ((mvIndex < 11) &&
-        (mvByteFilename[mvIndex] == device.getByteInEntry(
+        (byteFilename[mvIndex] == device.getByteInEntry(
         mvOffset + mvIndex)))
       {
         mvIndex++;
@@ -1400,7 +1418,7 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
       if (mvFound)
       {
         mvFound = (device.getByteInEntry(mvOffset - CPM14TableOffset.FILENAME +
-           CPM14TableOffset.EXTENT) == mvCurrentExtent + 1);
+           CPM14TableOffset.EXTENT) == currentExtent + 1);
       }
       counter++;
     }

@@ -19,19 +19,19 @@ public class CPM14Mode
   public final static int ALLOCATED = 0;
 
   /**
+   * File is created.
+   */
+  public final static int CREATING = 1;
+
+  /**
    * File is being read.
    */
-  public final static int READING = 1;
+  public final static int READING = 2;
 
   /**
    * File is being written.
    */
-  public final static int WRITING = 2;
-
-  /**
-   * File is being created.
-   */
-  public final static int CREATING = 3;
+  public final static int WRITING = 3;
 
   /**
    * File is being deleted.
@@ -39,7 +39,7 @@ public class CPM14Mode
   public final static int DELETING = 4;
 
   /**
-   * File is being closed.
+   * File is closed.
    */
   public final static int CLOSING = 5;
 }
