@@ -371,41 +371,41 @@ public class Kernel extends OSMessageHandler
   public void handleSystemCall()
     throws java.io.IOException
   {
-    int iCall = myCPU.getContext().
+    int call = myCPU.getContext().
       getInstructionRegister().getWordParameter();
-    if (iCall == Instruction.SYS_CHIN)
+    if (call == Instruction.SYS_CHIN)
     {
-      ChIn aMessage = new
+      ChIn msg = new
         ChIn(this, getCurrentProcess().getTerminalId());
-      sendMessage(aMessage);
+      sendMessage(msg);
     }
-    else if (iCall == Instruction.SYS_CHOUT)
+    else if (call == Instruction.SYS_CHOUT)
     {
       //Decrement of stack pointer before getting value. Bug fix.
       myCPU.getContext().decStackPointer();
-      ChOut aMessage = new
+      ChOut msg = new
         ChOut(this, getCurrentProcess().getTerminalId(),
         (char)
         myCPU.getProcessStack().read(myCPU.getContext().getStackPointer()));
-      sendMessage(aMessage);
+      sendMessage(msg);
     }
-    else if (iCall == Instruction.SYS_NUMIN)
+    else if (call == Instruction.SYS_NUMIN)
     {
-      NumIn aMessage = new
+      NumIn msg = new
         NumIn(this,
           getCurrentProcess().getTerminalId());
-      sendMessage(aMessage);
+      sendMessage(msg);
     }
-    else if (iCall == Instruction.SYS_NUMOUT)
+    else if (call == Instruction.SYS_NUMOUT)
     {
-      NumOut aMessage = new
+      NumOut msg = new
         NumOut(this, getCurrentProcess().getTerminalId(),
           (short) myCPU.getProcessStack().read(
           myCPU.getContext().getStackPointer()));
-      sendMessage(aMessage);
+      sendMessage(msg);
       myCPU.getContext().decStackPointer();
     }
-    else if (iCall == Instruction.SYS_STROUT)
+    else if (call == Instruction.SYS_STROUT)
     {
       int length = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
       myCPU.getContext().decStackPointer();
@@ -416,24 +416,24 @@ public class Kernel extends OSMessageHandler
            count<=myCPU.getContext().getStackPointer()+length;
            count++)
       {
-        ChOut aMessage = new
+        ChOut msg = new
           ChOut(this, getCurrentProcess().getTerminalId(),
             (char) myCPU.getProcessStack().read(count));
-        sendMessage(aMessage);
+        sendMessage(msg);
       }
     }
-    else if (iCall == Instruction.SYS_SEM_CREATE)
+    else if (call == Instruction.SYS_SEM_CREATE)
     {
-      int iInitValue = myCPU.getProcessStack().read(
+      int initValue = myCPU.getProcessStack().read(
         myCPU.getContext().getStackPointer());
       myCPU.getContext().decStackPointer();
       // get the semaphore's name using getName()
       // send the message
       SemaphoreCreate msg = new SemaphoreCreate(
-        this, getName(), getCurrentProcess().getPID(), iInitValue);
+        this, getName(), getCurrentProcess().getPID(), initValue);
       sendMessage(msg);
     }
-    else if (iCall == Instruction.SYS_SEM_OPEN)
+    else if (call == Instruction.SYS_SEM_OPEN)
     {
       //get the semaphore's name using getName()
       //send the message
@@ -441,31 +441,31 @@ public class Kernel extends OSMessageHandler
         this, getName(), getCurrentProcess().getPID());
       sendMessage(msg);
     }
-    else if (iCall == Instruction.SYS_SEM_CLOSE)
+    else if (call == Instruction.SYS_SEM_CLOSE)
     {
-      int iSemaphoreID = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
+      int semaphoreId = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
       myCPU.getContext().decStackPointer();
       SemaphoreClose msg = new SemaphoreClose(
-        this, iSemaphoreID, getCurrentProcess().getPID());
+        this, semaphoreId, getCurrentProcess().getPID());
     }
-    else if (iCall == Instruction.SYS_SEM_SIGNAL)
+    else if (call == Instruction.SYS_SEM_SIGNAL)
     {
-      int iSemaphoreID = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
+      int semaphoreId = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
       myCPU.getContext().decStackPointer();
       SemaphoreSignal msg = new SemaphoreSignal(
-        this, iSemaphoreID, getCurrentProcess().getPID());
+        this, semaphoreId, getCurrentProcess().getPID());
     }
-    else if (iCall == Instruction.SYS_SEM_WAIT)
+    else if (call == Instruction.SYS_SEM_WAIT)
     {
-      int iSemaphoreID = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
+      int semaphoreId = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
       myCPU.getContext().decStackPointer();
       SemaphoreWait msg = new SemaphoreWait(
-        this, iSemaphoreID, getCurrentProcess().getPID());
+        this, semaphoreId, getCurrentProcess().getPID());
       sendMessage(msg);
     }
-    else if (iCall == Instruction.SYS_SHR_CREATE)
+    else if (call == Instruction.SYS_SHR_CREATE)
     {
-      int iLength = myCPU.getProcessStack().read(
+      int length = myCPU.getProcessStack().read(
         myCPU.getContext().getStackPointer());
       myCPU.getContext().decStackPointer();
       //get the shared mem name using getName()
@@ -474,7 +474,7 @@ public class Kernel extends OSMessageHandler
       //  getName(), myCPU.getCurrentProcess().getPID(), iLength);
       //sendMessage(msg);
     }
-    else if (iCall == Instruction.SYS_SHR_OPEN)
+    else if (call == Instruction.SYS_SHR_OPEN)
     {
       //get the shared mem name using getName()
       //send the message
@@ -482,39 +482,39 @@ public class Kernel extends OSMessageHandler
       //  getName(), myCPU.getCurrentProcess().getPID());
       //sendMessage(msg);
     }
-    else if (iCall == Instruction.SYS_SHR_CLOSE)
+    else if (call == Instruction.SYS_SHR_CLOSE)
     {
-      int iSharedMemID = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
+      int shareMemId = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
       myCPU.getContext().decStackPointer();
       //SharedMemoryCloseMessage msg = new SharedMemoryCloseMessage(this,
       //  iSharedMemID, myCPU.getCurrentProcess().getPID());
     }
-    else if (iCall == Instruction.SYS_SHR_READ)
+    else if (call == Instruction.SYS_SHR_READ)
     {
-      int iOffset = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
+      int offset = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
       myCPU.getContext().decStackPointer();
-      int iSharedMemID = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
+      int sharedMemId = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
       myCPU.getContext().decStackPointer();
       //SharedMemoryReadMessage msg = SharedMemoryReadMessage(this,
       //  iSharedMemID, iOffset);
     }
-    else if (iCall == Instruction.SYS_SHR_WRITE)
+    else if (call == Instruction.SYS_SHR_WRITE)
     {
-      int iNewValue = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
+      int newValue = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
       myCPU.getContext().decStackPointer();
-      int iOffset = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
+      int offset = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
       myCPU.getContext().decStackPointer();
-      int iSharedMemID = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
+      int sharedMemId = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
       //SharedMemoryWriteMessage msg = SharedMemoryWriteMessage(this,
       //  iSharedMemID, iOffset, (short) iNewValue);
     }
-    else if (iCall == Instruction.SYS_SHR_SIZE)
+    else if (call == Instruction.SYS_SHR_SIZE)
     {
-      int iSharedMemID = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
+      int sharedMemId = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
       //SharedMemorySizeMessae msg = SharedMemorySizeMessage(this,
       //  iSharedMemID);
     }
-    else if (iCall == Instruction.SYS_FORK)
+    else if (call == Instruction.SYS_FORK)
     {
     }
     //System.out.println( "KERNEL: HandleSystemCall FINISHED" );
@@ -545,25 +545,25 @@ public class Kernel extends OSMessageHandler
 
   public String getName()
   {
-    int iLength = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
+    int length = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
 //    myCPU.getContext()StackPointer--;
 
-    char[] theName = new char[iLength];
+    char[] name = new char[length];
 
     myCPU.getContext().setStackPointer(
      (short) (myCPU.getContext().getStackPointer()
-     - iLength));
+     - length));
 
     int index = 0;
 
     for (int count = myCPU.getContext().getStackPointer();
-      count < myCPU.getContext().getStackPointer()+iLength;
+      count < myCPU.getContext().getStackPointer()+length;
       count++)
       {
-        theName[index] = (char) myCPU.getProcessStack().read(count);
+        name[index] = (char) myCPU.getProcessStack().read(count);
         index++;
       }
-    return (new String(theName));
+    return (new String(name));
   }
 
   /**
@@ -589,10 +589,10 @@ public class Kernel extends OSMessageHandler
         // no need to get a copy of the code as it won't change
         // Send a message to the ProcessScheduler to update old current
         // processes data structures
-        RunningToReady rrMsg = new RunningToReady(this,
+        RunningToReady tmpMsg = new RunningToReady(this,
           oldProcess);
         //System.out.println("Running to Ready: " + oldProcess.getPID());
-        sendMessage(rrMsg);
+        sendMessage(tmpMsg);
         //System.out.println("Sent Running to Ready: " + oldProcess.getPID());
       }
     }
@@ -610,17 +610,16 @@ public class Kernel extends OSMessageHandler
     RCOSProcess oldCurrent = new RCOSProcess(getCurrentProcess());
     //System.out.println("Got process: " + oldCurrent.getPID());
     oldCurrent.addToCPUTicks(getCurrentProcessTicks());
-    ProcessFinished pfMsg = new ProcessFinished(this,
-      oldCurrent);
-    sendMessage(pfMsg);
+    ProcessFinished tmpMsg = new ProcessFinished(this, oldCurrent);
+    sendMessage(tmpMsg);
     //System.out.println("-----End Handling Process Finished-----");
   }
 
-  public synchronized void processMessage(OSMessageAdapter aMsg)
+  public synchronized void processMessage(OSMessageAdapter message)
   {
     try
     {
-      aMsg.doMessage(this);
+      message.doMessage(this);
     }
     catch (Exception e)
     {
@@ -629,11 +628,11 @@ public class Kernel extends OSMessageHandler
     }
   }
 
-  public synchronized void processMessage(UniversalMessageAdapter aMsg)
+  public synchronized void processMessage(UniversalMessageAdapter message)
   {
     try
     {
-      aMsg.doMessage(this);
+      message.doMessage(this);
     }
     catch (Exception e)
     {
