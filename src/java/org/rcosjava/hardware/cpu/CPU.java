@@ -309,13 +309,15 @@ public class CPU
   /**
    * Perform main Instruction Execution cycle.
    *
-   * @return Description of the Returned Value
-   * @returns true if the process ran an instruction correctly and not at the
+   * @param ignorePaused ignore if the CPU is paused as to whether to execute
+   *   an instruction
+   * @return true if the process ran an instruction correctly and not at the
    *      end of a process
    */
-  public boolean performInstructionExecutionCycle()
+  public boolean performInstructionExecutionCycle(boolean ignorePaused)
   {
-    if ((!isPaused()) && (hasCodeToExecute()))
+    if (((!isPaused()) && (hasCodeToExecute())) ||
+        (ignorePaused && hasCodeToExecute()))
     {
       executeCode();
     }
