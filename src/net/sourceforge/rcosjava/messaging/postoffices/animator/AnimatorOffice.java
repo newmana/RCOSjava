@@ -194,6 +194,7 @@ public class AnimatorOffice extends PostOffice
             MessageAdapter message = (MessageAdapter)
               AnimatorOffice.this.localMessages.retrieveCurrent();
 
+            System.out.println("");
             if (message.forPostOffice(AnimatorOffice.this))
             {
               //Go through the hashtable returning all the handlers
