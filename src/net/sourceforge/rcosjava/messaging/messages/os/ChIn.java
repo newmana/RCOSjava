@@ -28,7 +28,7 @@ public class ChIn extends OSMessageAdapter
     terminalId = newTerminalId;
   }
 
-  public void doMessage (SoftwareTerminal theElement)
+  public void doMessage(SoftwareTerminal theElement)
   {
     if (theElement.getId().compareTo(terminalId) == 0)
       theElement.chIn();

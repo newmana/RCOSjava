@@ -45,7 +45,6 @@ import net.sourceforge.rcosjava.software.util.FIFOQueue;
  * @version 1.00 $Date$
  * @created 24th January 1996
  */
-
 public class HardwareTerminal extends RCOSFrame
 {
   /**
@@ -89,6 +88,8 @@ public class HardwareTerminal extends RCOSFrame
   }
 
   /**
+   * Return the title of the screen.
+   *
    * @return the title of the screen.
    */
   public String getTitle()
@@ -97,14 +98,18 @@ public class HardwareTerminal extends RCOSFrame
   }
 
   /**
-   * Set Process ID using this terminal
+   * Set Process Id using this terminal
+   *
+   * @param newCurrentProcess set the process id using this terminal.
    */
-  public void setCurrentProcessId(int iCurrentProcess)
+  public void setCurrentProcessId(int newCurrentProcess)
   {
-    softwareTerminal.currentProcess = iCurrentProcess;
+    softwareTerminal.setCurrentProcess(newCurrentProcess);
   }
 
   /**
+   * Return is there a keyeven waiting for processing?
+   *
    * @return is there a keyevent waiting for processing?
    */
   public boolean bufferEmpty()
@@ -113,7 +118,9 @@ public class HardwareTerminal extends RCOSFrame
   }
 
   /**
-   * @return keyevent from queue.
+   * Return key event from queue.
+   *
+   * @return key event from queue.
    */
   public KeyEvent getKeyFromBuffer()
   {
@@ -167,7 +174,7 @@ public class HardwareTerminal extends RCOSFrame
    *
    * @param num the number to display on the screen.
    */
-  public void printNum (short num)
+  public void printNum(short num)
   {
     myScreen.printNum(num);
   }

@@ -98,7 +98,7 @@ public class HardwareTerminalScreen extends Canvas
    *
    * @param c the image producer in which to create the graphicBuffer.
    */
-  public HardwareTerminalScreen (Component c)
+  public HardwareTerminalScreen(Component c)
   {
     super();
     contents = new char[MAXROWS*MAXCOLS];
@@ -107,7 +107,9 @@ public class HardwareTerminalScreen extends Canvas
     textWidth = fm.charWidth(' ');
 
     for (int count=0; count < MAXROWS*MAXCOLS; count++)
+    {
       contents[count] = ' ';
+    }
 
     row = 0;
     col = 0;
@@ -148,7 +150,7 @@ public class HardwareTerminalScreen extends Canvas
    *
    * @param ch the character to write on the screen.
    */
-  public void printChr (char ch)
+  public void printChr(char ch)
   {
     if ((ch != '\r') && (ch != '\f'))
     {
@@ -177,7 +179,7 @@ public class HardwareTerminalScreen extends Canvas
    *
    * @param num the number to write to the screen.
    */
-  public void printNum (short num)
+  public void printNum(short num)
   {
     StringBuffer tmpString = new
       StringBuffer((new String()).valueOf(num));
@@ -191,7 +193,7 @@ public class HardwareTerminalScreen extends Canvas
    *
    * @param numRows the number of rows to scroll the screen.
    */
-  public void scrollUp (int numRows)
+  public void scrollUp(int numRows)
   {
     int cols, rows;
 
