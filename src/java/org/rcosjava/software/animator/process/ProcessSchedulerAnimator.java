@@ -56,6 +56,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   {
     super(MESSENGING_ID, postOffice);
     panel = new ProcessSchedulerPanel(images, this);
+    panel.repaint();
   }
 
   /**
