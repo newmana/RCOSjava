@@ -46,17 +46,17 @@ public class ProcessSchedulerPanel extends RCOSPanel
   /**
    * The positions to move the process around the ready queue.
    */
-  private Position[] readyPositions = new Position[11];
+  private Position[] readyPositions;
 
   /**
    * The positions to move the process around the blocked queue.
    */
-  private Position[] blockedPositions = new Position[11];
+  private Position[] blockedPositions;
 
   /**
    * The positions to move the process around the zombie queue.
    */
-  private Position[] zombiePositions = new Position[11];
+  private Position[] zombiePositions;
 
   /**
    * Positions to move process to the from the zombie to the ready queue.
@@ -252,6 +252,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
     tmpLabel = new JLabel("Speed:", JLabel.CENTER);
+
     tmpLabel.setBackground(defaultBgColour);
     tmpLabel.setForeground(defaultFgColour);
     gridBag.setConstraints(tmpLabel, constraints);
@@ -356,13 +357,15 @@ public class ProcessSchedulerPanel extends RCOSPanel
     BufferedImage process;
     Graphics processGraphics;
 
+    // Set-up green process
     process = new BufferedImage(boxWidth, boxHeight,
-      BufferedImage.TYPE_INT_ARGB);
+        BufferedImage.TYPE_INT_ARGB);
     processGraphics = process.createGraphics();
     processGraphics.setColor(new Color(51, 255, 153));
     processGraphics.fillOval(0, 0, boxWidth, boxHeight);
     myImages[0] = process;
 
+    // Set-up blue process
     process = new BufferedImage(boxWidth, boxHeight,
       BufferedImage.TYPE_INT_ARGB);
     processGraphics = process.createGraphics();
@@ -384,28 +387,25 @@ public class ProcessSchedulerPanel extends RCOSPanel
     leftIndent = 50;
     rightIndent = width - leftIndent;
 
-    int count;
-    int count2;
-    int increment;
-    int arrayIndex;
+    int increment = 0;
+    int arrayIndex = 0;
+
+    int noBoxes = ((engine.getWidth() - (leftIndent * 2)) / boxWidth);
+    int halfNoBoxes =  noBoxes / 2;
+
+    readyPositions = new Position[noBoxes];
+    blockedPositions = new Position[noBoxes];
+    zombiePositions = new Position[noBoxes];
 
     // Movement inside queues
-    for (count = 1; count <= 3; count++)
+    for (int count = 1; count <= 3; count++)
     {
+      int bottomOfBox = (count * height) + fm.getHeight() + 5;
+      arrayIndex = noBoxes - 2;
+      increment = -5;
 
-      int bottomOfBox = (count * height) + (boxHeight / 2);
-
-      for (count2 = 5; count2 > -6; count2--)
+      for (int count2 = -halfNoBoxes; count2 < halfNoBoxes; count2++)
       {
-        if (count2 > -5)
-        {
-          increment = -2;
-        }
-        else
-        {
-          increment = 0;
-        }
-        arrayIndex = (count2 - 5) * -1;
         if (count == 1)
         {
           readyPositions[arrayIndex] = new Position(((count2 * boxHeight) + engine.getCenterX()),
@@ -421,6 +421,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
           zombiePositions[arrayIndex] = new Position(((count2 * boxHeight) + engine.getCenterX()),
               bottomOfBox, increment, 0);
         }
+        arrayIndex--;
       }
     }
 
@@ -468,20 +469,20 @@ public class ProcessSchedulerPanel extends RCOSPanel
     blockedMovement = new Movement();
     zombieMovement = new Movement();
 
-    for (count = 0; count < 11; count++)
+    for (int count = 0; count < 11; count++)
     {
       readyMovement.addPosition(readyPositions[count]);
       blockedMovement.addPosition(blockedPositions[count]);
       zombieMovement.addPosition(zombiePositions[count]);
     }
 
-    for (count = 0; count < 6; count++)
+    for (int count = 0; count < 6; count++)
     {
       blockedToReadyMovement.addPosition(blockedToReadyPositions[count]);
       zombieToReadyMovement.addPosition(zombieToReadyPositions[count]);
     }
 
-    for (count = 0; count < 4; count++)
+    for (int count = 0; count < 4; count++)
     {
       readyToCPUMovement.addPosition(readyToCPUPositions[count]);
       cpuToReadyMovement.addPosition(cpuToReadyPositions[count]);
@@ -824,7 +825,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
       engine.getPad().drawString(title, windowCenter,
           (heightCount * height) + fm.getHeight());
 
-      int boxIndentation = 50;
+      int boxIndentation = leftIndent;
       int halfNoBoxes = ((engine.getWidth() - (boxIndentation * 2))
           / boxWidth) / 2;
 
