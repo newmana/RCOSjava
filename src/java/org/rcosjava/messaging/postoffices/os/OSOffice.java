@@ -220,34 +220,31 @@ public class OSOffice extends PostOffice
           log.info("Local Delivering message:" + message.getClass());
         }
 
-        //System.out.println("OS got message: " + message);
+        TreeMap map = OSOffice.this.getHandlers();
+
         if (message.forPostOffice(OSOffice.this))
         {
           //Go through the hashtable returning all the handlers
           //registered.  Send the message to all of them.
+          Iterator tmpIter = map.values().iterator();
 
-          Iterator tmpIter = OSOffice.this.getHandlers().values().iterator();
-
-          synchronized (OSOffice.this.getHandlers())
+          while (tmpIter.hasNext())
           {
-            while (tmpIter.hasNext())
-            {
-              OSMessageHandler theDestination = (OSMessageHandler)
-                  tmpIter.next();
+            OSMessageHandler theDestination = (OSMessageHandler)
+                tmpIter.next();
 
-              //Send the message to the destination
-              try
-              {
-                Class[] classes = {message.getClass().getSuperclass()};
-                Method method = theDestination.getClass().getMethod(
-                    "processMessage", classes);
-                Object[] args = {message};
-                method.invoke(theDestination, args);
-              }
-              catch (Exception e)
-              {
-                e.printStackTrace();
-              }
+            //Send the message to the destination
+            try
+            {
+              Class[] classes = {message.getClass().getSuperclass()};
+              Method method = theDestination.getClass().getMethod(
+                  "processMessage", classes);
+              Object[] args = {message};
+              method.invoke(theDestination, args);
+            }
+            catch (Exception e)
+            {
+              e.printStackTrace();
             }
           }
         }
