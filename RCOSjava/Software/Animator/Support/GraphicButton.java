@@ -82,7 +82,7 @@ public class GraphicButton extends Canvas
 */
 
   public GraphicButton(Image iPicUp, Image iPicDown, String sButton,
-                       Font fFont, Color cColour, boolean bDepress)
+    Font fFont, Color cColour, boolean bDepress)
   {
     super();
     bOverButton = false;
@@ -101,8 +101,7 @@ public class GraphicButton extends Canvas
   }
 
   public GraphicButton(Image iPicUp, Image iPicDown, String sButton,
-                       Font fFont, Color cColour, boolean bDepress,
-                       boolean bDisplayText)
+    Font fFont, Color cColour, boolean bDepress, boolean bDisplayText)
   {
     super();
     bOverButton = false;
@@ -121,8 +120,8 @@ public class GraphicButton extends Canvas
   }
 
   public GraphicButton(Image iPicUp, Image iPicDown, String sButton,
-                       Font fFont, Color cColour, boolean bDepress,
-                       boolean bDisplayText, boolean bGreyed)
+    Font fFont, Color cColour, boolean bDepress, boolean bDisplayText,
+    boolean bGreyed)
   {
     super();
     bOverButton = false;
@@ -139,17 +138,7 @@ public class GraphicButton extends Canvas
     bGreyedOut = bGreyed;
     ImageFilter filter = new GreyOutImage();
     producer = new FilteredImageSource(imgButtonUpPic.getSource(), filter);
-    imgGreyPic = createImage(producer);
-    MediaTracker tracker = new MediaTracker(this);
-    tracker.addImage(imgGreyPic,0);
-    try
-    {
-      tracker.waitForID(0);
-    }
-    catch (InterruptedException e)
-    {
-      System.out.println("Error");
-    }
+    imgGreyPic = this.createImage(producer);
     setSize(iImageWidth,iImageHeight);
     repaint();
   }
@@ -168,10 +157,10 @@ public class GraphicButton extends Canvas
   {
     super.addNotify();
     if (gblMouse == null)
-	{
-	  gblMouse = new GraphicButtonListener();
-  	  addMouseListener(gblMouse);
-	}	
+    {
+      gblMouse = new GraphicButtonListener();
+      addMouseListener(gblMouse);
+    }
     repaint();
   }
 
@@ -179,23 +168,28 @@ public class GraphicButton extends Canvas
   {
     update(g);
   }
-  
+
   public void addActionListener(ActionListener l)
   {
-	actionListener = AWTEventMulticaster.add(actionListener, l);
+    actionListener = AWTEventMulticaster.add(actionListener, l);
   }
 
   public void removeActionListener(ActionListener l)
   {
     actionListener = AWTEventMulticaster.remove(actionListener, l);
   }
-  
+
   public String toString()
   {
     return sTheButton;
   }
 
-  public void update (Graphics g)
+  public void toggleGrey()
+  {
+    bGreyedOut = !bGreyedOut;
+  }
+
+  public void update(Graphics g)
   {
     FontMetrics fm = g.getFontMetrics();
 
@@ -206,7 +200,7 @@ public class GraphicButton extends Canvas
     int iX = (iImageWidth/2) - (fm.stringWidth(sTheButton)/2);
     int iY = (iImageHeight/2) + (fm.getAscent()/2);
 
-    if (bGreyedOut)
+    if ((bGreyedOut) && (imgGreyPic != null))
     {
       g.drawImage(imgGreyPic, 0, 0, this);
     }
@@ -242,7 +236,7 @@ public class GraphicButton extends Canvas
       }
       else
       {
-        g.drawString(sTheButton, iX, iY);      
+        g.drawString(sTheButton, iX, iY);
       }
     }
   }
@@ -270,7 +264,7 @@ public class GraphicButton extends Canvas
       bPressedButton = true;
       repaint();
     }
-  
+
     public void mouseReleased(java.awt.event.MouseEvent e)
     {
       if (bPressedButton && bOverButton && bDepressText)
