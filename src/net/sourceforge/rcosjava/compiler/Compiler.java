@@ -52,8 +52,8 @@ public class Compiler
       // Add header codes.
       addInstruction(0, new Instruction(OpCode.JUMP.getValue(), (byte) 0,
           (short) 1));
-      addInstruction(0, new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
-          instructionIndex));
+      addInstruction(1, new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
+          (short) 1));
 
       // Print out result to file
       Iterator tmpIter = instructions.iterator();
@@ -75,7 +75,7 @@ public class Compiler
     }
   }
 
-  private static void addInstruction(int index, Instruction instruction)
+  protected static void addInstruction(int index, Instruction instruction)
   {
     instructions.add(index, instruction);
   }

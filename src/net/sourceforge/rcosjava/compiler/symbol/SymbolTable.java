@@ -132,22 +132,17 @@ public class SymbolTable
   private Symbol getSymbol(String name, int level) throws Exception
   {
     Symbol symbol = null;
-    System.out.println("Get Symbol!!");
 
     if (instructions.containsKey(name))
     {
       ArrayList list = (ArrayList) instructions.get(name);
-      System.out.println("Symbol: " + symbol);
 
       if (null != list.get(level))
       {
-        System.out.println("Symbol: " + symbol);
         symbol = (Symbol) list.get(level);
-        System.out.println("Symbol: " + symbol);
       }
     }
 
-    System.out.println("Symbol: " + symbol);
     if (symbol == null)
     {
       throw new Exception("Symbol not found");

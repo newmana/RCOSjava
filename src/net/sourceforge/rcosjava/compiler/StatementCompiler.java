@@ -24,6 +24,7 @@ public class StatementCompiler extends DepthFirstAdapter
 // This will eventually be split into two.
   private VariableCompiler variableCompiler = new VariableCompiler();
   private SymbolTable table;
+  private int startIfStatement;
 
   public StatementCompiler()
   {
@@ -35,31 +36,29 @@ public class StatementCompiler extends DepthFirstAdapter
    */
   public void inAIfStatement(AIfStatement node)
   {
-    System.out.println("If stmt: " + node.getCompoundStatement());
-
     ARelConditionalExpression expr = (ARelConditionalExpression)
         node.getConditionalExpression();
 
     PValue expression1 = expr.getLeft();
     PValue expression2 = expr.getRight();
 
-    System.out.println("LH: " + expr.getLeft());
-    System.out.println("LH: " + expression1.getClass().toString());
-    System.out.println("RH: " + expr.getRight());
-    System.out.println("RH: " + expression2.getClass().toString());
-
     // With the left hand load the variable or literal
     handleIdentifierLoad(expression1);
 
     // With the right hand load the variable or literal
     handleIdentifierLoad(expression2);
+
+    // Record where the if statement finished so we can put the jump in if it
+    // fails.
+    startIfStatement = Compiler.getInstructionIndex();
   }
 
   public void outAIfStatement(AIfStatement node) {
 
 //    ArrayList tmpInstr = (ArrayList) previousInstruction.get(instructionIndex-1);
-    Compiler.addInstruction(new Instruction(OpCode.JUMP_ON_CONDITION.getValue(),
-      (byte) 0, (short) Compiler.getLevel()));
+    Compiler.addInstruction(startIfStatement+1,
+      new Instruction(OpCode.JUMP_ON_CONDITION.getValue(),
+      (byte) 0, (short) (Compiler.getInstructionIndex()+3)));
   }
 
   public void inAValueConditionalExpression(AValueConditionalExpression node)
@@ -79,7 +78,6 @@ public class StatementCompiler extends DepthFirstAdapter
     System.out.println("GT Node: " + node);
     writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
       Operator.GREATER_THAN.getValue()));
-    System.out.println("Begin call");
   }
 
   public void caseALteqRelop(ALteqRelop node)
@@ -105,17 +103,12 @@ public class StatementCompiler extends DepthFirstAdapter
 
   public void inAPrintf1RcosStatement(APrintf1RcosStatement node)
   {
-    System.out.println("Str contstant: " + node);
-    System.out.println("Literal: " + node.getStringLitteral());
-
     String stringValue = node.getStringLitteral().getText();
     //String name = variableCompiler.allocateVariable(1, stringValue.length());
     doLiteralLoading(stringValue);
 
     writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
       (byte) 0, SystemCall.STRING_OUT.getValue()));
-
-    System.out.println("End BasePosition: " + Compiler.getLevel());
   }
 
   /**
@@ -135,9 +128,6 @@ public class StatementCompiler extends DepthFirstAdapter
       String varValue = expr.getRhs().toString().trim();
       Variable newVar = table.getVariable(varName, Compiler.getLevel());
       short varPos = newVar.getOffset();
-      System.out.println("In a modify statement");
-      System.out.println("Varname: " + varName + " at: " +
-        varPos);
       doLiteralLoading(varValue);
 
       // Store variable at the variables location
@@ -173,8 +163,6 @@ public class StatementCompiler extends DepthFirstAdapter
     try
     {
       String identifierName = identifier.toString().trim();
-      System.out.println("Level: " + Compiler.getLevel());
-      System.out.println("Name: [" + identifierName + "]");
       Variable newVar = table.getVariable(identifierName, Compiler.getLevel());
       short location = newVar.getOffset();
       writePCode(new Instruction(OpCode.LOAD.getValue(), (byte) 0, location));
@@ -199,12 +187,12 @@ public class StatementCompiler extends DepthFirstAdapter
     {
       int varStrLength = varValue.length()-1;
       //emit each element in the string
-      int count = 0;
+      int count = 1;
       while(count < varStrLength)
       {
         // Check if it's a \n otherwise ignore
         if ((varValue.charAt(count) == '\\') &&
-            (varValue.charAt(count+1) == 'n'))
+            (varValue.charAt(count + 1) == 'n'))
         {
           writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
             (short) 13));
@@ -222,12 +210,11 @@ public class StatementCompiler extends DepthFirstAdapter
       }
       //emit store a required pos
       writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-        length));
+        (short) (length+1)));
     }
     // Do int storage
     else
     {
-      System.out.println("[" + varValue + "]");
       short varIntValue = Short.parseShort(varValue.trim());
       writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
         varIntValue));

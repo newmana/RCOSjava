@@ -65,7 +65,6 @@ public class VariableCompiler extends DepthFirstAdapter
    */
   public void inAVariableDeclaration(AVariableDeclaration node)
   {
-    System.out.println("In var declaration");
     // This compiler understands only 16 bit int/short and chars
     if (node.getTypeSpecifier() instanceof ASignedIntTypeSpecifier ||
       node.getTypeSpecifier() instanceof AUnsignedIntTypeSpecifier ||
@@ -77,8 +76,6 @@ public class VariableCompiler extends DepthFirstAdapter
       {
         Variable newVar = new Variable(node.getDeclarator().toString().trim(),
             Compiler.getLevel(), Compiler.getInstructionIndex());
-        System.out.println("Name: " + node.getDeclarator().toString().trim());
-        System.out.println("Level: " + Compiler.getLevel());
         table.addSymbol(newVar);
       }
       catch (Exception e)

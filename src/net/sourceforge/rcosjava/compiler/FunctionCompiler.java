@@ -43,11 +43,8 @@ public class FunctionCompiler extends DepthFirstAdapter
    */
   public void inAFunctionBody(AFunctionBody node)
   {
-    System.out.println("In a function!: ");
-
     StatementCompiler statementCompiler = new StatementCompiler();
     node.apply(statementCompiler);
-
   }
 
   /**
