@@ -17,11 +17,6 @@
    </target>
 
   <target name="prepare">
-    <echo message="Type in password:"/>
-    <cvs cvsRoot=":ext:${username}@cvs.rcosjava.sourceforge.net:/cvsroot/RCOSjava"
-     package="."
-     dest="."
-    />
     <echo message="Creating deployment directory in current dir called: ${deploy.dir}"/>
     <mkdir dir="${deploy.dir}"/>
     <mkdir dir="${javadoc.dir}"/>
