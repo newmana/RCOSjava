@@ -295,7 +295,7 @@ public class PagedMemoryManagement implements MemoryManagement
    */
   private void writeObject(ObjectOutputStream os) throws IOException
   {
-//    os.writeObject(myMainMemory);
+    os.writeObject(myMainMemory);
     os.writeObject(thePageTable);
   }
 
@@ -308,7 +308,7 @@ public class PagedMemoryManagement implements MemoryManagement
   private void readObject(ObjectInputStream is) throws IOException,
       ClassNotFoundException
   {
-//    myMainMemory = (MainMemory) is.readObject();
+    myMainMemory = (MainMemory) is.readObject();
     thePageTable = (FIFOQueue) is.readObject();
   }
 }
