@@ -18,7 +18,7 @@ import net.sourceforge.rcosjava.messaging.postoffices.os.OSOffice;
 import net.sourceforge.rcosjava.software.memory.MemoryManager;
 import net.sourceforge.rcosjava.software.memory.MemoryReturn;
 import net.sourceforge.rcosjava.software.memory.MemoryRequest;
-import net.sourceforge.rcosjava.software.util.ProcessQueue;
+import net.sourceforge.rcosjava.software.util.*;
 
 /**
  * Management of processes for RCOS.java
@@ -91,6 +91,7 @@ public class ProcessScheduler extends OSMessageHandler
 
   /**
    * Initializes the queue and registers the scheduler with the postoffice.
+   * By default creates FIFO queues to be used for the queueing process.
    *
    * @param postOffice the post office to register the process scheduler to and
    * the one that sends messages to it.
@@ -99,11 +100,11 @@ public class ProcessScheduler extends OSMessageHandler
   {
     super(MESSENGING_ID, postOffice);
 
-    zombieCreatedQ = new ProcessQueue(10,1);
-    zombieDeadQ = new ProcessQueue(10,1);
-    blockedQ = new ProcessQueue(10,1);
-    readyQ = new ProcessQueue(10,1);
-    executingQ = new ProcessQueue(1,1);
+    zombieCreatedQ = new ProcessQueue(new FIFOQueue(10,1));
+    zombieDeadQ = new ProcessQueue(new FIFOQueue(10,1));
+    blockedQ = new ProcessQueue(new FIFOQueue(10,1));
+    readyQ = new ProcessQueue(new FIFOQueue(10,1));
+    executingQ = new ProcessQueue(new FIFOQueue(10,1));
     currentPID = 1;
  }
 
@@ -126,7 +127,7 @@ public class ProcessScheduler extends OSMessageHandler
   private void insertIntoZombieCreatedQ(RCOSProcess zombieProcess)
   {
     //System.out.println("Insert into zombie created q: " + zombieProcess.getPID());
-    zombieCreatedQ.insert(zombieProcess);
+    zombieCreatedQ.insertProcess(zombieProcess);
   }
 
   /**
@@ -137,7 +138,7 @@ public class ProcessScheduler extends OSMessageHandler
   private RCOSProcess removeFromZombieCreatedQ(int pid)
   {
     //System.out.println("Remove from zombie created q: " + pid);
-    return (RCOSProcess) zombieCreatedQ.getProcess(pid);
+    return zombieCreatedQ.getProcess(pid);
   }
 
   /**
@@ -148,7 +149,7 @@ public class ProcessScheduler extends OSMessageHandler
   private void insertIntoBlockedQ(RCOSProcess blockedProcess)
   {
     //System.out.println("Insert into blocked q: " + blockedProcess.getPID());
-    blockedQ.insert(blockedProcess);
+    blockedQ.insertProcess(blockedProcess);
   }
 
   /**
@@ -159,7 +160,7 @@ public class ProcessScheduler extends OSMessageHandler
   private RCOSProcess removeFromBlockedQ(int pid)
   {
     //System.out.println("Remove from blocked q: " + pid);
-    return (RCOSProcess) blockedQ.getProcess(pid);
+    return blockedQ.getProcess(pid);
   }
 
   /**
@@ -170,11 +171,11 @@ public class ProcessScheduler extends OSMessageHandler
   private void insertIntoReadyQ(RCOSProcess readyPrococess)
   {
     //System.out.println("Insert into ready q: " + readyPrococess.getPID());
-    readyQ.insert(readyPrococess);
+    readyQ.insertProcess(readyPrococess);
     //System.out.println("Ready Q size: " + readyQ.size());
-    //System.out.println("First element: " + ((RCOSProcess) readyQ.peek(0)).getPID());
+    //System.out.println("First element: " + (readyQ.peek(0)).getPID());
     //if (readyQ.size() > 1)
-    //  System.out.println("2nd element: " + ((RCOSProcess) readyQ.peek(1)).getPID());
+    //  System.out.println("2nd element: " + (readyQ.peek(1)).getPID());
   }
 
   /**
@@ -185,7 +186,7 @@ public class ProcessScheduler extends OSMessageHandler
   private RCOSProcess removeFromReadyQ(int pid)
   {
     //System.out.println("Remove from ready q: " + pid);
-    return (RCOSProcess) readyQ.getProcess(pid);
+    return readyQ.getProcess(pid);
   }
 
   /**
@@ -197,7 +198,7 @@ public class ProcessScheduler extends OSMessageHandler
    */
   public RCOSProcess getExecutingProcess()
   {
-    return (RCOSProcess) executingQ.peek();
+    return executingQ.peekProcess();
   }
 
   /**
@@ -207,7 +208,7 @@ public class ProcessScheduler extends OSMessageHandler
    */
   public void setExecutingProcess(RCOSProcess newProcess)
   {
-    executingQ.insert(newProcess);
+    executingQ.insertProcess(newProcess);
   }
 
   /**
@@ -215,7 +216,7 @@ public class ProcessScheduler extends OSMessageHandler
    */
   public void setCurrentProcessNull()
   {
-    executingQ.removeAllElements();
+    executingQ.removeAllProcesses();
   }
 
   /**
@@ -225,7 +226,7 @@ public class ProcessScheduler extends OSMessageHandler
    */
   private RCOSProcess removeExecutingProcess(int pid)
   {
-    return (RCOSProcess) executingQ.getProcess(pid);
+    return executingQ.getProcess(pid);
   }
 
   /**
@@ -309,7 +310,7 @@ public class ProcessScheduler extends OSMessageHandler
   public void processAllocatedTerminal(int newPID, String newTerminalId)
   {
     // Try and retrieve the next process in the ZombieQ
-    RCOSProcess newProcess = (RCOSProcess) removeFromZombieCreatedQ(newPID);
+    RCOSProcess newProcess = removeFromZombieCreatedQ(newPID);
     if (newProcess != null)
     {
       // If a process is retrieve allocate terminal and move
@@ -484,6 +485,55 @@ public class ProcessScheduler extends OSMessageHandler
   }
 
   /**
+   * Copies all existing processes in the existing queues and converts them
+   * to a LIFO queueing structure.
+   */
+  public void switchToLIFOQueue()
+  {
+    zombieCreatedQ.setProcessQueue(new
+      LIFOQueue(10,1,zombieCreatedQ.getProcessQueue()));
+    zombieDeadQ.setProcessQueue(new
+      LIFOQueue(10,1,zombieDeadQ.getProcessQueue()));
+    blockedQ.setProcessQueue(new LIFOQueue(10,1,blockedQ.getProcessQueue()));
+    readyQ.setProcessQueue(new LIFOQueue(10,1,readyQ.getProcessQueue()));
+    executingQ.setProcessQueue(new
+      LIFOQueue(10,1,executingQ.getProcessQueue()));
+  }
+
+  /**
+   * Copies all existing processes in the existing queues and converts them
+   * to a LIFO queueing structure.
+   */
+  public void switchToFIFOQueue()
+  {
+    zombieCreatedQ.setProcessQueue(new
+      FIFOQueue(10,1,zombieCreatedQ.getProcessQueue()));
+    zombieDeadQ.setProcessQueue(new
+      FIFOQueue(10,1,zombieDeadQ.getProcessQueue()));
+    blockedQ.setProcessQueue(new FIFOQueue(10,1,blockedQ.getProcessQueue()));
+    readyQ.setProcessQueue(new FIFOQueue(10,1,readyQ.getProcessQueue()));
+    executingQ.setProcessQueue(new
+      FIFOQueue(10,1,executingQ.getProcessQueue()));
+  }
+
+  /**
+   * Copies all existing processes in the existing queues and converts them
+   * to a Priority queueing structure.
+   */
+  public void switchToPriorityQueue()
+  {
+    zombieCreatedQ.setProcessQueue(new
+      PriorityQueue(10,1,zombieCreatedQ.getProcessQueue()));
+    zombieDeadQ.setProcessQueue(new
+      PriorityQueue(10,1,zombieDeadQ.getProcessQueue()));
+    blockedQ.setProcessQueue(new
+      PriorityQueue(10,1,blockedQ.getProcessQueue()));
+    readyQ.setProcessQueue(new PriorityQueue(10,1,readyQ.getProcessQueue()));
+    executingQ.setProcessQueue(new
+      PriorityQueue(10,1,executingQ.getProcessQueue()));
+  }
+
+  /**
    * Executed every cycle to make sure that if there is not a currently
    * executing process that one is taken from the ready queue.
    */
@@ -496,7 +546,7 @@ public class ProcessScheduler extends OSMessageHandler
     {
       if (!readyQ.queueEmpty())
       {
-        RCOSProcess currentProcess = (RCOSProcess) readyQ.retrieve();
+        RCOSProcess currentProcess = readyQ.retrieveProcess();
 
         //System.out.println("Running: " + rpCurrentProcess.getPID());
         setExecutingProcess(currentProcess);

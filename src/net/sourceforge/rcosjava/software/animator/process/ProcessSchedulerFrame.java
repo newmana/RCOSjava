@@ -1,15 +1,3 @@
-//***************************************************************************
-// FILE     : ProcessSchedulerFrame.java
-// PACKAGE  : Animator
-// PURPOSE  : Based on the commands given by processSchedulerAnimator
-//            displays graphically what is happening.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 22/01/96  Original (processSchedulerAnimator).
-//          : 20/01/97  New Version Created.
-//          : 13/10/98  Converted to Java 1.1.
-//***************************************************************************//
-
 package net.sourceforge.rcosjava.software.animator.process;
 
 import java.awt.*;
@@ -31,25 +19,40 @@ import net.sourceforge.rcosjava.software.memory.MemoryRequest;
 import net.sourceforge.rcosjava.software.process.ProcessScheduler;
 import net.sourceforge.rcosjava.software.util.LIFOQueue;
 
-
+/**
+ * Based on the commands given by processSchedulerAnimator displays graphically
+ * what is happening.
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 20/01/97  New Version Created.
+ * 01/01/1997 First process set to 1. AN
+ * </DD><DD>
+ * 13/10/98  Converted to Java 1.1.
+ * </DD></DT>
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 22nd January 1996
+ */
 public class ProcessSchedulerFrame extends RCOSFrame
 {
   private GraphicsEngine engine;
-  private Position pCPU;
-  private Position[] pReady = new Position[11];
-  private Position[] pBlocked = new Position[11];
-  private Position[] pZombie = new Position[11];
-  private Position[] pZombieToReady = new Position[6];
-  private Position[] pBlockedToReady = new Position[6];
-  private Position[] pReadyToCPU = new Position[4];
-  private Position[] pCPUToReady = new Position[4];
-  private Position[] pCPUToBlocked = new Position[4];
+  private Position cpuPosition;
+  private Position[] readyPositions = new Position[11];
+  private Position[] blockedPositions = new Position[11];
+  private Position[] zombiePositions = new Position[11];
+  private Position[] zombieToReadyPositions = new Position[6];
+  private Position[] blockedToReadyPositions = new Position[6];
+  private Position[] readyToCPUPositions = new Position[4];
+  private Position[] cpuToReadyPositions = new Position[4];
+  private Position[] cpuToBlockedPositions = new Position[4];
   private MTGO tmpPic, cpuPic;
   private LIFOQueue ZombieQ, ReadyQ, BlockedQ;
-  private Movement mZombie, mBlocked, mReady;
-  private Movement mZombieToReady, mBlockedToReady, mReadyToCPU,
-    mCPUToReady, mCPUToBlocked;
-  private Panel pMain, pClose, pWest;
+  private Movement zombieMovement, blockedMovement, readyMovement;
+  private Movement zombieToReadyMovement, blockedToReadyMovement, readyToCPUMovement,
+    cpuToReadyMovement, cpuToBlockedMovement;
+  private Panel mainPanel, closePanel, westPanel;
   private Image myImages[] = new Image[5];
   private int iX, iCountX, iCountY, iIndentL, iIndentR, iWidth, iHeight;
   private int iBoxHeight, iBoxWidth;
@@ -158,11 +161,13 @@ public class ProcessSchedulerFrame extends RCOSFrame
     engine.pad.drawLine(iIndentR,cpuPic.iImageHeight/2,iIndentR,3*(iHeight)+45);
   }
 
-// Sets up the layout for the whole process scheduler window.
-// This uses the border layout manager.  The left (west) contains
-// option, the center contains the animation area and the bottom
-// (south) contains the Close button.
 
+  /**
+   * Sets up the layout for the whole process scheduler window.
+   * This uses the border layout manager.  The left (west) contains
+   * option, the center contains the animation area and the bottom
+   * (south) contains the Close button.
+   */
   public void setupLayout(Component c)
   {
     super.setupLayout(c);
@@ -177,9 +182,9 @@ public class ProcessSchedulerFrame extends RCOSFrame
 
     setupMovement();
 
-    pMain = new Panel();
-    pClose = new Panel();
-    pWest = new Panel();
+    mainPanel = new Panel();
+    closePanel = new Panel();
+    westPanel = new Panel();
     Panel pTemp = new Panel();
     Choice speedOption = new Choice();
     Choice quantumOption = new Choice();
@@ -272,12 +277,12 @@ public class ProcessSchedulerFrame extends RCOSFrame
     constraints.anchor = GridBagConstraints.WEST;
     gridBag.setConstraints(schedulerOption,constraints);
     pTemp.add(schedulerOption);
-//    quantumOption.addItemListener(new QuantumSelection());
+    schedulerOption.addItemListener(new SchedulerSelection());
 
     rBox = new RCOSBox(pTemp,new NewLabel("Options", titleFont),3,
                        3,3,3);
 
-    pWest.setLayout(gridBag);
+    westPanel.setLayout(gridBag);
     constraints.gridwidth=1;
     constraints.gridheight=1;
     constraints.weighty=1;
@@ -287,24 +292,25 @@ public class ProcessSchedulerFrame extends RCOSFrame
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.NORTH;
     gridBag.setConstraints(rBox,constraints);
-    pWest.add(rBox);
+    westPanel.add(rBox);
 
-    pClose.setLayout(new FlowLayout(FlowLayout.RIGHT));
+    closePanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
     tmpButton = new Button("Close");
-    pClose.add(tmpButton);
+    closePanel.add(tmpButton);
     tmpButton.addMouseListener(new RCOSFrame.CloseAnimator());
 
-    pMain.add(engine);
+    mainPanel.add(engine);
     engine.addMouseListener(new MTGOSelection());
 
-    add("Center",pMain);
-    add("South",pClose);
-    add("West", pWest);
+    add("Center",mainPanel);
+    add("South",closePanel);
+    add("West", westPanel);
   }
 
-// Perhaps a rather dumb way of creating the movement arrays between
-// the CPU and queues.  There must be a better way?
-
+  /**
+   * Perhaps a rather dumb way of creating the movement arrays between
+   * the CPU and queues.  There must be a better way?
+   */
   void setupMovement()
   {
     // Create the animation area for the panel.
@@ -338,17 +344,17 @@ public class ProcessSchedulerFrame extends RCOSFrame
         iArr = (count2-5) * -1;
         if (count == 1)
         {
-          pReady[iArr] = new Position(((count2*iBoxHeight)+engine.iCenterX),
+          readyPositions[iArr] = new Position(((count2*iBoxHeight)+engine.iCenterX),
             ((count*iHeight)+iBoxHeight),iIncrement,0);
         }
         if (count == 2)
         {
-          pBlocked[iArr] = new Position(((count2*iBoxHeight)+engine.iCenterX),
+          blockedPositions[iArr] = new Position(((count2*iBoxHeight)+engine.iCenterX),
             ((count*iHeight)+iBoxHeight),iIncrement,0);
         }
         if (count == 3)
         {
-          pZombie[iArr] = new Position(((count2*iBoxHeight)+engine.iCenterX),
+          zombiePositions[iArr] = new Position(((count2*iBoxHeight)+engine.iCenterX),
             ((count*iHeight)+iBoxHeight),iIncrement,0);
         }
       }
@@ -356,207 +362,221 @@ public class ProcessSchedulerFrame extends RCOSFrame
 
     // Movement of process from Zombie to Ready
 
-    pZombieToReady[0] = new Position(engine.iCenterX-180,(3*iHeight)+iBoxHeight,-2,0);
-    pZombieToReady[1] = new Position(iIndentL-(iBoxWidth/2),(3*iHeight)+iBoxHeight,0,-2);
-    pZombieToReady[2] = new Position(iIndentL-(iBoxWidth/2),(2*iHeight)+45+(iBoxHeight/2),2,0);
-    pZombieToReady[3] = new Position(iIndentR-(iBoxWidth/2),(2*iHeight)+45+(iBoxHeight/2),0,-2);
-    pZombieToReady[4] = new Position(iIndentR-(iBoxWidth/2),iHeight+iBoxHeight,-2,0);
-    pZombieToReady[5] = new Position(engine.iCenterX+150,iHeight+iBoxHeight,0,0);
+    zombieToReadyPositions[0] = new Position(engine.iCenterX-180,(3*iHeight)+iBoxHeight,-2,0);
+    zombieToReadyPositions[1] = new Position(iIndentL-(iBoxWidth/2),(3*iHeight)+iBoxHeight,0,-2);
+    zombieToReadyPositions[2] = new Position(iIndentL-(iBoxWidth/2),(2*iHeight)+45+(iBoxHeight/2),2,0);
+    zombieToReadyPositions[3] = new Position(iIndentR-(iBoxWidth/2),(2*iHeight)+45+(iBoxHeight/2),0,-2);
+    zombieToReadyPositions[4] = new Position(iIndentR-(iBoxWidth/2),iHeight+iBoxHeight,-2,0);
+    zombieToReadyPositions[5] = new Position(engine.iCenterX+150,iHeight+iBoxHeight,0,0);
 
     // Movement of process from Blocked to Ready
 
-    pBlockedToReady[0] = new Position(engine.iCenterX-180,(2*iHeight)+iBoxHeight,-2,0);
-    pBlockedToReady[1] = new Position(iIndentL-(iBoxWidth/2),(2*iHeight)+iBoxHeight,0,-2);
-    pBlockedToReady[2] = new Position(iIndentL-(iBoxWidth/2),iHeight+45+(iBoxHeight/2),2,0);
-    pBlockedToReady[3] = new Position(iIndentR-(iBoxWidth/2),iHeight+45+(iBoxHeight/2),0,-2);
-    pBlockedToReady[4] = new Position(iIndentR-(iBoxWidth/2),iHeight+iBoxHeight,-2,0);
-    pBlockedToReady[5] = new Position(engine.iCenterX+150,iHeight+iBoxHeight,0,0);
+    blockedToReadyPositions[0] = new Position(engine.iCenterX-180,(2*iHeight)+iBoxHeight,-2,0);
+    blockedToReadyPositions[1] = new Position(iIndentL-(iBoxWidth/2),(2*iHeight)+iBoxHeight,0,-2);
+    blockedToReadyPositions[2] = new Position(iIndentL-(iBoxWidth/2),iHeight+45+(iBoxHeight/2),2,0);
+    blockedToReadyPositions[3] = new Position(iIndentR-(iBoxWidth/2),iHeight+45+(iBoxHeight/2),0,-2);
+    blockedToReadyPositions[4] = new Position(iIndentR-(iBoxWidth/2),iHeight+iBoxHeight,-2,0);
+    blockedToReadyPositions[5] = new Position(engine.iCenterX+150,iHeight+iBoxHeight,0,0);
 
     // Movement of process from Ready to CPU
 
-    pReadyToCPU[0] = new Position(engine.iCenterX-180,iHeight+iBoxHeight,-2,0);
-    pReadyToCPU[1] = new Position(iIndentL-(iBoxWidth/2),iHeight+iBoxHeight,0,-2);
-    pReadyToCPU[2] = new Position(iIndentL-(iBoxWidth/2),iBoxHeight/2,2,0);
-    pReadyToCPU[3] = new Position(engine.CenterX(tmpPic),iBoxHeight/2,0,0);
+    readyToCPUPositions[0] = new Position(engine.iCenterX-180,iHeight+iBoxHeight,-2,0);
+    readyToCPUPositions[1] = new Position(iIndentL-(iBoxWidth/2),iHeight+iBoxHeight,0,-2);
+    readyToCPUPositions[2] = new Position(iIndentL-(iBoxWidth/2),iBoxHeight/2,2,0);
+    readyToCPUPositions[3] = new Position(engine.CenterX(tmpPic),iBoxHeight/2,0,0);
 
     // Movement of process from CPU to Ready
 
-    pCPUToReady[0] = new Position(engine.CenterX(tmpPic),iBoxHeight/2,2,0);
-    pCPUToReady[1] = new Position(iIndentR-(iBoxWidth/2),iBoxHeight/2,0,2);
-    pCPUToReady[2] = new Position(iIndentR-(iBoxWidth/2),iHeight+iBoxHeight,-2,0);
-    pCPUToReady[3] = new Position(engine.iCenterX+150,iHeight+iBoxHeight,0,0);
+    cpuToReadyPositions[0] = new Position(engine.CenterX(tmpPic),iBoxHeight/2,2,0);
+    cpuToReadyPositions[1] = new Position(iIndentR-(iBoxWidth/2),iBoxHeight/2,0,2);
+    cpuToReadyPositions[2] = new Position(iIndentR-(iBoxWidth/2),iHeight+iBoxHeight,-2,0);
+    cpuToReadyPositions[3] = new Position(engine.iCenterX+150,iHeight+iBoxHeight,0,0);
 
     // Movement of process from CPU to Blocked
 
-    pCPUToBlocked[0] = new Position(engine.CenterX(tmpPic),iBoxHeight/2,2,0);
-    pCPUToBlocked[1] = new Position(iIndentR-(iBoxWidth/2),iBoxHeight/2,0,2);
-    pCPUToBlocked[2] = new Position(iIndentR-(iBoxWidth/2),(2*iHeight)+iBoxHeight,-2,0);
-    pCPUToBlocked[3] = new Position(engine.iCenterX+150,(2*iHeight)+iBoxHeight,0,0);
+    cpuToBlockedPositions[0] = new Position(engine.CenterX(tmpPic),iBoxHeight/2,2,0);
+    cpuToBlockedPositions[1] = new Position(iIndentR-(iBoxWidth/2),iBoxHeight/2,0,2);
+    cpuToBlockedPositions[2] = new Position(iIndentR-(iBoxWidth/2),(2*iHeight)+iBoxHeight,-2,0);
+    cpuToBlockedPositions[3] = new Position(engine.iCenterX+150,(2*iHeight)+iBoxHeight,0,0);
 
     // Add all positions to create a movement.
 
-    mZombieToReady = new Movement();
-    mBlockedToReady = new Movement();
-    mReadyToCPU = new Movement();
-    mCPUToReady = new Movement();
-    mCPUToBlocked = new Movement();
-    mReady = new Movement();
-    mBlocked = new Movement();
-    mZombie = new Movement();
+    zombieToReadyMovement = new Movement();
+    blockedToReadyMovement = new Movement();
+    readyToCPUMovement = new Movement();
+    cpuToReadyMovement = new Movement();
+    cpuToBlockedMovement = new Movement();
+    readyMovement = new Movement();
+    blockedMovement = new Movement();
+    zombieMovement = new Movement();
 
     for (count=0; count < 11; count++)
     {
-      mReady.addPosition(pReady[count]);
-      mBlocked.addPosition(pBlocked[count]);
-      mZombie.addPosition(pZombie[count]);
+      readyMovement.addPosition(readyPositions[count]);
+      blockedMovement.addPosition(blockedPositions[count]);
+      zombieMovement.addPosition(zombiePositions[count]);
     }
 
     for (count=0; count < 6; count++)
     {
-      mBlockedToReady.addPosition(pBlockedToReady[count]);
-      mZombieToReady.addPosition(pZombieToReady[count]);
+      blockedToReadyMovement.addPosition(blockedToReadyPositions[count]);
+      zombieToReadyMovement.addPosition(zombieToReadyPositions[count]);
     }
 
     for (count=0; count < 4; count++)
     {
-      mReadyToCPU.addPosition(pReadyToCPU[count]);
-      mCPUToReady.addPosition(pCPUToReady[count]);
-      mCPUToBlocked.addPosition(pCPUToBlocked[count]);
+      readyToCPUMovement.addPosition(readyToCPUPositions[count]);
+      cpuToReadyMovement.addPosition(cpuToReadyPositions[count]);
+      cpuToBlockedMovement.addPosition(cpuToBlockedPositions[count]);
     }
     engine.removeMTGO("TEMP");
   }
 
-// A process has finished running normally.  Simply remove
-// it from being displayed.  It shouldn't be in any queues.
-
-  synchronized void processFinished(int iPID)
+  /**
+   * A process has finished running normally.  Simply remove it from being
+   * displayed.  It shouldn't be in any queues.
+   */
+  synchronized void processFinished(int pid)
   {
-    tmpMTGO = engine.returnMTGO("P" + iPID);
+    tmpMTGO = engine.returnMTGO("P" + pid);
     tmpMTGO.bVisible = false;
-    engine.removeMTGO("P" + iPID);
+    engine.removeMTGO("P" + pid);
     syncPaint(lDelay);
   }
 
-// A process has been removed without finishing being
-// run.  This means that it could exist anywhere. ie.
-// any queue, CPU or moving.
-
-  synchronized void killProcess(int iPID)
+  /**
+   * A process has been removed without finishing being run.  This means that
+   * it could exist anywhere. ie. any queue, CPU or moving.
+   */
+  synchronized void killProcess(int pid)
   {
-    tmpMTGO = engine.returnMTGO("P" + iPID);
+    tmpMTGO = engine.returnMTGO("P" + pid);
     tmpMTGO.bVisible = false;
-    engine.removeMTGO("P" + iPID);
+    engine.removeMTGO("P" + pid);
 
     // Remove it from any queues.
 
-    removeQueue(ProcessScheduler.READYQ, iPID);
-    removeQueue(ProcessScheduler.BLOCKEDQ, iPID);
-    removeQueue(ProcessScheduler.ZOMBIEQ, iPID);
+    removeQueue(ProcessScheduler.READYQ, pid);
+    removeQueue(ProcessScheduler.BLOCKEDQ, pid);
+    removeQueue(ProcessScheduler.ZOMBIEQ, pid);
     syncPaint(lDelay);
   }
 
-// Move a given process from the CPU to the Blocked Queue.
-// procID is the unique process identifier.
-
-  synchronized void cpuToBlocked(int iPID)
+  /**
+   * Move a given process from the CPU to the Blocked Queue.
+   *
+   * @param pid is the unique process identifier.
+   */
+  synchronized void cpuToBlocked(int pid)
   {
-    tmpMTGO = engine.returnMTGO("P" + iPID);
-    mCPUToBlocked.start();
-    while (!mCPUToBlocked.finished())
+    tmpMTGO = engine.returnMTGO("P" + pid);
+    cpuToBlockedMovement.start();
+    while (!cpuToBlockedMovement.finished())
     {
-      mCPUToBlocked.step();
-      tmpMTGO.iX = mCPUToBlocked.iCurrentX;
-      tmpMTGO.iY = mCPUToBlocked.iCurrentY;
+      cpuToBlockedMovement.step();
+      tmpMTGO.iX = cpuToBlockedMovement.iCurrentX;
+      tmpMTGO.iY = cpuToBlockedMovement.iCurrentY;
       syncPaint(lDelay);
     }
   }
 
-// Move a given process from the Blocked Queue to the Ready Queue.
-// procID is the unique process indentifier.
 
-  synchronized void blockedToReady(int iPID)
+  /**
+   * Move a given process from the Blocked Queue to the Ready Queue.
+   *
+   * @param pid is the unique process indentifier.
+   */
+  synchronized void blockedToReady(int pid)
   {
-    tmpMTGO = engine.returnMTGO("P" + iPID);
-    mBlockedToReady.start();
-    while (!mBlockedToReady.finished())
+    tmpMTGO = engine.returnMTGO("P" + pid);
+    blockedToReadyMovement.start();
+    while (!blockedToReadyMovement.finished())
     {
-      mBlockedToReady.step();
-      tmpMTGO.iX = mBlockedToReady.iCurrentX;
-      tmpMTGO.iY = mBlockedToReady.iCurrentY;
+      blockedToReadyMovement.step();
+      tmpMTGO.iX = blockedToReadyMovement.iCurrentX;
+      tmpMTGO.iY = blockedToReadyMovement.iCurrentY;
       syncPaint(lDelay);
     }
   }
 
-// Move a given process from the CPU to the Ready Queue.
-// procID is the unique process identifier.
-
-  synchronized void cpuToReady(int iPID)
+  /**
+   * Move a given process from the CPU to the Ready Queue.
+   *
+   * @param pid is the unique process identifier.
+   */
+  synchronized void cpuToReady(int pid)
   {
-    tmpMTGO = engine.returnMTGO("P" + iPID);
-    mCPUToReady.start();
-    while (!mCPUToReady.finished())
+    tmpMTGO = engine.returnMTGO("P" + pid);
+    cpuToReadyMovement.start();
+    while (!cpuToReadyMovement.finished())
     {
-      mCPUToReady.step();
-      tmpMTGO.iX = mCPUToReady.iCurrentX;
-      tmpMTGO.iY = mCPUToReady.iCurrentY;
+      cpuToReadyMovement.step();
+      tmpMTGO.iX = cpuToReadyMovement.iCurrentX;
+      tmpMTGO.iY = cpuToReadyMovement.iCurrentY;
       syncPaint(lDelay);
     }
   }
 
-// Move a given process from the Ready Queue to the CPU.
-// procID is the unique process identifier.
 
-  synchronized void readyToCPU(int iPID)
+  /**
+   * Move a given process from the Ready Queue to the CPU.
+   *
+   * @param pid is the unique process identifier.
+   */
+  synchronized void readyToCPU(int pid)
   {
-    tmpMTGO = engine.returnMTGO("P" + iPID);
-    mReadyToCPU.start();
-    while (!mReadyToCPU.finished())
+    tmpMTGO = engine.returnMTGO("P" + pid);
+    readyToCPUMovement.start();
+    while (!readyToCPUMovement.finished())
     {
-      mReadyToCPU.step();
-      tmpMTGO.iX = mReadyToCPU.iCurrentX;
-      tmpMTGO.iY = mReadyToCPU.iCurrentY;
+      readyToCPUMovement.step();
+      tmpMTGO.iX = readyToCPUMovement.iCurrentX;
+      tmpMTGO.iY = readyToCPUMovement.iCurrentY;
       syncPaint(lDelay);
     }
   }
 
-// Create a new process with the given number.  This alternates between
-// creating green and blue processes.
-
-  synchronized void newProcess(int iPID)
+  /**
+   * Create a new process with the given number.  This alternates between
+   * creating green and blue processes.
+   */
+  synchronized void newProcess(int pid)
   {
     //Alternate between blue and green processes.
 
-    if ((iPID % 2) == 1)
-      tmpPic = new MTGO(myImages[0], "P" + iPID, true, Color.darkGray);
+    if ((pid % 2) == 1)
+      tmpPic = new MTGO(myImages[0], "P" + pid, true, Color.darkGray);
     else
-      tmpPic = new MTGO(myImages[1], "P" + iPID, true, Color.darkGray);
+      tmpPic = new MTGO(myImages[1], "P" + pid, true, Color.darkGray);
     tmpPic.iPriority = 2;
     tmpPic.iX = engine.CenterX(tmpPic);
     tmpPic.iY = iHeight+iBoxHeight;
     engine.addMTGO(tmpPic,this);
   }
 
-// The first thing that a process does once allocated a terminal
-// is to move from the Zomebie Queue to the Ready Queue.  This
-// is where the process is told to move.
 
-  synchronized void zombieToReady(int iPID)
+  /**
+   * The first thing that a process does once allocated a terminal is to move
+   * from the Zomebie Queue to the Ready Queue.  This is where the process is
+   * told to move.
+   */
+  synchronized void zombieToReady(int pid)
   {
-    tmpMTGO = engine.returnMTGO("P" + iPID);
-    mZombieToReady.start();
-    while (!mZombieToReady.finished())
+    tmpMTGO = engine.returnMTGO("P" + pid);
+    zombieToReadyMovement.start();
+    while (!zombieToReadyMovement.finished())
     {
-      mZombieToReady.step();
-      tmpMTGO.iX = mZombieToReady.iCurrentX;
-      tmpMTGO.iY = mZombieToReady.iCurrentY;
+      zombieToReadyMovement.step();
+      tmpMTGO.iX = zombieToReadyMovement.iCurrentX;
+      tmpMTGO.iY = zombieToReadyMovement.iCurrentY;
       syncPaint(lDelay);
     }
   }
 
-// If a process has left or joined a queue then given the
-// queue type (1-3) redisplay all the processes that are in
-// that queue.
-
+  /**
+   * If a process has left or joined a queue then given the queue type (1-3)
+   * redisplay all the processes that are in that queue.
+   */
   private synchronized void refreshQueue(int iQType)
   {
     LIFOQueue tmpQ = new LIFOQueue();
@@ -587,90 +607,90 @@ public class ProcessSchedulerFrame extends RCOSFrame
     syncPaint(lDelay);
   }
 
-  synchronized void moveReadyQ(int iPID)
+  synchronized void moveReadyQ(int pid)
   {
-    tmpMTGO = engine.returnMTGO("P" + iPID);
-    mReady.start();
+    tmpMTGO = engine.returnMTGO("P" + pid);
+    readyMovement.start();
     int iPos = 10-ReadyQ.itemCount();
-    while (!mReady.finished(iPos))
+    while (!readyMovement.finished(iPos))
     {
-      mReady.step();
-      tmpMTGO.iX = mReady.iCurrentX;
-      tmpMTGO.iY = mReady.iCurrentY;
+      readyMovement.step();
+      tmpMTGO.iX = readyMovement.iCurrentX;
+      tmpMTGO.iY = readyMovement.iCurrentY;
       syncPaint(lDelay);
     }
   }
 
-  synchronized void moveBlockedQ(int iPID)
+  synchronized void moveBlockedQ(int pid)
   {
-    tmpMTGO = engine.returnMTGO("P" + iPID);
-    mBlocked.start();
+    tmpMTGO = engine.returnMTGO("P" + pid);
+    blockedMovement.start();
     int iPos = 10-ReadyQ.itemCount();
-    while (!mBlocked.finished(iPos))
+    while (!blockedMovement.finished(iPos))
     {
-      mBlocked.step();
-      tmpMTGO.iX = mBlocked.iCurrentX;
-      tmpMTGO.iY = mBlocked.iCurrentY;
+      blockedMovement.step();
+      tmpMTGO.iX = blockedMovement.iCurrentX;
+      tmpMTGO.iY = blockedMovement.iCurrentY;
       syncPaint(lDelay);
     }
   }
 
-  synchronized void moveZombieQ(int iPID)
+  synchronized void moveZombieQ(int pid)
   {
-    tmpMTGO = engine.returnMTGO("P" + iPID);
-    mZombie.start();
+    tmpMTGO = engine.returnMTGO("P" + pid);
+    zombieMovement.start();
     int iPos = 10-ReadyQ.itemCount();
-    while (!mZombie.finished(iPos))
+    while (!zombieMovement.finished(iPos))
     {
-      mZombie.step();
-      tmpMTGO.iX = mZombie.iCurrentX;
-      tmpMTGO.iY = mZombie.iCurrentY;
+      zombieMovement.step();
+      tmpMTGO.iX = zombieMovement.iCurrentX;
+      tmpMTGO.iY = zombieMovement.iCurrentY;
       syncPaint(lDelay);
     }
   }
 
-  synchronized void addQueue(int iQType, int iPID)
+  synchronized void addQueue(int iQType, int pid)
   {
-    String sProcessID = "P" + iPID;
+    String sProcessID = "P" + pid;
     switch (iQType)
     {
       case ProcessScheduler.READYQ:
         ReadyQ.insert(sProcessID);
-        moveReadyQ(iPID);
+        moveReadyQ(pid);
         break;
       case ProcessScheduler.BLOCKEDQ:
         BlockedQ.insert(sProcessID);
-        moveBlockedQ(iPID);
+        moveBlockedQ(pid);
         break;
       case ProcessScheduler.ZOMBIEQ:
         ZombieQ.insert(sProcessID);
-        moveZombieQ(iPID);
+        moveZombieQ(pid);
         break;
     }
     refreshQueue(iQType);
   }
 
-  synchronized void removeQueue(int iQType, int iPID)
+  synchronized void removeQueue(int iQType, int pid)
   {
     switch (iQType)
     {
       case ProcessScheduler.READYQ:
-        ReadyQ = removeProcID(iPID, ReadyQ);
+        ReadyQ = removeProcID(pid, ReadyQ);
         break;
       case ProcessScheduler.BLOCKEDQ:
-        BlockedQ = removeProcID(iPID, BlockedQ);
+        BlockedQ = removeProcID(pid, BlockedQ);
         break;
       case ProcessScheduler.ZOMBIEQ:
-        ZombieQ = removeProcID(iPID, ZombieQ);
+        ZombieQ = removeProcID(pid, ZombieQ);
         break;
     }
     refreshQueue(iQType);
   }
 
-  synchronized LIFOQueue removeProcID (int iPID, LIFOQueue tmpQueue)
+  synchronized LIFOQueue removeProcID (int pid, LIFOQueue tmpQueue)
   {
     String tmpID;
-    String sProcessID = "P" + iPID;
+    String sProcessID = "P" + pid;
     tmpQueue.goToHead();
     while (!tmpQueue.atTail())
     {
@@ -684,10 +704,12 @@ public class ProcessSchedulerFrame extends RCOSFrame
     return tmpQueue;
   }
 
-// If you click on an object in the animation area then do
-// something based on the object selected.  For example, display
-// the CPU frame if you click on the CPU object.
 
+  /**
+   * If you click on an object in the animation area then do something based
+   * on the object selected.  For example, display the CPU frame if you click
+   * on the CPU object.
+   */
   class MTGOSelection extends MouseAdapter
   {
     public void mousePressed(MouseEvent e)
@@ -711,8 +733,9 @@ public class ProcessSchedulerFrame extends RCOSFrame
     }
   }
 
-// Change the refresh rate based on the item selected.
-
+  /**
+   * Change the refresh rate based on the item selected.
+   */
   class SpeedSelection implements ItemListener
   {
     public void itemStateChanged(ItemEvent e)
@@ -741,8 +764,32 @@ public class ProcessSchedulerFrame extends RCOSFrame
     }
   }
 
-// Change the quatum based on the option selected.
+  /**
+   * Change the type of process queueing.
+   */
+  class SchedulerSelection implements ItemListener
+  {
+    public void itemStateChanged(ItemEvent e)
+    {
+      String whichObject = (String) e.getItem();
+      if (whichObject.compareTo("FIFO") == 0)
+      {
+        myProcessScheduler.sendSwitchFIFO();
+      }
+      else if (whichObject.compareTo("LIFO") == 0)
+      {
+        myProcessScheduler.sendSwitchLIFO();
+      }
+      else if (whichObject.compareTo("Priority") == 0)
+      {
+        myProcessScheduler.sendSwitchPriority();
+      }
+    }
+  }
 
+  /**
+   * Change the quatum based on the option selected.
+   */
   class QuantumSelection implements ItemListener
   {
     public void itemStateChanged(ItemEvent e)

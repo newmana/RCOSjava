@@ -16,6 +16,9 @@ import net.sourceforge.rcosjava.messaging.messages.animator.ShowCPU;
 import net.sourceforge.rcosjava.messaging.messages.MessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.os.OSMessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.universal.Quantum;
+import net.sourceforge.rcosjava.messaging.messages.universal.SwitchToFIFO;
+import net.sourceforge.rcosjava.messaging.messages.universal.SwitchToLIFO;
+import net.sourceforge.rcosjava.messaging.messages.universal.SwitchToPriority;
 import net.sourceforge.rcosjava.software.process.RCOSProcess;
 import net.sourceforge.rcosjava.software.process.ProcessScheduler;
 
@@ -132,6 +135,33 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   {
     //Create and send Quantum message
     Quantum msg = new Quantum(this, quantumValue.intValue());
+    sendMessage(msg);
+  }
+
+  /**
+   * Called by the frame to change the priority queue to FIFO.
+   */
+  public void sendSwitchFIFO()
+  {
+    SwitchToFIFO msg = new SwitchToFIFO(this);
+    sendMessage(msg);
+  }
+
+  /**
+   * Called by the frame to change the priority queue to LIFO.
+   */
+  public void sendSwitchLIFO()
+  {
+    SwitchToLIFO msg = new SwitchToLIFO(this);
+    sendMessage(msg);
+  }
+
+  /**
+   * Called by the frame to change the priority queue to Priority.
+   */
+  public void sendSwitchPriority()
+  {
+    SwitchToPriority msg = new SwitchToPriority(this);
     sendMessage(msg);
   }
 
