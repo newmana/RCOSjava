@@ -15,7 +15,6 @@ import java.util.*;
 
 import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.software.animator.RCOSPanel;
-import org.rcosjava.software.animator.support.RCOSBox;
 import org.rcosjava.software.animator.support.RCOSRectangle;
 import org.rcosjava.software.ipc.SharedMemory;
 import org.rcosjava.software.memory.MemoryManager;
@@ -98,8 +97,6 @@ public class MemoryManagerPanel extends RCOSPanel
     constraints.weightx = 1;
     constraints.insets = new Insets(1, 1, 0, 0);
     constraints.anchor = GridBagConstraints.CENTER;
-    constraints.gridheight = 85;
-    constraints.gridwidth = 48;
 
     int memRows, memCols;
 
