@@ -4,22 +4,30 @@ import net.sourceforge.rcosjava.hardware.cpu.Context;
 import net.sourceforge.rcosjava.hardware.memory.Memory;
 import net.sourceforge.rcosjava.messaging.messages.universal.NewProcess;
 import java.io.Serializable;
+import java.util.Comparator;
 
 /**
  * Defines the default process used to represent a user process in the system.
  * A process has a state (or status), an id, a priority, file name, memory,
  * terminal id, and a CPU context.
  * <P>
- * HISTORY: 01/07/97  Modified to use Memory. AN<BR>
- *          02/07/97  Uses MMU to get code and stack. AN<BR>
- *          10/11/97  Added getters and setters and constants. AN<BR>
+ * <DT><B>History:</B>
+ * <DD>
+ * 01/07/97 Modified to use Memory. AN
+ * </DD><DD>
+ * 02/07/97 Uses MMU to get code and stack. AN
+ * </DD><DD>
+ * 10/11/97 Added getters and setters and constants. AN
+ * </DD></DD>
+ * 8/5/2001 Implemented comparable interface. AN
+ * </DD></DT>
  * <P>
  * @author Andrew Newman.
  * @author David Jones.
  * @version 1.00 $Date$
  * @created 24th March 1996
  */
-public class RCOSProcess implements Serializable
+public class RCOSProcess implements Serializable, Comparable
 {
   /**
    * The numeric value of the lowest priority that a process can have.
@@ -271,5 +279,44 @@ public class RCOSProcess implements Serializable
   public Context getContext()
   {
     return currentContext;
+  }
+
+  public int compareTo(Object object)
+  {
+    if ((object != null) && (object.getClass().equals(this.getClass())))
+    {
+      RCOSProcess tmpProcess = (RCOSProcess) object;
+
+      if (getPriority() < tmpProcess.getPriority())
+        return -1;
+      else if (getPriority() == tmpProcess.getPriority())
+        return 0;
+      else if (getPriority() > tmpProcess.getPriority())
+        return 1;
+    }
+    throw new ClassCastException();
+  }
+
+  /**
+   * @return true if the process id, priority, file name, file size, status,
+   * number of stack pages and cpu ticks are the same.
+   */
+  public boolean equals(Object object)
+  {
+    if (object != null && (object.getClass().equals(this.getClass())))
+    {
+      RCOSProcess tmpProcess = (RCOSProcess) object;
+      if ((getPID() == tmpProcess.getPID()) &&
+          (getPriority() == tmpProcess.getPriority()) &&
+          (getFileName() == tmpProcess.getFileName()) &&
+          (getFileSize() == tmpProcess.getFileSize()) &&
+          (getStatus() == tmpProcess.getStatus()) &&
+          (getStackPages() == tmpProcess.getStackPages()) &&
+          (getCPUTicks() == tmpProcess.getCPUTicks()))
+      {
+        return true;
+      }
+    }
+    return false;
   }
 }
