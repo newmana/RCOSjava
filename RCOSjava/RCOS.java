@@ -36,6 +36,7 @@ import Software.Terminal.TerminalManager;
 import MessageSystem.PostOffices.Animator.AnimatorOffice;
 import MessageSystem.PostOffices.OS.OSOffice;
 import MessageSystem.PostOffices.Universal.UniversalMessageRecorder;
+import MessageSystem.PostOffices.Universal.UniversalMessagePlayer;
 
 /**
  * Main startup file for RCOS.java Version 1.00
@@ -67,6 +68,7 @@ public class RCOS extends java.applet.Applet implements Runnable
 
   // Recorder object.
   private UniversalMessageRecorder recorder;
+  private UniversalMessagePlayer player;
 
   //OS Objects.
   private TerminalManager theTerminalManager;
@@ -278,6 +280,9 @@ public class RCOS extends java.applet.Applet implements Runnable
     //Start the recording subsystem
     recorder = new UniversalMessageRecorder(this.defaultDomain, this.port,
       "Recorder", this.osPostOffice, this.animatorPostOffice);
+
+    player = new UniversalMessagePlayer(this.defaultDomain, this.port,
+      "Player", this.osPostOffice, this.animatorPostOffice);
   }
 
   /**
@@ -317,7 +322,7 @@ public class RCOS extends java.applet.Applet implements Runnable
       imgProcessMan);
 
     mmAnimator = new MultimediaAnimator(animatorPostOffice, smallX, smallY,
-      imgProcessMan, recorder);
+      imgProcessMan, recorder, player);
 
     aboutAnimator = new AboutAnimator(animatorPostOffice, largeX, largeY, imgAbout);
 //    overviewAnimator = new Overview("OverviewAnimator", animatorPostOffice, defX,

@@ -1,12 +1,3 @@
-// *************************************************************************/
-// FILE    : Memory.java
-// PURPOSE :
-// AUTHOR  : Bruce Jamieson
-// MODIFIED: Andrew Newman
-// HISTORY : ??/02/96 Completed.
-//           10/08/99 Added segment status as a separate property.
-/***************************************************************************/
-
 package Hardware.Memory;
 
 import java.io.Serializable;

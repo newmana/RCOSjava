@@ -13,6 +13,7 @@ import MessageSystem.Messages.Animator.AnimatorMessageAdapter;
 import MessageSystem.Messages.Universal.UniversalMessageAdapter;
 import MessageSystem.PostOffices.Animator.AnimatorOffice;
 import MessageSystem.PostOffices.Universal.UniversalMessageRecorder;
+import MessageSystem.PostOffices.Universal.UniversalMessagePlayer;
 
 /**
  * User interface which allows the recording and playback of messages that
@@ -30,17 +31,21 @@ public class MultimediaAnimator extends RCOSAnimator
   private MultimediaFrame mmFrame;
   private static final String MESSENGING_ID = "MultimediaAnimator";
   private UniversalMessageRecorder recorder;
-  private boolean recording;
+  private UniversalMessagePlayer player;
+  private boolean recording, playing;
 
   public MultimediaAnimator (AnimatorOffice aPostOffice,
-    int x, int y, Image[] pmImages, UniversalMessageRecorder newRecorder)
+    int x, int y, Image[] pmImages, UniversalMessageRecorder newRecorder,
+    UniversalMessagePlayer newPlayer)
   {
     super(MESSENGING_ID, aPostOffice);
     mmFrame = new MultimediaFrame(x, y, pmImages, this);
     mmFrame.pack();
     mmFrame.setSize(x,y);
     recorder = newRecorder;
+    player = newPlayer;
     recording = false;
+    playing = false;
   }
 
   public void setupLayout(Component c)
@@ -67,7 +72,7 @@ public class MultimediaAnimator extends RCOSAnimator
   {
     if (!recording)
     {
-      this.recorder.recordOn("test.xml");
+      this.recorder.recordOn("test");
       recording = true;
     }
     else
@@ -75,6 +80,13 @@ public class MultimediaAnimator extends RCOSAnimator
       this.recorder.recordOff();
       recording = false;
     }
+  }
+
+  //Basic step for now
+  public void playStep()
+  {
+    System.out.println("Play step");
+    this.player.sendNextMessage("test");
   }
 
   public void processMessage(AnimatorMessageAdapter aMsg)

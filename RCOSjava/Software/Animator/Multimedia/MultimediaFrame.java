@@ -95,6 +95,7 @@ public class MultimediaFrame extends RCOSFrame
       "Play", defaultFont, buttonColour, true);
     gridBag.setConstraints(playButton,constraints);
     pMain.add(playButton);
+    playButton.addMouseListener(new PlayStep());
 
     constraints.gridwidth=1;
     constraints.anchor = GridBagConstraints.CENTER;
@@ -107,7 +108,6 @@ public class MultimediaFrame extends RCOSFrame
     constraints.anchor = GridBagConstraints.CENTER;
     recordButton = new GraphicButton (myImages[0], myImages[1],
       "Record", defaultFont, buttonColour, true, true, false);
-
     gridBag.setConstraints(recordButton,constraints);
     pMain.add(recordButton);
     recordButton.addMouseListener(new RecordToggle());
@@ -135,6 +135,14 @@ public class MultimediaFrame extends RCOSFrame
     {
       myMultimediaAnimator.recordToggle();
       recordButton.toggleGrey();
+    }
+  }
+
+  class PlayStep extends MouseAdapter
+  {
+    public void mouseClicked(MouseEvent e)
+    {
+      myMultimediaAnimator.playStep();
     }
   }
 /*
