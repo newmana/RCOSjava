@@ -8,19 +8,17 @@
 package net.sourceforge.rcosjava.messaging.messages.os;
 
 import net.sourceforge.rcosjava.messaging.* ;
-import java.lang.String;
-import java.util.Hashtable;
 
 public class ShrmInit
 {
-  public String ShrmID;
+  public String shrmID;
   public int PID;
-  public int Size;
+  public int size;
 
-  public ShrmInit(String aID, int aPID, int aSize)
+  public ShrmInit(String newID, int newPID, int newSize)
   {
-    ShrmID = aID;
-    PID = aPID;
-    Size = aSize;
+    shrmID = newID;
+    PID = newPID;
+    size = newSize;
   }
 }

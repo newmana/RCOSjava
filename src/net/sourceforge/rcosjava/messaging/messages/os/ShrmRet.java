@@ -10,33 +10,27 @@
 package net.sourceforge.rcosjava.messaging.messages.os;
 
 import net.sourceforge.rcosjava.messaging.* ;
-import java.lang.String;
-import java.util.Hashtable;
 
 public class ShrmRet
 {
-  public int ShrmID;
+  public int shrmID;
   public int PID;
-  public int Offset;
-  public short Byte;
-  public int Size;
+  public short value;
+  public int offset;
+  public int size;
 
-
-  public ShrmRet(int aID, int aPID, short aByte, int aOffset)
+  public ShrmRet(int newID, int newPID, short newValue, int newOffset)
   {
-    ShrmID = aID;
-    PID = aPID;
-    Byte = aByte;
-    Offset = aOffset;
+    shrmID = newID;
+    PID = newPID;
+    value = newValue;
+    offset = newOffset;
   }
 
-  public ShrmRet(int aID, int aPID, int aSize)
+  public ShrmRet(int newID, int newPID, int newSize)
   {
-    ShrmID = aID;
-    PID = aPID;
-    Size = aSize;
+    shrmID = newID;
+    PID = newPID;
+    size = newSize;
   }
-
-
-
 }
