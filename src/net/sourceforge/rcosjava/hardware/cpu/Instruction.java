@@ -631,10 +631,8 @@ public class Instruction implements Cloneable, Serializable
   private byte[] convertShortToBytes(short existingValue)
   {
     byte newBytes[] = new byte[2];
-    for(int index = 0; index < 2; index++)
-    {
-      newBytes[index] = (byte) (existingValue >>> (1 - index) * 8);
-    }
+    newBytes[0] = (byte) (existingValue >>> 8 & 0xff);
+    newBytes[1] = (byte) (existingValue & 0xff);
     return newBytes;
   }
 
