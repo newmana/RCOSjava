@@ -2,7 +2,7 @@ package org.rcosjava.messaging.messages.universal;
 
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.hardware.memory.Memory;
-import org.rcosjava.software.animator.ipc.IPCManagerAnimator;
+import org.rcosjava.software.animator.memory.MemoryManagerAnimator;
 import org.rcosjava.software.ipc.IPC;
 import org.rcosjava.software.memory.MemoryReturn;
 import org.rcosjava.software.memory.MemoryManager;
@@ -38,7 +38,7 @@ public class AllocatedSharedMemoryPages extends UniversalMessageAdapter
     memory = newMemory;
   }
 
-  public void doMessage(IPCManagerAnimator theElement)
+  public void doMessage(MemoryManagerAnimator theElement)
   {
     theElement.allocatedPages(memoryReturn);
   }

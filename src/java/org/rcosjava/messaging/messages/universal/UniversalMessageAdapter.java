@@ -1,4 +1,5 @@
 package org.rcosjava.messaging.messages.universal;
+
 import java.io.Serializable;
 import org.rcosjava.RCOS;
 import org.rcosjava.messaging.messages.MessageAdapter;
@@ -13,6 +14,7 @@ import org.rcosjava.software.animator.cpu.CPUAnimator;
 import org.rcosjava.software.animator.disk.DiskSchedulerAnimator;
 import org.rcosjava.software.animator.filesystem.FileSystemAnimator;
 import org.rcosjava.software.animator.ipc.IPCManagerAnimator;
+import org.rcosjava.software.animator.memory.MemoryManagerAnimator;
 import org.rcosjava.software.animator.multimedia.MultimediaAnimator;
 import org.rcosjava.software.animator.process.ProcessManagerAnimator;
 import org.rcosjava.software.animator.process.ProcessSchedulerAnimator;
@@ -30,13 +32,10 @@ import org.rcosjava.software.terminal.TerminalManager;
 
 /**
  * Adapter for OSMessage and AnimatorMessage for messages bound to both OS and
- * Animator. <P>
- *
+ * Animator.
+ * <P>
  * HISTORY: 03/07/98 Used double dispatch<BR>
  * <P>
- *
- *
- *
  * @author Andrew Newman
  * @created 24th March 1996
  * @version 1.00 $Date$
@@ -233,6 +232,15 @@ public class UniversalMessageAdapter extends MessageAdapter
    * @param theElement Description of Parameter
    */
   public void doMessage(IPCManagerAnimator theElement)
+  {
+  }
+
+  /**
+   * Description of the Method
+   *
+   * @param theElement Description of Parameter
+   */
+  public void doMessage(MemoryManagerAnimator theElement)
   {
   }
 

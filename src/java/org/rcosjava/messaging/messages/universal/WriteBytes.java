@@ -1,6 +1,6 @@
 package org.rcosjava.messaging.messages.universal;
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
-import org.rcosjava.software.animator.ipc.IPCManagerAnimator;
+import org.rcosjava.software.animator.memory.MemoryManagerAnimator;
 import org.rcosjava.software.memory.MemoryManager;
 import org.rcosjava.software.memory.MemoryRequest;
 
@@ -49,7 +49,7 @@ public class WriteBytes extends UniversalMessageAdapter
    *
    * @param theElement the object being used to do the method.
    */
-  public void doMessage(IPCManagerAnimator theElement)
+  public void doMessage(MemoryManagerAnimator theElement)
   {
     theElement.writingMemory(request);
   }
