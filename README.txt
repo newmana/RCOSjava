@@ -22,7 +22,7 @@ build.xml assumes version 1.3 of Ant.
 
 Just go to the root directory of the source code, and execute "ant".
 
-After compilation the directories "deploy" and "javadoc" will have 
+After compilation the directories "dist" and "javadoc" will have 
 been generated.
 
 You run the server side application using either the "runme.sh" for Unix or
