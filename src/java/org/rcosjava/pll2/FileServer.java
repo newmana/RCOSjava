@@ -121,7 +121,7 @@ public class FileServer
   /**
    * Handles a single connection from a client.
    */
-  private void serviceRequests()
+  private synchronized void serviceRequests()
   {
     // Start the server.
     System.out.println("Starting up server on port " + this.serverPortNumber + "..");
@@ -170,14 +170,14 @@ public class FileServer
    * @return Description of the Returned Value
    * @exception IOException Description of Exception
    */
-  private boolean handleMessage()
+  private synchronized boolean handleMessage()
     throws IOException
   {
     fileMessage.readMessage();
 
     String path = fileMessage.getLastMessageData();
     //Only used for file data
-    String outputData = new String();
+    String outputData = "";
 
     if (fileMessage.getLastMessageType().equals(fileMessage.Q_WRITE_FILE_DATA))
     {
@@ -248,7 +248,7 @@ public class FileServer
    *
    * @param directoryPath Description of Parameter
    */
-  private void handleGetDirectoryListRequest(String directoryPath)
+  private synchronized void handleGetDirectoryListRequest(String directoryPath)
   {
     // Setup variables.
     String[] theDirectoryList;
@@ -286,7 +286,7 @@ public class FileServer
    *
    * @param filename Description of Parameter
    */
-  private void handleGetFileRequest(String filename)
+  private synchronized void handleGetFileRequest(String filename)
   {
     // Setup variables.
     FileInputStream inputFile;
@@ -363,7 +363,7 @@ public class FileServer
    *
    * @param filename Description of Parameter
    */
-  private void handleStatFileRequest(String filename)
+  private synchronized void handleStatFileRequest(String filename)
   {
     // Setup variables.
     FileInputStream inputFile;
