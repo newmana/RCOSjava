@@ -179,7 +179,7 @@ public class StatementCompiler extends DepthFirstAdapter
   {
     String stringValue = node.getStringLitteral().getText();
     //String name = variableCompiler.allocateVariable(1, stringValue.length());
-    handleLiteralLoading(stringValue);
+    handleLiteralLoad(stringValue);
 
     writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
       (byte) 0, SystemCall.STRING_OUT.getValue()));
@@ -191,6 +191,8 @@ public class StatementCompiler extends DepthFirstAdapter
   public void caseAPrintf2RcosStatement(APrintf2RcosStatement node)
   {
     PPrintfControlStrings control = node.getControl();
+    PValue value = node.getValue();
+    printOut(control, value);
   }
 
   /**
@@ -217,7 +219,7 @@ public class StatementCompiler extends DepthFirstAdapter
     String varValue = node.getSimpleExpression().toString().trim();
     if (node.getSimpleExpression() instanceof AConstantSimpleExpression)
     {
-      handleLiteralLoading(varValue);
+      handleLiteralLoad(varValue);
     }
     else if (node.getSimpleExpression() instanceof AVarnameSimpleExpression)
     {
@@ -231,9 +233,6 @@ public class StatementCompiler extends DepthFirstAdapter
    */
   public void caseAIdentifierBinaryExpression(AIdentifierBinaryExpression node)
   {
-    System.out.println("Node Value: " + node.getValue());
-    System.out.println("Identifier Value: " + node.getIdentifier());
-
     handleIdentifierLoad(node.getValue());
     handleIdentifierLoad(node.getIdentifier().toString().trim());
     node.getBinop().apply(this);
@@ -244,8 +243,16 @@ public class StatementCompiler extends DepthFirstAdapter
    */
   public void caseAConstantBinaryExpression(AConstantBinaryExpression node)
   {
-    handleLiteralLoading(node.getConstant().toString().trim());
-    handleIdentifierLoad(node.getValue().toString().trim());
+    handleLiteralLoad(node.getConstant().toString().trim());
+
+    if (node.getValue() instanceof AIdentifierValue)
+    {
+      handleIdentifierLoad(node.getValue().toString().trim());
+    }
+    else if (node.getValue() instanceof AConstantValue)
+    {
+      handleLiteralLoad(node.getValue().toString().trim());
+    }
     node.getBinop().apply(this);
   }
 
@@ -272,21 +279,32 @@ public class StatementCompiler extends DepthFirstAdapter
     try
     {
       String varName = node.getVarname().toString().trim();
-      Variable newVar = table.getVariable(varName, Compiler.getLevel());
+      Symbol newVar = table.getSymbol(varName, Compiler.getLevel());
 
       PRhs rhs = node.getRhs();
       rhs.apply(this);
 
+      OpCode storeOpCode = null;
+      if (newVar instanceof Variable)
+      {
+        storeOpCode = OpCode.STORE;
+      }
+      else if (newVar instanceof Array)
+      {
+        storeOpCode = OpCode.STORE_INDEXED;
+      }
+
       // Store variable at the variables location
       if (Compiler.getLevel() == newVar.getLevel())
       {
-        writePCode(new Instruction(OpCode.STORE.getValue(), (byte) 0,
-          newVar.getOffset()));
+          writePCode(new Instruction(storeOpCode.getValue(), (byte) 0,
+            newVar.getOffset()));
       }
       else
       {
-        writePCode(new Instruction(OpCode.STORE.getValue(),
-          (byte) newVar.getLevel(), newVar.getOffset()));
+        writePCode(new Instruction(storeOpCode.getValue(),
+          (byte) newVar.getLevel(),
+          newVar.getOffset()));
       }
     }
     catch (Exception e)
@@ -322,20 +340,44 @@ public class StatementCompiler extends DepthFirstAdapter
   {
     Compiler.incLevel();
 
-    // Get the number of declarations and set-up stack to do so.
-    LinkedList declarations = node.getVariableDeclaration();
+    inAFunctionBody(node);
+    if(node.getLBrace() != null)
+    {
+      node.getLBrace().apply(this);
+    }
+
+    Object temp[] = node.getVariableDeclaration().toArray();
+    for(int i = 0; i < temp.length; i++)
+    {
+      ((PVariableDeclaration) temp[i]).apply(this);
+    }
 
     // Set the number of declared variables
     writePCode(new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
-      ((short) (declarations.size() + 3))));
+      ((short) (table.getVariableSize() + 3))));
 
-    super.caseAFunctionBody(node);
+    Object temp2[] = node.getStatement().toArray();
+    for(int i = 0; i < temp2.length; i++)
+    {
+      ((PStatement) temp2[i]).apply(this);
+    }
+
+    if(node.getStopStatement() != null)
+    {
+      node.getStopStatement().apply(this);
+    }
+    if(node.getRBrace() != null)
+    {
+      node.getRBrace().apply(this);
+    }
+    outAFunctionBody(node);
 
     //System.out.println("Out of function!");
     //Modify the jump point code
     writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
       Operator.RETURN.getValue()));
     //localVarsTable = new HashMap();
+
     Compiler.decLevel();
   }
 
@@ -361,6 +403,7 @@ public class StatementCompiler extends DepthFirstAdapter
         if (isArray(name))
         {
           short size = getArraySize(name);
+          name = name.substring(0, name.indexOf("[")).trim();
           Array newArray = new Array(name, Compiler.getLevel(),
               Compiler.getInstructionIndex(), size);
           table.addSymbol(newArray);
@@ -399,7 +442,9 @@ public class StatementCompiler extends DepthFirstAdapter
    */
   private boolean isArray(String declarator)
   {
-    return ((declarator.indexOf("[") > 0) && (declarator.indexOf("]") > 0));
+    boolean isArray = (declarator.indexOf("[") > 0) &&
+      (declarator.indexOf("]") > 0);
+    return isArray;
   }
 
   /**
@@ -465,16 +510,26 @@ public class StatementCompiler extends DepthFirstAdapter
   {
     try
     {
-      Variable newVar = table.getVariable(identifierName, Compiler.getLevel());
+      Symbol newVar = table.getSymbol(identifierName, Compiler.getLevel());
+
+      OpCode loadOpCode = null;
+      if (newVar instanceof Variable)
+      {
+        loadOpCode = OpCode.LOAD;
+      }
+      else if (newVar instanceof Array)
+      {
+        loadOpCode = OpCode.LOAD_INDEXED;
+      }
 
       if (Compiler.getLevel() == newVar.getLevel())
       {
-        writePCode(new Instruction(OpCode.LOAD.getValue(), (byte) 0,
+        writePCode(new Instruction(loadOpCode.getValue(), (byte) 0,
           newVar.getOffset()));
       }
       else
       {
-        writePCode(new Instruction(OpCode.LOAD.getValue(),
+        writePCode(new Instruction(loadOpCode.getValue(),
           (byte) newVar.getLevel(), newVar.getOffset()));
       }
     }
@@ -486,15 +541,21 @@ public class StatementCompiler extends DepthFirstAdapter
 
   private void handleIdentifierLoad(AConstantValue constant)
   {
-    handleLiteralLoading(constant.toString());
+    handleLiteralLoad(constant.toString());
   }
 
-  private void handleLiteralLoading(String varValue)
+  private void handleLiteralLoad(String varValue)
   {
     short length = 0;
 
+    // Do char storage
+    if (varValue.indexOf("'") >= 0)
+    {
+      writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
+        (short) varValue.charAt(1)));
+    }
     // Do string storage
-    if ((varValue.indexOf("'") >= 0) || (varValue.indexOf("\"") >= 0))
+    else if ((varValue.indexOf("\"") >= 0))
     {
       int varStrLength = varValue.length()-1;
       //emit each element in the string
@@ -517,11 +578,10 @@ public class StatementCompiler extends DepthFirstAdapter
             (short) varValue.charAt(count)));
           count++;
         }
-        length++;
       }
       //emit store a required pos
       writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-        (short) (length+1)));
+        (short) (count-1)));
     }
     // Do int storage
     else
@@ -529,6 +589,39 @@ public class StatementCompiler extends DepthFirstAdapter
       short varIntValue = Short.parseShort(varValue.trim());
       writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
         varIntValue));
+    }
+  }
+
+  private void printOut(PPrintfControlStrings control, PValue value)
+  {
+    System.out.println("Value: " + value);
+    System.out.println("Value: " + value.getClass());
+    System.out.println("Control: " + control);
+    System.out.println("Control: " + control.getClass());
+
+    if (value instanceof AConstantValue)
+    {
+      handleLiteralLoad(value.toString().trim());
+    }
+    else if (value instanceof AIdentifierValue)
+    {
+      handleIdentifierLoad(value.toString().trim());
+    }
+
+    if (control instanceof AIntControlPrintfControlStrings)
+    {
+      writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
+        (byte) 0, SystemCall.NUMBER_OUT.getValue()));
+    }
+    else if (control instanceof AChrControlPrintfControlStrings)
+    {
+      writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
+        (byte) 0, SystemCall.CHARACTER_OUT.getValue()));
+    }
+    else if (control instanceof AStrControlPrintfControlStrings)
+    {
+      writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
+        (byte) 0, SystemCall.STRING_OUT.getValue()));
     }
   }
 }
