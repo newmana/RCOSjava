@@ -5,7 +5,14 @@ import java.io.*;
 import java.net.*;
 
 /**
- * Provides a simple compiler/decompiler of Pcode.
+ * Provides a simple compiler/decompiler of pcode.
+ * <P>
+ * <DT><B>Usage Example:</B><DD>
+ * <CODE>
+ *      pasm -d tmp.pll > result.pcode
+ *      pasm -c result.pcode > tmp.pll
+ * </CODE>
+ * </DD></DT>
  * <P>
  * @author Andrew Newman.
  * @author Brett Carter.
@@ -61,7 +68,6 @@ public class Pasm
       int eof;
       eof = inputStream.read(pcodeInstruction);
 
-      System.out.println("Begin dissassembly:");
       while (eof != -1)
       {
         Instruction theInstruction = new Instruction((
@@ -78,7 +84,33 @@ public class Pasm
     }
   }
 
+  /**
+   * Takes a file consisting of the pcode mnemonics.  Displays the result to
+   * stdout.
+   *
+   * @param theFileName the filename to compile into pcode.
+   */
   public static void compile(String theFileName)
   {
+    try
+    {
+      BufferedReader inputStream = new BufferedReader(
+        new InputStreamReader(new FileInputStream(theFileName)));
+
+      byte pcodeInstruction[] = new byte[8];
+      String instructionLine;
+      instructionLine = inputStream.readLine();
+
+      while (instructionLine != null)
+      {
+        Instruction theInstruction = new Instruction(instructionLine);
+        System.out.write(theInstruction.toByte(),0,8);
+        instructionLine = inputStream.readLine();
+      }
+    }
+    catch (java.io.IOException ioe)
+    {
+      ioe.printStackTrace();
+    }
   }
 }
