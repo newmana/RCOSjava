@@ -198,6 +198,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     Choice quantumOption = new Choice();
     Choice schedulerOption = new Choice();
 
+    // Setup the panel with a border around it.
     optionsPanel.setBackground(defaultBgColour);
     optionsPanel.setForeground(defaultFgColour);
     TitledBorder optionsTitle = BorderFactory.createTitledBorder("Options");
@@ -205,21 +206,18 @@ public class ProcessSchedulerPanel extends RCOSPanel
     optionsPanel.setBorder(BorderFactory.createCompoundBorder(
         optionsTitle, BorderFactory.createEmptyBorder(3,3,3,3)));
 
-    // Set-up options for choosing the speed of refresh.
-
     // Create a temporary gridbaglayout for the options portion
     // of the screen.
-
     GridBagConstraints constraints = new GridBagConstraints();
-    GridBagLayout gridBag = new GridBagLayout();
-
-    optionsPanel.setLayout(gridBag);
-
     constraints.gridwidth = 1;
     constraints.gridheight = 1;
     constraints.weighty = 1;
     constraints.weightx = 1;
 
+    GridBagLayout gridBag = new GridBagLayout();
+    optionsPanel.setLayout(gridBag);
+
+    // Set-up options for choosing the speed of refresh.
     speedOption.addItem("Fastest");
     speedOption.addItem("Fast");
     speedOption.addItem("Normal");
@@ -231,7 +229,6 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
     // Set-up the options for the choice of quantum ie.
     // time spent on the CPU.
-
     quantumOption.addItem("20");
     quantumOption.addItem("10");
     quantumOption.addItem("5");
@@ -243,7 +240,6 @@ public class ProcessSchedulerPanel extends RCOSPanel
     quantumOption.select("2");
 
     // Set-up the options for the choice of queue
-
     schedulerOption.addItem("FIFO");
     schedulerOption.addItem("LIFO");
     schedulerOption.addItem("Priority");
@@ -251,8 +247,8 @@ public class ProcessSchedulerPanel extends RCOSPanel
     schedulerOption.setBackground(defaultBgColour);
     schedulerOption.select("FIFO");
 
+    // Create speed label and add the drop down.
     JLabel tmpLabel = new JLabel();
-
     constraints.insets = new Insets(1, 3, 1, 1);
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
@@ -270,6 +266,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     optionsPanel.add(speedOption);
     speedOption.addItemListener(new SpeedSelection());
 
+    // Create quantum label and add the drop down.
     constraints.insets = new Insets(1, 3, 1, 1);
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
@@ -286,6 +283,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     optionsPanel.add(quantumOption);
     quantumOption.addItemListener(new QuantumSelection());
 
+    // Create type of queuing label and add the drop down.
     constraints.insets = new Insets(1, 3, 1, 1);
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
