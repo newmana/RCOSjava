@@ -34,13 +34,19 @@ public class SharedMemoryWriteMessage extends OSMessageAdapter
    */
   private short value;
 
+  /**
+   * The process id reading the segment.
+   */
+  private int PID;
+
   public SharedMemoryWriteMessage(OSMessageHandler theSource,
-    int newSharedMemoryId, int newOffset, short newValue)
+    int newSharedMemoryId, int newOffset, short newValue, int newPID)
   {
     super(theSource);
     sharedMemoryId = newSharedMemoryId;
     offset = newOffset;
     value = newValue;
+    PID = newPID;
   }
 
   /**
@@ -50,7 +56,7 @@ public class SharedMemoryWriteMessage extends OSMessageAdapter
    */
   public void doMessage(IPC theElement)
   {
-    theElement.sharedMemoryWrite(sharedMemoryId, offset, value);
+    theElement.sharedMemoryWrite(sharedMemoryId, offset, value, PID);
   }
 }
 

@@ -29,12 +29,18 @@ public class SharedMemoryReadMessage extends OSMessageAdapter
    */
   private int offset;
 
+  /**
+   * The process id reading the segment.
+   */
+  private int PID;
+
   public SharedMemoryReadMessage(OSMessageHandler theSource,
-    int newSharedMemoryId, int newOffset)
+    int newSharedMemoryId, int newOffset, int newPID)
   {
     super(theSource);
     sharedMemoryId = newSharedMemoryId;
     offset = newOffset;
+    PID = newPID;
   }
 
   /**
@@ -44,7 +50,7 @@ public class SharedMemoryReadMessage extends OSMessageAdapter
    */
   public void doMessage(IPC theElement)
   {
-    theElement.sharedMemoryRead(sharedMemoryId, offset);
+    theElement.sharedMemoryRead(sharedMemoryId, offset, PID);
   }
 }
 
