@@ -127,8 +127,14 @@ public class Compiler extends DepthFirstAdapter
   {
     System.out.println("If stmt: " + node.getCompoundStatement());
 
-    PConditionalExpression expr = node.getConditionalExpression();
-    System.out.println("expr: " + expr);
+    ARelConditionalExpression expr = (ARelConditionalExpression) node.getConditionalExpression();
+    System.out.println("LH: " + expr.getLeft());
+    System.out.println("RH: " + expr.getRight());
+  }
+
+  public void inAValueConditionalExpression(AValueConditionalExpression node)
+  {
+    System.out.println("Identifier: " + node);
   }
 
   public void caseAGteqRelop(AGteqRelop node)
@@ -145,20 +151,41 @@ public class Compiler extends DepthFirstAdapter
       Instruction.OPERATOR_GT));
   }
 
+  public void caseALteqRelop(ALteqRelop node)
+  {
+    System.out.println("LTE Node: " + node);
+    writePCode(new Instruction(Instruction.OPCODE_OPR, (byte) 0,
+      Instruction.OPERATOR_LE));
+  }
+
+  public void caseALtRelop(ALtRelop node)
+  {
+    System.out.println("LT Node: " + node);
+    writePCode(new Instruction(Instruction.OPCODE_OPR, (byte) 0,
+      Instruction.OPERATOR_LT));
+  }
+
+  public void caseAEqRelop(AEqRelop node)
+  {
+    System.out.println("EQ Node: " + node);
+    writePCode(new Instruction(Instruction.OPCODE_OPR, (byte) 0,
+      Instruction.OPERATOR_EQ));
+  }
+
   /**
    * Simple assignment statements
    */
-  public void inABasicStmtStatement(ABasicStmtStatement node)
+  public void inAModifyExpressionBasicStatement(AModifyExpressionBasicStatement node)
   {
-    String basicStatement = node.getBasicStatement().toString();
-    int equalLoc = basicStatement.indexOf("=");
-    String varName = basicStatement.substring(0,equalLoc);
-    String varValue = basicStatement.substring(equalLoc+1,
-      basicStatement.length()).trim();
+    //Need to find the way of getting the =, lt and rh sides.
+    ADirectModifyExpression expr = (ADirectModifyExpression) node.getModifyExpression();
+
+    String varName = expr.getVarname().toString().trim();
+    String varValue = expr.getRhs().toString().trim();
     System.out.println("Varname: " + varName + " at: " + getVariableLocation(varName));
 
     // Do string storage
-    if ((varValue.indexOf("'") > 0) || (varValue.indexOf("\"") > 0))
+    if ((varValue.indexOf("'") >= 0) || (varValue.indexOf("\"") >= 0))
     {
       int varStrLength = varValue.length()-2;
       //emit each element in the string
