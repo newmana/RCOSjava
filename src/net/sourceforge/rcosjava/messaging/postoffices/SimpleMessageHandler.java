@@ -58,9 +58,11 @@ public abstract class SimpleMessageHandler
     registeredPostOffice = newPostOffice;
 
     // Tell the PostOffice that I'm alive
-    AddHandler newMessage = new AddHandler(this, newId, newPostOffice);
-
-    newPostOffice.processMessage(newMessage);
+    if (newPostOffice != null)
+    {
+      AddHandler newMessage = new AddHandler(this, newId, newPostOffice);
+      newPostOffice.processMessage(newMessage);
+    }
   }
 
   /**
