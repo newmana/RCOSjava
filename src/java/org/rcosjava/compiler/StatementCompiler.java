@@ -499,8 +499,8 @@ public class StatementCompiler extends DepthFirstAdapter
    */
   public void caseAConstantBinaryExpression(AConstantBinaryExpression node)
   {
-    handlePValueLoad(node.getValue());
     handleLiteralLoad(node.getConstant());
+    handlePValueLoad(node.getValue());
     node.getBinop().apply(this);
   }
 
@@ -516,6 +516,18 @@ public class StatementCompiler extends DepthFirstAdapter
 //    System.out.println("Minus Node: " + node);
     writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
       Operator.SUBTRACT.getValue()));
+  }
+
+  public void caseADivBinop(ADivBinop node)
+  {
+    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
+      Operator.DIVIDE.getValue()));
+  }
+
+  public void caseAStarBinop(AStarBinop node)
+  {
+    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
+      Operator.MULTIPLY.getValue()));
   }
 
   /**
