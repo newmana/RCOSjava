@@ -1,0 +1,192 @@
+<HTML>
+<HEAD>
+  <TITLE>
+userip.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+userip.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Userip: Class Body all user input required by RCOS           *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Classes to provide the high level keyboard and mouse input.  *
+//                                                                        *
+//  HISTORY:                                                              *
+//   21-JAN-93	First (MSC/C++ 7.00) version				  *
+//   11-APR-93	Very Krude mouse implementation 			  *
+//   30-OCT-93  Massive simplification through the PAL abstraction module *
+//*************************************************************************
+
+#include "userip.hh"
+ 
+
+///////////////////
+// These *should* be private members of the Timer class, but it don't
+// work if they are (sigh) - seems scope related under MSC (Why?)
+// The header file for this module externalises them.
+//
+// NOTE: Because declaring a static class data member does "define" it,
+// actual allocation of storage must take place elsewhere.. this is where.
+//
+Kbd    KbdIn;
+Mouse  Mickey;
+
+
+//////////////////////////////////////////////////////////////////////////
+// Class constructor allocates two ring buffers, one for ASCII characters
+// and a smaller one for ALT and FUNCTION keys.
+//
+Kbd::Kbd ()
+{
+
+  palt = new Rng;
+  pasc = new Rng(32);
+}
+
+////////////////
+// Destructor of ring buffers
+//
+Kbd::~Kbd ()
+{
+
+  delete palt;
+  delete pasc;
+}
+
+//////////////////
+// Check status of passed buffer (Alt-Keys or Ascii)
+// RETURNS: TRUE  .. buffer has a character
+//	    FALSE .. nobody home at present (or illegal argument)
+//
+BOOL Kbd::KeyHit (UINT16 nSource)
+{
+  #ifdef UNIX
+    KeyFill();
+  #endif
+  return (nSource == _ASC) ? pasc->RngStat() :
+	 (nSource == _ALT) ? palt->RngStat() : FALSE;
+}
+
+////////////////////
+// Get a character from one of the two buffers.  Will not wait - assumes
+// caller has checked first to find that something is there..
+// RETURNS:  _ASC .. an ascii character (or NULL if nothing there)
+//	     _ALT .. raw key code for alt-key or func-key (or NULL...)
+//
+char Kbd::KeyGet (UINT16 nSource)
+{
+
+  return (nSource == _ASC) ? pasc->RngGet() :
+	 (nSource == _ALT) ? palt->RngGet() : '\0';
+}
+
+///////////////////////
+// Routine dumps any current contents of passed buffer
+//
+void Kbd::KeyFlush (UINT16 nSource)
+{
+
+  if (nSource == _ASC)
+    pasc->RngFlush();
+  else
+    if (nSource == _ALT)
+      palt->RngFlush();
+}
+
+#pragma check_stack (off)
+///////////////////////
+// Routine places the passed character into the specified buffer - can be
+// used to insert phantom data into the input stream.
+//
+void Kbd::KeyPut (UINT16 nSource, char ch)
+{
+
+  if (nSource == _ASC)
+    pasc->RngPut(ch);
+  else
+    if (nSource == _ALT)
+      palt->RngPut(ch);
+}
+
+///////////////////////////////
+// Ring buffer stuffer - extracts data from the BIOS buffer, separating
+// them into the two queues until there is nothing left in the BIOS buffer
+//
+void Kbd::KeyFill (void)
+{
+  unsigned val;
+
+  while (PalKeyReady()) {
+    val = PalGetKey();
+    if (val & 0xff)
+      pasc->RngPut((char)(val & 0xff));
+    else
+      palt->RngPut((char)((val >> 8) & 0xff));
+  }
+}
+#pragma check_stack (on)
+
+
+//////////////////////////////////////////////////////////////////////////
+// Constructor for Mouse class must determine if a driver is present..
+//
+Mouse::Mouse (void)
+{
+  if (bInstalled = PalMouseInit())
+    PalMousePointerOn();
+}
+
+////////////
+// Destructor resets mouse driver, if installed
+//
+Mouse::~Mouse (void)
+{
+  if (bInstalled)
+    PalMouseReset();
+}
+
+////////
+// Display the pointer
+//
+void Mouse::ShowPointer (void)
+{
+
+  if (bInstalled)
+    PalMousePointerOn();
+}
+
+////////
+// Restore area under mouse cursor
+//
+void Mouse::HidePointer (void)
+{
+
+  if (bInstalled)
+    PalMousePointerOff();
+}
+
+////////
+// Hide the pointer if it strays into this area (ShowPointer cancels)
+//
+void Mouse::AutoPointer (INT16 x1, INT16 y1, INT16 x2, INT16 y2)
+{
+  if (bInstalled)
+    PalMousePointerOff(x1, y1, x2, y2);
+}
+
+////////
+// Transfer data on the last event to the caller's variables
+// and reset the event trigger flag.
+//
+BOOL Mouse::GetEvent (point& pt)
+{
+  return PalMouseEvent(&pt.x, &pt.y);
+}
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

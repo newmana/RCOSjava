@@ -1,0 +1,211 @@
+<HTML>
+<HEAD>
+  <TITLE>
+dsk-disp.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+dsk-disp.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Disk Animation animator for the RCOS O/S simulator           *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Routines to graphically emulate disk spin, head positioning, *
+//           data transfer and queued request status for the disk system. *
+//  HISTORY:                                                              *
+//   23-AUG-94  First Simple implementation.                              *
+//*************************************************************************
+
+#include "dsk-disp.hh"
+
+extern UINT16 nWinFgColor[];
+extern UINT16 nWinBgColor[];
+
+
+///////////////////////////////////////////////////////////////////////////
+// Fix heads at track 00 and calculate platter centre location and radius..
+//
+DiskAnim::DiskAnim (UINT16 nId, UINT16 nTmax) :
+  nLid(nId), nTracks(nTmax)
+{
+  nDiskRad = nTracks + (INDEX_RAD * 5) + HUB_RAD;
+  PtSpinPos.x = (X_MARGIN+nDiskRad) + (nLid*X_MARGIN) + (nLid*nDiskRad*2);
+  PtSpinPos.y = SYS_Height + 5 + nDiskRad;
+  PtIndexPos.x = PtSpinPos.x;
+  PtIndexPos.y = PtSpinPos.y - (HUB_RAD + (2 * INDEX_RAD));
+  nHeadPosY = PtSpinPos.y + nDiskRad - INDEX_RAD - HEAD_Y;
+}
+
+//////////////////
+// Re-draw the complete disk unit - platter, heads and transfer queue.
+//
+void DiskAnim::Paint (void)
+{
+  INT16 n = (INT16)DSK_DISP;
+  Mickey.AutoPointer(PtSpinPos.x - nDiskRad, PtSpinPos.y - nDiskRad,
+                     PtSpinPos.x + nDiskRad, PtSpinPos.y + nDiskRad);
+  GfxCircle(PtSpinPos.x, PtSpinPos.y, nDiskRad, GFX_Fill, PLATTER_COLOR);
+  GfxCircle(PtSpinPos.x, PtSpinPos.y, nDiskRad, GFX_Frame, TQ_BDR);
+  GfxPattern(GFX_HalfTone);
+  GfxTextColorBg(nWinBgColor[n]);
+  GfxCircle(PtSpinPos.x, PtSpinPos.y, HUB_RAD, GFX_Fill, nWinFgColor[n]);
+  GfxCircle(PtSpinPos.x, PtSpinPos.y, HUB_RAD, GFX_Frame, TQ_BDR);
+  GfxPattern(GFX_Solid);
+  GfxCircle(PtIndexPos.x, PtIndexPos.y, INDEX_RAD, GFX_Fill,
+    (PtIndexPos.x - PtSpinPos.x) ? IDX_NORM_COLOR : IDX_SENSE_COLOR);
+  GfxCircle(PtIndexPos.x, PtIndexPos.y, INDEX_RAD, GFX_Frame, TQ_BDR);
+  Mickey.ShowPointer();
+  DiskSeek(0);
+  PaintTQ();
+}
+
+//////////////////
+// simulate head movement of <nDelta> tracks.  If <nDelta> is zero,
+// we are probably doing a display refresh, so don't bother to erase
+// the old position, just re-draw.
+//
+void DiskAnim::DiskSeek (INT16 nDelta)
+{
+  Mickey.AutoPointer(PtSpinPos.x + HEAD_X, PtSpinPos.y + HUB_RAD,
+                     PtSpinPos.y + HEAD_X, PtSpinPos.y + nDiskRad + TQ_GAP);
+  point p1(PtSpinPos.x - (HEAD_X / 2), nHeadPosY);
+  point p2(PtSpinPos.x + (HEAD_X / 2), nHeadPosY + HEAD_Y);
+  if (nDelta) {
+    GfxRect(p1.x, p1.y, p2.x, p2.y, GFX_Fill, PLATTER_COLOR);
+    nHeadPosY -= nDelta;
+    p1.y -= nDelta;
+    p2.y -= nDelta;
+  }
+  GfxRect(p1.x, p1.y, p2.x, p2.y, GFX_Fill, HEAD_COLOR);
+  GfxRect(p1.x, p1.y, p2.x, p2.y, GFX_Frame, TQ_BDR);
+  UINT16 x = PtSpinPos.x - (ARM_X / 2);
+  UINT16 y = PtSpinPos.y + nDiskRad + TQ_GAP;
+  for (int i = 0; i < ARM_X; i++, x++) {
+    GfxTextColor((i && (i < ARM_X-1)) ? HEAD_COLOR : TQ_BDR);
+    GfxMoveTo(x, p2.y);
+    GfxLineTo(x, y);
+  }
+  Mickey.ShowPointer();
+}
+
+///////////////////
+// The passed value <nTheta> is the current angle (in degrees) of
+// the index hole relative to the index sensor (at zero degrees).
+// erase the old index hole, calculate and store the new position,
+// then redraw. If it happens to be near the sensor LED, hilight it.
+//
+void DiskAnim::DiskSpin (UINT16 nTheta)
+{
+  INT16 nBound = HUB_RAD + (4 * INDEX_RAD);
+  INT16 nArc = nBound - (2 * INDEX_RAD);
+  Mickey.AutoPointer(PtSpinPos.x - nBound, PtSpinPos.y - nBound,
+                     PtSpinPos.x + nBound, PtSpinPos.y + nBound);
+  GfxCircle(PtIndexPos.x, PtIndexPos.y, INDEX_RAD, GFX_Fill, PLATTER_COLOR);
+  INT16 dx = PtSpinPos.x - (INT16)(cos(nTheta) * nArc);
+  INT16 dy = PtSpinPos.y + (INT16)(sin(nTheta) * nArc);
+  BOOL bSense = 
+    ((abs(dx-PtSpinPos.x) <= INDEX_RAD*2) && (dy < PtSpinPos.y)) ?
+    TRUE : FALSE;
+  GfxCircle(dx, dy, INDEX_RAD, GFX_Fill,
+    (bSense) ? IDX_SENSE_COLOR : IDX_NORM_COLOR);
+  GfxCircle(dx, dy, INDEX_RAD, GFX_Frame, TQ_BDR);
+  PtIndexPos.x = dx;
+  PtIndexPos.y = dy;
+  Mickey.ShowPointer();
+}
+
+////////////////////
+// draw the full transfer queue box..
+//
+void DiskAnim::PaintTQ (void)
+{ 
+  char  st[32];
+  INT16 i, x, y;
+  UINT16 k = (TQ_WIDTH / 2);
+  point p1(PtSpinPos);
+  p1.x -= k;
+  p1.y += (nDiskRad + TQ_GAP);
+  point p2(p1);
+  p2.x += TQ_WIDTH;
+  p2.y += TQ_HEIGHT;
+  static char *szHdr[TQ_COLS] = { "PID", "Opr", "Trk", "Sec", "Hd" };
+
+  Mickey.AutoPointer(p1.x, p1.y, p2.x, p2.y);
+  GfxSetClip(p1.x, p1.y, p2.x, p2.y);
+  GfxRect(p1.x, p1.y, p2.x, p2.y, GFX_Fill, TQ_BG_COLOR);
+  GfxRect(p1.x, p1.y, p2.x, p1.y+TQ_CELL_Y, GFX_Fill, TQ_HDR_COLOR);
+  GfxRect(p1.x, p1.y, p2.x, p2.y, GFX_Frame, TQ_BDR);
+  GfxMoveTo(CPROC_X2, CPROC_Y), GfxLineTo(CPROC_X2, CPROC_Y+CPROC_DY);
+  for (i = 0, x = p1.x+4; i < TQ_COLS; i++, x += TQ_CELL_X) {
+    GfxTextColor(SLOT_TXT);
+    GfxText(x, p1.y+((SLOT_DY-GfxTextHeight())/2), szHdr[i], GFX_Transparent);
+    GfxTextColor(TQ_BDR);
+    GfxMoveTo(x-4, p1.y), GfxLineTo(x-4, p2.y);
+  }
+  for (i = 0, y = p1.y; i < TQ_ROWS; i++, y += TQ_CELL_Y)
+    GfxMoveTo(p1.x, y), GfxLineTo(p2.x, y);
+  GfxClrClip();
+  sprintf(st, "Unit %c:", 'A'+nLid);
+  GfxTextColor(TQ_TXT_COLOR);
+  p2.x = PtSpinPos.x - (GfxTextExtent(st) / 2);
+  p2.y += (GfxTextHeight() / 2);
+  GfxText(p2.x, p2.y, st, GFX_Transparent);
+  Mickey.ShowPointer();
+}
+
+//////////////////
+// If the passed pointer is null
+//
+void DiskAnim::RefreshTQ (TransQ *pT, INT16 nStart)
+{
+  char  st[32];
+  point p1(PtSpinPos);
+  p1.x -= (TQ_WIDTH / 2);
+  p1.y += nDiskRad + TQ_GAP + TQ_CELL_Y;
+
+  Mickey.AutoPointer(p1.x, p1.y, p1.x+TQ_WIDTH, p1.y+TQ_HEIGHT);
+  GfxTextColor(TQ_TXT_COLOR);
+  for (UINT16 idx = nStart; idx < TQ_ROWS-1; idx++) {
+    GfxSetClip(p1.x+1, p1.y+1, p1.x+TQ_WIDTH-2, p1.y+TQ_CELL_Y-2);
+    point p2(p1);
+    p2.x++, p2.y++;
+    point p3(p1);
+    p3.x += TQ_CELL_X - 1;
+    p3.y += TQ_CELL_Y - 1;
+    pT->Peek(idx);
+    for (INT16 jdx = 0; jdx < TQ_COLS; jdx++) {
+      GfxRect(p2.x, p2.y, p3.x, p3.y, GFX_Fill, TQ_BG_COLOR);
+      if (idx < pT->GetLen()) {
+        GfxTextColor(TQ_TXT_COLOR);
+        switch (jdx) {
+          case 0 : 
+            if (MAX_PROC <= pT->GetPid())
+               strcpy(st, "Sys");
+            else
+               sprintf(st, "P%X",  pT->GetPid());
+            break;
+          case 2 : sprintf(st, "%02d", pT->GetTrk()); break;
+          case 3 : sprintf(st, "%02d", pT->GetSec()); break;
+          case 4 : sprintf(st, "%02d", pT->GetSid()); break;
+          case 1 :
+            sprintf(st, "  %c", (pT->IsRead() ? 'R' : 'W'));
+            GfxTextColor(pT->IsRead() ? READ_COLOR : WRITE_COLOR); 
+            break;
+        }
+        GfxText(p2.x+4, p1.y+((SLOT_DY-GfxTextHeight())/2), st, GFX_Transparent);
+      }
+      p2.x += TQ_CELL_X, p3.x += TQ_CELL_X;
+    }
+    GfxClrClip();
+    p1.y += TQ_CELL_Y;
+  }
+  Mickey.ShowPointer();
+}
+
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

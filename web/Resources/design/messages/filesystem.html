@@ -1,0 +1,190 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    FileSystem Messages
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999">
+
+<P ALIGN=LEFT>
+[ <A HREF="../index.html"> RCOS.java Home </A> ]<BR>
+<P>
+
+<H1>
+  FileSystem Messages
+</H1>
+
+  <BLOCKQUOTE>
+  <H2>
+    Related components
+  </H2>
+
+    <TABLE BORDER=2>
+      <TR>
+        <TH>
+          <H3>Component</H3>
+        </TH>
+        <TH>
+          <H3>Messages to</H3>
+        </TH>
+        <TH>
+          <H3>Messages from</H3>
+        </TH>
+      </TR>
+      <TR>
+        <TD ALIGN=LEFT VALIGN=TOP>
+          Kernel
+        </TD>
+        <TD ALIGN=LEFT VALIGN=TOP>
+          RETURN_VALUE
+        </TD>
+        <TD ALIGN=LEFT VALIGN=TOP>
+          F_ALLOC, F_EOF, F_DEL, F_CREAT, F_CLOSE, F_READ,
+          F_WRITE
+        </TD>
+      </TR>
+      <TR>
+        <TD ALIGN=LEFT VALIGN=TOP>
+          ProcessScheduler
+        </TD>
+        <TD ALIGN=LEFT VALIGN=TOP>
+          BlockProcess
+        </TD>
+        <TD ALIGN=LEFT VALIGN=TOP>
+        </TD>
+      </TR>
+      <TR>
+        <TD ALIGN=LEFT VALIGN=TOP>
+          DiskDrive
+        </TD>
+        <TD ALIGN=LEFT VALIGN=TOP>
+          DiskRequest 
+        </TD>
+        <TD ALIGN=LEFT VALIGN=TOP>
+          RequestComplete
+        </TD>
+      </TR>
+    </TABLE>
+
+  <H2>
+    Messages to FileSystem
+  </H2>
+
+  <TABLE BORDER=2>
+    <TR>
+      <TH>
+        <H3>Message parts</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        <B>From<BR>
+           Type<BR>
+           Body<BR></B>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Kernel<BR>
+        F_ALLOC<BR>
+        <TT>String fileName</TT>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Kernel<BR>
+        F_EOF | F_DEL | F_CREAT<BR>
+        <TT>int fileId</TT>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Kernel<BR>
+        F_CLOSE | F_READ<BR>
+        <TT>int fileId</TT>
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        <B>From<BR>
+           Type<BR>
+           Body<BR></B>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Kernel<BR>
+        F_Write<BR>
+        <TT>int fileId<BR>
+        MemoryChunk</TT>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        DiskDrive<BR>
+        RequestComplete<BR>
+        <TT>MemoryChunk</TT><BR>
+        empty if a write request
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        ProcessScheduler<BR>
+        BlockProcess<BR>
+        <TT>Process</TT>
+      </TD>
+    </TR>
+  </TABLE>
+
+  <H2>
+    Messages from FileSystem
+  </H2>
+
+  <TABLE BORDER=2>
+    <TR>
+      <TH>
+        <H3>Message parts</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        <B>To<BR>
+           Type<BR>
+           Body<BR></B>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        DiskDrive<BR>
+        DiskRequest<BR>
+        <TT>DiskRequest</TT>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Kernel<BR>
+        RETURN_VALUE<BR>
+        <TT>int</TT>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+      </TD>
+    </TR>
+  </TABLE>
+
+  </BLOCKQUOTE>
+
+<P>
+  <P> <A HREF="http://cq-pan.cqu.edu.au/validate/">
+    <IMG SRC="http://cq-pan.cqu.edu.au/validate/images/valid_html.mcom.gif" 
+    ALT="HTML HaL Mozilla Checked!" ALIGN=LEFT></A>
+
+<FONT SIZE=1>
+  <B>URL:</B> http://cq-pan.cqu.edu.au/david-jones/papers/projects/rcos/java/messages/filesystem.html <BR>
+  <B>Last modified:</B> DATE <BR>
+  <B>Author:</B> <A HREF="mailto:d.jones@cqu.edu.au">David Jones</A><BR>
+</FONT>       
+</BODY>
+</HTML>

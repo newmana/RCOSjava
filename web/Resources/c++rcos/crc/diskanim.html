@@ -1,0 +1,86 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class DiskAnim
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>DiskAnim</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+       DiskAnim
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   A class to render and animate a disk unit. Units are drawn in unit
+   ID order, left to right, with one pixel per track - so limit
+   instances to 80 tracks max, please..
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      WinPainter
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+  class DiskAnim : public WinPainter {
+    point  PtSpinPos;           // centre of disk platter
+    point  PtIndexPos;          // current index hole location
+    INT16  nHeadPosY;           // current graphic head position
+    UINT16 nLid;                // "our" logical unit ID (0 = "A:" etc)
+    UINT16 nTracks;             // 0 < nTracks <= 80
+    UINT16 nDiskRad;            // calculated platter radius in pixels
+  public:
+    DiskAnim (UINT16, UINT16);
+   ~DiskAnim (void) { }
+    void Paint (void);          // mandatory WinPainter member
+    void PaintTQ (void);        // full draw of queue box
+    void DiskSeek (INT16);      // head missile animator
+    void DiskSpin (UINT16);     // index hole animator
+    void RefreshTQ (TransQ*, INT16 = 0);        // queue update
+  };
+      </PRE> 
+
+</BODY>
+</HTML>

@@ -1,0 +1,91 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    Statistics CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>Statistics</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Statistics
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+ The following class defines the statistics that are to be kept
+ about Nachos behavior -- how much time (ticks) elapsed, how
+ many user instructions executed, etc.
+<P>
+ The fields in this class are public to make it easier to update.
+ 
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+<PRE>
+class Statistics {
+  public:
+    int totalTicks;             // Total time running Nachos
+    int idleTicks;              // Time spent idle (no threads to run)
+    int systemTicks;            // Time spent executing system code
+    int userTicks;              // Time spent executing user code
+                                // (this is also equal to # of
+                                // user instructions executed)
+
+    int numDiskReads;           // number of disk read requests
+    int numDiskWrites;          // number of disk write requests
+    int numConsoleCharsRead;    // number of characters read from the keyboard
+    int numConsoleCharsWritten; // number of characters written to the display
+    int numPageFaults;          // number of virtual memory page faults
+    int numPacketsSent;         // number of packets sent over the network
+    int numPacketsRecvd;        // number of packets received over the network
+
+    Statistics();               // initialize everything to zero
+
+    void Print();               // print collected statistics
+};                             
+</PRE>
+
+</BODY>
+</HTML>

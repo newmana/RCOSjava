@@ -1,0 +1,104 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    Directory CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>Directory</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Directory
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+ The following class defines a UNIX-like "directory".  Each entry in
+ the directory describes a file, and where to find it on disk.
+<P>
+ The directory data structure can be stored in memory, or on disk.
+ When it is on disk, it is stored as a regular Nachos file.
+<P>
+ The constructor initializes a directory structure in memory; the
+ FetchFrom/WriteBack operations shuffle the directory information
+ from/to disk.      
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+<PRE>
+class Directory {
+  public:
+    Directory(int size);                // Initialize an empty directory
+                                        // with space for "size" files
+    ~Directory();                       // De-allocate the directory
+
+    void FetchFrom(OpenFile *file);     // Init directory contents from disk
+    void WriteBack(OpenFile *file);     // Write modifications to
+                                        // directory contents back to disk
+
+    int Find(char *name);               // Find the sector number of the
+                                        // FileHeader for file: "name"
+
+    bool Add(char *name, int newSector);  // Add a file name into the directory
+
+    bool Remove(char *name);            // Remove a file from the directory
+
+    void List();                        // Print the names of all the files
+                                        //  in the directory
+    void Print();                       // Verbose print of the contents
+                                        //  of the directory -- all the file
+                                        //  names and their contents.
+
+  private:
+    int tableSize;                      // Number of directory entries
+    DirectoryEntry *table;              // Table of pairs:
+                                        // <file name, file header location>
+
+    int FindIndex(char *name);          // Find the index into the directory
+                                        //  table corresponding to "name"
+};                   
+</PRE>
+
+</BODY>
+</HTML>

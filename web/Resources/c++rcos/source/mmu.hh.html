@@ -1,0 +1,63 @@
+<HTML>
+<HEAD>
+  <TITLE>
+mmu.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+mmu.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : MMU - Devide driver class for a memory manager               *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: An RCOS Memory Management Unit device driver must respond to *
+//           the messages and format in this module.  The strategy of how *
+//           this is implemented my vary with different boby code modules *
+//  HISTORY:                                                              *
+//    22-APR-93 First version                                             *
+//    17-MAR-95 Partitions uped to 16 from 8 for additional users         *
+//*************************************************************************
+
+#ifndef _RCOS_MMU_
+
+  #include "rcos.hh"
+  #include "kernel.hh"
+  #include "message.hh"
+
+
+  #define PART_SIZE     1024    // fixed partition size (words)
+  #define MAX_PARTS     16      // maxim number of partitions
+
+
+  ///////////////////
+  // MMU dependant page table structure .. very simple in this case
+  //
+  typedef struct pgtbl {
+    UINT16 *pMem;               // pointer to actual RAM
+    BOOL   bInUse;              // flag set when allocated
+  } PGTBL, *PPGTBL;
+
+
+  ////////////////////////
+  // This is the MMU "driver" (based as usual on the port class)
+  //
+  class Mmu : public port {
+    UINT16 *pMemBlk;                // memory block managed by driver
+    PGTBL  arrPgTbl[MAX_PARTS];     // array of pages in main memory
+    HANDLE FindFree (PPGTBL);       // get a free page handle
+  public:
+    Mmu (UINT16, UINT16, Knl*);     // constructor
+    ~Mmu (void);                    // destructir
+    void RxPort (PMSG);             // supply virtual member of "port"
+  };
+
+  #define _RCOS_MMU_
+
+#endif
+
+/////////////////////////////////// eof ////////////////////////////////////
+</PRE>
+</BODY>
+</HTML>

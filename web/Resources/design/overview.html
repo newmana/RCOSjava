@@ -1,0 +1,160 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS.java - Structural Overview
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999">
+<TABLE WIDTH="100%">
+  <TR>
+    <TD ALIGN=LEFT>
+      <H4>/ <A HREF="../../resources.html" TARGET="body">Resources</A> /
+      <A HREF="index.html">Design</A> / Structural Overview</H4>
+    </TD>
+    <TD ALIGN=LEFT WIDTH=25% VALIGN="CENTER">
+      <IMG SRC="../../pics/rightEnd.gif" WIDTH="19" HEIGHT="30"><A HREF="../../index.html" TARGET="_parent"><IMG SRC="../../pics/home.gif" BORDER="0" ALT="RCOS.java Home Page" WIDTH="38" HEIGHT="30"></A><A HREF="description.html" TARGET="body"><IMG SRC="../../pics/back.gif" BORDER=0 ALT="System Description" WIDTH="38" HEIGHT="30"></A><A HREF="domain.html" TARGET="body"><IMG SRC="../../pics/forward.gif" BORDER=0 ALT="Domain Analysis" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../pics/leftEnd.gif" ALT="" WIDTH="19" HEIGHT="30"><BR>
+    </TD>
+  </TR>
+</TABLE>
+RCOS.java is divided into the following sections:
+    <UL>
+      <LI> simulated <A HREF="#hardware">hardware</A><BR>
+           A simulation of the operation of the hardware on which RCOS.java
+           executes.
+      <LI> <A HREF="#operating system">operating system</A><BR>
+           The components that implement the actual operating system.
+      <LI> <A HREF="#animation">animation</A><BR>
+           The animation of the previous two sections.
+    </UL>
+  </BLOCKQUOTE>
+
+<H3>
+  <A NAME="hardware">
+  Hardware
+</H3>
+
+  <BLOCKQUOTE>
+    <H4>
+      CPU
+    </H4>
+    Initially, the RCOS.java CPU will be based on the P-Code machine
+    used in the original RCOS.  The intention is to reuse the existing RCOS
+    PLL compiled code.  The operation of the CPU has been modified slightly
+    to support the concept of pages.
+    <P>
+    The PLL/2 compiler which was included in the original version is being
+    replaced by a full C/C++ compiler.  This compiler produces P-Code and
+    may be modified from the Java version to compile itself which opens 
+    the possibility of being able to compile programs from within RCOS.java.
+    <P>
+    For the truly keen, it may be possible in the future to use the Java
+    Virtual Machine (JVM) as the CPU and the other features of a Java Virtual
+    Machine.  This would not only allow people to understand basic concepts
+    of OS design but also the workings of the Java Virtual Machine.
+    <H4>
+      Disk
+    </H4>
+    The disk sub-system was written by Brett Carter and modified by Andrew Newman.
+    <P>
+    The disk sub-system is fairly small because of the desire to produce a graphical 
+    represenation of the allocation/deallocation of disk blocks by the file system.
+    <H4>
+      Terminal and Memory (RAM)
+    </H4>
+    The Terminal provides the physical interface to the user including the keyboard
+    and the visual display unit.
+    <P>
+    Memory consists of two sections.  The first is the CPU cache.  This is
+    dynamically adjusted to fit the current program into it.  The main reason
+    is to increase speed and reduce complexity.  Secondary RAM holds all
+    loaded programs and stores them in two sections: process code and stack.
+  </BLOCKQUOTE>
+
+<H3>
+  <A NAME="operating system">
+  Operating system
+</H3>
+
+  <BLOCKQUOTE>
+    <H4>
+      Kernel
+    </H4>  
+    RCOS.java uses a micro-kernel based, message passing structure.  The
+    kernel is responsible solely for a number of platform specific functions
+    including:
+    <UL>
+      <LI> handling interrupts,
+      <LI> saving/retrieving context, and
+      <LI> generating messages to appropriate operating system component
+           as a result of system calls
+    </UL>
+
+    <H4>
+      Message passing
+    </H4> 
+    Standard operating system functions are divided into a number of components.
+    All communication between these components must be in the form of messages.
+    All messages pass through the Post Office component that is responsible for
+    delivering messages to the correct destinations.
+    <P>
+    Intention is that theoretically that different components could be
+    located on different computers.
+    <P>
+    The Post Office may also be able to be used to hide the animation from
+    the rest of the operating system classes.  All the important OS events
+    take the form of messages that pass through the Post Office.
+    Rather than litter the implmentation of the OS components with messages
+    to the Animator the Post Office has been written automatically to forward
+    all messages it receives to the Animator (as well as the actual recipent).
+    <P>
+    The Animator class can then decide whether or not it wants to do anything
+    as a result of the message. 
+    
+    <H4>
+      Other OS Functions
+    </H4>
+    Remaining operating system responsibilites are divided into seperate
+    components (each a Java class in RCOS.java) including:
+    <UL>
+      <LI> <B>Disk Scheduler</B><BR>
+           Responsible for managing disk buffering, scheduling disk requests,
+           translating logical block numbers into drive specific sector, 
+           cylinder and surface.  There is one Disk Scheduler for each disk.
+           Close equivalent to a disk device driver. 
+      <LI> <B>File System</B><BR>
+           Responsible for implementing a particular file system (MS-DOS, CP/M,
+           UNIX, NTFS etc).  Handles standard messages like open file, close file,
+           read file, write file, open directory, get file attributes etc.
+           It is possible for one RCOS.java instance to have multiple file system
+           objects providing the ability to support more than one file system
+           at a time.
+      <LI> <B>Process Scheduler</B><BR>
+           Responsible for managing process creation, termination and scheduling.
+           Handles messages such as fork process, exec process, kill process,
+           schedule new process, block process, etc.  Maintains all disk queues
+           and includes methods such as "running to ready", "running to blocked",
+           "get next running process", etc.
+      <LI> <B>Memory Manager</B><BR>
+           Responsible for managing memory, allocating, deallocating memory
+           for processes, reading, writing memory for various other components.
+      <LI> <B>Terminals</B><BR>
+           Provide mechanism for writing/reading to/from a terminal.
+    </UL> 
+  </BLOCKQUOTE>
+
+<H3>
+  <A NAME="animation">
+  Animation
+</H3>
+  The Animation system is hidden from the remainder of the system by
+  the Post Office Animator class.  Responsibilities of the animation system includes:
+  <UL>
+    <LI> drawing the main overview screen,
+    <LI> handling input events for this main screen and initiating
+         new threads to handle the animation of the various OS components, and
+    <LI> deciding which messages are interesting to the animation system
+         and distributing them to the approriate threads (if they exist).
+  </UL>
+</BODY>
+</HTML>

@@ -1,0 +1,156 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS.java - Terminal Messages
+  </TITLE>
+</HEAD>
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999">
+<TABLE WIDTH="100%">
+  <TR>
+    <TD ALIGN=LEFT>
+      <H4>/ <A HREF="../../../resources.html" TARGET="body">Resources</A> /
+      <A HREF="../index.html">Design</A> / <A HREF="index.html">Messages</A>
+      / Terminal Messages</H4>
+    </TD>
+    <TD ALIGN=LEFT WIDTH=25% VALIGN="CENTER">
+      <IMG SRC="../../../pics/rightEnd.gif" WIDTH="19" HEIGHT="30"><A HREF="../../../index.html" TARGET="_parent"><IMG SRC="../../../pics/home.gif" BORDER="0" ALT="RCOS.java Home Page" WIDTH="38" HEIGHT="30"></A><A HREF="../transition.html" TARGET="body"><IMG SRC="../../../pics/back.gif" BORDER=0 ALT="Transitions" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../../pics/blank.gif" BORDER=0 ALT="" WIDTH="38" HEIGHT="30"><IMG SRC="../../../pics/leftEnd.gif" ALT="" WIDTH="19" HEIGHT="30"><BR>
+    </TD>
+  </TR>
+</TABLE>
+  <H2>
+    Related components
+  </H2>
+
+    <TABLE BORDER=2>
+      <TR>
+        <TH>
+          <H3>Component</H3>
+        </TH>
+        <TH>
+          <H3>Messages to</H3>
+        </TH>
+        <TH>
+          <H3>Messages from</H3>
+        </TH>
+      </TR>
+      <TR>
+        <TD ALIGN=LEFT VALIGN=TOP>
+          Kernel
+        </TD>
+        <TD ALIGN=LEFT VALIGN=TOP>
+          CH_READY, NUM_READY
+        </TD>
+        <TD ALIGN=LEFT VALIGN=TOP>
+          CHOUT, NUMOUT, CHIN, NUMIN, Keypress via TerminalInterruptHandler
+        </TD>
+      </TR>
+    </TABLE>
+
+  <H2>
+    Messages to Terminal
+  </H2>
+
+  <TABLE BORDER=2>
+    <TR>
+      <TH>
+        <H3>Message parts</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        <B>From<BR>
+           Type<BR>
+           Body<BR></B>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Kernel<BR>
+        CHIN  
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Kernel<BR>
+        NUMIN
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Kernel<BR>
+        CHOUT<BR>
+        <TT>char</TT>
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        <B>From<BR>
+           Type<BR>
+           Body<BR></B>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Kernel<BR>
+        NUMOUT<BR>
+        <TT>short</TT>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Kernel<BR>
+        STROUT<BR>
+        <TT>MemoryChunk</TT>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Kernel<BR>
+        InputReady
+      </TD>
+    </TR>
+  </TABLE>
+
+  <H2>
+    Messages from Terminal
+  </H2>
+
+  <TABLE BORDER=2>
+    <TR>
+      <TH>
+        <H3>Message parts</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        <B>From<BR>
+           Type<BR>
+           Body<BR></B>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Kernel or ProcessScheduler<BR>
+        CH_READY<BR>
+        <TT>char</TT>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Kernel or ProcessScheduler<BR>
+        NUM_READY<BR>
+        <TT>short</TT>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        If input is in buffer then message is
+        sent to Kernel.  Otherwise the process
+        is blocked until input is ready in which
+        case the message has to be sent to the
+        ProcessScheduler
+      </TD>
+    </TR>
+  </TABLE>
+</BODY>
+</HTML>

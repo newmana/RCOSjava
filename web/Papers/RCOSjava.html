@@ -1,0 +1,1401 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS.java - An Animated, Simulated Operating System in Java
+  </TITLE>
+</HEAD>
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999">
+<TABLE WIDTH="100%">
+  <TR>
+    <TD ALIGN=LEFT>
+      <H4>/ <A HREF="../papers.html">Papers</A> / An Animated, Simulated Operation System in Java</H4>
+    </TD>
+    <TD ALIGN=RIGHT>
+      <IMG SRC="../pics/rightEnd.gif" WIDTH="19" HEIGHT="30"><A HREF="../index.html" TARGET="_parent"><IMG SRC="../pics/home.gif" BORDER="0" ALT="RCOS.java Home Page" WIDTH="38" HEIGHT="30"></A><IMG SRC="../pics/blank.gif" BORDER=0 ALT="" WIDTH="38" HEIGHT="30"><A HREF="RCOSMessaging.html" TARGET="body"><IMG SRC="../pics/forward.gif" BORDER=0 ALT="The Messaging System in RCOS.java" WIDTH="38" HEIGHT="30"></A><IMG SRC="../pics/leftEnd.gif" ALT="" WIDTH="19" HEIGHT="30"><BR>
+    </TD>
+  </TR>
+</TABLE>
+<h1>
+An Animated, Simulated Operating System in Java</h1>
+
+<h2>
+David Jones and Andrew Newman</h2>
+
+<h2>
+Introduction</h2>
+A unit covering the algorithms, concepts and theories behind the design,
+construction and operation of operating systems is a recommended core component
+for courses in computer science [Denning 1989]. For a number of reasons
+students find operating systems related topics, like many computer science
+topics, difficult to relate to and learn [Hannay 199?].
+<p>RCOS.java is a Java-based, simulated operating system which attempts
+to address these problems by providing students the opportunity to observe
+animations and to actively experiment with the algorithms, data structures
+and services of an operating system. A unique characteristic of RCOS.java
+is that it combines the features of previous operating systems courseware,
+animation (reference), concurrency simulation (reference) and toy operating
+systems (reference), into a single system with the features of Java and
+the World-Wide Web. Most importantly RCOS.java includes features which
+can be combined with appropriate pedagogy to offer support for active and
+discovery-based learning. RCOS.java builds on lessons gathered during the
+use and development of previous computer-aided learning systems at CQU
+[Chernich, Jamieson and Jones 1996, Chernich and Jones 1994] and from the
+literature.
+<p>This chapter describes the rationale, design, features and examples
+of how RCOS.java will be used to aid student understanding of operating
+system concepts. The chapter starts by describing the background, history
+and context which initiated and influenced the design and development of
+RCOS.java. It then moves on to offer possible explanations for the difficulty
+many students have when taking a unit in operating systems and a description
+of the approaches from the literature which have been used to address these
+problems. The remainder of the chapter deals with the design, implementation
+and use of RCOS.java. ......
+<h2>
+Background and History</h2>
+A number of the decisions made during the design and development of RCOS.java
+have been influenced by the context in which it was developed. This section
+provides a brief overview of the context in which RCOS.java was developed
+and describes how the design of RCOS.java was influenced by problems with
+existing teaching approaches, changes in context and previous experience
+with teaching operating systems and the use of operating systems courseware.
+<h3>
+Context</h3>
+The primary purpose of RCOS.java is to address problems experienced during
+the teaching of the unit 85349, Operating Systems at Central Queensland
+University (CQU). CQU is an multi-campus, regional institution, based in
+Australia, with four branch, three interstate, and several international
+campuses. In many units less than 20% of students are on the same campus
+as the instructor in charge of the unit. 85349 Operating Systems is CQU's
+traditional operating systems unit and is a core unit in the second year
+of CQU's Bachelor of Information Technology degree. In 1998, 85349 had
+almost 350 students including 220 students spread over 6 campuses and 130
+distance education students.
+<p>Over 50% of CQU's students learn using a primarily print-based distance
+education approach. All CQU, distance, computing students are expected
+to have access to a Intel-based computer running a version of the Windows
+operating system. The software used in all CQU computing units is designed
+to run on that platform. Traditionally distance students rely on text books
+and print-based study guides as their sole source of learning.
+<p>On-campus students are learn via traditional on-campus delivery approaches
+including lectures and tutorials. The primary form of information distribution
+to on-campus students is in the form of either face-to-face lectures or
+through the use of video-conferencing. In some cases there can be up to
+four generally independent staff giving lectures in a unit at different
+campuses. Additionally, all campuses provide local tutors to provide small
+group support to students.
+<p>Relatively few CQU units, 85349 is one of them (http://infocom.cqu.edu.au/85349/)
+make use of the Web and other forms of online learning to supplement traditional
+on-campus and distance learning approaches. Applications of online learning
+include online assignment submission (Jones and Jamieson, 1997), CD-ROM
+mirrors of Web sites, online lectures and animations (Jones, 1999).
+<h3>
+Problems</h3>
+Talk about problems with existing delivery approaches and the change which
+is increasing those problems.
+<ul>
+<li>
+dual mode</li>
+
+<br>on-campus presentation can change, distance can't which brings difficulty
+in maintaining equity.
+<li>
+print-based distance education</li>
+
+<br>Production requires significant palnning and develoment to cater for
+every need. Greater effort is required. Lack of field specific knowledge
+in instructional design and editing, a lack of control felt by some academics,
+large lead times in subject development, and an inability to handle change.</ul>
+Current, generally static, lecture-based paradigms seem to have reached
+the limit of their effectiveness (..Boroni??)
+<p>As with most other units at CQU the circumstances under which 85349
+is taught has undergone massive change since 1994. This change, which has
+not been matched by corresponding changes in practice or infrastructure,
+has introduced a number or problems including increased complexity and
+workload.
+<p>The changes in 85349 include
+<ul>
+<li>
+increasing variety in student characteristics</li>
+
+<br>Students in 1994 were almost entirely Australian nationals while at
+least one-third of 1998 students are from different cultures. Additionally
+student capabilities in mathematics and other pre-requisite knowledge has
+decreased significantly.
+<li>
+increasing student numbers</li>
+
+<br>In 1994 85349 had just over 150 students, in 1998 it has just over
+350.
+<li>
+increasing modes of delivery</li>
+
+<br>In 1994, 85349 was taught at CQU's Rockhampton campus and via print-based
+distance education. In 1998, the unit was taught via print-based distance
+education, face-to-face lectures at three campuses by three different lecturers
+and video conferencing to two other campuses.</ul>
+Experience has shown that distance students have difficulty grasping some
+of the theoretical concepts associated with operating systems without interaction
+with a lecturer or practical examples of the theory.
+<h3>
+Previous Approaches</h3>
+There have been a number of approaches used at CQU to address the problems
+associated with teaching operating systems. These solutions have included
+the use of Minix (Kavka et al, 1991), PRMS (Hayes et al 1990), stand-alone
+animations and the development of RCOS. This section summarises the experience
+with each of these approaches and describes how this experience has contributed
+to the design of RCOS.java
+<p>The use of Minix was not a great success because of the steep learning
+curve in installing and becoming familiar with the system. While these
+problems could be minimised for on-campus students this could not be done
+for distance students. Distance students were responsible for installing
+Minix onto their computers with limited access to the instructor.
+<p>PRMS (Hayes et al, 1990) is a simulated operating system with graphical
+animation of some operating system data structures and algorithms which
+was written specifically for the MS-DOS platform. Whilst simpler to use
+PRMS suffered from a number of problems (Chernich and Jones, 1994). PRMS
+was limited to the simulation of process and simple resource management
+and while these are important concepts there are a number of other areas
+causing difficulty for students. Inconsistent design conventions, a high
+level of coupling between components, and insufficient documentation all
+contributed to making it difficult for students to modify PRMS which was
+seen as an important use of PRMS to aid student learning.
+<p>While the use of PRMS had accompanying problems the graphical animation
+of operating system data structures and algorithms, was seen as a useful
+learning tool, especially by distance students. Drawing on the lessons
+learnt during the use of PRMS and a wish list of desired features (Chernich
+and Jones, 1994) Ron Chernich's Operating System (RCOS) was built during
+1993 with further development occurring during 1994.
+<p>RCOS is a portable, multi-tasking operating system (OS) designed to
+demonstrate general operating system principles through controlled animation,
+and to allow simple modification and experimentation with OS data structures
+and algorithms. The use of RCOS during 1995 and 1996 was a success with
+74% of students agreeing that helped them understand operating system concepts
+with 28% believing it was too difficult to use.
+<p>Prior to the development of RCOS similar tools such as OSP (Kifer et
+al, 1992) and Nachos (Christopher et al, 1993) were considered for use.
+There were two primary reasons why these useful systems were not used:
+<ul>
+<li>
+Neither would run under MS-DOS, the standard CQU computing platform.</li>
+
+<li>
+Neither provided animation of the operating system's algorithms or data
+structures.</li>
+</ul>
+Experience with both PRMS and RCOS has shown the positive benefits a simulated
+operating which provides animation of its data structures and algorithms
+can provide.
+<p>The second feature was considered essential in order to provide assistance
+to distance students in understanding these concepts. Other features that
+were considered desireable included:
+<ul>
+<li>
+a conceptual separation of hardware and operating system concepts, one
+of the difficulties faced in the use of PRMS,</li>
+
+<li>
+enable simple modification of algorithms and data structures by students,</li>
+
+<li>
+compiler and hardware independence,</li>
+
+<li>
+implemented in C++, and</li>
+
+<li>
+the ability to perform as a real operating system.</li>
+</ul>
+In 1996 the transition of CQU students away from MS-DOS to the Windows
+platform and the increasing use of the Web in teaching and learning influenced
+the decision to redesign RCOS for implementation in Java. Other reasons
+for the move to Java included the potential for the integration of multimedia
+and Java's in-built support for a graphical user interface and multi-threading.
+<p><b>something about the use of stand alone animations</b>
+<h2>
+Why is Learning About Operating Systems Difficult?</h2>
+The study of operating systems involves gaining an understanding of both
+the responsibilities of an operating system, and the algorithms and data
+structures used in implementing these responsibilities. Teaching operating
+systems involves balancing coverage of a significant amount of theory with
+the desire to provide some practical relevance of the material and has
+always been a challenge (Perez-Davilla, 1995). It is even more difficult
+when, as with 85349, a significant proportion of students study at a distance
+where they are usually restricted to print as the primary learning medium.
+<p>A large number of the concepts introduced in an operating systems units
+(e.g. processes and concurrency) are abstractions and are not easily understood
+(Tosten, 1993). Additionally many of these concepts, concurrency especially,
+are dynamic concepts which cannot be easily explained in a static medium
+such as print. While operating systems texts use images to illustrate concepts
+they do not entail the dynamic nature of operating systems abstractions
+(Tosten, 1993). Students find it easier to understand these concepts when
+they are grounded to visual objects.
+<p><b>more here from the other papers</b>
+<p>Studies have shown that relatively few students reach an acceptable
+level of achievement in science and mathematics [4] FROM (Mordechai 1998)
+<br>ALl of the following is also from Mordechai
+<p>a beginning CS student has no effective model of a computer the computer
+forms an accessible ontological reality
+<p>If misconceptions are essential to the construction of new knowledge
+[16], the lack of an effective, if flawed, model of a computer is a serious
+obstacle to learning CS.
+<p>Even if no effort is made to present a view of what is going on 'inside'
+the learners will form their own" [3] p285
+<p>[12], p 162 "attribute students' fragile knowledge of programming in
+considerable part to a lack of a metnal model of the computer...."
+<p>Help files and tutorials must explicityly address the construction of
+a model, and not limit themselves to behaviourist practices of the form
+'to do X, follow these steps'
+<p>students find it difficult to build a mental model of the computer and
+operating system. Especially distance education students who are limited
+to print This section draws on the literature on teaching operating systems,
+computer science, science and distance education to describe the difficulties
+involved in teaching operating systems.
+<h1>
+Possible Solutions to the Problems</h1>
+There are a number of different methods, processes and practices which
+might address these problems. Some have been implemented specifically in
+teaching operating systems while others have been used in other computer
+science topics and disciplines. This section examines a number of these
+approaches, including approaches both specific to operating systems and
+of a more generaly nature, and details the benefits and disadvantages of
+these approaches. It is this description which will be drawn upon in the
+following section to explain the design rationale behind RCOS.java.
+<p>More general attempts have included computer-based learning, online
+learning, problem-based and other forms of constructivist learning.
+<h2>
+Computer Based Learning</h2>
+Developing quality computer based simulation tools to assist in instruction
+is costly. Some estimates indicate that up to 500 hours is required to
+produce one hour of quality interaction [5]. CQU experience has shown that
+the use of computing project students to develop these tools can help reduce
+the cost of development [27]. However it is still necessary to invest considerable
+resources in providing suitable documentation and integrating these tools
+into a subject.
+<p>Computer assisted learning (CAL) is becoming increasingly prominent
+in education and as a result is changing the face of teaching and learning.
+While the driving force behind such innovations is multifaceted, the desire
+to increase teaching efficiency (Davies &amp; Crowther, 1995) and quality
+(Coopers &amp; Lybrand et al., 1996) have generally been regarded as the
+major contributing factors.
+<p>Some (Reid, 1994) consider the process of developing CAL to be fraught
+with difficulties. Factors that may contribute to developmental difficulties
+include: lack of educationally sound examples on which to base development,
+departure of staff involved in development, the lengthy time of development
+and the high costs involved. Darby (1992) suggested developing software
+that can be used over a number of institutions as part of a =ECc ollaborative
+consortia=EE (p. 194) to alleviate the problem of high costs =2E Allen
+et al. (1996) consider the working relationship between develo pers and
+subject matter experts to be complex and a potential source of d ifficulty.
+If advantages of learning with CAL are to be realized, integr ation must
+be planned carefully (Wilss 1997).
+<p>It is essential that CAL programs are supported by a clear model of
+learning and teaching (Coopers &amp; Lybrand et al., 1996) While these
+conditions may facilitate development of CAL programs, the actual process
+of development is complex and time consuming (Reid, 1994)
+<p>While early studies of CAI assessed through meta-analysis reported technology-based
+instruction to be at least as effective as traditional instruction (e.g.
+Kulik, Kulik &amp; Cohen, 1980), the validity of the research has been
+queried (Reeves, 1993) and other commentators have debated the level of
+effectiveness (Clark, 1983; Sims, 1992). Even 10 years ago, Roblyer (1988:7)
+suggested: it is becoming more difficult to make a case for increased across-the-board
+implementation of CAI on the basis of research results. A review of past
+CAI uses indicates that effects on learning vary widely depending on product
+design and implementation, and that CAI may often not be as effective in
+raising student performance as other, less expensive non-traditional methods.
+<p>However, it is possible that the limited effectiveness has resulted
+from a poor understanding of the technology for interactive learning, rather
+than design integrity and that effectiveness will only be achieved when
+we fully understand the functionality and vagaries of the interactive technology
+itself (Sims ??).
+<p>Practitioners in the field of interactive technology are regularly faced
+with the dilemma of whether to commence development or wait for the next
+technological advance (Sims ??) A. W. (Tony) Bates, Technology, Open Learning
+and Distance Education, Routeledge, 1995
+<p>Benefits of pre-programed computer-based learning:
+<ul>
+<li>
+Presentation of information: Use to present information require high levels
+of symbolic representation,</li>
+
+<li>
+Tutorial dialogue: Can simulate dialogue with the learner using embedded
+questions and learner responses to question,</li>
+
+<li>
+Simulation and modelling: Excellent for manipulating quantifiable and rule-governed
+variables where students can input data, or supply information, and observe
+the effects.
+<b>deVries and Huisman, 1989,</b></li>
+
+<li>
+Testing: Useful for testing learners' knowledge where responses can be
+fitted into pre-determined coded categories,</li>
+
+<li>
+Individualised study: It allows learners to work at their own pace and
+obtain feedback on their progress,</li>
+
+<li>
+Diagnosis: It can use learners' responses to identify areas where further
+study is necessary,</li>
+
+<li>
+Mastery learning: By combining testing, feedback, repetition and diagnosis,
+learners can progress to the point whereh they can achieve correct answers,</li>
+
+<li>
+Learner choice,</li>
+
+<li>
+Adaptation to learning styles:Application of AI techniques allows the computer
+to use a number of different teaching approaches adapted to the needs of
+learners,</li>
+
+<li>
+Motivation: <b>Friesen 1991</b> reports sense of prestige and accomplishment
+of adult basic education learners using computers to learn, especially
+where the program uses innovative or amusing techniques for gaining and
+holding interest.</li>
+</ul>
+p 191
+<p>Limitations of pre-programmed computer-based learning
+<ul>
+<li>
+Access to the right equipment,</li>
+
+<li>
+Poor teaching strategies: CBL widely criticised for using poor teaching
+strategies. <b>Van der Brande, 1993</b> claims that 'only 3% of educational
+software has been written in the context of an articulated pedagogic rationale'
+(p23). Heavy emphasis on drill and practice and passive page turning. Emphasis
+mainly on comprehension and memorisation of facts and principles. Not an
+easy medium for developing the higher level learning skills of analysis,
+synthesis, evaluation or problem-solving, where there are no fixed rules
+or procedures,</li>
+
+<li>
+Lack of flexibility: Not good in subject matter where learners can provide
+legitimate but unexpected responses,</li>
+
+<li>
+Costs: Developing original, high quality CBL material is expensive and
+requires highly skilled designers if higher level skills required,</li>
+
+<li>
+Professional association: Intelligent Computer Assisted Instruction has
+not been tested in practice. Developed by AI scientists,</li>
+
+<li>
+Broken promises: AI and expert systems, while offering great promise, have
+by and large failed to make much impact on pre-programmed CBL. Very difficult
+to model real teacher behaviour on a computer.</li>
+</ul>
+p 192
+<p>Pre-Programed CBL is heavily influenced by behaviourism and cognitive
+science, which reject any element of conscious will as a dominant element
+of human behaviour. p 193&nbsp; The basic behavioural perspective is focused
+on external aspects of learning which include:
+<ul>
+<li>
+Stimuli,</li>
+
+<li>
+Reponse, and</li>
+
+<li>
+Feedback or reinforcement.</li>
+</ul>
+Pre-programed CBL, by restricting interaction between humans, and limiting
+the learners' ability to responding within pre-determined boundaries, constrains
+the capacity of the individual to personalise the learning or to create
+constructions of knowledge that are unanticipated in the design of the
+teaching material, but sill legitimate. p 193&nbsp; It also ignores the
+suggestions of cognitive theory that suggests the mental processes deal
+with and make sense of various stimuli.&nbsp; Designing instructional with
+this in mind leads to more context sensitive, varied and relistic experiences
+by generating stimuli which leads the learner to try, understand, model
+and predict futher problems and events [Heinich et al, 1993].
+<p>A survey was held at the Liverpool University [McDonough et al 1994]
+outlines these features of learning environments.&nbsp; Opinons from lecturers
+on the use Computer Based Training was taken.&nbsp; It found that computer
+based training is becoming more necessary as student/staff ratios become
+higher and as people require education but are unable to have face to face
+contact.&nbsp; However, nearly 70% of the lecturers who responded to the
+survey felt that they would not use computer based training because they
+were unfamiliar with the technology and that it was seen to be far too
+time consuming to develop.
+<p>Current technology is difficult to cost as:
+<ul>
+<li>
+The power of technology is increasingly rapidly enabling better quality
+symbolic presentation such as compressed audio and video</li>
+
+<li>
+Software tools that enable the design and development of multimedia are
+improving, thus dramatically reducing the labour costs associated with
+the design and development of CBL</li>
+
+<li>
+Technology improve, so do the range of possible applications. Different
+models => different costing implications</li>
+</ul>
+p197
+<p>This means cost data, from even a few years ago, can be very misleading.&nbsp;
+Good quality CBL is still quite expensive to produce. New instructional
+approaches with multimedia promise lower costs and greater flexiblity.
+<h2>
+Online Learning</h2>
+Traditional teaching methods are proving to be ineffective and inefficient
+for this diverse student population and continued use of these methods
+has created many issues, problems and additional workload for staff (Jones
+and Buchanan, 1996; Jones 1996; Jones 1999). One approach that has the
+potential to solve many of these problems, improve the overall learning
+experience of our students and possibly further expand the base on which
+we draw our students is online learning using the Internet (Jones and Buchanan,
+1996).
+<p>Online learning using the Internet and the Web when combined with appropriate
+pedagogies provides a number of advantages including (McCormack and Jones,
+1997)
+<ul>
+<li>
+Independence: Online learning using the Web provides geographic, temporal
+and platform independence. It no longer matters where (geographic) or when
+(temporal) a student wishes to learn. Similarly problems associated with
+students having different types of computers has been reduced,</li>
+
+<li>
+Familiar Interface: The Web has provided a marketable, intuitive interface
+to the With the widespread use of computers and the Web for everyday tasks
+the interface provided by the browser and Web pages are increasingly familiar
+to students. This reduces the need for up-front training,</li>
+
+<li>
+Computer Mediation: All the information and communication in online learning
+is passes through or is stored on a computer. This allows the information
+processing power of the computer to be harnessed to store, index, search,
+convert, distribute and adapt that information, and</li>
+
+<li>
+Multimedia: The use of dynamic multimedia reduces the complexity involved
+in explaning dynamic concepts and also offer the possbility of offering
+alternative representations of concepts.</li>
+</ul>
+The Web and Internet as panaceas for computer facilitated learning is a
+fallacy [Soloway 1995]. The online environment&nbsp; has a number of disadvantages:
+<ul>
+<li>
+Poor Performance,</li>
+
+<li>
+Difficulty Accessing,</li>
+
+<li>
+Prohibitive Cost,</li>
+
+<li>
+Training Required,</li>
+
+<li>
+Implementation: Web standards vary considerably between different browsers
+across company, version and platform,</li>
+
+<li>
+Copyright, Security and Authentication,</li>
+
+<li>
+Constant Upgrading and</li>
+
+<li>
+Shifting Requirements.</li>
+</ul>
+However, the instructional lecture based format of distance learning, as
+a recorded talking head, doesn’t work in the real world, and is no more
+useful for a change of medium.&nbsp; With all the possibilities that online
+learning offers there is still a problem that the usage of the Web is not
+taking full advantage of the possibilities of the new environment (Greening,
+1998). Boshier et al (1997, pp 347-348) express the concern that some sites
+emulate "the worst of face-to-face courses". Alexander's (1995) postmortem
+on failed uses of educational technology supports this argument, stating
+that many instructional designers focus on the technological features,
+and simply present old learning experiences in this new clothing. The use
+of the WWW appears to have the prospect to change the very individual nature
+of university teaching through its capacity to support and encourage collaborative
+environments (Oliver et al, 1997).&nbsp; It is certainly not possible to
+scale up individualized, personalized instruction in the traditional teacher
+or tutorial based instruction.
+<p>If "schools continue to emphasize the accumulation of information, continue
+to employ didactic instruction and continue to view the student as empty
+vessels, then students have no need for the...Internet" [Solway 1995, pp
+17].&nbsp; Traditional assignment structures need to be modified to enhance
+the learning process and use of the Internet as a resource.&nbsp; Assignments
+set to show how to solve a practical problem is far more motivating than
+doing one that will be forgotten next semester.&nbsp; The online environment
+can be used to support most forms of traditional teaching but it is also
+uniquely suited to a number of new approaches which may help improve learning
+outcomes. These new approaches include:
+<ul>
+<li>
+Communication and collaboration with peers, experts, other students, etc,</li>
+
+<li>
+Searching and research,</li>
+
+<li>
+Creation of student presentations, and</li>
+
+<li>
+Producing visual representation requiring deep understanding of the process.</li>
+</ul>
+Useful work can be done if students can delve deeply into a topic and includes
+group/collaborative learning.&nbsp; The idea of using hypermedia to allow
+people to collaborate interactively and solve problems is not a new one
+[Engelbart 1995].&nbsp; Engelbart sees computers as a way to facilitate
+teaching and "augmenting man's intellect".&nbsp; The idea of the toolkit
+to aid in solving a particular tool, much like the requirement of a carpenter
+and his tools.&nbsp; Instead of a solitary individual with their own set
+of tools there is a common toolkit available to all members of team [Engelbart
+1970].
+<p>The concepts of limitless reuse and embedded sharing of objects is certainly
+a powerful idea [Nelson 1995] and would be one well harnessed.&nbsp; Another
+idea that Nelson has discussed is "deep intercomparison" and "transclusion".&nbsp;
+While mainly dealing with copyright, the reuse of documents within their
+original context made available through shared instancing is applicable
+to online education.&nbsp; Indeed, one of the requirements for good instructional
+media is to provide the context in which media exists.&nbsp; Transclusion
+can also be useful in solving many of the problems that instructors have
+with creating content for the medium.&nbsp; Existing packages of information
+that appear in reusable format could be used to create, recreate and enhance
+new courseware.&nbsp; Students could build on previous assignments creating
+a sense of continued development.
+<p>On-line learning can be used with group work and can be used to simulate
+“what if” situations. Rarely do you come across problems in isolation and
+group work is therefore very important.
+<p>There are increasing opportunities with these tools for teachers in
+higher education to develop learning environments which connect individual
+learners into virtual communities sharing a common learning goal as well
+as more traditional based instruction.
+<p>In one example [Shute et al 1994] a program teaching tool called Stat
+Lady was used instead of presenting material on paper.&nbsp; Curriculum,
+presentation style, examples and help were all kept the same.&nbsp; The
+researches predicted that students would react better, require greater
+procedural skill and more benefit made by higher aptitude students.&nbsp;
+This, however, seemed to ignore the benefits that reducing complicated
+steps and having them continually evaluated would have on slower learners.
+<p>Not only was enjoyment higher for all of those using Stat Lady, it also
+had superior ability in declarative knowledge instruction.&nbsp; According
+to the research “students may benefit from computerized learning when definitions
+and concepts are the outcome goal”.
+<p>As well as enabling communication in the process of learning, the environments
+enable the learners to share the resources and materials which become the
+product of the learning (oliver et al 1997).
+<h2>
+Constructivism, Collaboration and Other Approaches</h2>
+The trend for both on-campus and distance teaching has been the use of
+behaviourist instructional strategies which rely on the development of
+a set of instructional sequences with predetermined outcomes (Lefoe 1998).
+The goal of teaching in behaviourist, also known as instructivist or objectivist,
+approaches is to facilitate the transfer of knowledge from an active expert
+to a passive learner. The traditional lecture approach embeds the pedagogical
+assumptions of the instructivist model, to present as much of the right
+information as possible (Nulden 1998).
+<p>It is now widely held that objectivist approaches suffer a number of
+weaknesses which decrease their educational effectiveness. For example,
+Confrey (1990) suggests that objectivist approaches require that the instructor,
+rather than students, are responsible for simplifying the contents of a
+knowledge domains. As a result the objectivist approaches present students
+with a simplified model of complex knowledge and deprive the students of
+the benefits gained by simplifying the knowledge domain.
+<p>In response to these perceived problems a number of alternative approaches
+have been identified including collaborative and constructivist learning.
+This section provides a brief overview of these theories of learning and
+the implications they have for teaching operating systems and the development
+of RCOS.java.
+<p>The constructivist group of theories place less emphasis on the sequence
+of instruction and more emphasis on the design of a learning environment.
+Central to the constructivist tradition of learning is the emphasis on
+the role of the learner in the creation of knowledge (Biggs, 1991). While
+there is a broad spectrum of approaches under the constructivist banner
+two common beliefs are that learning is an active process of constructing
+knowledge and that instruction is a process of supporting that construction
+rather than communicating knowledge (Duffy and Cunningham, 1996, p171).
+<p>Constructivism has a number of implications for teaching including a
+need to encourage students to plan and define their goals for learning
+based on their existing knowledge, since knowledge construction builds
+upon the student's existing knowledge (Ben-Ari, 1998). Teaching in a construcivist
+setting
+means providing students with the opportunity to examine their processes
+of thinking and problem solving and providing learning experiences that
+engage the learner. Constructivist based teaching techniques are supposed
+to be more successful than traditional techniques, because they explicitly
+address the inevitable process of knowledge construction (Ben-Ari, 1998).
+<h2>
+Operating Systems Approaches</h2>
+Approaches used to teach a subject in operating systems can be placed into
+one of five categories. In most cases an intstructor will draw upon a combination
+of these approaches.
+<h3>
+Purely Theoretical and Text Book Based</h3>
+This method introduces concepts and explanations with no practical application
+or demonstration. Many students never fully understand the relevance or
+meaning of the concepts and theory without the reinforcement and demonstration
+practical application provides. Many of the text books used in operating
+systems subjects follow this method (Stallings, 1992. Lister and Eager
+1988).
+<h3>
+The Use of Separate Unrelated Approaches</h3>
+This method uses separate practical projects to demonstrate a number of
+the important concepts. The projects do not meld together in any way and
+generally don't deal directly with an operating system. This method tends
+to produce students with an understanding of each separate concept but
+without a grasp on how these concepts fit together to produce an operating
+system (Withers and Bilodeau, 1992). The students do however gain a good
+understanding of each particular concept.
+<h3>
+Supplementary Learning Resources</h3>
+Take the form of:
+<ul>
+<li>
+programming assignments</li>
+
+<li>
+animations??</li>
+
+<li>
+physical demonstrations</li>
+
+<li>
+quizzes (West stuff)</li>
+</ul>
+Approaches specific to operating systems have included physical demonstrations
+[Tosten, 1993], animations [Hayes, 1990], concurrency simulators [Bynum
+1996, Kurtz 1998] and toy operating systems [Christopher, 1993].
+<h3>
+Use of a Simulated or Cut-Down Operating System</h3>
+This method involves the use of a simulated operating system (either in
+full or in part) which demonstrates the theoretical concepts. Problems
+faced by this approach include the learning curve associated with the simulation.
+Experience with PRMS (reference) showed this can be considerable (Chernich
+and Jones, 1994). Additionally the simulation may not exhibit exactly the
+behaviour of a typical operating system (Withers and Bilodeau, 1992. Goh,
+1992. Ramakrishnan and Lancaster,1993). As a result the student must perform
+the conceptual leap from the performance of the simulation to real operating
+system behaviour.
+<h3>
+Practical Application Using a Complete Operating System</h3>
+In this method an entire operating system provides a demonstration of the
+theoretical concepts. Students are able to see a real system and its implementation
+details (no conceptual leap). However the students must climb an even steeper
+learning curve than that in the previous method (Kavka et al, 1991.).
+<p>In addition, real operating systems can be hard to use. An attempt by
+CQU to use the Minix (Tanenbaum, 1987) operating system resulted in many
+distance students not being able to install Minix let alone observe it
+in action (Chernich and Jones, 1994).
+<h3>
+Animation and Algorithm Visualisation</h3>
+[Boroni et al 1997] suggests three categories for animation tools used
+in studying computer science:
+<ul>
+<li>
+Program animators: Interactive debuggers which aid the user's understanding
+of a program.</li>
+
+<li>
+Algorithm animators: Provide pictorial visulizations of an algorithm in
+execution.</li>
+
+<li>
+Concept animators: Provide an animation of a particular, usually abstract,
+concept.</li>
+</ul>
+Understanding and analysing algorithms is a significant component of operating
+systems and many computer science students find this a difficult task (Kehoe
+1996). Many instructors have looked toward algorithm animation (Kehow,
+1996), also known as algorith visualizaation [Naps 1997], as a possible
+approach to easing this difficulty. Algorithm visualisation/animation is
+used to depict the execution of an algorithm as a sequence of graphical
+snapshots which is usually controlled by the student [Naps 1997].
+<p>Kehoe (1998) reports on the mixed results found by investigations into
+the effectiveness of animations as a learning tool. While students report
+feeling that animations aid their understanding of algorithms (SBL93) there
+have been numerous reports showing both negative (or limited) (RBA90, PE91,
+SBL93, BCS96) and positive results (May89, MA91 LBS94). Unfortunately in
+the majority of cases the positive result for the animation was small and
+not statistically significant (Stasko 1997).
+<b>Something about the no
+significant difference phenomenon.</b>
+<p>A results of a study reported in Pane et al (1996) show little difference
+between dynamic and static presenations. This report (Pane, Corbet and
+Bonnie?? 1996) also suggests that dynamic presenations are not a panacea
+for instructional difficulty. They also found that even motiviated students
+did not take full advantage of the exploratory opportunities such systems
+provided and suggest that substantial guidance must be built into simulation
+environments.
+<p>The less than glowing conclusions about the effectiviness of animations
+may explain their lower than expected application. Stasko (1997) also suggests
+that technical requirements, computing availability and the time required
+to prepare such animations also contribute to the limited use. The Web
+and in particular Java offers a solution to one of the problems facing
+algorithm animation, the constraints of platform dependency [Naps 1997].
+<p><b>somethign about moving towards student construction of algorithms</b>
+Pane et al (1996) suggests that the challenge is to engage the student
+in the activity to encourage students to actively experiment with animations
+and simulations. Stasko (1997) suggests that requirements for the student
+construction of algorithms includes being very easy to learn and that developing
+the animation should be closely tied with actually understanding the algorithm
+and its operation. Designing and implementing an animation forces the student
+to identify the fundamental operations of the algorithm. It encourages
+the student to become the teacher (Stasko 1997).
+<p>Animations combined with a constructivist pedagogy, where students are
+encouraged to experiment and actively construct meaning, appear to offer
+the most appropriate use of the technology. Bergin et al (1996) believe
+that "active engagement on the part of students leads to higher motivation
+and better integration and retention of content. Lawerence et al (1994)
+also conclude that students who actively participate in the construction
+of animations achieve a better understanding of the concepts.
+<p>Pedagogical strategies for combining algorithm visualizations with accompanying
+hypertext materiais on the Web were detailed in [Naps 1996].
+<h1>
+The Rationale Behind RCOS.java</h1>
+RCOS.java is an attempt to learn from the lessons of others and to take
+advantage of the new generation of computers, networks and computer software.
+In describing the rationale we will draw on the content of the previous
+two sections to show how it attempts to address the problems associated
+with previous solutions and combine the advantages of more successful approaches.
+<p>Ultimately the value of multimedia will depend on its ability to provide
+the rich range of interaction and feedback required to allow the learner
+to respond flexibly and creatively. If students are forced to respond through
+a pre-programmed software application, the pedagogic benefits of analysis
+and interpretation available through the audio and video elements of multimedia
+may be lost, because of the restricted means by which the learner can interact.
+<p>New tools are allowing teachers and learners to create or modify their
+own materials to construct mental structures or schemas of the material
+presented.&nbsp; It is through these new tools that a successful instructional
+media can be provided that incompasses all various instructional perspectives
+[Heinich et al, 1993]:
+<ul>
+<li>
+Active participation and interaction: Engaging the student in meaningful
+(word meaing seeing your place in history or time??) tasks,</li>
+
+<li>
+Practice: By varying contexts and increasing exposure, new knowledge, skills
+and attitudes are acquired,</li>
+
+<li>
+Individual differences: Allowing the progression of learners through materials
+at their own speed,</li>
+
+<li>
+Reinforcement and feedback: Instant feedback to allow students information
+on their current compentcy,</li>
+
+<li>
+Realistic contexts: By removing rote learning and showing the application
+of acquired knowledge, and</li>
+
+<li>
+Cooperative groups: Providing pedagogical support from group members, tutors,
+teachers and peers.</li>
+</ul>
+
+<h2>
+The Design of RCOS.java</h2>
+This section provides an insight into the internal structure of RCOS.java
+and how it relates to the rationale mentioned previously. In particular,
+it will describe how RCOS.java attempts to use the features of Java [Kurtz
+1998] to produce a system that is flexible, extensible and portable.
+<p>Ben-Ari (1998) believes that many of the phenomena observered in the
+computer science literature, such as the haphazard construction of computer
+science concepts and the perception that computer science is hard, can
+be more easily explained by constructivism.&nbsp; For example, contemporary
+theories of learning place emphasis on gaining knowledge through appropriation
+of information. This is central to a constructivist tradtion of learning
+that emphasizes the role of the learner in knowledge creation (Biggs, 1991).
+Implications for teaching involve encouraging students to plan and define
+their goals for learning based on their existing knowledge; allowing students
+opportunity to examine their processes of thinking and problem solving,
+that is to become metacognitive processors of information; and providing
+learning experiences that engage the learner.
+<p>Many research studies have shown that there are clear educational advantages
+to be derived from collaborative activities among students (Oliver ??1997).
+Collaborative learning, the process for getting two or more learners to
+work together, assumes that knowledge is created as it is shared among
+learners (Nulden 1998). Some of the benefits of collaborative learning
+include increased ownership of learning tasks, students who are more actively
+engaged with learning (Greening ??), more thorough planning and writing
+(Nulden, 1998), increased motivation (Slavin, 1977), have higher levels
+of self-efficacy (Moriarty, Douglas, Punch &amp; Hattie, 1995), achievement,
+and self-direction, and higher levels of task related interaction and behaviour
+(Johnson, Johnson &amp; Stanne, 1986).
+<p>The increasing focus is on exploiting the properities of technology
+which empower students to take ownership of learning tasks, to colalborate
+with other students, and to actively construct new meaning (Greening ???).
+However, <b>something about the care needed when implementing this to avoid
+students feeling out of place, overworked.</b>
+<h2>
+Features of RCOS.java</h2>
+RCOS.java combines the features of previous approaches, animation/visualization,
+concurrency simulation and toy operating systems into a single system.
+It will also provide the ability to control the operation of RCOS.java
+and be used to create, by both student and teacher, educational sequences
+of the features of an operating system.
+<p>The structure of RCOS.java is closely matches the components of a modern
+computer system.&nbsp; This includes simulated hardware including Central
+Processor Unit (CPU), Random Access Memory (RAM), Visual Display Unit (VDU),
+and Permanent Storage (Disk Storage).&nbsp; These hardware compontents
+are managed by their respective operating system components: micro-kernel,
+memory manager, terminal manager, and disk manager.&nbsp; Program control,
+inter-process communication, messaging and file system management are also
+contained within RCOS.java.
+<p>The CPU is based on a simple stack based P-Machine.&nbsp; The P-Machine
+is a hypothetical computer which executes P-Code instructions.&nbsp; As
+well as a stack, the P-Machine has 4 registers: program counter, stack
+pointer, base pointer and instruction register.&nbsp; <b>more explanation
+about it here </b>While being highly simplified the design of the P-Machine
+is similiar in many ways to the architecture of modern CPUs and Sun's Java
+Virtual Machine (JVM).&nbsp; This is not to say however that the P-Machine
+is as fully functional or well designed as modern systems.
+<p>RCOS.java is a micro-kernel based system, where most of the operating
+system functionality is implemented outside of the kernel.&nbsp; In this
+way we have a seperate memory manager, terminal manager, process manager,
+disk manager, etc.
+<p>While these features are not new to an educational operating system
+their interface and manipulation by the student is.&nbsp; The initial interaction
+with the student is via the operating system animators.&nbsp; A direct
+representation of all hardware and software components simulated by RCOS.java
+is available in a graphical and useful way.
+<p>For example, a student can observer the full life cycle of a program.
+<p><img SRC="rcos1.JPG" height=600 width=800>
+<p><b>Picture of program manager (figure 1)</b>
+<p>(See Figure 1) The simulated storage device receives a request via the
+program manager (illustrated) and returns the program code.
+<p><img SRC="rcos2.jpg" height=600 width=800>
+<br><b>Picture of Process Scheduler and Terminal (Figure 2)</b>
+<p>(Figure 2) The process scheduler displays the Zombie, Blocked, Ready
+and CPU.&nbsp; The Zombie queue holds processes that cannot begin executing
+as it requires access to some resource, for example, a process must have
+a terminal in which to accept input and display output.&nbsp; The Blocked
+queue is used to display processes that require a resource in order to
+continue their execution.&nbsp; The Ready queue is used to hold any processes
+that are currently waiting for time on the CPU.&nbsp; The currently executing
+process is displayed on the CPU.&nbsp; Modification of the scheduling algorithm
+can be made at any time by the user.&nbsp; So too can the Quantum (the
+time a process stays on the CPU) and the speed of the animation display.
+<p><img SRC="rcos3.jpg" height=600 width=800>
+<br><b>Picture of the IPC Manager (Figure 3)</b>
+<p>(Figure 3)&nbsp; Currently allocated memory, current semaphore and shared
+memory are all viewed from the IPC Manager.&nbsp; In real time users can
+see memory being read, written, allocated and deallocated.
+<p><img SRC="rcos4.jpg" height=600 width=800>
+<br><b>Picture of CPU Animator (Figure 4)</b>
+<p>The CPU Animator shows an indepth view of the P-Code CPU and it's current
+state.&nbsp; Programs can be viewed as they are running and the effects
+of executing the program can be demonstrated.
+<p>The student also have the ability to create their own programs to run
+in RCOS.java.&nbsp; Instructors can construct pre-recorded examples to
+demonstrate important operating system concepts like deadlock, race conditions
+and starvation.
+<h2>
+RCOS.java and New Learning Styles</h2>
+Computer-based learning tools have been widely criticised for the poor
+teaching strategies accompanying their use [Bates 1995]. This section will
+describe examples of how RCOS.java can be used to aid student understanding
+of operating systems concepts. These will include using animations to explain
+operating system concepts, providing a platform in which students can experiment
+with concurrent processes and alternative operating systems algorithms,
+integration of RCOS.java with a hypermedia text, and enabling students
+to construct animations which explain operating system concepts.
+<p>One of the main aims in the design of these approaches is to encourage
+students to develop higher learning skills such as analysis, synthesis,
+evaluation and problem solving.
+<p>McQuillan's (1994) extensive ethnographic study clearly supports the
+notion that most benefits of introducing technology are related to the
+changes in teachers' conceptions and the consequential changes to instructional
+strategy rather than the introduced technology itself. Positive motivational
+content, clear goals and expectations, meaningful learner activities and
+interaction with others are features of learning environments that encourage
+deep ap proaches to learning (Gibbs 1992). Technological innovations therefore
+sh ould take these features into account in design and implementation.
+<p>These potential benefits of educational technology are not always realised.
+Students or faculties with limited financial resources are less likely
+to successfully incorporate a technology into their teaching or learning
+context because they simply can not afford them. Similarly, technology
+can fail to deliver deeper learning if people have had bad previous experiences
+for whatever reason (eg. poor on-going support or excessive reliance on
+huge quantities of facts). As the systems view suggests, even positi ve
+experiences with technology cannot guarantee current or future success
+=2E Students who have successfully applied technology to achieve a deep
+a pproach to learning in the past may be severely discouraged from replicat
+ing such an approach if the introduced technology is one that is poorly
+supported, suffers frequent breakdown or is designed in a way that encoura
+ges surface approaches to learning (Freeman 1997).
+<h2>
+Experiences with Java</h2>
+The original RCOS project [Chernich, Jamieson and Jones 1996, Chernich
+and Jones 1994] was implemented in C/C++.&nbsp; The target platforms were
+Windows/DOS and Unix that required code tailored specific to each platform.
+<p>Java was seen as an excellent candidate by being multi-platform, object
+oriented, multithreaded, and suited to network distribution.
+<p>The main reason for choosing Java, however, was to produce good object
+oriented software that was clear, simple and reusable.&nbsp; Java also
+removes C/C++ features such as pointers, operator overload, mulitple inheritance,
+functions, automatic coercians (by introducing explicit casting) structures,
+unions and typedefs.&nbsp; By making the language simpler it should be
+less prone to bugs and good design to overcome the missing features.
+<p>With the inclusion of Java in version 2 of Netscape and version 3 of
+Internet Explorer Java became the programming language for the web.&nbsp;
+Active X, Inferno and others have not gained as wide acceptance as Java.&nbsp;
+So to produce a learning tool to be integrated into a distant education,
+web distributed system it was the obvious choice.
+<h3>
+Designing for Students</h3>
+One of the goals in creating RCOS.java was to produce to produce a tool
+that could be easily extended and modified by students.&nbsp; This requires
+that the design and implementation of RCOS.java have sound grounds in good
+software engineering practice and design.&nbsp; Its primary goal, however,
+was as a learning tool for operating system ideas.&nbsp; This has meant
+a balancing act between required features, good design and timely implementation.
+<p>This meant:
+<ul>
+<li>
+Ensuring good use of Object Orientated Design and Patterns,</li>
+
+<li>
+Overcoming “conceptual confusion” [Deadman 1997], and</li>
+
+<li>
+Combining many differing requirements into one implementation.</li>
+</ul>
+
+<h3>
+Object Orientated Design and Patterns</h3>
+Using good Object Oriented Design (OOD) such as encapsulation, message
+passing, inheritance, overriding, overloading, and abstraction Java classes
+and packages were formulated.
+<h4>
+Visitor Pattern</h4>
+One of the important effects of the Visitor pattern used in RCOS.java is
+the ability to arbitrarily add functionality to an object without modifying
+them.&nbsp; This simplifies extending RCOS.java functionality.&nbsp; This
+technique is also known as “double dispatch”.&nbsp; However, Java is a
+“single dispatch language” in that the method executed is based on the
+type of the received object.
+<p>The benefits of this pattern are:
+<ul>
+<li>
+Reduction in the amount of code in each of the “MessageHandler” classes
+by removing a lot of if-then-else statements, and</li>
+
+<li>
+Code for each message is contained inside the appropriate message rather
+than the objects received them, increasing the maintainability.</li>
+</ul>
+
+<p><br>Messages did consist of an object of either complex (like a Memory
+or Terminal object) or simple (Integer or Char objects).&nbsp; Complex
+object definitions were used generally in one type of message and existed
+as a separate object definition.&nbsp; This pattern allowed the data to
+be combined into the object, simplifying the design and implementation.
+<p>The existing processing message had three main problems:
+<ul>
+<li>
+A new message required new code to be added to handle the message,</li>
+
+<li>
+The determining factor of whether a message was handled was based on arbitrary
+conditions.</li>
+
+<li>
+Little or no encapsulation of data.</li>
+</ul>
+
+<p><br>When the visitor pattern was implemented it simplified the processing
+of messages to a few lines of code for each receiver.&nbsp; The message
+object interface to outside code became well defined, attributes were kept
+encapsulated and access was allowed via methods.&nbsp; It also reduced
+complexity and decreased bugs caused by components handling messages when
+they shouldn't.
+<h4>
+Adapter Pattern</h4>
+A lot of effort has been made to ensure that the messages contained only
+the relevant methods and deta types appropriate to the components they
+aree sent to.
+<p>In order for the to be accomplished the messages are broken up into
+three destination categories:
+<ul>
+<li>
+OS only,</li>
+
+<li>
+Animator only, and</li>
+
+<li>
+Universal (all destinations).</li>
+</ul>
+When a message is received the appropriate call it is made dependent on
+the received components type.&nbsp; For each type of message there are
+adapters of the three abstract classes.&nbsp; Each abstract class contains
+a “doMessage” for each possible receiving component type.&nbsp; The adapter
+class implements the respective abstract class with empty methods.&nbsp;
+Each message then extends the adapter class and overrides only with methods
+necessary for components receiving the messages.
+<p>The adapter pattern encourages code reuse from within the messages themselves.&nbsp;
+There has been made a clear distinction between the operating system and
+their animators, logically they are supposed to be unrelated.&nbsp; However,
+it makes sense to combine a message when they deal with similar objects
+in the operating system and animator domains.&nbsp; For example, when memory
+is written to the message that updates the operating system can have exactly
+the same data structure.&nbsp; The calls to the animator and operating
+system component, however, is totally different.
+<p>This patter also allows new or existing functionality to be more easily
+added across multiple and/or unrelated receiving objects so that they can
+be implemented using as much of the same code as possible.
+<h4>
+Command Pattern</h4>
+A useful pattern to overcome the problem of invoking arbitrary methods
+in an object is the Command pattern.&nbsp; This essentially allows the
+interface to have undoable operations.&nbsp; Having an environment that
+is forgiving is an important principle of user interface design especially
+in an educational environment.
+<p>Each command in the RCOS.java system is decoupled.&nbsp; For example,
+when a button is pressed it invokes another object that performs the task
+rather than perform the task directly.&nbsp; This takes place via the messaging
+system.
+<p>By specialising the objects this way, the messages can store the state
+before the change was made.&nbsp; This enables a facilty where each "do"
+action object has an opposite "undo" action.&nbsp; A listener and play
+back object is required inorder to implement a multiple undo facility.
+<p>The listener object is used to record and store all messages in a first
+in, first out order (FIFO).&nbsp; The play back system then reads the recorded
+data and sends the messages from the file.
+<p>A lecturer or tutor who wishes to demonstrate a particular operating
+system concept can use this system to present students in and easily repeatable
+and distributable fashion.&nbsp; The format of the file is human readable
+so it can also be used by students in order to more easily understand the
+underlying operating and messaging system.
+<h4>
+Model-View-Controller Pattern</h4>
+The Model-View-Controller (MVC) design pattern originated in Smalltalk
+and specifically for user interface design [Gamma et al 1995].&nbsp; It’s
+probably most used in Java for creating user interfaces, too.&nbsp; The
+purpose of the MVC architecture is to separate the user interface from
+the underlying application (model).&nbsp; The user interface is split up
+into the view (output) and the control (user input).&nbsp; The model should
+be self-contained and free of the external requirements of the user interface.&nbsp;
+A lot of the previous patterns discussed have allowed these components
+to be loosely coupled enough to implement this pattern successfully.
+<p>The purpose of the MVC pattern is to allow:
+<ul>
+<li>
+the application code is reusable,</li>
+
+<li>
+the user interface or application can be developed independent of one another,
+and</li>
+
+<li>
+the system code can remain as modular as possible with classes able to
+inherit code.</li>
+</ul>
+The initial development of RCOS.java consisted of one programmer working
+on the user interface while the others worked on components of the operation
+system (message passing, file system, CPU, etc).&nbsp; This meant, by necessity,
+that the animation components were as independant as the specified messages
+would allow.&nbsp; Changes in the backend should have had little or no
+effect on the user interface.
+<p>This was not always possible, however.&nbsp; For example, the memory,
+process, and disk management all have varying scheduling algorithms that
+effect how they are displayed on the user interface.&nbsp; A process using
+the FIFO (first in, first out) schedule scheme has a different behaviour
+than a Priority Queue.&nbsp; It also requires that the active scheduling
+algorithms be defined via the user interface, at run time.&nbsp; This would
+seem to require that the animators and operating systems to be closely
+related.&nbsp; The solution that eveloed, has meant that when these operating
+system components initialize they send a message to the Animators describing
+what scheduling schemes are to be used and the currently used one.&nbsp;
+A choice is displayed and on selection, a message indicating a new scheduling
+scheme is sent.
+<p>It appears then, that the control and view are dependent on the model
+for it to receieve and process certain messages.&nbsp; Contradicting the
+whole idea of MVC pattern.&nbsp; It's important to keep in mind that the
+purpose of the pattern is to allow independent development of the view/control
+and model and to encourage code reuse.&nbsp; This is still available in
+RCOS.java.
+<p>By design, RCOS.java has a large hierarchy of class files.&nbsp; The
+Animator package is organised by operating system components i.e. Animator.CPU,
+Animator.Disk, etc.&nbsp; Operating system, animators and universal sections
+divide the messaging system in a similar fashion.&nbsp; The operating system
+and animation sub-systems have their own message controllers (post offices)
+designed to send message to each other and to registered components within
+the designated area.
+<p>The dependecies are not between the user interface and operating system
+but on the operating system and user interface on the messaging system.&nbsp;
+By using the other design patterns, the messages are implemented in such
+a way as to encourage code reuse and messages are coupled by common properites
+and methods.&nbsp; Messages can only be processed only as long as the receiving
+class has a "doMessage" method.&nbsp; As long as the messages are well
+defined then development can occur indepently, modularly and utilising
+inheritance.
+<h4>
+Mediator Pattern</h4>
+Talk about how the Post Offices keep a record of similar objects.&nbsp;
+It prevents objects from objects referring to each other explicity.&nbsp;
+All objects only know about the mediator and this reduces interconnections.
+<h3>
+Conceptual Confusion</h3>
+A problem with Java is that it usually isn’t the first language that people
+learn based, if nothing else, on the age of language.&nbsp; The project
+began with programmers with previous experience in Pascal, C/C++ and Ada.&nbsp;
+This is also a similar background that the students will have when asked
+to use and modify RCOS.java.&nbsp; While there are obvious similarities
+between Java and C/C++ and Ada there are also significant differences and
+old habits are hard to break.&nbsp; There were a number of mistakes made
+by developers taking the original C++ code and porting it to Java.
+<h4>
+Implied Access Specifiers</h4>
+In C++ a base class access is either “public” or “private”.&nbsp; The default
+access, when no specifier is given, is “private”.&nbsp; In Java base classes
+can be identified in four ways: “private”, “public”, “protected” and “friendly”.&nbsp;
+“Friendly” access, when no specifier is given, is the default and means
+only classes within the same package have access.
+<p>The “protected” keyword in C++ is only used during inheritance.&nbsp;
+Java’s “protected” keyword extends C++ meaning to include other classes
+in the same package.
+<p>This meant, initially, that the developers wrote code, in packages,
+that didn’t work.&nbsp; Java has a more restrictive default access policy
+caused this.
+<h4>
+Arguments</h4>
+With C++ there are two types of variable passing: by value and by reference.&nbsp;
+The C++ version of RCOS used both of these types of variable passing.&nbsp;
+In Java only a copy of the variable passed is used.&nbsp; Modification
+is only made when an attribute within a passed object is modified.&nbsp;
+Again, there were several instances where problems occurred based on the
+developer expecting to modify the direct value of a passed variable only
+to find those modifications disappeared outside the method.
+<p>While not used extensively, some code in the original RCOS allowed variable
+length parameter lists.&nbsp; This again had to be removed because of Java’s
+lack of support.
+<h4>
+Multiple Inheritance</h4>
+While the original version of RCOS used very little (if any) multiple inheritance
+it was initially thought that the lack of multiple inheritance would prove
+to make implementation difficult.&nbsp; Specifically, implementation of
+the memory sub-system .&nbsp; However, using the “interface” keyword to
+implement multiple interface and design patterns has meant there were few
+problems is implementing the design.
+<h2>
+Future Plans</h2>
+The initial plan was to complete RCOS.java for Sun's 1996 Java programming
+competition.&nbsp; The initial implementation was of RCOS.java was of rather
+poorly written 1.02 Java.&nbsp; Through the following years RCOS.java was
+redesigned, recoded and converted to Java 1.1.&nbsp; The initial target
+for execution was Netscape 3.0.&nbsp; The choice of implementation in the
+Java language has ensured that any time and effort has not been lost over
+the long coding time.&nbsp; While there are alternatives to certain aspects
+of Java it remains a clear choice for implementation of future versions.&nbsp;
+With the inclusion of the Java Media Framework, 2D and 3D APIs into the
+Java 1.2 specification the richness and scope of RCOS.java can only grow.
+<p>While improving the users visuals and user interface additional learning
+features should also be incorporated.&nbsp; This can be done by extending
+the concepts of forward and backward error recovery and reachability [Dix
+et al, 1993].&nbsp; Recoverability is understood to be the ability to correct
+a mistake once one has been made.&nbsp; Using the idea of "hypertime" from
+Nelson's OSMIC [Nelson 1999], comparisons between diverging choices or
+modifications can be made.&nbsp; The user can follow the program to a certain
+point, go back to a previous point, make a different decision or modification,
+and then examine the differences between the two (or more) outcomes.&nbsp;
+This creates not only an environment where a user is unafraid to make a
+mistake but are free to make as many mistakes as they wish.&nbsp; It is
+a completely non-distructive "undo" feature where all versions are stored,
+compared and recoverable at any time.&nbsp; This can be expanded to parallel
+modifications or groupware where users can begin at one starting point,
+develop a conclusion or solution to the problem and then make comparisons
+between other members of the group.&nbsp; This could be done in real time,
+anonymously and across diverse geographies in the student base.
+<p>Quite by accident, RCOS.java is appropriate for subjects other than
+just the 85321 Operating System class.&nbsp; Other areas where it could
+be included in instruction include:
+<ul>
+<li>
+An introductory course into the basic computing concepts,</li>
+
+<li>
+Systems simulation and modelling,</li>
+
+<li>
+Computer architecture and assembler,</li>
+
+<li>
+Compiler design,</li>
+
+<li>
+Human Computer Interaction, and</li>
+
+<li>
+Research into advanced topics in Operating System design and algorithms.</li>
+</ul>
+Simulation of entire, real life, operating system and hardware platforms
+are possible due the design of RCOS.java.&nbsp; Another obvious choice
+would be to replace the existing CPU implementation with the Java Virtual
+Machine.&nbsp; By adding a simulated network card students could explore
+the ideas of networks, collaborative and distributed computing.&nbsp; A
+chat like program could be implemented by creating a C++ program compiled
+by RCOS.java.
+<p>The number of applications to be applied to RCOS.java are numerous and
+varied and can be re-used for other projects easily.
+<h2>
+Conclusions</h2>
+
+<h2>
+References</h2>
+[Bates, 1995] A. W. (Tony) Bates, Technology, “Open Learning and Distance
+Education”, Routeledge,
+<br>1995
+<p>[Boroni 1997] Boroni, C., Goosey, F., Grinder, M., Rockford, R., and
+Wissenbach, P, "WebLab! A Universal and Interactive Teaching, Learning,
+and Laboratory Environment for the World Wide Web", Proc of the SIGCSE
+Technical Symposium 28 (1:199-203, March 1997).
+<p>[Bynam et al, 1996] Bill Bynum, Tracy Camp, After you, Alfonse: A Mutual
+Exclusion Toolkit,
+<br>Proceedings of the 27th SIGCSE Technical Symposium on Computer Science
+Education, SIGCSE
+<br>Bulletin, 28(1), March, 1996, pp 170-174
+<p>[Christopher 1993] W A Christopher et a. (1993), The Nachos Instructional
+Operating System.
+<br>Proceedings of the Winter 1993 Usenix Technical Conference, pp 481-489.
+<p>[Deadman 1997] Richard Deadman (1997), When is Rome: A Guide to the
+Java Paradigm, Java Report, October, 1997, pp 41-52.
+<p>[Dillon, Tan, 1993] Tharam S. Dillon, Poh Lee Tan (1993), Object-oriented
+Conceptual Modeling, Prentice Hall, pp 63-84.
+<p>[Dix et al, 1993] Alan Dix, Janet Finlay, Gregory Adowd, Russell Beale,
+Human-Computer Interaction, Prentice Hall, pp142-144.
+<p>[Denning 1989] P Denning, et al (1989), “Computing as a Discipline.”,
+Communications of the ACM,
+<br>32(1), pp 9-23
+<p>[Engelbart 1995] Douglas Engelbart, “Toward Augmenting the Human Intellect
+and Boosting our Collective IQ”, Communications of the ACM, August 1995.
+<p>"Intellectual Implications of Multi-Access Computer Networks," Douglas
+C. Engelbart, Proceedings of the
+<br>Interdisciplinary Conference on Multi-Access Computer Networks, Austin,
+TX, April 1970
+<p>&nbsp;[Gamma et al, 1995], Erich Gamma, Richard Helm, Ralph Johnson,
+John Vlissides, "Design Patters Elements of Reusable Object-Orientated
+Software", Addison-Wesley, pp 293-299.
+<p>[Hannay 19??] D.G. Hannay, “Hypercard automata simulation: finite-state
+pushdown and Turing
+<br>machines”, SIGCSE Bulletin, 24(2), p55-58
+<p>[Hayes, 1990] Hayes J H, Miller L R, Othmer BA and Saeed M (1990): Simulation
+of Process and
+<br>Resource Management in a Multiprogramming Operating System, Proceedings
+of the 21st ACM
+<br>Technical Symposium on Computer Science Education, February, 1990,
+p125.
+<p>[Heinich et al, 1993] Robert Heinich, Michael Molenda, James D. Russell,
+"Instructional Media and the New Technologies of Instruction", Macmillan
+Publishing Company, pp346-362
+<p>[Hunt, 1997] John Hunt, “Constructing Modular User Interfaces in Java”,
+Java Report, September, 1997, pp25
+<p>[Kurtz, 1998] Barry Kurtz, Hong Cai, Chris Plock, Xijia Chen, “A Concurrency
+Simulator Designed
+<br>for Sophomore-level instruction”, SIGCSE Bulletin, 30(1), 1998, pp
+237-241.
+<p>[LaLonde 1991] W.R. LaLonde, J.R. Pugh, Inside Smalltalk Vol 11, Prentice
+Hall, 1991, pp 7-12
+<p>[McDonough et al 1994], “University Courseware Development: Compartive
+Views of Computer-Based Teching by Users and Non-Users.”, Computers and
+Education, Vol. 23, No. 3, Nov. 1994, pp. 211-220.
+<p>[Naps 1996] Thomas Naps, "Algorithm Visualization Delivered Off the
+World Wide Web -- Why and How", Proceedings of the Association for Computing
+Machinety's SIGCSE/SIGCUE Conference on Integrating Technology into Computer
+Science Education, Barcelona Spain, June, 1996
+<p>[Naps 1997] Thomas Naps, "Algorithm visualization on the World Wide
+Web---the difference Java makes!", Proceedings of ITiCSE'97, Uppsala Sweeden,
+pp59-61.
+<p>[Nelson 1995] Theodore Nelson, “The Heart of Connection : Hypermedia
+Unified by Transclusion”, Communications of the ACM, August 1995.
+<p>[Nelson 1999] Theodore Nelson, "Reasoning Behind the OSMIC Proposal:
+Models of Time, Backtracking and Groupware", http://www.sfc.keio.ac.jp/~ted/OSMIC/osmicTime.html
+<p>[Sebrechts et al 1995] Marc M Sebrechts et al, “Establishing an Electronic
+Collaborative Learning Environment in a University Consortium: The Circle
+Project”, Computers and Education, Vol. 25, No. 1, Dec. 1995, pp. 215-224.
+<p>[Shute et al 1994] Valerie Shute and Lisa Gawlick-Grendell, “What does
+the Computer Contribute to Learning?”, Computers and Education, Vol. 23,
+No. 3, Nov. 1994, pp. 177-186.
+<p>&nbsp;[Soloway 1995] E. Soloway, “Beware, Techies Bearing Gifts”, Comm.
+ACM, Vol. 38, No. 1, Jan. 1995, pp. 17-24.
+<p>[Tosten 1993] Rodney S. Tosten, “Using a Model Railroad system in an
+Artificial Intelligence and
+<br>Operating Systems Course”, ACM SIGCSE Bulletin, 25(1), March 1993
+<p>[Wutka, 1997] Mark Wutka et al, Hacking Java, QUE, pp194-206.
+<p>A. W. (Tony) Bates, Technology, Open Learning and Distance Education,
+Routeledge, 1995
+<p>Ron Chernich, Bruce Jamieson, David Jones, RCOS: Yet another teaching
+operating system, Proceedings of the First Australasian Conference on Computer
+Science Education.
+<p>W A Christopher et a. (1993), The Nachos Instructional Operating System.
+Proceedings of the Winter 1993 Usenix Technical Conference, pp 481-489.
+<p>Bergin, J., Brodlie, K., Goldweber, M., Jimenez-Peris, R., Khuri S.,
+Patiiio-Martmez, M., McNally, M., Naps, T., Rodger S., and Wilson, J. An
+Overview of Visu- alization: its Use and Design. Integrating Technology
+into Computer Science Education, SIGCSE (28:192- 200, March 1996).
+<p>Bill Bynum, Tracy Camp, After you, Alfonse: A Mutual Exclusion Toolkit,
+Proceedings of the 27th SIGCSE Technical Symposium on Computer Science
+Education, SIGCSE Bulletin, 28(1), March, 1996, pp 170-174
+<p>Chernich, R., Jones, D.. (1994). The Design and Construction of a Simulated
+Operating System. Proceedings of Asia Pacific Information Technology In
+Teaching and Education '94, Brisbane. pp 1033-1038,
+<p>Ron Chernich, Bruce Jamieson, David Jones, RCOS: Yet Another Teaching
+Operating System,Proceedings of the First Australasian Conference on Computer
+Science Education.
+<p>Christopher, W.A., et al. (1993). The Nachos Instructional Operating
+System. Proceedings of the Winter 1993 Usenix Technical Conference, 481-489.
+<p>Clayton, D. Farrands, P. Lynch, T. and Robinson, P. Empowering the distance
+learner: Using Computer-Based Instruction to Enhance Learning Introductory
+Statistical Concepts. Proceedings of the Asia Pacific Information Technology
+in Education Conference, Brisbane, July 1994, pp 999-1004
+<p>P Denning, et al (1989),Computing as a Discipline. Communications of
+the ACM, 32(1), pp 9-23
+<p>D.G. Hannay, Hypercard automata simulation: finite-state pushdown and
+Turing machines, SIGCSE Bulletin, 24(2), p55-58
+<p>Hayes J H, Miller L R, Othmer BA and Saeed M (1990): Simulation of Process
+and Resource Management in a Multiprogramming Operating System, Proceedings
+of the 21st ACM Technical Symposium on Computer Science Education, February,
+1990, p125.
+<p>Kavka, C. et al. (1991). Experiencing Minix as a Didactical Aid for
+Operating System Courses. ACM Operating Systems Review, 25(3),
+<p>Kehoe, Colleen and Stasko, John T., Using Animations to Learn about
+Algorithms: An Ethnographic Case Study, Graphics, Visualization, and Usability
+Center, Georgia Institute of Technology, Atlanta, GA, Technical Report
+GIT-GVU-96-20, September 1996.
+<p>Kifer, M. Smolka, S. (1992). OSP An Environment for Operating System
+Projects. Operating Systems Review, 26(4), pp 98-99.
+<p>Barry Kurtz, Hong Cai, Chris Plock, Xijia Chen, A Concurrency Simulator
+Designed for Sophomore-level instruction, SIGCSE Bulletin, 30(1), 1998,
+pp 237-241.
+<p>W.R. LaLonde, J.R. Pugh, Inside Smalltalk Vol 11, Prentice Hall, 1991,
+pp 7-12
+<p>Colin McCormack, David Jones (1997), Building a Web-based Education
+System, John Wiley &amp; Sons, New York.
+<p>Mordechai Ben-Ari, Constructivism in Computer Science Education, SIGCSE
+Bulletin, 30(1), 1998, pp 257-261
+<p>Nulden, Urban, The ExCon Project: Advocating Continuous Examination,
+SIGCSE Bulletin 30(1), 1998, pp 126-130
+<p>&nbsp;Stasko, J.T., Using Student Built Algorithm Animations as Learning
+Aids, Proceedings of the 28th Technical Symposium on Computer Science Education,
+1997, pp 25-29
+<p>John Pane, Albert Corbet, Bonnie John, Assessing Dynamics in Computer-Based
+Instruction, Common Ground: CHI 96 Conference Proceedings (1996), New York:
+ACM Press.
+<p>Perez-Davila, Alfredo, OS Bridge Between Academia and Reality, Proceedings
+of the 26th SIGCSE Technical Symposium on Computer Science Education, SIGCSE
+Bulletin, 27(1), March 1995, pp 146-1481
+<p>Tosten, Rodney S., Using a Model Railroad system in an Artificial Intelligence
+and Operating Systems Course, ACM SIGCSE Bulletin, 25(1), March 1993
+<p>Withers, J.M. Bilodeau, M.B. (1992). An Examination of Operating Systems
+Laboratory Techniques. ACM SIGCSE Bulletin, 24(3), 60-64
+<p>Young, B. and Zelmer, A. CAL_Maker: The Development of a Simple Courseware
+Authoring Tool as a Student Project. Proceedings of the Information Technology
+for Training and Education'92 Conference, Brisbane, 1991, pp 678-685
+</body>
+</html>

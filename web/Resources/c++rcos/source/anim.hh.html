@@ -1,0 +1,63 @@
+<HTML>
+<HEAD>
+  <TITLE>
+anim.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+anim.hh
+  </H1>
+<PRE>
+//***********************************************************************
+//  MODULE : ANIM - Animator Device Driver for the RCOS OS simulator    *
+//  AUTHOR : Ron Chernich                                               *
+//  PURPOSE: Module to perform all screen animation operations and re-  *
+//           draw of switched displays.                                 *
+//  HISTORY:                                                            *
+//   14-MAY-93  First (MSC/C++ 7.00) version                            *
+//   18-AUG-94  static func of module made private member               *
+//   15-MAR-95  Modified to accomodate improved user tty encapsulation  *
+//   22-MAR-95  (Happy Birthday, Ron!) No of terminals made dynamic     *
+//***********************************************************************
+
+#ifndef _ANIM_RCOS_
+  #define _ANIM_RCOS_
+
+  #include "rcos.hh"
+  #include "message.hh"
+  #include "timer.hh"
+  #include "cpu-disp.hh"
+  #include "dev-disp.hh"
+  #include "dsk-disp.hh"
+  #include "kernel.hh"
+  #include "app.hh"
+  
+
+  //////////////////////////////
+  // This is a device driver merely to facilitate abstract communications
+  // with it.  It does not respond to normal Open, Read etc messages.
+  //
+  class Animate : public port {
+  private:
+    UINT16    nTermRb;
+    AniWin    nCurWin;                  // to inhibit updates of hidden windows
+    CpuAnim   Cpu;                      // process scheduler animation
+    TTyAnim  *pDev;                     // TTY and printer animation
+    DiskAnim *pDiskAnim[MAX_DRIVES];    // Disk Driver animation
+    void      PutTitle (char*, UINT16 = 0, char* = NULL);
+  public:
+    Animate (UINT16, UINT16, Knl*, UINT16);
+   ~Animate (void);
+    void   RxPort (PMSG);
+    void   SetCurWin (INT16, BOOL = FALSE);
+    INT16  GetCurWin (void)    { return (INT16)nCurWin; }
+  };
+
+
+#endif
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

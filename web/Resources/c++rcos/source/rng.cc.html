@@ -1,0 +1,95 @@
+<HTML>
+<HEAD>
+  <TITLE>
+rng.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+rng.cc
+  </H1>
+<PRE>
+//***********************************************************************
+//  MODULE : Rng - Class Header						*
+//  AUTHOR : Ron Chernich						*
+//  PURPOSE: Ring buffer body routines for the RCOS system		*
+//  HISTORY:								*
+//   18-JAN-93	First (MSC/C++ 7.00) version				*
+//***********************************************************************
+
+
+#include "rng.hh"
+
+
+#pragma check_stack (off)
+/////////////////
+// Class Constructor defaults buffer size to 16 entries
+//
+Rng::Rng (UINT16 length)
+{
+  size = length;
+  head = tail = 0;
+  buf = new char[length];
+  memset(buf, 0, length);
+}
+
+///////////////
+// Class destructor
+//
+Rng::~Rng ()
+{
+  delete buf;
+}
+
+/////////////
+// Add an entry to the buffer.	If the head catches the tail, the "new"
+// char will over-write the previous one.
+//
+void Rng::RngPut (char ch)
+{
+  unsigned short idx = head;
+
+  *(buf+idx) = ch;
+  if (++idx >= size)
+    idx = 0;
+  if (idx != tail)
+    head = idx;
+}
+
+////////////////
+// Get a char from the buffer (provided there is one to get).  The status
+// routine should be called first to check for something there.
+// RETURNS: next char in buffer (or NULL if no char was ready)
+//
+char Rng::RngGet (void)
+{
+  char ch;
+
+  if (head == tail)
+    ch = '\0';
+  else {
+    ch = *(buf+tail);
+    if (++tail >= size)
+      tail = 0;
+  }
+  return ch;
+}
+
+///////////////////
+// Anybody home?
+// RETURNS: TRUE  .. we have a char
+//	    FALSE .. queue empty
+//
+BOOL Rng::RngStat (void)
+{
+
+  return (BOOL)(head != tail);
+}
+
+#pragma check_stack (on)
+
+
+/************************************ EOF ******************************/
+</PRE>
+</BODY>
+</HTML>

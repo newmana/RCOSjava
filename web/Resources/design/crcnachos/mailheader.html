@@ -1,0 +1,79 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    MailHeader CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>MailHeader</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      MailHeader
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+ Mailbox address -- uniquely identifies a mailbox on a given machine.
+ A mailbox is just a place for temporary storage for messages.
+<TT>typedef int MailBoxAddress;</TT>
+<P>
+ The following class defines part of the message header.
+ This is prepended to the message by the PostOffice, before the message
+ is sent to the Network.     
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+<PRE>
+
+class MailHeader {
+  public:
+    MailBoxAddress to;          // Destination mail box
+    MailBoxAddress from;        // Mail box to reply to
+    unsigned length;            // Bytes of message data (excluding the
+                                // mail header)
+};                          
+</PRE>
+
+</BODY>
+</HTML>

@@ -1,0 +1,56 @@
+<HTML>
+<HEAD>
+  <TITLE>
+str.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+str.hh
+  </H1>
+<PRE>
+//***********************************************************************
+//  MODULE : Str - Class Header						*
+//  AUTHOR : Ron Chernich						*
+//  PURPOSE: Derived from the Microsoft C/C++ tutorial material, this	*
+//	     class performs dynamic allocation of memory, allowing re-	*
+//	     sizeable objects.						*
+//  HISTORY:								*
+//   12-JAN-93	First (MSC/C++ 7.00) version				*
+//   18-APR-94  == for char* added (would I ever like to rewrite this!) *
+//***********************************************************************
+
+#ifndef _RCOS_STRING
+
+  #define _RCOS_STRING
+
+  #include <string.h>
+  #include <memory.h> 
+  
+  #include "rcos.hh"
+
+  class Str {
+    char  *buf;
+    INT16 length;
+  public:
+   ~Str (void);
+    Str (void);
+    Str (const char*);
+    Str (char, INT16);
+    Str (const Str&);
+    Str&  operator = (const Str&);
+    BOOL  operator == (const char*);
+    void  StrSet (INT16, char);
+    char  StrGet (INT16) const;
+    char *StrGet (void) const { return buf; };
+    INT16 StrGetLen (void) const { return length; };
+    void  StrAppend (const char*);
+  };
+
+
+#endif
+
+/********************************* EOF ***********************************/
+</PRE>
+</BODY>
+</HTML>

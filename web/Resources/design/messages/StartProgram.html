@@ -1,0 +1,75 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS.java - StartProgram Messages
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999">
+<TABLE WIDTH="100%">
+  <TR>
+    <TD ALIGN=LEFT>
+      <H4>/ <A HREF="../../../resources.html" TARGET="body">Resources</A> /
+      <A HREF="../index.html">Design</A> / <A HREF="index.html">Messages</A>
+      / StartProgram </H4>
+    </TD>
+    <TD ALIGN=LEFT WIDTH=25% VALIGN="CENTER">
+      <IMG SRC="../../../pics/rightEnd.gif" WIDTH="19" HEIGHT="30"><A HREF="../../../index.html" TARGET="_parent"><IMG SRC="../../../pics/home.gif" BORDER="0" ALT="RCOS.java Home Page" WIDTH="38" HEIGHT="30"></A><A HREF="ProgramManagerAnimator.html" TARGET="body"><IMG SRC="../../../pics/back.gif" BORDER=0 ALT="ProgramManagerAnimator" WIDTH="38" HEIGHT="30"></A><A HREF="TerminalManagerAnimator.html" TARGET="body"><IMG SRC="../../../pics/forward.gif" BORDER=0 ALT="TerminalManagerAnimator" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../../pics/leftEnd.gif" ALT="" WIDTH="19" HEIGHT="30"><BR>
+    </TD>
+  </TR>
+</TABLE>
+This is a seperate process (created by the ProgramManager) for loading and
+initializing a program.  A message will also be sent to the Terminal
+Manager to create a new terminal.
+<H3>Sent by StartProgram</H3>
+  <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+    <TR>
+      <TH>
+        To
+      </TH>
+      <TH>
+        Name
+      </TH>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        TerminalManager<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        TerminalOn<BR>
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        ProgramManager<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        NewFile<BR>
+      </TD>
+    </TR>
+  </TABLE>
+<BR>
+<H3>
+  Processed by ProgramManagerAnimator
+</H3>
+  <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+    <TR>
+      <TH>
+        From
+      </TH>
+      <TH>
+        Name
+      </TH>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        None<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        None<BR>
+      </TD>
+    </TR>
+  </TABLE>
+</FONT>       
+</BODY>
+</HTML>

@@ -1,0 +1,95 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    MessageHandler CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>MessageHandler</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      MessageHandler
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      The base class for all operating system components.  Defines the
+      minimum functions and data structures that must be implemented in
+      order for a class to communicate with the group.
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      <A HREF="message.html">Message</A> - base message class<BR>
+      <A HREF="messagedata.html">MessageData</A> - container for data to
+              be send as part of a message<BR>
+      <A HREF="postoffice.html">PostOffice</A> - central delivery point
+              for all messages, it is not just another MessageHandler
+              because it must keep a track of all MessageHandlers,
+              ???is this true??<BR>
+      
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+  <UL>
+    <LI> MessageHandler( String myName ) - register itself with the PostOffice
+    <LI> SendMessage( Message theMessage )
+    <LI> PostMessage( Message theMessage )
+    <LI> ReceiveMessage( Message theMessage ) - ?? syncrhonous receive ??
+    <LI> HandleMessage() - main function for class, most will simply loop
+                           through this function doing
+<PRE>
+  wait for a message
+  if it isn't a valid message then
+    send message back saying its an error
+  else
+    decide what type of message ( String type = theMessage.type() )
+    switch type
+    {
+      case ?? :  ...
+    . 
+    .
+    }
+  end
+</PRE>
+  </UL>
+
+</BODY>
+</HTML>

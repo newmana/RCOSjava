@@ -1,0 +1,321 @@
+<HTML>
+<HEAD>
+  <TITLE>
+palunix.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+palunix.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Pal_Unix - Program Abstraction Layer for the RCOS system     *
+//                      Unix versiont                                     *
+//  AUTHOR : David Jones                                                  *
+//  PURPOSE: Definition of a class to provide platform dependant services *
+//           for timer interrupts, raw keyboard buffer access and low     *
+//           level mouse events.                                          *
+//  HISTORY:                                                              *
+//   29-OCT-93  Created to make "Timer" more platform independant         *
+//*************************************************************************
+
+#include "rcos.hh"
+
+#include "palunix.hh"
+
+#include <iostream.h>
+
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
+
+extern Display *theDisplay;
+extern Window theWindow;
+
+  /////////////
+  // Raw key data waiting
+  // RETURNS:  TRUE .. Yes, there is
+  //          FALSE .. No, there 'aint
+  //
+BOOL 
+PalKeyReady (void)
+{
+  int result;
+  XEvent theEvent;
+
+  result = XCheckWindowEvent (theDisplay, theWindow, KeyPressMask, &theEvent);
+
+  if (result == TRUE)
+  {
+    XPutBackEvent (theDisplay, &theEvent);
+  }
+
+  return result;
+}
+
+  ////////////
+  // Get raw key data - caller must ensure there is something to get first!
+  // RETURNS: lo byte = ASCII value; hi byte = keyboard scan code
+  //
+
+UINT16 
+PalGetKey (void)
+{
+  int result, count;
+  XEvent theEvent;
+  XKeyEvent *theKeyEvent;
+  char buffer[10];
+  KeySym theSym;
+
+  result = XCheckWindowEvent (theDisplay, theWindow, KeyPressMask, &theEvent);
+
+  if (result == TRUE)
+    {
+      theKeyEvent = (XKeyEvent *) & theEvent;
+      count = XLookupString (theKeyEvent, buffer, 10, &theSym, NULL);
+
+      if ( count == 1 )
+      {
+        if ( theKeyEvent->state & Mod1Mask )
+        {
+	  UINT16 value = ConvertASCII( buffer[0] );
+          return (UINT16)(value << 8);
+        }
+        else
+	  return (UINT16) buffer[0];
+      }  
+    }
+  
+  //cout << "No key pressed\n";
+
+  return (UINT16) 0;
+}
+
+
+
+  //////////
+  // get the address of the passed interrupt vector
+  // RETURNS: address as a 32 bit value (CS:Offset)
+  //
+UINT32
+PalGetVec (UINT16 nVec)
+{
+  return (UINT32) 0;
+}
+
+  //////////
+  // Change the interrupt vector to that passed
+  //
+void 
+PalSetVec (UINT16 nVec, UINT32 uFp)
+{
+  return;
+}
+
+  ////////
+  // Prepare the DOS clock for 1mS resolution
+  //
+void 
+PalInitClk (void)
+{
+  return;
+}
+
+  ////////
+  // Restore the DOS clock to 10mS resolution
+  //
+void 
+PalResetClk (void)
+{
+  return;
+}
+
+  ///////////
+  // Get system time since midnight in milliseconds
+  //
+UINT32 
+PalGetTime (void)
+{
+  struct timeval tv;
+  struct timezone tz;
+  int result;
+  UINT32 theTime;
+
+  result = gettimeofday (&tv, &tz);
+
+  theTime = (tv.tv_sec * 1000) + ((tv.tv_usec - (tv.tv_usec % 1000)) / 1000);
+
+  return theTime;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// And now for the mouse (Microsoft and Borland are the same)..
+//
+
+  //////////
+  // These Globals are local to this module so that the mouse driver
+  // invoked service routine can pass info to the Pal routine..
+  //
+//  UINT _x, _y, _event;
+
+  /////////////
+  // Determine if a driver is present by looking at the software interrupt
+  // vector.  If it is null, or points to an IRET op-code, there's a good
+  // chance of no mouse.  If we've got one we'll set up a call back to our
+  // info gathering friend func and start monitoring for any Left Button
+  // Down events..
+  //
+BOOL 
+PalMouseInit (void)
+{
+  return TRUE;
+}
+
+  /////////////
+  // restore default mouse operation
+  //
+void 
+PalMouseReset (void)
+{
+  return;
+}
+
+  ///////////////
+  // Get the location of the last mouse event (stored by handler call-back)
+  //
+BOOL 
+PalMouseEvent (INT16 * px, INT16 * py)
+{
+  int result;
+  XEvent theEvent;
+  XButtonEvent *theButtonEvent;
+
+  result = XCheckWindowEvent (theDisplay, theWindow, ButtonReleaseMask,
+			      &theEvent);
+  theButtonEvent = (XButtonEvent *) & theEvent;
+
+  if ((result == TRUE) && (theButtonEvent->button == Button1))
+    {
+      // cout << "Mouse event x = " << theButtonEvent->x << '\n';
+      // cout << "Mouse event y = " << theButtonEvent->y << '\n';
+
+      *px = (INT16) theButtonEvent->x;
+      *py = (INT16) theButtonEvent->y;
+      return TRUE;
+    }
+  return FALSE;
+}
+
+  ////////////
+  // Turn on the mouse pointer (under DOS, this increments a driver
+  // internal counter.. the pointer appears when it reaches zero)
+  //
+void 
+PalMousePointerOn (void)
+{
+  return;
+}
+
+  //////////////
+  // If x1 is less than zero (ie, it defaulted), unconditionally turn
+  // off the pointer.  Otherwise, use "smart" hiding (if available).
+  //
+void 
+PalMousePointerOff (INT16 x1, INT16 y1, INT16 x2, INT16 y2)
+{
+  return;
+}
+
+
+/////////
+// convert ASCII values into the values expected by PalGetKey
+//
+
+UINT16
+ConvertASCII( char ch )
+{
+  switch ((int)tolower(ch))
+  {
+    case 48:
+		return (UINT16)120;
+    case 49:
+		return (UINT16)121;
+    case 50:
+		return (UINT16)122;
+    case 51:
+		return (UINT16)123;
+    case 52:
+		return (UINT16)124;
+    case 53:
+		return (UINT16)125;
+    case 54:
+		return (UINT16)126;
+    case 55:
+		return (UINT16)127;
+    case 56:
+		return (UINT16)128;
+    case 57:
+		return (UINT16)129;
+
+    // lower case characters
+
+    case 97:	
+		return (UINT16)30;
+    case 98:
+		return (UINT16)48;
+    case 99:
+		return (UINT16)46;
+    case 100:
+		return (UINT16)32;
+    case 101:
+		return (UINT16)18;
+    case 102:
+		return (UINT16)33;
+    case 103:
+		return (UINT16)34;
+    case 104:
+		return (UINT16)35;
+    case 105:
+		return (UINT16)23;
+    case 106:
+		return (UINT16)36;
+    case 107:
+		return (UINT16)37;
+    case 108:
+		return (UINT16)38;
+    case 109:
+		return (UINT16)50;
+    case 110:
+		return (UINT16)49;
+    case 111:
+		return (UINT16)24;
+    case 112:
+		return (UINT16)25;
+    case 113:
+		return (UINT16)16;
+    case 114:
+		return (UINT16)19;
+    case 115:
+		return (UINT16)31;
+    case 116:
+		return (UINT16)20;
+    case 117:
+		return (UINT16)22;
+    case 118:
+		return (UINT16)47;
+    case 119:
+		return (UINT16)17;
+    case 120:
+		return (UINT16)45;
+    case 121:
+		return (UINT16)21;
+    case 122:
+		return (UINT16)44;
+  }
+}
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,45 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.04 [en] (Win95; I) [Netscape]">
+   <TITLE>    RCOS.java - What is P-Code?
+  </TITLE>
+</HEAD>
+<BODY TEXT="#EEEEEE" BGCOLOR="#000000" LINK="#FFFF00" VLINK="#999999">
+<TABLE WIDTH="100%" >
+<TR>
+<TD ALIGN=LEFT>
+<H4>
+/ <A HREF="../../../resources.html" TARGET="body">Resources</A> / <A HREF="../index.html">References</A>
+/ P-Code / What is P-Code?</H4>
+</TD>
+
+<TD ALIGN=LEFT VALIGN=CENTER WIDTH="25%"><IMG SRC="../../../pics/rightEnd.gif" HEIGHT=30 WIDTH=19><A HREF="../../../index.html" TARGET="_parent"><IMG SRC="../../../pics/home.gif" ALT="RCOS.java Home Page" BORDER=0 HEIGHT=30 WIDTH=38></A><IMG SRC="../../../pics/blank.gif" ALT="" BORDER=0 HEIGHT=30 WIDTH=38><IMG SRC="../../../pics/blank.gif" ALT="" BORDER=0 HEIGHT=30 WIDTH=38><IMG SRC="../../../pics/leftEnd.gif" ALT="" HEIGHT=30 WIDTH=19></TD>
+</TR>
+</TABLE>
+One of the first attempts to provide a truely platform independent programming
+language came with the introduction of Pascal and the p-Machine.&nbsp;
+A Pascal-P compiler would generate an intermediate code called P-Code.&nbsp;&nbsp;
+P-Code is the native assembly language of a hypothetical, stack machine,
+called the P-Machine.&nbsp; The origins of this instruction set is said
+to be from the Burrough Large System.&nbsp; Each new system could simply
+implement the P-Machine and run any P-Code.
+
+<P>The term was first used in "Algorithms + Data Structures = Programs",
+N. Wirth, P-H 1976.&nbsp; Byte articles on writing a Pascal Compiler in
+Northstar BASIC (August, 1978) is the basis of the RCOS implementation.&nbsp;
+Additions of the basic specification were made to accomodate RCOS specific
+features such as reading and writing of files, shared memory, and semaphores.
+
+<P><A HREF="http://www.cs.ucr.edu/~rhyde/psource.htm">p-Source</A> and
+the <A HREF="osborne.html">Osborne User's Guide</A> are two of the many
+books written at the time to support the growing number of home and business
+computers running P-Code based systems: including TRS-80, Apple II, Osborne
+1, CoCo 3, etc.
+
+<P>This idea of compiler design, where there is a step between compilation
+and generating machine specific code, is still used today.&nbsp; Apart
+from the obvious (Java), it is used in products such as Power Builder,
+Visual Basic and Delphi.
+</BODY>
+</HTML>

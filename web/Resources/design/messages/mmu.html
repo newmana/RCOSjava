@@ -1,0 +1,125 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS.java - MMU Messages
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999">
+<TABLE WIDTH="100%">
+  <TR>
+    <TD ALIGN=LEFT>
+      <H4>/ <A HREF="../../../resources.html" TARGET="body">Resources</A> /
+      <A HREF="../index.html">Design</A> / <A HREF="index.html">Messages</A>
+      / MMU</H4>
+    </TD>
+    <TD ALIGN=LEFT WIDTH=25% VALIGN="CENTER">
+      <IMG SRC="../../../pics/rightEnd.gif" WIDTH="19" HEIGHT="30"><A HREF="../../../index.html" TARGET="_parent"><IMG SRC="../../../pics/home.gif" BORDER="0" ALT="RCOS.java Home Page" WIDTH="38" HEIGHT="30"></A><A HREF="kernel.html" TARGET="body"><IMG SRC="../../../pics/back.gif" BORDER=0 ALT="Kernel" WIDTH="38" HEIGHT="30"></A><A HREF="processscheduler.html" TARGET="body"><IMG SRC="../../../pics/forward.gif" BORDER=0 ALT="ProcessScheduler" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../../pics/leftEnd.gif" ALT="" WIDTH="19" HEIGHT="30"><BR>
+    </TD>
+  </TR>
+</TABLE>
+<H3>Sent by MMU</H3>
+  <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+    <TR>
+      <TH>
+        To
+      </TH>
+      <TH>
+        Name
+      </TH>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        SoftwareTerminal<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        CHIN, NUMIN, KeyPress, CHOUT, CHIN<BR>
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        ProcessScheduler<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        RunningToBlocked, RunningToReady, ProcessFinished,
+        IllegalInstruction, EXEC, FORK<BR>
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        IPCManager<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        SEM_CREATE, SEM_OPEN, SEM_CLOSE,        
+        SEM_SIGNAL, SEM_WAIT, SHR_CLOSE,
+        SHR_CREATE, SHR_OPEN, SHR_SIZE,
+        SHR_READ, SHR_WRITE<BR>
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        FileSystem<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        F_ALLOC, F_EOF, F_DEL, F_OPEN
+        F_CREAT, F_CLOSE, F_READ, F_WRITE
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        DiskScheduler
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        DiskRequestComplete
+      </TD>
+    </TR>
+  </TABLE>
+<BR>
+<H3>
+  Sent to MMU
+</H3>
+  <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+    <TR>
+      <TH>
+        From
+      </TH>
+      <TH>
+        Name
+      </TH>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        ProcessScheduler<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>       
+        AllocatePages, AllocateBytes, DeallocatePages, DeallocateBytes<BR>
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        SoftwareTerminal<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        RegisterInterruptHandle, ReturnValue, BlockProcess<BR>
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        IPCManager<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        ReturnValue, BlockProcess
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        ProcessSchedulerAnimator<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Quantum
+      </TD>
+    </TR>
+  </TABLE>
+</FONT>       
+</BODY>
+</HTML>

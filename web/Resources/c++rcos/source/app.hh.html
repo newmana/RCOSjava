@@ -1,0 +1,143 @@
+<HTML>
+<HEAD>
+  <TITLE>
+app.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+app.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : App - Class definition for an "application"		  *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Open a graphics screen, instanciate all the base controls	  *
+//	     types (which will be empty) and provide a messaging system   *
+//	     on which an application can be built.			  *
+//  HISTORY:                                                              *
+//   22-JAN-93	First (MSC/C++ 7.00) version				  *
+//   28-JAN-93	Modal/Modeless Window class added to allow pop-ups.	  *
+//   02-FEB-94  Anti-fascist mode window re-paint added for Xlib support  *
+//   05-FEB-94  "Window" changed to "AppWindow" 'cause of Xlib clash.     *
+//*************************************************************************
+
+#ifndef _RCOS_APP
+
+  #include "obj.hh"
+  #include "timer.hh"
+  #include "ctrls.hh"
+  #include "userip.hh"
+
+
+  /**********************
+  * First, define destinations, then messages..
+  */
+  #define   RC_System	2000	// has title and close gadget, but no border
+  #define   RC_Modal	2001	// has border, optional title bar, no close
+  #define   RC_Modeless 2002	// has the works.
+
+  #define   RC_Userapp	2010	// message destinations
+  #define   RC_Sysapp	2011
+
+  #define   RC_Click	2020	// user has clicked on a control
+  #define   RC_Close	2021	// user wants to terminate application
+  #define   RC_HelpKey	2022	// system level F1 key press
+  #define   RC_Paint	2023	// system needs display totally redrawn
+
+  #define   RC_PushBtn	2100	// creatable control gadgets
+  #define   RC_RadioBtn 2101
+  #define   RC_CheckBox 2102
+
+
+  /////////////////
+  // This is a "Window".  Instantiating one of these gives a work area
+  // (the graphic window) with anchors for all three button types, and
+  // some options, like menu bars and close gadget.  The window can be
+  // system modal (no menu bar, all input limited to the window), or
+  // modeless (menu bar, inputs go to it and its modeless ancestors).
+  // NOTE that (mostly) there will only ever be one instance of the
+  // "Window" class and that will belong to the one instance of the
+  // "Application" class.  Child windows are linked to the original
+  // window instance by calls to <Open>, so all the constructor need
+  // do is invoke that member to do create the head element.  In fact,
+  // this whole class probably should be private to the "App" class.
+  //
+  class AppWindow : public DblList {
+    typedef struct winTag {
+      rect r;
+      INT16  mode;
+      PbCtrl Pb;
+      RbCtrl Rb;
+      CbCtrl Cb;
+      SysMenu *Sys;
+      PIMBUF  pi;
+    } WIN;
+    typedef winTag *PWIN;
+    PWIN pw;
+  public:
+    AppWindow (INT16 md = RC_Modeless,			   // window type
+	    char* st = NULL,				   // title
+	    INT16 x1 = 0, INT16 y1 = 0,			   // location UL
+	    INT16 x2 = GFX_Xmin-1, INT16 y2 = GFX_Ymin-1,  // location BR
+	    INT16 n1 = _Black,				   // window color
+	    INT16 n2 = _Black)				   // modal border
+	   { Open(md, st, x1, y1, x2, y2, n1, n2); };
+    ~AppWindow (void);
+    UINT16 Scan (char);
+    UINT16 Scan (point&);
+    void   Title (char*);
+    void   Close (void);
+    virtual void Refresh (void);
+    BOOL   CBstate (UINT16 , BOOL&);
+    BOOL   Open (UINT16, char*, INT16, INT16, INT16, INT16, UINT16, UINT16);
+    BOOL   Create (UINT16, UINT16, char*, INT16, INT16, INT16, INT16);
+    BOOL   Destroy (UINT16, UINT16);
+  };
+
+  ///////////////////
+  // And this is an "Application".  There can be only one of these and it
+  // has the system timer ISR, the base Window and the Message switching
+  // centre for window action traffic.
+  //
+  class App : private DblList {
+    struct msgstruct {
+      INT16  dest;		// who it's from
+      UINT16 message;		// what it is
+      UINT16 wParam;		// optional 16 bit param
+      UINT32 lParam;		// and 32 bit param (usually a pointer)
+    };
+    BOOL bGfxOpen;
+    msgstruct *pm;
+    void AppRun (void);
+  public:
+    AppWindow *pMain;
+    App (char* = NULL);
+    ~App ();
+    void AppTitle   (char *st)
+      { pMain->Title(st); };
+    BOOL AppDestroy (UINT16 n, UINT16 id)
+      { return pMain->Destroy(n, id); };
+    BOOL AppCreate  (UINT16 n, UINT16 id, char *st,
+                     int p1, int p2, int p3 = 0, int p4 = 0)
+      { return pMain->Create(n, id, st, p1, p2, p3, p4); };
+    BOOL AppGetMsg  (UINT16&, UINT16&, UINT32&);
+    BOOL AppRunning (void)
+      { return bGfxOpen; };
+    BOOL AppChildWin (UINT16 md, char *st,
+                      INT16 x1, INT16 y1, INT16 x2, INT16 y2,
+		      UINT16 n1 = _Green, UINT16 n2 = _BrightWhite)
+      { return pMain->Open(md, st, x1, y1, x2, y2, n1, n2); };
+    void AppCloseWin (void)
+      { pMain->Close(); };
+    BOOL AppCBstate (UINT16 uId, BOOL &bCB)
+      { return pMain->CBstate(uId, bCB); };
+  };
+
+  #define _RCOS_APP
+#endif
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

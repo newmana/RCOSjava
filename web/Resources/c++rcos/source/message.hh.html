@@ -1,0 +1,297 @@
+<HTML>
+<HEAD>
+  <TITLE>
+message.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+message.hh
+  </H1>
+<PRE>
+//***********************************************************************
+//  MODULE : RCOS - Common message definitions in one convenient spot   *
+//  AUTHOR : Ron Chernich                                               *
+//  PURPOSE: Define messages and message structures common accross the  *
+//           RCOS suite.                                                *
+//  HISTORY:                                                            *
+//   14-MAY-93  Gathered in one place owing to sheer frustration        *
+//   31-MAR-94  DM messages to Get/Set TTY mode added                   *
+//   17-AUG-94  CP/M File System messages added, Animations enhanced.   *
+//***********************************************************************
+
+#ifndef _RCOS_MESSAGES_
+
+
+  ///////////////////////////////////////////////////////////////////////
+  // This object is a message.  Like Microsoft's NT, All messages
+  // share a common header, with a message specific body.
+  //
+  class message {
+  public:
+    message (UINT16 us = 0, UINT16 um = 0, UINT16 up = 0, void *pb = NULL)
+      { wSender = us, wMsgType = um, wParam = up, pBody = pb; }
+    ~message (void) {};
+    UINT16 wSender;                     // who it's from
+    UINT16 wMsgType;                    // what it is           
+    UINT16 wParam;                      // non-specific parameter
+    void  *pBody;                       // pointer to specific data
+  };
+  typedef message  MSG;
+  typedef message* PMSG;
+
+  ////////////
+  // Messages can be synchronous or asynchronous, depending on how
+  // they were passed (Send = Sync; Post = Async).  The message switcher
+  // will set the MSB of synch messages, where the reply (if any) must
+  // be made in the body of the received message.  A reply to an async
+  // message requires a "new" message struct.
+  //
+  #define MM_Sync       0x8000          // bit set for a synchronous xfer
+  #define IS_SYNCH(n)   (n & MM_Sync)   // macro for classifying xfer type
+
+
+  ///////////////////////////////////////////////////////////////////////
+  // All Device drivers must be based on this Class.  The constructor
+  // will be supplied with an ID and a pointer to a Knl class, which
+  // will handle message passing for the driver (normally the Kernel!)
+  // Drivers communicate by messages. These can be "posted" by calling
+  // the Knl class member "PostMsg" - which uses a FIFO queue to effect
+  // ascynchronous transfers, or by calling "SendMsg". This causes a
+  // direct (synchronous) transfer where the switcher directly invokes
+  // the recieve member of the distination port before returning to the
+  // sender.  The actual message receiver is declared as a "pure virtual"
+  // meaning each instantiation MUST overload the function.
+  //////////////////////////
+  // ..we need a forward reference to the message switcher..
+  //////////
+  class Knl;
+  class port {
+  public:
+    UINT16 uID;                         // Unique ID of driver
+    Knl   *pTx;                         // pointer to the message dispatcher
+    port (UINT16, UINT16, Knl*);        // const. gets ID, class and Tx ptr
+    void DevError (INT16, BOOL);        // Issue device error message
+    virtual void RxPort (PMSG) = 0;     // Dispatcher for received messages
+  };
+
+    ///////////
+    // port status bits..
+    //
+    #define STAT_Ready      0x0001
+    #define STAT_Inhibit    0x0002
+    #define STAT_Busy       0x0004
+
+
+    /////////////
+    // Device drivers must notify kernel what they are..
+    //
+    #define CLS_SysRes      0x9000      // System Resource - unassignable
+    #define CLS_VDU         0x1001      // in/out display device
+    #define CLS_PRN         0x1002      // Printer, output only
+    #define CLS_MTU         0x1003      // Mage tape unit, output only
+    #define CLS_FSF         0x1004      // File system file, input/output
+
+
+    ///////////////
+    // The device may signal internal error conditions with member func
+    // DevError() .. the Kernel will ask the console process to display
+    // these Certain common errors are defined as ..
+    //
+    #define ET_InitFail     0x7F00      // initialization failed
+    #define ET_NotOpen      0x7F01      // close of a device not open
+    #define ET_StillOpen    0x7F02      // open of a device already open
+    #define ET_NoSupport    0x7F03      // command not supported by device
+    #define ET_InvalidReq   0x7F04      // device cannot perform request
+    #define ET_FileSysErr   0x7F05      // failure in file system
+
+
+  /////////////////////////
+  // Working along Unix lines (Ref: Bach, MJ (1986): "The Design of the Unix
+  // Operating System", Prentice-Hall, Chapter 6), we maintain two levels of
+  // indirection between a process and its memory.  The Process Control Block
+  // manager (Exec) does not need to know about Page Tables.  The Memory Mgr
+  // does not need to know about PCB's - but they need a common interface
+  // point.  Hence this structure, the "per process region table" ..
+  //
+  typedef struct procrtbl {
+    HANDLE hText;           // process text (code) region(s)
+    HANDLE hStack;          // handle to stack region(s) for process
+    HANDLE hData;           // Data (not used at present) handle
+  } MCB,   *PMCB;
+
+  /////////////////
+  // This is the message body for MMU Read/Write transfers..
+  // wParam = HANDLE of allocated memory
+  //
+  typedef struct {
+    UINT16   *pData;        // destination/source for read/write
+    UINT16   uOffset;       // source/destination offset within handle
+    UINT16   uLen;          // number of bytes for transfer (Blk only)
+  } MMU_MSG, *PMMU_MSG;
+
+
+  /////////////////////////////////////////////////////////////////////////
+  // Kernel messages (KMs) sent by kernel, or to which kernel will respond..
+  //
+  #define KM_Register   0x0700    // wParam = driver class
+                                  //  pBody  = pointer to port (ie it's "this")
+  #define KM_CheckOut   0x0701    // wParam = driver class
+                                  //  pBody  = pointer to port (ie it's "this")
+  #define KM_SetStatus  0x0702    // Allow port (driver) to change it's status
+                                  //  wParam = new status
+  #define KM_KeyPress   0x0703    // user keyboard char received
+                                  //  wParam = character
+  #define KM_DevError   0x0704    // Device driver internal Error (-ve = fatal)
+                                  //  wParam = Numeric internal reference
+  #define KM_Open       0x0705    // Give me one of these (or here it is)
+                                  //  wParam = device type (class)
+  #define KM_Close      0x0706    // I'm finished with it now
+                                  //  wParam = device ID
+  #define KM_Read       0x0707    // Char mode read of device
+                                  //  wParam = char (in LO byte)
+  #define KM_ReadBlk    0x0708    // Block mode read of device
+                                  //  wParam = count; pBody -> data block
+  #define KM_Write      0x0709    // Char mode write to device
+                                  //  wParam = char (in LO byte)
+  #define KM_WriteBlk   0x070a    // Block mode write to device
+                                  //  wParam = count; pBody -> data block
+  #define KM_IoCtrl     0x070b    // Device specific control request
+                                  //  usually, device sets wParam = status
+  #define KM_Signal     0x070c    // Signal to process
+                                  //  wParam = semaphore ID | kernel signal #
+  #define KM_Break      0x070f    // Break signal from user
+
+
+  ///////////////////////////////////////////////////////////////////////
+  // These messages are specific to the ANIMATOR..
+  //
+  #define ANI_REFRESH   0x0300    // Refresh display <wParam>
+  #define ANI_GET_QUS   0x0301    // Get Q processes for display
+  #define ANI_IN_RDY    0x0302    // Animate process Input -> Ready
+  #define ANI_RDY_RUN   0x0303    // .. Ready -> Running
+  #define ANI_RUN_RDY   0x0304    // .. Running -> Ready
+  #define ANI_RUN_BLK   0x0305    // .. Running -> Blocked
+  #define ANI_RDY_SRDY  0x0306    // .. Ready -> Suspended Ready
+  #define ANI_BLK_RDY   0x0307    // .. Blocked -> Suspended Ready
+  #define ANI_BLK_SBLK  0x0308    // .. Blocked -> Suspended Blocked
+  #define ANI_SRDY_RDY  0x0309    // .. Suspended Ready -> Ready
+  #define ANI_SBLK_BLK  0x030A    // .. Suspended Blocked -> Blocked
+  #define ANI_SBLK_SRDY 0x030B    // .. Suspended Blocked -> Suspended Ready
+  #define ANI_GET_PCB   0x030C    // Copy current PCB to pBody-> a local one
+  #define ANI_UPDAT_PCB 0x030D    // Update displayed PCB box information
+  #define ANI_DELETE    0x030E    // Process killed by operator
+  #define ANI_FORKS     0x030F    // Process forks (spawns, whatever)
+  #define ANI_HALT_OK   0x0310    // Process halts and deletes normally
+  #define ANI_HALT_BAD  0x0311    // Process halts and deletes on Illegal
+  #define ANI_PREEMPT   0x0312    // Running process pre-empted by higher one
+
+  #define ANI_DCREAT    0x0320    // Message to create a new disk animation
+  #define ANI_CHAN_ENQ  0x0321    // New disk channel request arrived
+  #define ANI_SPIN      0x0322    // Update disk rotation indicator
+  #define ANI_BEGIN_SEEK 0x0323   // Start of a seek
+  #define ANI_SEEK      0x0324    // Move disk head graphic
+  #define ANI_ONTRACK   0x0325    // Seek complete
+  #define ANI_RWOP      0x0326    // Read/Write operation complete (de-queue)
+
+
+  ///////////////
+  // This message struct gets loaded with (up to) 5 Exec queue
+  // snap-shots in support of CPU type animations..
+  //
+  typedef struct aniq {
+    UINT16 arr[5][MAX_PROC];
+  } MSG_ANIQ, *PMSG_ANIQ;
+
+  ///////////
+  // This one is filled with current process information..
+  //
+  typedef struct anip {
+    INT16  nPri;
+    UINT16 uNr[7];
+    char  *pszName;
+    char   szPCD[16];
+  } MSG_ANIP, *PMSG_ANIP;
+
+
+  /////////////////////////////////////////////////////////////////////
+  // As well as responding to standard Kernel messages (read, write),
+  // an MMU driver must support these messages..
+  //
+  #define MMU_Allocate  0x0401      // used to create a page table
+  #define MMU_Duplicate 0x0402      // duplicate a page table
+  #define MMU_Resize    0x0403      // modify a page table
+
+  /////////////////////
+  // Parameters specific to the TTY Class - passed as wParam of an
+  // IO Control request (KM_IoCtrl)..
+  //   DM_KeyHit and DM_GetSize return data in wParam
+  //
+  #define DM_Reset      0x0501      // clear screen, flush buffer, etc.
+  #define DM_KeyHit     0x0502      // wParam = TRUE/FALSE = key waiting
+  #define DM_GetSize    0x0503      // wParam: hi byte = rows, low = cols.
+  #define DM_GetPos     0x0504      // wParam: hi byte = row, low = column
+  #define DM_BreakOn    0x0505      // Set line protocol driver break status
+  #define DM_BreakOff   0x0506      //   (never actually gets to the TTY..)
+  #define DM_GetMode    0x0507      // Enquire current TTY mode via line driver
+  #define DM_SetMode    0x0508      // Change current TTY mode via line driver
+
+
+  //////////////////
+  // valid messages to and from the file system..
+  //
+  #define FS_Creat      0x0FD0
+  #define FS_Open       0x0FD1
+  #define FS_ReadSeq    0x0FD2
+  #define FS_WriteSeq   0x0FD3
+  #define FS_ReadRan    0x0FD4
+  #define FS_WriteRan   0x0FD5
+  #define FS_Close      0x0FD6
+  #define FS_Stat       0x0FD7
+  #define FS_Rename     0x0FD8
+  #define FS_Delete     0x0FD9
+  #define FS_FindFirst  0x0FDa
+  #define FS_FindNext   0x0FDb
+  //
+  // These are the FS response message types plus the sent
+  // messages they are applicable to (and should be checked for)..
+  // 
+  #define FS_Ok         0x6660          // all operations
+  #define FS_NotFound   0x6661          // open, rename, delete, find*
+  #define FS_DiskFull   0x6662          // creat, write
+  #define FS_DiskError  0x6663          // all operations
+  #define FS_Wprotect   0x6664          // write, creat
+  #define FS_NotReady   0x6665          // all operations
+  #define FS_Fail       0x6666          // Unrecoverable file sys error
+  #define FS_EOF        0x6667          // read
+  #define FS_Exists     0x6668          // Creat
+  #define FS_Busy       0x6669          // may take a while (all)
+  #define FS_NoHandles  0x666a          // no more process file handles
+  #define FS_BadName    0x666b          // name format illegal
+  #define FS_BadUnit    0x666c          // illegal or off-line disk unit  
+
+  //////////////////
+  // Set of indicies for the Radio Button controlled Animation Windows..
+  //
+  enum AniWin { CPU_DISP, MEM_DISP, DSK_DISP, TTY_DISP, NIL };
+
+  ////////////////
+  // Here is an abstract class for all window painters..
+  //
+  class WinPainter {
+  public:
+    WinPainter (void) { }
+    virtual ~WinPainter (void) { }
+    virtual  void Paint (void) = 0;
+  };
+
+
+
+  #define _RCOS_MESSAGES_
+
+#endif
+
+//************************************ EOF ******************************
+</PRE>
+</BODY>
+</HTML>

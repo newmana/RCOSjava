@@ -1,0 +1,96 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class CpmFs
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>CpmFs</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	CpmFs
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   Interface to the file system based on our old friend, the "port".
+   Note how each file system operation takes a single XfReq pointer as
+   input.  The Single instance of class CpmFs receives requests for
+   FS operations from user processes as messages.  It merely creates
+   a new XfReq object, filling in the originating PID and FCB pointer,
+   determines which disk "unit" the request is for, checks that that
+   unit is "on-line" and then calls the appropriate (protected) member
+   function.
+  <P> 
+   ALL calls to the File System result in the caller process
+   becomming blocked.  When the FS service is deemed to be complete,
+   a result message will be posted to the PID (unblocking it) and the
+   XfReq object killed off.  The last member function of CpmBdos to
+   be passed the XfReq pointer does this.
+ <P> 
+   Note: it's each user process's responsibility to ensure the FCB
+   is correctly initialised (by a successful call to FsOpen or FsCreat).
+   The FS uses these FCB's to retain working data during file I/O
+   operations.  Looks to me now (in hindsight) that if you diddle with
+   these, and you can trash the file system, big time. Funny, I don't
+   recall that ever happening though (?)
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+ class CpmFs : public port {
+  private:
+    CpmBdos *pUnit[MAX_DRIVES];         // Disk File System instances
+  public:
+    CpmFs (UINT16, UINT16, Knl*);       // register with kernel
+   ~CpmFs (void);                       // murder all file systems
+    void RxPort (PMSG);                 // supply virtual member of "port"
+    void MountDrive (UINT16, char, DPB&, DPARAM&); // Instatiate new Bdos
+  };
+      </PRE> 
+
+</BODY>
+</HTML>

@@ -1,0 +1,89 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    AddrSpace CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>AddrSpace</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      AddrSpace
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+     Data structures to keep track of executing user programs
+      (address spaces).
+<P>
+      For now, we don't keep any information about address spaces.
+      The user level CPU state is saved and restored in the thread
+      executing the user program (see thread.h).
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+<PRE>
+class AddrSpace {
+  public:
+    AddrSpace(OpenFile *executable);    // Create an address space,
+                                        // initializing it with the program
+                                        // stored in the file "executable"
+    ~AddrSpace();                       // De-allocate an address space
+
+    void InitRegisters();               // Initialize user-level CPU registers,
+                                        // before jumping to user code
+
+    void SaveState();                   // Save/restore address space-specific
+    void RestoreState();                // info on a context switch
+
+  private:
+    TranslationEntry *pageTable;        // Assume linear page table translation
+                                        // for now!
+    unsigned int numPages;              // Number of pages in the virtual
+                                        // address space
+};                             
+</PRE>
+
+</BODY>
+</HTML>

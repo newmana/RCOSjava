@@ -1,0 +1,171 @@
+<HTML>
+<HEAD>
+  <TITLE>
+dev-disp.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+dev-disp.cc
+  </H1>
+<PRE>
+//************************************************************************
+//  MODULE : Device Manager display module                               *
+//  AUTHOR : Ron Chernich                                                *
+//  PURPOSE: Perform all actions (except clear screen) associated with   *
+//           the Device Manager (TTYs and Printer) screen.               *
+//  HISTORY:                                                             *
+//   26-MAR-93  First (MSC/C++ 7.00) version                             *
+//   26-AUG-94  Class-ified                                              *
+//   15-MAR-95  Class to manage terminals added                          *
+//   22-MAR-95  (Happy Birthday, Ron!) No of terminals made dynamic      *
+//   23-MAR-95  Mod so F5 repaint function does tty display contents too *
+//************************************************************************
+
+
+#include "dev-disp.hh"
+
+	    #if defined(BC20) || defined(BC31)
+	    // fix for BC20, can't return reference to temp object
+	    rect pTemp( 0, 0, 0, 0 );
+	    #endif
+
+///////////////////////////////////////////////////////////////////////
+// Create the Terminals object that manages the user device representation
+//
+TTyAnim::TTyAnim (Knl *pKnl, UINT16 n)
+{
+  pTerms = new Terminals(pKnl, n);
+}
+
+//////////////
+// get rid of the rubbish
+//
+TTyAnim::~TTyAnim (void)
+{
+  if (pTerms)
+    delete pTerms;
+}
+
+////////////////
+// Paint the video console frames..
+//
+void TTyAnim::Paint (void)
+{
+  if (pTerms)
+    pTerms->Paint();
+}
+
+//////////////
+// get the location of the passed user terminal number
+//
+rect& TTyAnim::GetTTyPos (UINT16 n)
+{
+  if (pTerms)
+    return pTerms->GetPos(n);
+  #if defined(BC20) || defined (BC31)
+    return pTemp;
+  #else
+    return rect(0, 0, 0, 0);
+  #endif
+
+}
+
+
+///////////////////////////////////////////////////////////////////////
+// Create TTY device instances; one for each user terminal as defined
+// by the system preference <terminals>. If any one fails, null its pointer.
+//
+Terminals::Terminals (Knl *pKnl, UINT16 n) : nTerm(n)
+{
+  pTerm = new tty*[nTerm];
+  pttyPos = new rect[nTerm];
+  int tty_width = (GFX_Xmin - (TTY_XGAP * 3)) / 2;
+  int tty_height =
+    (TTY_YLIM2 - TTY_YLIM1 - (TTY_YGAP * ((nTerm+1) / 2))) / ((nTerm+1) / 2);
+  for (UINT16 i = 0; i < nTerm; i++) {
+    pttyPos[i].lr = point(tty_width, tty_height);
+    pttyPos[i].ul.x = (i % 2) ? ((TTY_XGAP * 2) + tty_width) : TTY_XGAP;
+    pttyPos[i].ul.y =
+      TTY_YLIM1 + (TTY_YGAP / 3) + ((i / 2) * (TTY_YGAP + tty_height));
+    if ((nTerm == i + 1) && (nTerm % 2))
+      pttyPos[i].lr.x += (tty_width + TTY_XGAP);
+    pTerm[i] = new tty(ID_TTY_BASE + i, CLS_VDU, pKnl,
+                       pttyPos[i], TTY_TXT, TTY_SCRN);
+    if (pTerm[i])
+      pTerm[i]->SetMode(TTY_Uscore);
+    else
+      pttyPos[i] = rect(0, 0, 0, 0);
+  }
+}
+        
+//////////
+// kill off all terminals created.
+//
+Terminals::~Terminals (void)
+{
+  if (pTerm) {
+    for (UINT16 i = 0; i < nTerm; i++)
+      if (pTerm[i])
+        delete pTerm[i];
+    delete pTerm;
+  }
+  if (pttyPos)
+    delete pttyPos;
+}
+
+
+//////////
+// Repaint representation and contents of all terminals.
+//
+void Terminals::Refresh (void)
+{
+  for (UINT16 i = 0; i < nTerm; i++)
+    if (pTerm[i])
+      pTerm[i]->ReFresh();
+}
+
+//////////
+// Temporarily inhibit all terminals
+//
+void Terminals::DeActivate (void)
+{
+  for (UINT16 i = 0; i < nTerm; i++)
+    if (pTerm[i])
+      pTerm[i]->SetMode(pTerm[i]->GetMode() & ~TTY_Active);
+}
+
+//////////
+// Activate and display all terminals
+//
+void Terminals::Activate (void)
+{
+  for (UINT16 i = 0; i < nTerm; i++)
+    if (pTerm[i])
+      pTerm[i]->SetMode(pTerm[i]->GetMode() | TTY_Active);
+}
+
+//////////////
+// draw the terminal frames
+//
+void Terminals::Paint (void)
+{
+  for (UINT16 i = 0; i < nTerm; i++)
+    if (pTerm[i]) {
+      GfxRect(pttyPos[i].ul.x - 2, pttyPos[i].ul.y - 2,
+              pttyPos[i].ul.x + pttyPos[i].lr.x + 2,
+              pttyPos[i].ul.y + pttyPos[i].lr.y + 16, GFX_Fill, TTY_FRAME);
+      GfxRect(pttyPos[i].ul.x - 3, pttyPos[i].ul.y - 3,
+              pttyPos[i].ul.x + pttyPos[i].lr.x + 3,
+              pttyPos[i].ul.y + pttyPos[i].lr.y + 17, GFX_Frame, TTY_BDR);
+      GfxRect(pttyPos[i].ul.x, pttyPos[i].ul.y,
+              pttyPos[i].ul.x + pttyPos[i].lr.x,
+              pttyPos[i].ul.y + pttyPos[i].lr.y, GFX_Fill, TTY_SCRN);
+    }
+  Refresh();
+}
+
+///////////////////////////////// EOF //////////////////////////////////////
+</PRE>
+</BODY>
+</HTML>

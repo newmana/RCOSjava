@@ -1,0 +1,129 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class DskModel
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>DskModel</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	DskModel
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   This class simulates a disk drive using preset constants, based on the
+   mS granularity system clock ticker, in terms of physical attributes of:
+ <P> 
+   <UL>
+      <LI> Track to track seek time  
+      <LI> Head settle time
+      <LI> Rotational Latency
+      <LI> Soft error rate
+   </UL>
+  <P>
+   Channel requests arrive via the usual message service.  The model
+   actions these in FIFO, moving the "head" missile to the specified
+   "track", delaying for the head settle period, waiting until the
+   required "sector" "arrives" under the "head", then calling the Read/
+   Write routine to do the transfer to the specific address.  Finally,
+   the CpmBdos::NxtFunc member is called (again via the Object pointer
+   in the message), passing it the transfer request object pointer.  A
+   parameter in the object indicates what routine is to precess the
+   completed transfer.  If this is the end of the chain for the transfer,
+   the XfReq object is destroyed and the blocked process sent a message
+   to resume, otherwise the params are set for another transfer and the
+   message re-posted to join the FIFO queue again.
+ <P> 
+   This sounds convoluted, but it enables us to implement a BDOS which
+   is re-enterant, since all transfers are encapsulated totally in a
+   XfReq object which rattles around independant of, and inter-leaved
+   with, all other such objects without multi-threading or interrupts.
+ <P> 
+   One of these objects should be instantiated for each drive unit to be
+   modelled, but NOTE that it is important to use the same parameter
+   struct when initialising the corresponding File System object so that
+   it "knows" the size of its "drive".
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+  class DskModel : public port {
+  private:
+    ddState stage;              // stage of transfer (see enum type)
+    BYTE    nLid;               // logical unit ID (0 = "A:" etc)
+    BYTE    nAngleInc;          // rotate degrees per mS
+    BYTE    nTrkInc;            // mS per head step
+    BYTE    nSettle;            // mS to settle after step
+    BYTE    nSecAngle;          // degrees per sector
+    UINT16  nCurTrk;            // current head location
+    UINT16  nCurAngle;          // current angle of sector index "hole"
+    UINT32  nErrRate;           // soft error rate (one every...)
+    UINT32  nOpCnt;             // count of operations for error emulation
+    UINT32  lLastTime;          // gated clock state memory
+    UINT32  lHoldTime;          // state memory for delayed events
+    int     fd;                 // handle for host "disk" data file
+    BOOL    bOk;                // TRUE if disk is on-line and operational
+    UINT16  nBps;               // bytes per sector
+    UINT32  nBpt;               // bytes per cylinder
+    UINT32  nBpd;               // total bytes on "disk"
+    TreqstQ ChanQ;              // FIFO queue of requests for this unit
+    BOOL    Read (void);        // read to buffer BLOCK_LEN bytes
+    BOOL    Write (void);       // write from buffer BLOCK_LEN bytes
+    long    CalcOffset (void);  // get offset for host file transfer
+  public: 
+    DskModel (UINT16, UINT16, Knl*, char*, DPB&, BYTE);
+   ~DskModel (void);
+    void Scheduler (void);               // called in "main loop"
+    void RxPort (PMSG);                  // incomming message handler
+    BOOL IsOnLine (void) { return bOk; } // check on c::tor success
+  };
+
+      </PRE> 
+
+</BODY>
+</HTML>

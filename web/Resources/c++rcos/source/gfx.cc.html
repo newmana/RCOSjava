@@ -1,0 +1,36 @@
+<HTML>
+<HEAD>
+  <TITLE>
+gfx.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+gfx.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Gfx - Module functions and globals                           *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: This module contains all the compiler dependant primitives.  *
+//  HISTORY:                                                              *
+//   02-DEC-92  First (MSC/C++ 7.00) version                              *
+//   24-JAN-93	Clipping routines added 				  *
+//   07-APR-93  Borland pixel addressing is relative clip origin!!        *
+//   23-MAY-93  Explicit path removed from BC <initgraph> (Needs EGAVGA)  *
+//   05-FEB-94  GfxFill combined into GfxRect 'cause Xlib has no support! *
+//*************************************************************************
+
+#include "gfx.hh"
+
+#ifdef DOS_ENV
+  #include "gfxdos.cpp"
+#endif
+
+#ifdef UNIX
+  #include "gfxunix.cc"
+#endif
+
+</PRE>
+</BODY>
+</HTML>

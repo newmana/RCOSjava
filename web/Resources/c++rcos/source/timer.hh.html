@@ -1,0 +1,106 @@
+<HTML>
+<HEAD>
+  <TITLE>
+timer.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+timer.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Timer - Module contains high level Timer class definition.   *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Definition of classes to provide interrupt service for timer *
+//	     events, delays, counts.                                      *
+//	     CAUTION: User defined Interrupt service routines require the *
+//	     C/C++ stack probes be disabled on all routines which are or  *
+//	     may be used during service.  Ensure the appropriate option   *
+//	     switch is set (or use MSC #pragma stack_check (off)).	  *
+//  HISTORY:                                                              *
+//   21-JAN-93	First (MSC/C++ 7.00) version				  *
+//   08-APR-93	Start/Stop added and GetTicks adjusted for 1mS (hah!)	  *
+//   27-OCT-93  Smart pointer hiding added (mouse int, fn 16)             *
+//   30-OCT-93  Massive simplification through the PAL abstraction module * 
+//   04-FEB-94  "Tock" size changed to 32 bits                            *
+//*************************************************************************
+
+#ifndef _RCOS_TIMER_
+
+  #include "rcos.hh"
+  #include "pal.hh"
+  #include "userip.hh"
+
+
+  //////////////////////
+  // This module contains a platform dependant routine that must be
+  // regularely called.  Under DOS, we can use the "user clock" interrupt..
+  //
+  // I would dearly love to remove the need for these, but it would
+  // require a PAL function that takes a variable number of function
+  // pointers as formal params..
+  //
+  #ifdef MSC700
+    #define __CPPARGS	void
+    #define INTERRUPT	__cdecl __interrupt __far __loadds
+  #endif
+
+  #ifdef BC31
+    #define __CPPARGS 	...
+    #define INTERRUPT	interrupt
+  #endif
+
+  #ifdef SYM60
+    extern  "C"
+    #define __CPPARGS	void
+    #define INTERRUPT
+  #endif
+  
+  #ifdef _DOS_ENV
+    #define _DOS_RTC	0x1c
+  #endif
+
+  #ifdef UNIX
+	#define __CPPARGS void
+	#define INTERRUPT
+	#define _DOS_RTC 1
+  #endif
+
+  ///////////////////////
+  // Timer class understates scope of this thing.. as well as providing a
+  // mechanism for the kernel to perform time accounting for applications,
+  // it also acts as a "hardware interrupt" module by grabbing keyboard
+  // input during timer interrupts and storing them for later dispersal
+  // within the <main> loop.
+  //
+  class Timer {
+    static UINT32 nTocks;		      // 18 mS interrupt accum.
+    INT16  nSenCnt;			      // startable only when zero
+    UINT32 OldRTC; 		              // old interrupt handler
+    UINT32 mTicks, mofs; 		      // retained timer counts
+    friend void INTERRUPT NewRTC (__CPPARGS); // new one (runs first)
+  public:
+    Timer ();
+    ~Timer ();
+    void   Stop (void);			      // Stop accumulating
+    void   Start (void);		      // Accumulate milliseconds
+    UINT32 GetTicks (void);		      // return 1 mS ticks
+    UINT32 GetTocks (void);		      // return 18 mS ticks
+  };
+
+  //////////////
+  // And this should be private to the "App" class, but I can't make it
+  // work that way - something to do with variable referencing for ISR's;
+  // It's actual instantiation is in <app.cpp>.
+  //
+  extern Timer  Clock;
+
+  #define _RCOS_TIMER_
+
+#endif
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

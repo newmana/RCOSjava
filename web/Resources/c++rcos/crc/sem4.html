@@ -1,0 +1,95 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class sem4
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>sem4</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	sem4
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   Semaphores are used by running processes for Inter-Process Communication
+   (IPC) synchronisation. They are identified by power of 2 integer values.
+   Each PID holds bit maps for semaphores they have created, ones they have
+   "set" and ones they are waiting (delayed) on.  Since a semaphore must be
+   identified to the PLL/2 compiler by an integer, and since PLL/2 ints are
+   16 bit, this limits us to a max of 16 samaphores..
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+ 	<A HREF="dbllist.html">DblList</A>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+  class Sem4 {
+    Pque   uPid,                // list of users (semaphore is free when empty)
+           uDelayed;            // priority list of waiting users
+    UINT16 uCount,              // current p/v count, set when created
+           uCreator;            // PID# of process that first opened it
+    char   *pst;                // optional user supplied name
+  public:
+    Sem4 (void);
+   ~Sem4 (void);
+    void   SemOpen (PCB&, UINT16, char*);
+    BOOL   operator == (char*); // match with semaphore name
+    BOOL   SemWait (PCB&);      // this user wants the batton
+    BOOL   SemSignal (void);    // release held semaphore
+    BOOL   SemIsFree (void);    // test for any current users
+    BOOL   SemIsUser (PCB&);    // test for specific user
+    BOOL   SemAddUser (PCB&);   // enroll new user
+    BOOL   SemDelUser (PCB&);   // remove all trace of user (may deallocate)
+    UINT16 SemGetDelayed (void);// get the head of the delayed task queue
+    UINT16 SemGetDelayed (UINT16); // get specific PID from delayed task Q
+    UINT16 SemGetCount (void) { return uCount; };
+  };
+
+      </PRE> 
+
+</BODY>
+</HTML>

@@ -1,0 +1,78 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class proctbl
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>proctbl</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	proctbl
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Working along Unix lines (Ref: Bach, MJ (1986): "The Design of the Unix
+      Operating System", Prentice-Hall, Chapter 6), we maintain two levels of
+      indirection between a process and its memory.  The Process Control Block
+      manager (Exec) does not need to know about Page Tables.  The Memory Mgr
+      does not need to know about PCB's - but they need a common interface
+      point.  Hence this structure, the "per process region table" ..
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+  typedef struct procrtbl {
+    HANDLE hText;           // process text (code) region(s)
+    HANDLE hStack;          // handle to stack region(s) for process
+    HANDLE hData;           // Data (not used at present) handle
+  } MCB,   *PMCB;
+      </PRE> 
+
+</BODY>
+</HTML>

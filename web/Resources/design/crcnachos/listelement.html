@@ -1,0 +1,80 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    ListElement CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>ListElement</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      ListElementHeader
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+ The following class defines a "list element" -- which is
+ used to keep track of one item on a list.  It is equivalent to a
+ LISP cell, with a "car" ("next") pointing to the next element on the list,
+ and a "cdr" ("item") pointing to the item on the list.
+<P>
+ Internal data structures kept public so that List operations can
+ access them directly.  
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+<PRE>
+class ListElement {
+   public:
+     ListElement(void *itemPtr, int sortKey);   // initialize a list element
+
+     ListElement *next;         // next element on list,
+                                // NULL if this is the last
+     int key;                   // priority, for a sorted list
+     void *item;                // pointer to item on the list
+};            
+</PRE>
+
+</BODY>
+</HTML>

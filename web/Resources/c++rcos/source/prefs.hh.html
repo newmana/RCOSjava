@@ -1,0 +1,80 @@
+<HTML>
+<HEAD>
+  <TITLE>
+prefs.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+prefs.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : System Initialization Parameters support module              *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Define function protos and any constants                     *
+//  HISTORY:                                                              *
+//   21-MAR-95  First Version (MS Visual C++ 1.5)                         *
+//*************************************************************************
+
+
+#ifndef _INI_PREFS_
+
+  #include <fstream.h>
+  #include <string.h>
+  #include <stdlib.h>
+  #include <ctype.h>
+  #include "rcos.hh"
+
+  //////////////////////
+  // define the constants which identify the private preferences file
+  // and the user selectable variables..
+  //
+  #define PREFS_NAME    "rcos.ini"
+  #define PREFS_TTYS    "terminals"
+  #define PREFS_QUAN    "quantum"
+  #define PREFS_VIEW    "display"
+  
+  #define SPACE         ' '
+  #define MAX_PREF      128
+  #define PREFS_MODE    (ios::in | ios::nocreate )
+
+  //////////////////
+  // Borland and MS have different ways of testing for an open stream..
+  //
+  #if defined(MSC700)
+    #define __OPEN_TEST (ini.is_open() ? TRUE : FALSE)
+  #endif
+
+  // BC31 not tested yet
+  #if defined(BC20) || defined (BC31)
+    #define __OPEN_TEST ((ini.rdbuf())->is_open() ? TRUE : FALSE)
+  #endif
+
+  #ifdef UNIX
+	#define __OPEN_TEST (ini.is_open() ? TRUE : FALSE )
+  #endif
+
+  ////////////////
+  // A class to hold private INI file data
+  //
+  class Preferences {
+    ifstream ini;
+    BOOL bOpen;
+    char *pBuffer;
+    char *FindKey (const char*);
+  public:
+    Preferences (void);
+   ~Preferences (void);
+    UINT16 GetPrefInt (const char*, UINT16);
+    UINT16 GetPrefStr (const char*, const char*, char*, UINT16);
+  };
+
+  #define _INI_PREFS_
+
+#endif
+
+///////////////////////////////// EOF //////////////////////////////////////
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,111 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    PostOffice CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>PostOffice</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      PostOfficeHeader
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+ The following class defines a "Post Office", or a collection of
+ mailboxes.  The Post Office is a synchronization object that provides
+ two main operations: Send -- send a message to a mailbox on a remote
+ machine, and Receive -- wait until a message is in the mailbox,
+ then remove and return it.
+<P>
+ Incoming messages are put by the PostOffice into the
+ appropriate mailbox, waking up any threads waiting on Receive.
+                   
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+<PRE>
+class PostOffice {
+  public:
+    PostOffice(NetworkAddress addr, double reliability, int nBoxes);
+                                // Allocate and initialize Post Office
+                                //   "reliability" is how many packets
+                                //   get dropped by the underlying network
+    ~PostOffice();              // De-allocate Post Office data
+
+    void Send(PacketHeader pktHdr, MailHeader mailHdr, char *data);
+                                // Send a message to a mailbox on a remote
+                                // machine.  The fromBox in the MailHeader is
+                                // the return box for ack's.
+
+    void Receive(int box, PacketHeader *pktHdr,
+                MailHeader *mailHdr, char *data);
+                                // Retrieve a message from "box".  Wait if
+                                // there is no message in the box.
+
+    void PostalDelivery();      // Wait for incoming messages,
+                                // and then put them in the correct mailbox
+
+    void PacketSent();          // Interrupt handler, called when outgoing
+                                // packet has been put on network; next
+                                // packet can now be sent
+    void IncomingPacket();      // Interrupt handler, called when incoming
+                                // packet has arrived and can be pulled
+                                // off of network (i.e., time to call
+                                // PostalDelivery)
+
+  private:
+    Network *network;           // Physical network connection
+    NetworkAddress netAddr;     // Network address of this machine
+    MailBox *boxes;             // Table of mail boxes to hold incoming mail
+    int numBoxes;               // Number of mail boxes
+    Semaphore *messageAvailable;// V'ed when message has arrived from network
+    Semaphore *messageSent;     // V'ed when next message can be sent to network
+    Lock *sendLock;             // Only one outgoing message at a time
+};                                 
+</PRE>
+
+</BODY>
+</HTML>

@@ -1,0 +1,76 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class fcbTag
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>fcbTag</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	fcbTag
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   a CP/M File Control Block. While it "uses" the Directory entry struct,
+   certain bytes have different meanings from those held on the disk.
+   Note that the target buffer for the transfer is an extension of the
+   original - added to permit totally encapsulated operation requests.
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+  typedef struct fcbTag {
+    DIRENT de;                  // A.A. but nUsrNmbr = drive ID
+    BYTE   nCurRec;             // current record for sequential read/write
+    BYTE   nRandom[3];          // record number (0..65535)
+    char  *pBuf;                // address for transfer
+  } FCB, *PFCB;
+      </PRE> 
+
+</BODY>
+</HTML>

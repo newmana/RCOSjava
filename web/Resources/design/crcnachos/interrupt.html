@@ -1,0 +1,123 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    Interrupt CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>Interrupt</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Interrupt
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+ The following class defines the data structures for the simulation
+ of hardware interrupts.  We record whether interrupts are enabled
+ or disabled, and any hardware interrupts that are scheduled to occur
+ in the future.  
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+<PRE>
+class Interrupt {
+  public:
+    Interrupt();                        // initialize the interrupt simulation
+    ~Interrupt();                       // de-allocate data structures
+
+    IntStatus SetLevel(IntStatus level);// Disable or enable interrupts
+                                        // and return previous setting.
+
+    void Enable();                      // Enable interrupts.
+    IntStatus getLevel() {return level;}// Return whether interrupts
+                                        // are enabled or disabled
+
+    void Idle();                        // The ready queue is empty, roll
+                                        // simulated time forward until the
+                                        // next interrupt
+
+    void Halt();                        // quit and print out stats
+
+    void YieldOnReturn();               // cause a context switch on return
+                                        // from an interrupt handler
+
+    MachineStatus getStatus() { return status; } // idle, kernel, user
+    void setStatus(MachineStatus st) { status = st; }
+
+    void DumpState();                   // Print interrupt state
+
+
+    // NOTE: the following are internal to the hardware simulation code.
+    // DO NOT call these directly.  I should make them "private",
+    // but they need to be public since they are called by the
+    // hardware device simulators.
+
+    void Schedule(VoidFunctionPtr handler,// Schedule an interrupt to occur
+        int arg, int when, IntType type);// at time ``when''.  This is called
+                                        // by the hardware device simulators.
+
+    void OneTick();                     // Advance simulated time
+
+  private:
+    IntStatus level;            // are interrupts enabled or disabled?
+    List *pending;              // the list of interrupts scheduled
+                                // to occur in the future
+    bool inHandler;             // TRUE if we are running an interrupt handler
+    bool yieldOnReturn;         // TRUE if we are to context switch
+                                // on return from the interrupt handler
+    MachineStatus status;       // idle, kernel mode, user mode
+
+    // these functions are internal to the interrupt simulation code
+
+    bool CheckIfDue(bool advanceClock); // Check if an interrupt is supposed   
+                                        // to occur now
+
+    void ChangeLevel(IntStatus old,     // SetLevel, without advancing the
+        IntStatus now);                 // simulated time
+};           
+</PRE>
+
+</BODY>
+</HTML>

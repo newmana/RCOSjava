@@ -1,0 +1,37 @@
+<HTML>
+<HEAD>
+  <TITLE>
+pal.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+pal.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Pal - Program Abstraction Layer for the RCOS system	  *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Definition of a class to provide platform dependant services *
+//           for timer interrupts, raw keyboard buffer access and low     *
+//           level mouse events.					  *
+//  HISTORY:                                                              *
+//   22-MAR-93  ISR made a friend to beat Borland compiler quirk	  *
+//   08-APR-93	Start/Stop added and GetTicks adjusted for 1mS (hah!)	  *
+//   14-MAY-93	Sentinal to prevent starting a stopped timer		  *
+//   29-OCT-93  Created to make "Timer" more platform independant	  *
+//   04-FEB-94  Timer class body moved here from "timer"                  *
+//*************************************************************************
+
+#include "pal.hh"
+
+#ifdef DOS_ENV
+  #include "paldos.cpp"
+#endif
+
+#ifdef UNIX
+  #include "palunix.cc"
+#endif
+</PRE>
+</BODY>
+</HTML>

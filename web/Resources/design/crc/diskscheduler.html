@@ -1,0 +1,128 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    DiskScheduler CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>DiskScheduler</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      DiskScheduler
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Based on MessageHandler class, HandleMessage method must be 
+      written to handle a number of specified messages.<P> 
+      <P>
+      Receives read/write requests (based on logical sectors) from 
+      FileSystems and possibly VirtualMemoryManagers.  Translates logical
+      sectors into real cylinder, sector, surface combinations, constructs
+      TransferRequests to be sent to a DiskDrive and places them in a Queue
+      to be scheduled.
+      <P>
+      Messages received could include a message from the kernel that the
+      last DiskTransferRequest has completed.  If so the following should
+      occur
+ <PRE>
+ if request was a read then
+   information is placed into DiskBuffer 
+ else
+   mark DiskBuffer as free
+ send MSG to owner that disk request has finished
+ </PRE>
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      <A HREF="disktransferrequest.html">DiskTransferRequest</A> - type of request,
+         owner, request number, location of request<BR>
+      <A HREF="diskschedulerrequest.html">DiskSchedulerRequest</A> - actual
+         request made by MMU or FileSystem of DiskScheduler, request contains
+         ID of system requesting service<BR>
+      <A HREF="diskbuffer.html">DiskBuffer</A><BR>
+      <A HREF="messagehandler.html">MessageHandler</A> <BR>
+      <A HREF="message.html">Message</A> <BR>
+      <A HREF="filesystem.html">FileSystem</A> <BR>
+      <A HREF="diskdrive.html">DiskDrive</A> <BR>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+  <UL>
+    <P>
+      <LI> <B>DiskScheduler( DiskDrive theDiskDrive )</B><BR>
+           - associate a scheduler with a particular disk
+    <P>
+      <LI> <B>HandleMessage()</B><BR>
+           - redefinition of method from parent MessageHandler
+         class, written to handle DiskScheduler messages (specified in table
+         below)
+    <P>
+      <LI> <B>DiskTransferRequest theDiskRequest = 
+             GenerateTransferRequest( DiskSchedulerRequest theSchedulerRequest )</B><BR>
+         - take a DiskSchedulerRequest and generate appropriate DiskTransferRequest,
+           including calling LogicalBlockToPhysical
+    <P>
+      <LI> <B>DiskPhysicalLocation theLocation = LogicalBlockToPhysical(
+                 int theLogicalBlock )</B><BR>
+           - take logical block and calculate physical disk location
+    <P>
+      <LI> <B>AddTransferRequest( DiskTransferRequest theDiskRequest )</B><BR>
+           - add a request to the request queue
+    <P>
+      <LI> <B>DiskTransferRequest theDiskRequest GetNextTransferRequest()</B><BR>
+           - get the next request from the queue
+    <P>
+      <LI> <B>int ChooseBuffer()</B><BR>
+           - choose buffer in which to place information just
+           read from disk, or to be written into disk (?? should DiskScheduler
+           be able to read memory straight from specifed location??)
+    <P>
+      <LI> <B>NotifyOwner( DiskSchedulerRequest theRequest, int status )</B><BR>
+           - tell the owner of request what has happened with request 
+             (could be completed, or some form of error) 
+    <P>
+      <LI> <B>int GetDiskStatus()</B><BR>
+           - return status of associate disk drive 
+  </UL>
+
+</BODY>
+</HTML>

@@ -1,0 +1,200 @@
+<HTML>
+<HEAD>
+  <TITLE>
+dbllist.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+dbllist.cc
+  </H1>
+<PRE>
+//***********************************************************************
+//  MODULE : DblList - Class body					*
+//  AUTHOR : Ron Chernich						*
+//  PURPOSE: Double linked List Class (after Atkinson**2, 1990: p505).	*
+//	     Note that data is added to the list by making a byte-wise	*
+//	     copy, so take care that the source element data is <auto>, *
+//	     or disposed of, if possible.				*
+//  HISTORY:								*
+//   10-JAN-93	First (MSC/C++ 7.00) version				*
+//   28-JAN-93	Fixed: Delete needs to adjust current or tail gets lost	*
+//***********************************************************************
+
+#include "dbllist.hh"
+                
+                
+//////////////////////
+// Initializes a new "element" for a list
+// RETURNS: pointer to initialised list element
+//
+PDBLT DblList::create(void *pData, UINT16 nLen)
+{
+  if ((pTemp = new DBLT) == NULL)
+    return NULL;
+  if (NULL == (pTemp->data = new unsigned char[nLen])) {
+    free(pTemp);
+    return NULL;
+  }
+  memmove(pTemp->data, pData, nLen);
+  pTemp->prev = pTemp->next = NULL;
+  pTemp->nBytes = nLen;
+  return pTemp;
+}
+
+/////////////
+// Constructor simply Nulls pointers.
+//
+DblList::DblList(INT16 sort)
+{
+  order = sort;
+  pBase = pCrnt = pTemp = NULL;
+}
+
+/////////////
+// Destructor for a list removes all contents.
+//
+DblList::~DblList()
+{
+  DblDrop();
+}
+
+/////////////
+// Delete the "current" element (if any), closing up as required.  The
+// "current" pointer is adjusted to the following element is one exists,
+// or the previous if we've just killed the tail.  This may be NULL.
+//
+void DblList::DblDelete()
+{
+  if (pCrnt) {
+    if ((pTemp = pCrnt->next) == NULL)
+      pTemp = pCrnt->prev;
+    if (pCrnt->prev == NULL)
+      pBase = pCrnt->next;
+    else
+      pCrnt->prev->next = pCrnt->next;
+    if (pCrnt->next)
+      pCrnt->next->prev = pCrnt->prev;
+    DELETE_ARRAY pCrnt->data;
+    delete pCrnt;
+    pCrnt = pTemp;
+  }
+}
+
+/////////////
+// Deletes all elements from list and sets list pointer to virgin.
+//
+void DblList::DblDrop()
+{
+  pCrnt = pBase;
+  while (pCrnt) {
+    pTemp = pCrnt->next;
+    DblDelete();
+    pCrnt = pTemp;
+  }
+  pBase = pCrnt = pTemp = NULL;
+}
+
+/////////////
+// Set current record to the head of the list.
+// RETURNS: pointer to first element, or NULL if list empty
+//
+void *DblList::DblGetHead()
+{
+  pCrnt = pBase;
+  return ((pCrnt) ? pCrnt->data : NULL);
+}
+
+/////////////
+// Chase through the list, head to tail (really should implement a *tail).
+// RETURNS: pointer to last element, or NULL if list empty
+//
+void *DblList::DblGetTail()
+{
+  pCrnt = pBase;
+  if (pCrnt)
+    while (pCrnt->next)
+      pCrnt = pCrnt->next;
+  return ((pCrnt) ? pCrnt->data : NULL);
+}
+
+/////////////
+// RETURNS: pointer to element following "current", or NULL already at tail
+//
+void *DblList::DblGetNext()
+{
+  if (pCrnt)
+    pCrnt = pCrnt->next;
+  return ((pCrnt) ? pCrnt->data : NULL);
+}
+
+/////////////
+// RETURNS: pointer to element prior to "current", or NULL already at head
+//
+void *DblList::DblGetPrev()
+{
+  if (pCrnt)
+    pCrnt = pCrnt->prev;
+  return ((pCrnt) ? pCrnt->data : NULL);
+}
+
+/////////////
+// Append passed element data to the end of the list.
+// *NOTE* that is possible to insert duplicate data!
+// RETURNS: pointer to new element, or NULL if append failed
+//
+void *DblList::DblAppend(void *data, UINT16 bytes)
+{
+  if (NULL == (pTemp = create(data, bytes)))
+    return NULL;
+  DblGetTail();
+  if (pCrnt == NULL)
+    pBase = pCrnt = pTemp;
+  else {
+    pCrnt->next = pTemp;
+    pTemp->prev = pCrnt;
+    pCrnt = pTemp;
+  }
+  return pCrnt->data;
+}
+
+/////////////
+// Add passed element data to list in the order specified when this object
+// was instantiated, based on binary contents of data (which can be
+// anything!).	*NOTE* it is possible to insert duplicate data!
+// RETURNS: pointer to new element, or NULL if insert failed
+//
+void *DblList::DblInsert (void *data, UINT16 bytes)
+{
+  PDBLT pHold;
+
+  DblGetHead();
+  if (pCrnt == NULL)
+    return DblAppend(data, bytes);
+  if (NULL == (pHold = create(data, bytes)))
+    return NULL;
+  while (pCrnt->next && (memcmp(data, pCrnt->data, bytes) == order))
+    pCrnt = pCrnt->next;
+  if ((pCrnt->next == NULL) && (memcmp(data, pCrnt->data, bytes) == order)) {
+    pCrnt->next = pHold;
+    pHold->prev = pCrnt;
+    pCrnt = pHold;
+  }
+  else {
+    pTemp = pCrnt->prev;
+    pHold->prev = pTemp;
+    pHold->next = pCrnt;
+    pCrnt->prev = pHold;
+    if (pTemp == NULL)
+      pBase = pHold;
+    else
+      pTemp->next = pHold;
+    pCrnt = pHold;
+  }
+  return pCrnt->data;
+}
+
+/********************************** EOF ***********************************/
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,587 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS.java - RCOS C++ Version
+  </TITLE>
+</HEAD>
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+<TABLE WIDTH="100%">
+  <TR>
+    <TD ALIGN=LEFT>
+      <H4>/ <A HREF="../../resources.html" TARGET="body">Resources</A> / C++ Version /</H4>
+    </TD>
+    <TD ALIGN=RIGHT>
+      <IMG SRC="../../pics/rightEnd.gif" WIDTH="19" HEIGHT="30"><A HREF="../../index.html" TARGET="_parent"><IMG SRC="../../pics/home.gif" BORDER="0" ALT="RCOS.java Home Page" WIDTH="38" HEIGHT="30"></A><A HREF="../design/index.html" TARGET="body"><IMG SRC="../../pics/back.gif" BORDER=0 ALT="Design" WIDTH="38" HEIGHT="30"></A><A HREF="../references/index.html" TARGET="body"><IMG SRC="../../pics/forward.gif" BORDER=0 ALT="References" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../pics/leftEnd.gif" ALT="" WIDTH="19" HEIGHT="30"><BR>
+    </TD>
+  </TR>
+</TABLE>
+<P>
+The following provides a summary of the C++ version of 
+<A HREF="http://cq-pan.cqu.edu.au/david-jones/projects/rcos/">RCOS</A> as of
+the end of 1995.  
+<P>
+The files and classes used have been divided into a 13 sections.  Of the
+13 sections, ?? will probably not be used in the Java port of RCOS including
+<UL>
+  <LI> support classes, graphics, data structures 
+  <LI> platform abstraction layer
+  <LI> preferences and application framework
+  <LI> animation and display
+</UL>
+<P>
+The concepts used in the remainder of the sections will be used but are
+liable to be heavily modified.
+<P>
+
+<H2>
+  Main function and global definitions
+</H2>
+
+  <BLOCKQUOTE>
+    <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+      <TR>
+        <TD VALIGN=TOP ALIGN=CENTER>
+          <H4>Files</H4>
+        </TD>
+        <TD>
+          <UL>
+	    <LI> <A HREF="source/rcos.cc.html">rcos.cc</A><BR>
+ 	    	Main (Supervisor) module    
+	    <LI> <A HREF="source/rcos.hh.html">rcos.hh</A><BR>
+ 		Common header definitions  
+          </UL>
+        
+        </TD>
+      </TR>
+ 
+      <TR>
+        <TD VALIGN=TOP ALIGN=CENTER>
+          <H4>Classes</H4>
+        </TD>
+        <TD>
+          <UL>
+            none, just C++ main function
+          </UL>
+        </TD>
+      </TR>
+    </TABLE>
+
+  </BLOCKQUOTE>
+
+<H2>
+  Kernel and messages
+</H2>
+    
+  <BLOCKQUOTE>
+    <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Files</H4>
+        </TD>
+        <TD>
+          <UL>
+            <LI> <A HREF="source/debugknl.cc.html">debugknl.cc</A><BR>
+    		Debugging kernel normally not used in a normal version of RCOS    
+    	    <LI> <A HREF="source/kernel.cc.html">kernel.cc</A><BR>
+     		The kernel class with Exec as a private member          
+    	    <LI> <A HREF="source/kernel.hh.html">kernel.hh</A><BR>
+    	    <LI> <A HREF="source/message.hh.html">message.hh</A><BR>
+     		Abstract class for all Device Drivers and all messages  
+          </UL>
+        </TD>
+      </TR>
+ 
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Classes</H4>
+        </TD>
+        <TD>
+          message.hh
+          <UL>
+            <LI> <A HREF="crc/message.html">message </A>
+            <LI> <A HREF="crc/port.html">port</A>
+            <LI> struct <A HREF="crc/proctbl.html">proctbl</A>
+            <LI> struct <A HREF="crc/mmu_msg.html">MMU_MSG</A>
+            <LI> struct <A HREF="crc/aniq.html">aniq</A>
+            <LI> struct <A HREF="crc/anip.html">anip</A>
+            <LI> <A HREF="crc/winpainter.html">WinPainter</A>
+          </UL>
+          kernel.hh
+          <UL>
+            <LI> struct <A HREF="crc/qmsg.html">qmsg</A>
+            <LI> struct <A HREF="crc/devlst.html">devlst</A>
+            <LI> <A HREF="crc/kernel.html">Knl</A>
+          </UL>
+        </TD>
+      </TR>
+    </TABLE>
+  </BLOCKQUOTE>
+
+<H2>
+  Exec
+</H2>
+ 
+  <BLOCKQUOTE>
+  <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Files</H4>
+        </TD>
+        <TD>
+          <UL>
+            	<LI> <A HREF="source/exec.cc.html">exec.cc</A><BR>
+  		Class for PCB actions and process management (Fork, Dispatch)       
+            	<LI> <A HREF="source/exec.hh.html">exec.hh</A><BR>
+		Associated header (includes PCB struct definition) 
+          </UL>
+        </TD>
+      </TR>
+ 
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Classes</H4>
+        </TD>
+        <TD>
+        <UL>
+          <LI> <A HREF="crc/pcb.html">PCB</A>
+          <LI> <A HREF="crc/pque.html">Pque</A>
+          <LI> <A HREF="crc/sem4.html">Sem4</A>
+          <LI> struct <A HREF="crc/sh_tag.html">sh_tag</A>
+          <LI> <A HREF="crc/qmmgr.html">QmMgr</A>
+          <LI> <A HREF="crc/exec.html">Exec</A>
+        </UL> 
+        </TD>
+      </TR>
+    </TABLE>
+  </BLOCKQUOTE>
+
+<H2>
+  P-Code Interpreter
+</H2>
+
+  <BLOCKQUOTE>
+  <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Files</H4>
+        </TD>
+        <TD>
+          <UL>
+	      <LI> <A HREF="source/pci.cc.html">pci.cc</A><BR>
+ 	 	P-Code Interpreter      
+	      <LI> <A HREF="source/pci.hh.html">pci.hh</A><BR>
+          </UL>
+        </TD>
+      </TR>
+ 
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Classes</H4>
+        </TD>
+        <TD>
+          <UL>
+            none, just defines method <TT>Exec::RunProc</TT>
+          </UL>
+        </TD>
+      </TR>
+    </TABLE>
+  </BLOCKQUOTE>
+
+<H2>
+  Memory Management
+</H2>
+
+  <BLOCKQUOTE>
+  <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Files</H4>
+        </TD>
+        <TD>
+          <UL>
+	    <LI> <A HREF="source/mmu.hh.html">mmu.hh</A><BR>
+ 		Header defining a general memory manager  
+	    <LI> <A HREF="source/mmup.cc.html">mmup.cc</A><BR>
+ 		Implmentation of a simple fixed partition memory manager   
+          </UL>
+        </TD>
+      </TR>
+ 
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Classes</H4>
+        </TD>
+        <TD>
+          <UL>
+            <LI> struct <A HREF="crc/pgtbl.html">pgtbl</A>
+            <LI> <A HREF="crc/mmu.html">Mmu</A>
+          </UL>
+        </TD>
+      </TR>
+    </TABLE>
+  </BLOCKQUOTE>
+
+<H2>
+  Inter-process communication 
+</H2>
+  
+  <BLOCKQUOTE>
+<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Files</H4>
+        </TD>
+        <TD>
+          <UL>
+	      <LI> <A HREF="source/ipc.cc.html">ipc.cc</A><BR>
+ 		Implements semaphores 
+	      <LI> <A HREF="source/mshare.cc.html">mshare.cc</A><BR>
+  		Implements shared memory   
+         </UL>
+        </TD>
+      </TR>
+ 
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Classes</H4>
+        </TD>
+        <TD>
+          ipc.cc
+          <UL>
+            no new classes, implement methods for <A HREF="crc/sem4.html">sem4</A> 
+            and <A HREF="crc/exec.html">Exec</A> (semaphore related methods)
+          </UL>
+          mshare.cc
+          <UL>
+            no new classes, implement methods for <A HREF="crc/qmmgr.html">QmMgr</A> 
+            and <A HREF="crc/exec.html">Exec</A> (shm related methods)
+          </UL>
+        </TD>
+      </TR>
+    </TABLE>
+  </BLOCKQUOTE>
+
+<H2>
+  File system and disk drives
+</H2>
+
+  <BLOCKQUOTE>
+    <TABLE BORDER>
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Files</H4>
+        </TD>
+        <TD>
+          <UL>
+              <LI> <A HREF="source/cpmbdos.cc.html">cpmbdos.cc</A><BR>
+ 		Simulates the operation of a CP/M disk drive  
+              <LI> <A HREF="source/cpmfs.cc.html">cpmfs.cc</A><BR>
+  		The basic CP/M like file system RCOS uses   
+              <LI> <A HREF="source/cpmfs.hh.html">cpmfs.hh</A><BR>
+              <LI> <A HREF="source/fsiface.cc.html">fsiface.cc</A><BR>
+		File system interface between processes and the file system         
+              <LI> <A HREF="source/fsiface.hh.html">fsiface.hh</A><BR>
+	      <LI> <A HREF="source/dskdrv.cc.html">dskdrv.cc</A><BR>
+ 		Provides intermediate level I/O routines for disk drives 
+          </UL>
+        </TD>
+      </TR>
+ 
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Classes</H4>
+        </TD>
+        <TD>
+          cpmfs.hh
+          <UL>
+            <LI> struct <A HREF="crc/dskparmstag.html">DskParmsTag</A>
+            <LI> struct <A HREF="crc/mactag.html">macTag</A>
+            <LI> struct <A HREF="crc/detag.html">deTag</A>
+            <LI> struct <A HREF="crc/fcbtag.html">fcbTag</A>
+            <LI> struct <A HREF="crc/fcbreftag.html">fcbRefTag</A>
+            <LI> <A HREF="crc/xfreq.html">XfReq</A>
+            <LI> <A HREF="crc/cpmfs.html">CpmFs</A>
+            <LI> <A HREF="crc/treqstq.html">TreqstQ</A>
+            <LI> <A HREF="crc/transq.html">TransQ</A>
+            <LI> <A HREF="crc/dskmodel.html">DskModel</A>
+          </UL>
+          fsiface.hh
+          <UL>
+            <LI> struct <A HREF="crc/xfcb_tag.html">xfcb_tag</A>
+            <LI> <A HREF="crc/fsiface.html">FsIface</A>
+          </UL>
+ 
+        </TD>
+      </TR>
+    </TABLE>
+  </BLOCKQUOTE>
+
+<H2>
+  Terminal and line driver
+</H2>
+
+  <BLOCKQUOTE>
+<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Files</H4>
+        </TD>
+        <TD>
+          <UL>
+	    <LI> <A HREF="source/tty.cc.html">tty.cc</A><BR>
+ 		Class for an ANSI terminal    
+	    <LI> <A HREF="source/tty.hh.html">tty.hh</A><BR>
+	    <LI> <A HREF="source/ttyld.hh.html">ttyld.hh</A><BR>
+ 		Class for Line Protocol Driver   
+	    <LI> <A HREF="source/ttyld.cc.html">ttyld.cc</A><BR>
+          </UL>
+        </TD>
+      </TR>
+ 
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Classes</H4>
+        </TD>
+        <TD>
+          tty.hh
+          <UL>
+            <LI> <A HREF="crc/tty.html">tty</A>
+          </UL>
+          ttyld.hh
+          <UL>
+            <LI> struct <A HREF="crc/cblock.html">cblock</A>
+            <LI> <A HREF="crc/Cblock.html">Cblock</A>
+            <LI> <A HREF="crc/lndrv.html">LnDrv</A>
+          </UL>
+        </TD>
+      </TR>
+    </TABLE>
+  </BLOCKQUOTE>
+
+<H2>
+  Operator's console
+</H2>
+
+  <BLOCKQUOTE>
+<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Files</H4>
+        </TD>
+        <TD>
+          <UL>
+	    <LI> <A HREF="source/conx.cc.html">conx.cc</A><BR>
+	 	Operator's Console class     
+          </UL>
+        </TD>
+      </TR>
+ 
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Classes</H4>
+        </TD>
+        <TD>
+          <UL>
+             no new classes, defines Exec::RunCon and other functions used
+             to implement the console process
+        </TD>
+      </TR>
+    </TABLE>
+  </BLOCKQUOTE>
+
+<H2>
+  Animation and display
+</H2>
+
+  <BLOCKQUOTE>
+<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Files</H4>
+        </TD>
+        <TD>
+	    <UL>
+		<LI> <A HREF="source/anim.cc.html">anim.cc</A><BR>
+	 		Class to dispatch animation messages and title bar text 
+		<LI> <A HREF="source/anim.hh.html">anim.hh</A><BR>
+		<LI> <A HREF="source/cpu-disp.cc.html">cpu-disp.cc</A><BR>
+	 		Draw the CPU scheduler window  
+		<LI> <A HREF="source/cpu-disp.hh.html">cpu-disp.hh</A><BR>
+		<LI> <A HREF="source/dev-disp.cc.html">dev-disp.cc</A><BR>
+	 		Draw the Devices window (TTY and Line Printer) 
+		<LI> <A HREF="source/dev-disp.hh.html">dev-disp.hh</A><BR>
+		<LI> <A HREF="source/dsk-disp.cc.html">dsk-disp.cc</A><BR>
+	 		Functions to animate disk movement and transfers  
+		<LI> <A HREF="source/dsk-disp.hh.html">dsk-disp.hh</A><BR>
+	    </UL>
+	        
+        </TD>
+      </TR>
+ 
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Classes</H4>
+        </TD>
+        <TD>
+          anim.hh
+          <UL>
+            <LI> <A HREF="crc/animate.html">Animate</A>
+          </UL>  
+          cpu-disp.hh
+          <UL>
+            <LI> <A HREF="crc/cpuanim.html">CpuAnim</A>
+          </UL>
+          dev-disp.hh
+          <UL>
+            <LI> <A HREF="crc/terminals.html">Terminals</A>
+            <LI> <A HREF="crc/ttyanim.html">TTyAnim</A>
+          </UL>
+          dsk-disp.hh
+          <UL>
+            <LI> <A HREF="crc/diskanim.html">DiskAnim</A>
+          </UL>
+ 
+        </TD>
+      </TR>
+    </TABLE>
+  </BLOCKQUOTE>
+
+<H2>
+  Preferences and application framework
+</H2>
+
+  <BLOCKQUOTE>
+<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Files</H4>
+        </TD>
+        <TD>
+	    <UL>
+		<LI> <A HREF="source/app.cc.html">app.cc</A><BR>
+	 		Application shell (start-up, close-down, low level message pass)    
+		<LI> <A HREF="source/app.hh.html">app.hh</A><BR>
+		<LI> <A HREF="source/prefs.cc.html">prefs.cc</A><BR>
+			Used to read preferences file
+		<LI> <A HREF="source/prefs.hh.html">prefs.hh</A><BR>
+	    </UL>
+        </TD>
+      </TR>
+ 
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Classes</H4>
+        </TD>
+        <TD>
+          app.hh
+          <UL>
+		<LI> <A HREF="source/appwindow.html">AppWindow</A>
+		<LI> <A HREF="source/app.html">App</A>
+	  </UL>
+          prefs.hh
+          <UL>
+		<LI> <A HREF="source/preferences.html">Preferences</A>
+	  </UL>
+        </TD>
+      </TR>
+    </TABLE>
+  </BLOCKQUOTE>
+
+<H2>
+  Platform abstraction layer
+</H2>
+
+  <BLOCKQUOTE>
+<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Files</H4>
+        </TD>
+        <TD>
+	    <UL>
+		<LI> <A HREF="source/gfx.cc.html">gfx.cc</A><BR>
+	 		Program Abstraction Layer for graphics  
+		<LI> <A HREF="source/gfx.hh.html">gfx.hh</A><BR>
+		<LI> <A HREF="source/gfxdos.cc.html">gfxdos.cc</A><BR>
+		<LI> <A HREF="source/gfxdos.hh.html">gfxdos.hh</A><BR>
+		<LI> <A HREF="source/gfxunix.cc.html">gfxunix.cc</A><BR>
+		<LI> <A HREF="source/gfxunix.hh.html">gfxunix.hh</A><BR>
+		<LI> <A HREF="source/pal.cc.html">pal.cc</A><BR>
+	 		Program Abstraction Layer for timer, keyboard and mouse 
+		<LI> <A HREF="source/pal.hh.html">pal.hh</A><BR>
+		<LI> <A HREF="source/paldos.cc.html">paldos.cc</A><BR>
+		<LI> <A HREF="source/paldos.hh.html">paldos.hh</A><BR>
+		<LI> <A HREF="source/palunix.cc.html">palunix.cc</A><BR>
+		<LI> <A HREF="source/palunix.hh.html">palunix.hh</A><BR>
+		<LI> <A HREF="source/timer.cc.html">timer.cc</A><BR>
+	 		<H4>Classes</H4> for System Clock and Keyboard/Mouse input 
+		<LI> <A HREF="source/timer.hh.html">timer.hh</A><BR>
+	    </UL>
+        </TD>
+      </TR>
+ 
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Classes</H4>
+        </TD>
+        <TD>
+          <UL>
+            not done, as won't be used in RCOS.java
+          </UL>
+        </TD>
+      </TR>
+    </TABLE>
+  </BLOCKQUOTE>
+
+<H2>
+  Support classes, graphics, data structures
+</H2>
+
+  <BLOCKQUOTE>
+<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Files</H4>
+        </TD>
+        <TD>
+	    <UL>
+		<LI> <A HREF="source/btn.cc.html">btn.cc</A><BR>
+	 		Base class for all gizmos 
+		<LI> <A HREF="source/btn.hh.html">btn.hh</A><BR>
+		<LI> <A HREF="source/ctrls.cc.html">ctrls.cc</A><BR>
+	  		Classes for supervisor control gadgets   
+		<LI> <A HREF="source/ctrls.hh.html">ctrls.hh</A><BR>
+		<LI> <A HREF="source/dbllist.cc.html">dbllist.cc</A><BR>
+	 		Single base class for all lists (FIFO, LIFO, priority)   
+		<LI> <A HREF="source/dbllist.hh.html">dbllist.hh</A><BR>
+		<LI> <A HREF="source/obj.cc.html">obj.cc</A><BR>
+	 		geometric object classes (point, rectangle) 
+		<LI> <A HREF="source/obj.hh.html">obj.hh</A><BR>
+		<LI> <A HREF="source/rng.cc.html">rng.cc</A><BR>
+	 		Ring buffer class 
+		<LI> <A HREF="source/rng.hh.html">rng.hh</A><BR>
+		<LI> <A HREF="source/str.cc.html">str.cc</A><BR>
+	 		Class for null terminated strings 
+		<LI> <A HREF="source/str.hh.html">str.hh</A><BR>
+		<LI> <A HREF="source/ttyld.hh.html">ttyld.hh</A><BR>
+		<LI> <A HREF="source/userip.cc.html">userip.cc</A><BR>
+	 		provides high level keyboard and mouse input 
+		<LI> <A HREF="source/userip.hh.html">userip.hh</A><BR>
+	  </UL>
+        </TD>
+      </TR>
+ 
+      <TR>
+        <TD ALIGN=CENTER VALIGN=TOP>
+          <H4>Classes</H4>
+        </TD>
+        <TD>
+          <UL>
+            not done, as won't be used in RCOS.java
+          </UL>
+        </TD>
+      </TR>
+    </TABLE>
+  </BLOCKQUOTE>
+</BODY>
+</HTML>

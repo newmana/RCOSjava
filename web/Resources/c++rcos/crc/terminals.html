@@ -1,0 +1,82 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class Terminals
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>Terminals</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+       Terminals
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   this class simplifies handling the display management of the
+   simulated user terminals configured into the system.
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+  class Terminals {
+  private:
+    UINT16 nTerm;
+    tty  **pTerm;
+    rect *pttyPos;
+  public:
+    Terminals (Knl*, UINT16);
+   ~Terminals (void);
+    void Paint (void);
+    void Refresh (void);
+    void Activate (void);
+    void DeActivate (void);
+    inline rect& GetPos (UINT16 n) { return pttyPos[n]; }
+  };
+      </PRE> 
+
+</BODY>
+</HTML>

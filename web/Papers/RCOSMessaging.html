@@ -1,0 +1,294 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.72 [en] (Win98; U) [Netscape]">
+   <title>    RCOS.java - The Messaging System in RCOS.java
+  </title>
+</head>
+<body text="#EEEEEE" bgcolor="#000000" link="#FFFF00" vlink="#999999">
+&nbsp;
+<table WIDTH="100%" >
+<tr>
+<td ALIGN=LEFT>
+<h4>
+/ <a href="../papers.html">Papers</a> / The Messaging System in RCOS.java</h4>
+</td>
+
+<td ALIGN=RIGHT><img SRC="rightEnd.gif" height=30 width=19><a href="../index.html" TARGET="_parent"><img SRC="home.gif" ALT="RCOS.java Home Page" BORDER=0 height=30 width=38></a><a href="RCOSjava.html" TARGET="body"><img SRC="back.gif" ALT="An Animated, Simulated Operating System in Java" BORDER=0 height=30 width=38></a><img SRC="blank.gif" ALT="" BORDER=0 height=30 width=38><img SRC="leftEnd.gif" ALT="" height=30 width=19></td>
+</tr>
+</table>
+
+<h1>
+The Revised Messaging System in RCOS.java</h1>
+
+<h2>
+Andrew Newman</h2>
+
+<h2>
+Passive Notification</h2>
+COAD p224
+<h2>
+Java 1.02 AWT Event Model</h2>
+Much like the original RCOS.java messaging system.
+<h2>
+Java 1.1 AWT Event Model</h2>
+Describe the different classes and interfaces.
+<br>p509 Thinking in Java
+<h2>
+Observable</h2>
+Java.util.Observable
+<br>p193 Hacking Java
+<h2>
+Java Beans Notification</h2>
+p99-107 Special Edition Use Java Beans
+<br>p271 Coad differences.
+<h2>
+Infobus Notification</h2>
+p275 Coad
+<h2>
+The Original Messaging System</h2>
+Outline original C++ version and its conversion to Java.
+<p>Outline of C++ system.
+<p>The conversion to Java lead to a very procedural based solution.&nbsp;
+This was due to it being derived from the C++ system and the lack of knowledge
+in how to produce object orientated based system.
+<p>Initially any object that implemented "SimpleMessageHandler" would register
+to a given post office.&nbsp; The job of the post office was to record
+the registered objects and send the messages to the registered objects.
+<p>The system relied upon the base object type "Message".&nbsp; This object
+contained a Source, Destination, Type and Body.&nbsp; The first three were
+strings and the body an Object.&nbsp; The post office object would use
+the destination to parse the send object to the appropriate registered
+object.&nbsp; The type attributed would be used by the receiving object
+to determine whether it handled it or not.&nbsp; The body was used to store
+any primitive (in their object form) or complex data types.
+<p>The system relied upon the following common methods:
+<br>sendMessage(Message) - The message is sent to the Post Office.
+<br>receiveMessage(Message) - Checks to determine whether the object is
+valid and passes it (if okay) to ProcessMessage.
+<br>processMessage(Message) - In a series of if-then-else statements it
+checks to see what type the message and proceeds to do some action if it
+matches.
+<h2>
+Improving the Messaging System</h2>
+A new system was considered in order to provide a more object orientated
+approach to achieve messaging.&nbsp; The criteria of the messaging system
+was that it must increase the readability and maintability of the system
+while encouraging code reuse.&nbsp; In this was it was decided that a distinction
+between messages being sent be enhanced.&nbsp; Two distinct post offices
+were created for the Operating System and for the Animator Office.&nbsp;
+The mimiced the distinction made already within the system.&nbsp; For simplicity
+the operating system and animator components know only of their post office
+and the components connected to them.
+<br>&nbsp;
+<h3>
+MessageSystem</h3>
+The messaging system divided all messages into three categories:
+<ul>
+<li>
+Animator – Messages for animator components only,</li>
+
+<li>
+OS – Messages for operating system components only, and</li>
+
+<li>
+Universal – Message destined for all messaging sub-systems.</li>
+</ul>
+
+<h3>
+Visitor Pattern</h3>
+One of the important effects of the Visitor pattern used in RCOS.java is
+the ability to arbitrarily add functionality to object without modification
+of them.&nbsp; This simplifies the introduction of extending RCOS.java
+functionality.&nbsp; This technique is known as “double dispatch”.&nbsp;
+However, Java is a “single dispatch language” in that the method executed
+is based on the type of the received object.
+<p>The benefits of this pattern are:
+<br>1/ Reduction in the amount of code by removing many long and complicated
+if-then-else statements.&nbsp; The determining factor of whether an object
+processes a message is not based on arbitrary conditions.
+<br>2/ Coherence within a particular message object.&nbsp; The code for
+each message is contained inside the appropriate message.
+<br>3/ Complicated objects or primitive data types can be used inside the
+object without casting or creating ad hoc external objects.
+<br>4/ New messages do not require new code to be added to handle the message;
+rather the message is modified instead.
+<br>5/ The determining factor of whether a message was handled was based
+on arbitrary conditions.
+<br>6/ Increased encapsulation of data and implementation hiding.
+<p>When the visitor pattern was implemented a simplified the process message
+to a few lines of code for each receiver.&nbsp; The message object interface
+to outside code became well defined, attributes were kept encapsulated
+and access was allowed via methods.
+<p>Related to the MVC Pattern is double dispatch.
+<h3>
+Adapter Pattern</h3>
+The messages are broken up into three destination categories:
+<ul>
+<li>
+OS only,</li>
+
+<li>
+Animator only, and</li>
+
+<li>
+Universal (all destinations).</li>
+</ul>
+
+<p><br>Now there are adapters of the abstract classes.&nbsp; Each abstract
+class contains a “doMessage” for each possible receiving class.&nbsp; The
+adapter class implements the respective abstract class with empty methods.&nbsp;
+Each message then extends the adapter class and overrides only the necessary
+methods.
+<h3>
+Command Pattern</h3>
+A useful pattern to overcome the problem of invoking arbitrary methods
+in an object is the Command pattern.&nbsp; This is essential in allowing
+the interface to allow undoable operations.&nbsp; This is an important
+principle of user interface design especially in an educational environment
+[impressive link here].
+<p>Each command in the RCOS.java system is decoupled i.e. the button pressed
+invokes a messaging object that performs the task rather than performing
+the task directly.&nbsp; This enables object performing the task to save
+any relevant information before executing so that it may be undone at any
+time.&nbsp; Meanwhile a listener object records all of the operations that
+have occurred.
+<p>In RCOS you have a Message Object:
+<br>doMessage(receiver type) – stores state and carries out some operation
+based on receiver type.
+<br>undoMessage(receiver type) – undoes operation based on receiver type.
+<br>boolean undoableMessage(receiver type) – returns true of false if message
+can or can't be undone.
+<p>Post Office Object:
+<br>Vector vMessages – Vector of messages which can be undone.
+<br>sendMessage() – sends message to all Post Offices.
+<br>localSendMessage() – sends message to local objects listening.
+<br>undoMessage() – sends an undo message to all listeners.
+<br>processMessage() - proceeds to create a new message object based on
+it's type and executes the method "doMessage" passing itself.
+<h3>
+Model-View-Controller Pattern</h3>
+The Model-View-Controller design pattern originated in Smalltalk and specifically
+use in user interface design [Gamma et al 1995].&nbsp; It's probably most
+used in Java in creating user interfaces, too.&nbsp; The purpose of the
+MVC architecture is to separate the user interface from the underlying
+application (model).&nbsp; The user interface is split up into the view
+(output) and the control (user input).&nbsp; The model should be self-contained
+and free of external requirements of the user interface.
+<p>This is implemented to ensure that:
+<ul>
+<li>
+the application code is reusable,</li>
+
+<li>
+the user interface or application can be developed independent of one another,
+and</li>
+
+<li>
+the system code can remain as modular as possible with classes able to
+inherit code.</li>
+</ul>
+The initial development of RCOS.java consisted of one programmer working
+on the user interface while the others worked on components of the operation
+system (message passing, file system, CPU, etc.).&nbsp; This ensured that
+the animation was dependant only on predefined messages it would receive
+from the operating system.
+<p>By design RCOS.java has a large hierarchy of class files.&nbsp; The
+Animator package is split by operating system components i.e. Animator.CPU,
+Animator.Disk, etc.
+<p>Operating system, animators and universal sections divide the messaging
+system.&nbsp; The operating system and animation sub-systems have their
+own post office designed to send message to each other and to registered
+components within the designated area.
+<br>&nbsp;
+<h2>
+Advantages over old messaging system</h2>
+Reduction in and elimination of overlapping the usage of certain messages.&nbsp;
+In the new message system, each message object clearly defines who receives
+the message and what data objects it contains.&nbsp; This lead to removal
+of several unneeded messages (due to overlapping with other messages) and
+data objects.&nbsp; There was also the case where objects (especially animators)
+would explicity determine which object was sending the message in order
+to process the message or not.&nbsp; This indicated that there were messages
+that were being used for two or more purposes.&nbsp; These were also eliminated.
+<p>As this is a new system the extensibility of the system has yet to be
+fully tested.&nbsp; However, one of the advantages foreseen with the new
+system is in the case of maintenance.&nbsp; The addition of new messages,
+that use the existing functionality of the system, requires only creation
+of just a new message object. The removal of a messages is equally simple.
+<p>This commensurate effort did not exist in the old system.&nbsp; It was
+possible to remove the sending of an old message and it's object constructors.&nbsp;
+Yet the removal of receiving the retired message could be left intact,
+was difficult to track and had no negative impact.&nbsp; This could lead
+to confusion and code bloat over a long periods of modification.&nbsp;
+In fact, it existed in the old system already in the "CPUAnimator" expecting
+to receive a "UpdateInstruction" message that never came.&nbsp; This was
+retained in the system, over many changes, until the new messaging system
+was implemented.
+<p><font color="#FFFFFF">Ownership of messages is made easier for two reasons:</font>
+<ul>
+<li>
+All the receiving objects are explicit in the message object and</li>
+
+<li>
+All sending objects implicitly import them.</li>
+</ul>
+This contrasts with the old system where messages could be created by simply
+constructing a message object with different "String" parameter.&nbsp;
+This ad hoc manner of message creation meant that there was no real way
+to easily examine the source code to determine what message existed, who
+would be sending and what were the receiving objects.&nbsp; There were
+several instances where the senders and receivers ID was incorrect or simply
+made up.
+<p>The new system design removed the ability to define the identification
+of the receiving and sending objects when a message object is intiatited.&nbsp;
+Indeed, there is no way when creating a message to explicitly define a
+receiving object.&nbsp; This change is important because receiving objects
+could change over time.&nbsp; By sending it to those all objects that have
+registered to the post office it enables the message object itself to contain
+who receives it.&nbsp; The sending object is nolonger string based but
+a message handler.&nbsp; Which should at least reduce the ability to create
+ad hoc senders.&nbsp; In normal usage an object sending it would pass itself.
+<p>The original message object had only one message container object (Object)
+that was then cast to the required type e.g. Integer, RCOS defined object
+like RCOSProcess, etc.&nbsp; Instead each object now contains the required
+content type(s).&nbsp; Creation of object containers of primitive types
+(like integers and bytes) before a message is sent has been removed.&nbsp;
+There is also no casting is needed to process the message.&nbsp; The cost
+of this is that a message object is created each time when they are received
+by an object to be processed.&nbsp;&nbsp; It has the benefit however, that
+allows multiple complex data objects to be internally constructured for
+message transport.&nbsp; Instead of creating external objects for one off
+messages or sending multiple messages with different names (like UpdateFileList
+and UpdateDirectoryList) in order to get many complicated data structures
+returned.
+<p>The removal of the code blocks within the series of if-then-else and
+moving them to separate methods led to a greater formalisation of what
+each object within the system was to perform.&nbsp; Also, the appearance
+of common methods and data structures lead to the improvement of code reuse.&nbsp;
+Similar sections of code that were used to process two or three messages
+were converted into methods for reuse.&nbsp; Where appropriate these were
+made publicly or privately accessible.
+<br>&nbsp;
+<h2>
+Improvements</h2>
+The use of inheritance or composition rather than a flat message objects.&nbsp;
+Currently, the system has separate messages for each task, whether or not
+their are similar messages with similar tasks.&nbsp; Messages that use
+system objects (like RCOSProcess) use composition to achieve similar tasks
+within different messages.&nbsp; Further aggregation of common objects
+passed inside messages and further sorting of messages into packages based
+on sender or sendee would increase reusability.&nbsp; An example might
+be taking the read and write memory messages.&nbsp; These are currently
+divided by reading by pages and reading by bytes.&nbsp; A simpler "readMemory"
+and "writeMemory" could combine their functionality.
+<p>Implementing of the Visitor pattern to other areas of RCOS.java.&nbsp;
+Such as the CPU and Kernel.
+<p>String to Int and Ints to Strings
+<br>Best way to convert between string and ints are Essential Java Style
+p19:
+<br>String.valueOf(iSource) -> int to string
+<br>Integer.parseInt(sSource) -> string to int
+</body>
+</html>

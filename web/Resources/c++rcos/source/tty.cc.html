@@ -1,0 +1,556 @@
+<HTML>
+<HEAD>
+  <TITLE>
+tty.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+tty.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : TTY - Device Driver to emulate a simple teletype emulator	  *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: This class used by RCOS to instantiate devices for the	  *
+//	     "Operator's console" and the (two) TTY "user terminals".	  *
+//  HISTORY:                                                              *
+//   05-APR-93	Second Implementation following previous flawed design	  *
+//   08-APR-93	ANSI terminal driver and Error Signals 41, 42 added	  *
+//   12-MAY-93	Bugs in WriteBlk and ANSI gotoxy squashed		  *
+//   18-MAY-93	Memory leaks plugged (always kill arrays with delete[] !) *
+//   27-OCT-93  Limit cursor hiding to "screen" region                    *
+//   01-APR-94  Allow TTY mode to be changed via an IoCtrl message	  *
+//   20-APR-94  YAM - YetAnotherMemoryleak plugged in GetKey/PutKey	  *
+//*************************************************************************
+
+  #include "tty.hh"
+  #include "kernel.hh"
+
+
+  #define XM	    3	    // Offset, screen left edge to first character
+  #define BUFLEN    32	    // Size for input ring buffer
+  #define FATAL     TRUE    // Define fatal and simple error conditions
+  #define WARN	    FALSE
+
+
+//////////////////////////////////////////////////////////////////////////
+// Class constructor must run base class constructor first.  Passed params
+// specify display size and location (in pixels) in a rect struct, and the
+// colors to use for the foreground and background.  The "screen" size in
+// chars is determined from the pixel dimensions and a char array allocated
+// and cleared to all spaces.
+//
+tty::tty (UINT16 id, UINT16 cls, Knl *pK, rect &pR, UINT16 nFg, UINT16 nBg)
+    :port(id, cls, pK), RngBuf(BUFLEN), nFgnd(nFg), nBgnd(nBg)
+{
+  x = pR.ul.x, y = pR.ul.y;
+  dx = pR.lr.x, dy = pR.lr.y;
+  nRows = dy / GfxTextHeight();
+  nCols = (dx - 2) / GfxTextExtent("w");
+  ddy = (dy - (GfxTextHeight() * nRows)) >> 1;
+  pVmem = new char[(nRows * nCols)+1];
+  if (pVmem) {
+    nMode = TTY_Silent;
+    Reset(TRUE);
+  }
+  else {
+    nMode = TTY_Failed;
+    DevError(ET_InitFail, FATAL);
+  }
+}
+
+////////////////////
+// Destructor must release "video" memory
+//
+tty::~tty (void)
+{
+  if (pVmem)
+    DELETE_ARRAY pVmem;
+}
+
+//////////////////////
+// Receive and action a message. Like a good driver, TTY opens, closes,
+// can be read, written (char and vlock modes) and responds to specific
+// IO control requests..
+//
+void tty::RxPort (PMSG pM)
+{
+  switch (pM->wMsgType & ~MM_Sync) {
+    case KM_Open :
+      if (uDest)
+	DevError(ET_StillOpen, WARN);
+      else {
+	Reset(TRUE);
+	uDest = pM->wSender;
+      }
+      break;
+    case KM_Close :
+      if (uDest)
+	uDest = ID_NULL;
+      else
+	DevError(ET_NotOpen, WARN);
+      break;
+    case KM_Read :
+      if (uDest == pM->wSender)
+	GetKey(pM);
+      else
+	DevError(ET_InvalidReq, WARN);
+      break;
+    case KM_KeyPress :
+      if (nMode & TTY_UConly)
+	pM->wParam = (UINT16)toupper(pM->wParam);
+      PutKey((char)pM->wParam);
+      break;
+    case KM_Write :
+      Display((char*)&pM->wParam, 1);
+      break;
+    case KM_WriteBlk :
+      Display((char*)pM->pBody, pM->wParam);
+      break;
+    case KM_IoCtrl :
+      if (uDest) {
+	UINT16 wStat = 0xffff;
+	switch (pM->wParam) {
+	  case DM_Reset:
+	    Reset((pM->wSender == ID_Kernel) ? TRUE : FALSE);
+	    break;
+	  case DM_KeyHit:
+	    wStat = (UINT16)RngBuf.RngStat();
+	    break;
+	  case DM_GetSize:
+	    wStat = (UINT16)((nRows << 8) | nCols);
+	    break;
+	  case DM_GetPos:
+	    wStat = (UINT16)(((idx / nCols) << 8) | (idx % nCols));
+	    break;
+ 	  case DM_GetMode:
+ 	    wStat = (UINT16)nMode;
+	    break;
+	  case DM_SetMode:
+	    nMode = *(INT16*)pM->pBody;
+ 	    wStat = (UINT16)nMode;
+	    break;
+	default:
+	  DevError(ET_NoSupport, WARN);
+	}
+	if (IS_SYNCH(pM->wMsgType))
+	  pM->wParam = wStat;
+	else {
+	  PMSG pM = new message(uID, KM_IoCtrl, wStat);
+	  pTx->PostMsg(pM->wSender, pM);
+	}
+      }
+      break;
+  default:
+    DevError(ET_NoSupport, WARN);
+  }
+}
+
+/////////////////
+// Clear the video RAM and, if the display is active, clear the screen
+// and home the cursor.  If bool param is set, we must also reinitialize
+// the the keyboard buffer.
+//
+void tty::Reset (BOOL bFlush)
+{
+
+  if (bFlush) {
+    while (RngBuf.RngStat())
+      RngBuf.RngGet();
+    uDest = ID_NULL, uCnt = 0;
+  }
+  idx = jdx = nEscape = 0;
+  ycurr = y + ddy, xcurr = x + XM;
+  memset(pVmem, ' ', (nRows * nCols));
+  if (nMode & TTY_Active) {
+    GfxRect(x, y, x+dx, y+dy, GFX_Fill, nBgnd);
+    TtyCursor(ON);
+  }
+}
+
+//////////
+// Refresh the display from the input buffer.  For optimum speed,
+// trailing blanks are truncated - the whole line even, maybe..
+//
+void tty::ReFresh (BOOL bClear)
+{
+  char *pBuf = new char[nCols+1];
+
+  if (NULL == pBuf)
+    DevError(41, FATAL);
+  else {
+    char *cp;
+    INT16  i, j;
+    Mickey.AutoPointer(x, y, x+dx, y+dy);
+    if (bClear)
+      GfxRect(x, y, x+dx, y+dy, GFX_Fill, nBgnd);
+    GfxSetClip(x, y, x+dx, y+dy);
+    GfxTextColor(nFgnd);
+    for (i = 0, cp = pVmem; i < nRows; i++, cp += nCols) {
+      strncpy(pBuf, cp, nCols);
+      j = nCols - 1;
+      while ((pBuf[j] == ' ') && (j >= 0))
+	--j;
+      pBuf[j+1] = '\0';
+      if (*pBuf)
+	GfxText(x+XM, y+ddy+(i*GfxTextHeight()), pBuf, GFX_Transparent);
+    }
+    GfxClrClip();
+    TtyCursor(ON);
+    Mickey.ShowPointer();
+    DELETE_ARRAY pBuf;
+  }
+}
+
+//////////////////////
+// Provided the thing is not stuffed, change its mode.
+// RETURNS: previous mode
+//
+INT16 tty::SetMode (INT16 nNew)
+{
+  INT16 nOld = nMode;
+
+  if (!(nMode & TTY_Failed))
+    nMode = nNew;
+  return nOld;
+}
+
+/////////////
+// The ANSI Terminal Driver.  This is a subset of the ISO 6429 standard in:
+// 1.  Sequences 'h', 'l', 'p' are NOT implemented.
+// 2.  The 'm' (graphics) sequence implement Fore/Background colors only -
+//     ie, Attributes (Blink etc) are ignored.
+// The tty class default if line-wrap on. Since 'l' is not implemented,
+// there is no way to change this at present.
+//
+INT16 tty::AnsiDriver (char ch)
+{
+  static short aColor[8] = {0, 4, 2, 14, 1, 5, 3, 15};
+
+  if (nEscape == 1) {
+    n1 = n2 = 0;
+    return ((ch == '[') ? 2 : 0);
+  }
+  else {
+    INT16 i, j;
+    switch (ch) {
+      case 'A':     // <--------------------------------- Cursor Up and Down
+      case 'B':
+	if (nEscape == 3) {
+	  j = ((ch == 'A') ? MIN((idx/nCols),n1) : MIN((idx/nCols),n1));
+	  if (j) {
+	    i = nCols * j;
+	    idx += (ch == 'A') ? -i : i;
+	    i = GfxTextHeight() * j;
+	    ycurr += (ch == 'A') ? -i : i;
+	    ch = pVmem[idx], pVmem[idx] = '\0';
+	    i = idx - (idx % nCols);
+	    xcurr = x + XM + GfxTextExtent(pVmem + i) * j;
+	    pVmem[idx] = ch;
+	  }
+	}
+	break;
+      case 'C':
+      case 'D':     // <------------------------------ Cursor Right and Left
+	if (nEscape == 3) {
+	  j = ((ch == 'C') ?
+	    MIN((idx-((idx%nCols)+1)),n1) : MIN(((idx % nCols)+1),n1));
+	  if (j) {
+	    idx += (ch == 'C') ? j : -j;
+	    i = idx - (idx % nCols);
+	    ch = pVmem[idx], pVmem[idx] = '\0';
+	    xcurr = x + XM + GfxTextExtent(pVmem + i);
+	    pVmem[idx] = ch;
+	  }
+	}
+	break;
+      case 'f':
+      case 'H':     // <------------------------------------ Position Cursor
+	if (nEscape >= 3) {
+	  n1 = MIN(n1,(nRows-1)), n2 = MIN(n2,(nCols-1));
+	  idx = (nCols * n1) + n2;
+	  ycurr = y + ddy + (GfxTextHeight() * n1);
+	  ch = pVmem[idx], pVmem[idx] = '\0';
+	  xcurr = x + XM + GfxTextExtent(pVmem + (n1 * nCols));
+	  pVmem[idx] = ch;
+	}
+	break;
+      case 'J':     // <----------------------- Clear screen and home cursor
+	if (((char)n1 == '2') && (nEscape == 3))
+	  Reset(FALSE);
+	break;
+      case 'K':	    // <------------------------------- Erase to end of line
+	for(i = idx, j = idx + nCols - (idx % nCols); i < j; i++)
+	  pVmem[i] = ' ';
+	GfxRect(xcurr,ycurr,x+dx,ycurr+GfxTextHeight(),GFX_Fill,nBgnd);
+	break;
+      case 'm':     // <------------------- Set Graphics Mode (Fg/Bg Colors)
+	if (nEscape >= 4)
+	  while (n1 >= 30) {
+	    if ((j = n1 % 10) <= 7) {
+	      if (3 == (n1 / 10))
+		nFgnd = aColor[j];
+	      if (4 == (n1 / 10))
+		nBgnd = aColor[j];
+	    }
+	    n1 = n2, n2 = 0;
+	  }
+	break;
+      case 's':     // <----------------------	save current cursor position
+	jdx = idx;
+	break;
+      case 'u':	    // <---------------------------- restore cursor position
+	idx = jdx;
+	ycurr = y + ddy + (GfxTextHeight() * idx / nCols);
+	ch = pVmem[idx], pVmem[idx] = '\0';
+	xcurr = x + XM + GfxTextExtent(pVmem + idx - (idx % nCols));
+	pVmem[idx] = ch;
+	break;
+      case ';':     // <------------------------- process argument separator
+	return (nEscape + 1);
+    default:
+      (nEscape > 2) ? (n2 = (INT16)ch) : (n1 = (INT16)ch);
+      return (nEscape + 1);
+    }
+  }
+  return 0;
+}
+
+/////////////////
+// Copy the passed data into the screen buffer, interpreting any special
+// characters as we go.	If the display is "visible", echo the changes to
+// the screen - I'd like a better Bell routine, though.  The unusual amount
+// of code in the routines that set the horizontal pixel var <xcurr> is to
+// accomodate proportional fonts (Microsoft - looks good, by costs!)
+//
+// CAUTION! The Auto Line-feed mode relies on the ACR case falling
+//	    through to the ALF case.. don't change the order!
+//
+void tty::Display (char *cp, INT16 n)
+{
+
+  if (nMode & TTY_Active) {
+    Mickey.AutoPointer(x, y, x+dx, y+dy);
+    TtyCursor(OFF);
+    GfxSetClip(x, y, x+dx, y+dy);
+  }
+  while (n--)
+    if (nEscape) {
+      nEscape = AnsiDriver(*cp++);
+      continue;
+    }
+    else {
+      switch (*cp) {
+	case ABEL:
+	  fputc('\a', stdout);
+	  break;
+	case BKSP:
+	  if (idx) {
+	    --idx;
+	    char cTemp = pVmem[idx];
+	    pVmem[idx] = '\0';
+	    if (((idx % nCols) == (nCols - 1)) && (ycurr > y + ddy))
+	      ycurr -= GfxTextHeight();
+	    xcurr = x + GfxTextExtent(pVmem + idx - (idx % nCols)) + XM;
+	    pVmem[idx] = cTemp;
+	  }
+	  break;
+	case AFF :
+	  Reset(FALSE);
+	  break;
+	case ACR:
+	  xcurr = x+XM;
+	  idx -= idx % nCols;
+	  if (0 == (nMode & TTY_AutoLF))
+	    break;
+	case ALF:
+	  if (idx >= nCols * (nRows - 1))
+	    Scroll();
+	  else {
+	    idx += nCols;
+	    ycurr += GfxTextHeight();
+	  }
+	  break;
+	case ESC:
+	  if (nMode & TTY_UseANSI)
+  	    nEscape = 1;
+	  break;
+      default:
+	if ((*cp >= ' ') && (*cp < DEL)) {
+	  pVmem[idx++] = *cp;
+	  char cTemp = pVmem[idx];
+	  pVmem[idx] = '\0';
+	  if (nMode & TTY_Active) {
+	    GfxTextColor(nFgnd);
+	    GfxText(xcurr, ycurr, pVmem+idx-1, GFX_Transparent);
+	  }
+	  if (idx % nCols) {
+	    xcurr += GfxTextExtent(pVmem+idx-1);
+	    pVmem[idx] = cTemp;
+	  }
+	  else {
+	    xcurr = x + XM;
+	    if (idx / nCols < nRows) {
+	      ycurr += GfxTextHeight();
+	      pVmem[idx] = cTemp;
+	    }
+	    else {
+	      Scroll();
+	      idx = nCols * (nRows - 1);
+	    }
+	  }
+	}
+      } 			    // end switch
+      ++cp;
+    }				    // end while
+  if (nMode & TTY_Active) {
+    TtyCursor(ON);
+    GfxClrClip();
+    Mickey.ShowPointer();
+  }
+}
+
+////////////////////
+// Scroll the video RAM, filling the last line with blanks and scroll the
+// visible screen too, if it is active.  Again, scrolling would probably
+// run faster if the "video RAM" buffer used a start-of-scan pointer, but
+// the arrays should be small and I'm running out of time...
+//
+// YABBWA .. Yet another Borland Bug Work-Around!
+//   The Borland farmalloc/farfree functions eventually fail, resulting
+//   in no scroll.  Since this is un-acceptable, we'll do a character
+//   based scroll if (when) IMALLOC returns NULL.  Needless to say, the
+//   Microsoft C/C++ 7.00 runs with no problem.  jeeze.
+//   ** News Flash: this probably due to Borland's delete not operating
+//   ** like Microsoft's .. could be fixed now - need testing (18-MAY-93).
+//
+void tty::Scroll (void)
+{
+  INT16 nLastLine = nCols * (nRows - 1), x2 = x+dx, y0 = y+ddy;
+
+  memcpy(pVmem, pVmem+nCols, nLastLine);
+  memset(pVmem+nLastLine, ' ', nCols);
+  if (nMode & TTY_Active) {
+    PIMBUF pImg = GfxGetImage(x, y0+GfxTextHeight(), x2, y+dy);
+    if (pImg) {
+      GfxPutImage(x, y0, pImg);
+      GfxFreeImage(pImg);
+    }
+    else {
+      char *cp, *pBuf = new char[nCols+1];
+      if (NULL == pBuf)
+        DevError(42, FATAL);
+      else {
+        for (INT16 i = 0, j = nCols; i < nRows; i++, j += nCols) {
+          GfxRect(x, y0, x2, y0+GfxTextHeight(), GFX_Fill, nBgnd);
+          strncpy(pBuf, pVmem+j, nCols);
+          cp = pBuf + nCols - 1;
+          while ((*cp == ' ') && (cp >= pBuf))
+            --cp;
+          *(cp+1) = '\0';
+          if (*pBuf)
+            GfxText(x+XM, y0, pBuf, GFX_Transparent);
+          y0 += GfxTextHeight();
+        }
+	DELETE_ARRAY pBuf;
+      }
+    }
+    GfxRect(x, y0+(GfxTextHeight()*(nRows-1)), x2, y+dy, GFX_Fill, nBgnd);
+  }
+}
+
+//////////////////////
+// Routine controls processing of characters read from keyboard.
+// If there an outstanding request for data, service it immediatly
+// Otherwise add the key to the ring buffer.  The char is written
+// to video RAM (and perhaps displayed) if terminal is set to Simplex.
+//
+void tty::PutKey (char ch)
+{
+
+  if (nMode & TTY_Simplex)
+    Display(&ch, 1);
+  RngBuf.RngPut(ch);
+  if (uCnt) {
+    --uCnt;
+    MSG msg(uID, KM_Read, (UINT16)RngBuf.RngGet());
+    pTx->PostMsg(uDest, &msg);
+  }
+}
+
+//////////////////////
+// Service a request for key data.  Several things should never happen,
+// but let's be defensive..  First, we should be "open" and the request
+// must have come from whoever has us open.  Next, characters can only
+// be sent if we happen to have any, otherwise we increment a request-for-
+// data count and exit (this count will be inspected when data finally
+// arrives).  If we have data we either place it in the requesting message
+// struct if the transfer was synchronous, or post a message if the request
+// was async.
+//
+// ASIDE: I'm not all that keen on this one character per message scheme
+// It will probably bog down - a more flexible arrangement like a Block
+// mode request may ultimately be a better way to fly.. END OF ASIDE.
+//
+void tty::GetKey (PMSG pM)
+{
+
+  if (RngBuf.RngStat() == FALSE)
+    ++uCnt;
+  else {
+    char ch = RngBuf.RngGet();
+    if (IS_SYNCH(pM->wMsgType))
+      pM->wParam = (UINT16)ch;
+    else {
+      MSG msg(uID, KM_Read, (UINT16)ch);
+      pTx->PostMsg(uDest, &msg);
+    }
+  }
+}
+
+/////////////
+// Draw or hide the cursor at the current X/Y location in a style
+// determined by the top two bits of the mode word..
+//
+void tty::TtyCursor (UINT16 state)
+{
+  char   st2[2];
+  INT16  dy = ycurr + GfxTextHeight();
+  UINT16 nFhue = ((state == ON) ? nFgnd : nBgnd);
+  UINT16 nBhue = ((state == ON) ? nBgnd : nFgnd);
+
+  switch (nMode & TTY_CsrMask) {
+    case TTY_IBar:
+      GfxTextColor(nFhue);
+      GfxMoveTo(xcurr-2, ycurr), GfxLineTo(xcurr-1, ycurr);
+      GfxMoveTo(xcurr+2, ycurr), GfxLineTo(xcurr+1, ycurr);
+      GfxMoveTo(xcurr-2, dy),	 GfxLineTo(xcurr-1, dy);
+      GfxMoveTo(xcurr+2, dy),	 GfxLineTo(xcurr+1, dy);
+      GfxMoveTo(xcurr, ycurr+1), GfxLineTo(xcurr, dy-1);
+      break;
+    case TTY_InvBlk:
+      st2[0] = pVmem[idx], st2[1] = '\0';
+      GfxTextColor(nFhue);
+      GfxTextColorBg(nBhue);
+      GfxText(xcurr, ycurr, st2, GFX_Replace);
+      //GfxRect(xcurr, ycurr, xcurr+GfxTextExtent(st2), dy, GFX_Fill, hue);
+      GfxTextColorBg(nFhue);
+      GfxTextColor(nBhue);
+      break;
+    case TTY_Uscore:
+      GfxTextColor(nFhue);
+      st2[0] = pVmem[idx], st2[1] = '\0';
+      GfxMoveTo(xcurr, dy - GFX_UlnOffset);
+      GfxLineTo(xcurr+GfxTextExtent(st2), dy-GFX_UlnOffset);
+      GfxTextColor(nBhue);
+      break;
+    case TTY_CursorOff:
+      break;
+  }
+}
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,82 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class qmmgr
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>qmmgr</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	qmmgr
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   Class encapsulates operations required to support shared memory, based
+   on a FIFO list (and hides details of the double link list we don't need).
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      struct <A HREF="sh_tag.html">sh_tag</A>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+ class QmMgr : private DblList {
+  public:
+    QmMgr (void);               
+   ~QmMgr (void);
+    BOOL  QmExists (char*, PMS*);         // check by name string
+    BOOL  QmExists (UINT16, PMS*);        // check by block ID
+    void  QmIncCnt (UINT16);              // increase usage count
+    void  QmDecCnt (UINT16);              // decrease count, kill off if zero
+    INT16 QmLength (UINT16);              // return block length
+    BOOL  QmAdd (char*, UINT16);          // Create and append a new block
+    BOOL  QmGet (UINT16, UINT16, INT16*); // read an int value
+    BOOL  QmPut (UINT16, UINT16, INT16*); // write an int value
+  };
+      </PRE> 
+
+</BODY>
+</HTML>

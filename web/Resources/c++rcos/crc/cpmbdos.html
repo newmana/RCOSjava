@@ -1,0 +1,184 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class CpmBdos
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>CpmBdos</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	CpmBdos
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   Here is the actual, re-entrant File System class.  In olden days
+   (BC++), we would write this as a set of subroutines with lists and
+   arrays to hold dynamic, unit variable data.  To-day, we make it a
+   class and instantiate it once for each physical disk configured in.
+   A more flexible scheme would have a list of devices rather than a
+   simple array (as used in class CpmFs) permitting unlimited, dynamic
+   mount and un-mount of devices at run time.
+ <P> 
+   Once a physical disk is determined to be "on-line" (ie, the host file
+   emulating a disk unit, or a real disk unit, even, has started up ok),
+   an instance of this class is created giving it the disk characteristics
+   and some required file system parameters (number of directory entries,
+   block size, etc..).  It is also given the Kernel message dispatcher
+   address and the ID of the disk unit it will be responsible for.
+ <P> 
+   The sequence of events then goes like this:
+   <OL>
+     <LI> A process invokes an FS operation and is blocked.  This results in
+      a message to the CpmFs instance.
+     <LI> The  creates an XfReq instance, fills in the FCB and PID
+      data from the message, identifies the target unit from the FCB
+      (placing a pointer to it in the XfReq), destroys the message and
+      calls the appropriate member of the array of the  instances
+      with the XfReq pointer.  The  takes no further part in the
+      operation.
+     <LI>The  instance formulates an appropriate disk transfer
+      (track, sector etc) inserting this into the  object along
+      with a constant identifying which member function will deal with
+      the completed transfer.  It then posts the  to "its" disk
+      channel handler.
+     <LI> The  arrives at the channel handler and is placed in a FIFO
+      queue.  When it finally gets actioned, a result code is placed in
+      the  object and the  member of the  instance
+      called with the  as parameter via the object pointer.
+     <LI> 5. Using the constant placed in the XfReq by the previous member func,
+      CpmBdos::NxtFunc passes the XfReq to an internal, private function
+      which will do one off:
+      <UL>
+        <LI> Build a reply message and post it to the PID, then destroy the
+          XfReq object.  This completes the cycle, un-blocking the Proc.
+        <LI> Alter the XfReq params (eg when a directory block just read
+          needs to be re-written) and post to the channel handler again.
+        <LI> Spawn another XfReq (as in the case of a read/write operation
+          that needs to re-access the directory to fetch the next extent),
+          "attaching" the XfReq pointer to the new one, so that operations
+          on it can continue after the intermediate operation has finished.
+          This allows infinite (!?) nesting of channel calls. 
+     </UL>
+    <LI> A message arrives back at the originating process with the result
+      of the requested operation, effectively un-blocking it to continue
+      processing as dictated by internal logic.  The FCB it passed in the
+      first place has been updated and data transfered to/from the buffer
+      set in the FCB.  Simple, right?
+   </UL>
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+  class CpmBdos {
+    friend class CpmFs;
+  private:
+    Knl   *pTx;         // copy of CpmFs Message dispatcher
+    UINT16 nId;         // copy of CpmFs unique identifier
+    UINT16 nChan;       // Channel ID for XfReq messages
+    BYTE   nFsc;        // first physical sector number (0 or 1)
+    BYTE   nLsc;        // last sector number
+    BYTE   nSkf;        // optional sector skew factor
+    UINT16 nBls;        // data allocation block size
+    UINT16 nDks;        // number of blocks on disk
+    UINT16 nDir;        // number of directory entreies
+    UINT16 nCks;        // number of "checked" directory entries (for exchangable media)
+    BYTE   nOfs;        // track offset of logical track 00
+    BYTE   nAlb;        // No of allocation blkd/extent (8 or 16)
+    BYTE   DirBuf[BLOCK_LEN]; // buffer for directory operations
+    BYTE  *pAlv;        // Allocation Vector (dynamically allocated)
+    BYTE  *pCsv;        // Checksum vector (for exchangable disks)
+    BYTE  *pXlt;        // Sector skew table (NULL if no skew)
+    DPB   *pDpb;        // physical characteristics for this unit
+    void   Open1  (XfReq*);                     // looping step in Open
+    void   Open2  (XfReq*, BOOL);               // termination for Open
+    void   Close1 (XfReq*);                     // found file dir block
+    void   Close2 (XfReq*);                     // check update of dir blk
+    void   Creat1 (XfReq*);                     // end exist scan check
+    void   Creat2 (XfReq*);                     // looping step in Creat
+    void   Creat3 (XfReq*);                     // Success step in Creat
+    void   Stat1  (XfReq*);                     // looping step in Stat
+    void   Renam1 (XfReq*);                     // looping step in Rename
+    void   Renam2 (XfReq*);                     // success step in Rename
+    void   Remov1 (XfReq*);                     // looping step in Delete
+    void   Remov2 (XfReq*);                     // success step in Delete
+    void   Find1  (XfReq*);                     // first find success/fail
+    void   Find2  (XfReq*);                     // find next looping step
+    void   Read1  (XfReq*);                     // read complete step
+    void   Write1 (XfReq*);                     // write complete step
+    void   Write2 (XfReq*);                     // write open new extent step
+    void   Write3 (XfReq*);                     // write new extent intermediate
+    void   DoRetry(XfReq*);                     // disk error recovery
+    void   LogDisk  (void);                     // build Allocation and Checksum vectors
+    void   LogDisk1 (XfReq*);                   // loop building Allocation vector
+    UINT16 SecXlt (UINT16);                     // perform skew translation
+    UINT16 GetFreeBlk (void);                   // locate first unused allocation block of unit
+    void   AllocBlk (UINT16, BYTE = 1);         // set/reset numbered bit of disk allocation vector 
+    void   ReGenerate (XfReq*, UINT16 = 0);     // copy passed request and post the copy
+    void   DeAllocBlk (UINT16 n) { AllocBlk(n, 0); }
+    void   DirScanPrep (FCB*, UINT16*, UINT16*);
+    void   BlkDecode (UINT16, UINT16, UINT16*, UINT16*);
+  protected:
+    void   Open  (XfReq*);                      // locate by name if exists (wildcard ok)
+    void   Creat (XfReq*);                      // Create if name unique and entry available
+    void   Close (XfReq*);                      // Close file, update Dir.
+    void   Renam (XfReq*);                      // name change (not open!)
+    void   Remov (XfReq*);                      // remove file from system
+    void   Stat  (XfReq*);                      // file size and protection
+    void   Find  (XfReq*, UINT16);              // directory name scanner
+    void   Read  (XfReq*, UINT16);              // Seq/Random read op.
+    void   Write (XfReq*, UINT16);              // Seq/Random write op.
+    CpmBdos (DPB&, DPARAM&, UINT16);            // only friends can create
+  public:
+   ~CpmBdos(void);
+    void   NxtFunc (XfReq*);                    // the only public entry point
+  };
+
+      </PRE> 
+
+</BODY>
+</HTML>

@@ -1,0 +1,366 @@
+<HTML>
+<HEAD>
+  <TITLE>
+ipc.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+ipc.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : IPC - Inter Process Communication module			  *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: This module contains the Kernel IPC functions and the	  *
+//	     supporting object methods, such as semaphores.		  *
+//  HISTORY:                                                              *
+//    08-MAR-94 Split off from Exec module				  *
+//    13-APR-94 Semaphore count initialisation added			  *
+//    19-APR-94 SemDelUser must NULL pst to prevent bad deletes by ::dtor *
+//*************************************************************************
+
+#include "exec.hh"	    // related header
+#include "kernel.hh"	    // can't put this in header due recursion
+
+
+///////////////////////////////////////////////////////////////////////////
+//		   Class Methods for Semaphores
+//-------------------------------------------------------------------------
+// Constructor must Init the queues and null the name .. destructor will
+// cleanup any memory in use (in case of a dis-orderly shut-down)
+//
+Sem4::Sem4 (void) : uPid(FALSE), uDelayed(TRUE), pst(NULL), uCount(0)  { }
+
+Sem4::~Sem4 (void)
+{
+  if (pst)
+   DELETE_ARRAY pst;
+}
+
+///////////
+// Open the semaphore for use and set its count and (optional) name string.
+// The passed PID is added to the user stack and saved as the "creator".
+//
+void Sem4::SemOpen (PCB &proc, UINT16 uCnt, char *pszName)
+{
+  if (this->SemIsFree()) {
+    uCount = uCnt;
+    uCreator = proc.uPid;
+    if (pszName && strlen(pszName))
+      if (pst = new char[strlen(pszName)+1])
+        strcpy(pst, pszName);
+    this->SemAddUser(proc);
+  }
+}
+        
+////////////////
+// Allows us to use the "==" operator on a semaphore reference to test its
+// name string.
+// RETURNS: TRUE  .. it's a match
+//          FALSE .. different
+//
+BOOL Sem4::operator == (char *pszName)
+{
+  if (pst && (strcmp(pst, pszName) == 0))
+    return TRUE;
+  return FALSE;
+}
+
+////////
+// The semaphore is no longer in use when the PID queue is empty
+// RETURNS: TRUE  .. yes it is
+//	    FALSE .. no it ain't
+//
+BOOL Sem4::SemIsFree (void)
+{
+  return uPid.PqEmpty();
+}
+
+///////
+// Check if the passed PID is using the semaphore
+// RETURNS: TRUE  .. yes it is
+//	    FALSE .. no it ain't
+//
+BOOL Sem4::SemIsUser (PCB &proc)
+{
+  return uPid.PqFind(proc.uPid);
+}
+
+///////
+// Adds the passed process to the list of users of this semaphore
+// RETURNS: TRUE  .. User added
+//	    FALSE .. user was already a user!
+//
+BOOL Sem4::SemAddUser (PCB &proc)
+{
+  if (!uPid.PqFind(proc.uPid)) {
+    uPid.PqAdd(proc);
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/////////////
+// Remove passed PID from stack of registered users and the queue of
+// delayed processes (if it's there).  If the stack becomes empty,
+// the semaphore is "free" and its name (if any) is removed.
+// RETURNS: TRUE  .. User removed
+//	    FALSE .. user was not a user!
+//
+BOOL Sem4::SemDelUser (PCB &proc)
+{
+  UINT16 uTemp = uPid.PqGet(proc.uPid);
+  if (uTemp == proc.uPid)  {
+    if (uDelayed.PqFind(proc.uPid))
+      uDelayed.PqGet(proc.uPid);
+    if (uPid.PqEmpty() && pst) {
+      DELETE_ARRAY pst;
+      pst = NULL;
+    }
+    return TRUE;
+  }
+  return FALSE;
+}
+
+///////////
+// The passed PID wants to gain access to the semaphore.  Provided the
+// current count is > zero, just decrement the count and return TRUE.  If
+// the semaphore is fully in use, add the user PID# to the priority queue
+// and indicate this to the caller by returning FALSE.
+// RETURNS: TRUE  .. PID has exclusive use of resource
+//          FALSE .. PID added to waiting PID queue
+//
+BOOL Sem4::SemWait (PCB &proc)
+{
+  if (uCount) {
+    --uCount;
+    return TRUE;
+  }
+  uDelayed.PqAdd(proc);
+  return FALSE;
+}
+
+//////////
+// Release a lock on the semaphore, incrementing the semaphore counter.
+// RETURNS: TRUE  .. there are processes waiting for a lock
+//          FALSE .. semaphore is temporarily "free"
+//
+BOOL Sem4::SemSignal (void)
+{
+  ++uCount;
+  return (uDelayed.PqEmpty() ? FALSE : TRUE);  
+}
+
+/////////////
+// Removes and returns the PID# at the head of the "delayed" queue.
+// RETURNS: PID#, or NO_PROC if queue empty.
+//
+UINT16 Sem4::SemGetDelayed (void)
+{
+  return uDelayed.PqGet();
+}
+
+
+/////////////
+// Removes and returns the PID# from the "delayed" queue.
+// RETURNS: PID#, or NO_PROC if queue empty.
+//
+UINT16 Sem4::SemGetDelayed (UINT16 uPid)
+{
+  return uDelayed.PqGet(uPid);
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+//		   Exec Class Methods for IPC operations
+//-------------------------------------------------------------------------
+// Search the list of semaphores in use to see if any has the user
+// supplied name as passed.  If found, add the current process to its
+// list of users.
+// RETURNS: Zero for "not found" or semaphore ID.
+//
+UINT16 Exec::IpcOpen (char *pszName)
+{
+  for (UINT16 idx = 0; idx < MAX_SEM; idx++)
+    if (!arrSem[idx].SemIsFree() && (arrSem[idx] == pszName)) {
+      arrSem[idx].SemAddUser(arrPCB[uCurProc]);
+      UINT16 uSid = 0x01 << idx;
+      arrPCB[uCurProc].uSemOpen |= uSid;
+      return uSid;
+    }
+  return 0;
+}
+
+///////////
+// Walk the semaphore array to locate the "lowest" unused one and allocate
+// it to the currently active process.  The passed value is used to set the
+// count (unity implies a binary semaphore). If the passed string pointer is
+// non-null, "name" the semaphore with it.
+// RETURNS: Semaphore ID, or
+//          Zero if none are free or supplied name not unique
+//
+UINT16 Exec::IpcAlloc (char *pszName, UINT16 nInit)
+{
+  for (UINT16 idx = 0; idx < MAX_SEM; idx++)
+    if (arrSem[idx].SemIsFree()) {
+      arrSem[idx].SemOpen(arrPCB[uCurProc], nInit, pszName);
+      UINT16 uSid = 0x01 << idx;
+      arrPCB[uCurProc].uSemOpen |= uSid;
+      return uSid;
+    }
+  return 0;  
+}
+
+/////////////
+// The passed process wishes to close/free/release the semaphore with
+// the passed ID. We can't assume that the process is the current one
+// because this call could be as a result of an operator DElete action.
+//
+// As a result, another process may be able to acquire the semaphore.
+// If so, unblock it and remove it from all other queues it may also
+// have been patiently waiting in.
+//
+void Exec::IpcClose (UINT16 uPid, UINT16 uSid)
+{
+  if (arrPCB[uPid].uSemOpen & uSid) {
+    UINT16 uBit = uSid;
+    for (UINT16 idx = 0; !(uBit & 0x01); ++idx)
+      uBit >>= 0x01;
+    arrSem[idx].SemDelUser(arrPCB[uPid]);
+    arrPCB[uPid].uSemOpen &= ~uSid;
+    arrPCB[uPid].uSemWait &= ~uSid;
+    if (arrPCB[uPid].uSemSet & uSid) {
+      arrPCB[uPid].uSemSet &= ~uSid;
+      UINT16 uHead = arrSem[uSid].SemGetDelayed();
+      if (uHead != NO_PROC) {
+        arrSem[idx].SemWait(arrPCB[uHead]);
+        arrPCB[uHead].uSemSet |= uHead;
+        arrPCB[uHead].uSemWait = 0;
+        MSG msg(ID_Kernel, KM_Signal, uSid);
+        PostReply(uPid, &msg);
+      }
+    }
+  }
+}
+
+///////////////
+// The passed PID has SIGNALED that is has completed the mutual exclusion
+// action associated with the passed semaphore.  If the "delayed" priority
+// queue is empty, we simply continue - otherwise we remove the process
+// at the head of the queue for this semaphore and re-issue the <IpcWait>
+// call for it - causing it to unblock and clean itself up for execution.
+//
+void Exec::IpcSignal (UINT16 uPid, UINT16 uSid)
+{
+  if (arrPCB[uPid].uSemOpen & uSid) {
+    UINT16 uBit = uSid;
+    for (UINT16 idx = 0; !(uBit & 0x01); ++idx)
+      uBit >>= 0x01;
+    arrPCB[uPid].uSemSet &= ~uSid;
+    if (arrSem[idx].SemSignal())
+      IpcWait(arrSem[idx].SemGetDelayed(), uSid);
+  }
+}
+
+///////////
+// This function allows multiple wait requests by logical disjunction of
+// semaphore ID numbers (powers of 2).  We must validate that all requests
+// are for resources the process actually has open (returning -1 if ANY are
+// invalid). There are then three cases to consider:
+//
+// 1. The semaphore(s) is NOT available. This should only arise when the
+//    process is running. For each bit set in <uSidMask>, place the PID
+//    on the waiting queue, setting the corresponding PID bit-map. Finally,
+//    block the process and return (0).
+//    
+// 2. A semaphore is available and the process has not "delayed" on it:
+//    Add the PID to the semaphores "user" list, decrementing its count.
+//    Flag the PID to show it has set this semaphore and return the ID of
+//    the semaphore the process now has possession of (perhaps non-exclusive)
+//
+// 3. The process is currently blocked and a semaphore is now available:
+//    This should only arise via a call from <IpcSignal>, having determined
+//    that the delayed process is next in line for the passed specific
+//    semaphore. <IpcSignal> will have removed the PID from the "delayed"
+//    queue, so add it to the "user" list, set the "set by me" PID bit-map
+//    bit, then check the "I've been waiting on" bit-map.  If this semaphores
+//    ID was NOT the only one, we must remove the PID from the "delayed"
+//    queues of all the others. Then we need to cause the process to unblock
+//    by creating a message structure which can be attached to the PID as the
+//    reply. Finally, we can clear the "waiting on" bit-map and return the
+//    ID the process now has posession of.
+//
+// RETURNS: Negative .. -1 indicates process has not opened the semaphore!
+//          Positive .. Id of semaphore process now has possesion of.
+//              Zero .. semaphore in use, process now blocked.
+//
+INT16 Exec::IpcWait (UINT16 uPid, UINT16 uSidMask)
+{
+  UINT32 uVal = 1;
+  while (uVal < (UINT32)arrPCB[uPid].uSemOpen) {
+    if ((UINT16)(uVal & 0xffff) & uSidMask)
+      if (!(arrPCB[uPid].uSemOpen & (UINT16)uVal))
+        return -1;
+    uVal <<= 0x01;
+  }
+  //
+  // All requests valid, process previously blocked process first
+  //
+  if (arrPCB[uPid].uSemWait) {
+    UINT16 idx = 0;
+    UINT16 uBit = 1;
+    while (arrPCB[uPid].uSemWait) {
+      if (uBit == uSidMask)
+        arrSem[idx].SemWait(arrPCB[uPid]);
+      if (arrPCB[uPid].uSemWait & uBit)
+        arrSem[idx].SemGetDelayed(uPid);
+      arrPCB[uPid].uSemWait &= ~uBit;
+      uBit <<= 0x01;
+      ++idx;  
+    }
+    arrPCB[uPid].uSemSet |= uSidMask;
+    MSG msg(ID_Kernel, KM_Signal, uSidMask);
+    PostReply(uPid, &msg);
+    return uSidMask;
+  }
+  //
+  // process all possession requests until one is granted, or all block
+  // If one is granted, unwind any that blocked.
+  //
+  if ((uPid == uCurProc) && (arrPCB[uPid].uSemWait == 0)) {
+    UINT16 idx = 0;
+    UINT16 uBit = 1;
+    UINT16 uBitCpy = uSidMask;
+    while (uBitCpy) {
+      if ((uBitCpy & uBit) && arrSem[idx].SemGetCount()) {
+        arrSem[idx].SemWait(arrPCB[uPid]);
+        arrPCB[uPid].uSemSet |= uBit;
+        return uBit;
+      }
+      uBitCpy &= ~uBit;
+      uBit <<= 0x01;
+      ++idx;
+    }
+    idx = 0;
+    uBit = 1;
+    uBitCpy = uSidMask;
+    while (uBitCpy) {
+      if (uBitCpy & uBit) {
+        arrSem[idx].SemWait(arrPCB[uPid]);
+        arrPCB[uPid].uSemWait |= uBit;
+      }
+      uBitCpy &= ~uBit;
+      uBit <<= 0x01;
+      ++idx;
+    }
+    Block();
+  }
+  return 0;
+}
+
+/////////////////////////////////// eof ////////////////////////////////////
+
+</PRE>
+</BODY>
+</HTML>

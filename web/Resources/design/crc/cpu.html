@@ -1,0 +1,121 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS.java - Class Definition - CPU
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+<TABLE WIDTH="100%">
+  <TR>
+    <TD ALIGN=LEFT>
+      <H4>/ <A HREF="../../../resources.html" TARGET="body">Resources</A> / 
+      <A HREF="../index.html">Design</A> / <A HREF="../class.html">Class Definitions</A> / 
+      CPU</H4>
+    </TD>
+    <TD ALIGN=LEFT WIDTH=25% VALIGN="CENTER">
+      <IMG SRC="../../../pics/rightEnd.gif" WIDTH="19" HEIGHT="30"><A HREF="../../../index.html" TARGET="_parent"><IMG SRC="../../../pics/home.gif" BORDER="0" ALT="RCOS.java Home Page" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../../pics/blank.gif" BORDER=0 ALT="" WIDTH="38" HEIGHT="30"><A HREF="context.html" TARGET="body"><IMG SRC="../../../pics/forward.gif" BORDER=0 ALT="Context" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../../pics/leftEnd.gif" ALT="" WIDTH="19" HEIGHT="30"><BR>
+    </TD>
+  </TR>
+</TABLE>
+<H1>
+  <TT>CPU</TT>
+</H1>
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Class:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      CPU
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      CPU
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Simulates P-Code CPU, normally executes in a simple loop.
+      <P>
+ <b>fetchInstruction</b>
+ <ul>
+   <LI>address translation
+   <LI>check valid instruction
+ </ul>
+ <b>executeInstruction</b>
+ <blockquote>
+ if interruptsEnabled then<br>
+   handleInterrupts
+   <UL>
+     <LI>check InterruptQ to see if any are due at this point in time
+     <LI>any due are handled in a loop and usually result in calling
+       a kernel method, 
+     <LI>possibly a differnet method for each interrupt OR same method
+       but pass the Interrupt class as a parameter.
+   </UL>
+ </blockquote>
+  <b>oneTick</b>
+   <UL>
+   <LI>increment CPU clock
+   <LI>if time for a TimerInterrupt than add to the InterruptQ so
+     that the interrupt is handled at the end of the next instruction
+     execution cycle
+   <LI>should include a simple method to change when TimerInterrupts occur
+   </UL>
+     
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      <A HREF="interrupt.html">Interrupt</A> - store information about type, 
+                                               source etc<BR>
+      <A HREF="instruction.html">Instruction</A> - store opcode, parameter etc<BR>
+      <A HREF="address.html">Address</A> - possibly used for translation mechanisms<BR>
+      <A HREF="priorityqueue.html">PriorityQueue</A> - used to store interrupts that are scheduled to happen
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+  <UL>
+    <LI> Instruction theInstruction = fetchInstruction( Address real )
+    <LI> int result = executeInstruction( theInstruction )
+    <LI> handleInterrupts - cycle through all interrupts in queue and handle
+         those ones that are either past time or ready to be handled, <BR>
+         Handling can either be just generating messages for the kernel or
+         modifying CPU H/W so another step actually does the handling.  The
+         idea for the latter method is so that you have problems if two intterrupts
+         occur at the same time.  
+    <LI> enableInterrupts 
+    <LI> disableInterrupts - what happens when an interrupt is attempted when
+         interrupts are disabled?
+    <LI> boolean interruptsEnabled() - TRUE if interrupts can occur
+    <LI> virtualToReal( Address virtual, Address real ) - perform address 
+         tranlation mechanism
+    <LI> readMemory( Address real )
+    <LI> int readRegister( int register )
+    <LI> writeRegister( int register, int value )
+    <LI> oneTick - advance CPU clock one tick, check if a timer interrupt
+         should now be generate, if yes add one to the interrupt queue
+    <LI> generateInterrupt( Interrupt theInt ) - add an interrupt to the queue  
+  </UL>
+
+</BODY>
+</HTML>

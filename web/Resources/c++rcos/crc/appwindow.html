@@ -1,0 +1,109 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class AppWindow
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>AppWindow</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+       AppWindow
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   This is a "Window".  Instantiating one of these gives a work area
+   (the graphic window) with anchors for all three button types, and
+   some options, like menu bars and close gadget.  The window can be
+   system modal (no menu bar, all input limited to the window), or
+   modeless (menu bar, inputs go to it and its modeless ancestors).
+   NOTE that (mostly) there will only ever be one instance of the
+   "Window" class and that will belong to the one instance of the
+   "Application" class.  Child windows are linked to the original
+   window instance by calls to , so all the constructor need
+   do is invoke that member to do create the head element.  In fact,
+   this whole class probably should be private to the "App" class.
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+  class AppWindow : public DblList {
+    typedef struct winTag {
+      rect r;
+      INT16  mode;
+      PbCtrl Pb;
+      RbCtrl Rb;
+      CbCtrl Cb;
+      SysMenu *Sys;
+      PIMBUF  pi;
+    } WIN;
+    typedef winTag *PWIN;
+    PWIN pw;
+  public:
+    AppWindow (INT16 md = RC_Modeless,                     // window type
+            char* st = NULL,                               // title
+            INT16 x1 = 0, INT16 y1 = 0,                    // location UL
+            INT16 x2 = GFX_Xmin-1, INT16 y2 = GFX_Ymin-1,  // location BR
+            INT16 n1 = _Black,                             // window color
+            INT16 n2 = _Black)                             // modal border
+           { Open(md, st, x1, y1, x2, y2, n1, n2); };
+    ~AppWindow (void);
+    UINT16 Scan (char);
+    UINT16 Scan (point&);
+    void   Title (char*);
+    void   Close (void);
+    virtual void Refresh (void);
+    BOOL   CBstate (UINT16 , BOOL&);
+    BOOL   Open (UINT16, char*, INT16, INT16, INT16, INT16, UINT16, UINT16);
+    BOOL   Create (UINT16, UINT16, char*, INT16, INT16, INT16, INT16);
+    BOOL   Destroy (UINT16, UINT16);
+  };
+
+      </PRE> 
+
+</BODY>
+</HTML>

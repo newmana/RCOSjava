@@ -1,0 +1,73 @@
+<HTML>
+<HEAD>
+  <TITLE>
+gfxunix.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+gfxunix.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Gfxunix - Module function prototypes                        *
+//  AUTHOR : David Jones							                   *
+//  PURPOSE: This module contains all the compiler dependant primitive    *
+//           graphic functions required by the RCOS system.  These names  *
+//           are invariant - the underlying code willbe compiler specific * 
+//           for graphic     
+//  HISTORY:                                                              *
+//   02-DEC-92  First (MSC/C++ 7.00) version                              *
+//   24-JAN-93  Clipping routines added                                   *
+//   09-APR-93  Borland GfxTextHeight simplified, removing parameter      *
+//   23-JAN-94  X Windows Port Commenced                                   
+//*************************************************************************
+
+#ifndef _RCOS_GFXUNIX
+#define _RCOS_GFXUNIX
+
+  //***********************************
+  // Temporary for testing purposes
+  
+  #include <X11/Xlib.h>
+  #include <X11/Xutil.h>
+  #include <iostream.h>		// for debugging purposes
+  #include <math.h>
+  #include <stdlib.h>
+  
+  #define GFX_UlnOffset	1
+  
+  typedef struct
+    {
+      Pixmap pix;
+      int width, height;
+    }
+  pixmap_data;
+  #define PIMBUF	pixmap_data *
+  
+  // The colours are just indexes into the colors array defined in
+  // gfxunix.cc
+  
+  #define _Black         0
+  #define _Blue          1
+  #define _Green         2
+  #define _Cyan          3
+  #define _Red           4
+  #define _Magenta       5
+  #define _Brown         6
+  #define _White         7
+  #define _DarkGrey      8
+  #define _LightBlue     9
+  #define _LightGreen    10
+  #define _LightCyan     11
+  #define _LightRed      12
+  #define _LightMagenta  13
+  #define _Yellow        14
+  #define _BrightWhite   15
+  
+#endif 	// _RCOS_GFXUNIX
+
+  /*********************************** eof ***********************************/
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,87 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class LnDrv
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>LnDrv</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+       LnDrv
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   This class processes user input commands from a terminal running
+   in full duplex mode.  It performs simple input editing by destructive
+   backspace, echoing the user's input and passing on the owner processes
+   output.  Edited input is held in a chain of CBLOCK structs (like Unix)
+   from which delimited blocks can be retrieved to satisfy data requests.
+ <P> 
+   This (initial) version performs line (CR delimited) buffering only
+   and does not expand TAB characters.
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+ class LnDrv : public port {
+    Cblock  Cblk;
+    UINT16  uPid, uTerm;                // who makes 'em and who eats 'em
+    INT16   nBlkReq, nChReq;            // outstanding request counts.
+    char    cDelim;                     // Data block delimiter char
+    BOOL    bBreakOn;                   // control break detection
+    void LnReq (void);                  // process User Process request
+    void LnEdit (char);                 // process data from terminal
+  public:
+    LnDrv (UINT16, UINT16, Knl*);       // constructor
+    ~LnDrv ();                          // destructor
+    void RxPort (PMSG);                 // Receive port body for virtual
+  };
+      </PRE> 
+
+</BODY>
+</HTML>

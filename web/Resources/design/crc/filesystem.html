@@ -1,0 +1,94 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    FileSystem CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>FileSystem</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      FileSystem
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Provides the functionality of a normal file system i.e. takes operations
+      specified in logical file operations (open file, read bytes from a file,
+      open a directory etc) and translates them into real disk operations.
+      Includes probably providing a directory hierarchy and allocation of
+      free disk blocks.
+      <P>
+      Implementation is in the form of a class based on 
+      <A HREF="messagehandler.html">MessageHandler</A>.     
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      <A HREF="messagehandler.html">MessageHandler</A> - base class<BR>
+      <A HREF="file.html">File</A> - operating system class used to store
+         information about a file<BR>
+      <A HREF="fileattributes.html">FileAttributes</A> - probably part
+         of previous class stores information about various file attributes
+         length, protections, owner, type etc<BR>
+      <A HREF="directory.html">Directory</A><BR>
+      <A HREF="diskscheduler.html">DiskScheduler</A> - "device driver" that
+         fulfills the file systems requests (possibly need multiple 
+         DiskSchedulers if FileSystem span many devices)
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+  <UL>
+    <P>
+      <LI> <B> FileSystem( DiskScheduler theDiskScheduler )</B><BR>
+            - associate FileSystem with a particular DiskScheduler, 
+              register with PostOffice
+    <P>
+      <LI> <B> AddDiskScheduler( DiskScheduler theDiskScheduler )</B><BR>
+            - add a DiskScheduler to the FileSystem
+    <P>
+      <LI> various FileSystem functions (following is RCOS list)</BR>
+         IsEof, Open, Close, Delete, Creat, CloseAll??, Read, Write,
+         Stat, FindFirst, FindNext, Allocate??,<BR>
+         Additions - ChangeAttributes, GetAttributes, Seek, OpenDir
+  </UL>
+
+</BODY>
+</HTML>

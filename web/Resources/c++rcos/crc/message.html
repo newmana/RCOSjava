@@ -1,0 +1,80 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class message<
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>message</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	message
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+       This object is a message.  Like Microsoft's NT, All messages
+       share a common header, with a message specific body.  Used to
+       send messages via <A HREF="kernel.html">kernel</A>.
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+      class message {
+      public:
+        message (UINT16 us = 0, UINT16 um = 0, UINT16 up = 0, void *pb = NULL)
+          { wSender = us, wMsgType = um, wParam = up, pBody = pb; }
+        ~message (void) {};
+        UINT16 wSender;                     // who it's from
+        UINT16 wMsgType;                    // what it is           
+        UINT16 wParam;                      // non-specific parameter
+        void  *pBody;                       // pointer to specific data
+      };
+      </PRE> 
+
+</BODY>
+</HTML>

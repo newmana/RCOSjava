@@ -1,0 +1,118 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    Network CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>Network</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Network
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+ The following class defines a physical network device.  The network
+ is capable of delivering fixed sized packets, in order but unreliably,
+ to other machines connected to the network.
+<P>
+ The "reliability" of the network can be specified to the constructor.
+ This number, between 0 and 1, is the chance that the network will lose
+ a packet.  Note that you can change the seed for the random number
+ generator, by changing the arguments to RandomInit() in Initialize().
+ The random number generator is used to choose which packets to drop.   
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+<PRE>
+class Network {
+  public:
+    Network(NetworkAddress addr, double reliability,
+          VoidFunctionPtr readAvail, VoidFunctionPtr writeDone, int callArg);
+                                // Allocate and initialize network driver
+    ~Network();                 // De-allocate the network driver data
+
+    void Send(PacketHeader hdr, char* data);
+                                // Send the packet data to a remote machine,
+                                // specified by "hdr".  Returns immediately.
+                                // "writeHandler" is invoked once the next
+                                // packet can be sent.  Note that writeHandler
+                                // is called whether or not the packet is
+                                // dropped, and note that the "from" field of
+                                // the PacketHeader is filled in automatically
+                                // by Send().
+
+    PacketHeader Receive(char* data);
+                                // Poll the network for incoming messages.
+                                // If there is a packet waiting, copy the
+                                // packet into "data" and return the header.
+                                // If no packet is waiting, return a header
+                                // with length 0.
+
+    void SendDone();            // Interrupt handler, called when message is
+                                // sent
+    void CheckPktAvail();       // Check if there is an incoming packet
+
+  private:
+    NetworkAddress ident;       // This machine's network address
+    double chanceToWork;        // Likelihood packet will be dropped
+    int sock;                   // UNIX socket number for incoming packets
+    char sockName[32];          // File name corresponding to UNIX socket
+    VoidFunctionPtr writeHandler; // Interrupt handler, signalling next packet
+                                //      can be sent.
+    VoidFunctionPtr readHandler;  // Interrupt handler, signalling packet has
+                                //      arrived.
+    int handlerArg;             // Argument to be passed to interrupt handler
+                                //   (pointer to post office)
+    bool sendBusy;              // Packet is being sent.
+    bool packetAvail;           // Packet has arrived, can be pulled off of
+                                //   network
+    PacketHeader inHdr;         // Information about arrived packet
+    char inbox[MaxPacketSize];  // Data for arrived packet
+};                                       
+</PRE>
+
+</BODY>
+</HTML>

@@ -1,0 +1,432 @@
+<HTML>
+<HEAD>
+  <TITLE>
+paldos.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+paldos.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Pal - Program Abstraction Layer for the RCOS system          *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Definition of a class to provide platform dependant services *
+//           for timer interrupts, raw keyboard buffer access and low     *
+//           level mouse events.                                          *
+//  HISTORY:                                                              *
+//   22-MAR-93  ISR made a friend to beat Borland compiler quirk          *
+//   08-APR-93  Start/Stop added and GetTicks adjusted for 1mS (hah!)     *
+//   14-MAY-93  Sentinal to prevent starting a stopped timer              *
+//   29-OCT-93  Created to make "Timer" more platform independant         *
+//   04-FEB-94  Timer class body moved here from "timer"                  *
+//*************************************************************************
+
+#include "pal.hh"
+
+
+//////////////////////////////////////////////////////////////////////////
+// Amazing! 3 DOS compilers all implement these the same way!
+//
+#if defined(MSC700) || defined(BC31) || defined(SC60)
+
+  #include <bios.h>
+
+  #pragma check_stack (off)
+
+  #ifdef BC20
+  #define __MSC
+  #endif
+
+  /////////////
+  // Raw key data waiting
+  // RETURNS:  TRUE .. Yes, there is
+  //          FALSE .. No, there 'aint
+  //
+  BOOL PalKeyReady (void)
+  {
+    #if defined(BC31)
+	return (BOOL)(bioskey( 1 ));
+    #else
+      return (BOOL)(_bios_keybrd(_NKEYBRD_READY) != 0);
+    #endif
+  }
+
+  ////////////
+  // Get raw key data - caller must ensure there is something to get first!
+  // RETURNS: lo byte = ASCII value; hi byte = keyboard scan code
+  //
+  UINT16 PalGetKey (void)
+  {
+    #if defined(BC31)
+	return (UINT16)(bioskey(0));
+    #else
+	return (UINT16)_bios_keybrd(_NKEYBRD_READ);
+    #endif
+  }
+
+  #pragma check_stack (on)
+
+#endif
+
+
+//////////////////////////////////////////////////////////////////////////
+// Microsoft specific ways of doing the job
+//
+#ifdef MSC700
+
+  #include <dos.h>
+  #include <time.h>
+  #include <sys\timeb.h>
+
+  #define ASM   __asm
+
+  //////////
+  // get the address of the passed interrupt vector
+  // RETURNS: address as a 32 bit value (CS:Offset)
+  //
+  UINT32 PalGetVec (UINT16 nVec)
+  {
+    void (__cdecl __interrupt __far *pvec)(void);
+    pvec = _dos_getvect(nVec);
+    return (UINT32)pvec;
+  }
+
+  //////////
+  // Change the interrupt vector to that passed
+  //
+  void PalSetVec (UINT16 nVec, UINT32 uFp)
+  {
+    _dos_setvect(nVec, (void (__cdecl __interrupt __far*)(void))uFp);
+  }
+
+  ////////
+  // Prepare the DOS clock for 1mS resolution
+  //
+  void PalInitClk (void)
+  {
+    return;
+  }
+
+  ////////
+  // Restore the DOS clock to 10mS resolution
+  //
+  void PalResetClk (void)
+  {
+    return;
+  }
+
+  ///////////
+  // Get system time since midnight in milliseconds
+  //
+  UINT32 PalGetTime (void)
+  {
+    struct _timeb tb;
+    _ftime(&tb);
+    return (UINT32)(tb.time * 1000) + (UINT32)tb.millitm;
+  }
+
+#endif
+
+
+//////////////////////////////////////////////////////////////////////////
+// The Borland way..
+//
+#ifdef BC31
+
+  #include <dos.h>
+
+  #define ASM   asm     // changed to a common format for later re-use
+
+  //////////
+  // get the address of the passed interrupt vector
+  // RETURNS: address as a 32 bit value (CS:Offset)
+  //
+  UINT32 PalGetVec (UINT16 nVec)
+  {
+    #ifndef BC31
+	void interrupt (far *pvec)(...);
+	pvec = _dos_getvect(nVec);
+    #else
+	void *pvec;
+	pvec = getvect( nVec );
+    #endif
+    return (UINT32)pvec;
+  }
+
+  //////////
+  // Change the interrupt vector to that passed
+  //
+  void PalSetVec (UINT16 nVec, UINT32 uFp)
+  {
+    setvect(nVec, (void interrupt (far*)(...))uFp);
+  }
+
+  ////////
+  // Prepare the DOS clock for 1mS resolution
+  //
+  void PalInitClk (void)
+  {
+    return;
+  }
+
+  ////////
+  // Restore the DOS clock to 10mS resolution
+  //
+  void PalResetClk (void)
+  {
+    return;
+  }
+
+  ///////////
+  // Get system time since midnight in milliseconds
+  //
+  UINT32 PalGetTime (void)
+  {
+    #ifndef BC31
+	struct dostime_t tb;
+	_dos_gettime(&tb);
+	return (UINT32)(tb.second * 1000) + (UINT32)tb.hsecond;
+    #else
+	struct time tb;
+	gettime( &tb );
+	return (UINT32)(tb.ti_sec*1000) + (UINT32)tb.ti_hund;
+    #endif
+  }
+
+#endif
+
+
+//////////////////////////////////////////////////////////////////////////
+// And Symantic (why bother? Symantic has no DOS graphics, so we'll
+// need to "borrow" them from Microsoft anyway!)
+//
+#ifdef SC60
+
+  //////////
+  // get the address of the passed interrupt vector
+  // RETURNS: address as a 32 bit value (CS:Offset)
+  //
+  UINT32 PalGetVec (UINT16 nVec)
+  {
+    unsigned seg, ofs;
+    int_getvector(nVec, &ofs, &seg);
+    return (UINT32)seg << 16 + (UINT32)ofs;
+  }
+
+  //////////
+  // Change the interrupt vector to that passed
+  //
+  void PalSetVec (UINT16 nVec, UINT32 uFn)
+  {
+    int_setvector(nVec, (unsigned)(uFn >> 16), (unsigned)(uFn & 0xffff));
+  }
+
+  ////////
+  // Prepare the DOS clock for 1mS resolution
+  //
+  void PalInitClk (void)
+  {
+    return;
+  }
+
+  ////////
+  // Restore the DOS clock to 10mS resolution
+  //
+  void PalResetClk (void)
+  {
+    return;
+  }
+
+  ///////////
+  // Get system time since midnight in milliseconds.
+  //
+  UINT32 PalGetTime (void)
+  {
+    struct dostime_t tb;
+    dos_gettime(&tb)
+    return (UINT32)(tb.second * 1000) + (UINT32)tb.hsecond;
+  }
+
+#endif
+
+//////////////////////////////////////////////////////////////////////////
+// And now for the mouse (Microsoft and Borland are the same)..
+//
+#if defined(MSC700) || defined(BC31)
+
+  //////////
+  // These Globals are local to this module so that the mouse driver
+  // invoked service routine can pass info to the Pal routine..
+  //
+  static UINT16 _x, _y, _event;
+
+  //////////
+  // proto for a local function..
+  //
+  void _loadds MouseTrap (void);
+
+  /////////////
+  // Determine if a driver is present by looking at the software interrupt
+  // vector.  If it is null, or points to an IRET op-code, there's a good
+  // chance of no mouse.  If we've got one we'll set up a call back to our
+  // info gathering friend func and start monitoring for any Left Button
+  // Down events..
+  //
+  BOOL PalMouseInit (void)
+  {
+    UINT32 uMp = PalGetVec(MM_Driver);
+//    if ((void __far*)uMp /* && (*(char __far*)uMp && 0xff == 0xCF) */) {
+    if ((void FAR *)uMp /* && (*(char __far*)uMp && 0xff == 0xCF) */) {
+      union REGS regs;
+      struct SREGS sregs;
+      segread(&sregs);
+      regs.x.ax = MM_SetISR;
+      regs.x.bx = 0;
+      regs.x.cx = MM_LBdown;
+      regs.x.dx = (unsigned)((UINT32)MouseTrap & (UINT32)0xffff);
+      sregs.es = (unsigned)((UINT32)MouseTrap >> 16 & (UINT32)0xffff);
+      int86x(MM_Driver, &regs, &regs, &sregs);
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /////////////
+  // restore default mouse operation
+  //
+  void PalMouseReset (void)
+  {
+    union REGS regs;
+    regs.x.ax = MM_Reset;
+    int86(MM_Driver, &regs, &regs);
+  }
+
+  ///////////////
+  // Get the location of the last mouse event (stored by handler call-back)
+  //
+  BOOL PalMouseEvent (INT16 *px, INT16 *py)
+  {
+    BOOL bRes = (BOOL)(_event && MM_LBdown == MM_LBdown);
+    *px = _x, *py = _y, _event = 0;
+    return bRes;
+  }
+
+  ////////////
+  // Turn on the mouse pointer (under DOS, this increments a driver
+  // internal counter.. the pointer appears when it reaches zero)
+  //
+  void PalMousePointerOn (void)
+  {
+    union REGS regs;
+    regs.x.ax = MM_Show;
+    int86(MM_Driver, &regs, &regs);
+  }
+
+  //////////////
+  // If x1 is less than zero (ie, it defaulted), unconditionally turn
+  // off the pointer.  Otherwise, use "smart" hiding (if available).
+  //
+  void PalMousePointerOff (INT16 x1, INT16 y1, INT16 x2, INT16 y2)
+  {
+    union REGS regs;
+    if (x1 < 0)
+      regs.x.ax = MM_Hide;
+    else {
+      regs.x.ax = MM_Smart;
+      regs.x.cx = x1, regs.x.dx = y1, regs.x.si = x2, regs.x.di = y2;
+    }
+    int86(MM_Driver, &regs, &regs);
+  }
+
+  ////////////////
+  // User mouse subroutine called on events as specified by call to SetISR.
+  // Now this is really crude.  We are looking for button down events only
+  // and we will only store the most recent one in "local globals" where
+  // they can be retreived by a call to <PalMouseEvent>.
+  //
+  // A future revision should at least buffer a few events and monitor
+  // (initially) for button down.  When that occurs, If the click is inside
+  // a control rect region, we should shift the graphic and change to
+  // monitoring for move and release events.  If the pointer moves outside
+  // the control region, we restore the graphic but resister "no click" -
+  // a release inside the control is a real activation; *sigh* maybe later.
+  //
+  #pragma check_stack (off)
+  void _loadds MouseTrap (void)
+  {
+    ASM {
+      mov _event,bx     // the in-line assembler won't/can't
+      mov _y,dx         // reference class members,
+      mov _x,cx         // hence this kluge.
+    }
+  }
+  #pragma check_stack (on)
+
+#endif
+
+//////////////////////////////////////////////////////////////////////////
+// Symantic thoughtfully supplies low level mouse library functions,
+// but no DOS graphics library fns - You figure it out, it's beyond me!
+//
+#ifdef SC60
+
+  #include <mouse.h>
+
+
+  /////////////
+  // Protos for low level mouse services
+  //
+  BOOL PalMouseInit (void)
+  {
+    return (msm_init()) ? TRUE : FALSE;
+  }
+
+  /////////////
+  // restore default mouse operation
+  //
+  void PalMouseReset (void)
+  {
+    msm_term();
+  }
+
+  ///////////////
+  // Get the location of the last mouse left button down event
+  //
+  BOOL PalMouseEvent (INT16 *px, INT16 *py)
+  {
+    unsigned n = 0;
+    msm_getpress(&n, px, py);
+    return ((n) ? TRUE : FALSE);
+  }
+
+  ////////////
+  // Turn on the mouse pointer (under DOS, this increments a driver
+  // internal counter.. the pointer appears when it reaches zero)
+  //
+  void PalMousePointerOn (void)
+  {
+    msm_showcursor();
+  }
+
+  //////////////
+  // If x1 is less than zero (ie, it defaulted), unconditionally turn
+  // off the pointer.  Otherwise, use "smart" hiding (if available).
+  //
+  void PalMousePointerOff (INT16 x1 = -1, INT16 y1 = -1,
+			   INT16 x2 = -1, INT16 y2 = -1)
+  {
+    if (x1 == -1)
+      msm_hidecursor();
+    else
+      msm_condoff(x1, y1, x2, y2);
+  }
+
+#endif
+
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

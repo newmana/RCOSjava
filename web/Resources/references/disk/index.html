@@ -1,0 +1,84 @@
+<html>
+<head>
+            
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+            
+  <meta name="GENERATOR" content="Mozilla/4.04 [en] (Win95; I) [Netscape]">
+  <title>RCOS.java - Disk I/O</title>
+</head>
+ <body text="#eeeeee" bgcolor="#000000" link="#ffff00" vlink="#999999">
+ 
+<table width="100%">
+   <tbody>
+     <tr>
+       <td align="Left">       
+      <h4> / <a href="../../resources.html" target="body">Resources</a> /
+       <a href="../index.html">References</a> / Disk I/O</h4>
+       </td>
+       <td align="Left" valign="CENTER" width="25%"><img src="../../../pics/rightEnd.gif" height="30" width="19"><a href="../../../index.html" target="_parent"><img src="../../../pics/home.gif" alt="RCOS.java Home Page" border="0" height="30" width="38"></a><img src="../../../pics/blank.gif" alt="" border="0" height="30" width="38"><img src="../../../pics/blank.gif" alt="" border="0" height="30" width="38"><img src="../../../pics/leftEnd.gif" alt="" height="30" width="19"></td>
+     </tr>
+   
+  </tbody> 
+</table>
+   The following is based on section 7.5 of "Operating Systems" by William
+ Stallings.<br>
+ 
+<h3>Disk I/O Performance Parameters</h3>
+ 
+<p>The general timing of disk I/O consists of<br>
+ </p>
+ 
+<ul>
+   
+  <li>Wait for device,</li>
+   
+  <li>Wait for channel,</li>
+   
+  <li>Seek time,</li>
+   
+  <li>Rotational delay and</li>
+   
+  <li>Data transfer.</li>
+ 
+</ul>
+  Seek Time - the time taken to position te drives head system to the required
+ track.<br>
+  Rotation Delay - the time it takes for the beginning of the sector to reach
+ the head.<br>
+  Data Transfer - where the head reads or writes the required information.<br>
+ <br>
+  We are ignoring waiting for the device and channel.&nbsp; Assuming that 
+this will be handled by the scheduler.<br>
+ <br>
+ 
+<h3>Calculating Seek Time</h3>
+  The linear formulae used is:<br>
+  T = m * n + s<br>
+ <br>
+  T - estimated seek time,<br>
+  m - a drive specific constant,<br>
+  n - tracks traversed, and<br>
+  s - start-up time.<br>
+ <br>
+ 
+<h3>Rotational Delay</h3>
+&nbsp; This is dependent on the speed of rotation (rpm).&nbsp; A floppy disk
+runs &nbsp; at approximately 100-200 rpm and a hard drive starts at 3600
+rpm (modern drives&nbsp; are typically 5400 or 7200 rpm).&nbsp; At 3600 rpm
+the disk passes the head every 16.7 ms, on average it will take 8.35 ms.<br>
+ <br>
+ 
+<h3>Transfer Time</h3>
+  The formulae used is:<br>
+  T = b / (r * N)<br>
+ <br>
+  T - transfer time,<br>
+  b - number of bytes to transfer,<br>
+  r - rotation speed in revolutions per second, and<br>
+  N - number of bytes per track.<br>
+ <br>
+ The has been implemented in&nbsp; "Hardware.Disk.SimpleDisk".<br>
+ <br>
+ 
+</body>
+</html>

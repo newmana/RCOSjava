@@ -1,0 +1,105 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    FileHeader CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>FileHeader</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      FileHeader
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+ The following class defines the Nachos "file header" (in UNIX terms,
+ the "i-node"), describing where on disk to find all of the data in the file.
+ The file header is organized as a simple table of pointers to
+ data blocks.
+<P>
+ The file header data structure can be stored in memory or on disk.
+ When it is on disk, it is stored in a single sector -- this means
+ that we assume the size of this data structure to be the same
+ as one disk sector.  Without indirect addressing, this
+ limits the maximum file length to just under 4K bytes.
+<P>
+ There is no constructor; rather the file header can be initialized
+ by allocating blocks for the file (if it is a new file), or by
+ reading it from disk.     
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+<PRE>
+class FileHeader {
+  public:
+    bool Allocate(BitMap *bitMap, int fileSize);// Initialize a file header,
+                                                //  including allocating space
+                                                //  on disk for the file data
+    void Deallocate(BitMap *bitMap);            // De-allocate this file's
+                                                //  data blocks
+
+    void FetchFrom(int sectorNumber);   // Initialize file header from disk
+    void WriteBack(int sectorNumber);   // Write modifications to file header
+                                        //  back to disk
+
+    int ByteToSector(int offset);       // Convert a byte offset into the file
+                                        // to the disk sector containing
+                                        // the byte
+
+    int FileLength();                   // Return the length of the file
+                                        // in bytes
+
+    void Print();                       // Print the contents of the file.
+
+  private:
+    int numBytes;                       // Number of bytes in the file
+    int numSectors;                     // Number of data sectors in the file
+    int dataSectors[NumDirect];         // Disk sector numbers for each data
+                                        // block in the file
+};                
+</PRE>
+
+</BODY>
+</HTML>

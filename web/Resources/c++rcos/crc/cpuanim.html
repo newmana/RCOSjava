@@ -1,0 +1,83 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class CpuAnim
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>CpuAnim</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+       CpuAnim
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   A class to perform all Window Painting..for CPU screen
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      <A HREF="winpainter.html">WinPainter</A>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+  class CpuAnim : public WinPainter {
+    BOOL bVis[8];         // intuition gives 9 possible undirected paths
+    void DrawQueue (INT16, INT16, char*);
+    void MoveBug (point, point, BOOL);
+    void DispQ (UINT16*, INT16, INT16, INT16 = -SLOT_DX);
+  public:
+    CpuAnim (void);
+   ~CpuAnim (void) { }
+    void Paint (void);
+    void Anim (INT16, INT16, BOOL = FALSE);
+
+    void PaintBox (PMSG_ANIP);
+    void RefreshQ (UINT16, UINT16*);
+    void PaintAllQ (MSG_ANIQ&);
+  };
+      </PRE> 
+
+</BODY>
+</HTML>

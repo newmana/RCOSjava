@@ -1,0 +1,84 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS.java - CPUAnimator Messages
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999">
+<TABLE WIDTH="100%">
+  <TR>
+    <TD ALIGN=LEFT>
+      <H4>/ <A HREF="../../../resources.html" TARGET="body">Resources</A> /
+      <A HREF="../index.html">Design</A> / <A HREF="index.html">Messages</A>
+      / CPUAnimator </H4>
+    </TD>
+    <TD ALIGN=LEFT WIDTH=25% VALIGN="CENTER">
+      <IMG SRC="../../../pics/rightEnd.gif" WIDTH="19" HEIGHT="30"><A HREF="../../../index.html" TARGET="_parent"><IMG SRC="../../../pics/home.gif" BORDER="0" ALT="RCOS.java Home Page" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../../pics/blank.gif" BORDER=0 ALT="" WIDTH="38" HEIGHT="30"><A HREF="DiskSchedulerAnimator.html" TARGET="body"><IMG SRC="../../../pics/forward.gif" BORDER=0 ALT="DiskSchedulerAnimator" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../../pics/leftEnd.gif" ALT="" WIDTH="19" HEIGHT="30"><BR>
+    </TD>
+  </TR>
+</TABLE>
+The messages here are used by the Animator to display what is going on inside
+the P-Code CPU.  The user cannot directly manipulate the CPU so no messages
+based on user interaction is sent by this Animator.
+
+<H3>Sent by CPUAnimator</H3>
+  <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+    <TR>
+      <TH>
+        To
+      </TH>
+      <TH>
+        Name
+      </TH>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        None<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        None<BR>
+      </TD>
+    </TR>
+  </TABLE>
+<BR>
+<H3>
+  Processed by CPUAnimator
+</H3>
+  <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+    <TR>
+      <TH>
+        From
+      </TH>
+      <TH>
+        Name
+      </TH>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        CPU<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        SetContext, ProcessSwitch, InstructionExecution, BasePointer<BR>
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        ProcessScheduler<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        NullProcess<BR>
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        ProcessSchedulerAnimator<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        ShowCPU<BR>
+      </TD>
+    </TR>
+  </TABLE>
+</FONT>       
+</BODY>
+</HTML>

@@ -1,0 +1,290 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS.java - Transitions
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999">
+<TABLE WIDTH="100%">
+  <TR>
+    <TD ALIGN=LEFT>
+      <H4>/ <A HREF="../../resources.html" TARGET="body">Resources</A> /
+      <A HREF="index.html">Design</A> / Transitions</H4>
+    </TD>
+    <TD ALIGN=LEFT WIDTH=25% VALIGN="CENTER">
+      <IMG SRC="../../pics/rightEnd.gif" WIDTH="19" HEIGHT="30"><A HREF="../../index.html" TARGET="_parent"><IMG SRC="../../pics/home.gif" BORDER="0" ALT="RCOS.java Home Page" WIDTH="38" HEIGHT="30"></A><A HREF="class.html" TARGET="body"><IMG SRC="../../pics/back.gif" BORDER=0 ALT="Class Definitions" WIDTH="38" HEIGHT="30"></A><A HREF="messages/index.html" TARGET="body"><IMG SRC="../../pics/forward.gif" BORDER=0 ALT="Messages" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../pics/leftEnd.gif" ALT="" WIDTH="19" HEIGHT="30"><BR>
+    </TD>
+  </TR>
+</TABLE>
+<P>
+    The following table explains the various numbered transitions contained
+    in the RCOS.java <A HREF="../../structure.html">overview diagram</A>
+<P>
+<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+  <TR>
+    <TH>
+      Number
+    </TH>
+    <TH>
+      Cause
+    </TH>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP ALIGN=CENTER>
+      1
+    </TD>
+    <TD>
+      <A NAME="1">Memory access (read/write).</A>
+    </TD>
+  </TR>
+    
+
+  <TR>
+    <TD VALIGN=TOP ALIGN=CENTER>
+      <A NAME="2">2</A>
+    </TD>
+    <TD>
+      The disk device calls <TT>CPU.GenerateInterrupt</TT>
+      to add an interrupt to the CPU Interrupt Queue.  The
+      interrupt signifies that a disk request has completed
+      or generated an error.  CPU Interrupt handling takes over.
+    </TD>
+  </TR>
+    
+
+  <TR>
+    <TD VALIGN=TOP ALIGN=CENTER>
+     <A NAME="3">3</A>
+    </TD>
+    <TD>
+      A number of possibilities:
+      <UL>
+        <LI> CPU calls Kernel.HandleInterrupt for 
+             <A HREF="scenario/interrupt.html">processing of an interrupt</A>,
+             handles I/O, software, error, and clock interrupts.
+        <LI> Kennel.ReadContext reads values of current context
+        <LI> Kernel.WriteContext writes new values of current context
+      </UL>
+    </TD>
+  </TR>
+    
+
+  <TR>
+    <TD VALIGN=TOP ALIGN=CENTER>
+      <A NAME="4">4</A>
+    </TD>
+    <TD>
+      Interrupt generated because of a terminal I/O completion or
+      error condition
+    </TD>
+  </TR>
+    
+
+  <TR>
+    <TD VALIGN=TOP ALIGN=CENTER>
+      <A NAME="5">5</A>
+    </TD>
+    <TD>
+      DiskScheduler executes Disk.HandleRequest( DiskXferRequest theRequest )
+      equivalent to disk driver asking physical disk to perform a task
+    </TD>
+  </TR>
+    
+
+  <TR>
+    <TD VALIGN=TOP ALIGN=CENTER>
+      <A NAME="6">6</A>
+    </TD>
+    <TD>
+      Memory read by MemoryManager in response to request by other 
+      process, in combination with CPU read may mean that we do  need
+      a seperate RAM object so that both can access it
+    </TD>
+  </TR>
+    
+
+  <TR>
+    <TD VALIGN=TOP ALIGN=CENTER>
+      <A NAME="7">7</A>
+    </TD>
+    <TD>
+      ??KernelMemory read?? will it need to do it, can this be 
+      restricted to just reading CPU registers, probably should
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP ALIGN=CENTER>
+      <A NAME="8">8</A>
+    </TD>
+    <TD>
+      ??KernelMemory read?? will it need to do it, can this be 
+      restricted to just reading CPU registers, probably should
+    </TD>
+  </TR>  
+
+  <TR>
+    <TD VALIGN=TOP ALIGN=CENTER>
+      <A NAME="9">9</A>
+    </TD>
+    <TD>
+      MemoryManager receiving and sending messages will include
+      <UL>
+        <LI> recieiving<BR>
+             AllocateBlock, DeAllocateBlock, CodeExist?? used by
+             ProcessScheduler to check if a program is already loaded?
+             maybe this could be done as part of AllocateBlock when it
+             is passed the name of the program?
+        <LI> sending<BR>
+             MemoryFull, BlockAllocated
+      </UL>
+    </TD>
+  </TR>
+    
+
+  <TR>
+    <TD VALIGN=TOP ALIGN=CENTER>
+      <A NAME="10">10</A>
+    </TD>
+    <TD>
+      Kernel sending and receiving messages including
+      <UL>
+        <LI> sending <BR>
+             SystemCalls( MessageHandler destination, SystemCall sc )<BR> 
+             Interrupts( MessageHandler destiantion, Interrupt int )
+        <LI> receiving<BR>
+             NewRunningProcess( ProcessScheduler, ProcessContext )
+      </UL>
+    </TD>
+  </TR>
+    
+
+  <TR>
+    <TD VALIGN=TOP ALIGN=CENTER>
+      <A NAME="11">11</A>
+    </TD>
+    <TD>
+      Tty sending and receiving messages including
+      <UL>
+        <LI> sending<BR>
+             CharacterReady, WriteCharacterDone, CursorMoveDone<BR>
+             BlockProcess( ProcessScheduler, PID ) ??
+        <LI> receiving<BR>
+             GetCharacter, PutCharacter, GoToXY?
+      </UL>
+    </TD>
+  </TR>
+    
+
+  <TR>
+    <TD VALIGN=TOP ALIGN=CENTER>
+      <A NAME="12">12</A>
+    </TD>
+    <TD>
+      DiskScheduler reciving and sending messages including
+      <UL>
+        <LI> sending<BR>
+             TransferComplete( DiskTransfer ), TransferError( DiskTransfer )
+        <LI> receiving<BR>
+             DoTransfer( DiskTransfer theTransfer )
+      </UL>
+    </TD>
+  </TR>
+    
+
+  <TR>
+    <TD VALIGN=TOP ALIGN=CENTER>
+      <A NAME="13">13</A>
+    </TD>
+    <TD>
+      ProcessScheduler receiving and sending messages including
+      <UL> 
+        <LI> sending <BR>
+             NewRunningProces( kernel, ProcessContext )<BR>
+             ProcessForkError( kernel, Pid )??<BR> 
+             ProcessExecError( kernel, Pid )<BR>
+             AllocateBlock( MemoryManager, ProcessName ) for CreateProcess<BR>
+             DeAllocateBlock( MemoryManager ) for KillProcess<BR>
+        <LI> receiving<BR>
+             ForkProcess<BR>
+             ExecProcess<BR>
+             SchedulerNewProcess<BR>
+             BlockProcess - for other OS components to block processes e.g.
+               DiskScheduler when they request I/O, IPCManager P( 0 )<BR>
+      </UL>
+    </TD>
+  </TR>
+    
+
+  <TR>
+    <TD VALIGN=TOP ALIGN=CENTER>
+      <A NAME="14">14</A>
+    </TD>
+    <TD>
+      Messages to the Animator, ??Animator doesn't send (to PostOffice) just 
+      receive, at least it doesn't send to "real" OS components, it may send
+      to other Animator components but that probably won't use the PostOffice.
+      PostOffices sends the Animator all messages (asyncrhonously??) BEFORE 
+      sending them to proper destination.  Animator decides whether it wants 
+      to do anything withit.
+    </TD>
+  </TR>
+    
+
+  <TR>
+    <TD VALIGN=TOP ALIGN=CENTER>
+      <A NAME="15">15</A>
+    </TD>
+    <TD>
+      FileSystem sending and receiving messages including
+      <UL>
+        <LI> receiving<BR>
+             OpenFile, CloseFile, OpenDir, FindNext, FindFirst, Read,
+             Write, Delete, GetFileAttribute, SetFileAttribute, GetFileLock??,
+             ReleaseFileLock 
+        <LI> sending<BR>
+             completion or error messages indicating result of the above<BR>
+             BlockProcess( MemoryManager, PID ) - block process request I/O
+      </UL>
+    </TD>
+  </TR>
+    
+
+  <TR>
+    <TD VALIGN=TOP ALIGN=CENTER>
+      <A NAME="16">16</A>
+    </TD>
+    <TD>
+      IPCManager sending and receiving messages including
+      <UL>
+        <LI> receiving<BR>
+             Open(Sem|Shm), Create(Sem|Shm), Close(Sem|Shm), Read|WriteShm,
+             Wait, Signal, GetShmSize..
+        <LI> sending<BR>
+             return results for the above<BR>
+             BlockProcess( MemoryManager, PID ) - block process P(0) 
+      </UL>
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP ALIGN=CENTER>
+      <A NAME="17">17</A>
+    </TD>
+    <TD>
+      IPCManager sending and receiving messages including
+      <UL>
+        <LI> receiving<BR>
+             Open(Sem|Shm), Create(Sem|Shm), Close(Sem|Shm), Read|WriteShm,
+             Wait, Signal, GetShmSize..
+        <LI> sending<BR>
+             return results for the above<BR>
+             BlockProcess( MemoryManager, PID ) - block process P(0) 
+      </UL>
+    </TD>
+  </TR>
+</TABLE>
+</BODY>
+</HTML>

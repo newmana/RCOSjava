@@ -1,0 +1,302 @@
+<HTML>
+<HEAD>
+  <TITLE>
+kernel.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+kernel.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Kernel - The RCOS message switching centre.                  *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Supply a single point which receives and dispatches messages *
+//           and runs applications when it has nothing else to do..       *
+//  HISTORY:                                                              *
+//   31-MAR-93  First (MSC/C++ 7.00) version                              *
+//   04-APR-93  Port concept with pointers to function members introduced *
+//   20-APR-94  Memory leak in Run and Destructor plugged (10 byte MSG)   *
+//   21-MAR-94  Quantum made a constructor parameter (passed to Exec)     *
+//*************************************************************************
+
+#include "kernel.hh"
+#include "exec.hh"
+
+
+//////////////////////////////////////////////////////////////////////////
+// Constructor for Port class must set its ID and register with
+// the Kernel..
+//
+port::port (UINT16 id, UINT16 cls, Knl *pK)
+{
+  uID = id;
+  pTx = pK;
+  MSG Msg(uID, KM_Register, cls, (void*)(this));
+  pTx->SendMsg(ID_Kernel, &Msg);
+}
+
+///////////////////////
+// Port routine to simplify sending error messages to its manager.
+// <nErr> is a device specific code (positive) which can be used by
+// "support" to trace reason for failure.  <bFatal> is a flag for
+// degree - set if Fatal.
+//
+void port::DevError (INT16 nErr, BOOL bFatal)
+{
+  MSG Msg(uID, KM_DevError, ((bFatal) ? (0x8000 | nErr) : nErr));
+  pTx->SendMsg(ID_Kernel, &Msg);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Since the class exports its <run> member, all of Kernel is considered
+// critical and must be protected in the time honored way.  The Executive
+// is then created with the specified parameters - currently only the
+// process quantum can be changed.
+//
+Knl::Knl (UINT16 nQuant)
+{
+  inCrit = 0;
+  pTask = new Exec(this, nQuant);
+}
+
+////////////
+// Close down the operating system - free up any memory occupied by
+// structures in the linked lists that the list class won't be able
+// to release, and close down the Exec Instance.
+//
+Knl::~Knl (void)
+{
+  PQMSG pM;
+  while (pM = (PQMSG)Msg.DblGetHead()) {
+    if (pM->pMsg->pBody)
+      DELETE_ARRAY pM->pMsg->pBody;
+    if (pM->pMsg)
+      delete pM->pMsg;
+    Msg.DblDelete();
+  }
+  delete pTask;
+}
+
+//////////////////
+// Scan the list of ports known to us for one matching the passed ID
+// RETURNS: pointer to structure, or NULL if not in list
+//
+PDEVLST Knl::GetPort (UINT16 uPortID)
+{
+  PDEVLST pD = (PDEVLST)Dev.DblGetHead();
+
+  while (pD)
+    if (pD->uID == uPortID)
+      break;
+    else
+      pD = (PDEVLST)Dev.DblGetNext();
+  return pD;
+}
+
+/////////////////////
+// Dispatch the message at the head of the queue: if it's a KERNEL service
+// request, dispatch direct; if it's for a device which does not exist,
+// disgard it; if the destination is legal and its status is "Ready", invoke
+// the port's receive member. If the port is Inhibited or Busy, call our own
+// "Post" member, effectively putting the message to the back of the queue.
+// If the destination is a process which is sleeping on this message, place
+// the message in the process PCB and remove the block on the process.
+// If there are no messages, see if we have a ready process and execute its
+// next p-code. Failing all the above, just exit .. something will happen
+// eventually.
+//
+// Late breaking thought: on the above logic, if we have a message for a port
+// which is continually busy, <Run> will spend ALL its time re-posting the
+// message and no p-codes will ever get executed! So, in this event we must
+// call the dispatcher as well as sending the message to the back of the Q.
+//                                                       arcy .. 20-APR-94
+//
+// RETURNS: TRUE  .. Single-step procedure (if active) can continue
+//          FALSE .. A p-code has been executed; deactivte s-step.
+//
+BOOL Knl::Run (void)
+{
+  BOOL bStep = TRUE;
+
+  if (inCrit == 0) {
+    --inCrit;
+    PQMSG pM = (PQMSG)Msg.DblGetHead();
+    if (pM == NULL)
+      bStep = pTask->Dispatch();
+    else {
+      if (pM->wDest == ID_Kernel)
+        Service(pM->pMsg);
+      else {
+        PDEVLST pD = GetPort(pM->wDest);
+        if (pD) {
+          if (pD->uStatus == STAT_Ready)
+            pD->pP->RxPort(pM->pMsg);
+          else {
+            PostMsg(pD->uID, pM->pMsg);
+            bStep = pTask->Dispatch();
+          }
+        }
+      }
+      pM = (PQMSG)Msg.DblGetHead();
+      if (pM->pMsg->pBody)
+	DELETE_ARRAY pM->pMsg->pBody;
+      if (pM->pMsg)
+        delete pM->pMsg;
+      Msg.DblDelete();
+    }
+    ++inCrit;
+  }
+  return bStep;
+}
+
+////////////////
+// This function acts like a direct call to the destination device,
+// effectively allowing any device to make a synchronous call to
+// another driver.  If the destination don't exist, nothing happens.
+//
+void Knl::SendMsg (UINT16 dest, PMSG pMsg)
+{
+  if (dest == ID_Kernel)
+    Service(pMsg);
+  else {
+    PDEVLST pD = GetPort(dest);
+    if (pD) {
+      pMsg->wMsgType |= MM_Sync;
+      pD->pP->RxPort(pMsg);
+    }
+  }
+}
+
+///////////////
+// This function effects an asynchronous call to the destination device or
+// process.  If the destination is a process, we ask Exec to attach it to
+// the message input queue for the process (causing it to become un-blocked
+// if it had previously blocked on a PostMsg).  All other messages are added
+// to our message FIFO queue.  Some checking for destination validity must
+// be done somewhere, but not here - we can leave that until this message
+// reaches the head and is about to be dispatched.  Finally, if the sender
+// is a process, we get Exec to block the process until a reply for this
+// message returns.
+//
+void Knl::PostMsg (UINT16 uDest, PMSG pMsg)
+{
+  if (uDest < MAX_PROC)
+    pTask->PostReply(uDest, pMsg);
+  else {
+    QMSG temp;
+    temp.wDest = uDest;
+    temp.pMsg = new MSG(*pMsg);
+    Msg.DblAppend((void*)&temp, sizeof(QMSG));
+    if (pMsg->wSender < MAX_PROC)
+      pTask->Block();
+  }
+}
+
+//////////////////
+// allows a port to "peek" at it's next message without actually
+// retrieving it from the queue..
+//
+void Knl::PeekMsg (UINT16 uDest, PMSG *p)
+{
+  PQMSG pM = (PQMSG)Msg.DblGetHead();
+
+  while (pM && (pM->wDest != uDest))
+    pM = (PQMSG)Msg.DblGetNext();
+  *p = (pM) ? pM->pMsg : NULL;
+}
+
+///////////////////
+// Process a Kernel services message -
+//   Adds new ports to the list provide that the ID is unique
+//   Allows a port to change it's status
+//   Displays Device errors/failures on console (unless it's failed!)
+//
+void Knl::Service (PMSG pM)
+{
+  PDEVLST pD = GetPort(pM->wSender);
+  static char *szEmsg = "\33[s\33[x;yH\33[K  Device 0x%X %s: 0x%x\33[u\a";
+
+  switch (pM->wMsgType) {
+    case KM_SetStatus:
+      if (pD)
+        pD->uStatus = pM->wParam;
+      break;
+    case KM_DevError:
+      if (pD) {
+        if ((INT16)pM->wParam < 0)
+          pD->uStatus = STAT_Inhibit;
+        if (pD->uID != ID_TTY0) {
+          char *pstr = (char*)malloc(strlen(szEmsg)+16);
+          if (pstr) {
+            sprintf(pstr, szEmsg, pD->uID,
+             (((INT16)pM->wParam < 0) ? "FAILED":"ERROR"), pM->wParam&0x7fff);
+            MSG Msg(ID_Kernel, KM_WriteBlk, strlen(pstr), (void*)pstr);
+            *(pstr + 5) = *(pstr + 7) = '\0';
+            SendMsg(ID_TTY0, &Msg);
+          }
+        }
+      }
+      break;
+    case KM_Register:
+      if (pD == NULL) {
+        pD = new DEVLST;
+        if (pD) {
+          pD->uAssign = NO_PROC;
+          pD->uID = pM->wSender;
+          pD->uClass = pM->wParam;
+          pD->uStatus = STAT_Ready;
+          pD->pP = (port*)(pM->pBody);
+          Dev.DblAppend((void*)pD, sizeof(DEVLST));
+          delete pD;
+        }
+      }
+      break;
+    case KM_CheckOut:
+      if (pD)
+        Dev.DblDelete();
+      break;
+    case KM_Open: {
+        PDEVLST pDC = (PDEVLST)Dev.DblGetHead();
+        while (pDC) {
+          if ((pDC->uClass == pM->wParam) && (pDC->uAssign == NO_PROC)) {
+            SendMsg(pDC->uID, pM);
+            pDC->uAssign = pM->wSender;
+            pM->wParam = pDC->uID;
+            return;
+          }
+          pDC = (PDEVLST)Dev.DblGetNext();
+        }
+        pM->wParam = ID_NULL;
+      }
+      break;
+    case KM_Close: {
+        PDEVLST pDC = (PDEVLST)Dev.DblGetHead();
+        while (pDC) {
+          if (pDC->uID == pM->wParam) {
+            SendMsg(pDC->uID, pM);
+            pDC->uAssign = NO_PROC;
+            pDC->uStatus = STAT_Ready;
+            pM->wParam = ID_NULL;
+            return;
+          }
+          pDC = (PDEVLST)Dev.DblGetNext();
+        }
+        pM->wParam = 0;
+      }
+      break;
+    case ANI_GET_QUS:
+      pTask->GetQcom(pM->wParam, (PMSG_ANIQ)pM->pBody);
+      break;
+    case ANI_GET_PCB:
+      pTask->GetPcom((PMSG_ANIP)pM->pBody);
+      break;
+  }
+}
+
+
+////////////////////////////////// EOF /////////////////////////////////////
+</PRE>
+</BODY>
+</HTML>

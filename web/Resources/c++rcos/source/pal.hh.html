@@ -1,0 +1,78 @@
+<HTML>
+<HEAD>
+  <TITLE>
+pal.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+pal.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Pal - Program Abstraction Layer for the RCOS system          *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Definition of a class to provide platform dependant services *
+//           for timer interrupts, raw keyboard buffer access and low     *
+//           level mouse events.                                          *
+//  HISTORY:                                                              *
+//   29-OCT-93  Created to make "Timer" more platform independant         *
+//*************************************************************************
+
+#ifndef _RCOS_PAL
+
+  #include <stdlib.h>
+  #include "rcos.hh"
+
+  #if defined(BC20) || defined(UNIX)
+    #define FAR far
+  #else
+    #define FAR __far
+  #endif
+
+  //////////////////////////////////////
+  // Protos for low level keyboard and timer services
+  //
+  BOOL   PalKeyReady (void);         // Return state of input keyboard buffer
+  UINT16 PalGetKey (void);           // get next value from keyboard buffer
+  UINT32 PalGetVec (UINT16);         // get (flat) vector to service routine
+  void   PalSetVec (UINT16, UINT32); // replace vector of service interrupt
+  UINT32 PalGetTime (void);          // get milliseconds since midnight
+  void   PalInitClk (void);          // Setup for 1mS clock resolution
+  void   PalResetClk (void);         // Restore original resolution
+
+
+  ////////////////////
+  // define constants for DOS based mouse functions..
+  //
+  #define MM_Driver     0x33            // Standard MS-DOS mouse interrupt
+  #define MM_Reset      0x00            // Reset mouse driver
+  #define MM_Show       0x01            // show mouse pointer
+  #define MM_Hide       0x02            // Hide mouse cursor
+  #define MM_SetH       0x07            // Set horizontal movement limits
+  #define MM_SetV       0x08            // Set vertical movement limits
+  #define MM_SetISR     0x0C            // Set user defined service routine
+  #define MM_Smart      0x10            // Conditional cursor hide
+  #define MM_MouseMove  0x01            // Mask for movement notification
+  #define MM_LBdown     0x02            // Mask for left button pressed
+  #define MM_LBup       0x04            // Mask for left button released
+
+  /////////////
+  // Protos for low level mouse services.. Notice the "Hide Pointer" routine
+  // takes optional args.  If they default, just turn the begger off.  If
+  // a rect region is given, use "smart" blanking; ie pointer turns off
+  // only if it is in, or moves into the specified region.
+  //
+  BOOL PalMouseInit (void);             // Prepare mouse for use (if installed)
+  void PalMouseReset (void);            // restore anything done by Init
+  BOOL PalMouseEvent (INT16*, INT16*);  // get location of last click (if any)
+  void PalMousePointerOn (void);        // display pointer
+  void PalMousePointerOff (INT16 = -1, INT16 = -1, INT16 = -1, INT16 = -1);
+
+  #define _RCOS_PAL
+#endif
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,855 @@
+<HTML>
+<HEAD>
+  <TITLE>
+cpmbdos.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+cpmbdos.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : CpmBdos - The Basic Disk Operating System object members     *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: This is the actual CP/M-like BDOS (Basic Disk Operating      *
+//           System), providing file operations and low level block       *
+//           access. Normally, char at a time buffering would be provided *
+//           by the compiler - but RCOS builds this into the Exec/PCI.    *
+//  HISTORY:                                                              *
+//    13-AUG-94 First version                                             *
+//*************************************************************************
+
+#include "cpmfs.hh"
+            
+            
+//////////////////////////////////////////////////////////////////////////
+//         The BDOS .. Instantiate one of these per disk drive.
+//------------------------------------------------------------------------
+// Each file consists of 0..31 "extents" where an extent is a physical
+// entry in the directory.  Each extent can contain either 8 or 16
+// disk allocation blocks, depending on the total blocks on the media.
+// This is because 16 bytes of each dir entry are reserved for allocation
+// block numbers.  IBM 3740 floppies have 243 blocks total, hence a block
+// ID fits in one byte.  Bigger disks need two bytes per block number.
+//   (Aside: MS-DOS compromised, using 12 bits for a group number)
+// A block is a power of two multiple of 1024 bytes - this is the smallest
+// piece of disk that can be allocated.  When (say) 16 blocks have been
+// allocated, a new "extent" is opened, duplicating the file name in the
+// first free directory slot.  Blocks are allocated on a first free basis
+// from the "Allocation Vector" for the disk.
+//
+// CP/M supported only block at a time transfers (it was up to compilers to
+// implement byte at a time access).  Entry <nRecCnt> contains the "current"
+// 128 byte record of the last allocation block that is in use. If you write
+// beyond the last 128 byte record of the last block, a new block is 
+// allocated, opening extents as required.  Finding out where you are in
+// the current rec of the last block required an EOF mark (usually 0x1a).
+// When introduced, MS-DOS kept an actual byte count, making the EOF mark
+// redundant.  But, to this day, some old ported proggies still write 0x1a
+// EOF marks in text files!
+//
+// For an IBM 3740 8" diskette with 241 available 1K blocks, each extent
+// can reference 16K and the maximum 32 extents for one file references
+// more than the disk can hold.  Larger disks required larger block sizes.
+//
+//////////////////////////////////////////////////////////////////////////
+// Class constructor sets params for the unit, allocates space for the
+// checksum vector (if we have any checked Dir entries), creates the
+// allocation vector (which will be initialised when the disk is "logged")
+// If the sector skew factor is not zero, a translate table is built.
+//
+CpmBdos::CpmBdos (DPB& dpb, DPARAM& mac, UINT16 nChanId) :
+  pDpb(&dpb), nFsc(mac.nFsc), nLsc(mac.nLsc), nSkf(mac.nSkf),
+  nBls(mac.nBls), nDks(mac.nDks), nDir(mac.nDir), nCks(mac.nCks),
+  nOfs(mac.nOfs), nChan(nChanId)
+{
+  nAlb = (nDks > 255) ? 8 : 16;
+  if (0 == nCks)
+    pCsv = NULL;
+  else {
+    pCsv = new BYTE[nCks];
+    if (NULL == pCsv)
+      return;
+    memset(pCsv, 0xff, nCks);
+  }
+  if (0 == nSkf)
+    pXlt = NULL;
+  else {
+    int nSecs = nLsc + (nFsc ? 0 : 1);
+    if (NULL == (pXlt = new BYTE[nSecs]))
+      return;
+    int nSec = nFsc;
+    for (int i = 0; i < nSecs; i++) {
+      *(pXlt + i) = nSec;
+      nSec += nSkf;
+      if (nSec > nLsc) {
+        nSec -= nLsc;
+        if (nSec == nFsc)
+          ++nSec;
+      }
+    }
+  }
+  pAlv = new BYTE[(nDks + 7) / 8];
+}
+
+////////////////
+// shut down
+//
+CpmBdos::~CpmBdos (void)
+{
+  if (pAlv)
+    DELETE_ARRAY pAlv;
+  if (pXlt)
+    DELETE_ARRAY pXlt;
+  if (pCsv)
+    DELETE_ARRAY pCsv;
+}
+
+/////////////////////
+// The public interface used to simulate interrupt service vectoring.
+// The disk controller channel device calls her when a disk operation
+// has finished, supplying the packet of info (a XfReq object) that
+// encapsulates the transfer. The member who launched the packet knew
+// where to go next and placed an appropriate constant in the packet,
+// so at the mere expense of a few (!) nested stack frames..
+//
+void CpmBdos::NxtFunc (XfReq *pX)
+{
+  switch (pX->ivec) {
+    case LOG1   : LogDisk1(pX); break;
+    case CLOSE1 : Close1(pX);   break;
+    case CLOSE2 : Close2(pX);   break;
+    case OPEN1  : Open1(pX);    break;
+    case CREAT1 : Creat1(pX);   break;
+    case CREAT2 : Creat2(pX);   break;
+    case CREAT3 : Creat3(pX);   break;
+    case READ0  : Read(pX, 0);  break;
+    case READ1  : Read1(pX);    break;
+    case WRITE1 : Write1(pX);   break;
+    case REMOV1 : Remov1(pX);   break;
+    case REMOV2 : Remov2(pX);   break;
+    case WRITE2 : break;
+ }
+}
+
+/////////////////////////////////////////////////////////////////////////
+//                      These Members are PRIVATE
+//----------------------------------------------------------------------
+// The BDOS re-enterent mechanism runs by re-posting messages to itself.
+// Since the Kernel::Run message dispatcher destroys messages after
+// they have been dispatched, we must copy the message to be re-posted
+// otherwise we end up multiply free-ing mamory (which is very bad).
+//
+void CpmBdos::ReGenerate (XfReq* pOld, UINT16 nTag)
+{
+  XfReq *pNew = new XfReq;
+  *pNew = *pOld;
+  message msg(nId, 0, nTag, (void*)pNew);
+  pTx->PostMsg(nChan, &msg);
+}
+
+//////////////
+// Set/reset the passed bit of the disk allocation vector
+//
+void CpmBdos::AllocBlk (UINT16 nBit, BYTE nState)
+{
+  UINT16 nByte = nBit / 8;
+  BYTE   nMask = 0x80 >> (nBit % 8);
+
+  if (nState)
+    *(pAlv + nByte) |= nMask;
+  else
+    *(pAlv + nByte) &= ~nMask;
+}
+
+//////////
+// Scan the Disk Alocation vector for the first free block
+// number (ie first zero bit, working left to right)
+// RETURNS: block number, or zero if disk full!
+//
+UINT16 CpmBdos::GetFreeBlk (void)
+{
+  UINT16 nByte = 0;
+  BYTE nMask = 0x80;
+  
+  while (nByte < nBls) {
+    for (int i = 0; i < 8; i++)
+      if (0x00 == (*(pAlv + nByte) & nMask >> i))
+        return (UINT16)((nByte * 8) + i);
+    ++nByte;
+  }
+  return 0x00;
+}
+
+///////////
+// Set sector for transfer -
+// using sector skew translate table if not null
+//
+UINT16 CpmBdos::SecXlt (UINT16 nLogSec)
+{
+  return (pXlt) ? *(pXlt + nLogSec - nFsc) : (nLogSec);
+}
+
+/////////////
+// Calculate track and sector numbers of passed record within block..
+//
+void CpmBdos::BlkDecode (UINT16 nBlk, UINT16 nRec,
+                         UINT16 *pnTrk, UINT16 *pnSec)
+{
+  if (nBlk < nDks) {
+    UINT16 nSecs = (nBlk * nBls / pDpb->nSecSize) + nRec;
+    *pnTrk = nOfs + (UINT16)(nSecs / pDpb->nSecs);
+    *pnSec = SecXlt(nFsc + (UINT16)(nSecs % pDpb->nSecs));
+  }
+}
+
+/////////////
+// A read/write has failed. Decrement the retry counter and if not zero,
+// post to the channel controller to try it again. If the error persists,
+// see your doctor (ghod, i hope this never gets called to the end).
+//
+void CpmBdos::DoRetry (XfReq *pX)
+{
+  if (--(pX->nRetry)) {
+    message msg(nId, 16, 16, (void*)pX);
+    pTx->PostMsg(nChan, &msg);
+  }
+  else {
+    if (pX->pNxt) {
+      XfReq *pInner = pX->pNxt;
+      pInner->bRes = FALSE;
+      delete pX;
+      NxtFunc(pInner);
+      return;
+    }
+    if (LOG1 == pX->ivec)
+      delete pX->pFcb;
+    else {
+      message msg(nId, FS_Ok);
+      pTx->PostMsg(pX->uProc, &msg);
+    }
+  }
+}
+
+/////////////////
+// Several (lots) of members need to prepare for a full directory scan,
+// so this little 'fella sets up the passed FCB for the common stuff..
+//
+void CpmBdos::DirScanPrep (FCB *pFcb, UINT16 *pnTrk, UINT16 *pnSec)
+{
+  pFcb->de.nRes1 = 0;
+  pFcb->de.nRes2 = 0;
+  pFcb->de.nExtent = 0;
+  pFcb->nCurRec = nDir / 4;
+  BlkDecode(0, 0, pnTrk, pnSec);
+}
+
+///////////////////
+// Begin the process of Logging the Disk by creating an XfReq for the
+// first record of the directory and queueing it for execution. Function
+// <LogDisk1> will receive the service "interrupt" and issue more
+// requests until logging is complete.  Here I make an improvement on
+// CP/M - A blank disk is all 0xE5's - valid Directory entries have
+// a first byte of 0..15 and the erase process just rewrote this with
+// 0xE5 (note that the name remained in tact - unlike MS-DOS).  We want
+// to scan all valid entries to build the allocation vector.  Since
+// entries are allocated by using the first available, sequentially,
+// if we use 0xF7 to erase a file, the first time we strike an 0xE5
+// flag, we know that no more valid files exist after this point -
+// resulting in a considerably shortened log process.
+// 
+void CpmBdos::LogDisk (void)
+{
+  XfReq *pX;
+  
+  if (pCsv)
+    memset(pCsv, 0xff, nCks);
+  memset(pAlv, 0, (nDks + 7) / 8);
+  UINT16 nDirBls = ((nDir * 32) + nBls - 1) / nBls;
+  UINT16 nBlkVal = 0;
+  while (nDirBls--)
+    AllocBlk(nBlkVal++);
+  pX = new XfReq;
+  if (pX) {
+    pX->pFnCb = this;
+    pX->ivec  = LOG1;
+    pX->cmnd  = DD_READ;
+    pX->pDma  = (char*)DirBuf;
+    pX->pFcb  = new FCB;
+    if (NULL == pX->pFcb)
+      delete pX;
+    else {
+      memset((char*)pX->pFcb, 0, sizeof(FCB));
+      pX->pFcb->nCurRec = nDir / 4;
+      DirScanPrep(pX->pFcb, &pX->nTrk, &pX->nSec);
+      message msg(nId, 0, 0, (void*)pX);
+      pTx->PostMsg(nChan, &msg);
+    }
+  }
+}
+
+///////////
+// This is the directory scan log-in loop. We arrive here each time
+// another DIR block has been read to scan for current files, setting
+// the Allocation vectors from the individual entry maps and
+// calculating the checksums for all (checked) dir entries until
+// no more files CAN be found, or all DIR blocks have been scanned.
+//
+void CpmBdos::LogDisk1 (XfReq *pX)
+{
+  if (FALSE == pX->bRes)
+    DoRetry(pX);
+  else {
+    int idx;
+    for (idx = 0; idx < 4; idx++) {
+      DIRENT *pDir = (DIRENT*)(pX->pDma + (idx * 32));
+      if (0xE5 == pDir->nUsrNmbr)
+        break;
+      if (0xF7 != pDir->nUsrNmbr)
+        for (int jdx = 0; jdx < 16; jdx++) {
+          if (0 == pDir->nAllocBlk[jdx])
+            break;
+          AllocBlk((UINT16)pDir->nAllocBlk[jdx]);
+        }
+    }
+    if ((idx < 4) || (--(pX->pFcb->nCurRec) <= 0)) {
+      delete pX->pFcb;
+      pX->pFcb = NULL;
+    }
+    else {
+      ++(pX->pFcb->de.nRes2);
+      if (pX->pFcb->de.nRes2 >= (nBls / 128)) {
+        ++(pX->pFcb->de.nRes1);
+        pX->pFcb->de.nRes2 = 0;
+      }
+      BlkDecode(pX->pFcb->de.nRes1, pX->pFcb->de.nRes2,
+              &(pX->nTrk), &(pX->nSec));
+      ReGenerate(pX, 1);
+    }
+  }
+}
+
+//////////////////
+// This is the loop point for "Open" operations.  If the read was Ok, we
+// scan the Dir record, terminating "not found" if we encounter an 0xE5
+// flag.  Valid names are matched against the required name (Wild cards
+// ARE permitted) and the actual disk dir entry copied over the user's
+// FCB on first match (the extent is also matched).
+//
+void CpmBdos::Open1 (XfReq *pX)
+{
+  if (FALSE == pX->bRes)
+    DoRetry(pX);
+  else {
+    for (int idx = 0; idx < 4; idx++) {
+      DIRENT *pDir = (DIRENT*)(pX->pDma + (idx * 32));
+      if (0xE5 == pDir->nUsrNmbr) {
+        Open2(pX, FALSE);
+        return;
+      }
+      if ((0xF7 != pDir->nUsrNmbr) && (pDir->nExtent == pX->pFcb->de.nExtent)) {
+        for (int jdx = 0; jdx < FILENAME_LEN; jdx++)
+          if ((pX->pFcb->de.fname[jdx] != pDir->fname[jdx]) &&
+              (pX->pFcb->de.fname[jdx] != '?'))
+            break;
+        if (jdx == FILENAME_LEN) {
+          pX->pFcb->de.nRes1 = idx * 32;
+          pX->pFcb->de.nRes2 = 0;
+          pX->pFcb->nCurRec = 0;
+          Open2(pX, TRUE);
+          return;
+        }
+      }
+    }
+    if (--pX->pFcb->nCurRec <= 0)
+      Open2(pX, FALSE);
+    else {
+      ++(pX->pFcb->de.nRes2);
+      if (pX->pFcb->de.nRes2 >= (nBls / 128)) {
+        ++(pX->pFcb->de.nRes1);
+        pX->pFcb->de.nRes2 = 0;
+      }
+      BlkDecode(pX->pFcb->de.nRes1, pX->pFcb->de.nRes2,
+              &(pX->nTrk), &(pX->nSec));
+      ReGenerate(pX, 2);
+      //message msg(nId, 2, 2, (void*)pX);
+      //pTx->PostMsg(nChan, &msg);
+    }
+  }
+}
+
+//////////////
+// This is the end of the "Open" process and we've either found the file
+// or we've not - so it's time to clean up and reply to the request.
+//
+// We must check for chained XfReq blocks, because we may have been
+// called to open the next extent of a file during a Read or Write, or
+// scan for the file before doing a Creat.  In such cases, control gets
+// passed via the usual <NxtFunc> member of the attached request.  If
+// there is no attached request, we message back to the original request
+// process ID via Kernel post.
+//
+void CpmBdos::Open2 (XfReq *pX, BOOL bFound)
+{
+  if (NULL == pX->pNxt) {
+    char *cp1 = (char*)&pX->pFcb->de;
+    char *cp2 = (char*)pX->pDma+pX->pFcb->de.nRes1;
+    memcpy(cp1, cp2, sizeof(DIRENT));
+    pX->pFcb->nCurRec = 0;
+    message msg(nId, (bFound ? FS_Ok : FS_NotFound));
+    pTx->PostMsg(pX->uProc, &msg);
+  }
+  else {
+    XfReq *pInner = pX->pNxt;
+    pInner->bRes = bFound;
+    switch (pInner->ivec) {
+      case CLOSE1:
+      case REMOV1:
+        pInner->nTrk = pX->nTrk;
+        pInner->nSec = pX->nSec;
+        pInner->nSid = pX->nSid;
+        pInner->pDma = pX->pDma;
+        pInner->pFcb->de.nRes1 = pX->pFcb->de.nRes1;
+        break;
+    default:
+      memcpy((char*)&pInner->pFcb->de, (char*)&pX->pFcb->de, sizeof(DIRENT));
+      pInner->pFcb->nCurRec = 0;
+    }
+    delete pX->pFcb;
+    NxtFunc(pInner);
+  }
+}
+
+///////////////
+// Arriving here, we have scanned the directory for the file and the
+// result sits in bRes: FALSE means the file does not exists, so we 
+// need to scan for the first free directory entry of the disk.
+//
+void CpmBdos::Creat1 (XfReq *pX)
+{
+  if (pX->bRes) {
+    message msg(nId, FS_Exists);
+    pTx->PostMsg(pX->uProc, &msg);
+  }
+  else {
+    DirScanPrep(pX->pFcb, &pX->nTrk, &pX->nSec);
+    pX->ivec = CREAT2;
+    pX->cmnd = DD_READ;
+    pX->pDma = (char*)DirBuf;
+    message msg(nId, 3, 3, (void*)pX);
+    pTx->PostMsg(nChan, &msg);
+  }
+}
+
+///////////////
+// At this point, the outer packet has the result of a directory
+// scan for the file we want to kill off.  If it was found, we can
+// simply set its flag char to "erased" and issue the rewrite.
+// If not found, it's only an error if we were looking for the
+// first extent - not found on subsequent extents is an Ok situation.
+//
+void CpmBdos::Remov1 (XfReq *pX)
+{
+  if (FALSE == pX->bRes) {
+    message msg(nId, pX->pFcb->de.nExtent ? FS_Ok : FS_NotFound);
+    pTx->PostMsg(pX->uProc, &msg);
+  }
+  else {
+    DIRENT *pDir = (DIRENT*)(pX->pDma + pX->pFcb->de.nRes1);
+    pDir->nUsrNmbr = 0xF7;
+    pX->ivec = REMOV2;
+    pX->cmnd = DD_WRITE;
+    message msg(nId, 4, 4, (void*)pX);
+    pTx->PostMsg(nChan, &msg);
+  }
+}
+
+/////////////
+// If the rewrite worked, we must unallocate (in our in-memory bit map)
+// all blocks associated with this file.  If the extent was full, there
+// may be another which needs to be crossed off..
+//
+void CpmBdos::Remov2 (XfReq *pX)
+{
+  if (FALSE == pX->bRes)
+    DoRetry(pX);
+  else {
+    BOOL bDone;
+    if (nAlb > 8) {
+      BYTE *pB = pX->pFcb->de.nAllocBlk;
+      for (int idx = 0; *pB && (idx < nAlb); pB++, idx++)
+        DeAllocBlk((UINT16)*pB);
+      bDone = ((idx < nAlb) && (pX->pFcb->de.nRcnt < 7)) ? TRUE : FALSE;
+    }
+    else {
+      UINT16 *pN = (UINT16*)pX->pFcb->de.nAllocBlk;
+      for (int idx = 0; *pN && (idx < nAlb); pN++, idx++)
+        DeAllocBlk(*pN);
+      bDone = ((idx < nAlb) && (pX->pFcb->de.nRcnt < 7)) ? TRUE : FALSE;
+    }
+    if (bDone) {
+      message msg(nId, FS_Ok);
+      pTx->PostMsg(pX->uProc, &msg);
+    }
+    else {
+      ++pX->pFcb->de.nExtent;
+      Remov(pX);
+    }
+  }
+}
+
+
+///////////////
+// we arrive here when the nested dir scan has located the dir block
+// (which was cunningly transferred to the inner XfReq sec/trk vars)
+// so from here we issue the re-write..
+//
+void CpmBdos::Close1 (XfReq *pX)
+{
+  pX->ivec = CLOSE2;
+  pX->cmnd = DD_WRITE;
+  char *cp = (char*)pX->pDma;
+  memcpy(cp+pX->pFcb->de.nRes1, (char*)&pX->pFcb->de, sizeof(DIRENT));
+  message msg(nId, 5, 5, (void*)pX);
+  pTx->PostMsg(nChan, &msg);
+}
+
+///////////////
+// ..and we arrive here after the write attempt has taken place.
+//
+void CpmBdos::Close2 (XfReq *pX)
+{
+  if (FALSE == pX->bRes)
+    DoRetry(pX);
+  else {
+    message msg(nId, FS_Ok);
+    pTx->PostMsg(pX->uProc, &msg);
+  }
+}
+  
+/////////////
+// This is the loop point for the scan for a free directory entry as
+// flagged by an 0xE5 (never used) or 0xF7 (erased) flag.  If one is
+// found, it is allocated as a zero length file.  <nRes1> of the FCB
+// is set to the logical entry number for convenience and the block
+// containing the entry rewritten.
+//
+// CAUTION: There should be a lock placed on the block someplace to
+// prevent the classic "lost update" scenario being enacted yet again.
+// this is left as an exercise for the user (ho, ho, ho).
+//
+void CpmBdos::Creat2 (XfReq *pX)
+{
+  if (FALSE == pX->bRes)
+    DoRetry(pX);
+  else {
+    int idx;
+    for (idx = 0; idx < 4; idx++) {
+      DIRENT *pDir = (DIRENT*)(pX->pDma + (idx * 32));
+      if ((0xF7 == pDir->nUsrNmbr) || (0xE5 == pDir->nUsrNmbr)) {
+        memset((char*)pDir, 0, sizeof(DIRENT));
+        memcpy(pDir->fname, pX->pFcb->de.fname, FILENAME_LEN);
+        pX->ivec = CREAT3;
+        pX->cmnd = DD_WRITE;
+        ReGenerate(pX, 6);
+        //message msg(nId, 6, 6, (void*)pX);
+        //pTx->PostMsg(nChan, &msg);
+        return;
+      }
+    }
+    if (--(pX->pFcb->de.nRcnt) <= 0) {
+      message msg(nId, FS_DiskFull);
+      pTx->PostMsg(pX->uProc, &msg);
+    }
+    else {
+      ++(pX->pFcb->de.nRes2);
+      if (pX->pFcb->de.nRes2 >= (nBls / 128)) {
+        ++(pX->pFcb->de.nRes1);
+        pX->pFcb->de.nRes2 = 0;
+      }
+      BlkDecode(pX->pFcb->de.nRes1, pX->pFcb->de.nRes2,
+              &(pX->nTrk), &(pX->nSec));
+      ReGenerate(pX, 7);
+      //message msg(nId, 7, 7, (void*)pX);
+      //pTx->PostMsg(nChan, &msg);
+    }
+  }
+}
+
+////////////////
+// This is a common usage point for all operations that entail a rewrite
+// to the Directory. We check the return code, vectoring to the retry
+// code if needs be, otherwise check for attached transfers and act..
+//
+void CpmBdos::Creat3 (XfReq *pX)
+{
+  if (FALSE == pX->bRes)
+    DoRetry(pX);
+  else {
+    if (NULL == pX->pNxt) {
+      pX->pFcb->nCurRec = 0;
+      message msg(nId, FS_Ok);
+      pTx->PostMsg(pX->uProc, &msg);
+    }
+    else {
+      XfReq *pInner = pX->pNxt;
+      memcpy((char*)&pInner->pFcb->de, (char*)&pX->pFcb->de, sizeof(DIRENT));
+      pInner->pFcb->nCurRec = 0;
+      delete pX;
+      NxtFunc(pInner);
+    }
+  }
+}
+
+//////////////////
+// arrive here after an attempted record read - retry on error, or
+// perform house keeping of FCB and tidy up.
+//
+void CpmBdos::Read1 (XfReq *pX)
+{
+  if (FALSE == pX->bRes)
+    DoRetry(pX);
+  else {
+    ++pX->pFcb->nCurRec;
+    message msg(nId, FS_Ok);
+    pTx->PostMsg(pX->uProc, &msg);
+  }    
+}
+
+//////////////////
+// Arrive here after an attempted record write - retry on error, or
+// perform house keeping of FCB and reply to the caller. Scenarios:
+//
+// 1.  A previously written record has been re-written:
+//     No extra action.
+// 2.  The record was after the last used and:
+//     - the current block is the cardinal last for the extent, or
+//     - is the last allocation block of the extent:
+//       Increment <nRcnt> (range is 0..nRpb-1; 0..7 for IBM 3740).
+//
+// This will set <nRcnt> to nRpb-1 when the last record of the last
+// block of the extent is used - indicating to <Write> that a new
+// extent must be opened before further writes can take place.
+//
+// When a new allocation block is added, <nRcnt> is zeroed.
+//
+void CpmBdos::Write1 (XfReq *pX)
+{
+  if (FALSE == pX->bRes)
+    DoRetry(pX);
+  else {
+    ++pX->pFcb->nCurRec;
+    BYTE nRpb = nBls / 128;
+    BYTE nAbs = pX->pFcb->nCurRec / nRpb;
+    BYTE nRec = pX->pFcb->nCurRec % nRpb;
+    if ((pX->pFcb->de.nRcnt < nRec) && 
+       ((nAbs == nAlb-1) || (0 == pX->pFcb->de.nAllocBlk[nAbs+1])))
+       pX->pFcb->de.nRcnt = nRec;
+    message msg(nId, FS_Ok);
+    pTx->PostMsg(pX->uProc, &msg);
+  }
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+//                      These Members are PROTECTED
+//----------------------------------------------------------------------
+// Scan the directory for the first file matching the name in the passed
+// FCB and extent matching the FCB extent number.  We start by requesting
+// the first record of block zero, setting <nRes1> as the block counter
+// <nRes2> as record of block counter and <nRcnt> as the total records
+// for the search. These will be replaced by the Dir entry detail, if found.
+// 
+void CpmBdos::Open (XfReq *pX)
+{
+  DirScanPrep(pX->pFcb, &pX->nTrk, &pX->nSec);
+  pX->ivec  = OPEN1;
+  pX->cmnd  = DD_READ;
+  pX->pDma = (char*)DirBuf;
+  message msg(nId, 8, 8, (void*)pX);
+  pTx->PostMsg(nChan, &msg);
+}
+
+/////////////
+// This activity must fail if the file exists - so we begin by nesting
+// this transfer request inside one that will try to open a file of the
+// same name.
+//
+void CpmBdos::Creat (XfReq *pX)
+{
+  XfReq *pNew = new XfReq(nId);
+
+  if (pNew && (pNew->pFcb = new FCB)) {
+    memcpy((char*)pNew->pFcb, (char*)pX->pFcb, sizeof(FCB));
+    pX->ivec = CREAT1;
+    pNew->pNxt = pX;
+    pNew->ivec = OPEN1;
+    pNew->cmnd = DD_READ;
+    pNew->pDma = (char*)DirBuf;
+    pNew->pFnCb = this;
+    DirScanPrep(pNew->pFcb, &pNew->nTrk, &pNew->nSec);
+    message msg(nId, 9, 9, (void*)pNew);
+    pTx->PostMsg(nChan, &msg);
+  }
+}
+
+////////////////
+// Read a record sequentially (at this time random access is provisioned
+// for, but not implemented). There are 3 scenarios:
+//
+// 1.  The record is within the scope of the current extent - we simply
+//     calculate its disk location and ask for a transfer.
+// 2.  The record is in the next extent (and there is one).  Open the next
+//     extent by upping the FCB extent number and callin Open1, then
+//     return here to continue as for (1) above.
+// 3.  We are at EOF - either in this extent (easy to test), or we need
+//     another extent and there isn't one.
+//
+void CpmBdos::Read (XfReq *pX, UINT16 nType)
+{
+  pX->ivec  = READ1;
+  pX->cmnd  = DD_READ;
+  BYTE nRpb = nBls / 128;
+  BYTE nAbs = pX->pFcb->nCurRec / nRpb;
+  BYTE nRec = pX->pFcb->nCurRec % nRpb;
+  if ((nRec > pX->pFcb->de.nRcnt) &&
+      (0 == pX->pFcb->de.nAllocBlk[nAbs+1])) {
+    message msg(pX->uProc, FS_EOF);
+    pTx->PostMsg(nChan, &msg);
+    return;
+  }
+  if (pX->pFcb->de.nAllocBlk[nAbs]) {
+    BlkDecode(pX->pFcb->de.nAllocBlk[nAbs], nRec, &pX->nTrk, &pX->nSec);
+    message msg(nId, 10, 10, (void*)pX);
+    pTx->PostMsg(nChan, &msg);
+  }
+  else {
+    XfReq *pNew = new XfReq;
+    memcpy((char*)pNew->pFcb, (char*)pX->pFcb, sizeof(FCB));
+    pX->ivec = READ0;
+    pNew->pNxt = pX;
+    pNew->ivec = OPEN1;
+    pNew->cmnd = DD_READ;
+    pNew->pFcb->de.nExtent++;
+    pNew->pDma = (char*)DirBuf;
+    DirScanPrep(pNew->pFcb, &pNew->nTrk, &pNew->nSec);
+    message msg(nId, 11, 11, (void*)pNew);
+    pTx->PostMsg(nChan, &msg);
+  }
+}
+
+////////////////
+// Write a (sequential) record (random access is provisioned for, but not
+// implemented). This is VERY similar to read, but different enough to
+// warrant its own entry point. There are 3 scenarios:
+//
+// 1.  The record is within the scope of the current extent:
+//     Simply calculate its disk location and ask for a transfer.
+//     (we can't do any FCB housekeeping until we know the write worked).
+//
+// 2.  The record is beyond the current allocation block and the next
+//     allocation block is zero - get a free block (if possible) and
+//     use its first record.
+//
+// 3.  The record is beyond the last block of this extent. Here there are
+//     two sub-scenarios:
+//       3a.  There is a next extent - open it and proceed as for (1).
+//       3b.  There is no next extent - create one and proceed as for (3).
+//     Note that (3b) may fail if there are no directory entries available,
+//     even though there may still be disk blocks available.
+//
+void CpmBdos::Write (XfReq *pX, UINT16 nType)
+{
+  pX->ivec  = WRITE1;
+  pX->cmnd  = DD_WRITE;
+  BYTE nRpb = nBls / 128;
+  BYTE nAbs = pX->pFcb->nCurRec / nRpb;
+  BYTE nRec = pX->pFcb->nCurRec % nRpb;
+  //
+  // Scenario 1
+  //
+  if (pX->pFcb->de.nAllocBlk[nAbs]) {
+    BlkDecode(pX->pFcb->de.nAllocBlk[nAbs], nRec, &pX->nTrk, &pX->nSec);
+    message msg(nId, 12, 12, (void*)pX);
+    pTx->PostMsg(nChan, &msg);
+    return;
+  }
+  //
+  // Scenario 2
+  //
+  if (0 == pX->pFcb->de.nAllocBlk[nAbs]) {
+    pX->pFcb->de.nAllocBlk[nAbs] = GetFreeBlk();
+    if (0 == pX->pFcb->de.nAllocBlk[nAbs]) {
+      message msg(pX->uProc, FS_DiskFull);
+      pTx->PostMsg(nChan, &msg);
+      return;
+    }
+    else {
+      AllocBlk(pX->pFcb->de.nAllocBlk[nAbs]);
+      pX->pFcb->de.nRcnt = 0;
+      BlkDecode(pX->pFcb->de.nAllocBlk[nAbs], nRec, &pX->nTrk, &pX->nSec);
+      message msg(nId, 13, 13, (void*)pX);
+      pTx->PostMsg(nChan, &msg);
+      return;
+    }
+  }
+  //
+  // Scenario 3 (note temporary cop-out)
+  // 
+  if (TRUE) {
+    message msg(pX->uProc, FS_DiskFull);
+    pTx->PostMsg(nChan, &msg);
+    return;
+  }
+}
+
+//////////////
+// A file Close operation needs to locate the Dir block containing the
+// current extent and update the record (if it's chaged)..
+//
+void CpmBdos::Close (XfReq *pX)
+{
+  XfReq *pNew = new XfReq;
+
+  if (pNew && (pNew->pFcb = new FCB)) {
+    memcpy((char*)pNew->pFcb, (char*)pX->pFcb, sizeof(FCB));
+    pX->ivec = CLOSE1;
+    pNew->pNxt  = pX;
+    pNew->pFnCb = this;
+    pNew->ivec  = OPEN1;
+    pNew->cmnd  = DD_READ;
+    pNew->pDma  = (char*)DirBuf;
+    DirScanPrep(pNew->pFcb, &pNew->nTrk, &pNew->nSec);
+    message msg(nId, 14, 14, (void*)pNew);
+    pTx->PostMsg(nChan, &msg);
+  }
+}
+
+///////////////
+// delete a current file -  first we must be able to open it..
+//
+void CpmBdos::Remov (XfReq *pX)
+{
+  XfReq *pNew = new XfReq;
+
+  if (pNew && (pNew->pFcb = new FCB)) {
+    memcpy((char*)pNew->pFcb, (char*)pX->pFcb, sizeof(FCB));
+    pX->ivec = REMOV1;
+    pNew->pNxt  = pX;
+    pNew->pFnCb = this;
+    pNew->ivec  = OPEN1;
+    pNew->cmnd  = DD_READ;
+    pNew->pDma  = (char*)DirBuf;
+    DirScanPrep(pNew->pFcb, &pNew->nTrk, &pNew->nSec);
+    message msg(nId, 15, 15, (void*)pNew);
+    pTx->PostMsg(nChan, &msg);
+  }
+}
+
+
+
+/////////////////////////////////// eof ////////////////////////////////////
+  </PRE>
+</BODY>
+</HTML>

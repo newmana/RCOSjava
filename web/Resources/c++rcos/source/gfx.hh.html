@@ -1,0 +1,85 @@
+<HTML>
+<HEAD>
+  <TITLE>
+gfx.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+gfx.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Gfx - Module function prototypes                             *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: This module contains all the compiler dependant primitive    *
+//           graphic functions required by the RCOS system.  These names  *
+//           are invariant - the underlying code willbe compiler specific *     for graphic     graphic
+//  HISTORY:                                                              *
+//   02-DEC-92  First (MSC/C++ 7.00) version                              *
+//   24-JAN-93	Clipping routines added 				  *
+//   09-APR-93	Borland GfxTextHeight simplified, removing parameter	  * 
+//   01-FEB-94  All int params changed to typedef'ed types.               *
+//   05-FEB-94  GfxFill and GfxImageSize functions removed                *
+//*************************************************************************
+
+#ifndef _RCOS_GFX
+
+  #include <stdio.h>
+  #include <string.h>
+  #include <math.h> 
+  #include <malloc.h>
+  
+  #include "rcos.hh"
+
+#ifdef _DOS_ENV
+#include "gfxdos.hh"
+#endif
+
+#ifdef UNIX
+#include "gfxunix.hh"
+#endif
+
+  /***************
+  * define attributes for device independant graphics operations..
+  */
+  #define GFX_Fill          1
+  #define GFX_Frame         2
+  #define GFX_Replace       3
+  #define GFX_Solid         4
+  #define GFX_Transparent   5
+  #define GFX_HalfTone      6
+  #define GFX_QtrTone       7
+
+  #define GFX_Xmin        640  /* All display adaptors must support (and */
+  #define GFX_Ymin        480  /* will be limited to) this pixel size.   */
+    
+  /*********************
+  * Finally, the function protos..
+  */  
+  extern BOOL   GfxInit (void);
+  extern void   GfxClose (void);
+  extern void   GfxClrClip (void);
+  extern void   GfxSetClip (INT16, INT16, INT16, INT16);
+  extern void   GfxMoveTo (INT16, INT16);
+  extern void   GfxLineTo (INT16, INT16);
+  extern UINT16 GfxTextExtent (char*);
+  extern UINT16 GfxTextHeight (void);
+  extern void   GfxPattern (UINT16);
+  extern void   GfxTextColor (UINT16);
+  extern void   GfxTextColorBg (UINT16);
+  extern void   GfxCircle (INT16, INT16, INT16, UINT16, UINT16);
+  extern void   GfxArc (INT16, INT16, INT16, double, double, UINT16);
+  extern void   GfxRect (INT16, INT16, INT16, INT16, UINT16, UINT16);
+  extern void   GfxText (INT16, INT16, char*, UINT16);
+  extern BOOL   GfxPutImage (INT16, INT16, PIMBUF);
+  extern PIMBUF GfxGetImage (INT16, INT16, INT16, INT16);
+  extern void   GfxFreeImage (PIMBUF);
+  
+  #define _RCOS_GFX
+#endif
+
+/*********************************** eof ***********************************/
+</PRE>
+</BODY>
+</HTML>

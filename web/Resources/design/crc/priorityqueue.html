@@ -1,0 +1,97 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    PriorityQueue CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>PriorityQueue</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      PriorityQueue
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      basic queue class, used for most scheduling algorithms
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+  <UL>
+    <LI> <B>Insert( Object theObject ) </B><BR>
+         - insert object into Q in order
+  <P>
+    <LI> <B>Object theObject = Retrieve()</B><BR>
+         - get a copy and remove item from head of Q
+  <P>
+    <LI> <B>GoToHead()</B><BR>
+         - move a tmp pointer to the head of Q
+  <P>
+    <LI> <B>Boolean possible = GoToNext()</B><BR>
+         - move tmp pointer to next item in Q 
+           (return TRUE if able, FALSE otherwise)
+  <P>
+    <LI> <B>Boolean possible = GoToPrevious()</B><BR>
+         - move tmp pointer to previous item in Q
+                (return TRUE if able, FALSE otherwise)
+  <P>
+    <LI> <B>GoToTail()</B><BR>
+         - move tmp pointer to the tail of Q
+  <P>
+    <LI> <B>Object theObject = Peek()</B><BR>
+         - return copy of item at tmp pointer (but don't remove it from the Q)
+  <P>
+    <LI> <B>Boolean theResult = IsEmpty()</B><BR>
+         - return TRUE if Q is empty
+  <P>
+    <LI> <B>int theCount = ItemCount()</B><BR>
+         - return number of items in Q
+  <P>
+    <LI> <B>int theResult = Compare( Object first, second )</B><BR>
+         - take two items and return -1, 0, 1 if first item is <, =, > 
+           the second item
+  </UL>
+
+</BODY>
+</HTML>

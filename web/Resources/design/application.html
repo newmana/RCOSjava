@@ -1,0 +1,118 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS.java - Application Analysis
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999">
+<TABLE WIDTH="100%">
+  <TR>
+    <TD ALIGN=LEFT>
+      <H4>/ <A HREF="../../resources.html" TARGET="body">Resources</A> /
+      <A HREF="index.html">Design</A> / Application Analysis</H4>
+    </TD>
+    <TD ALIGN=LEFT WIDTH=25% VALIGN="CENTER">
+      <IMG SRC="../../pics/rightEnd.gif" WIDTH="19" HEIGHT="30"><A HREF="../../index.html" TARGET="_parent"><IMG SRC="../../pics/home.gif" BORDER="0" ALT="RCOS.java Home Page" WIDTH="38" HEIGHT="30"></A><A HREF="domain.html" TARGET="body"><IMG SRC="../../pics/back.gif" BORDER=0 ALT="Domain Analysis" WIDTH="38" HEIGHT="30"></A><A HREF="class.html" TARGET="body"><IMG SRC="../../pics/forward.gif" BORDER=0 ALT="Class Definitions" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../pics/leftEnd.gif" ALT="" WIDTH="19" HEIGHT="30"><BR>
+    </TD>
+  </TR>
+</TABLE>
+The RCOS.java application is divided into the following sections
+<UL>
+  <LI> functional specification
+  <LI> specification of <A HREF="#clusters">class clusters</A>
+</UL>
+</BLOCKQUOTE>
+<H4>
+  Functional Specification
+</H4>
+<BLOCKQUOTE>
+  Functional specification is list of capabilities of RCOS.java
+</BLOCKQUOTE>
+    <B> Hardware </B>
+    <UL>
+      <LI> simulated CPU is pcode machine with additions for interrupt
+           handling (??) and paged memory
+      <LI> CPU will carry out obvious steps in instruction execution
+           cycle (instruction fetch, instruction execution, check for
+           interrupts and handle interrupts)
+      <LI> simulated disk is similar to RCOS disk however code will need
+           to be modified to stay inline with new interrupt handling 
+           mechanism
+      <LI> should support multiple disks
+      <LI> terminal similar to RCOS including support for multiple terminals
+      <LI> size of RAM will need to be increased
+      <LI> NetworkCard simulation given time
+      <LI> all hardware simulation belongs to a class Machine
+    </UL>
+      
+    <B> Programming Language </B>
+    <UL>
+      <LI> machine language is Pcode
+      <LI> source language will be Pascal (hopefully full version) and
+           possibly C++/C subset if appropriate compiler can be found/built
+      <LI> some work will need to be done so that code and data (variables and
+           stack) are placed into separate pages
+      <LI> theoretically possible to provide a compiler that runs from within
+           RCOS
+      <LI> which implies the need for a shell (and editor??) that runs on RCOS
+    </UL>
+
+    <B> Animation/Simulation </B>
+    <UL>
+      <LI> graphical animation/representation of all OS elements (will include 
+           some representation of H/W elements)
+      <LI> provide as much direct manipulation as possible
+      <LI> ability to single step simulation at individual machine instruction,
+           interrupts, OS events, quantum switches through various levels
+           up to not at all
+      <LI> ability for guided tours implies need to automate setup and running
+           of system
+      <LI> ability to use components of the animation/OS to demonstrate
+           particular algorithms e.g. talking about CPU scheduling it would
+           be nice to show just the context switching going on
+      <LI> AnimationSupervisor is responsible for upkeep of main screen and
+           for delivering messages between the various other animators
+    </UL>
+
+    <B> Operating System</B>
+    <UL>
+      <LI> keep <A HREF="crcnachos/statistics.html">statistics</A> in much the 
+           same way as Nachos but provide graphical representation of stats
+           for each execution and ways to compare (useful for experiementation)
+      <LI> no support for OS threads at this time
+      <LI> base MMU is just real memory but support for virtual memory should
+           be added real soon, especially using TLB
+      <LI> programs will be divided into two regions text and data (including
+           both types of data and stack)
+      <LI> at a minimum the file system should support the RCOS CP/M like
+           file system, but preferably a more complete system that supports
+           directory hierarchies should be included
+      <LI> have a system call that allows a thread/process to give up CPU
+           (useful in testing concurrency problems)
+      <LI> simple mechanism for the addition of more system calls, probably
+           to hard to do will always require re-compilation of compiler
+           and Java
+    </UL>
+ 
+<H4>
+  <A NAME="clusters">
+  Class Clusters
+</H4>
+    <UL>
+      <LI> simulated hardware - the hardware RCOS runs on<BR>
+           CPU, ?RAM?, Disk, Terminal, ?NetworkCard?, Machine
+      <LI> operating system<BR>
+           Kernel, CPUScheduler, DiskScheduler, FileSystem, MemoryManager,
+           Process, ?File?, ?Directory?,
+      <LI> animation - responsible for the graphical representation, direct
+           manipulation<BR>
+           AnimationSupervisor, CPUSchedulerAnimator, KernelAnimator, 
+           DiskSchedulerAnimator, FileSystemAnimator, MemoryManagerAnimator,
+           ?ProcessAnimator (new thread for every process selected)?
+           ?FileAnimator? ?DiskBlockAnimator?
+      <LI> support classes<BR>
+           Queue, BitMap
+    </UL>
+</BODY>
+</HTML>

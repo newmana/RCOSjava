@@ -1,0 +1,74 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class fcbRefTag
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>fcbRefTag</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	fcbRefTag
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   We plan to pass references to FCB's around using the asynchronous
+   "post" mechanism, but this ends up "deleteing" the passed object
+   if passed by reference, so this little double indirection thingy
+   preserves the FCB (as far as TxPost is concerned) but allows the
+   class  to make changes back to the referenced item..
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+ typedef struct fcbRefTag {
+    PFCB pFcbRef;
+  } FCBREF, *PFCBREF;
+      </PRE> 
+
+</BODY>
+</HTML>

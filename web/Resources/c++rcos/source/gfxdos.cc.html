@@ -1,0 +1,569 @@
+<HTML>
+<HEAD>
+  <TITLE>
+gfxdos.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+gfxdos.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Gfx - Module functions and globals                           *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: This module contains all the compiler dependant primitives.  *
+//  HISTORY:                                                              *
+//   02-DEC-92  First (MSC/C++ 7.00) version                              *
+//   24-JAN-93  Clipping routines added                                   *
+//   07-APR-93  Borland pixel addressing is relative clip origin!!        *
+//   23-MAY-93  Explicit path removed from BC <initgraph> (Needs EGAVGA)  *
+//   05-FEB-94  GfxFill combined into GfxRect 'cause Xlib has no support! *
+//*************************************************************************
+
+#include "gfx.hh"
+
+
+/*************** MICROSOFT AND SYMANTIC SPECIFIC CODE ********************/
+
+#if defined(MSC700) || defined(SYM60)
+
+  /*******************
+  * variables private to this module..
+  */
+  static double dRadFac;                          /* degrees -> radians   */
+  static UINT16 nFillStyle;                       /* current fill style   */
+  static UINT16 nFgColor, nBgColor;               /* stored color setings */
+  static unsigned char __far *pSolidMask;         /* solid pattern mask   */
+  static unsigned char pDotMask1[8] =             /* 50% background mask  */
+     {0xaa,0x55,0xaa,0x55,0xaa,0x55,0xaa,0x55};
+  static unsigned char pDotMask2[8] =             /* 25% background mask  */
+     {0xcc,0x44,0xcc,0x11,0xcc,0x44,0xcc,0x11};
+
+
+
+  /************************************************************************
+  * Take whatever actions required to place the system in graphics mode
+  * and ensure resolution is at least 640 x 480 pixels. The coordinate
+  * convention requires the the screen top/left is (0, 0).
+  * RETURNS:    TRUE  .. ready for operation
+  *             FALSE .. unable to set graphics mode
+  */
+  BOOL GfxInit (void)
+  {
+    struct videoconfig vc;
+    static char *pszEmsg = "RCOS: %s!\n";
+    static char *pszErrs[] = {"Can't find Font files",
+			     "Graphics initialization error",
+			     "Insufficient display resolution"};
+
+    dRadFac = atan(1.0)/(double)45.0;
+    if (_registerfonts("*.FON") < 0)
+      fprintf(stderr, pszEmsg, pszErrs[0]);
+    else {
+      _setfont("t'system'h12w9br");
+      if (_setvideomode(_VRES16COLOR) == 0)
+	fprintf(stderr, pszEmsg, pszErrs[1]);
+      else {                                                                
+	nFillStyle = GFX_Solid;
+	pSolidMask = _getfillmask(pSolidMask);
+	_getvideoconfig(&vc);
+	if ((vc.numxpixels >= GFX_Xmin) && (vc.numypixels >= GFX_Ymin)) {
+	  _setviewport(0, 0, GFX_Xmin-1, GFX_Ymin-1);
+	  _setcliprgn(0, 0, GFX_Xmin-1, GFX_Ymin-1);
+	  return(TRUE);
+	}
+	GfxClose();
+	fprintf(stderr, pszEmsg, pszErrs[2]);
+      }
+    }
+    return(FALSE);
+  }
+
+  /*************
+  * Return system to "normal" operation.
+  */
+  void GfxClose (void)
+  {
+    _unregisterfonts();
+    _setvideomode(_DEFAULTMODE);
+  }
+
+  /*************
+  * Limit the area in which graphic operations will occur.
+  */
+  void GfxSetClip (INT16 x1, INT16 y1, INT16 x2, INT16 y2)
+  {
+    _setcliprgn(x1, y1, x2, y2);
+  }
+
+  /**********
+  * Permit drawing of graphics and text fonts anywhere on "our" screen..
+  */
+  void GfxClrClip (void)
+  {
+    _setcliprgn(0, 0, GFX_Xmin-1, GFX_Ymin-1);
+  }
+
+  /**********
+  * Set the position for the next operation..
+  */
+  void GfxMoveTo (INT16 x, INT16 y)
+  {
+    _moveto(x, y);
+  }
+
+  /*************
+  * Draw a line from the "current" location to the passed location
+  * using the current color.
+  */
+  void GfxLineTo (INT16 x, INT16 y)
+  {
+    _setcolor((short)nFgColor);
+    _lineto(x, y);
+  }
+
+  /*************
+  * Returns the number of pixels the string argument will occupy
+  */
+  UINT16  GfxTextExtent (char *str)
+  {
+    return (UINT16)(_getgtextextent(str));
+  }
+
+  /*************
+  * Returns the height (in pixels) of a text character cell
+  */
+  UINT16  GfxTextHeight (void)
+  {
+    struct _fontinfo vc;
+
+    _getfontinfo(&vc);
+    return (UINT16)(vc.pixheight);
+  }
+
+  /*************
+  * Set the graphics fill mode to specified pattern
+  */
+  void GfxPattern (UINT16 nStyle)
+  {
+    nFillStyle = nStyle;
+  }
+
+  /*************
+  * Sets the foreground color for text output
+  */
+  void GfxTextColor (UINT16 nColor)
+  {
+    nFgColor = nColor;
+  }
+
+  /*************
+  * Sets the background color for text outout
+  */
+  void GfxTextColorBg (UINT16 nColor)
+  {
+    nBgColor = nColor;
+  }
+
+  /*************
+  * Draw a circle, centred on <x, y> of radius <rad>, in passed style
+  * and color
+  */
+  void GfxCircle (INT16 x, INT16 y, INT16 nRad, UINT16 nStyle, UINT16 nColor)
+  {
+    INT16 x1, y1, x2, y2;
+
+    x1 = x - nRad, y1 = y - nRad;
+    x2 = x + nRad, y2 = y + nRad;
+    _setcolor((short)nColor);
+    switch (nStyle) {
+      case GFX_Fill:  _ellipse(_GFILLINTERIOR, x1, y1, x2, y2); break;
+      case GFX_Frame: _ellipse(_GBORDER, x1, y1, x2, y2);       break;
+    }
+  }
+
+  /***************
+  * Draw an arc centred on <x,y> of radius <nRad>, beginning at <dStart>
+  * degrees (zero is straight up), ending at <dEnd> degrees.
+  */
+  void GfxArc (INT16 x, INT16 y, INT16 nRad,
+	       double dStart, double dEnd, UINT16 nColor)
+  {
+    INT16 x1, y1, x2, y2, x3, y3, x4, y4;
+
+    x1 = x - nRad, y1 = y - nRad;
+    x2 = x + nRad, y2 = y + nRad;
+    y3 = y - (INT16)((double)nRad * sin(dStart * dRadFac));
+    y4 = y - (INT16)((double)nRad * sin(dEnd * dRadFac));
+    x3 = (dStart >= 180.0) ? x1 : x2;
+    x4 = (dEnd >= 180.0) ? x1 : x2;
+    _setcolor((short)nColor);
+    _arc(x1, y1, x2, y2, x3, y3, x4, y4);
+  }
+
+  /*************
+  * Draw a rectangle bracketed by <x1, y1> (Top Left) and <x2, y2>
+  * (Bottom Right), of passed style and Color.  If the currnet style
+  * is not GFX_Solid, we dither based on the current background color.
+  * Because the FloodFill used to dither needs a bounding color, for
+  * simplicity, we (blindly) assume _Black (this is all your fault, DJ).
+  */
+  void GfxRect (INT16 x1, INT16 y1,
+		INT16 x2, INT16 y2, UINT16 nStyle, UINT16 nColor)
+  {
+    _setcolor((short)nColor);
+    switch (nStyle) {
+      case GFX_Frame:
+	_rectangle(_GBORDER, x1, y1, x2, y2);
+	break;
+      case GFX_Fill:
+	_rectangle(_GFILLINTERIOR, x1, y1, x2, y2);
+	if ((nFillStyle != GFX_Solid) && (nBgColor != nColor)) {
+	  _setfillmask(((nFillStyle == GFX_HalfTone) ? pDotMask1:pDotMask2));
+	  _setcolor(nBgColor), _floodfill(x1+1, y1+1, _Black);
+	  _setfillmask(pSolidMask);
+	}
+    }
+  }
+
+  /*************
+  * Draw the passed text string at the passed location, in the passed style,
+  * using the current colors (point <x, y> marks top/left of text extent).
+  */
+  void GfxText (INT16 x, INT16 y, char *st, UINT16 nStyle)
+  {
+    if (nStyle == GFX_Replace) {
+      _setcolor((short)nBgColor);
+      _rectangle(_GFILLINTERIOR,x,y,x+GfxTextExtent(st),y+GfxTextHeight());
+    }
+    _setcolor((short)nFgColor);
+    _moveto(x, y);
+    _outgtext(st);
+  }
+
+  /*************
+  * Allocate a mamory block to hold the bounded screen image bit map
+  * in the passed co-ords and store it.
+  * RETURNS: pointer to storage, or NULL if unable to comply
+  */
+  PIMBUF GfxGetImage (INT16 x1, INT16 y1, INT16 x2, INT16 y2)
+  { 
+    PIMBUF p;
+    
+    if (p = (PIMBUF)_fmalloc((size_t)_imagesize(x1, y1, x2, y2)) )
+      _getimage(x1, y1, x2, y2, p);
+    return p;
+  }
+
+  /*************
+  * copy the image in the passed buffer to the screen at x, y,
+  */
+  BOOL GfxPutImage (INT16 x, INT16 y, PIMBUF p)
+  {
+    _putimage(x, y, p, _GPSET);
+    return (BOOL)_grstatus();
+  }
+
+  /*************
+  * copy the image in the passed buffer to the screen at x, y,
+  * then release the storage.
+  */
+  void GfxFreeImage (PIMBUF p)
+  {
+    if (p)
+      _ffree((void far*)p);
+  }
+
+#endif         /************** END MICROSOFT SPECIFIC CODE ***************/
+
+#ifdef BC31    /***************** BORLAND C/C++ 3.1 ***********************
+	       * CAUTION: File "EGAVGA.BGI" must be in the RCOS start-up
+	       * directory (or change to link-in the binary - see UTIL.DOC)
+	       * Author's Lament: The Borland BGI is infinitely inferior
+	       * to Microsoft's graphic support.  If you can only afford
+	       * one real C/C++ development system, do NOT by swayed by
+	       * Phillipe's slick advertising.  Yes, his IDE is faster for
+	       * development than MS Programmer's Workbench, but MS C/C++
+	       * 7.0 compiles smaller, runs faster, optimises better (if
+	       * slower) and the Graphic services and font support are FAR
+	       * superior.  Finally, MS "Code View" urinates on the Turbo
+	       * Debugger from a great height.  Evidence: look at what has
+	       * to be done in this module to achieve a PALE imitation of
+	       * what the MS code does so simply, and see how much faster
+	       * the prittier MSCV700 version runs.      (arcy, 27-JAN-93)
+	       */
+
+
+  /*******************
+  * variables private to this module..
+  */
+
+
+  static BOOL   bVpActive;                      /* set when clipping on */
+  static INT16  vpxo, vpyo;                     /* view port origin     */
+  static UINT16 nFillStyle;                     /* stored fill pattern  */
+  static UINT16 nFgColor, nBgColor;             /* stored color setings */
+  
+  #ifdef BC20
+  static char pDotMask1[8] =           /* 50% background mask  */
+     {0xaa,0x55,0xaa,0x55,0xaa,0x55,0xaa,0x55};
+  static char pDotMask2[8] =           /* 25% background mask  */
+     {0xcc,0x44,0xcc,0x11,0xcc,0x44,0xcc,0x11};
+  #else
+  static unsigned char pDotMask1[8] =           /* 50% background mask  */
+     {0xaa,0x55,0xaa,0x55,0xaa,0x55,0xaa,0x55};
+  static unsigned char pDotMask2[8] =           /* 25% background mask  */
+     {0xcc,0x44,0xcc,0x11,0xcc,0x44,0xcc,0x11};
+  #endif
+
+  /************************************************************************
+  * Take whatever actions required to place the system in graphics mode
+  * and ensure resolution is at least 640 x 480 pixels. The coordinate
+  * convention requires the the screen top/left is (0, 0).
+  * RETURNS:    TRUE  .. ready for operation
+  *             FALSE .. unable to set graphics mode
+  */
+  BOOL GfxInit (void)
+  {
+    int gdriver, gmode, errorcode;
+    static char *pszEmsg = "RCOS: %s!\n";
+    static char *pszErrs[] = {"Graphics initialization error",
+			     "Insufficient display resolution"};
+
+    gdriver = DETECT;
+    initgraph(&gdriver, &gmode, NULL);
+    errorcode = graphresult();
+    if (errorcode != 0)
+      fprintf(stderr, pszEmsg, pszErrs[0]);
+    else {
+      nFillStyle = GFX_Solid;
+      if ((getmaxx()+1 >= GFX_Xmin) && (getmaxy()+1 >= GFX_Ymin)) {
+	GfxClrClip();
+	return(TRUE);
+      }
+      GfxClose();
+      fprintf(stderr, pszEmsg, pszErrs[1]);
+    }
+    return FALSE;
+  }
+
+  /*************
+  * Return system to "normal" operation.
+  */
+  void GfxClose (void)
+  {
+    closegraph();
+  }
+
+  /*************
+  * We can't actually set a clipping reigon using the BGI.  The best
+  * alternate is to set a viewport (refer UCQ 84247, Graphics) which
+  * makes subsequent output relative to the top left corner, then
+  * set a switch and store the origin as an offset which needs to be
+  * subrtacted from all coordinates while the switch is set (uugh).
+  */
+  void GfxSetClip (INT16 x1, INT16 y1, INT16 x2, INT16 y2)
+  {
+    bVpActive = TRUE;
+    vpxo = x1, vpyo = y1;
+    setviewport(x1, y1, x2, y2, TRUE);
+  }
+
+  /**********
+  * Permit drawing of graphics and text fonts anywhere on "our" screen..
+  */
+  void GfxClrClip (void)
+  {
+    bVpActive = FALSE;
+    vpxo = 0, vpyo = 0;
+    setviewport(0, 0, GFX_Xmin-1, GFX_Ymin-1, TRUE);
+  }
+
+  /**********
+  * Set the position for the next operation..
+  */
+  void GfxMoveTo (INT16 x, INT16 y)
+  {
+    if (bVpActive)
+      moveto(x-vpxo, y-vpyo);
+    else
+      moveto(x, y);
+  }
+
+  /*************
+  * Draw a line from the "current" location to the passed location
+  * using the current color.
+  */
+  void GfxLineTo (INT16 x, INT16 y)
+  {
+    setcolor(nFgColor);
+    if (bVpActive)
+      lineto(x-vpxo, y-vpyo);
+    else
+      lineto(x, y);
+  }
+
+  /*************
+  * Returns the number of pixels the string argument will occupy
+  */
+  UINT16 GfxTextExtent (char *str)
+  {
+    return (UINT16)textwidth(str);
+  }
+
+  /*************
+  * Returns the height (in pixels) of a text character cell. ASIDE: why
+  * does the BGI need a parameter? ENDOFASIDE.  Note:  I have increased
+  * the cell height set by Borland for aesthetic reasons. The <GfxText>
+  * routine compensates accordingly.
+  */
+  UINT16 GfxTextHeight (void)
+  {
+    return (UINT16)(textheight("I") + 2);
+  }
+
+  /*************
+  * Set the graphics fill mode to specified pattern
+  */
+  void GfxPattern (UINT16 nStyle)
+  {
+    nFillStyle = nStyle;
+  }
+
+  /*************
+  * Sets the foreground color for text output
+  */
+  void GfxTextColor (UINT16 nColor)
+  {
+    nFgColor = nColor;
+  }
+
+  /*************
+  * Sets the background color for text outout
+  */
+  void GfxTextColorBg (UINT16 nColor)
+  {
+    nBgColor = nColor;
+  }
+
+  /*************
+  * Draw a circle, centred on <x, y> of radius <rad>, in passed style
+  * and color.  NOTE: Ignores clipping! (see also color lament above).
+  */
+  void GfxCircle (INT16 x, INT16 y, INT16 nRad, UINT16 nStyle, UINT16 nColor)
+  {
+    if (bVpActive)
+      x -= vpxo, y -= vpyo;
+    setcolor(nColor);
+    switch (nStyle) {
+      case GFX_Frame:
+	circle(x, y, nRad);
+	break;
+      case GFX_Fill:
+	setfillstyle(SOLID_FILL, nColor);
+	fillellipse(x, y, nRad, nRad);
+	break;
+    }
+  }
+
+  /***************
+  * Draw an arc centred on <x,y> of radius <nRad>, beginning at <dStart>
+  * degrees (zero is straight up), ending at <dEnd> degrees.
+  * NOTE: Ignores clipping!
+  */
+  void GfxArc (INT16 x, INT16 y, INT16 nRad,
+	       double dStart, double dEnd, UINT16 nColor)
+  {
+    if (bVpActive)
+      x -= vpxo, y -= vpyo;
+    setcolor(nColor);
+    arc(x, y, (int)dStart, (int)dEnd, nRad);
+  }
+
+  /*************
+  * Draw a rectangle bracketed by <x1, y1> (Top Left) and <x2, y2>
+  * (Bottom Right), of passed style and Color.  NOTE: Ignores clipping!
+  * This one is real bad.  There is simply no way that the background color
+  * in the filled area can be anything other than BGI color zero (normally
+  * black).  This means we can't dither new and attractive shades like the
+  * Microsoft code can - jeeze.
+  */
+  void GfxRect (INT16 x1, INT16 y1,
+		INT16 x2, INT16 y2, UINT16 nStyle, UINT16 nColor)
+  {
+    if (bVpActive)
+      x1 -= vpxo, y1 -= vpyo, x2 -= vpxo, y2 -= vpyo;
+    setcolor(nColor);
+    if (nStyle == GFX_Frame)
+      rectangle(x1, y1, x2, y2);
+    if (nStyle == GFX_Fill) {
+      setfillstyle(SOLID_FILL, nColor);
+      bar(x1, y1, x2, y2);
+    }
+    if ((nFillStyle != GFX_Solid) && (nBgColor != nColor)) {
+      setfillpattern(((nFillStyle == GFX_HalfTone)?pDotMask1:pDotMask2),
+	nBgColor);
+      floodfill(x1+1, y1+1, _Black);
+    }
+  }
+
+  /*************
+  * Draw the passed text string at the passed location, in the passed style,
+  * using the current colors (point <x, y> marks top/left of text extent).
+  */
+  void GfxText (INT16 x, INT16 y, char *st, UINT16 nStyle)
+  {
+    if (nStyle == GFX_Transparent) {
+      if (bVpActive)
+	x -= vpxo, y -= vpyo;
+      setcolor(nFgColor);
+      outtextxy(x, y+1, st);
+    }
+  }
+
+  /*************
+  * Allocate a mamory block to hold the bounded screen image bit map
+  * in the passed co-ords and store it.
+  * RETURNS: pointer to storage, or NULL if unable to comply
+  */
+  PIMBUF GfxGetImage (INT16 x1, INT16 y1, INT16 x2, INT16 y2)
+  {                                                          
+    PIMBUF p;
+    
+    if (p = farmalloc((unsigned long)imagesize(x1, y1, x2, y2)) ) {
+      if (bVpActive)
+	x1 -= vpxo, y1 -= vpyo, x2 -= vpxo, y2 -= vpyo;
+      getimage(x1, y1, x2, y2, p);
+    }
+    return p;
+  }
+
+  /*************
+  * copy the image in the passed buffer to the screen at x, y
+  */
+  BOOL GfxPutImage (INT16 x, INT16 y, PIMBUF p)
+  {
+    if (bVpActive)
+      x -= vpxo, y -= vpyo;
+    putimage(x, y, p, COPY_PUT);
+    return(TRUE);
+  }
+
+  /*************
+  * copy the image in the passed buffer to the screen at x, y
+  * then release the storage.
+  */
+  void GfxFreeImage (PIMBUF p)
+  {
+    if (p)
+      farfree((void far*)p);
+  }
+
+
+#endif     /******************* END BORLAND C/C++ 3.1 ********************/
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,146 @@
+<HTML>
+<HEAD>
+  <TITLE>
+timer.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+timer.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Timer - Module contains high level Timer class definition.   *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Provide body member functions of class to provide interrupt  *
+//           service for timer events, delays, counts.                    *
+//	     CAUTION: User defined Interrupt service routines require the *
+//	     C/C++ stack probes be disabled on all routines which are or  *
+//	     may be used during service.  Ensure the appropriate option   *
+//	     switch is set (or use MSC #pragma stack_check (off)).	  *
+//  HISTORY:                                                              *
+//   21-JAN-93	First (MSC/C++ 7.00) version				  *
+//   08-APR-93	Start/Stop added and GetTicks adjusted for 1mS (hah!)	  *
+//   27-OCT-93  Smart pointer hiding added (mouse int, fn 16)             *
+//   30-OCT-93  Massive simplification through the PAL abstraction module * 
+//   04-FEB-94  "Tock" size changed to 32 bits                            *
+//*************************************************************************
+
+
+#include "timer.hh"
+
+
+
+///////////////////
+// NOTE: Because declaring a static class data member does "define" it,
+// actual allocation of storage must take place elsewhere.. this is where.
+//
+UINT32 Timer::nTocks;
+
+
+//////////////////////////////////////////////////////////////////////////
+// The entire class member code for "Timer" is somewhat platform dependant
+// so it is isolated here for convenience.
+//
+#if defined  (_DOS_ENV) || defined (UNIX) 
+
+  /////////////////
+  // Constructor for Timer class grabs the DOS 0x1C interrupt so that we can
+  // get called every 18.2 mS, thereabouts..
+  //
+  Timer::Timer () : mTicks(0L)
+  {
+
+    nTocks = 0;
+    nSenCnt = 0;
+    PalInitClk();
+    OldRTC = PalGetVec(_DOS_RTC);
+    PalSetVec(_DOS_RTC, (UINT32)NewRTC);
+  }
+
+  //////////////////////
+  // The destructor must replace the 0x1C vector..
+  //
+  Timer::~Timer ()
+  {
+    PalResetClk();
+    PalSetVec(_DOS_RTC, OldRTC);
+  }
+
+  /////////////////////
+  // This is the interrupt service routine.  On each interrupt, a private
+  // count is incremented and the BIOS keyboard buffer is emptied by our
+  // keyboard class object. There as Yet Another Problem with Borland's
+  // compiler.. can't take the address of a private member as an ISR
+  // (needless to say, MSCV7 can), so I've made it a friend.
+  //
+  #pragma check_stack (off)
+  
+  extern Kbd KbdIn;
+  
+  void INTERRUPT NewRTC (__CPPARGS)
+  {
+    ++Timer::nTocks;
+    KbdIn.KeyFill();
+  }
+  #pragma check_stack (on)
+
+  ///////////////
+  // Prepare to track fine timing mechanism.  This depwnds on the granularity
+  // of the <PalGetTime> implementation.  A simple DOS solution (ie no bit-
+  // twiddling in assembler) will return deci-seconds (10 milli-seconds ticks).
+  //
+  // When <Start> is called, we store what <PalGetTime> reports as the current
+  // mS value.  Requests for time used through our <GetTicks> member will use
+  // this to get the number of mS since the timer was (re)started, add this to
+  // our accumulated "active" time, and return the result.  When the timer is
+  // stopped, we calculate the total time we were active, and update our
+  // accumulated time.
+  //
+  void Timer::Start (void)
+  {
+    if (--nSenCnt < 0)
+      mofs = PalGetTime();
+  }
+
+  ///////////////
+  // You can stop now (see explanation above)..
+  // The increment protector allows the Animator to stop and start the clock
+  // without danger regardless of whether it was running in the first place.
+  //
+  void Timer::Stop (void)
+  {
+    if (++nSenCnt == 0)
+      mTicks += PalGetTime() - mofs;
+  }
+
+  ///////////////
+  // return 1 millisecond ticks (see explanation above).
+  // NOTE: Under DOS, this actually return then in blocks of ten!
+  //
+  UINT32 Timer::GetTicks (void)
+  {
+    return mTicks + PalGetTime() - mofs;
+  }
+
+  ///////////////
+  // return count of 18 millisecond segments ("tocks") since RCOS was
+  // started.  These are used in the supervisor where course timing delays
+  // are required.  Under DOS, it's trivial - elsewhere, do what you must.
+  //
+  UINT32 Timer::GetTocks (void)
+  {
+	#ifdef _DOS_ENV
+      return Timer::nTocks;
+	#endif
+	#ifdef UNIX
+	  return (mTicks + PalGetTime() - mofs ) * 18;
+    #endif
+  }
+  
+#endif
+  
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

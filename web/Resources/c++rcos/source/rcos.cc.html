@@ -1,0 +1,424 @@
+<HTML>
+<HEAD>
+  <TITLE>
+rcos.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+rcos.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : RCOS main module - control loop for the supervisor.          *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Create, run and destroy the RCOS operating system under a    *
+//           host operating system.                                       *
+//  HISTORY:                                                              *
+//   04-JUN-93 Dignified with a title block from the "T8" candidate code. *
+//   29-OCT-93 Individual pop-ups changed to a GP Message Box function.   *
+//   01-FEB-94 Dependency on integer size removed by typedef'ing bit lens *
+//   02-FEB-94 Anti-fascist mode window re-paint added for Xlib support   *
+//   25-AUG-94 All animation window responsibility given to Animator.     *
+//   15-MAR-95 User terminals managed through a class for beter config.   *
+//   22-MAR-95 Configurable options added via <Preferences> object        *
+//*************************************************************************
+
+
+#include "rcos.hh"
+#include "message.hh"
+#include "exec.hh"
+#include "kernel.hh"
+#include "app.hh"
+#include "tty.hh"
+#include "mmu.hh"
+#include "anim.hh"
+#include "timer.hh"
+#include "display.h"
+#include "dev-disp.hh"
+#include "cpmfs.hh"
+#include "prefs.hh"
+
+
+///////////////
+// Button style for pop-up message box
+//
+enum mbStyle { MB_OK, MB_OKCANCEL, MB_YESNO, MB_YESCANCEL };
+enum mbRetrn { ID_OK = 200, ID_CANCEL, ID_YES, ID_NO };
+
+///////////////
+// Globals.. the simple App instantiation makes it all start happening,
+//
+char *pszInitl =  { "RCOS - Press F1 for help" };
+char *pszTitle =  { "RCOS - Ron's OS Simulator Mk IIb" };
+App  Rcos(pszInitl);
+
+//////////////////////
+// this struct combines the physical attributes of an IBM 3740, 8"
+// single side, single density disk and a Schugart Associates 880 drive.
+//
+static DPB _IBM3740 = {
+        26,     // sectors (number from one)
+        77,     // tracks (number from zero)
+        1,      // sides
+        128,    // bytes per sector
+        2,      // mS per rev (~ 360 RPM)
+        25,     // mS track to track
+        10,     // mS settle
+        1000    // soft (recoverable) error rate
+};
+                
+/////////////////
+// This struct says how to partition a 3740 diskette into the CP/M
+// standard Single Side, Single Density (SSSD) - which was the only
+// guaranteed interchange format in the late 70's.
+//
+static DPARAM _SSSD = {
+        0,      // Unit number
+        1,      // first sec number
+        26,     // no of sectors
+        6,      // sector skew factor
+        1024,   // diak allocation block size (bytes)
+        234,    // total blocks on disk
+        64,     // no of directory entries
+        0,      // none checked (treat as fixed disk)
+        2       // reserved (system) tracks
+};
+       
+
+///////////////////////////////////////////////////////////////////////
+// local protos in order of appearance..
+//
+static UINT16 MessageBox (char*, char**, UINT16);
+static void   PaintCtrls (INT16);
+static void   PaintFixed (void);
+static void   DestroyCtrls (INT16);
+
+#ifdef DOS_ENV
+       void   main (void);		// g++ doesn't like it
+#endif
+
+
+///////////////////////////////////////////////////////////////////////
+// popup a Windows-like message box with supplied heading and text,
+// with appropriate controls.  The size of the box depends on the
+// passed array of string pointers.
+// RETURNS: ID of button pressed to close the window
+//
+UINT16 MessageBox (char *szTitle, char **pszText, UINT16 uStyle)
+{
+  UINT32 lParam;
+  UINT16 msg, wParam;
+  INT16  n, x, y, x1, y1, x2, y2;
+  static char *pLab[] = { "&Ok", "&Cancel", "&Yes", "&No" };
+
+  for (x = 0, y = 0; pszText[y]; y++)
+    x = MAX(x, (INT16)GfxTextExtent(pszText[y]));
+  y2 = SYS_Height + PB_HT + (GfxTextHeight() * ++y) + 16;
+  x2 = 16 + ((uStyle > MB_OK) ? (PB_WID << 1) + 8 : PB_WID);
+  x2 = MAX(x2, x+16);
+  y1 = (WIN_Y2 - WIN_Y1 - y2) >> 1;
+  x1 = (WIN_X2 - WIN_X1 - x2) >> 1;
+  if (uStyle == MB_OK)
+    Rcos.AppChildWin(RC_Modal, szTitle, x1, y1, x1+x2, y1+y2);
+  else
+    Rcos.AppChildWin(RC_Modal, szTitle, x1, y1, x1+x2, y1+y2, _Red);
+  Mickey.AutoPointer(x1, y1, x1+x2, y1+y2);
+  switch (uStyle) {
+    case MB_OK:
+      Rcos.AppCreate(RC_PushBtn, ID_OK, pLab[0],
+        x1 + ((x2 - PB_WID) >> 1), y1 + y2 - PB_HT - 8, PB_WID, PB_HT);
+      break;
+    case MB_OKCANCEL:
+      Rcos.AppCreate(RC_PushBtn, ID_CANCEL, pLab[1],
+        x1 + 8, y1 + y2 - PB_HT - 8, PB_WID, PB_HT);
+      Rcos.AppCreate(RC_PushBtn, ID_OK, pLab[0],
+        x1 + x2 - PB_WID - 8, y1 + y2 - PB_HT - 8, PB_WID, PB_HT);
+      break;
+    case MB_YESCANCEL:
+      Rcos.AppCreate(RC_PushBtn, ID_CANCEL, pLab[1],
+        x1 + 8, y1 + y2 - PB_HT - 8, PB_WID, PB_HT);
+      Rcos.AppCreate(RC_PushBtn, ID_YES, pLab[2],
+        x1 + x2 - PB_WID - 8, y1 + y2 - PB_HT - 8, PB_WID, PB_HT);
+      break;
+    case MB_YESNO:
+      Rcos.AppCreate(RC_PushBtn, ID_NO, pLab[3],
+        x1 + 8, y1 + y2 - PB_HT - 8, PB_WID, PB_HT);
+      Rcos.AppCreate(RC_PushBtn, ID_YES, pLab[2],
+        x1 + x2 - PB_WID - 8, y1 + y2 - PB_HT - 8, PB_WID, PB_HT);
+      break;
+  }
+  GfxSetClip(x1, y1, x1+x2, y1+y2);
+  y = y1 + SYS_Height + 8;
+  n = 0;
+  while (pszText[n]) {
+    x = x1 + ((x2 - GfxTextExtent(pszText[n])) >> 1);
+    GfxText(x, y, pszText[n], GFX_Transparent);
+    y += GfxTextHeight();
+    ++n;
+  }
+  GfxClrClip();
+  Mickey.ShowPointer();
+  while (Rcos.AppGetMsg(msg, wParam, lParam) == FALSE)
+    ;
+  Rcos.AppDestroy(RC_PushBtn, ID_OK);
+  Rcos.AppDestroy(RC_PushBtn, ID_CANCEL);
+  Rcos.AppDestroy(RC_PushBtn, ID_NO);
+  Rcos.AppDestroy(RC_PushBtn, ID_YES);
+  Rcos.AppCloseWin();
+  KbdIn.KeyFlush(_ALT);
+  KbdIn.KeyFlush(_ASC);
+  return wParam;
+}
+
+//////////////////
+// Paint fixed supervisor objects.
+//
+static void PaintFixed (void)
+{
+
+  GfxRect(STRIP_X1, STRIP_Y1, STRIP_X2, STRIP_Y2, GFX_Frame, _Black);
+  GfxRect(STRIP_X1, STRIP_Y1+1, STRIP_X2, STRIP_Y2-1, GFX_Fill, _White);
+  GfxTextColorBg(_Yellow);  
+  GfxPattern(GFX_HalfTone);
+  GfxRect(STRIP_X1, STRIP_Y2+1, STRIP_X2, GFX_Ymin-1, GFX_Fill, _White);
+  GfxPattern(GFX_Solid);
+  GfxRect(CON_X1-1, CON_Y1-1, CON_X2+1, CON_Y2+1, GFX_Frame, _Black);
+}        
+////////////////////
+// Initialize Control panel gadgets. Ideally, these should live in a
+// resource segment of the EXE file as binary data which is disgarded
+// after use.  Oh well..
+//
+static void PaintCtrls (INT16 n)
+{
+  BOOL bMx[4];
+ 
+  PaintFixed();
+  bMx[0] = bMx[1] = bMx[2] = bMx[3] = FALSE;
+  bMx[n] = TRUE;
+  Rcos.AppCreate(RC_PushBtn, PB_RUN, "&Run", PB_X1,PB_Y1,PB_WID,PB_HT);
+  Rcos.AppCreate(RC_PushBtn, PB_PAUSE, "&Pause", PB_X1,PB_Y1+PB_DY, PB_WID, PB_HT);
+  Rcos.AppCreate(RC_PushBtn, PB_STEP, "&Step",  PB_X1,PB_Y1+(2*PB_DY),PB_WID,PB_HT);
+  Rcos.AppCreate(RC_PushBtn, PB_ABOUT, "&About", PB_X1,PB_Y1+(3*PB_DY),PB_WID,PB_HT);
+  Rcos.AppCreate(RC_RadioBtn, RB_PM, "&CPU Scheduler", 20, STRIP_Y0, bMx[0]);
+  Rcos.AppCreate(RC_RadioBtn, RB_MM, "&Memory Manager", 150, STRIP_Y0, bMx[1]);
+  Rcos.AppCreate(RC_RadioBtn, RB_RM, "R&esource Manager", 300, STRIP_Y0, bMx[2]);
+  Rcos.AppCreate(RC_RadioBtn, RB_DM, "&Devices", 460, STRIP_Y0, bMx[3]);
+  Rcos.AppCreate(RC_CheckBox, CB_CONF, "Co&nfirm", 560, STRIP_Y0, TRUE);
+}
+
+////////////////////
+// Kill off all controls
+//
+static void DestroyCtrls (INT16 nWin)
+{
+  if (nWin == 3) {
+    Rcos.AppDestroy(RC_RadioBtn, RB_TTY1);
+    Rcos.AppDestroy(RC_RadioBtn, RB_TTY2);
+  }
+  Rcos.AppDestroy(RC_PushBtn, PB_RUN);
+  Rcos.AppDestroy(RC_PushBtn, PB_PAUSE);
+  Rcos.AppDestroy(RC_PushBtn, PB_STEP);
+  Rcos.AppDestroy(RC_PushBtn, PB_ABOUT);
+  Rcos.AppDestroy(RC_RadioBtn, RB_PM);
+  Rcos.AppDestroy(RC_RadioBtn, RB_MM);
+  Rcos.AppDestroy(RC_RadioBtn, RB_RM);
+  Rcos.AppDestroy(RC_RadioBtn, RB_DM);
+  Rcos.AppDestroy(RC_CheckBox, CB_CONF);
+}
+
+////////////////////////////////////////////////////////////////////////////
+//                                                                        //
+//  RCOS is controlled from here. To give the appearence of concurrency   //
+//  without pre-emptive interrupts, the three operations in the main      //
+//  program loop should do as little as possible before yielding to each  //
+//  other.  Actual control (supervision) of the OS is ALL performed here. //
+//  Supervisor gadgets set booleans which control running and stepping.   //
+//  The Kernel runs on Messages.  These are posted into its queue by the  //
+//  Operator's Console Command parser, Device Drivers and Kernel itself   //
+//  (it's usefull to post messages to youself!)  On each pass through the //
+//  loop, Kernel extracts and actions one message - if there are any.  If //
+//  there are no messages in the queue, the Kernel scheduler gets control //
+//  and runs the P-code interpreter to execute a single p-code.           //
+//                                                                        //
+////////////////////////////////////////////////////////////////////////////
+//
+void main (void)
+{
+//  rect   r;
+  UINT32 lParam;
+  UINT16 msg, wParam, nRbLast;
+  BOOL   bState,
+         bRun = FALSE,
+         bStep = FALSE,
+         bFirst = TRUE,
+         bActive = TRUE,
+         bReTitle = FALSE;
+  static char *pszDisp[] = {"cpu scheduler", "memory manager",
+                            "resource manager", "devices", NULL };
+  static char *pszExit[] = {"RCOS is about to terminate.", " ",
+                            "Are you sure you want to exit now?",
+                             NULL };
+  static char *pszHelp[] = {"This program is CUA complient.", " ",
+                            "Use the mouse, or press ALT+Underlined char to",
+                            "activate a control.  Press ALT+F4 to terminate.",
+                             NULL };
+  static char *pszRcos[] = {"RCOS - A multi-tasking OS simulator.",
+                            "Written by Ronald A Chernich (1993)",
+                            "for the Department of Maths and Computing",
+                            "of the University of Central Queensland.",
+                             NULL };
+
+
+  if (Rcos.AppRunning()) {
+    //
+    // Since the application framework seems to be running, we can
+    // instantiate the Kernel, followed by all the device drivers,
+    // passing their constructors a pointer to the Kernel.  They will
+    // notify it of their existance by message passing.  This greatly
+    // simplifies design changes.
+    //
+    Preferences Prefs;
+    Knl  Kernel(Prefs.GetPrefInt(PREFS_QUAN, PCD_QUANTUM));
+    tty  OpCon(ID_TTY0, CLS_VDU, &Kernel, 
+         rect(CON_X1, CON_Y1, CON_X2-CON_X1, CON_Y2-CON_Y1),
+         _Black, _BrightWhite);
+    UINT16 nTerms = Prefs.GetPrefInt(PREFS_TTYS, NUM_TTY);
+
+    if ( nTerms == 0 )
+      nTerms=2;
+
+    Mmu      MemMan(ID_MMU, CLS_SysRes, &Kernel);
+    CpmFs    FileSys(ID_FS, CLS_SysRes, &Kernel);
+    Animate  Ani(ID_ANIM,   CLS_SysRes, &Kernel, nTerms);
+    DskModel ADrive(ID_DISK_A, CLS_FSF, &Kernel, "CPMA", _IBM3740, _SSSD.nLid);
+    if (ADrive.IsOnLine())
+      FileSys.MountDrive(ID_DISK_A, 'A', _IBM3740, _SSSD);
+      
+    //_SSSD.nLid = 1;
+    //DskModel BDrive(ID_DISK_B, CLS_FSF, &Kernel, "CPMB", _IBM3740, _SSSD.nLid);
+    //if (BDrive.IsOnLine())
+    //  FileSys.MountDrive(ID_DISK_B, 'B', _IBM3740, IBM_SSSD);
+
+    Mickey.HidePointer();
+    {
+      char st[32];
+      Prefs.GetPrefStr(PREFS_VIEW, pszDisp[0], st, sizeof(st));
+      UINT16 nInit = 0;
+      while (pszDisp[nInit])
+        if (strcmp(pszDisp[nInit], st))
+          ++nInit;
+        else
+          break;
+      if (NULL == pszDisp[nInit])
+        nInit = 0;
+      PaintCtrls(nInit);
+      Ani.SetCurWin(nInit, bReTitle);
+      nRbLast = RB_PM + nInit;
+    }
+    if (Ani.GetCurWin() == CPU_DISP) {
+      MSG mess = message(ID_NULL, ANI_REFRESH, Ani.GetCurWin());
+      Kernel.SendMsg(ID_ANIM, &mess);
+    }
+    OpCon.SetMode(TTY_Active | TTY_UConly | TTY_UseANSI | TTY_IBar);
+    OpCon.ReFresh();
+    Mickey.ShowPointer();
+    while (bActive) {
+      //
+      // RCOS called here - each call to Kernel will do one of:
+      //  * Dispatch a message (thus running a device driver).
+      //  * Perform task switch if quantum expired.
+      //  * Execute a pcode, task switching if pcode calls "slow" operation.
+      //
+      // We start the clock before the kernel code runs and stops it
+      // again after the Kernel has had its time slice.  This allows
+      // the Kernel to perform reasonably accurate time accounting.
+      // Each emulated disk drive also get some time to spin it wheels
+      // and see if any pending operation has completed...
+      //
+      if (bRun || bStep) {
+        Clock.Start();
+        bStep = Kernel.Run();
+        Clock.Stop();
+        ADrive.Scheduler();
+        //BDrive.Scheduler();
+      }
+      if (Rcos.AppGetMsg(msg, wParam, lParam)) {
+        switch (msg) {
+          case RC_Close:
+            if (Rcos.AppCBstate(CB_CONF, bState) == FALSE)
+              bActive = FALSE;
+            else
+              bActive = (bState ? (BOOL)(ID_CANCEL ==
+                MessageBox("Information!", pszExit, MB_YESCANCEL)) : FALSE);
+            break;
+          case RC_Click:
+            switch (wParam) {
+              case PB_RUN:
+                bRun = TRUE;
+                Rcos.AppTitle("Running..");
+                if (bFirst) {
+                  Kernel.Startup();
+                  bFirst = FALSE;
+                }
+                break;
+              case PB_PAUSE:
+                bRun = FALSE;
+                bStep = FALSE;
+                Rcos.AppTitle("Paused..");
+                break;
+              case PB_STEP:
+                bStep= TRUE;
+                bRun = FALSE;
+                Rcos.AppTitle("Step Mode Active.");
+                break;
+              case PB_ABOUT:
+                MessageBox("About the Author", pszRcos, MB_OK);
+                break;
+            default:
+              if ((wParam >= RB_PM) && (wParam <= RB_TTY_BASE + nTerms - 1))
+                nRbLast = wParam;
+              if ( ((wParam - RB_PM) != (UINT16)Ani.GetCurWin()) &&
+                   ((wParam >= RB_PM) && (wParam <= RB_DM)) ) {
+                Ani.SetCurWin((wParam - RB_PM), bReTitle);
+                MSG mess = message(ID_NULL, ANI_REFRESH, Ani.GetCurWin());
+                Kernel.SendMsg(ID_ANIM, &mess);
+              }
+            }
+            bReTitle = ((wParam <= PB_STEP) ? TRUE : FALSE);
+            break;
+          case RC_Paint:
+            PaintFixed();
+            Ani.SetCurWin(Ani.GetCurWin(), bReTitle);
+            OpCon.ReFresh();
+            Rcos.pMain->Refresh();
+            break;
+          case RC_HelpKey:
+            Rcos.AppTitle(pszTitle);
+            MessageBox("Help", pszHelp, MB_OK);
+            break;
+        }
+      }
+      //
+      // Dispatch any user keystrokes to one of the tty devices based on
+      // the current radio button setting.  Note that unless the TTY's
+      // are visible, they can't get input (reasonable).  Changing the
+      // display from the "Devices" automatically resets input to the
+      // operator's console, as does the "Devices" button at all times..
+      //
+      if (KbdIn.KeyHit(_ASC)) {
+        MSG mess(ID_Kernel, KM_KeyPress, (UINT16)KbdIn.KeyGet(_ASC));
+        UINT16 wDest = (nRbLast >= RB_TTY_BASE) ?
+                       ID_TTY_BASE + (nRbLast - RB_TTY_BASE) : ID_TTY0;
+        Kernel.PostMsg(wDest, &mess);
+      }
+    }
+    DestroyCtrls((UINT16)Ani.GetCurWin());
+  }
+}
+
+/////////////////////////////////// EOF ////////////////////////////////////
+</PRE>
+</BODY>
+</HTML>

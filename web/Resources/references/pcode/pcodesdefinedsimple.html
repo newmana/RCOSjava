@@ -1,0 +1,510 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (Win98; I) [Netscape]">
+   <title>    RCOS.java - P-Codes Defined
+  </title>
+</head>
+<body text="#EEEEEE" bgcolor="#000000" link="#FFFF00" vlink="#999999">
+&nbsp;
+<h1>P-Codes Defined</h1>
+P-codes occupy four bytes each. The first byte is the operation code (op-code).
+There are thirteen basic P-code instructions, each with a different op-code.
+<p>The second byte of the P-code instruction contains either 0 or a lexical
+level offset, or a condition code for the conditional jump instruction.
+<p>The last two bytes taken as a 16-bit integer form an operand which is
+a literal value, or a variable offset from a base in the stack, or a P-code
+instruction location, or an operation number, or a special routine number,
+depending on the op-code.
+<h3>
+Basic P-Codes</h3>
+
+<table BORDER CELLSPACING=0 CELLPADDING=2 >
+<tr>
+<th>P-Code</th>
+
+<th>Hex OP-Code</th>
+
+<th>Description</th>
+</tr>
+
+<tr>
+<td>LIT 0,N</td>
+
+<td>0x00</td>
+
+<td>load literal value onto stack by incrementing stack pointer, writing
+N to data stack.</td>
+</tr>
+
+<tr>
+<td>OPR 0,N&nbsp;</td>
+
+<td>0x01&nbsp;</td>
+
+<td>arithmetic or logical operation on top of stack&nbsp;</td>
+</tr>
+
+<tr>
+<td>LOD L,N&nbsp;</td>
+
+<td>0x02&nbsp;</td>
+
+<td>load value of variable at level offset L, base offset N in stack onto
+to of stack&nbsp;</td>
+</tr>
+
+<tr>
+<td>STO L,N&nbsp;</td>
+
+<td>0x03&nbsp;</td>
+
+<td>store value on top of stack into variable location at level offset
+L, base offset N in stack&nbsp;</td>
+</tr>
+
+<tr>
+<td>CRL L,N&nbsp;</td>
+
+<td>0x04&nbsp;</td>
+
+<td>call PROC or FUNC at P-code location N declared at level offset L&nbsp;</td>
+</tr>
+
+<tr>
+<td>INT 0,N&nbsp;</td>
+
+<td>0x05&nbsp;</td>
+
+<td>increment stackpointer (T) by N (may be negative)&nbsp;</td>
+</tr>
+
+<tr>
+<td>JMP 0,N&nbsp;</td>
+
+<td>0x06&nbsp;</td>
+
+<td>jump to P-code location N&nbsp;</td>
+</tr>
+
+<tr>
+<td>JPC C,N&nbsp;</td>
+
+<td>0x07&nbsp;</td>
+
+<td>jump if C=value on top of stack to P-code location N (C can = 0 or
+1)&nbsp;</td>
+</tr>
+
+<tr>
+<td>CSP 0,N&nbsp;</td>
+
+<td>0x08&nbsp;</td>
+
+<td>call standard procedure number N&nbsp;</td>
+</tr>
+
+<tr>
+<td>LODX L,N&nbsp;</td>
+
+<td>0x12&nbsp;</td>
+
+<td>load indexed (array) variables as above&nbsp;</td>
+</tr>
+
+<tr>
+<td>STOX L,N&nbsp;</td>
+
+<td>0x13&nbsp;</td>
+
+<td>store indexed variable as above&nbsp;</td>
+</tr>
+</table>
+
+<h3>
+P-Machine Instruction Set</h3>
+POP X means remove the top element of the stack and load it into X (the
+stack is now one smaller. PUSH X means place the value of X onto the top
+of the stack (the stack is now one bigger).
+<br>&nbsp;
+<table BORDER CELLSPACING=0 CELLPADDING=2 >
+<tr>
+<td>LIT 0,NN&nbsp;</td>
+
+<td>literal: push NN&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,0&nbsp;</td>
+
+<td>process and function, return operation&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,1&nbsp;</td>
+
+<td>negate: POP A, PUSH (-A)</td>
+</tr>
+
+<tr>
+<td>OPR 0,2&nbsp;</td>
+
+<td>add: POP A, POP B, PUSH (B+A)</td>
+</tr>
+
+<tr>
+<td>OPR 0,3&nbsp;</td>
+
+<td>subtract: POP A, POP B, PUSH (B-A)</td>
+</tr>
+
+<tr>
+<td>OPR 0,4&nbsp;</td>
+
+<td>multiply: POP A, POP B, PUSH (B*A)</td>
+</tr>
+
+<tr>
+<td>OPR 0,5&nbsp;</td>
+
+<td>divide: POP A, POP B, PUSH (B/A)</td>
+</tr>
+
+<tr>
+<td>OPR 0,6&nbsp;</td>
+
+<td>low bit: POP A, PUSH (A and 1)&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,7&nbsp;</td>
+
+<td>mod: POP A, POP B, PUSH (B mod A)&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,8&nbsp;</td>
+
+<td>test equal: POP A, POP B, PUSH (B=A)&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,9&nbsp;</td>
+
+<td>test not equal: POP A, POP B, PUSH (B&lt;>A)&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,10&nbsp;</td>
+
+<td>test less than: POP A, POP B, PUSH (B&lt;A)&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,11&nbsp;</td>
+
+<td>test greather than or equal to: POP A, POP B, PUSH (B>=A)&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,12&nbsp;</td>
+
+<td>test great than: POP A, POP B, PUSH (B>A)&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,13&nbsp;</td>
+
+<td>test less than or equal to: POP A, POP B, PUSH (B&lt;=A)&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,14&nbsp;</td>
+
+<td>logical OR: POP A, POP B, PUSH (B or A)&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,15&nbsp;</td>
+
+<td>logical AND: POP A, POP B, PUSH (B and A)&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,16&nbsp;</td>
+
+<td>logical NOT: POP A, PUSH (not A)&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,17&nbsp;</td>
+
+<td>shift left: POP A, POP B, PUSH (B left shifted A bits)&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,18&nbsp;</td>
+
+<td>shift right: POP A, POP B, PUSH (B right shifted A bits)&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,19&nbsp;</td>
+
+<td>increment: POP A, PUSH A+1&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,20&nbsp;</td>
+
+<td>decrement: POP A, PUSH A-1&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,21&nbsp;</td>
+
+<td>copy: POP A, PUSH A, PUSH A&nbsp;</td>
+</tr>
+
+<tr>
+<td>LOD L,D&nbsp;</td>
+
+<td>load a word: LOAD A from (base of level offset L)+D, PUSH A&nbsp;</td>
+</tr>
+
+<tr>
+<td>LOD 255,0&nbsp;</td>
+
+<td>load byte from memory address which is on top of stack onto top of
+stack: POP address, load A with byte from address, PUSH A&nbsp;</td>
+</tr>
+
+<tr>
+<td>LODX L,D&nbsp;</td>
+
+<td>load a word by index: POP index, load A from (base of level offset)+D+index,
+PUSH A&nbsp;</td>
+</tr>
+
+<tr>
+<td>STO L,D&nbsp;</td>
+
+<td>store a word: POP A, store A at (base of level offset L)+D&nbsp;</td>
+</tr>
+
+<tr>
+<td>**STO 255,0&nbsp;</td>
+
+<td>store a byte: POP A, POP address, store low byte at address&nbsp;</td>
+</tr>
+
+<tr>
+<td>STOX L,D&nbsp;</td>
+
+<td>store a word by index: POP index, POP A, store A at (base of level
+offset L)+D+index&nbsp;</td>
+</tr>
+
+<tr>
+<td>CAL L,A&nbsp;</td>
+
+<td>call procedure or function at p-code location A, with base at level
+offset L&nbsp;</td>
+</tr>
+
+<tr>
+<td>**CAL 255,0&nbsp;</td>
+
+<td>call procedure address in memory: POP address, PUSH return address,
+JUMP to address&nbsp;</td>
+</tr>
+
+<tr>
+<td>INT 0,NN&nbsp;</td>
+
+<td>add NN to stack pointer&nbsp;</td>
+</tr>
+
+<tr>
+<td>JMP 0,A&nbsp;</td>
+
+<td>jump to P-code location A&nbsp;</td>
+</tr>
+
+<tr>
+<td>JPC 0,A&nbsp;</td>
+
+<td>jump if true : POP A, IF (A AND 1) = 0 then jump to location A&nbsp;</td>
+</tr>
+
+<tr>
+<td>**JPC 1,A</td>
+
+<td>jump if true : POP A, IF (A AND 1) = 1 then jump to location A?</td>
+</tr>
+
+<tr>
+<td>CSP 0,0&nbsp;</td>
+
+<td>input 1 character: INPUT A, PUSH A&nbsp;</td>
+</tr>
+
+<tr>
+<td>CSP 0,1&nbsp;</td>
+
+<td>output 1 character: POP A, OUTPUT A&nbsp;</td>
+</tr>
+
+<tr>
+<td>CSP 0,2&nbsp;</td>
+
+<td>input an integer: INPUT A#, PUSH A&nbsp;</td>
+</tr>
+
+<tr>
+<td>CSP 0,3&nbsp;</td>
+
+<td>output an integer: POP A, OUTPUT A#&nbsp;</td>
+</tr>
+
+<tr>
+<td>**CSP 0,4</td>
+
+<td>input a hexadecimal number</td>
+</tr>
+
+<tr>
+<td>**CSP 0,5</td>
+
+<td>output a hexadecimal number</td>
+</tr>
+
+<tr>
+<td>CSP 0,8&nbsp;</td>
+
+<td>output a character string: POP A, FOR I := 1 to A DO BEGIN POP B, OUTPUT
+B, END</td>
+</tr>
+
+<tr>
+<td>*CSP 0,9</td>
+
+<td>semaphore close: details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,10</td>
+
+<td>semaphore create: details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,11</td>
+
+<td>semaphore open: details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,12</td>
+
+<td>semaphore signal: details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,13</td>
+
+<td>semaphore wait: details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,14</td>
+
+<td>shared memory close: details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,15</td>
+
+<td>shared memory create: details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,16</td>
+
+<td>shared memory open: details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,17</td>
+
+<td>shared memory read: details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,18</td>
+
+<td>shared memory write: details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,19</td>
+
+<td>shared memory size: details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,20</td>
+
+<td>file allocate: details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,21</td>
+
+<td>file open: details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,22</td>
+
+<td>file create: details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,23</td>
+
+<td>file close: details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,24</td>
+
+<td>file end of file (EOF): details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,25</td>
+
+<td>file delete: details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,26</td>
+
+<td>file read: details to come</td>
+</tr>
+
+<tr>
+<td>*CSP 0,27</td>
+
+<td>file write: details to come</td>
+</tr>
+</table>
+* - Addition to the standard P-Code specification (as specified from Byte).
+<br>** - Not implemented in RCOS.java.
+<p><b><u>NOTE:</u></b> When a logical operation is performed a TRUE result
+is indicated by a 1 and a 0 inidicates FALSE.
+<br>&nbsp;
+</body>
+</html>

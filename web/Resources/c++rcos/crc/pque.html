@@ -1,0 +1,87 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class pque
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>pque</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	pque
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   Priority queue used to store PIDs.  May be instantiated as ordered
+   (by Process Priority, Quantum, something), or simple FIFO.
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+ 	<A HREF="dbllist.html">DblList</A>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+  class Pque : private DblList {
+    typedef struct qmbr {     // structure used for double link list
+      INT16  nKey;            // Key for ordering (normally priority)
+      UINT16 uPid;            // index into array (which is the PID #)
+    } QMBR;
+    typedef QMBR *PQMBR;      // g++ doesn't like it being defined as
+                              // part of the previous typedef???
+    BOOL bOrdered;            // FIFO or priority ordering
+  public:
+    Pque   (BOOL = FALSE);    // default is FIFO
+   ~Pque   (void);            // kill off any left-overs
+    BOOL   PqEmpty (void);    // state of play
+    BOOL   PqFind (UINT16);   // is this PID in the queue?
+    void   PqAdd (PCB&);      // add/insert PID (perhaps in priority order)
+    UINT16 PqGet (void);      // remove PID from queue (head if ordered)
+    UINT16 PqGet (UINT16);    // remove specific PID from queue
+    void   PqImage (UINT16*); // copy queue PID numbers to passed array
+  };
+      </PRE> 
+
+</BODY>
+</HTML>

@@ -1,0 +1,103 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (Win98; U) [Netscape]">
+   <title>    RCOS.java - Kernel Messages
+  </title>
+</head>
+<body text="#EEEEEE" bgcolor="#000000" link="#FFFF00" vlink="#999999">
+&nbsp;
+<table WIDTH="100%" >
+<tr>
+<td ALIGN=LEFT>
+<h4>
+/ <a href="../../../resources.html" TARGET="body">Resources</a> / <a href="../index.html">Design</a>
+/ <a href="index.html">Messages</a> / Kernel</h4>
+</td>
+
+<td ALIGN=LEFT VALIGN=CENTER WIDTH="25%"><img SRC="rightEnd.gif" height=30 width=19><a href="../../../index.html" TARGET="_parent"><img SRC="home.gif" ALT="RCOS.java Home Page" BORDER=0 height=30 width=38></a><a href="ipc.html" TARGET="body"><img SRC="back.gif" ALT="IPC" BORDER=0 height=30 width=38></a><a href="mmu.html" TARGET="body"><img SRC="forward.gif" ALT="MMU" BORDER=0 height=30 width=38></a><img SRC="leftEnd.gif" ALT="" height=30 width=19></td>
+</tr>
+</table>
+
+<h3>
+Sent by Kernel</h3>
+
+<table BORDER CELLSPACING=0 CELLPADDING=2 >
+<tr>
+<th>To&nbsp;</th>
+
+<th>Name&nbsp;</th>
+</tr>
+
+<tr>
+<td ALIGN=LEFT VALIGN=TOP>SoftwareTerminal</td>
+
+<td ALIGN=LEFT VALIGN=TOP>CHIN, NUMIN, KeyPress, CHOUT, CHIN</td>
+</tr>
+
+<tr>
+<td ALIGN=LEFT VALIGN=TOP>ProcessScheduler</td>
+
+<td ALIGN=LEFT VALIGN=TOP>RunningToBlocked, RunningToReady, ProcessFinished,
+IllegalInstruction, EXEC, FORK</td>
+</tr>
+
+<tr>
+<td ALIGN=LEFT VALIGN=TOP>IPCManager</td>
+
+<td ALIGN=LEFT VALIGN=TOP>SEM_CREATE, SEM_OPEN, SEM_CLOSE, SEM_SIGNAL,
+SEM_WAIT, SHR_CLOSE, SHR_CREATE, SHR_OPEN, SHR_SIZE, SHR_READ, SHR_WRITE</td>
+</tr>
+
+<tr>
+<td ALIGN=LEFT VALIGN=TOP>FileSystem</td>
+
+<td ALIGN=LEFT VALIGN=TOP>F_ALLOC, F_EOF, F_DEL, F_OPEN F_CREAT, F_CLOSE,
+F_READ, F_WRITE&nbsp;</td>
+</tr>
+
+<tr>
+<td ALIGN=LEFT VALIGN=TOP>DiskScheduler&nbsp;</td>
+
+<td ALIGN=LEFT VALIGN=TOP>DiskRequestComplete&nbsp;</td>
+</tr>
+</table>
+
+<h3>
+Sent to Kernel</h3>
+
+<table BORDER CELLSPACING=0 CELLPADDING=2 >
+<tr>
+<th>From&nbsp;</th>
+
+<th>Name&nbsp;</th>
+</tr>
+
+<tr>
+<td ALIGN=LEFT VALIGN=TOP>ProcessScheduler</td>
+
+<td ALIGN=LEFT VALIGN=TOP>KillProcessMessage, NullProcess, ProcessSwitch</td>
+</tr>
+
+<tr>
+<td ALIGN=LEFT VALIGN=TOP>SoftwareTerminal</td>
+
+<td ALIGN=LEFT VALIGN=TOP>RegisterInterruptHandle, ReturnValue, BlockProcess</td>
+</tr>
+
+<tr>
+<td ALIGN=LEFT VALIGN=TOP>IPCManager</td>
+
+<td ALIGN=LEFT VALIGN=TOP>ReturnValue, BlockProcess&nbsp;</td>
+</tr>
+
+<tr>
+<td ALIGN=LEFT VALIGN=TOP>ProcessSchedulerAnimator</td>
+
+<td ALIGN=LEFT VALIGN=TOP>Quantum&nbsp;</td>
+</tr>
+</table>
+
+</body>
+</html>

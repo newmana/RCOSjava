@@ -1,0 +1,82 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class devlst
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>devlst</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	devlst
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+  The Knl class - a message switcher - holds a linked list of
+  receive ports for the messages its FIFO queue.  Each element
+  of the list contains the port ID, its status and a pointer to
+  the actual port instance. This allows the switcher to match
+  message destination with port ID and call the port's receiver
+  member with the message - thus effecting the pass.
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+ typedef struct devlst {
+    port    *pP;                // pointer to a "port" class instance
+    UINT16  uID;                // unique ID of Device owing port
+    UINT16  uClass;             // Device driver class
+    UINT16  uAssign;            // "Owner" PID, if assignable
+    UINT16  uStatus;            // current status of device
+  } DEVLST, *PDEVLST;
+
+
+      </PRE> 
+
+</BODY>
+</HTML>

@@ -1,0 +1,385 @@
+<HTML>
+<HEAD>
+  <TITLE>
+cpu-disp.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+cpu-disp.cc
+  </H1>
+<PRE>
+//************************************************************************
+//  MODULE : CPU Scheduler display module				 *
+//  AUTHOR : Ron Chernich						 *
+//  PURPOSE: Perform all Graphic display actions (except clear screen)	 *
+//	     associated with the CPU scheduler screen.			 *
+//  HISTORY:								 *
+//   26-MAR-93	First (MSC/C++ 7.00) version				 *
+//   29-APR-93	Bug animation routines added				 *
+//   16-MAY-93	Snail Trail redraw made intelligent			 *
+//   27-OCT-93  Smart Mouse pointer hiding added			 *
+//   28-FEB-94  Label lost! - Cast GfxTextExtent to INT16 in DrawQueue   *
+//   25-AUG-94  All static funcs collected under a class umbrella	 *
+//************************************************************************
+
+
+#include "cpu-disp.hh"
+#include "kernel.hh"
+
+
+///////////////////////////////////////////////////////////////////////////
+// On startup, ensure all path memory is "FALSE"
+//
+CpuAnim::CpuAnim (void)
+{
+  for (int idx = 0; idx < 8; idx++)
+    bVis[idx] = FALSE;
+}
+
+///////////////////
+// Bug Animator routine - passed a start and end point, animate a blot
+// representing the current process between where it is now, and where
+// it's headed.  The animation paths support Deitel's model of a multi
+// tasking OS, so "illogical" movements are ignored.
+//
+void CpuAnim::Anim (INT16 Start, INT16 Finish, BOOL bQuik)
+{
+  point p1, p2;
+
+  switch (Start) {
+    case INPUT_Q:
+      p1.x = PT_INPUT_LX, p1.y = PT_INPUT_LY;
+      p2.x = PT_BUG_XMIN, p2.y = p1.y;
+      MoveBug(p1, p2, bQuik);
+      p1.x = p2.x, p1.y = PT_READY_LY;
+      MoveBug(p2, p1, bQuik);
+      p2.x = PT_READY_LX, p2.y = p1.y;
+      MoveBug(p1, p2, bQuik);
+      bVis[0] = TRUE;
+      break;
+    case SUSRDY_Q:
+      p1.x = PT_SUSRDY_LX, p1.y = PT_SUSRDY_LY;
+      p2.x = PT_BUG_XMIN, p2.y = p1.y;
+      MoveBug(p1, p2, bQuik);
+      p1.y = PT_READY_LY, p1.x = p2.x;
+      MoveBug(p2, p1, bQuik);
+      p2.x = PT_READY_LX, p2.y = p1.y;
+      MoveBug(p1, p2, bQuik);
+      bVis[5] = TRUE;
+      break;
+    case CPROC_BOX:
+      p1.x = PT_CPROC_X, p1.y = PT_CPROC_Y;
+      switch (Finish) {
+	case BLOKED_Q:
+	  p2.x = p1.x, p2.y = PT_BLOKED_LY;
+	  MoveBug(p1, p2, bQuik);
+	  p1.x = PT_BLOKED_LX, p1.y = p2.y;
+	  MoveBug(p2, p1, bQuik);
+	  bVis[3] = TRUE;
+	  break;
+	case READY_Q:
+	  p2.x = p1.x, p2.y = PT_BUG_YMIN;
+	  MoveBug(p1, p2, bQuik);
+	  p1.x = PT_BUG_XMIN, p1.y = p2.y;
+	  MoveBug(p2, p1, bQuik);
+	  p2.x = p1.x, p2.y = PT_READY_LY;
+	  MoveBug(p1, p2, bQuik);
+	  p1.x = PT_READY_LX, p1.y = p2.y;
+	  MoveBug(p2, p1, bQuik);
+	  bVis[2] = TRUE;
+	  break;
+      }
+      break;
+    case READY_Q:
+      switch (Finish) {
+	case CPROC_BOX:
+	  p1.x = PT_READY_RX, p1.y = PT_READY_RY;
+	  p2.x = PT_CPROC_X, p2.y = p1.y;
+	  MoveBug(p1, p2, bQuik);
+	  p1.x = PT_CPROC_X, p1.y = PT_CPROC_Y;
+	  MoveBug(p2, p1, bQuik);
+	  bVis[1] = TRUE;
+	  break;
+	case SUSRDY_Q:
+	  p1.x = PT_READY_LX, p1.y = PT_READY_LY;
+	  p2.x = PT_BUG_XMIN, p2.y = p1.y;
+	  MoveBug(p1, p2, bQuik);
+	  p1.x = p2.x, p1.y = PT_SUSRDY_LY;
+	  MoveBug(p2, p1, bQuik);
+	  p2.x = PT_SUSRDY_LX, p2.y = p1.y;
+	  MoveBug(p1, p2, bQuik);
+	  bVis[5] = TRUE;
+	  break;
+      }
+      break;
+    case BLOKED_Q:
+      p1.x = PT_BLOKED_RX, p1.y = PT_BLOKED_RY;
+      p2.x = PT_BUG_XMAX, p2.y = p1.y;
+      MoveBug(p1, p2, bQuik);
+      switch (Finish) {
+	case READY_Q:
+	  p1.x = p2.x, p1.y = PT_BUG_YMIN;
+	  MoveBug(p2, p1, bQuik);
+	  p2.x = PT_BUG_XMIN, p2.y = p1.y;
+	  MoveBug(p1, p2, bQuik);
+	  p1.x = p2.x, p1.y = PT_READY_LY;
+	  MoveBug(p2, p1, bQuik);
+	  p2.x = PT_READY_LX, p2.y = p1.y;
+	  MoveBug(p1, p2, bQuik);
+	  bVis[4] = TRUE;
+	  break;
+	case SUSBLK_Q:
+	  p1.x = p2.x, p1.y = PT_SUSBLK_RY;
+	  MoveBug(p2, p1, bQuik);
+	  p2.x = PT_SUSBLK_RX, p2.y = p1.y;
+	  MoveBug(p1, p2, bQuik);
+	  bVis[6] = TRUE;
+	  break;
+      }
+      break;
+    case SUSBLK_Q:
+      switch (Finish) {
+	case BLOKED_Q:
+	  p1.x = PT_SUSBLK_RX, p1.y = PT_SUSBLK_RY;
+	  p2.x = PT_BUG_XMAX, p2.y = p1.y;
+	  MoveBug(p1, p2, bQuik);
+	  p1.x = p2.x, p1.y = PT_BLOKED_RY;
+	  MoveBug(p2, p1, bQuik);
+	  p2.x = PT_BLOKED_RX, p2.y = p1.y;
+	  MoveBug(p1, p2, bQuik);
+	  bVis[6] = TRUE;
+	  break;
+	case SUSRDY_Q:
+	  p1.x = PT_SUSBLK_LX, p1.y = PT_SUSBLK_LY;
+	  p2.x = PT_SUSRDY_RX, p2.y = PT_SUSRDY_RY;
+	  MoveBug(p1, p2, bQuik);
+	  bVis[7] = TRUE;
+	  break;
+      }
+      break;
+  }
+}
+
+/////////////////
+// Paint the Graphics for the CPU scheduler screen
+//
+void CpuAnim::Paint (void)
+{
+  static char *szProcTxt[] =
+    { "Process ID", "Parent ID", "Priority", "BP", "SP", "IP", "Quantum" };
+
+  DrawQueue(INPUT_QX,  INPUT_QY,  "Input Queue");
+  DrawQueue(READY_QX,  READY_QY,  "Ready Queue");
+  DrawQueue(BLOKED_QX, BLOKED_QY, "Blocked Queue");
+  DrawQueue(SUSRDY_QX, SUSRDY_QY, "Suspended-Ready Queue");
+  DrawQueue(SUSBLK_QX, SUSBLK_QY, "Suspended-Blocked Queue");
+  GfxRect(CPROC_X, CPROC_Y, CPROC_X2, CPROC_Y+CPROC_DY,
+    GFX_Fill, PROC_BG);
+  GfxRect(CPROC_X2, CPROC_Y, CPROC_X+CPROC_DX, CPROC_Y+CPROC_DY,
+    GFX_Fill, SLOT_BG);
+  GfxRect(CPROC_X, CPROC_Y, CPROC_X+CPROC_DX, CPROC_Y+CPROC_DY,
+    GFX_Frame, SLOT_TXT);
+  GfxTextColor(SLOT_TXT);
+  GfxMoveTo(CPROC_X2, CPROC_Y), GfxLineTo(CPROC_X2, CPROC_Y+CPROC_DY);
+  for (INT16 i = 0, y = CPROC_Y; i < CPROC_ITEM; i++, y += CPROC_DDY) {
+    GfxMoveTo(CPROC_X, y), GfxLineTo(CPROC_X+CPROC_DX, y);
+    GfxText(CPROC_X+4,
+      y+((SLOT_DY-GfxTextHeight()) >> 1), szProcTxt[i], GFX_Transparent);
+  }
+  if (bVis[0])
+    Anim(INPUT_Q, READY_Q, TRUE);
+  if (bVis[1])
+    Anim(READY_Q, CPROC_BOX, TRUE);
+  if (bVis[2])
+    Anim(CPROC_BOX, READY_Q, TRUE);
+  if (bVis[3])
+    Anim(CPROC_BOX, BLOKED_Q, TRUE);
+  if (bVis[4])
+    Anim(BLOKED_Q, READY_Q, TRUE);
+  if (bVis[5])
+    Anim(READY_Q, SUSRDY_Q, TRUE);
+  if (bVis[6])
+    Anim(BLOKED_Q, SUSBLK_Q, TRUE);
+  if (bVis[7])
+    Anim(SUSBLK_Q, SUSRDY_Q, TRUE);
+}
+
+/////////////////
+// Draw (or erase) the process box variable data stuff..
+//
+void CpuAnim::PaintBox (PMSG_ANIP pPcb)
+{
+  char  st[32];
+  INT16 idx = 0;
+  INT16 y = CPROC_Y;
+  static UINT16 uLastPid = NO_PROC;
+
+  GfxTextColor(SLOT_TXT);
+  if (pPcb && (uLastPid == pPcb->uNr[0])) {
+    idx = 3;
+    y += (3 * CPROC_DDY);
+  }
+  Mickey.AutoPointer(CPROC_X2, CPROC_Y, CPROC_X+CPROC_DX, CPROC_Y+CPROC_DY);
+  while (idx < CPROC_ITEM) {
+    GfxSetClip(CPROC_X2+1, y+1, CPROC_X+CPROC_DX-1, y+SLOT_DY-1);
+    GfxRect(CPROC_X2+1, y+1, CPROC_X+CPROC_DX-1, y+SLOT_DY-1,
+      GFX_Fill, SLOT_BG);
+    if (idx < 2) {
+      if (pPcb)
+	sprintf(st, "P%d", pPcb->uNr[idx]);
+      else
+	strcpy(st, ((idx == 0) ? "<Idle>" : ""));
+    }
+    if (pPcb && (idx >= 2))
+      switch (idx) {
+	case 2 : sprintf(st, "%d", pPcb->nPri); break;
+	case 3 : sprintf(st, "%d", pPcb->uNr[2]); break;
+	case 4 : sprintf(st, "%d:%04X", pPcb->uNr[4], pPcb->uNr[5]); break;
+	case 5 : sprintf(st, "%d:%s", pPcb->uNr[3], pPcb->szPCD); break;
+	case 6 : sprintf(st, "%d", (((INT16)pPcb->uNr[6]<0)?0:pPcb->uNr[6]));
+      }
+    GfxText(CPROC_X2+4, y+((SLOT_DY-GfxTextHeight()) >> 1),
+	st, GFX_Transparent);
+    GfxClrClip();
+    idx++;
+    y += CPROC_DDY;
+  }
+  Mickey.ShowPointer();
+  uLastPid = (pPcb) ? pPcb->uNr[0] : NO_PROC;
+}
+
+/////////////////////
+// Animate the "Bug" between the passed points (which will always be in
+// the same plane, x or y).  If the Kwik Draw bool is true, don't animate,
+// just do it as fast as possible (used after screen re-draw).
+//
+void CpuAnim::MoveBug (point Pts, point Ptf, BOOL bKwik)
+{
+  Mickey.AutoPointer(MIN(Pts.x, Ptf.x)-BUG_RAD, MIN(Pts.y, Ptf.y)-BUG_RAD,
+    MAX(Pts.x, Ptf.x)+BUG_RAD, MAX(Pts.y, Ptf.y)+BUG_RAD);
+  if (bKwik) {
+    GfxCircle(Pts.x, Pts.y, BUG_RAD, GFX_Fill, BUG_TAIL);
+    GfxCircle(Ptf.x, Ptf.y, BUG_RAD, GFX_Fill, BUG_TAIL);
+    if (Pts.x == Ptf.x)
+      Pts.x -= BUG_RAD, Ptf.x += BUG_RAD;
+    else
+      Pts.y -= BUG_RAD, Ptf.y += BUG_RAD;
+    GfxRect(Pts.x, Pts.y, Ptf.x, Ptf.y, GFX_Fill, BUG_TAIL);
+  }
+  else
+    if (Pts.x == Ptf.x) {
+      INT16 inc = (Ptf.y > Pts.y) ? 1 : -1;
+      while (Pts.y != (Ptf.y + inc)) {
+        GfxCircle(Pts.x, Pts.y, BUG_RAD-2, GFX_Fill, BUG_BLOT);
+        GfxCircle(Pts.x, Pts.y, BUG_RAD, GFX_Frame, BUG_TAIL);
+        Pts.y += inc;
+      }
+      GfxCircle(Ptf.x, Ptf.y, BUG_RAD, GFX_Fill, BUG_TAIL);
+    }
+    else {
+      INT16 inc = (Ptf.x > Pts.x) ? 1 : -1;
+      while (Pts.x != (Ptf.x + inc)) {
+        GfxCircle(Pts.x, Pts.y, BUG_RAD-2, GFX_Fill, BUG_BLOT);
+        GfxCircle(Pts.x, Pts.y, BUG_RAD, GFX_Frame, BUG_TAIL);
+        Pts.x += inc;
+      }
+      GfxCircle(Ptf.x, Ptf.y, BUG_RAD, GFX_Fill, BUG_TAIL);
+    }
+  Mickey.ShowPointer();
+}
+
+////////////////////
+// (Re)Draw a queue of slots for the process display at the passed Top Left.
+//
+void CpuAnim::DrawQueue (INT16 x, INT16 y, char *str)
+{
+  INT16 i, dx, dy;
+
+  GfxRect(x, y, (x+(SLOT_DX * MAX_SLOTS)), (y+SLOT_DY), GFX_Fill, SLOT_BG);
+  for (i = 0, dx = 0; i < MAX_SLOTS; i++, dx += SLOT_DX)
+    GfxRect((x+dx), y, (x+dx+SLOT_DX), (y+SLOT_DY), GFX_Frame, SLOT_BDR);
+  dx = x + (((SLOT_DX * MAX_SLOTS) - (INT16)GfxTextExtent(str)) >> 1);
+  dy = y + SLOT_DY + (GfxTextHeight() >> TEXT_OFS);
+  GfxTextColor(SLOT_TXT);
+  GfxText(dx, dy, str, GFX_Transparent);
+}
+
+//////////////////
+// Called each time all queues need displaying with arrays mapping
+// queue slots to processes
+//
+void CpuAnim::PaintAllQ (MSG_ANIQ &qs)
+{
+  GfxTextColor(PROC_TXT);
+  DispQ(qs.arr[0], INPUT_QX, INPUT_QY, SLOT_DX);
+  DispQ(qs.arr[1], READY_QX+((MAX_SLOTS-1)*SLOT_DX),  READY_QY);
+  DispQ(qs.arr[2], BLOKED_QX+((MAX_SLOTS-1)*SLOT_DX), BLOKED_QY);
+  DispQ(qs.arr[3], SUSRDY_QX+((MAX_SLOTS-1)*SLOT_DX), SUSRDY_QY);
+  DispQ(qs.arr[4], SUSBLK_QX+((MAX_SLOTS-1)*SLOT_DX), SUSBLK_QY);
+}
+
+///////////////
+// Repaint the processes in the passed Q using the (updated) array..
+//
+void CpuAnim::RefreshQ (UINT16 q, UINT16 *pNr)
+{
+  INT16 x, y, dx = -SLOT_DX;
+  
+  switch (q) {
+    case INPUT_Q:
+      x = INPUT_QX+1, y = INPUT_QY+1, dx = SLOT_DX;
+      break;
+    case READY_Q:
+      x = READY_QX+((MAX_SLOTS-1)*SLOT_DX)+1, y = READY_QY+1;
+      break;
+    case SUSRDY_Q:
+      x = SUSRDY_QX+((MAX_SLOTS-1)*SLOT_DX)+1, y = SUSRDY_QY+1;
+      break;
+    case SUSBLK_Q:
+      x = SUSBLK_QX+((MAX_SLOTS-1)*SLOT_DX)+1, y = SUSBLK_QY+1;
+      break;
+    case BLOKED_Q:
+      x = BLOKED_QX+((MAX_SLOTS-1)*SLOT_DX)+1, y = BLOKED_QY+1;
+      break;
+  }
+  INT16 xpos, ypos = y + ((SLOT_DY - GfxTextHeight()) >> 1) - 1;
+  GfxTextColor(PROC_TXT);
+  for (INT16 i = 0; i < MAX_PROC; i++, pNr++, x += dx) {
+    Mickey.AutoPointer(x, y, x+SLOT_DX, y+SLOT_DY);
+    GfxSetClip(x, y, x+SLOT_DX-2, y+SLOT_DY-2);
+    GfxRect(x, y, x+SLOT_DX-2, y+SLOT_DY-2, GFX_Fill, SLOT_BG);
+    if (*pNr != NO_PROC) {
+      char st[4];
+      sprintf(st, "P%d", *pNr);
+      xpos = x + ((SLOT_DX - GfxTextExtent(st)) >> 1);
+      GfxText(xpos, ypos, st, GFX_Transparent);
+    }
+    GfxClrClip();
+    Mickey.ShowPointer();
+  }
+}
+
+//////////////////
+// Label a queue's slots with the processes occupying them
+//
+void CpuAnim::DispQ (UINT16 *pq, INT16 x, INT16 y, INT16 dx)
+{
+  char  sz[4];
+  INT16 xpos, ypos = y + ((SLOT_DY - GfxTextHeight()) >> 1);
+
+  Mickey.AutoPointer(x, y, x+SLOT_DX, y+SLOT_DY);
+  for (int i = 0; i < MAX_PROC; i++, pq++, x += dx) {
+    if (*pq == NO_PROC)
+      break;
+    sprintf(sz, "P%d", *pq);
+    xpos = x + ((SLOT_DX - GfxTextExtent(sz)) >> 1) + 1;
+    GfxText(xpos, ypos, sz, GFX_Transparent);
+  }
+  Mickey.ShowPointer();
+}
+
+///////////////////////////////// EOF //////////////////////////////////////
+</PRE>
+</BODY>
+</HTML>

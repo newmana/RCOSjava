@@ -1,0 +1,122 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class Exec
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>Exec</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	Exec
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   This class performs all process control operations.  There will only
+   be one of him which is a private member of the Kernel (only one of
+   her, too).  When instantiated by the kernel, the class receives a
+   reference to the kernel (sort of like device drivers) which it may
+   use to send/post messages.
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      struct <A HREF="sh_tag.html">sh_tag</A>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+  class Exec {
+    Knl    *pTx;                    // pointer to out master's post box
+    Pque   PqIn;                    // input queue (initialized, not started)
+    Pque   PqBlocked;               // Procs waiting on an event
+    Pque   PqSusReady;              // Procs suspended while ready
+    Pque   PqSusBlock;              // Procs suspended while blocked
+    Pque   PqReady;                 // Procs ready to roll (perhaps rock, too)
+    PCB    arrPCB[MAX_PROC];        // array of PCB structures
+    MCB    arrMCB[MAX_PROC];        // per process region table structures
+    Sem4   arrSem[MAX_SEM];         // array of available semaphores
+    QmMgr  ShareMem;                // shared memory manager
+    UINT16 nQuantum;                // default quantum per process
+    UINT16 uProcCnt;                // current number of processes in system
+    UINT16 uCurProc;                // current (running) proc - if any
+    BOOL   LoSked (UINT16);         // Low Level scheduler (for I/P queue)
+    void   Sked (void);             // dispatch next ready process to CPU
+    UINT16 Fork (void);             // create new process from current
+    BOOL   Kill (UINT16);           // remove process
+    BOOL   Start (UINT16);          // move it from input to ready
+    BOOL   Resume (UINT16);         // resume suspended process
+    BOOL   Suspend (UINT16);        // suspend this process
+    void   RunCon (PCB&);           // Run the Console process
+    void   RunProc (PCB&, MCB&);    // Run the current User process
+    void   DeCode (UINT32, char*);  // decode a p-code
+    void   CreateCon (void);        // Create the "console" process
+    void   InitCon (void);          // Pre-start code for console
+    void   ParseCon (char*);        // Parse and action operator commands
+    UINT16 IpcOpen (char*);         // register as user of named semaphore
+    UINT16 IpcAlloc (char*, UINT16);// allocate next free for use & set count
+    INT16  IpcWait (UINT16, UINT16);// process wants to use this samaphore
+    void   IpcSignal(UINT16,UINT16);// process finished with it for now
+    void   IpcClose (UINT16,UINT16);// free and release (if no other users)
+    INT16  SmOpen (char*);          // open existing shared mem by name
+    INT16  SmCreate (char*, UINT16);// create named/annon shared mem block
+    INT16  SmClose (UINT16, UINT16);// close usage of shared mem for process
+    INT16  SmLength (UINT16);       // get length of shared mem block from ID
+    BOOL   SmRead (UINT16,UINT16,INT16*);  // get int data of block at offset
+    BOOL   SmWrite (UINT16,UINT16,INT16*); // set int data of block at offset
+  public:
+    Exec (Knl*, UINT16);            // Initialize Exec (and Console)
+    ~Exec (void);                   // Complete close down procedure
+    void Block (void);              // Block current process
+    BOOL Dispatch (void);           // Ready Queue manager
+    void StartCon (void);           // Startup process Zero (console)
+    void PostReply (UINT16, PMSG);  // Add message to queue for process
+    void GetPcom (PMSG_ANIP);       // Snapshot current PCB
+    void GetQcom (UINT16, PMSG_ANIQ); // Snapshot Queue contents
+  };
+
+
+      </PRE> 
+
+</BODY>
+</HTML>

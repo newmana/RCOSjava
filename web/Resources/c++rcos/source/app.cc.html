@@ -1,0 +1,345 @@
+<HTML>
+<HEAD>
+  <TITLE>
+app.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+app.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : App - "application" body code.				  *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Open a graphics screen, instanciate all the base controls	  *
+//	     types (which will be empty) and provide a messaging system   *
+//	     on which an application can be built.			  *
+//  HISTORY:                                                              *
+//   22-JAN-93	First (MSC/C++ 7.00) version				  *
+//   28-JAN-93	Window class added and App amended accordingly		  *
+//   11-APR-93  Mouse activation code added				  *
+//   27-OCT-93  Mouse pointer should be hidden during Window open/close   *
+//*************************************************************************
+
+#include "app.hh"
+
+
+/////////////
+// Timer object which should be private to App, but I can't make that work!
+//
+// NOTE: Because declaring a static class data member does "define" it,
+// actual allocation of storage must take place elsewhere.. this is where.
+//
+Timer  Clock;
+UINT32 nTicks;
+
+
+////////////////////////// App Class Routines /////////////////////////////
+//
+// Constructor initialises the graphic subsystem and (if successful)
+// creates the window title bar, then color fills the desk-top space.
+//
+App::App (char *st)
+{
+  if (!GfxInit())
+    bGfxOpen = FALSE;
+  else {
+    bGfxOpen = TRUE;
+    pMain = new AppWindow;
+    if (st)
+      pMain->Title(st);
+  }
+}
+
+/////////////////////
+// Destructor performs DOS text mode restoration (if in graphics mode)
+// and destroys the system menu and associated gadgets..
+//
+App::~App ()
+{
+  if (bGfxOpen) {
+    delete pMain;
+    GfxClose();
+  }
+}
+
+//////////////////
+// This is the message buffer stuffer.	It is run at every reasonable
+// opportunity to extract control events (ALT-key presses and eventually,
+// mouse left-button presses) from the ring buffer, see if they correspond
+// to any valid control acellerators, and if so, create a message in the
+// FIFO message queue about the event for later dispatch.
+//
+void App::AppRun (void)
+{
+  char  ch;
+  INT16 n = 0;
+  point HotSpot;
+
+  if (Mickey.GetEvent(HotSpot))
+    n = pMain->Scan(HotSpot);
+  else
+    if (KbdIn.KeyHit(_ALT)) {
+      ch = KbdIn.KeyGet(_ALT);
+      n = pMain->Scan(ch);
+    }
+  if (n) {
+    msgstruct m = { RC_Userapp, RC_Click, (UINT16)n, 0L };
+    if (n == ID_HELP)
+      m.message = RC_HelpKey;
+    if (n == ID_CLOSE)
+      m.message = RC_Close;
+    if (n == ID_REDRAW)
+      m.message = RC_Paint;
+    pm = (msgstruct*)DblAppend((void*)&m, (UINT16)sizeof(msgstruct));
+  }
+}
+
+////////////////
+// The application calls here to see if there are any messages for it..
+// We'll take the opprotunity to run the message extractor, the remove
+// the first message targeted for the client, copy the relevant data into
+// the passed var references, and return a result.
+// RETURNS: TRUE  .. message data loaded into parameters referenced
+//	    FALSE .. nothing for you yet.
+//
+BOOL App::AppGetMsg (UINT16 &msg, UINT16 &wParam, UINT32 &lParam)
+{
+
+  AppRun();
+  pm = (msgstruct*)DblGetHead();
+  while (pm) {
+    if (pm->dest == RC_Userapp) {
+      msg = pm->message;
+      wParam = pm->wParam;
+      lParam = pm->lParam;
+      DblDelete();
+      return TRUE;
+    }
+    pm = (msgstruct*)DblGetNext();
+  }
+  return FALSE;
+}
+
+/////////////////////////// Window Class Routines //////////////////////////
+//
+// Window killer - close all windows.
+//
+AppWindow::~AppWindow (void)
+{
+  pw = (PWIN)DblGetTail();
+  while (pw) {
+    if (pw->pi) {
+      GfxPutImage(pw->r.ul.x, pw->r.ul.y, pw->pi);
+      GfxFreeImage(pw->pi);
+    }
+    if (pw->Sys)
+      delete pw->Sys;
+    pw->Pb.BtnKill(0);
+    pw->Rb.BtnKill(0);
+    pw->Cb.BtnKill(0);
+    DblDelete();
+    pw = (PWIN)DblGetPrev();
+  }
+}
+
+///////////////
+// delete the topmost (latest) window
+//
+void AppWindow::Close (void)
+{
+  if (pw = (PWIN)DblGetTail()) {
+    if (pw->pi) {
+      Mickey.HidePointer();
+      GfxPutImage(pw->r.ul.x, pw->r.ul.y, pw->pi);
+      GfxFreeImage(pw->pi);
+      pw->pi = NULL;
+      Mickey.ShowPointer();
+    }
+    if (pw->Sys)
+      delete pw->Sys;
+    DblDelete();
+    pw = (PWIN)DblGetTail();
+  }
+}
+
+///////////
+// Get state of a check box by ID
+//
+BOOL AppWindow::CBstate (UINT16 id, BOOL &bState)
+{
+  pw = (PWIN)DblGetTail();
+  while (pw) {
+    if (pw->Cb.State(id, bState))
+      return TRUE;
+    if (pw->mode == RC_Modal)
+      break;
+    pw = (PWIN)DblGetPrev();
+  }
+  return FALSE;
+}
+
+/////////////
+//  Change the title text of the current window.
+//
+void AppWindow::Title (char *st)
+{
+  pw = (PWIN)DblGetTail();
+  if ((pw->mode == RC_Modeless) && pw->Sys)
+    pw->Sys->SysTitle(st, pw->r);
+}
+
+//////////////////
+// See if the passed Hot Key character is associated with any control in
+// the current (tail-end) window.  If not, while there are more windows
+// and the current one is not type MODAL, check out the previous one..
+// RETURNS: ID of control activated or ZERO for unregistered key
+//
+UINT16 AppWindow::Scan (char ch)
+{
+  UINT16 n, k;
+
+  pw = (PWIN)DblGetTail();
+  while (pw) {
+    n = (k = pw->Pb.Scan(ch)) ? k :
+	(k = pw->Rb.Scan(ch)) ? k :
+	(k = pw->Cb.Scan(ch)) ? k : pw->Sys->Scan(ch);
+    if (n)
+      return n;
+    if (pw->mode == RC_Modal)
+      break;
+    pw = (PWIN)DblGetPrev();
+  }
+  return (UINT16)0;
+}
+
+//////////////////
+// Very similar to the above, but uses a point..
+// RETURNS: ID of control activated or ZERO for unregistered key
+//
+UINT16 AppWindow::Scan (point& Pt)
+{
+  UINT16 n, k;
+
+  pw = (PWIN)DblGetTail();
+  while (pw) {
+    n = (k = pw->Pb.Scan(Pt)) ? k :
+	(k = pw->Rb.Scan(Pt)) ? k :
+	(k = pw->Cb.Scan(Pt)) ? k : pw->Sys->Scan(Pt);
+    if (n)
+      return n;
+    if (pw->mode == RC_Modal)
+      break;
+    pw = (PWIN)DblGetPrev();
+  }
+  return (UINT16)0;
+}
+
+////////////////
+// create a window control gadget.
+// RETURNS: TRUE  .. control created
+//	    FALSE .. invalid type, out of memory, something bad..
+//
+BOOL AppWindow::Create (UINT16 ctrl, UINT16 id, char *st,
+                        INT16 p1, INT16 p2, INT16 p3, INT16 p4)
+{
+  pw = (PWIN)DblGetTail();
+  switch (ctrl) {
+    case RC_PushBtn:
+      return pw->Pb.Create(id, st, p1, p2, p3, p4);
+    case RC_RadioBtn:
+      return pw->Rb.Create(id, st, p1, p2, (BOOL)p3);
+    case RC_CheckBox:
+      return pw->Cb.Create(id, st, p1, p2, (BOOL)p3);
+  }
+  return FALSE;
+}
+
+/////////////////
+// Kill off a control..
+//
+BOOL AppWindow::Destroy (UINT16 ctrl, UINT16 id)
+{
+  switch (ctrl) {
+    case RC_PushBtn:  return pw->Pb.Destroy(id);
+    case RC_RadioBtn: return pw->Rb.Destroy(id);
+    case RC_CheckBox: return pw->Cb.Destroy(id);
+  }
+  return FALSE;
+}
+
+/////////////////
+// Open a new window in <md> mode using the passed corners.  Mode and params:
+// RC_Modal - No system menu/close gadget
+//	      Border/Interior colors are n2/n1
+//	      If <st> is not NULL, window gets title bar + title
+//	      Area occupied by window will be saved and restored if possible.
+// RC_Modeless - Window gets Title bar, close gadget and optional title
+//	      Window has no border, interior color = n2
+//	      Occupied area not saved.	User responsible for re-draw.
+// RETURNS: TRUE  .. window opened and "running"
+//	    FALSE .. illegal mode.
+//
+BOOL AppWindow::Open (UINT16 md, char *st, INT16 x1, INT16 y1,
+                      INT16 x2, INT16 y2, UINT16 n1, UINT16 n2)
+{
+  WIN  w;
+  BOOL bCreated = FALSE;
+
+  w.mode = md;
+  w.r = rect(x1, y1, x2, y2);
+  Mickey.HidePointer();
+  if (w.mode == RC_Modeless) {
+    w.pi = NULL;
+    w.Sys  = new SysMenu;
+    GfxRect(x1, y1+SYS_Height+1, x2, y2, GFX_Fill, n1);
+    GfxRect(x1, y1, x2, y2, GFX_Frame, _Black);
+    bCreated = TRUE;
+  }
+  if (w.mode == RC_Modal) {
+    w.Sys = NULL;
+    w.pi = GfxGetImage(x1, y1, x2, y2);
+    GfxRect(x1, y1, x2, y2, GFX_Fill, n1);
+    GfxRect(x1+4, y1+4, x2-4, y2-4, GFX_Fill, n2);
+    GfxRect(x1, y1, x2, y2, GFX_Frame, _Black);
+    if (st) {
+      GfxRect(x1+5, y1+5, x2-5, y1+SYS_Height+4, GFX_Fill, n1);
+      GfxSetClip(x1+5, y1+5, x2-5, y1+SYS_Height+4);
+      INT16 y = y1 + 5 + ((SYS_Height - GfxTextHeight()) >> 1);
+      INT16 x = x1 + ((x2 - x1 - GfxTextExtent(st)) >> 1);
+      GfxTextColor(_BrightWhite);
+      GfxText(x, y, st, GFX_Transparent);
+      GfxClrClip();
+    }
+    bCreated = TRUE;
+  }
+  Mickey.ShowPointer();
+  if (bCreated)
+    DblAppend((void*)&w, (UINT16)sizeof(WIN));
+  return bCreated;
+}
+
+////////////////////
+// For circumstances where all control gadgets need to be repainted
+// (like we were just exposed in an XWindow environment, or the display
+// has become trashed somehow), repaint all defined controls..
+//
+void AppWindow::Refresh (void)
+{
+
+  Mickey.HidePointer();
+  pw = (PWIN)DblGetTail();
+  while (pw) {
+    pw->Pb.Refresh();
+    pw->Rb.Refresh();
+    pw->Cb.Refresh();
+    pw = (PWIN)DblGetNext();
+  }
+  Mickey.ShowPointer();
+}
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,78 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS.java - IPCManagerAnimator Messages
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999">
+<TABLE WIDTH="100%">
+  <TR>
+    <TD ALIGN=LEFT>
+      <H4>/ <A HREF="../../../resources.html" TARGET="body">Resources</A> /
+      <A HREF="../index.html">Design</A> / <A HREF="index.html">Messages</A>
+      / IPCManagerAnimator </H4>
+    </TD>
+    <TD ALIGN=LEFT WIDTH=25% VALIGN="CENTER">
+      <IMG SRC="../../../pics/rightEnd.gif" WIDTH="19" HEIGHT="30"><A HREF="../../../index.html" TARGET="_parent"><IMG SRC="../../../pics/home.gif" BORDER="0" ALT="RCOS.java Home Page" WIDTH="38" HEIGHT="30"></A><A HREF="filesystemanimator.html" TARGET="body"><IMG SRC="../../../pics/back.gif" BORDER=0 ALT="FileSystemAnimator" WIDTH="38" HEIGHT="30"></A><A HREF="ProcessManagerAnimator.html" TARGET="body"><IMG SRC="../../../pics/forward.gif" BORDER=0 ALT="ProcessManagerAnimator" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../../pics/leftEnd.gif" ALT="" WIDTH="19" HEIGHT="30"><BR>
+    </TD>
+  </TR>
+</TABLE>
+As this Animator doesn't allow the user to modify the memory manager, shared
+memory or semaphores directly, no messages are sent.  The messages that
+are received are used to display the current semaphore, shared memory and
+memory usage.
+<p>
+Currently, reading/writing bytes/pages are treated the same.
+<H3>Sent by IPCManagerAnimator</H3>
+  <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+    <TR>
+      <TH>
+        To
+      </TH>
+      <TH>
+        Name
+      </TH>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        None<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        None<BR>
+      </TD>
+    </TR>
+  </TABLE>
+<BR>
+<H3>
+  Processed by IPCManagerAnimator
+</H3>
+  <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+    <TR>
+      <TH>
+        From
+      </TH>
+      <TH>
+        Name
+      </TH>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        MMU<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        AllocatedPages, DeallocatedPages, FinishedMemoryRead, FinishedMemoryWrite<BR>
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        CPU<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        ReadBytes, WriteBytes, ReadPage, WritePage<BR>
+      </TD>
+    </TR>
+  </TABLE>
+</FONT>       
+</BODY>
+</HTML>

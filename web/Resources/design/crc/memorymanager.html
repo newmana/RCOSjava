@@ -1,0 +1,86 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    MemoryManager CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>MemoryManager</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      MemoryManager
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Responsible for allocating memory to processes and operating system
+      should also be used to read and write memory locations.  Based on
+      MessageHandler class.
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      <A HREF="messagehandler.html">MessageHandler</A> <BR>
+      <A HREF="memoryblock.html">MemoryBlock</A> - a block of memory
+        allocated by the MemoryManager to a process
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+  <UL>
+     <P>
+       <LI> <B>HandleMessage</B>
+     <P>
+       <LI> <B>MemoryBlock theBlock = AllocateMemory( int size );</B><BR>
+            Given a size of memory requested find and allocate memory block
+     <P>
+       <LI> <B>DeAllocateMemory( MemoryBlock theBlock )</B><BR>
+     <P>
+       <LI> <B>CompactMemory()</B><BR>
+            Optional function might be used on early systems
+     <P>
+       <LI> <B>MemoryBlock theBlock = ReadMemory( int start, int size )</B><BR>
+            return a memory block in response for a read memory request
+     <P>
+       <LI> <B>int status = WriteMemory( int start, int size, MemoryBlock theBlock )</B><BR>
+            format may change
+  </UL>
+
+</BODY>
+</HTML>

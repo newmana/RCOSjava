@@ -1,0 +1,131 @@
+<HTML>
+<HEAD>
+  <TITLE>
+btn.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+btn.hh
+  </H1>
+<PRE>
+//***********************************************************************
+//  MODULE : Btn - Class Header                                         *
+//  AUTHOR : Ron Chernich                                               *
+//  PURPOSE: Class header for "button" like objects used in RCOS        *
+//  HISTORY:                                                            *
+//   18-JAN-93  First (MSC/C++ 7.00) version                            *
+//***********************************************************************
+
+#ifndef _RCOS_BTN
+
+  #include "rcos.hh"
+  #include "obj.hh"
+  #include "str.hh"
+  #include "dbllist.hh"
+
+//  #ifdef _DOS_ENV
+    #define ALT_Q     16  // ALT-Key combinations used as button "hot-key"
+    #define ALT_W     17  // flagged by a "&" prefix in the button label
+    #define ALT_E     18
+    #define ALT_R     19
+    #define ALT_T     20
+    #define ALT_Y     21
+    #define ALT_U     22
+    #define ALT_I     23
+    #define ALT_O     24
+    #define ALT_P     25
+    #define ALT_A     30
+    #define ALT_S     31
+    #define ALT_D     32
+    #define ALT_F     33
+    #define ALT_G     34
+    #define ALT_H     35
+    #define ALT_J     36
+    #define ALT_K     37
+    #define ALT_L     38
+    #define ALT_Z     44
+    #define ALT_X     45
+    #define ALT_C     46
+    #define ALT_V     47
+    #define ALT_B     48
+    #define ALT_N     49
+    #define ALT_M     50
+
+    #define ALT_F1   104
+    #define ALT_F2   105
+    #define ALT_F3   106
+    #define ALT_F4   107
+    #define ALT_F5   108
+    #define ALT_F6   109
+    #define ALT_F7   110
+    #define ALT_F8   111
+    #define ALT_F9   112
+    #define ALT_F10  113
+    #define ALT_F11  114
+    #define ALT_F12  115
+
+    #define ALT_1    120
+    #define ALT_2    121
+    #define ALT_3    122
+    #define ALT_4    123
+    #define ALT_5    124
+    #define ALT_6    125
+    #define ALT_7    126
+    #define ALT_8    127
+    #define ALT_9    128
+    #define ALT_0    129
+
+    #define F1_KEY    59
+    #define F2_KEY    60
+    #define F3_KEY    61
+    #define F4_KEY    62
+    #define F5_KEY    63
+    #define F6_KEY    64
+    #define F7_KEY    65
+    #define F8_KEY    66
+    #define F9_KEY    67
+    #define F0_KEY    68
+    #define F11_KEY   69
+    #define F12_KEY   70
+    
+ // #endif
+
+  ////////////////////////////
+  // Base information common to all button types (which are based on this)
+  // Since they will need direct access to this data, the structure must
+  // lie outside the class context..
+  //
+  struct btn {
+    UINT16 Id;          // The (unique) ID by which the control is known
+    UINT16 status;      // Storage for Bit significant control data
+    char   HotKey;      // The ALT-key which will activate the control
+    Str    *pst;        // An (optional) label for the object
+    rect   r;           // "Hot" Area of control
+  };
+
+  ///////////////////
+  // Generalised class, based on a double linked list, to support
+  // Push Buttons, Radio Buttons, Check Boxes and System Menu objects.
+  //
+  class Btn : public DblList {
+  public:
+    btn *pb;
+    Btn () { };					// no default needed
+    ~Btn ();					// but a destructor is
+    btn *BtnHit  (const char);			// activated by Keypress
+    btn *BtnHit  (point&);			// or by mouse click
+    void BtnKill (const UINT16);		// destroy all trace by ID
+    BOOL BtnFind (const UINT16);		// locate by ID
+    BOOL BtnNew  (const UINT16, char*, rect&);	// create new object with ID
+    virtual void Refresh (void) = 0;		// re-render gadget image(s)
+  };
+
+  #define _RCOS_BTN
+
+#endif
+
+/************************************ EOF ********************************/
+</PRE>
+</BODY>
+</HTML>

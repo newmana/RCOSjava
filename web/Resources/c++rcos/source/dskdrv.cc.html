@@ -1,0 +1,351 @@
+<HTML>
+<HEAD>
+  <TITLE>
+dskdrv.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+dskdrv.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : SimDsk - Conceptual Disk Driver for all types of drives.     *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: This object Provides the Intermediate level IO routines      *
+//           (select, seek, etc) to interface between the File System and *
+//           multiple instances of all types of physical disk units.      *
+//  HISTORY:                                                              *
+//    13-AUG-94 First version                                             *
+//    17-AUG-94 Animation features added                                  *
+//*************************************************************************
+
+#include "cpmfs.hh"
+
+  #include <fcntl.h>
+#ifdef _DOS_ENV
+  #include <sys\types.h>
+  #include <sys\stat.h>
+  #include <io.h>
+
+#endif
+
+#ifdef UNIX
+  #include <sys/types.h>
+  #include <sys/stat.h>
+  #include <unistd.h>
+#endif
+#include <string.h>
+
+
+///////////////////////////////////////////////////////////////////////////
+// First we have the im plemenation of a FIFO queue that holds pending
+// disk transfer requests..
+//
+XfReq* TreqstQ::Get (UINT16 n)
+{
+  XfReq *p = Peek(n);
+  if (p) {
+    DblDelete();
+    --nInq;
+  }
+  return p;
+}
+
+XfReq* TreqstQ::Peek (UINT16 n)
+{
+  XfReq *p = (XfReq*)DblGetHead();
+  if (n)
+    while (--n)
+      if (NULL == (p = (XfReq*)DblGetNext()))
+        break;
+  return p;
+}
+
+void TreqstQ::Purge (UINT16 n)
+{
+  XfReq *p = Get(n);
+}
+
+void TreqstQ::PurgeAll (void)
+{
+  while (nInq)
+    Purge();
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+// The disk device is simulated through a host OS sequential file of the
+// passed mount name.  If the file (created if necessary) length does not
+// match the "disk" parameters, it is "initialized" by writing all "0xE5"
+// records out to the required length. Info conveyed in the DPB are stored.
+//
+DskModel::DskModel (UINT16 id, UINT16 cls, Knl *pK, char *pSt, DPB& dsk, BYTE n) :
+  port(id, cls, pK), nCurTrk(0), nCurAngle(0), nOpCnt(0), lHoldTime(0),
+  nLid(n), bOk(FALSE), stage(DD_IDLE)
+{
+  char stName[128], *cp;
+
+  strcpy(stName, pSt);
+  cp = strrchr(stName, '.');
+  if ((NULL == cp) || (strlen(stName) - (cp - stName) > 4))
+    strcat(stName, ".dsk");
+
+  #ifdef UNIX
+	  fd = open(stName, O_CREAT | O_RDWR, S_IREAD | S_IWRITE );
+  #endif
+  #if defined(BC20) || defined(BC31)
+	  fd = open(stName, O_CREAT | O_BINARY | O_RDWR, S_IREAD | S_IWRITE);
+  #endif
+  #if !defined(BC31) && !defined(BC20) && !defined(UNIX)
+	  fd = open(stName, _O_CREAT | _O_BINARY | _O_RDWR, _S_IREAD | _S_IWRITE);
+  #endif
+
+  if (fd > 0) {
+    struct stat info;
+    message Msg(uID, ANI_DCREAT, nLid, (void*)&dsk.nTrks);
+    stat(stName, &info);    
+    long nBlks = dsk.nSecs * dsk.nTrks * dsk.nSides;
+    if (info.st_size != (long)(nBlks * dsk.nSecSize)) {
+      char *pBuf = new char[dsk.nSecSize];
+      if (NULL == pBuf)
+        return;
+      memset(pBuf, 0xe5, dsk.nSecSize);
+      for (int i = 0; i < nBlks; i++)
+        if ((int)dsk.nSecSize != write(fd, pBuf, dsk.nSecSize))
+          return;
+      //_commit(fd);
+      DELETE_ARRAY pBuf;
+    } 
+    nBps = dsk.nSecSize;
+    nBpt = nBps * dsk.nSecs * dsk.nSides;
+    nBpd = nBpt * dsk.nTrks;
+    nSecAngle = (BYTE)(360 / (dsk.nSecs + 1));
+    nAngleInc = dsk.nAngleInc;
+    nTrkInc   = dsk.nTrkInc;
+    nSettle   = dsk.nSettle;
+    nErrRate  = dsk.nErrRate;
+    lLastTime = Clock.GetTicks();
+    pTx->SendMsg(ID_ANIM, &Msg);
+    bOk = TRUE;
+  }
+}
+
+//////////////
+// Close our associated disk file.
+//
+DskModel::~DskModel (void)
+{
+  if (fd > 0)
+    close(fd);
+}
+
+/////////////
+// Calculate offset for a transfer, doing rudimentary validation
+// RETURNS -1 .. record out of range, else record number.
+//
+long DskModel::CalcOffset (void)
+{
+  XfReq *p = ChanQ.Peek();
+  long nOfs = (p->nTrk * p->nSid * nBpt) + ((p->nSec - 1) * nBps);
+  return (nOfs <= (long)(nBpd - nBps)) ? nOfs : -1L;
+}
+
+/////////////////////
+// Internal read simulates a "soft" (recoverable) error every <nErrRate>
+// operations. On others, it calcs the location of the sector sized
+// file sector to transfer and does so the address at the head of Q.
+// RETURNS: TRUE  .. transfer Ok
+//          FALSE .. bad params or soft (or even a host hard) error
+//
+BOOL DskModel::Read (void)
+{
+  if (++nOpCnt >= nErrRate)
+    nOpCnt = 0;
+  else {
+    XfReq *p = ChanQ.Peek();
+    long nOfs = CalcOffset();
+    if ((nOfs > 0L) &&
+        (nOfs == lseek(fd, nOfs, SEEK_SET)) &&
+        ((int)nBps == read(fd, p->pDma, nBps)))
+      return TRUE;
+  }
+  return FALSE;
+}
+
+/////////////////////
+// Same sort of thing as for read operation..
+// RETURNS: TRUE  .. transfer Ok
+//          FALSE .. bad params or soft (or even a host hard) error
+//
+BOOL DskModel::Write (void)
+{
+  if (++nOpCnt >= nErrRate)
+    nOpCnt = 0;
+  else {
+    XfReq *p = ChanQ.Peek();
+    long nOfs = CalcOffset();
+    if ((nOfs > 0L) &&
+        (nOfs == lseek(fd, nOfs, SEEK_SET)) &&
+        ((int)nBps == write(fd, p->pDma, nBps)))
+      return TRUE;
+  }
+  return FALSE;
+}
+
+///////////////
+// Port receive member simply adds passed Transfer Request to the queue
+// of transfer rwquests (FIFO). A message is sent to the animator in case
+// the disk model is being displayed, which will update the queue contents.
+//
+void DskModel::RxPort (PMSG pMsg)
+{
+  if (pMsg->pBody) {
+    ChanQ.Put((XfReq*)pMsg->pBody);
+    TransQ Tq(&ChanQ);
+    message msg(uID, ANI_CHAN_ENQ, nLid, &Tq);
+    pTx->SendMsg(ID_ANIM, &msg);
+  }
+}
+
+//////////////////
+// This member is called on every pass around the RCOS loop in <main>,
+// effectively acting as the disk sub-system's time slice.  If there
+// are no transfers in the queue, we just update the angular disk
+// position and exit. If there is something at the head of queue, we:
+//
+//   1. Step the heads until nCurTrk = required track (with animation),
+//   2. Delay for the head settle period,
+//   3. After the settle, calculate the delay until the disk rotation
+//      (based on the current angular position) will bring the required
+//      sector "under" the heads,
+//   4. Perform the read or write operation, then
+//   5. Remove the head of queue <XfReq> object, call the animator, then
+//      call the CpmDsk::NxtFunc function (using the pointer in the XfReq)
+//      which is analogous to issuing a "disk operation" complete interrupt.
+//
+void DskModel::Scheduler (void)
+{
+  UINT32 lTm = Clock.GetTicks();
+  UINT16 nMs = (UINT16)(lTm - lLastTime);
+  UINT16 ndTheta = nMs / nAngleInc;
+  if (ndTheta) {
+    if (361 < (nCurAngle += ndTheta))
+      nCurAngle %= 360;
+    message msg(uID, ANI_SPIN, nLid, (void*)&nCurAngle);
+    pTx->SendMsg(ID_ANIM, &msg);
+  }
+  lLastTime = lTm;
+  //
+  // If there is a transfer pending, do (in order):
+  //  1. Seek to track
+  //  2. Wait head settling time
+  //  3. Wait out rotational latency
+  //  4. Perform transfer.
+  // if (by luck) we are already on track, skip steps 1 and 2
+  //
+  if (ChanQ.GetLen()) {
+    XfReq *p = ChanQ.Peek();
+    switch (stage) {
+      //
+      // The disk drive has nothing to do and a transfer is waiting. If we
+      // are on-cylinder, we can immediatly begin scanning for the required
+      // sector. Otherwise we'll have to go the whole hog - seek, settle etc..
+      //
+      case DD_IDLE:
+        if (nCurTrk != p->nTrk) {
+          UINT16 nTargTrk = p->nTrk;
+          if (nCurTrk < nTargTrk)
+            nTargTrk |= 0x8000;
+          message msg(uID, ANI_BEGIN_SEEK, nLid, (void*)&nTargTrk);
+          pTx->SendMsg(ID_ANIM, &msg);
+          stage = DD_SEEK;
+        }
+        else {
+          message msg(uID, ANI_ONTRACK, p->nSec);
+          pTx->SendMsg(ID_ANIM, &msg);
+          UINT16 nSecPos = (p->nSec - 1) * nSecAngle;
+          if (nSecPos < nCurAngle)
+            lHoldTime = lLastTime + ((nCurAngle - nSecPos) / nAngleInc);
+          else
+            lHoldTime = lLastTime + ((360 - nCurAngle + nSecPos) / nAngleInc);
+          stage = DD_TRANSFER;
+        }
+        break;
+      //
+      // We are seeking.  Move the heads at the best rate the mechanics will
+      // accomodate until we arrive on cylinder, then set in the anticipated
+      // time after which the heads will be stable enough to start reading..
+      //
+      case DD_SEEK: {
+          INT16 nInc = nMs / nTrkInc;
+          if (nInc) {
+            INT16 nGap = abs(nCurTrk - p->nTrk);
+            if (nInc > nGap)
+              nInc = nGap;
+            if (nCurTrk > p->nTrk)
+              nInc = -nInc;
+            message msg(uID, ANI_SEEK, 0,(void*)&nInc);
+            pTx->SendMsg(ID_ANIM, &msg);
+            nCurTrk += nInc;
+            if (nCurTrk == p->nTrk) {
+              lHoldTime = lLastTime;
+              stage = DD_SETTLE;
+            }
+          }       
+        }
+        break;
+      //
+      // We are on track and the head settling time has been set. If it has
+      // expired, calculate rotational time delay until the desired sector
+      // arrives..
+      //
+      case DD_SETTLE:
+        if (nSettle <= lLastTime - lHoldTime) {
+          UINT16 nSecPos = (p->nSec - 1) * nSecAngle;
+          if (nSecPos < nCurAngle)
+            lHoldTime = lLastTime + ((nCurAngle - nSecPos) / nAngleInc);
+          else
+            lHoldTime = lLastTime + ((360 - nCurAngle + nSecPos) / nAngleInc);
+          message msg(uID, ANI_ONTRACK, p->nSec);
+          pTx->SendMsg(ID_ANIM, &msg);
+          stage = DD_WAIT;
+        }
+        break;
+      //
+      // When we reach here, we see if the rotational delay has expired
+      //
+      case DD_WAIT:
+        if (lLastTime >= lHoldTime) {
+          lHoldTime = 0L;
+          stage = DD_TRANSFER;
+        }
+        break;
+      //
+      // Ready to perform the read/write operation, de-queue the transfer
+      // request, run the display animation, then callback (interrupt) the
+      // file system to do the next stage of the BDOS operation..
+      //
+      case DD_TRANSFER: {
+          TransQ Tq(&ChanQ);
+          message msg(uID, ANI_RWOP, nLid, &Tq);
+          pTx->SendMsg(ID_ANIM, &msg);
+          switch (p->cmnd) {
+            case DD_READ : p->bRes = Read();  break;
+            case DD_WRITE: p->bRes = Write(); break;
+          }
+          ChanQ.Purge();
+          stage = DD_IDLE;
+          p->pFnCb->NxtFunc(p);
+        }
+        break;
+    }
+  }
+}
+
+
+/////////////////////////////////// eof ///////////////////////////////////
+  
+</PRE>
+</BODY>
+</HTML>

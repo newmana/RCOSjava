@@ -1,0 +1,80 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    MailBox CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>MailBox</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      MailBoxHeader
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+ The following class defines a single mailbox, or temporary storage
+ for messages.   Incoming messages are put by the PostOffice into the
+ appropriate mailbox, and these messages can then be retrieved by
+ threads on this machine.     
+    </TD>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+<PRE>
+class MailBox {
+  public:
+    MailBox();                  // Allocate and initialize mail box
+    ~MailBox();                 // De-allocate mail box
+
+    void Put(PacketHeader pktHdr, MailHeader mailHdr, char *data);
+                                // Atomically put a message into the mailbox
+    void Get(PacketHeader *pktHdr, MailHeader *mailHdr, char *data);
+                                // Atomically get a message out of the
+                                // mailbox (and wait if there is no message
+                                // to get!)
+  private:
+    SynchList *messages;        // A mailbox is just a list of arrived messages
+};        
+</PRE>
+
+</BODY>
+</HTML>

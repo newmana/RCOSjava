@@ -1,0 +1,83 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    TranslationEntry CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>TranslationEntry</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      TranslationEntry
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+ The following class defines an entry in a translation table -- either
+ in a page table or a TLB.  Each entry defines a mapping from one
+ virtual page to one physical page.<BR>
+ In addition, there are some extra bits for access control (valid and
+ read-only) and some bits for usage information (use and dirty).
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+<PRE>
+class TranslationEntry {
+  public:
+    int virtualPage;    // The page number in virtual memory.
+    int physicalPage;   // The page number in real memory (relative to the
+                        //  start of "mainMemory"
+    bool valid;         // If this bit is set, the translation is ignored.
+                        // (In other words, the entry hasn't been initialized.)
+    bool readOnly;      // If this bit is set, the user program is not allowed
+                        // to modify the contents of the page.
+    bool use;           // This bit is set by the hardware every time the
+                        // page is referenced or modified.
+    bool dirty;         // This bit is set by the hardware every time the
+                        // page is modified.
+};             
+</PRE>
+
+</BODY>
+</HTML>

@@ -1,0 +1,80 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class macTag
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>macTag</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	macTag
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   This parameter list is equivalent to the Digital Research "MAC"
+   macro that was used to build the required logical disk parameters..
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+  typedef struct macTag {
+    BYTE   nLid;        // Logical unit ID (0 = "A:" ...)
+    BYTE   nFsc;        // first physical sector number (0 or 1)
+    BYTE   nLsc;        // last sector number
+    BYTE   nSkf;        // optional sector skew factor
+    UINT16 nBls;        // data allocation block size
+    UINT16 nDks;        // number of blocks on disk
+    UINT16 nDir;        // number of directory entreies
+    UINT16 nCks;        // number of "checked" directory entries (for exchangable media)
+    BYTE   nOfs;        // track offset of logical track 00
+  } DPARAM, *PDPARAM;
+
+      </PRE> 
+
+</BODY>
+</HTML>

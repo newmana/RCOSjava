@@ -1,0 +1,62 @@
+<HTML>
+<HEAD>
+  <TITLE>
+pci.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+pci.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : PCI - Header exports and defines for the P-code Interpreter  *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Defines the codes which the RCOS p-code interpreter and the  *
+//           related compiler understand.                                 *
+//  HISTORY:                                                              *
+//    19-DEC-92 First ANSI MSC version                                    *
+//    22-APR-93 First C++ version                                         *
+//    06-MAR-94 CSP Semaphore functions added                             *
+//    18-APR-94 CSP Shared Memory functions added                         *
+//    01-SEP-94 CSP File modifiers added                                  *
+//*************************************************************************
+
+#ifndef _RCOS_PCI_
+
+  #include "rcos.hh"
+  #include "kernel.hh"
+  #include "exec.hh"
+
+  
+  ////////////////////
+  // These enumerations match "sets" in the p-code compiler, so don't
+  // even think about changin the order without adjusting the PAS file..
+  //
+  enum opcodes
+   {LIT, OPR, LOD, STO, CAL, INT, JMP,
+    JPC, CSP, LODX = 0x12, STOX = 0x13, ILLEGAL_PCD};
+
+  enum operargs
+   {_RET, _NEG, _ADD, _SUB, _MUL, _DIV, _LOW, _MOD, _EQ,
+    _NE, _LT, _GE, _GT, _LE, _OR, _AND, _XOR, _NOT, _SHL,
+    _SHR, _INC, _DEC, _CPY, ILLEGAL_OPR_ARG};
+
+  enum cspargs
+    {CHIN,      CHOUT,      NUMIN,    NUMOUT,     HEXIN,     HEXOUT,
+     EXEC,      FORK,       STROUT,
+     SEM_CLOSE, SEM_CREATE, SEM_OPEN, SEM_SIGNAL, SEM_WAIT,
+     SHR_CLOSE, SHR_CREATE, SHR_OPEN, SHR_READ,   SHR_WRITE, SHR_SIZE,
+     F_ALLOC,   F_OPEN,     F_CREAT,  F_CLOSE,    F_EOF,     F_DEL,
+     F_READ,    F_WRITE,
+     ILLEGAL_CSP_ARG};
+
+
+  #define _RCOS_PCI_
+
+#endif
+
+/////////////////////////////////// eof ////////////////////////////////////
+</PRE>
+</BODY>
+</HTML>

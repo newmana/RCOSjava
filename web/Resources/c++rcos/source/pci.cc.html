@@ -1,0 +1,882 @@
+<HTML>
+<HEAD>
+  <TITLE>
+pci.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+pci.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : PCI - Kernel resident P-code Interpreter for the RCOS system *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Passed the "context" of an RCOS process, execute the next    *
+//           p-code.  Interpereter developed from the stand-alone ANSI C  *
+//           version which was modeled after a Pascal version by Kin-Man  *
+//           Chung and Herbert Yuen from their October 1978 BYTE article, *
+//           "A 'Tiny' Pascal Compiler - Part 1: The p_code Interpereter" *
+//  HISTORY:                                                              *
+//    19-DEC-92 First ANSI MSC version                                    *
+//    24-MAY-93 New p-code "CSP 0/EXEC" added to load & execute programs  *
+//    27-MAY-93 Hallelujah - RCOS multi-tasks two "Hello World" programs! *
+//    02-JUN-93 Detect and abort on User Break messages from line driver  *
+//    06-MAR-94 CSP Semaphore functions added                             *
+//    01-APR-94 Force TTY Auto LF mode during CSP *IN executions.         *
+//    13-APR-94 Semaphore count initialisation added to SEM_CREATE CSP    *
+//    18-APR-94 CSP Shared Memory support added                           *
+//    01-SEP-94 CSP File operations added (RunProc now officialy too big) *
+//    12-SEP-94 EOF detect added (G'wing lounge, BN-SY delayed again!)    *
+//*************************************************************************
+
+
+#include "pci.hh"
+#include "fsiface.hh"
+
+
+#define BUF_SIZE    64     // Number of integers in buffer for program load
+
+///////////
+// local level function protos..
+//
+static BOOL ValidCode (UINT16, INT16);
+
+
+///////////////////
+// Execute a pcode: Fetch the next pcode and its argument (two 16 bit words)
+// Decode and execute, adjusting process IP, SP and BP accordingly.  Begin
+// with a Pre-fetch of the 32 bit word at IP (the IP is a 32 bit offset):
+//   giving: hhll aaaa
+//    where: ll = p-code; hh = base ref; aaaa = immediate argument
+//
+// If the passed PCB struct has a reply attached, it must be as a result of
+// a Read/ReadBlk/SemWait from a CSP pcode, so process that. If not, pre-fetch
+// the top-of-stack (just about everything needs that) and parse and execute..
+//
+//   Lament: This thing is getting bigger than the giant MS Windows case
+//           statement from hell that ate Cleaveland!
+//
+void Exec::RunProc (PCB& pcbx, MCB& mcbx)
+{
+  char   *cp;
+  BOOL    bIsLegal;
+  MMU_MSG memXfer;
+  UINT16  uFsRet = FS_Ok;
+  INT16   nFunc, nFuncBase;
+  UINT16  uText[2], uStack[3], uTemp, *pu;
+  static  char *pszErr[] = { "\n\rHalted - %s",
+    "User Break", "Illegal p-code", "Shared mem violation" };
+
+  memXfer.uLen = 2;
+  memXfer.pData = uText;
+  memXfer.uOffset = (pcbx.uIP << 1);
+  MSG msg(uCurProc, KM_ReadBlk, mcbx.hText, &memXfer);
+  pTx->SendMsg(ID_MMU, &msg);
+  memXfer.uLen = 1;
+  memXfer.pData = uStack;
+  memXfer.uOffset = pcbx.uSP;
+  msg = message(uCurProc, KM_ReadBlk, mcbx.hStack, &memXfer);
+  pTx->SendMsg(ID_MMU, &msg);
+  pcbx.lCode = (UINT32)uText[0] + ((UINT32)uText[1] << 16);
+  pcbx.uTos = uStack[0];
+  nFunc = (INT16)(uText[0] & 0xff);
+  nFuncBase = (INT16)(0xff & (uText[0] >> 8));
+  bIsLegal = ValidCode(uText[0], uText[1]);
+  msg = message(ID_Kernel, ANI_UPDAT_PCB);
+  pTx->SendMsg(ID_ANIM, &msg);
+  if (!bIsLegal) {
+    pcbx.uStatus = PS_Illegal;
+    if (pcbx.pDev) {
+      char str[64];
+      sprintf(str, pszErr[0], pszErr[2]);
+      msg = message(pcbx.uPid, KM_WriteBlk, strlen(str), str);
+      pTx->SendMsg(ID_LNDRV + pcbx.uPid, &msg);
+    }
+    return;
+  }
+  pcbx.uIP++;
+  if (pcbx.pReply) {
+    if (pcbx.pReply->wMsgType == KM_Break) {
+      delete pcbx.pReply;
+      pcbx.pReply = NULL;
+      pcbx.uStatus = PS_Halted;
+      char str[64];
+      sprintf(str, pszErr[0], pszErr[1]);
+      msg = message(pcbx.uPid, KM_WriteBlk, strlen(str), str);
+      pTx->SendMsg(ID_LNDRV + pcbx.uPid, &msg);
+      return;
+    }
+    if (nFunc == CSP) 
+      if ((F_ALLOC <= uText[1]) && (uText[1] <= F_WRITE)) {
+	uFsRet = pcbx.pReply->wMsgType;
+	delete pcbx.pReply;
+	pcbx.pReply = NULL;
+      }
+      else {
+	if (uText[1] == 0)
+	  uStack[0] = pcbx.pReply->wParam;
+	else
+	  if (pcbx.pReply->wMsgType != KM_Signal) {
+	    cp = new char[pcbx.pReply->wParam + 1];
+	    strncpy(cp, (char*)pcbx.pReply->pBody, pcbx.pReply->wParam);
+	    cp[pcbx.pReply->wParam] = '\0';
+	    sscanf(cp, ((uText[1] == HEXIN) ? "%x" : "%d"), &uStack[0]);
+	    DELETE_ARRAY pcbx.pReply->pBody;
+	    DELETE_ARRAY cp;
+	    msg = message(uCurProc, KM_IoCtrl, DM_GetMode);
+	    pTx->SendMsg(pcbx.uPid + ID_LNDRV, &msg);
+	    uTemp = msg.wParam & ~TTY_AutoLF;
+	    msg = message(uCurProc, KM_IoCtrl, DM_SetMode, &uTemp);
+	    pTx->SendMsg(pcbx.uPid + ID_LNDRV, &msg);
+	  }
+	delete pcbx.pReply;
+	pcbx.pReply = NULL;
+	memXfer.pData = &uStack[0];
+	memXfer.uOffset = ++pcbx.uSP;
+	MSG msg(uCurProc, KM_Write, mcbx.hStack, &memXfer);
+	pTx->SendMsg(ID_MMU, &msg);
+	return;
+      }
+  }
+  switch (nFunc) {
+    case INT:
+      pcbx.uSP += uText[1];
+      break;
+    case JMP:
+      pcbx.uIP = uText[1];
+      break;
+    case JPC:
+      msg = message(uCurProc, KM_Read, mcbx.hStack, &memXfer);
+      pTx->SendMsg(ID_MMU, &msg);
+      if (uStack[0] == (UINT16)nFuncBase)
+	pcbx.uIP = uText[1];
+      pcbx.uSP--;
+      break;
+    case LIT:
+      memXfer.pData = &uText[1];
+      memXfer.uOffset = ++pcbx.uSP;
+      msg = message(uCurProc, KM_Write, mcbx.hStack, &memXfer);
+      pTx->SendMsg(ID_MMU, &msg);
+      break;
+    case LOD:
+    case LODX:
+      if (nFunc == LODX)
+	uText[1] += uStack[0];
+      else
+      ++pcbx.uSP;
+      memXfer.pData = &uStack[0];
+      memXfer.uOffset = pcbx.uBP;
+      msg = message(uCurProc, KM_Read, mcbx.hStack, &memXfer);
+      while (nFuncBase--) {
+	pTx->SendMsg(ID_MMU, &msg);
+	memXfer.uOffset = uStack[0];
+      }
+      memXfer.uOffset += uText[1];
+      msg = message(uCurProc, KM_Read, mcbx.hStack, &memXfer);
+      pTx->SendMsg(ID_MMU, &msg);
+      memXfer.uOffset = pcbx.uSP;
+      msg = message(uCurProc, KM_Write, mcbx.hStack, &memXfer);
+      pTx->SendMsg(ID_MMU, &msg);
+      break;
+    case STO:
+    case STOX:
+      uStack[1] = uStack[0];
+      if (nFunc == STOX) {
+	memXfer.uOffset = pcbx.uSP - 1;
+	msg = message(uCurProc, KM_Read, mcbx.hStack, &memXfer);
+	pTx->SendMsg(ID_MMU, &msg);
+	uText[1] += uStack[0];
+      }
+      memXfer.pData = &uStack[0];
+      memXfer.uOffset = pcbx.uBP;
+      msg = message(uCurProc, KM_Read, mcbx.hStack, &memXfer);
+      while (nFuncBase--) {
+	pTx->SendMsg(ID_MMU, &msg);
+	memXfer.uOffset = uStack[0];
+      }
+      memXfer.uOffset += uText[1];
+      memXfer.pData = &uStack[1];
+      msg = message(uCurProc, KM_Write, mcbx.hStack, &memXfer);
+      pTx->SendMsg(ID_MMU, &msg);
+      pcbx.uSP -= ((nFunc == STOX) ? 2 : 1);
+      break;
+    case CAL:
+      msg = message(uCurProc, KM_Read, mcbx.hStack, &memXfer);
+      memXfer.pData = &uStack[0];
+      memXfer.uOffset = pcbx.uBP;
+      while (nFuncBase--) {
+	pTx->SendMsg(ID_MMU, &msg);
+	memXfer.uOffset = uStack[0];
+      }
+      uStack[0] = memXfer.uOffset;
+      uStack[1] = pcbx.uBP;
+      uStack[2] = pcbx.uIP;
+      memXfer.uLen = 3;
+      memXfer.uOffset = pcbx.uSP + 1;
+      msg = message(uCurProc, KM_WriteBlk, mcbx.hStack, &memXfer);
+      pTx->SendMsg(ID_MMU, &msg);
+      pcbx.uIP = uText[1];
+      pcbx.uBP = pcbx.uSP + 1;
+      break;
+    case OPR:
+      switch (uText[1]) {
+	case _RET:
+	  pcbx.uSP = pcbx.uBP - 1;
+	  memXfer.uLen = 2;
+	  memXfer.pData = uStack;
+	  memXfer.uOffset = pcbx.uSP + 2;
+	  msg = message(pcbx.uPid, KM_ReadBlk, mcbx.hStack, &memXfer);
+	  pTx->SendMsg(ID_MMU, &msg);
+	  pcbx.uBP = uStack[0];
+	  pcbx.uIP = uStack[1];
+	  if ((INT16)pcbx.uBP < 0) {
+	    pcbx.uStatus = PS_Halted;
+	    if (pcbx.pDev) {
+	      char str[16];
+	      strcpy(str, "\n\rHalted - Ok");
+	      msg = message(pcbx.uPid, KM_WriteBlk, strlen(str), str);
+	      pTx->SendMsg(ID_LNDRV + pcbx.uPid, &msg);
+	    }
+	  }
+	  break;
+	case _NEG:
+	  uStack[0] = (UINT16)(0 - (INT16)uStack[0]);
+	  break;
+	case _CPY:
+	  pcbx.uSP++;
+	  break;
+	case _NOT:
+	  uStack[0] = ~uStack[0];
+	  break;
+	case _INC:
+	  ++uStack[0];
+	  break;
+	case _DEC:
+	  --uStack[0];
+	  break;
+	case _LOW:
+	  uStack[0] &= 1;
+	  break;
+	default:
+	  uStack[1] = uStack[0];
+	  memXfer.uOffset = --pcbx.uSP;
+	  msg = message(uCurProc, KM_Read, mcbx.hStack, &memXfer);
+	  pTx->SendMsg(ID_MMU, &msg);
+	  switch (uText[1]) {
+	    case _ADD:
+	      uStack[0] = (UINT16)((INT16)uStack[0] + (INT16)uStack[1]);
+	      break;
+	    case _SUB:
+	      uStack[0] = (UINT16)((INT16)uStack[0] - (INT16)uStack[1]);
+	      break;
+	    case _MUL:
+	      uStack[0] = (UINT16)((INT16)uStack[0] * (INT16)uStack[1]);
+	      break;
+	    case _DIV:
+	      uStack[0] = (UINT16)((INT16)uStack[0] / (INT16)uStack[1]);
+	      break;
+	    case _MOD:
+	      uStack[0] = (UINT16)((INT16)uStack[0] % (INT16)uStack[1]);
+	      break;
+	    case _AND:
+	      uStack[0] &= uStack[1];
+	      break;
+	    case _OR:
+	      uStack[0] |= uStack[1];
+	      break;
+	    case _XOR:
+	      uStack[0] ^= uStack[1];
+	      break;
+	    case _SHR:
+	      uStack[0] >>= uStack[1];
+	      break;
+	    case _SHL:
+	      uStack[0] <<= uStack[1];
+	      break;
+	    case _EQ:
+	      uStack[0] = (uStack[0] == uStack[1]) ? 1 : 0;
+	      break;
+	    case _NE:
+	      uStack[0] = (uStack[0] != uStack[1]) ? 1 : 0;
+	      break;
+	    case _LT:
+	      uStack[0] = ((INT16)uStack[0] < (INT16)uStack[1]) ? 1 : 0;
+	      break;
+	    case _GT:
+	      uStack[0] = ((INT16)uStack[0] > (INT16)uStack[1]) ? 1 : 0;
+	      break;
+	    case _LE:
+	      uStack[0] = ((INT16)uStack[0] <= (INT16)uStack[1]) ? 1 : 0;
+	      break;
+	    case _GE:
+	      uStack[0] = ((INT16)uStack[0] >= (INT16)uStack[1]) ? 1 : 0;
+	      break;
+	  }
+	  break;
+      }
+      if (uText[1] != _RET) {
+	memXfer.uOffset = pcbx.uSP;
+	msg = message(uCurProc, KM_Write, mcbx.hStack, &memXfer);
+	pTx->SendMsg(ID_MMU, &msg);
+      }
+      break;
+    case CSP:
+      switch (uText[1]) {
+	case CHIN:
+	case NUMIN:
+	case HEXIN:
+	  pcbx.uIP--;
+	  msg = message(uCurProc, KM_IoCtrl, DM_GetMode);
+	  pTx->SendMsg(pcbx.uPid + ID_LNDRV, &msg);
+	  uTemp = msg.wParam | TTY_AutoLF;
+	  msg = message(uCurProc, KM_IoCtrl, DM_SetMode, &uTemp);
+	  pTx->SendMsg(pcbx.uPid + ID_LNDRV, &msg);
+	  msg = message(uCurProc,((uText[1] == CHIN) ? KM_Read : KM_ReadBlk));
+	  pTx->PostMsg(pcbx.uPid + ID_LNDRV, &msg);
+	  break;
+	case CHOUT:
+	  msg = message(uCurProc, KM_Write, uStack[0]);
+	  pTx->SendMsg(pcbx.uPid + ID_LNDRV, &msg);
+	  pcbx.uSP--;
+	  break;
+	case NUMOUT:
+	  if (cp = new char[8]) {
+	    sprintf(cp, " %d", uStack[0]);
+	    msg = message(uCurProc, KM_WriteBlk, strlen(cp), (void*)cp);
+	    pTx->SendMsg(pcbx.uPid + ID_LNDRV, &msg);
+	    DELETE_ARRAY cp;
+	  }
+	  pcbx.uSP--;
+	  break;
+	case HEXOUT:
+	  if (cp = new char[8]) {
+	    sprintf(cp, " %x", uStack[0]);
+	    msg = message(uCurProc, KM_WriteBlk, strlen(cp), (void*)cp);
+	    pTx->SendMsg(pcbx.uPid + ID_LNDRV, &msg);
+	    DELETE_ARRAY cp;
+	  }
+	  pcbx.uSP--;
+	  break;
+	case STROUT:
+	  if (pu = new UINT16[uStack[0]]) {
+	    memXfer.pData = pu;
+	    memXfer.uLen = uStack[0];
+	    memXfer.uOffset = pcbx.uSP - uStack[0];
+	    msg = message(uCurProc, KM_ReadBlk, mcbx.hStack, &memXfer);
+	    pTx->SendMsg(ID_MMU, &msg);
+	    if (cp = new char[uStack[0]]) {
+	      for (INT16 i = 0; i < (INT16)uStack[0]; i++)
+		cp[i] = (char)pu[i];
+	      msg = message(uCurProc, KM_WriteBlk, uStack[0], cp);
+	      pTx->SendMsg(pcbx.uPid + ID_LNDRV, &msg);
+	      DELETE_ARRAY cp;
+	    }
+	    DELETE_ARRAY pu;
+	  }
+	  pcbx.uSP -= (uStack[0] + 1);
+	  break;
+	case FORK:
+	  uStack[0] = Fork();
+	  memXfer.uLen = 1;
+	  memXfer.pData = uStack;
+	  memXfer.uOffset = pcbx.uSP;
+	  msg = message(uCurProc, KM_ReadBlk, mcbx.hStack, &memXfer);
+	  pTx->SendMsg(ID_MMU, &msg);
+	  if (uStack[0] != NO_PROC) {
+	    msg = message(uStack[0], KM_ReadBlk, mcbx.hStack, &memXfer);
+	    uStack[0] = 0;
+	    pTx->SendMsg(ID_MMU, &msg);
+	  }
+	  break;
+	case EXEC:
+	  if (pu = new UINT16[uStack[0]]) {
+	    memXfer.pData = pu;
+	    memXfer.uLen = uStack[0];
+	    memXfer.uOffset = pcbx.uSP - uStack[0];
+	    msg = message(uCurProc, KM_ReadBlk, mcbx.hStack, &memXfer);
+	    pTx->SendMsg(ID_MMU, &msg);
+	    if (cp = new char[uStack[0] + 1]) {
+	      for (INT16 i = 0; i < (INT16)uStack[0]; i++)
+		cp[i] = (char)pu[i];
+	      cp[i] = '\0';
+	      FILE *ipf = fopen(cp, "rb");
+	      if (ipf) {
+		UINT16 uBuf[BUF_SIZE];
+		memXfer.uLen = BUF_SIZE;
+		memXfer.uOffset = 0;
+		memXfer.pData = uBuf;
+		msg = message(uCurProc, KM_WriteBlk, mcbx.hText, &memXfer);
+		while (fread(uBuf, sizeof(UINT16), BUF_SIZE, ipf)) {
+		  pTx->SendMsg(ID_MMU, &msg);
+		  memXfer.uOffset += BUF_SIZE;
+		}
+		fclose(ipf);
+	      }
+	      DELETE_ARRAY cp;
+	    }
+	    DELETE_ARRAY pu;
+	  }
+	  pcbx.uBP = 1;
+	  pcbx.uIP = pcbx.uSP = 0;
+	  msg = message(uCurProc, KM_WriteBlk, mcbx.hStack, &memXfer);
+	  pTx->SendMsg(ID_MMU, &msg);
+	  //
+	  // ************ 
+	  // TEMP MEASURE
+	  // ************
+	  //
+	  pcbx.pDev =
+	    new LnDrv(pcbx.uPid, ID_LNDRV + pcbx.uPid, pTx);
+	  break;
+	case SEM_CREATE:
+	  uTemp = uStack[0];
+	  pcbx.uSP--;
+	  memXfer.uLen = 1;
+	  memXfer.pData = uStack;
+	  memXfer.uOffset = pcbx.uSP;
+	  msg = message(uCurProc, KM_ReadBlk, mcbx.hStack, &memXfer);
+	  pTx->SendMsg(ID_MMU, &msg);
+
+  if (nFuncBase)
+	    if (pu = new UINT16[uStack[0]]) {
+	      UINT16 uSid;
+	      memXfer.pData = pu;
+	      memXfer.uLen = uStack[0];
+	      memXfer.uOffset = pcbx.uSP - uStack[0];
+	      msg = message(uCurProc, KM_ReadBlk, mcbx.hStack, &memXfer);
+	      pTx->SendMsg(ID_MMU, &msg);
+	      if (cp = new char[uStack[0]+1]) {
+		for (INT16 i = 0; i < (INT16)uStack[0]; i++)
+		  cp[i] = (char)pu[i];
+		*(cp+uStack[0]) = '\0';
+		uSid = ((uText[1]==SEM_OPEN) ? IpcOpen(cp) : IpcAlloc(cp, uTemp));
+		DELETE_ARRAY cp;
+	      }
+	      DELETE_ARRAY pu;
+	      pcbx.uSP -= (uStack[0]);
+	      uStack[0] = uSid;
+	    }
+	  memXfer.uLen = 1;
+	  memXfer.pData = &uStack[0];
+	  memXfer.uOffset = pcbx.uSP;
+	  msg = message(uCurProc, KM_Write, mcbx.hStack, &memXfer);
+	  pTx->SendMsg(ID_MMU, &msg);
+
+
+	  //??????
+	  break;
+	case SEM_OPEN:
+	  if (nFuncBase)
+	    if (pu = new UINT16[uStack[0]]) {
+	      UINT16 uSid;
+	      memXfer.pData = pu;
+	      memXfer.uLen = uStack[0];
+	      memXfer.uOffset = pcbx.uSP - uStack[0];
+	      msg = message(uCurProc, KM_ReadBlk, mcbx.hStack, &memXfer);
+	      pTx->SendMsg(ID_MMU, &msg);
+	      if (cp = new char[uStack[0]+1]) {
+		for (INT16 i = 0; i < (INT16)uStack[0]; i++)
+		  cp[i] = (char)pu[i];
+		*(cp+uStack[0]) = '\0';
+		uSid = ((uText[1]==SEM_OPEN) ? IpcOpen(cp) : IpcAlloc(cp, uTemp));
+		DELETE_ARRAY cp;
+	      }
+	      DELETE_ARRAY pu;
+	      pcbx.uSP -= (uStack[0]);
+	      uStack[0] = uSid;
+	    }
+	  memXfer.uLen = 1;
+	  memXfer.pData = &uStack[0];
+	  memXfer.uOffset = pcbx.uSP;
+	  msg = message(uCurProc, KM_Write, mcbx.hStack, &memXfer);
+	  pTx->SendMsg(ID_MMU, &msg);
+	  break;
+	case SEM_CLOSE:
+	  IpcClose(uCurProc, uStack[0]);
+	  break;
+	case SEM_SIGNAL:
+	  IpcSignal(uCurProc, uStack[0]);
+	  break;
+	case SEM_WAIT:
+	  uTemp = (UINT16)IpcWait(uCurProc, uStack[0]);
+	  if (uTemp == 0)
+	    --pcbx.uIP;
+	  else {
+	    uStack[0] = uTemp;
+	    memXfer.uLen = 1;
+	    memXfer.pData = &uStack[0];
+	    memXfer.uOffset = pcbx.uSP;
+	    msg = message(uCurProc, KM_Write, mcbx.hStack, &memXfer);
+	    pTx->SendMsg(ID_MMU, &msg);
+	  }
+	  break;
+	case SHR_CLOSE:
+	  uStack[0] = SmClose(uCurProc, uStack[0]);
+	  memXfer.uLen = 1;
+	  memXfer.pData = &uStack[0];
+	  memXfer.uOffset = pcbx.uSP;
+	  msg = message(uCurProc, KM_Write, mcbx.hStack, &memXfer);
+	  pTx->SendMsg(ID_MMU, &msg);
+	  break;
+	case SHR_CREATE:
+	  uTemp = uStack[0];
+	  pcbx.uSP--;
+	  memXfer.uLen = 1;
+	  memXfer.pData = uStack;
+	  memXfer.uOffset = pcbx.uSP;
+	  msg = message(uCurProc, KM_ReadBlk, mcbx.hStack, &memXfer);
+	  pTx->SendMsg(ID_MMU, &msg);
+
+	  if (pu = new UINT16[uStack[0]]) {
+	    UINT16 uId;
+	    memXfer.pData = pu;
+	    memXfer.uLen = uStack[0];
+	    memXfer.uOffset = pcbx.uSP - uStack[0];
+	    msg = message(uCurProc, KM_ReadBlk, mcbx.hStack, &memXfer);
+	    pTx->SendMsg(ID_MMU, &msg);
+	    if (cp = new char[uStack[0]+1]) {
+	      for (INT16 i = 0; i < (INT16)uStack[0]; i++)
+		cp[i] = (char)pu[i];
+	      *(cp+uStack[0]) = '\0';
+	      uId = ((uText[1]==SHR_OPEN) ? SmOpen(cp) : SmCreate(cp, (INT16)uTemp));
+	      DELETE_ARRAY cp;
+	    }
+	    DELETE_ARRAY pu;
+	    pcbx.uSP -= (uStack[0]);
+	    uStack[0] = uId;
+	  }
+	  memXfer.uLen = 1;
+	  memXfer.pData = &uStack[0];
+	  memXfer.uOffset = pcbx.uSP;
+	  msg = message(uCurProc, KM_Write, mcbx.hStack, &memXfer);
+	  pTx->SendMsg(ID_MMU, &msg);
+
+
+	  //????
+	  break;
+	case SHR_OPEN:
+	  if (pu = new UINT16[uStack[0]]) {
+	    UINT16 uId;
+	    memXfer.pData = pu;
+	    memXfer.uLen = uStack[0];
+	    memXfer.uOffset = pcbx.uSP - uStack[0];
+	    msg = message(uCurProc, KM_ReadBlk, mcbx.hStack, &memXfer);
+	    pTx->SendMsg(ID_MMU, &msg);
+	    if (cp = new char[uStack[0]+1]) {
+	      for (INT16 i = 0; i < (INT16)uStack[0]; i++)
+		cp[i] = (char)pu[i];
+	      *(cp+uStack[0]) = '\0';
+	      uId = ((uText[1]==SHR_OPEN) ? SmOpen(cp) : SmCreate(cp, (INT16)uTemp));
+	      DELETE_ARRAY cp;
+	    }
+	    DELETE_ARRAY pu;
+	    pcbx.uSP -= (uStack[0]);
+	    uStack[0] = uId;
+	  }
+	  memXfer.uLen = 1;
+	  memXfer.pData = &uStack[0];
+	  memXfer.uOffset = pcbx.uSP;
+	  msg = message(uCurProc, KM_Write, mcbx.hStack, &memXfer);
+	  pTx->SendMsg(ID_MMU, &msg);
+	  break;
+	case SHR_SIZE:
+	  uStack[0] = SmLength(uStack[0]);
+	  memXfer.uLen = 1;
+	  memXfer.pData = &uStack[0];
+	  memXfer.uOffset = pcbx.uSP;
+	  msg = message(uCurProc, KM_Write, mcbx.hStack, &memXfer);
+	  pTx->SendMsg(ID_MMU, &msg);
+	  break;
+	case SHR_READ:
+	  pcbx.uSP--;
+	  memXfer.uLen = 1;
+	  memXfer.pData = &uStack[1];
+	  memXfer.uOffset = pcbx.uSP;
+	  msg = message(uCurProc, KM_ReadBlk, mcbx.hStack, &memXfer);
+	  pTx->SendMsg(ID_MMU, &msg);
+	  if (SmRead(uStack[1], uStack[0], (INT16*)&uStack[2])) {
+	    memXfer.uLen = 1;
+	    memXfer.pData = &uStack[2];
+	    memXfer.uOffset = pcbx.uSP;
+	    msg = message(uCurProc, KM_Write, mcbx.hStack, &memXfer);
+	    pTx->SendMsg(ID_MMU, &msg);
+	  }
+	  else {
+	    pcbx.uStatus = PS_Illegal;
+	    if (pcbx.pDev) {
+	      char str[64];
+	      sprintf(str, pszErr[0], pszErr[3]);
+	      msg = message(pcbx.uPid, KM_WriteBlk, strlen(str), str);
+	      pTx->SendMsg(ID_LNDRV + pcbx.uPid, &msg);
+	    }
+	  }
+	  break;
+	case SHR_WRITE:
+	  pcbx.uSP -= 2;
+	  memXfer.uLen = 3;
+	  memXfer.pData = uStack;
+	  memXfer.uOffset = pcbx.uSP;
+	  msg = message(uCurProc, KM_ReadBlk, mcbx.hStack, &memXfer);
+	  pTx->SendMsg(ID_MMU, &msg);
+	  if (SmWrite(uStack[0], uStack[1], (INT16*)&uStack[2])) {
+	    memXfer.uLen = 1;
+	    memXfer.pData = &uStack[2];
+	    memXfer.uOffset = pcbx.uSP;
+	    msg = message(uCurProc, KM_Write, mcbx.hStack, &memXfer);
+	    pTx->SendMsg(ID_MMU, &msg);
+	  }
+	  else {
+	    pcbx.uStatus = PS_Illegal;
+	    if (pcbx.pDev) {
+	      char str[64];
+	      sprintf(str, pszErr[0], pszErr[3]);
+	      msg = message(pcbx.uPid, KM_WriteBlk, strlen(str), str);
+	      pTx->SendMsg(ID_LNDRV + pcbx.uPid, &msg);
+	    }
+	  }
+	  break;
+	case F_ALLOC:
+	  if (NULL == pcbx.pFile) {
+	    pcbx.pFile = new FsIface(uCurProc, pTx);
+	    if (NULL == pcbx.pFile) {
+	      pcbx.uStatus = PS_Illegal;
+	      return;
+	    }
+	  }
+	  if (pu = new UINT16[uStack[0]]) {
+	    HANDLE hFile;
+	    memXfer.pData = pu;
+	    memXfer.uLen = uStack[0];
+	    memXfer.uOffset = pcbx.uSP - uStack[0];
+	    msg = message(uCurProc, KM_ReadBlk, mcbx.hStack, &memXfer);
+	    pTx->SendMsg(ID_MMU, &msg);
+	    if (cp = new char[uStack[0]+1]) {
+	      for (INT16 i = 0; i < (INT16)uStack[0]; i++)
+		cp[i] = (char)pu[i];
+	      *(cp+uStack[0]) = '\0';
+	      if (FS_Ok != pcbx.pFile->Allocate(hFile, cp))
+		pcbx.uStatus = PS_Illegal;
+	      DELETE_ARRAY cp;
+	    }
+	    DELETE_ARRAY pu;
+	    pcbx.uSP -= (uStack[0]);
+	    uStack[0] = (UINT16)hFile;
+	  }
+	  memXfer.uLen = 1;
+	  memXfer.pData = &uStack[0];
+	  memXfer.uOffset = pcbx.uSP;
+	  msg = message(uCurProc, KM_Write, mcbx.hStack, &memXfer);
+	  pTx->SendMsg(ID_MMU, &msg);
+	  break;
+	case F_DEL:
+	case F_OPEN:
+	case F_CREAT:
+	case F_CLOSE:
+	  if (NULL == pcbx.pFile)
+	    pcbx.uStatus = PS_Illegal;
+	  else {
+	    INT16 nRes;
+	    switch (uText[1]) {
+	      case F_DEL:   nRes = pcbx.pFile->Delete(uStack[0], uFsRet); break;
+	      case F_OPEN:  nRes = pcbx.pFile->Open(uStack[0],   uFsRet); break;
+	      case F_CREAT: nRes = pcbx.pFile->Creat(uStack[0],  uFsRet); break;
+	      case F_CLOSE: nRes = pcbx.pFile->Close(uStack[0],  uFsRet); break;
+	    }              
+	    switch (nRes) {
+	      case FS_Busy:
+		pcbx.uIP--;
+		pcbx.uStatus &= ~PS_Ready;
+		pcbx.uStatus |= PS_Blocked;
+		break;
+	      case FS_NotFound:
+		if (F_DEL == uText[1])
+		  break;
+	      case FS_DiskFull:
+		pcbx.uStatus = PS_Illegal;
+		break;
+	      case FS_Ok:
+		break;
+	    }
+	  }
+	  break;
+	case F_READ:
+	  if (NULL == pcbx.pFile)
+	    pcbx.uStatus = PS_Illegal;
+	  else {
+	    char  ch;
+	    INT16 nRes = pcbx.pFile->Read(uStack[0], ch, uFsRet);
+	    if (FS_Busy == nRes) {
+	      pcbx.uIP--;
+	      pcbx.uStatus &= ~PS_Ready;
+	      pcbx.uStatus |= PS_Blocked;
+	    }
+	    else {
+	      uStack[0] = (UINT16)ch;
+	      memXfer.uLen = 1;
+	      memXfer.pData = &uStack[0];
+	      memXfer.uOffset = pcbx.uSP;
+	      msg = message(uCurProc, KM_Write, mcbx.hStack, &memXfer);
+	      pTx->SendMsg(ID_MMU, &msg);
+	    }
+	  }
+	  break;
+	case F_WRITE:
+	  if (NULL == pcbx.pFile)
+	    pcbx.uStatus = PS_Illegal;
+	  else {
+	    INT16 nRes, nFrame = 2;
+	    memXfer.uLen = 2;
+	    memXfer.pData = &uStack[0];
+	    memXfer.uOffset = pcbx.uSP - 1;
+	    msg = message(uCurProc, KM_ReadBlk, mcbx.hStack, &memXfer);
+	    pTx->SendMsg(ID_MMU, &msg);
+	    switch (nFuncBase) {
+	      case 0:
+		nRes = pcbx.pFile->Write(uStack[1], (char)uStack[0], uFsRet);
+		break;
+	      case 1:
+		if (cp = new char[8]) {
+		  sprintf(cp, "%d", uStack[0]);
+		  nRes = pcbx.pFile->Write(uStack[1], cp, uFsRet);
+		  DELETE_ARRAY cp;
+		}
+		break;
+	      case 2:
+		if (cp = new char[8]) {
+		  sprintf(cp, "%04X", uStack[0]);
+		  nRes = pcbx.pFile->Write(uStack[1], cp, uFsRet);
+		  DELETE_ARRAY cp;
+		}
+		break;
+	      case 3:
+		nFrame += uStack[0];
+		if (pu = new UINT16[uStack[0]]) {
+		  memXfer.pData = pu;
+		  memXfer.uLen = uStack[0];
+		  memXfer.uOffset = pcbx.uSP - nFrame + 1;
+		  msg = message(uCurProc, KM_ReadBlk, mcbx.hStack, &memXfer);
+		  pTx->SendMsg(ID_MMU, &msg);
+		  if (cp = new char[uStack[0]+1]) {
+		    for (INT16 i = 0; i < (INT16)uStack[0]; i++)
+		      cp[i] = (char)pu[i];
+		    *(cp+uStack[0]) = '\0';
+		    nRes = pcbx.pFile->Write(uStack[1], cp, uFsRet);
+		    DELETE_ARRAY cp;
+		  }
+		  DELETE_ARRAY pu;
+		}
+		break;
+	    default:
+	      pcbx.uStatus = PS_Illegal;
+	    }
+	    switch (nRes) {
+	      case FS_Ok :
+		pcbx.uSP -= nFrame;
+		break;
+	      case FS_Busy:
+		pcbx.uIP--;
+		pcbx.uStatus &= ~PS_Ready;
+		pcbx.uStatus |= PS_Blocked;
+		break;
+	    default:
+	      pcbx.uStatus = PS_Illegal;
+	    }
+	  }
+	  break;
+	case F_EOF:
+	  if (NULL == pcbx.pFile)
+	    pcbx.uStatus = PS_Illegal;
+	  else {
+	    uStack[0] = (FS_EOF == pcbx.pFile->IsEof(uStack[0])) ? 0xffff : 0;
+	    memXfer.uLen = 1;
+	    memXfer.pData = &uStack[0];
+	    memXfer.uOffset = pcbx.uSP;
+	    msg = message(uCurProc, KM_Write, mcbx.hStack, &memXfer);
+	    pTx->SendMsg(ID_MMU, &msg);
+	  }
+	  break;
+      }
+  }
+}
+
+//////////////////////
+// Decode the passed opcode and argument into the passed string
+//
+void Exec::DeCode (UINT32 lCode, char *pstr)
+{
+  INT16  wOper, wArg, k1, k2, k3;
+  static char *stMn[] = {
+    "LIT", "OPR", "LOD", "STO",  "CAL",  "INT",
+    "JMP", "JPC", "CSP", "LODX", "STOX", "???"
+  };
+  static char *OPRarg[] = {
+    "RET", "NEG", "ADD", "SUB", "MUL",
+    "DIV", "LOW", "MOD", "EQ",  "NE",  "LT",
+    "GE",  "GT",  "LE",  "OR",  "AND", "XOR",
+    "NOT", "SHL", "SHR", "INC", "DEC", "CPY", "???"
+  };
+  static char *CSParg[] = {
+    "GETC", "PUTC", "GETN", "PUTN", "GETH", "PUTH",
+    "EXEC", "FORK", "PUTS",
+    "SCLO", "SCRE", "SOPN", "SSIG", "SWAIT",
+    "MCLO", "MCRE", "MOPN", "MGET", "MPUT", "MLEN",
+    "ALOC", "OPEN", "CREA", "CLOS", "EOF",  "DEL",
+    "READ", "WRIT",
+    "????"
+  };
+
+  k2 = k3 = 0;
+  wOper = (INT16)(lCode & 0xff);
+  wArg = (INT16)(lCode >> 16);
+  k1 = ((wOper >= LIT)  && (wOper <= CSP))  ?  wOper      :
+       ((wOper == LODX) || (wOper == STOX)) ? (wOper - 9) : ILLEGAL_PCD;
+  sprintf(pstr, "%s %2X,", stMn[k1], (INT16)((lCode >> 8) & 0xff));
+  switch (k1) {
+    case OPR:
+      k2 = ((wArg >= _RET) && (wArg < ILLEGAL_OPR_ARG)) ? wArg : ILLEGAL_OPR_ARG;
+      strcat(pstr, OPRarg[k2]);
+      break;
+    case CSP:
+      k3 = ((wArg >= CHIN) && (wArg < ILLEGAL_CSP_ARG)) ? wArg : ILLEGAL_CSP_ARG;
+      strcat(pstr, CSParg[k3]);
+      break;
+    default:
+      if ((k1 == LIT) && (wArg > 0))
+	sprintf(pstr+strlen(pstr), "0x%02X ", wArg);
+      else
+	sprintf(pstr+strlen(pstr), "%2d", wArg);
+      break;
+  }
+}
+
+/////////////
+// very similar to the above func, but only validates
+// RETURNS: TRUE  .. good code
+//          FALSE .. Illegal - process must terminate
+//
+static BOOL ValidCode (UINT16 uInst, INT16 wArg)
+{
+  INT16  oper, k1, k2, k3;
+
+  k2 = k3 = 0;
+  oper = (INT16)(uInst & 0xff);
+  k1 = ((oper >= LIT)  && (oper <= CSP))  ?  oper      :
+       ((oper == LODX) || (oper == STOX)) ? (oper - 9) : ILLEGAL_PCD;
+  switch (k1) {
+    case OPR:
+      k2 = ((wArg >= _RET) && (wArg < ILLEGAL_OPR_ARG)) ? wArg : ILLEGAL_OPR_ARG;
+      break;
+    case CSP:
+      k3 = ((wArg >= CHIN) && (wArg < ILLEGAL_CSP_ARG)) ? wArg : ILLEGAL_CSP_ARG;
+      break;
+  }
+  return (((k1 == ILLEGAL_PCD) ||
+       (k2 == ILLEGAL_OPR_ARG) ||
+       (k3 == ILLEGAL_CSP_ARG)) ? FALSE : TRUE);
+}
+
+/////////////////////////////////// eof ////////////////////////////////////
+</PRE>
+</BODY>
+</HTML>

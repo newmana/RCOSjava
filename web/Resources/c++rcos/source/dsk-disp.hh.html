@@ -1,0 +1,101 @@
+<HTML>
+<HEAD>
+  <TITLE>
+dsk-disp.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+dsk-disp.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Disk Animation header for the RCOS O/S simulator		  *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Define absolute screen locations of elements comprising the  *
+//	     disk drive graphic displays used by RCOS.  Where possible,   *
+//	     all screen locations are relative to each other.		  *
+//  HISTORY:                                                              *
+//   23-AUG-94	Preliminary layout.					  *
+//*************************************************************************
+
+#ifndef __DISK_DISP__
+  #define __DISK_DISP__
+
+  #include "gfx.hh"
+  #include "obj.hh"
+  #include "cpmfs.hh"
+  #include "display.h"
+  #include "message.hh"
+
+
+
+  /////////////////
+  // Relative display constants for the disk animation
+  //
+  #define INDEX_RAD	3		// radius of disk index hole
+  #define HUB_RAD	7		// radius of disk hub hole
+  #define HEAD_X	9		// Head width
+  #define HEAD_Y	6		// Head height
+  #define ARM_X		5		// Head movement arm width
+
+  #define X_MARGIN	10		// from left margin + between units
+
+  #define TQ_ROWS	4		// no of transfers to show + 1
+  #define TQ_COLS	5		// " PID  Opr  Trk  Sec  Sid "
+  #define TQ_CELL_X	32		// Width of each column
+  #define TQ_CELL_Y	20		// height of all rows
+  #define TQ_GAP	10		// gap between disk and queue box
+
+  #define TQ_WIDTH	(TQ_COLS * TQ_CELL_X)
+  #define TQ_HEIGHT	(TQ_ROWS * TQ_CELL_Y)
+
+
+  //////////////////////////////
+  // Colors used for disk display..
+  //
+  #define PLATTER_COLOR	   _Brown
+  #define HEAD_COLOR	   _Yellow
+  #define TQ_TXT_COLOR	   _BrightWhite
+  #define TQ_HDR_COLOR     _Blue
+  #define TQ_BG_COLOR	   _White
+  #define IDX_NORM_COLOR   _White
+  #define IDX_SENSE_COLOR  _LightRed
+  #define READ_COLOR	   _LightGreen
+  #define WRITE_COLOR	   _LightRed
+
+  #if defined(MSC700) || defined(SYM60) || defined(UNIX)
+    #define TQ_BDR  _Black
+  #elif defined(BC31)
+    #define TQ_BDR  _BrightWhite
+  #endif
+  
+  ////////////////
+  // A class to render and animate a disk unit. Units are drawn in unit
+  // ID order, left to right, with one pixel per track - so limit
+  // instances to 80 tracks max, please..
+  //
+  class DiskAnim : public WinPainter {
+    point  PtSpinPos;		// centre of disk platter
+    point  PtIndexPos;		// current index hole location
+    INT16  nHeadPosY;		// current graphic head position
+    UINT16 nLid;		// "our" logical unit ID (0 = "A:" etc)
+    UINT16 nTracks;		// 0 < nTracks <= 80
+    UINT16 nDiskRad;		// calculated platter radius in pixels
+  public:
+    DiskAnim (UINT16, UINT16);
+   ~DiskAnim (void) { }
+    void Paint (void);		// mandatory WinPainter member
+    void PaintTQ (void);	// full draw of queue box
+    void DiskSeek (INT16);	// head missile animator
+    void DiskSpin (UINT16);	// index hole animator
+    void RefreshTQ (TransQ*, INT16 = 0);	// queue update
+  };
+
+
+#endif
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

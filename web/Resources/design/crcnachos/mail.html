@@ -1,0 +1,81 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    Mail CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>Mail</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      MailHeader
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+ The following class defines the format of an incoming/outgoing
+ "Mail" message.  The message format is layered:
+  <UL>
+     <LI> network header (PacketHeader)
+     <LI> post office header (MailHeader)
+     <LI> data     
+  </UL>
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+<PRE>
+class Mail {
+  public:
+     Mail(PacketHeader pktH, MailHeader mailH, char *msgData);
+                                // Initialize a mail message by
+                                // concatenating the headers to the data
+
+     PacketHeader pktHdr;       // Header appended by Network
+     MailHeader mailHdr;        // Header appended by PostOffice
+     char data[MaxMailSize];    // Payload -- message data
+};         
+</PRE>
+
+</BODY>
+</HTML>

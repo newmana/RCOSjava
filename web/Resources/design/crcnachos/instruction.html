@@ -1,0 +1,82 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    Instruction CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>Instruction</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Instruction
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+ The following class defines an instruction, represented in both
+   <LI>   undecoded binary form
+   <LI>   decoded to identify
+   <LI>       operation to do
+   <LI>       registers to act on
+   <LI>       any immediate operand value
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+<PRE>
+class Instruction {
+  public:
+    void Decode();      // decode the binary representation of the instruction
+
+    unsigned int value; // binary representation of the instruction
+
+    char opCode;     // Type of instruction.  This is NOT the same as the
+                     // opcode field from the instruction: see defs in mips.h
+    char rs, rt, rd; // Three registers from instruction.
+    int extra;       // Immediate or target or shamt field or offset.
+                     // Immediates are sign-extended.
+};        
+</PRE>
+
+</BODY>
+</HTML>

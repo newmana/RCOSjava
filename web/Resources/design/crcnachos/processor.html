@@ -1,0 +1,74 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    Processor CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>Processor</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Processor
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      simulates CPU actions
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Process, Ram, Disk, Terminal, Kernel, ProcessorAnim, Context
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+  <UL>
+    <LI> instructionFetch
+    <LI> instructionExecution  
+    <LI> handleInterrupts - next step in instruction execution cycle
+    <LI> enableInterrupts 
+    <LI> disableInterrupts
+    <LI> virtualToReal - perform address tranlation mechanism
+    <LI> saveContext - place context onto Process PCB
+    <LI> retrieveContext - get context from Process PCB
+  </UL>
+
+</BODY>
+</HTML>

@@ -1,0 +1,93 @@
+<HTML>
+<HEAD>
+  <TITLE>
+dev-disp.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+dev-disp.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Device Manager display module                                *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Define function protos and any constants                     *
+//  HISTORY:                                                              *
+//   26-MAR-93  Cut from Test #6 code file.                               *
+//   26-AUG-94  Made into a class for the all-singing-dancing animator    *
+//   14-MAR-95  Class Terminals added for variable user tty allocation    *
+//   22-MAR-95  (Happy Birthday, Ron!) No of terminals made dynamic       *
+//*************************************************************************
+
+
+#ifndef _DEV_DISP_
+
+  #include "tty.hh"
+  #include "gfx.hh"
+  #include "ctrls.hh"
+  #include "display.h"
+  #include "message.hh"
+
+
+  ///////////////////
+  // Size and location for TTY device "screens" ..
+  //
+  #define  TTY_YLIM1     (SYS_Height + 1)
+  #define  TTY_YLIM2     (STRIP_Y1 - 1)
+  #define  TTY_XGAP      10
+  #define  TTY_YGAP      25
+
+  #define  TTY_SCRN      _Black         // Colors used for TTYs
+  #define  TTY_FRAME     _White
+  #define  TTY_TXT       _Green            
+  
+  #if defined(MSC700) || defined (SYM60) || defined (UNIX)
+    #define TTY_BDR  _Black
+  #elif defined (BC31)
+    #define TTY_BDR  _BrightWhite
+  #endif
+
+  #define TTY_BDR _Blue
+
+  /////////////////
+  // this class simplifies handling the display management of the
+  // simulated user terminals configured into the system.
+  //       
+  class Terminals {
+  private:
+    UINT16 nTerm;
+    tty  **pTerm;
+    rect *pttyPos;
+  public:
+    Terminals (Knl*, UINT16);
+   ~Terminals (void);
+    void Paint (void);
+    void Refresh (void);
+    void Activate (void);
+    void DeActivate (void);
+    inline rect& GetPos (UINT16 n) { return pttyPos[n]; }
+  };
+
+  ////////////////
+  // A class to hold static TTY model info and methods
+  //
+  class TTyAnim : public WinPainter {
+    Terminals *pTerms;
+  public:
+    TTyAnim (Knl*, UINT16);
+   ~TTyAnim (void);
+    void Paint (void);
+    rect& GetTTyPos (UINT16);
+    inline void Activate (void)   { pTerms->Activate();   }
+    inline void DeActivate (void) { pTerms->DeActivate(); }
+  };
+
+  #define _DEV_DISP_
+
+#endif
+
+///////////////////////////////// EOF //////////////////////////////////////
+</PRE>
+</BODY>
+</HTML>

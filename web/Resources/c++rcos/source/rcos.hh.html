@@ -1,0 +1,175 @@
+<HTML>
+<HEAD>
+  <TITLE>
+rcos.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+rcos.hh
+  </H1>
+<PRE>
+//***********************************************************************
+//  MODULE : RCOS - Common defines and types                            *
+//  AUTHOR : Ron Chernich                                               *
+//  PURPOSE: Define types common accross the RCOS system                *
+//  HISTORY:                                                            *
+//   18-JAN-93  First (MSC/C++ 7.00) version                            *
+//   26-MAR-93  Priority definition added                               *
+//   20-APR-93  Provision for Line Protocol Drivers and better BOOL def *
+//   01-FEB-94  Integers fully typedef'ed to improve portability.       *
+//   14-MAR-95  Number of user terminals made more dynamic              *
+//***********************************************************************
+
+#ifndef _RCOS_
+
+  #include <stdio.h>
+  
+  //*****************************
+  // Compiler Defines
+  //    COMPILER                DEFINES
+  //    Borland C++ 3.1         #define BC31
+  //    Borland C++ 2.0         #define BC31    &
+  //                            #define BC20
+  //    Microsoft 7.0           #define MSC700
+  //    Symantec 6.0            #define SYM60
+  //    UNIX/X11                #define UNIX
+
+//  #define BC31
+//  #define BC20
+//  #define MSC700
+  #define UNIX
+
+  ////////////
+  // This define should be TRUE for all MS-DOS based systems..
+  //
+  #if defined(MSC700) || defined(BC31) || defined(SYM60)
+    #define     _DOS_ENV
+  #endif
+  
+  ///////////////////////////
+  // Borland 2.0 doesn't understand delete[]
+  #ifdef BC20
+	#define DELETE_ARRAY delete
+  #else
+	#define DELETE_ARRAY delete[]
+  #endif
+
+  //////////////
+  // general purpose macros..
+  //
+  #define MAX(i,j)    ((i>j)?(i):(j))
+  #define MIN(i,j)    ((i<j)?(i):(j))
+
+
+  //////////////
+  // defines for RCOS basic specifications..
+  //
+  #define MAX_PROC      8           // maximum number of processes
+  #define MAX_CHILDREN  6           // limit on progeney
+  #define MAX_PRIORITY  100         // highest process priority (console)
+  #define MIN_PRIORITY  1           // .. and min for a decent range
+  #define DEF_PRIORITY  42          // Default priority for user processes
+  #define NUM_TTY       4           // number of user terminals
+  
+
+
+  /////////////////
+  // These identifiers list all RCOS's components..
+  //
+  #define ID_NULL       0x0000      // Unassigned ("Bit Bucket")
+  #define ID_Kernel     0x8000      // The OS Kernel Message Switcher
+  #define ID_CON        0x8001      // Operator's console device
+  #define ID_MMU        0x8002      // Memory Management Unit driver
+  #define ID_LP0        0x8003      // Conceptual Line Printer device
+  #define ID_LP1        0x8004      //  (reserved)
+  #define ID_MT0        0x8005      // Mag Tape Unit #1
+  #define ID_MT1        0x8006      // Mag Tape Unit #2
+  #define ID_MT2        0x8007      //  (reserved)
+  #define ID_MT3        0x8008      //  (reserved)
+  #define ID_ANIM       0x8009      // Animator Device
+  #define ID_TTY0       0x8010      // TTY device for console
+  #define ID_TTY_BASE   0x8011      // Base value for user terminal ID's
+  #define ID_TTY1       (ID_TTY_BASE)
+  #define ID_TTY2       (ID_TTY_BASE+1)
+  #define ID_TTY3       (ID_TTY_BASE+2)
+  #define ID_TTY4       (ID_TTY_BASE+3)
+  #define ID_LNDRV      0x8080      // Base ID for line protocol drivers
+
+  #define ID_FS         0x8100      // File System device (at last!)
+  #define ID_DISK_A     0x8101      // Disk Manager device driver for unit A
+  #define ID_DISK_B     0x8102      // Disk Manager device driver for unit B
+  #define ID_DISK_C     0x8103      // Disk Manager device driver for unit C
+
+  
+  ///////////////////
+  // define ID's for controls..
+  //
+  #define PB_RUN      1         // Run Button
+  #define PB_PAUSE    2         // Pause Button
+  #define PB_STEP     3         // Step Button
+  #define PB_ABOUT    4         // About (reserved) Button
+  #define CB_CONF     5         // Conform pop-up control
+  #define RB_PM       100       // Process Manager screen selector
+  #define RB_MM       (RB_PM+1) // Memory Manager screen selector
+  #define RB_RM       (RB_PM+2) // Resource Manager screen selector
+  #define RB_DM       (RB_PM+3) // Device Manager screen selector
+  #define RB_TTY_BASE (RB_PM+4) // Beginning of all TTY selector radio btns
+  #define RB_TTY1     (RB_TTY_BASE)
+  #define RB_TTY2     (RB_TTY_BASE+1)
+  #define RB_TTY3     (RB_TTY_BASE+2)
+  #define RB_TTY4     (RB_TTY_BASE+3)
+
+
+
+  ////////////////
+  // Now define global types.  These are used to ensure cross-platform
+  // portability by forcing the "porter" to match the size of their
+  // environments data primatives size (in bits) to what RCOS wants
+  // to use (EXAMPLE: p-codes are written to file as integers.  If a
+  // p-code file of p-codes created by a machine based on 16 bit integers
+  // is read by one whose default size is 32 bits, every second p-code
+  // would be skipped!) The default for DOS is uaually 16 bits; Unix 32.
+  //                              
+  // These defs are made conditional to make you think, and perhaps
+  // consult the compiler docs, even.
+  //
+  #if defined(_DOS_ENV)
+  
+    typedef int                 INT16;          // a 16 bit integer
+    typedef long                INT32;          // and a 32 bit one
+    typedef unsigned int        UINT16;         // a.a. but unsigned
+    typedef unsigned long       UINT32;         // ditto
+    typedef unsigned char       BYTE;           // what else can I say?
+    
+  #endif
+
+  #ifdef UNIX
+	typedef short   INT16;
+	typedef int             INT32;
+	typedef unsigned short UINT16;
+	typedef unsigned int   UINT32;
+	typedef unsigned char  BYTE;
+  #endif
+
+  ///////////////
+  // ..and a rather neat way of declaring a Boolean type
+  //
+  enum BOOL { FALSE, TRUE };
+
+
+  /////////////////////
+  // Memory in RCOS is managed similar to memory and files under MS Windows:
+  // we ask for some memory, we get a "handle" to it.
+  //
+  typedef UINT16 HANDLE;
+
+
+  #define _RCOS_
+
+#endif
+
+//************************************ EOF ******************************
+</PRE>
+</BODY>
+</HTML>

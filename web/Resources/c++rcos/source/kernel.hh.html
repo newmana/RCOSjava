@@ -1,0 +1,93 @@
+<HTML>
+<HEAD>
+  <TITLE>
+kernel.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+kernel.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Kernel - Class definitions for a Kernel and Device Drivers   *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: These classes are used as the basis of an object performing  *
+//           message distribution and the things (devices) that generate  *
+//           and service the messages.                                    *
+//  HISTORY:                                                              *
+//   31-MAR-93  First (MSC/C++ 7.00) version                              *
+//   04-APR-93  Port concept with pointers to function members introduced *
+//   10-MAY-93  Exec class added as private member of Kernel              *
+//   21-MAR-94  Quantum made a constructor parameter (passed to Exec)     *
+//*************************************************************************
+
+#ifndef _RCOS_KERNEL_
+
+  #include "rcos.hh"
+  #include "exec.hh"
+  #include "dbllist.hh"
+
+
+  ////////////////
+  // Messages waiting for dispatch are held in a linked list
+  // FIFO queue of these:
+  //
+  typedef struct qmsg {         // element of FIFO message queue
+    UINT16 wDest;               // who it's for
+    PMSG   pMsg;                // pointer to actual message
+  } QMSG, *PQMSG;
+
+  //////////////
+  // The Knl class - a message switcher - holds a linked list of
+  // receive ports for the messages its FIFO queue.  Each element
+  // of the list contains the port ID, its status and a pointer to
+  // the actual port instance. This allows the switcher to match
+  // message destination with port ID and call the port's receiver
+  // member with the message - thus effecting the pass.
+  //
+  typedef struct devlst {
+    port    *pP;                // pointer to a "port" class instance
+    UINT16  uID;                // unique ID of Device owing port
+    UINT16  uClass;             // Device driver class
+    UINT16  uAssign;            // "Owner" PID, if assignable
+    UINT16  uStatus;            // current status of device
+  } DEVLST, *PDEVLST;
+
+
+  ///////////////////////////////////////////////////////////////////////
+  // The visible members of the kernel are used by the Device Drivers to
+  // communicate with each other, or the Kernel itself, by calling eithe
+  // the <PostMsg> member which places the message is in a FIFO queqe for
+  // future dispatch, or <SendMsg> (if the matter is urgent) which causes
+  // the Kernel to immediatly call the destination driver.  Note the <Run>
+  // member allows the supervisor to control the kernel and probably should
+  // not be used by any drivers as it would result in recursive invocations.
+  //
+  class Knl {
+    Exec   *pTask;
+    INT16   inCrit;                     // count variable on Kernel code
+    DblList Dev;                        // List of Device Rx ports
+    DblList Msg;                        // Message Queue
+    void Service (PMSG);                // Service messages to kernel
+    PDEVLST GetPort (UINT16);           // Get devlist element of ID
+  public:
+    Knl (UINT16);
+    ~Knl (void);
+    BOOL Run (void);                    // Entry from Supervisor
+    void PostMsg (UINT16, PMSG);        // Asynchronous message transfer
+    void SendMsg (UINT16, PMSG);        // Synchronous message transfer
+    void PeekMsg (UINT16, PMSG*);       // Anything for me?
+    void Startup (void)
+       { pTask->StartCon(); }           // Startup process Zero
+  };
+
+
+  #define _RCOS_KERNEL_
+
+#endif
+
+////////////////////////////////// EOF /////////////////////////////////////
+</PRE>
+</BODY>
+</HTML>

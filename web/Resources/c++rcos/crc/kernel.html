@@ -1,0 +1,92 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class Knl
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>Knl</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	Knl
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   The visible members of the kernel are used by the Device Drivers to
+   communicate with each other, or the Kernel itself, by calling eithe
+   the  member which places the message is in a FIFO queqe for
+   future dispatch, or  (if the matter is urgent) which causes
+   the Kernel to immediatly call the destination driver.  Note the 
+   member allows the supervisor to control the kernel and probably should
+   not be used by any drivers as it would result in recursive invocations.
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+  class Knl {
+    Exec   *pTask;
+    INT16   inCrit;                     // count variable on Kernel code
+    DblList Dev;                        // List of Device Rx ports
+    DblList Msg;                        // Message Queue
+    void Service (PMSG);                // Service messages to kernel
+    PDEVLST GetPort (UINT16);           // Get devlist element of ID
+  public:
+    Knl (UINT16);
+    ~Knl (void);
+    BOOL Run (void);                    // Entry from Supervisor
+    void PostMsg (UINT16, PMSG);        // Asynchronous message transfer
+    void SendMsg (UINT16, PMSG);        // Synchronous message transfer
+    void PeekMsg (UINT16, PMSG*);       // Anything for me?
+    void Startup (void)
+       { pTask->StartCon(); }           // Startup process Zero
+  };
+
+      </PRE> 
+
+</BODY>
+</HTML>

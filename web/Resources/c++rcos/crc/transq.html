@@ -1,0 +1,82 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class TransQ
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>TransQ</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	TransQ
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   for safety, we sub-class off the disk device transfer FIFO queue
+   preventing the animator form doing anthing bad with queue data..
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+       class TransQ {
+    TreqstQ *pTQ;
+    XfReq   *pX;
+  public:
+    TransQ (TreqstQ *p) : pTQ(p) { }
+   ~TransQ (void) { }
+    void   Peek (UINT16 n) { pX = pTQ->Peek(n);  }
+    UINT16 GetLen (void) { return pTQ->GetLen(); }
+    UINT16 GetPid (void) { return pX->uProc;     }
+    UINT16 GetTrk (void) { return pX->nTrk;      }
+    UINT16 GetSec (void) { return pX->nSec;      }
+    UINT16 GetSid (void) { return pX->nSid;      }
+    BOOL   IsRead (void) { return (pX->cmnd == DD_READ) ? TRUE : FALSE; }
+  };
+      </PRE> 
+
+</BODY>
+</HTML>

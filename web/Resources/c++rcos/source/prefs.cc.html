@@ -1,0 +1,146 @@
+<HTML>
+<HEAD>
+  <TITLE>
+prefs.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+prefs.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : System Initialization Parameters support module              *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Class methods                                                *
+//  HISTORY:                                                              *
+//   21-MAR-95  First Version (MS Visual C++ 1.5)                         *
+//*************************************************************************
+
+#include "prefs.hh"
+
+
+///////////////////////////////////////////////////////////////////////////
+// constructor tries to open the preferences file..
+//
+Preferences::Preferences (void)
+{
+  ini.open(PREFS_NAME, PREFS_MODE);
+  BOOL  bOpen = __OPEN_TEST;
+//  bOpen = FALSE;
+  if (!bOpen)
+    pBuffer = NULL;
+  else {
+    pBuffer = new char[MAX_PREF];
+    if (NULL == pBuffer) {
+      ini.close();
+      bOpen = FALSE;
+    }
+  }
+}
+
+/////////
+// close prefs file, if open
+//
+Preferences::~Preferences (void)
+{
+  if (bOpen) {
+    ini.close();
+    DELETE_ARRAY pBuffer;
+  }
+}
+
+/////////////////
+// The INI file contains lines of the form:
+//
+//     KEY = VALUE ;COMMENT
+//
+// (the whitespace around the VALUE and the comment are optional
+// This private member scans the file for a line starting
+// with the passed key string (ignoring case) and extracts the Value stuff
+// If a comment is present, it and any trailing white space are deleted.
+// RETURNS: pointer to the first non-space char after the equals sign or NULL
+//
+char *Preferences::FindKey (const char *pszKey)
+{
+  ini.seekg(0);
+  for (;;)
+  {
+    if (ini.eof())
+      break;
+    ini.getline(pBuffer, MAX_PREF);
+    char *cp = pBuffer;
+    while (*cp)
+      tolower(*cp++);
+
+  #ifdef _DOS_ENV
+    if (0 == strnicmp(pBuffer, pszKey, strlen(pszKey))) {
+  #endif
+
+  #ifdef UNIX  // why do they use casecmp instead of icmp (which is standard?)
+    if ( strncasecmp(pBuffer, pszKey, strlen(pszKey))) {
+  #endif
+
+      cp = strchr(pBuffer, '=');
+      if (*cp)
+      {
+	while (*cp)
+	  if (SPACE != *(++cp))
+	    break;
+	if (*cp)
+	{
+	  char *cp2 = strchr(cp, ';');
+	  if (cp2)
+	  {
+	    while (SPACE == *(cp2 - 1))
+	      --cp2;
+	    *cp2 = '\0';
+	  }
+	}
+      }
+      return cp;
+    }
+  }
+  return 0;
+}
+
+///////////////
+// find and return the integer value associated with the passed key tag
+// string.  If not found (or no INI file) return the passed default value
+// RETURNS: Integer value for key identifier
+//
+UINT16 Preferences::GetPrefInt (const char *pszKey, UINT16 nDef)
+{
+  UINT16 nVal = nDef;
+  if (bOpen) {
+    char *cp = FindKey(pszKey);
+    if (cp)
+      nDef = (UINT16)atoi(cp);
+  }
+  return nDef;
+}
+
+////////////
+// find the passed key tag in the INI file and copy to the callers buffer
+// If not found (or no INI file) use the passed default value
+// RETURNS: Number of characters copied
+//
+UINT16 Preferences::GetPrefStr
+  (const char *pszKey, const char *pszDef, char *psz, UINT16 n)
+{
+  if (!bOpen)
+    strncpy(psz, pszDef, n);
+  else {
+    char *cp = FindKey(pszKey);
+    if (cp)
+      strncpy(psz, cp, n);
+    else
+      strncpy(psz, pszDef, n);
+  }
+  return strlen(psz);
+}
+
+///////////////////////////////// EOF //////////////////////////////////////
+</PRE>
+</BODY>
+</HTML>

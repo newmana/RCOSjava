@@ -1,0 +1,473 @@
+<HTML>
+<HEAD>
+  <TITLE>
+fsiface.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+fsiface.cc
+  </H1>
+<PRE>
+//**************************************************************************
+//  MODULE : Process File System Support Object Methods.                   *
+//  AUTHOR : Ron Chernich                                                  *
+//  PURPOSE: Each Process descriptor has a pointer to one of these. If the *
+//           the process ever invokes an ASSIGN file function, an instance *
+//           of this class is created to support all required actions.     *
+//  HISTORY:                                                               *
+//   31-AUG-94  First Simple implementation.                               *
+//   11-SEP-94  Relief! Unit tests for all basic PLL/2 file funcs passed!  *
+//**************************************************************************
+
+  
+#include <ctype.h>  
+#include "fsiface.hh"  
+
+#undef toupper          // ensure the function version (not macro) is used
+  
+  
+////////////////////////////////////////////////////////////////////////
+// When created, simply ensure that all XFCB pointers are NULL and set
+// the "magic" number to one sufficiently random to assure that they
+// will appear unique..
+//
+FsIface::FsIface (UINT16 n, Knl *p) : pTx(p), uID(n)
+{
+  for (int idx = 0; idx < MAX_FILES; idx++)
+    pXfcb[idx] = NULL;
+  uMagic = (UINT16)(Clock.GetTicks() & 0x0ff0);
+}
+
+//////////////
+// on destruction, any remaining XFCB's are destroyed without
+// flushing (ie automatic behavour assumes process went illegal)..
+//
+FsIface::~FsIface (void)
+{
+  for (int idx = 0; idx < MAX_FILES; idx++)
+    if (NULL == pXfcb[idx])
+      break;
+    else {
+      if (pXfcb[idx]->Fcb.pBuf)
+	DELETE_ARRAY pXfcb[idx]->Fcb.pBuf;
+      delete pXfcb[idx];
+    }
+}
+
+////////////
+// Copies passed "name" string into passed destination, doing wild card expansion of
+// first encountered *splat*, padding to the passed length..
+// RETURNS: TRUE  .. all ok
+//          FALSE .. bad char, too much input, etc, etc
+//
+BOOL FsIface::ExpandName (char *pszTarg, char *pszSrc, UINT16 nLen)
+{
+  if (strchr(pszSrc, ':') || strchr(pszSrc, '.') || strchr(pszSrc, ':'))
+    return FALSE;
+  if (strlen(pszSrc) > nLen)
+    return FALSE;
+  char *cp = pszSrc;
+  for (UINT16 idx = 0; idx < nLen; idx++)
+    if ('\0' == *cp)
+      pszTarg[idx] = ' ';
+    else
+      if (*cp != '*')
+        pszTarg[idx] = toupper(*cp++);
+      else {
+        pszTarg[idx] = '?';
+        *cp = '\0';
+      }
+  return TRUE;
+}
+
+////////////////////
+// If the passed path is for a valid drive unit and the name pases ok,
+// try to get an XFCB for it
+//
+// RETURNS: TRUE  .. all Ok
+//          FALSE .. Bad file name or disk unit
+//
+UINT16 FsIface::Allocate (HANDLE& hFile, char *pszName)
+{
+  int  idx;
+  char *cp1, *cp2, *psz;
+  
+  for (idx = 0; idx < MAX_FILES; idx++)
+    if (NULL == pXfcb[idx])
+      break;
+  if (idx < MAX_FILES) {
+    pXfcb[idx] = new XFCB;
+    if (NULL == pXfcb[idx])
+      return FS_Fail;
+    memset((char*)pXfcb[idx], 0, sizeof(XFCB));
+    pXfcb[idx]->Fcb.pBuf = new char[BLOCK_LEN];
+    if (NULL == pXfcb[idx]->Fcb.pBuf) {
+      delete pXfcb[idx];
+      return FS_Fail;
+    }
+    if (cp2 = strrchr(pszName, '.'))
+      *cp2++ = '\0';
+    if (NULL == (cp1 = strchr(pszName, ':')))
+      cp1 = pszName;
+    else {
+      *cp1++ = '\0';
+      if (strlen(pszName) > 1)
+        return FS_BadUnit;
+      *pszName = toupper(*pszName);
+      if ((*pszName < 'A') || (*pszName > 'A' + MAX_DRIVES))
+        return FS_BadUnit;
+      pXfcb[idx]->Fcb.de.nUsrNmbr = *pszName - 'A';
+    }
+    if (0 == strlen(cp1))
+      return FS_BadName;
+    psz = (char*)pXfcb[idx]->Fcb.de.fname;
+    if (FALSE == ExpandName(psz, cp1, PNAME_LEN))
+      return FS_BadName;
+    psz = (char*)pXfcb[idx]->Fcb.de.fextn;
+    if (FALSE == ExpandName(psz, cp2, ENAME_LEN))
+      return FS_BadName;
+    hFile = (HANDLE)(uMagic + idx);
+    pXfcb[Idx(hFile)]->mState = FSM_Assigned;
+    return FS_Ok;
+  }
+  return FS_NoHandles;
+}
+
+///////////////////
+// This func (which will always cause a block), posts a message to open
+// an existing file if the current state is "Assigned" then waits to see
+// if the open works (the file may not exist, you see)..
+//
+UINT16 FsIface::Open (HANDLE hFile, UINT16 uStat)
+{ 
+  if ((0 <= Idx(hFile)) && (Idx(hFile) < MAX_FILES) && (pXfcb[Idx(hFile)]))
+    switch (pXfcb[Idx(hFile)]->mState) {
+      case FSM_Assigned: {
+          PFCBREF pRef = new FCBREF;
+          pRef->pFcbRef = (FCB*)&pXfcb[Idx(hFile)]->Fcb;
+          message Msg(uID, FS_Open, 0, (void*)pRef);
+          pTx->PostMsg(ID_FS, &Msg);
+          pXfcb[Idx(hFile)]->mState = FSM_Opening;
+          return FS_Busy;
+        }
+        break;
+      case FSM_Opening:
+        switch (uStat) {
+          case FS_Ok:
+            pXfcb[Idx(hFile)]->mState = FSM_BufferMT;
+            break;
+          case FS_NotFound:
+            pXfcb[Idx(hFile)]->mState = FSM_Assigned;
+            break;
+        default:
+          uStat = FS_Fail;
+        }
+        return uStat;
+    }
+  return FS_Fail;
+}
+
+////////////////////
+// This scenario deals adequately with a CLOSE call, flushing the file if
+// there have been any write operations performed, in which case we transit
+// to the intermediate "Flushing" state, return Busy and wait for the result
+// to come back. When it does (or if there have been no writes, or even
+// possibly we never got past "assigned"), we deallocate the XFCB for reuse.
+//
+// An EOF mark is inserted in the last block unless we are right on the
+// point of opening a new record (in which case the BDOS can report the EOF).
+//
+UINT16 FsIface::Close (HANDLE hFile, UINT16 uStat)
+{
+  if ((Idx(hFile) < MAX_FILES) && (pXfcb[Idx(hFile)]))
+    switch (pXfcb[Idx(hFile)]->mState) {
+      case FSM_BufferMT:
+      case FSM_DataAvailable:
+        if (0 == pXfcb[Idx(hFile)]->nWriteCnt) {
+          pXfcb[Idx(hFile)]->mState = FSM_Closing;
+          return Close(hFile, uStat);
+        }
+      case FSM_BuffAvailable:
+        pXfcb[Idx(hFile)]->mState = FSM_Flushing;
+        return Write(hFile, (char)FS_EOFmark);
+      case FSM_Writing:
+        if (FS_Ok == uStat) {
+          PFCBREF pRef = new FCBREF;
+          pRef->pFcbRef = (FCB*)&pXfcb[Idx(hFile)]->Fcb;
+          message Msg(uID, FS_Close, 0, (void*)pRef);
+          pTx->PostMsg(ID_FS, &Msg);
+          pXfcb[Idx(hFile)]->mState = FSM_Closing;
+          return FS_Busy;
+        }
+        pXfcb[Idx(hFile)]->mState = FSM_DiskError;
+        break;
+      case FSM_Closing:
+	DELETE_ARRAY pXfcb[Idx(hFile)]->Fcb.pBuf;
+        delete pXfcb[Idx(hFile)];
+        pXfcb[Idx(hFile)] = NULL;
+        break;
+    default:
+      uStat = FS_Fail;
+    }
+  return uStat;
+}
+
+////////////////////
+// Allow deletes provided no operation other than Allocate has taken place.
+// Regardless of outcome, status is set back to "Assigned" ('cause the PLL/2
+// compiler always fires off a "Delete" ahead of a "Creat" to enforce the
+// rules for the "ASSIGN, REWRITE" precodures)..
+//
+UINT16 FsIface::Delete (HANDLE hFile, UINT16 uStat)
+{
+  if ((Idx(hFile) < MAX_FILES) && (pXfcb[Idx(hFile)]))
+    switch (pXfcb[Idx(hFile)]->mState) {
+      case FSM_Assigned: {
+          PFCBREF pRef = new FCBREF;
+          pRef->pFcbRef = (FCB*)&pXfcb[Idx(hFile)]->Fcb;
+          message Msg(uID, FS_Delete, 0, (void*)pRef);
+          pTx->PostMsg(ID_FS, &Msg);
+          pXfcb[Idx(hFile)]->mState = FSM_Deleting;
+        }
+        return FS_Busy;
+      case FSM_Deleting:
+        pXfcb[Idx(hFile)]->mState = FSM_Assigned;
+        if (FS_Ok == uStat)
+          return FS_Ok;
+        else
+          return FS_NotFound;
+    }
+  return FS_Fail;
+}
+
+////////////////////
+// If we hit here with status of Assigned, we try to create a new file,
+// (provided the FCB name has no wild chars int it, which is bad, but we
+// couldn't tell if the ASSIGN would be followed by a RESET or a REWRITE)
+// by sending a message to the BDOS and telling exec this process is now
+// blocked (busy).  When the reply comes back, we transit to "Buffer Empty"
+// ready for a read or write sequence (can't tell which yet) if the creat
+// worked and return the status to the caller (normally the PCI).
+//
+UINT16 FsIface::Creat (HANDLE hFile, UINT16 uStat)
+{
+  if ((Idx(hFile) < MAX_FILES) && (pXfcb[Idx(hFile)]))
+    switch (pXfcb[Idx(hFile)]->mState) {
+      case FSM_Assigned: {
+          char *cp = (char*)pXfcb[Idx(hFile)]->Fcb.de.fname;
+          for (int i = 0; i < FILENAME_LEN; i++, cp++)
+            if ('?' == *cp)
+              return FS_BadName;
+          PFCBREF pRef = new FCBREF;
+          pRef->pFcbRef = (FCB*)&pXfcb[Idx(hFile)]->Fcb;
+          message Msg(uID, FS_Creat, 0, (void*)pRef);
+          pTx->PostMsg(ID_FS, &Msg);
+          pXfcb[Idx(hFile)]->mState = FSM_Creating;
+          return FS_Busy;
+        }
+      case FSM_Creating:
+        pXfcb[Idx(hFile)]->mState = (FS_Ok == uStat) ? FSM_BufferMT : FSM_DiskFull;
+        return uStat;
+    }
+  return FS_Fail;
+}
+
+////////////////////
+// Provided we have a valid file handle, with an existing extended control block
+// which has not been "written to", read a character, performing buffered reads
+// to the BDOS.  We will assume that EOF marks (usually 0x1a) are imbedded in all
+// text files.  NOTE how we use a little gentle recursion to simplify the code..
+//
+UINT16 FsIface::Read (HANDLE hFile, char& ch, UINT16 uStat)
+{ 
+  if ((MAX_FILES <= Idx(hFile))   ||
+      (NULL == pXfcb[Idx(hFile)]) ||
+      (pXfcb[Idx(hFile)]->nWriteCnt))
+    return FS_Fail;
+  switch (pXfcb[Idx(hFile)]->mState) {
+    case FSM_BufferMT: {
+        PFCBREF pRef = new FCBREF;
+        pRef->pFcbRef = (FCB*)&pXfcb[Idx(hFile)]->Fcb;
+        message Msg(uID, FS_ReadSeq, 0, (void*)pRef);
+        pTx->PostMsg(ID_FS, &Msg);
+        pXfcb[Idx(hFile)]->mState = FSM_Reading;
+        pXfcb[Idx(hFile)]->nReadCnt++;
+      }
+      return FS_Busy;
+    case FSM_Reading:
+      pXfcb[Idx(hFile)]->mState = FSM_DataAvailable;
+      pXfcb[Idx(hFile)]->ndx = 0;
+      return Read(hFile, ch, uStat);
+    case FSM_DataAvailable:
+      if (BLOCK_LEN <= pXfcb[Idx(hFile)]->ndx) {
+        pXfcb[Idx(hFile)]->mState = FSM_BufferMT;
+        return Read(hFile, ch, uStat);
+      }
+      else {
+        ch = pXfcb[Idx(hFile)]->Fcb.pBuf[pXfcb[Idx(hFile)]->ndx++];
+        if ((BLOCK_LEN > pXfcb[Idx(hFile)]->ndx) &&
+            (FS_EOFmark == pXfcb[Idx(hFile)]->Fcb.pBuf[pXfcb[Idx(hFile)]->ndx]))
+          pXfcb[Idx(hFile)]->mState = FSM_EOF;
+      }
+      return FS_Ok;
+    case FSM_EOF:
+      return FS_Fail;
+  }
+  return uStat;
+}
+
+////////////////////
+// Buffer character writes, flushing to disk as it fills.  The handle must be
+// valid, an extended FCB allocated and the file can NOT have been read from.
+// Again, we use recursion to save on code as the State Machine steps through
+// the sequence BufferMT -> BuffAvailable -> Writing -> BufferMT..
+//
+// Caution! BufferMT FALLS THROUGH to BuffAvailable
+//
+UINT16 FsIface::Write (HANDLE hFile, char ch, UINT16 uStat)
+{
+  if ((Idx(hFile) < MAX_FILES) && 
+      (pXfcb[Idx(hFile)]) && (0 == pXfcb[Idx(hFile)]->nReadCnt))
+    switch (pXfcb[Idx(hFile)]->mState) {
+      case FSM_BufferMT:
+        pXfcb[Idx(hFile)]->nWriteCnt++;
+        pXfcb[Idx(hFile)]->ndx = 0;
+        pXfcb[Idx(hFile)]->mState = FSM_BuffAvailable;
+      case FSM_Flushing:
+      case FSM_BuffAvailable: {
+          if (pXfcb[Idx(hFile)]->ndx < BLOCK_LEN) {
+            pXfcb[Idx(hFile)]->Fcb.pBuf[pXfcb[Idx(hFile)]->ndx++] = ch;
+            if (FSM_Flushing != pXfcb[Idx(hFile)]->mState)
+              return FS_Ok;
+          }
+          PFCBREF pRef = new FCBREF;
+          pRef->pFcbRef = (FCB*)&pXfcb[Idx(hFile)]->Fcb;
+          message Msg(uID, FS_WriteSeq, 0, (void*)pRef);
+          pTx->PostMsg(ID_FS, &Msg);
+          pXfcb[Idx(hFile)]->mState = FSM_Writing;
+        }
+        return FS_Busy;
+      case FSM_Writing:
+        if (uStat != FS_Ok) {
+          pXfcb[Idx(hFile)]->mState = FSM_DiskFull;
+          return FS_Fail;
+        }
+        pXfcb[Idx(hFile)]->mState = FSM_BufferMT;
+        return Write(hFile, ch, uStat);
+    }
+  return FS_Fail;
+}
+
+////////////////////
+// This one deals with entering strings into the deblocking buffer.  It is
+// similar to the signle char case except it does not have to deal with the
+// "FSM_Flushing" state, but it does have to deal with an input string that
+// may fill the buffer (perhaps more than once!).  The XFCB has a char
+// pointer to hold any overflow.  A copy of this overflow is held using
+// this reference and the buffer written to disk.  When the caller (who
+// has managed the blocked state) call us again, we test this pointer
+// and recurse until is is null.
+//
+UINT16 FsIface::Write (HANDLE hFile, char *psz, UINT16 uStat)
+{
+  if (psz && (Idx(hFile) < MAX_FILES) && 
+      (pXfcb[Idx(hFile)]) && (0 == pXfcb[Idx(hFile)]->nReadCnt))
+    switch (pXfcb[Idx(hFile)]->mState) {
+      case FSM_BufferMT:
+        pXfcb[Idx(hFile)]->nWriteCnt++;
+        pXfcb[Idx(hFile)]->ndx = 0;
+        pXfcb[Idx(hFile)]->mState = FSM_BuffAvailable;
+      case FSM_BuffAvailable: {
+          char *pszHold = NULL;
+          while (*psz && (pXfcb[Idx(hFile)]->ndx < BLOCK_LEN))
+            pXfcb[Idx(hFile)]->Fcb.pBuf[pXfcb[Idx(hFile)]->ndx++] = *psz++;
+          if (*psz) {
+            pszHold = new char[strlen(psz) + 1];
+            if (pszHold)
+              strcpy(pszHold, psz);
+            else
+              return FS_Fail;
+          }
+          if (pXfcb[Idx(hFile)]->pszTemp)
+	    DELETE_ARRAY pXfcb[Idx(hFile)]->pszTemp;
+          pXfcb[Idx(hFile)]->pszTemp = pszHold;
+          if (pXfcb[Idx(hFile)]->ndx < BLOCK_LEN)
+            return FS_Ok;
+          PFCBREF pRef = new FCBREF;
+          pRef->pFcbRef = (FCB*)&pXfcb[Idx(hFile)]->Fcb;
+          message Msg(uID, FS_WriteSeq, 0, (void*)pRef);
+          pTx->PostMsg(ID_FS, &Msg);
+          pXfcb[Idx(hFile)]->mState = FSM_Writing;
+        }
+        return FS_Busy;
+      case FSM_Writing:
+        if (uStat != FS_Ok) {
+          pXfcb[Idx(hFile)]->mState = FSM_DiskFull;
+          return FS_Fail;
+        }
+        pXfcb[Idx(hFile)]->mState = FSM_BufferMT;
+        return (NULL == pXfcb[Idx(hFile)]->pszTemp) ?
+          FS_Ok : Write(hFile, pXfcb[Idx(hFile)]->pszTemp, uStat);
+      default:
+        break;
+    }
+  return FS_Fail;
+}
+
+////////////////////
+// ** NOT IMPLEMENTED **
+//
+UINT16 FsIface::Read (HANDLE hFile, char *psz, UINT16 uStat)
+{
+  return FS_Ok;
+}
+
+////////////////////
+// ** NOT IMPLEMENTED **
+//
+//
+UINT16 FsIface::Stat (HANDLE, UINT16)
+{
+  return FS_Ok;
+}
+
+////////////////////
+// Return the state of the the XFCB FSM associated with the passed handle
+// as either hit end of file, or not.
+//
+UINT16 FsIface::IsEof (HANDLE hFile)
+{
+  return ((MAX_FILES <= Idx(hFile)) || (NULL == pXfcb[Idx(hFile)])) ?
+    FS_Fail : (FSM_EOF == pXfcb[Idx(hFile)]->mState) ? FS_EOF : FS_Ok;
+}
+
+////////////////////
+// ** NOT IMPLEMENTED **
+//
+UINT16 FsIface::CloseAll (UINT16)
+{
+  return FS_Ok;
+}
+
+////////////////////
+// ** NOT IMPLEMENTED **
+//
+UINT16 FsIface::FindFirst (HANDLE, UINT16)
+{
+  return FS_Ok;
+}
+
+////////////////////
+// ** NOT IMPLEMENTED **
+//
+UINT16 FsIface::FindNext (HANDLE hFile, UINT16 uStat)
+{
+  return FS_Ok;
+}
+
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

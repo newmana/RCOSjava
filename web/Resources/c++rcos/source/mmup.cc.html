@@ -1,0 +1,158 @@
+<HTML>
+<HEAD>
+  <TITLE>
+mmup.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+mmup.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : MMUP - A very simple Memory Manager of the Partitioned type  *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: An RCOS Memory Management Unit device driver which simply	  *
+//	     partitions main store into fixed size blocks.  Since all	  *
+//	     calls to the MMU are messages, the strategy is totally up to *
+//	     the driver which can be as simple or complex as you like!	  *
+//  HISTORY:                                                              *
+//    22-APR-93	First version						  *
+//*************************************************************************
+
+
+#include <string.h>
+#include <memory.h>
+#include "mmu.hh"		    // related header for MMU driver
+
+
+//////////////////////////////////////////////////////////////////////////
+// Class constructor must run base class constructor first, then allocate
+// enough memory to act as main store.	Note: This is a really simple
+// minded implementation.  There is no error reporting and minimal safe
+// guards - if we did not get any memory, all blocks are set "In Use"!
+//
+Mmu::Mmu (UINT16 id, UINT16 cls, Knl *pK) : port(id, cls, pK)
+{
+  INT16  i;
+  UINT16 k;
+
+  pMemBlk = new UINT16[PART_SIZE * MAX_PARTS];
+  for (i = 0, k = 0; i < MAX_PARTS; i++, k += PART_SIZE) {
+    arrPgTbl[i].pMem = (pMemBlk + k);
+    arrPgTbl[i].bInUse = (BOOL)(pMemBlk == NULL);
+  }
+}
+
+////////////////////
+// Destructor must release memory block
+//
+Mmu::~Mmu (void)
+{
+  if (pMemBlk)
+    DELETE_ARRAY pMemBlk;
+}
+
+////////////////////
+// Memory for this driver is a simple block of fixed RAM, partitioned into
+// equal size chunks.  When allocated (or duplicated from an existing MCB)
+// a new MCB struct is created and the next free partition assigned.
+// In all cases (except Open - see below), the message void pointer
+// references a MCB. Valid Actions are:
+//
+// Open:  Allocate next free partition with size atleast <wParam> words,
+//	  marking it "InUse".  Return handle to Table entry in <wParam> of
+//	  message, or zero if no mem available.
+// Close: <wParam> is the handle to an allocated page. Release the partition
+//	  allocated to it by clearing the flag.
+// Dup:   If a partition is available, allocate it to a new MCB, then do a
+//	  bitwise copy of partition referenced by <wParam> to it, returning
+//	  the handle to the new partition.
+// Read:  Get the word at offset <uOffset> from the partition <wParam> and
+//	  write it to <pData>.
+// Write: Store the word at <pData> to offset <uOffset> of the partition
+//	  <wParam>.
+// *Blk:  Transfer <uLen> words to/from <pData> beginning at <uOffset> of
+//	  partition <wParam>
+// Resize: <not supported in this driver >
+//
+// By convention (what i tell thee three times is true), all messages to
+// the MMU will be SENT from the Kernel (or the PCI), so replies can be
+// simply placed in the passed message.	If you doubt this, use the MM_Sync
+// bit and respond to Posted messages by Post.
+//
+void Mmu::RxPort (PMSG pM)
+{
+  switch (pM->wMsgType & ~MM_Sync) {
+    case KM_Open :
+      if (pM->wParam = (UINT16)FindFree(&arrPgTbl[0]))
+	memset(arrPgTbl[pM->wParam-1].pMem, 0, (PART_SIZE << 1));
+      break;
+    case KM_Close :
+      if (pM->wParam)
+	arrPgTbl[pM->wParam - 1].bInUse = FALSE;
+      break;
+    case MMU_Duplicate:
+      if (pM->wParam) {
+	HANDLE hTemp = (HANDLE)pM->wParam - 1;
+	if ((HANDLE)pM->wParam = FindFree(&arrPgTbl[0]))
+	  memcpy(arrPgTbl[pM->wParam - 1].pMem,
+	    arrPgTbl[hTemp].pMem, (PART_SIZE << 1));
+      }
+      break;
+    case KM_Read :
+      if (pM->wParam && pM->pBody) {
+	PMMU_MSG pT = (PMMU_MSG)pM->pBody;
+	if (pT->uOffset < PART_SIZE)
+	  *(pT->pData) = *(arrPgTbl[pM->wParam - 1].pMem + pT->uOffset);
+      }
+      break;
+    case KM_Write :
+      if (pM->wParam && pM->pBody) {
+	PMMU_MSG pT = (PMMU_MSG)pM->pBody;
+	if (pT->uOffset < PART_SIZE)
+	  *(arrPgTbl[pM->wParam - 1].pMem + pT->uOffset) = *(pT->pData);
+      }
+      break;
+    case KM_ReadBlk :
+      if (pM->wParam && pM->pBody) {
+	PMMU_MSG pT = (PMMU_MSG)pM->pBody;
+	if (PART_SIZE > (pT->uOffset + pT->uLen))
+	  memcpy(pT->pData, (arrPgTbl[pM->wParam - 1].pMem + pT->uOffset),
+		(pT->uLen << 1));
+      }
+      break;
+    case KM_WriteBlk :
+      if (pM->wParam && pM->pBody) {
+	PMMU_MSG pT = (PMMU_MSG)pM->pBody;
+	if (PART_SIZE > (pT->uOffset + pT->uLen))
+	  memcpy((arrPgTbl[pM->wParam - 1].pMem + pT->uOffset),
+		  pT->pData, (pT->uLen << 1));
+      }
+      break;
+    case MMU_Resize:
+      break;
+  default:
+    DevError(ET_NoSupport, FALSE);
+  }
+}
+
+////////////
+// scan the page table for an unused partition
+// RETURNS: Zero if no free handles, or a valid handle
+//
+HANDLE Mmu::FindFree (PPGTBL pPt)
+{
+  for (INT16 idx = 0; idx < MAX_PARTS; ++idx, ++pPt)
+    if (pPt->bInUse == FALSE) {
+      pPt->bInUse = TRUE;
+      return (idx + 1);
+    }
+  return 0;
+}
+
+
+/////////////////////////////////// eof ////////////////////////////////////
+</PRE>
+</BODY>
+</HTML>

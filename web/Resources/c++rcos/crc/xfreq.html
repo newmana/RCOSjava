@@ -1,0 +1,100 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class XfReq
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>XfReq</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	XfReq
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   A "Transfer Request" class; being an object created for each quantum
+   of disk activity.  It gets posted to the appropriate drive unit and
+   enters its FIFO queue.  When actioned, the CpmBdos pointer is used
+   to call the member function that knows (via a constant placed in the
+   object by the previous member function) which member function to pass
+   the object along to next.
+ <P> 
+  Normally, the  pointer will be a copy of the buffer address in
+  the FCB, but making it separate allows the BDOS to present the disk
+  driver with the address of its internal buffers without danger of the
+  user code accidentally gaining access to them.
+ <P> 
+   Note: stuff which class  is not concerned with
+         is hidden away - including C::tor and D::tor.
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+  class XfReq {
+    friend CpmFs;
+    friend CpmBdos;
+  protected:
+    PFCB   pFcb;                // instance of an FCB in the PCB or BDOS
+    NXTFNC ivec;                // what to do next (internal to CpmBdos)
+    BYTE   nRetry;              // error retry count
+    XfReq *pNxt;                // any "postponed" assosociated Xfer
+   ~XfReq (void) { }            // only friends can destroy
+    XfReq (UINT16 = 0);         //    or create one of these..
+    XfReq (UINT16, PFCB);
+  public:
+    UINT16   uProc;             // transfer initiator PID (or BDOS ID)
+    CHCMD    cmnd;              // What we want the disk channel to do
+    UINT16   nTrk, nSec, nSid;  // Cylinder, sector, head
+    char    *pDma;              // transfer buffer pointer
+    BOOL     bRes;              // Outcome of channel operation
+    CpmBdos *pFnCb;             // class that handeles completed xfers
+  };
+
+      </PRE> 
+
+</BODY>
+</HTML>

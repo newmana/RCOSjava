@@ -1,0 +1,330 @@
+<HTML>
+<HEAD>
+  <TITLE>
+conx.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+conx.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : CONX - Operator's console process  (see EXEC.HPP for class)  *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: The operator's console is started by magic as PID ZERO when  *
+//           the RCOS kernel first runs.  It reads command lines and will *
+//           fork to create and other procs (which are its childern).     *
+//           Aside: I wanted to call this module "con" but under DOS, you *
+//           can't name a file "con" anything!  End of Aside.             *
+//  HISTORY:                                                              *
+//   26-MAR-93  First version of Command parser                           *
+//   20-APR-93  Re-coded as a high proirity, priviledged process          *
+//   14-MAY-93  Rolling log a'la ICL 2903 added                           *
+//   17-MAY-93  Tricky bug tracked to "delete[]" required on arrays!      *
+//   04-JAN-94  Testing constant expression for "Priority" + a mem leak!  *
+//   17-Sep-94  Console said OK to start of an invalid PID slot number.   *
+//   22-MAR-95  Happy Birthday, Ron! FIND command new reports process ID  *
+//*************************************************************************
+
+#include "exec.hh"
+#include "tty.hh"
+#include "kernel.hh"
+
+
+/////////////
+// globals define ansi sequences for output formatting..
+//
+#define CONX_PID      0
+#define ROW           2
+#define COL           4
+#define LEN_GOTO      6
+#define LEN_EREOL     3
+#define LEN_PROMPT    2
+#define LEN_NEWECHO   (LEN_GOTO+LEN_EREOL)
+#define LEN_NEWPROMPT (LEN_GOTO+LEN_PROMPT+LEN_EREOL)
+
+
+///////////////////
+// Legal operator commands (don't change order of first 3, or of the
+// corresponding sting array <pszFnar>)..
+//
+enum { CMD_Die, CMD_Find, CMD_Batch, CMD_Delete,
+       CMD_Go, CMD_Suspend, CMD_Resume, CMD_Priority };
+
+////////////////
+// Operator error message indicies..
+//
+enum { CMND_OK, ERR_WHAT, ERR_NOT_FOUND, ERR_BAD_PID, ERR_BAD_PRIORITY,
+       ERR_XTRA_PARAM, ERR_NO_START, ERR_NO_CAN_DIE };
+
+
+/////////////////
+// local globals (ho ho)..
+//
+static UINT16 uCon;                         // ID of terminal given us
+static INT16  nRows, nCols, nDispRow;       // Size of terminal & output row#
+static char   arrPrmpt[] = { '>', ' ' };
+static char   arrErEol[] = { ESC, '[', 'K' };
+static char   arrGoto[]  = { ESC, '[', 0, ';', 0, 'H' };
+static char  *pszFnar[]  = { "DIE", "FIND", "BATCH", "DELETE", "GO",
+                           "SUSPEND", "RESUME", "PRIORITY", "" };
+
+
+//////////////////
+// Protos local to this module..
+//
+static void ConEcho (char*, Knl*);
+static BOOL FileCheck (char*, INT16, MMU_MSG&);
+
+
+//////////////////////////////////////////////////////////////////////////
+// At this point, we are a process (pid zero), with a Line Protocol Driver
+// (which has a tty device allocated to it whose ID we don't know, or need
+// to know).  Since we don't know what "size" the tty is (rows/cols) and
+// since this will be compiler font and graphic layout dependant, we'll
+// ask for some details, store them, and turn off the "break" detect on
+// the line driver.
+//
+void Exec::InitCon (void)
+{
+  uCon = ID_LNDRV+arrPCB[0].uPid;
+  MSG mess(CONX_PID, KM_IoCtrl, DM_GetSize);
+  pTx->SendMsg(uCon, &mess);
+  nRows = mess.wParam >> 8;
+  nCols = mess.wParam & 0x00ff;
+  nDispRow = 0;
+  mess = message(CONX_PID, KM_IoCtrl, DM_BreakOff);
+  pTx->SendMsg(uCon, &mess);
+}
+
+///////////////////
+// Here we have the console process.  All other processes are forked off it.
+// We arrive here every time the Kernel (Exec, actually) dispatches process
+// ZERO (us) to the CPU. This probably means that a message we ware blocked
+// on has been received - ie a reply from the line protocol driver. We will
+// action the user text, then re-display the prompt and ask the line driver
+// for another block, effectively blocking ourselves again.
+//
+void Exec::RunCon (PCB &Pcb)
+{
+  if (Pcb.pReply) {
+    char *pst;
+    if (pst = new char[Pcb.pReply->wParam + 1]) {
+      UINT16 wMsg = Pcb.pReply->wMsgType & ~MM_Sync;
+      strncpy(pst, (char*)Pcb.pReply->pBody, Pcb.pReply->wParam);
+      *(pst + Pcb.pReply->wParam) = '\0';
+      DELETE_ARRAY Pcb.pReply->pBody;
+      delete Pcb.pReply;
+      Pcb.pReply = NULL;
+      switch (wMsg) {
+        case KM_ReadBlk:
+          ParseCon(pst);
+	  DELETE_ARRAY pst;
+          break;
+        case KM_WriteBlk:
+          ConEcho(pst, pTx);
+	  DELETE_ARRAY pst;
+          return;
+        default:
+	  DELETE_ARRAY pst;
+          return;
+      }
+    }
+  }
+  arrGoto[COL] = 0;
+  arrGoto[ROW] = nRows - 1;
+  char st[LEN_NEWPROMPT];
+  memcpy(st, arrGoto, LEN_GOTO);
+  memcpy(st + LEN_GOTO, arrErEol, LEN_EREOL);
+  memcpy(st + LEN_GOTO + LEN_EREOL, arrPrmpt, LEN_PROMPT);
+  MSG mess(CONX_PID, KM_WriteBlk, LEN_NEWPROMPT, (void*)st);
+  pTx->SendMsg(uCon, &mess);
+  mess = message(CONX_PID, KM_ReadBlk, 0, NULL);
+  pTx->PostMsg(uCon, &mess);
+}
+
+//////////////////////
+// Command parser .. implements the OS "operator's console" based on the
+// good old ICL 1900 (DME) Exec.  All Upper case chars for valid commands
+// are mandatory; the rest (if present) must be correct but are ignored.
+//
+//   DIe                             Orderly Termination of operating system
+//   FInd     <name>                 Load program
+//   BAtch    <name>                 Execute batch of operator commands
+//   GO       <pid>                  Begin execution
+//   SUspend  <pid>                  Suspend process
+//   DElete   <pid>                  Delete process
+//   REsume   <pid>                  Resume process (after suspension)
+//   PRiority <pid> <new priority>   Revise process priority
+//
+// Note that all chars in the input string are guaranteed upper case and any
+// "new" char arrays sent to the line driver are deleted by the tty device.
+//
+void Exec::ParseCon (char* pCmnd)
+{
+  char *cp;
+  INT16  n1, n2, nErr = ERR_WHAT, idx = 0;
+  MMU_MSG memmsg = { NULL, arrPCB[0].uSP, 0 };
+  static char *szRsp[] = { " - O.K.", " - ERROR %c", "  Loaded %d" };
+
+  while (pszFnar[idx]) {
+    INT16 nLen = (pCmnd[2] == ' ') ? 2 : strlen(pszFnar[idx]);
+    if (strncmp(pCmnd, pszFnar[idx], nLen))
+      ++idx;
+    else {
+      nErr = CMND_OK;
+      cp = pCmnd + nLen;
+      if ((idx == CMD_Find) || (idx == CMD_Batch))
+        nErr = (FileCheck(cp, idx, memmsg) ? CMND_OK : ERR_NOT_FOUND);
+      if (idx > CMD_Batch) {
+        n1 = n2 = -1;
+        sscanf(cp, " %d %d", &n1, &n2);
+        if ((n1 < 0) || (n1 > MAX_PROC))
+          nErr = ERR_BAD_PID;
+        if ((n2 != -1) && (idx != CMD_Priority))
+          nErr = ERR_XTRA_PARAM;
+      }
+      if (nErr == CMND_OK) {
+        MSG msg;
+        switch(idx) {
+          case CMD_Die:
+            if (uProcCnt == 1)
+              KbdIn.KeyPut(_ALT, ALT_F4);
+            else
+              nErr = ERR_NO_CAN_DIE;
+            break;
+          case CMD_Go:
+            if (!LoSked(n1))
+              nErr = ERR_BAD_PID;
+            break;
+          case CMD_Delete:
+            Kill(n1);
+            break;
+          case CMD_Find:
+            msg = message(CONX_PID, KM_WriteBlk,
+              arrMCB[0].hStack, (void*)&memmsg);
+            pTx->SendMsg(ID_MMU, &msg);
+	    DELETE_ARRAY memmsg.pData;
+            arrPCB[0].uSP += (memmsg.uLen - 1);
+            n1 = Fork();
+            nErr = (NO_PROC == n1) ? ERR_NO_START : CMND_OK;
+            arrPCB[0].uSP -= (memmsg.uLen - 1);
+            break;
+          case CMD_Suspend:
+            if (!Suspend(n1))
+              nErr = ERR_BAD_PID;
+            break;
+          case CMD_Resume:
+            if (!Resume(n1))
+              nErr = ERR_BAD_PID;
+            break;
+          case CMD_Priority:
+            nErr = ((n2 < MIN_PRIORITY) || (n2 > MAX_PRIORITY)) ?
+              ERR_BAD_PRIORITY : (arrPCB[n1].uPid == NO_PROC)   ?
+              ERR_BAD_PID : CMND_OK;
+            if (nErr == CMND_OK)
+              arrPCB[n1].nPriority = n2;
+            break;
+        }
+      }
+      break;  // while
+    }
+  }
+  char *pst;
+  if (pst = new char[nCols+1]) {
+    char szRes[16];
+    INT16 nLim = MIN((INT16)strlen(pCmnd), nCols);
+    strncpy(pst, pCmnd, MIN((INT16)strlen(pCmnd), nCols-2));
+    if ((CMD_Find == idx) && (CMND_OK == nErr)) {
+      sprintf(pst + nLim, szRsp[2], n1);
+      nLim = strlen(pst);
+    }
+    sprintf(szRes, ((nErr == CMND_OK) ? szRsp[0] : szRsp[1]), nErr+64);
+    INT16 nReq = strlen(szRes);
+    while ((nLim + nReq) > nCols)
+      --nLim;
+    strcpy(pst + nLim, szRes);
+    ConEcho(pst, pTx);
+    DELETE_ARRAY pst;
+  }
+}
+
+///////////////
+// Ensure a file with the passed name exists.  Extension and mode dependant
+// on param <n> thus:
+//   CMD_FI: .PCD extension in binary mode
+//   CMD_BA: .BAT extension in text mode
+// Since the string <st> may contain an extension, over-ride it with the
+// correct extension, provided it's within 4 chars of the string end,
+// since if it's not, it may be the part of a path ID. If successful, copy
+// the name and its length into the data area of the memory request message
+// passed as <memreq>.
+// RETURNS: TRUE  .. file exists
+//          FALSE .. no it don't
+//
+BOOL FileCheck(char *st, INT16 n, MMU_MSG &memreq)
+{
+  char *cp, szName[128];
+
+  while (st && (*st == ' '))
+    ++st;
+  strcpy(szName, st);
+  cp = szName + MAX(0, strlen(szName) - 1);
+  while ((*cp == ' ') && (cp >= szName))
+    *(cp--) = '\0';
+  if (szName) {
+    if ((cp = strrchr(szName, '.')) && (strlen(cp) <= 4))
+      *cp = '\0';
+    strcat(szName, ((n == CMD_Find) ? ".PCD" : ".BAT"));
+    FILE *pf;
+    if (pf = fopen(szName, ((n == CMD_Find) ? "rb" : "rt"))) {
+      fclose(pf);
+      if (memreq.pData = new UINT16[strlen(szName)+1]) {
+        UINT16 idx = 0;
+        while (szName[idx]) {
+          memreq.pData[idx] = (UINT16)szName[idx];
+          ++idx;
+        }
+        memreq.pData[idx] = idx;
+        memreq.uLen = (idx + 1);
+        return TRUE;
+      }
+    }
+  }
+  return FALSE;
+}
+
+/////////////
+// Format the passed message to effect a "rolling" message area above the
+// console command line (jus' like the good ol' ICL 2903). Since the array
+// needed to build the text block is of variable length we will use the
+// heap to allocate it, and since the WriteBlk message is "sent" we are
+// responsible for deleting it.
+//
+static void ConEcho (char *pszTxt, Knl *pTx)
+{
+  char *pst;
+  INT16  nLen = MIN(nCols-2, (INT16)strlen(pszTxt));
+  if (pst = new char[nLen+(LEN_NEWECHO*2)]) {
+    arrGoto[COL] = 2;
+    arrGoto[ROW] = nDispRow++;
+    if (nDispRow >= nRows - 1)
+      nDispRow = 0;
+    memcpy(pst, arrGoto, LEN_GOTO);
+    memcpy(pst+LEN_GOTO, arrErEol, LEN_EREOL);
+    arrGoto[ROW] = nDispRow;
+    memcpy(pst+LEN_NEWECHO+nLen, arrGoto, LEN_GOTO);
+    memcpy(pst+LEN_NEWECHO+nLen+LEN_GOTO, arrErEol, LEN_EREOL);
+    memcpy(pst+LEN_NEWECHO, pszTxt, nLen);
+    MSG mess(CONX_PID, KM_WriteBlk, nLen+(LEN_NEWECHO<<1), (void*)pst);
+    pTx->SendMsg(uCon, &mess);
+    DELETE_ARRAY pst;
+  }
+}
+
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

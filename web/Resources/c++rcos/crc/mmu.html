@@ -1,0 +1,77 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class Mmu
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>Mmu</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	Mmu
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   This is the MMU "driver" (based as usual on the port class)
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+ class Mmu : public port {
+    UINT16 *pMemBlk;                // memory block managed by driver
+    PGTBL  arrPgTbl[MAX_PARTS];     // array of pages in main memory
+    HANDLE FindFree (PPGTBL);       // get a free page handle
+  public:
+    Mmu (UINT16, UINT16, Knl*);     // constructor
+    ~Mmu (void);                    // destructir
+    void RxPort (PMSG);             // supply virtual member of "port"
+  };
+
+      </PRE> 
+
+</BODY>
+</HTML>

@@ -1,0 +1,100 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    BitMap CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>BitMap</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      BitMap
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+ The following class defines a "bitmap" -- an array of bits,
+ each of which can be independently set, cleared, and tested.
+<P>
+ Most useful for managing the allocation of the elements of an array --
+ for instance, disk sectors, or main memory pages.
+ Each bit represents whether the corresponding sector or page is
+ in use or free.           
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+<PRE>
+class BitMap {
+  public:
+    BitMap(int nitems);         // Initialize a bitmap, with "nitems" bits
+                                // initially, all bits are cleared.
+    ~BitMap();                  // De-allocate bitmap
+
+    void Mark(int which);       // Set the "nth" bit
+    void Clear(int which);      // Clear the "nth" bit
+    bool Test(int which);       // Is the "nth" bit set?
+    int Find();                 // Return the # of a clear bit, and as a side
+                                // effect, set the bit.
+                                // If no bits are clear, return -1.
+    int NumClear();             // Return the number of clear bits
+
+    void Print();               // Print contents of bitmap
+
+    // These aren't needed until FILESYS, when we will need to read and
+    // write the bitmap to a file
+    void FetchFrom(OpenFile *file);     // fetch contents from disk
+    void WriteBack(OpenFile *file);     // write contents to disk
+
+  private:
+    int numBits;                        // number of bits in the bitmap
+    int numWords;                       // number of words of bitmap storage
+                                        // (rounded up if numBits is not a
+                                        //  multiple of the number of bits in
+                                        //  a word)
+    unsigned int *map;                  // bit storage
+};                                       
+</PRE>
+
+</BODY>
+</HTML>

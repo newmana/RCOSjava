@@ -1,0 +1,377 @@
+<HTML>
+<HEAD>
+  <TITLE>
+anim.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+anim.cc
+  </H1>
+<PRE>
+//***********************************************************************
+//  MODULE : ANIM - Animator Device Driver for the RCOS OS simulator    *
+//  AUTHOR : Ron Chernich                                               *
+//  PURPOSE: Module to perform all screen animation operations and re-  *
+//           draw of switched displays.                                 *
+//  HISTORY:                                                            *
+//   14-MAY-93  First (MSC/C++ 7.00) version                            *
+//   03-FEB-94  Pre-empt message added                                  *
+//   18-AUG-94  Disk Animation title messages added                     *
+//   25-AUG-94  Animator given responsibility for all display classes   *
+//   16-MAR-94  Creation/deletion of TTY Radio Btns made dynamic        *
+//   22-MAR-95  (Happy Birthday, Ron!) No of terminals made dynamic     *
+//***********************************************************************
+
+#include "anim.hh"
+
+
+//////////////
+// This define sets the minimum time between message changes in DOS
+// clock ticks of 18.2 mS
+//
+#define MIN_DISY        42  // about three quarters of a second
+
+
+////////////////
+// Defined in the main module, this reference lets us display messages
+// in the Supervisor Title Bar and create/destroy control buttons..
+//
+extern App Rcos;
+extern char *pszInitl;
+extern char *pszTitle;
+
+/////////////
+// These arrays set dithered backgrounds for the display window..
+//
+UINT16 nWinFgColor[4] = { _Green, _LightBlue, _Yellow, _LightRed };
+UINT16 nWinBgColor[4] = { _DarkGrey, _White, _BrightWhite, _Yellow };
+
+/////////////
+// ..and here are the messages for display..
+//
+static char *pszInRdy =
+  { "Low Level Scheduler moves Process P%d to the Ready Queue" };
+static char *pszRdyRun =
+  { "Process P%d context dispatched to the CPU" };
+static char *pszRunBlk =
+  { "Process P%d Blocks on an external event" };
+static char *pszBlkRdy =
+  { "Event Process P%d was Blocked on completes - Process now Ready." };
+static char *pszRunRdy =
+  { "Quantum for Process P%d expires - Process moved back to Ready." };
+static char *pszForked =
+  { "Process P0 Forks creating Process P%d." };
+static char *pszRdySus =
+  { "Ready Process P%d suspended by operator." };
+static char *pszSusRdy =
+  { "Suspended Ready Process P%d moves back to Ready." };
+static char *pszBlkSus =
+  { "Blocked Process P%d suspended by operator." };
+static char *pszSusBlk =
+  { "Suspended Blocked Process P%d moves back to Blocked." };
+static char *pszSusBlkSus =
+  { "Event Suspended Process P%d was blocked on completes." };
+static char *pszHaltOk =
+  { "Process P%d Terminated normally." };
+static char *pszHaltBad =
+  { "Process P%d Terminated on Illegal p-code." };
+static char *pszPreEmpt =
+  { "Running Process pre-empted by P%d (higher priority)." };
+//
+// These strings relate to the disk drive animation..
+//
+static char *pszEnQueue =
+  { "A new Transfer Request arrives on the device queue.." };
+static char *pszSeek =
+  { "Seek %s to Track %d commences.." };
+static char *pszOnTrack =
+  { "On track - scanning for sector %02d.." };
+static char *pszDeQueue =
+  { "Data %s user buffer - Interrupt issued." };
+static char *pszIdle =
+  { "Disk Unit %c: now Idle." };
+
+
+/////////////////////////////////////////////////////////////////////////
+// Disk animators are not instantiated until actually needed..
+//
+Animate::Animate (UINT16 uId, UINT16 uCls, Knl *pK, UINT16 nTerm) :
+  port(uId, uCls, pK), nCurWin(NIL)
+{
+  nTermRb = nTerm;
+  pDev = new TTyAnim(pK, nTerm);
+  for (int idx = 0; idx < MAX_DRIVES; idx++)
+    pDiskAnim[idx] = NULL;
+}
+
+///////////////
+// Kill off any disk animators..
+//
+Animate::~Animate (void)
+{
+  if (pDev)
+    delete pDev;
+  for (int idx = 0; idx < MAX_DRIVES; idx++)
+    if (pDiskAnim[idx])
+      delete pDiskAnim[idx];
+}
+
+///////////////////////
+// As the user pressed buttons, different components of the OS come into
+// "view" in the main animation window.  This member registers the new
+// change and performs any clean-up required by the old one.  If changing
+// from the Devices screen, we must destroy the Radio Buttons for the TTYs
+// to inhibit redirection of keyboard.
+//
+void Animate::SetCurWin (INT16 nWin, BOOL bReTitle)
+{
+  if ((CPU_DISP <= (AniWin)nWin) && (NIL > (AniWin)nWin)) {
+    Mickey.AutoPointer(WIN_X1, WIN_Y1, WIN_X2, WIN_Y2);
+    if (bReTitle)
+      Rcos.AppTitle(pszTitle);
+    if ((nCurWin == TTY_DISP) && ((AniWin)nWin != TTY_DISP)) {
+      pDev->DeActivate();
+      for (UINT16 i = 0; i < nTermRb; i++) {
+        rect r = pDev->GetTTyPos(i);
+        if (r.lr.x && r.lr.y)
+          Rcos.AppDestroy(RC_RadioBtn, RB_TTY_BASE + i);
+      }
+    }
+    GfxPattern(GFX_HalfTone);
+    GfxTextColorBg(nWinBgColor[nWin]);
+    GfxRect(WIN_X1, WIN_Y1+1, WIN_X2, WIN_Y2, GFX_Fill, nWinFgColor[nWin]);
+    GfxPattern(GFX_Solid);
+    switch ((AniWin)nWin) {
+      case CPU_DISP:
+        Cpu.Paint();
+        break;
+      case MEM_DISP:
+        break;
+      case DSK_DISP: {
+          for (int idx = 0; idx < MAX_DRIVES; idx++)
+            if (NULL != pDiskAnim[idx])
+              pDiskAnim[idx]->Paint();
+        }
+        break;
+      case TTY_DISP:
+        pDev->Paint();
+        if (nCurWin != TTY_DISP) {
+          pDev->Activate();
+          for (UINT16 i = 0; i < nTermRb; i++) {
+            rect r = pDev->GetTTyPos(i);
+            if (r.lr.x && r.lr.y) {
+              char szLab[8];
+              sprintf(szLab, "TTY &%d", i+1);
+              Rcos.AppCreate(RC_RadioBtn, RB_TTY_BASE + i, szLab,
+                    r.ul.x + 8, r.ul.y + r.lr.y + 8, FALSE);
+            }
+          }
+        }
+        break;
+    }
+    Mickey.ShowPointer();
+    nCurWin = (AniWin)nWin;
+  }
+}
+
+//////////////////
+// Provided the appropriate window is visible, perform graphix actions
+// as dictated by the message <wParam> to depict some internal change.
+// We suspend timing while this is taking place so that it takes no
+// time at all, at all..
+//
+void Animate::RxPort (PMSG pM)
+{
+  if (0 == nCurWin) {
+    MSG msg;
+    MSG_ANIP pcby;
+    MSG_ANIQ aniq;
+    Clock.Stop();
+    switch (pM->wMsgType & ~MM_Sync) {
+      case ANI_REFRESH:
+        msg = message(ID_ANIM, ANI_GET_QUS, 0, &aniq);
+        pTx->SendMsg(ID_Kernel, &msg);
+        Cpu.PaintAllQ(aniq);
+        break;
+      case ANI_UPDAT_PCB:
+        msg = message(ID_ANIM, ANI_GET_PCB, 0, &pcby);
+        pTx->SendMsg(ID_Kernel, &msg);
+        Cpu.PaintBox(&pcby);
+        break;
+      case ANI_IN_RDY:
+        PutTitle(pszInRdy, pM->wParam);
+        msg = message(ID_ANIM, ANI_GET_QUS, READY_Q+(INPUT_Q<<8), &aniq);
+        pTx->SendMsg(ID_Kernel, &msg);
+        Cpu.RefreshQ(INPUT_Q, &aniq.arr[0][0]);
+        Cpu.Anim(INPUT_Q, READY_Q);
+        Cpu.RefreshQ(READY_Q, &aniq.arr[1][0]);
+        break;
+      case ANI_RDY_RUN:
+        PutTitle(pszRdyRun, pM->wParam);
+        msg = message(ID_ANIM, ANI_GET_QUS, READY_Q, &aniq);
+        pTx->SendMsg(ID_Kernel, &msg);
+        msg = message(ID_ANIM, ANI_GET_PCB, 0, &pcby);
+        pTx->SendMsg(ID_Kernel, &msg);
+        Cpu.RefreshQ(READY_Q, &aniq.arr[1][0]);
+        Cpu.Anim(READY_Q, CPROC_BOX);
+        Cpu.PaintBox(&pcby);
+        break;
+      case ANI_RUN_RDY:
+        PutTitle(pszRunRdy, pM->wParam);
+        msg = message(ID_ANIM, ANI_GET_QUS, READY_Q, &aniq);
+        pTx->SendMsg(ID_Kernel, &msg);
+        Cpu.Anim(CPROC_BOX, READY_Q);
+        Cpu.RefreshQ(READY_Q, &aniq.arr[1][0]);
+        Cpu.PaintBox(NULL);
+        break;
+      case ANI_RUN_BLK:
+        PutTitle(pszRunBlk, pM->wParam);
+        msg = message(ID_ANIM, ANI_GET_QUS, BLOKED_Q, &aniq);
+        pTx->SendMsg(ID_Kernel, &msg);
+        Cpu.Anim(CPROC_BOX, BLOKED_Q);
+        Cpu.RefreshQ(BLOKED_Q, &aniq.arr[1][0]);
+        Cpu.PaintBox(NULL);
+        break;
+      case ANI_BLK_RDY:
+        PutTitle(pszBlkRdy, pM->wParam);
+        msg = message(ID_ANIM, ANI_GET_QUS, BLOKED_Q+(READY_Q<<8), &aniq);
+        pTx->SendMsg(ID_Kernel, &msg);
+        Cpu.RefreshQ(BLOKED_Q, &aniq.arr[1][0]);
+        Cpu.Anim(BLOKED_Q, READY_Q);
+        Cpu.RefreshQ(READY_Q, &aniq.arr[0][0]);
+        break;
+      case ANI_BLK_SBLK:
+        PutTitle(pszSusBlk, pM->wParam);
+        msg = message(ID_ANIM, ANI_GET_QUS, BLOKED_Q+(SUSBLK_Q<<8), &aniq);
+        pTx->SendMsg(ID_Kernel, &msg);
+        Cpu.RefreshQ(BLOKED_Q, &aniq.arr[1][0]);
+        Cpu.Anim(BLOKED_Q, SUSBLK_Q);
+        Cpu.RefreshQ(SUSBLK_Q, &aniq.arr[0][0]);
+        break;
+      case ANI_SBLK_BLK:
+        PutTitle(pszSusBlk, pM->wParam);
+        msg = message(ID_ANIM, ANI_GET_QUS, SUSBLK_Q+(BLOKED_Q<<8), &aniq);
+        pTx->SendMsg(ID_Kernel, &msg);
+        Cpu.RefreshQ(SUSBLK_Q, &aniq.arr[1][0]);
+        Cpu.Anim(SUSBLK_Q, BLOKED_Q);
+        Cpu.RefreshQ(BLOKED_Q, &aniq.arr[0][0]);
+        break;
+      case ANI_RDY_SRDY:
+        PutTitle(pszRdySus, pM->wParam);
+        msg = message(ID_ANIM, ANI_GET_QUS, READY_Q+(SUSRDY_Q<<8), &aniq);
+        pTx->SendMsg(ID_Kernel, &msg);
+        Cpu.RefreshQ(READY_Q, &aniq.arr[1][0]);
+        Cpu.Anim(READY_Q, SUSRDY_Q);
+        Cpu.RefreshQ(SUSRDY_Q, &aniq.arr[0][0]);
+        break;
+      case ANI_SBLK_SRDY:
+        PutTitle(pszSusBlkSus, pM->wParam);
+        msg = message(ID_ANIM, ANI_GET_QUS, SUSBLK_Q+(SUSRDY_Q<<8), &aniq);
+        pTx->SendMsg(ID_Kernel, &msg);
+        Cpu.RefreshQ(SUSBLK_Q, &aniq.arr[1][0]);
+        Cpu.Anim(SUSBLK_Q, SUSRDY_Q);
+        Cpu.RefreshQ(SUSRDY_Q, &aniq.arr[0][0]);
+        break;
+      case ANI_SRDY_RDY:
+        PutTitle(pszSusRdy, pM->wParam);
+        msg = message(ID_ANIM, ANI_GET_QUS, SUSRDY_Q+(READY_Q<<8), &aniq);
+        pTx->SendMsg(ID_Kernel, &msg);
+        Cpu.RefreshQ(SUSRDY_Q, &aniq.arr[1][0]);
+        Cpu.Anim(SUSRDY_Q, READY_Q);
+        Cpu.RefreshQ(READY_Q, &aniq.arr[0][0]);
+        break;
+      case ANI_FORKS:
+        PutTitle(pszForked, pM->wParam);
+        msg = message(ID_ANIM, ANI_GET_QUS, INPUT_Q, &aniq);
+        pTx->SendMsg(ID_Kernel, &msg);
+        Cpu.RefreshQ(INPUT_Q, &aniq.arr[1][0]);
+        break;
+      case ANI_HALT_OK:
+        PutTitle(pszHaltOk, pM->wParam);
+        break;
+      case ANI_HALT_BAD:
+        PutTitle(pszHaltBad, pM->wParam);
+        break;
+      case ANI_PREEMPT:
+        PutTitle(pszPreEmpt, pM->wParam);
+        msg = message(ID_ANIM, ANI_GET_QUS, READY_Q, &aniq);
+        pTx->SendMsg(ID_Kernel, &msg);
+        Cpu.Anim(CPROC_BOX, READY_Q);
+        Cpu.RefreshQ(READY_Q, &aniq.arr[1][0]);
+        Cpu.PaintBox(NULL);
+        break;
+    }
+    Clock.Start();
+  }
+  else if (2 == nCurWin) {
+    Clock.Stop();
+    switch (pM->wMsgType & ~MM_Sync) {
+      case ANI_ONTRACK:
+        PutTitle(pszOnTrack, pM->wParam);
+        break;
+      case ANI_CHAN_ENQ:
+        if (pDiskAnim[pM->wParam])
+          pDiskAnim[pM->wParam]->RefreshTQ((TransQ*)pM->pBody, 0);
+        PutTitle(pszEnQueue);
+        break;
+      case ANI_SPIN:
+        if (pDiskAnim[pM->wParam])
+          pDiskAnim[pM->wParam]->DiskSpin(*(UINT16*)pM->pBody);
+        break;
+      case ANI_BEGIN_SEEK: {
+          char str[8];
+          UINT16 nVal = *(UINT16*)pM->pBody;
+          strcpy(str, (nVal & 0x8000) ? "out" : "in");
+          PutTitle(pszSeek, nVal & 0x7fff, str);
+        }
+        break;
+      case ANI_SEEK:
+        if (pDiskAnim[pM->wParam])
+          pDiskAnim[pM->wParam]->DiskSeek(*(UINT16*)pM->pBody);
+        break;
+      case ANI_RWOP: {
+          char str[16];
+          strcpy(str, (pM->wParam) ? "written from" : "read into");
+          PutTitle(pszDeQueue, 0, str);
+          if (pDiskAnim[pM->wParam])
+            pDiskAnim[pM->wParam]->RefreshTQ((TransQ*)pM->pBody, 1);
+          TransQ *pTq = (TransQ*)pM->pBody;
+          if (1 == pTq->GetLen())
+            PutTitle(pszIdle, pM->wParam + 'A');
+        }
+        break;
+    }
+    Clock.Start();
+  }
+  else if ((pM->wMsgType & ~MM_Sync) == ANI_DCREAT) {
+    if (NULL == pDiskAnim[pM->wParam])
+      pDiskAnim[pM->wParam] = new DiskAnim(pM->wParam, *(UINT16*)pM->pBody);
+  }
+}
+
+///////////////
+// Prepare a title message from the passed template and parameter(s)
+// and display it on the Application Title Bar.  Make sure at least
+// MIN_DISY 18mS ticks have elapsed since the last message (gives
+// adequate time to read the damn things..)
+//
+void Animate::PutTitle (char *psz1, UINT16 uNr, char *psz2)
+{
+  char   sz[80];
+  static UINT32 uPrevTock = 0;
+
+  if (psz2)
+    sprintf(sz, psz1, psz2, uNr);
+  else
+    sprintf(sz, psz1, uNr);
+  while (Clock.GetTocks() - uPrevTock < MIN_DISY)
+    NULL;
+  Rcos.AppTitle(sz);
+  uPrevTock = Clock.GetTocks();
+}
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

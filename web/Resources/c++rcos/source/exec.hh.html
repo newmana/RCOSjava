@@ -1,0 +1,227 @@
+<HTML>
+<HEAD>
+  <TITLE>
+exec.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+exec.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Exec - Definitions for Process Control Blocks and such.      *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Define all classes and strucures required by the Kernel for  *
+//           process control and management.                              *
+//  HISTORY:                                                              *
+//    21-APR-93 First version                                             *
+//    06-MAR-94 Semaphore class added and PCB struct moded as needed      *
+//    01-SEP-94 File System Interface added to PCB struct                 *
+//    21-MAR-94 Quantum made a constructor parameter                      *
+//*************************************************************************
+
+#ifndef _RCOS_EXEC_
+
+  #include "rcos.hh"
+  #include "message.hh"
+  #include "app.hh"
+  #include "dbllist.hh"
+  #include "ttyld.hh"
+  #include "cpu-disp.hh"
+
+  ////////////////
+  // Values for process status (PS) - some combinations are valid
+  //
+  #define PS_Created    0x0001  // created, not yet started
+  #define PS_Ready      0x0002  // could run at any time
+  #define PS_Blocked    0x0004  // waiting on event or resource
+  #define PS_Suspended  0x0008  // under user suspension
+  #define PS_Illegal    0x0010  // can't continue (bad p-code?)
+  #define PS_Halted     0x0020  // Normal termination
+  #define PS_Swapped    0x0040  // swapped out to backing store
+  #define PS_Zombie     0x0080  // terminated, but still present
+
+  #define PCD_QUANTUM   100     // milliseconds per time-slice 
+  #define PCD_PREEMPT  -100     // quantum value when pre-empted
+  #define MAX_DEV       4       // Most devices a process can "own"
+  #define NO_PROC       0xffff  // flag PCB PID/DEV for not in use
+
+  /////////////////////
+  // Process Control Block - built when a process is created (forked off)
+  // contains all details of process context.
+  // 
+  class FsIface;
+  //
+  typedef struct pcb {
+    char   *pszName;            // user name for process, if any
+    INT16   nPriority,          // process priority
+            nQuantum;           // max permissable ticks per scheduling
+    UINT16  uPid,               // unique ID for process (PID)
+            uPidp,              // parent PID of process
+            uIP, uSP, uBP,      // Instruction, Stack and Base pointers
+            uStatus,            // current status
+            uDevCnt;            // count of devices open by process
+    PMSG    pReply;             // message associated with wake-up
+    UINT32  lStarted,           // time process started/created (mS).
+            luTicks,            // amount of processor time in user mode
+            leTicks,            // time consumed in executive mode
+            lCode;              // 32 bit instruction at IP for animator
+    LnDrv  *pDev;               // pointer line protocol driver
+    UINT16  arrDev[MAX_DEV];    // Devices needed before process can start
+    UINT16  uTos;               // fetched values at top of stack
+    UINT16  uSemOpen,           // Bit map of semaphore ID's opened by PID
+            uSemSet,            //   map of semaphores set by this process
+            uSemWait;           //   map of semaphores we are waiting on
+    DblList Share;              // List of open shared memory block ID's
+    FsIface *pFile;             // File sysem Interface package
+  } PCB, *PPCB;
+  
+  
+  //////////////////
+  // Priority queue used to store PIDs.  May be instantiated as ordered
+  // (by Process Priority, Quantum, something), or simple FIFO.
+  //
+  class Pque : private DblList {
+    typedef struct qmbr {     // structure used for double link list
+      INT16  nKey;            // Key for ordering (normally priority)
+      UINT16 uPid;            // index into array (which is the PID #)
+    } QMBR;
+    typedef QMBR *PQMBR;	  // g++ doesn't like it being defined as
+							  // part of the previous typedef???
+    BOOL bOrdered;            // FIFO or priority ordering
+  public:
+    Pque   (BOOL = FALSE);    // default is FIFO
+   ~Pque   (void);            // kill off any left-overs
+    BOOL   PqEmpty (void);    // state of play
+    BOOL   PqFind (UINT16);   // is this PID in the queue?
+    void   PqAdd (PCB&);      // add/insert PID (perhaps in priority order)
+    UINT16 PqGet (void);      // remove PID from queue (head if ordered)
+    UINT16 PqGet (UINT16);    // remove specific PID from queue
+    void   PqImage (UINT16*); // copy queue PID numbers to passed array
+  };
+
+  ////////////
+  // Semaphores are used by running processes for Inter-Process Communication
+  // (IPC) synchronisation. They are identified by power of 2 integer values.
+  // Each PID holds bit maps for semaphores they have created, ones they have
+  // "set" and ones they are waiting (delayed) on.  Since a semaphore must be
+  // identified to the PLL/2 compiler by an integer, and since PLL/2 ints are
+  // 16 bit, this limits us to a max of 16 samaphores..
+  //
+  #define MAX_SEM 16            // maps system semaphores onto a 16 bit integer
+  
+  class Sem4 {
+    Pque   uPid,                // list of users (semaphore is free when empty)
+           uDelayed;            // priority list of waiting users
+    UINT16 uCount,              // current p/v count, set when created
+           uCreator;            // PID# of process that first opened it
+    char   *pst;                // optional user supplied name
+  public:
+    Sem4 (void);
+   ~Sem4 (void);
+    void   SemOpen (PCB&, UINT16, char*);
+    BOOL   operator == (char*); // match with semaphore name
+    BOOL   SemWait (PCB&);      // this user wants the batton
+    BOOL   SemSignal (void);    // release held semaphore
+    BOOL   SemIsFree (void);    // test for any current users
+    BOOL   SemIsUser (PCB&);    // test for specific user
+    BOOL   SemAddUser (PCB&);   // enroll new user
+    BOOL   SemDelUser (PCB&);   // remove all trace of user (may deallocate)
+    UINT16 SemGetDelayed (void);// get the head of the delayed task queue
+    UINT16 SemGetDelayed (UINT16); // get specific PID from delayed task Q
+    UINT16 SemGetCount (void) { return uCount; };
+  };
+  
+
+  //////////////////////////
+  // Class encapsulates operations required to support shared memory, based
+  // on a FIFO list (and hides details of the double link list we don't need).
+  //
+  typedef struct sh_tag {
+    UINT16 nID;                 // ID allocated to this block
+    UINT16 nCnt;                // Usage count, delete when zero
+    UINT16 nLen;                // Allocated length of block
+    INT16 *pData;               // data (16 bit PLL/2 integers)
+    Str   *pstName;             // Unique shared block name
+  } MSHARE, *PMS;
+
+  class QmMgr : private DblList {
+  public:
+    QmMgr (void);               
+   ~QmMgr (void);
+    BOOL  QmExists (char*, PMS*);         // check by name string
+    BOOL  QmExists (UINT16, PMS*);        // check by block ID
+    void  QmIncCnt (UINT16);              // increase usage count
+    void  QmDecCnt (UINT16);              // decrease count, kill off if zero
+    INT16 QmLength (UINT16);              // return block length
+    BOOL  QmAdd (char*, UINT16);          // Create and append a new block
+    BOOL  QmGet (UINT16, UINT16, INT16*); // read an int value
+    BOOL  QmPut (UINT16, UINT16, INT16*); // write an int value
+  };
+
+              
+  ////////////////////////
+  // This class performs all process control operations.  There will only
+  // be one of him which is a private member of the Kernel (only one of
+  // her, too).  When instantiated by the kernel, the class receives a
+  // reference to the kernel (sort of like device drivers) which it may
+  // use to send/post messages.
+  //
+  class Exec {
+    Knl    *pTx;                    // pointer to out master's post box
+    Pque   PqIn;                    // input queue (initialized, not started)
+    Pque   PqBlocked;               // Procs waiting on an event
+    Pque   PqSusReady;              // Procs suspended while ready
+    Pque   PqSusBlock;              // Procs suspended while blocked
+    Pque   PqReady;                 // Procs ready to roll (perhaps rock, too)
+    PCB    arrPCB[MAX_PROC];        // array of PCB structures
+    MCB    arrMCB[MAX_PROC];        // per process region table structures
+    Sem4   arrSem[MAX_SEM];         // array of available semaphores
+    QmMgr  ShareMem;                // shared memory manager
+    UINT16 nQuantum;                // default quantum per process
+    UINT16 uProcCnt;                // current number of processes in system
+    UINT16 uCurProc;                // current (running) proc - if any
+    BOOL   LoSked (UINT16);         // Low Level scheduler (for I/P queue)
+    void   Sked (void);             // dispatch next ready process to CPU
+    UINT16 Fork (void);             // create new process from current
+    BOOL   Kill (UINT16);           // remove process
+    BOOL   Start (UINT16);          // move it from input to ready
+    BOOL   Resume (UINT16);         // resume suspended process
+    BOOL   Suspend (UINT16);        // suspend this process
+    void   RunCon (PCB&);           // Run the Console process
+    void   RunProc (PCB&, MCB&);    // Run the current User process
+    void   DeCode (UINT32, char*);  // decode a p-code
+    void   CreateCon (void);        // Create the "console" process
+    void   InitCon (void);          // Pre-start code for console
+    void   ParseCon (char*);        // Parse and action operator commands
+    UINT16 IpcOpen (char*);         // register as user of named semaphore
+    UINT16 IpcAlloc (char*, UINT16);// allocate next free for use & set count
+    INT16  IpcWait (UINT16, UINT16);// process wants to use this samaphore
+    void   IpcSignal(UINT16,UINT16);// process finished with it for now
+    void   IpcClose (UINT16,UINT16);// free and release (if no other users)
+    INT16  SmOpen (char*);          // open existing shared mem by name
+    INT16  SmCreate (char*, UINT16);// create named/annon shared mem block
+    INT16  SmClose (UINT16, UINT16);// close usage of shared mem for process
+    INT16  SmLength (UINT16);       // get length of shared mem block from ID
+    BOOL   SmRead (UINT16,UINT16,INT16*);  // get int data of block at offset
+    BOOL   SmWrite (UINT16,UINT16,INT16*); // set int data of block at offset
+  public:
+    Exec (Knl*, UINT16);            // Initialize Exec (and Console)
+    ~Exec (void);                   // Complete close down procedure
+    void Block (void);              // Block current process
+    BOOL Dispatch (void);           // Ready Queue manager
+    void StartCon (void);           // Startup process Zero (console)
+    void PostReply (UINT16, PMSG);  // Add message to queue for process
+    void GetPcom (PMSG_ANIP);       // Snapshot current PCB
+    void GetQcom (UINT16, PMSG_ANIQ); // Snapshot Queue contents
+  };
+
+  #define _RCOS_EXEC_
+
+#endif
+
+/////////////////////////////////// eof ////////////////////////////////////
+</PRE>
+</BODY>
+</HTML>

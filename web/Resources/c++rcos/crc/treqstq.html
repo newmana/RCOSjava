@@ -1,0 +1,81 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class TreqstQ
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>TreqstQ</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	TreqstQ
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   Disk transfer requests are held in a FIFO queue based on (guess what?)
+   We will use what Taligent term "implemenmtation inheritance", ie a
+   private base class.  Thie code rests with the Disk driver stuff..
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+  class TreqstQ : private DblList {
+    UINT16 nInq;
+  public:
+    TreqstQ (void) : nInq(0) { }
+   ~TreqstQ (void) { }
+    XfReq   *Get   (UINT16 = 0);
+    XfReq   *Peek  (UINT16 = 0);
+    void     Purge (UINT16 = 0);
+    void     PurgeAll (void);
+    UINT16   GetLen (void)  { return nInq; }
+    void     Put (XfReq *p) { DblAppend((void*)p, sizeof(XfReq)); ++nInq; }
+  };
+      </PRE> 
+
+</BODY>
+</HTML>

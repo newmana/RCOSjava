@@ -1,0 +1,80 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    Kernel CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>Kernel</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Kernel
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      RCOS message passing kernel, possibly with more functionality added
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+  <UL>
+    <LI> init - perform necessary operations at start
+    <LI> close - shutdown OS
+    <LI> <B>Run()</B><BR>
+         - ?? not sure what will be here
+    <LI> sendMessage
+    <LI> postMessage
+    <LI> handleMessage?
+    <LI> <B>DoSystemCall( int sCall, ..data )</B><BR>
+         called by CPU when it detects a system call
+  <P>
+    <LI> <B>ProcessContext theContext = ReadContext()</B><BR>
+         save the current CPU context onto the appropriate Process
+  <P>
+    <LI> <B>WriteContext( ProcessContext theContext )</B><BR>
+         write a new context
+  </UL>
+
+</BODY>
+</HTML>

@@ -1,0 +1,144 @@
+<HTML>
+<HEAD>
+  <TITLE>
+cpmfs.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+cpmfs.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : CpmFs - A file system based on the old CP/M design           *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Provides reudimentary (nonheirarachial) file system for RCOS *
+//  HISTORY:                                                              *
+//    13-AUG-94 First version                                             *
+//    21-AUG-94 Unit tests on open/create/read/write completed Ok.        *
+//*************************************************************************
+
+#include "cpmfs.hh"
+
+
+            
+//////////////////////////////////////////////////////////////////////////
+//              A CP/M-like file system (RIP, Garry Kildal).
+//------------------------------------------------------------------------
+// C::tor regesters us with the Kernel for e-mail and null's out
+// the BDOS array, awaiting mounting of the drives..
+//
+CpmFs::CpmFs (UINT16 id, UINT16 cls, Knl *pK) : port(id, cls, pK)
+{
+  for (int idx = 0; idx < MAX_DRIVES; idx++)
+    pUnit[idx] = NULL;
+}
+
+/////////////////
+// close off simulated disks
+//
+CpmFs::~CpmFs (void)
+{
+  for (int idx = 0; idx < MAX_DRIVES; idx++)
+    if (NULL != pUnit[idx])
+      delete pUnit[idx];
+}
+
+/////////////
+// This member called when disk has started up ok.  We create a new BDOS
+// object in our private array, passing it the supplied structs which
+// are used to define the disk layout - for example:
+// 
+//   a CP/M IBM 3740 format 8" diskette reserved the first two tracks
+//   as system tracks (unused) and used 1024 byte allocation blocks.
+//   With 26 x 128 byte sectors and 77 tracks, this results in total
+//   user capacity = ((26 * 128 * 77) - (64 * 32)) / 1024 = 243 K.
+//   By convention, 64 directory entries were specified.  The directory
+//   immediatly follows the system tracks, so 64 x 32 bytes = 2K, ie
+//   the first two allocation blocks are reserved for the directory,
+//   leaving 241K for user file space.
+//
+// The BDOS also needed to know the actual value used for the first
+// sector of each track (0 or 1) and what sector "skew" would be used
+// for track access.  This allows the BDOS to convert the logical
+// sector which it calculates from the record within block numbers into
+// an actual physical disk sector.
+//
+// Finally, since 8" drives did not support any knid of "door opened"
+// interrupt, removable media needed to be checked to make sure the
+// disk had not been changed in order to prevent trashing the disk
+// structure by writing one disks data to another.  This was accomplished
+// by specifying the number of "checked" directory entries.  A vector
+// of checksums was built for each "checked" directory entry which was
+// checked before all write operations.  Slow?  You bet!
+//
+void CpmFs::MountDrive (UINT16 nDrv, char cUnit, DPB& mac, DPARAM& dprm)
+{
+  UINT16 idx = UINT16(cUnit - 'A');
+  if ((idx >= 0) && (idx < MAX_DRIVES) && (NULL == pUnit[idx])) {
+    pUnit[idx] = new CpmBdos(mac, dprm, nDrv);
+    pUnit[idx]->pTx = pTx;
+    pUnit[idx]->nId = uID;
+    pUnit[idx]->LogDisk();
+  }
+}
+
+///////////////
+// All File System requests arrive here.  We just create an XfReq instance,
+// fill in what we can, then call the appropriate member func of the BDOS
+// instance corresponding to the drive unit specified in the FCB.
+//
+void CpmFs::RxPort (PMSG pM)
+{ 
+  PFCBREF pRef = (PFCBREF)pM->pBody;
+  PFCB pFcb = pRef->pFcbRef;
+  if (pFcb == NULL)
+    return;
+  UINT16 idx = pFcb->de.nUsrNmbr;
+  if ((idx >= MAX_DRIVES) || (NULL == pUnit[idx]))
+    DevError(ET_FileSysErr, FALSE);
+  else {
+    XfReq *pX = new XfReq(pM->wSender, pFcb);
+    pX->pFnCb = pUnit[idx];
+    switch (pM->wMsgType & ~MM_Sync) {
+      case FS_Open     : pUnit[idx]->Open(pX);     break;
+      case FS_Creat    : pUnit[idx]->Creat(pX);    break;
+      case FS_Close    : pUnit[idx]->Close(pX);    break;
+      case FS_ReadSeq  : pUnit[idx]->Read(pX, 0);  break;
+      case FS_ReadRan  : pUnit[idx]->Read(pX, 1);  break;
+      case FS_WriteSeq : pUnit[idx]->Write(pX, 0); break;
+      case FS_WriteRan : pUnit[idx]->Write(pX, 1); break;
+      case FS_Delete   : pUnit[idx]->Remov(pX);    break;
+      case FS_Rename   : break;
+      case FS_Stat     : break;
+      case FS_FindFirst: break;
+      case FS_FindNext : break;
+    default:
+      DevError(ET_FileSysErr, FALSE);
+    }
+  }
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// Default Transfer request C::tor - just preset simple stuff.
+//
+XfReq::XfReq (UINT16 uOwner) :
+ nSid(1), pNxt(NULL), nRetry(3), bRes(FALSE), uProc(uOwner)
+{ }
+
+//////////////
+// Transfer request C::tor has a user (or BDOS) FCB to work with..
+//
+XfReq::XfReq (UINT16 uOwner, PFCB pUfcb) :
+ nSid(1), pNxt(NULL), nRetry(3), bRes(FALSE), uProc(uOwner)
+{
+  pFcb  = pUfcb;
+  pDma  = pUfcb->pBuf;
+}
+
+
+/////////////////////////////////// eof ////////////////////////////////////
+  </PRE>
+</BODY>
+</HTML>

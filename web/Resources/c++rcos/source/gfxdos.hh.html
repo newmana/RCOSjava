@@ -1,0 +1,92 @@
+<HTML>
+<HEAD>
+  <TITLE>
+gfxdos.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+gfxdos.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Gfxdos - Module function prototypes                             *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: This module contains all the compiler dependant primitive    *
+//           graphic functions required by the RCOS system.  These names  *
+//           are invariant - the underlying code willbe compiler specific *     for graphic     graphic
+//  HISTORY:                                                              *
+//   02-DEC-92  First (MSC/C++ 7.00) version                              *
+//   24-JAN-93	Clipping routines added 				  *
+//   09-APR-93	Borland GfxTextHeight simplified, removing parameter	  * 
+//   01-FEB-94  All int params changed to typedef'ed types.               *
+//   05-FEB-94  GfxFill and GfxImageSize functions removed                *
+//	 12-JAN-95	Gfx system reorganised along DOS UNIX compoenents
+//*************************************************************************
+
+#ifndef _RCOS_GFXDOS
+
+  #include <stdio.h>
+  #include <string.h>
+  #include <math.h> 
+  #include <malloc.h>
+  
+  #include "rcos.hh"
+
+  /**********
+  * Define the type which will be used to store/retrieve images.
+  * GFX_UlnOffset is the number of pixels relative to a char "cell"
+  * to draw an underline. 
+  */
+  #if defined(MSC700) || defined(SYM60)
+    #include <dos.h>
+    #ifdef MSC700
+      #include <graph.h>
+    #else
+      #include "MGRAPH.H"
+    #endif
+    
+    #define PIMBUF               char _huge*
+    #define GFX_UlnOffset        2		
+  #endif
+
+  #ifdef BC31 
+    #include <dos.h>
+    #include <graphics.h>
+    
+    #define PIMBUF               void far*
+    #define GFX_UlnOffset        1
+  #endif
+    
+  /***************************
+  * Color mapping will be platform dependant, so we place it under
+  * a conditional selection...
+  */  
+  #if defined(MSC700) || defined(SYM60) || defined(BC31)
+  
+    #define _Black         0x00
+    #define _Blue          0x01
+    #define _Green         0x02
+    #define _Cyan          0x03
+    #define _Red           0x04
+    #define _Magenta       0x05
+    #define _Brown         0x06
+    #define _White         0x07
+    #define _DarkGrey      0x08
+    #define _LightBlue     0x09
+    #define _LightGreen    0x0a
+    #define _LightCyan     0x0b
+    #define _LightRed      0x0c
+    #define _LightMagenta  0x0d
+    #define _Yellow        0x0e
+    #define _BrightWhite   0x0f
+    
+  #endif
+            
+  #define _RCOS_GFXDOS
+#endif
+
+/*********************************** eof ***********************************/
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>RCOS.java - Status</title>
+    
+  <meta name="description" content="RCOS.java a Java based teaching operating system Written by Andrew Newman, David Jones and others.">
+ 
+  <meta name="keywords" content="operating system, teaching, Java, disk scheduler, memory manager, file system, p-code, semaphores, memory management, shared memory, scheduling, RCOS, RCOS.java, Andrew Newman, David Jones, Australia">
+</head>
+ <body text="#eeeeee" bgcolor="#000000" link="#ffff00" vlink="#999999">
+ 
+<table width="100%">
+   <tbody>
+    <tr>
+     <td align="Left">       
+      <h4>/ Status /</h4>
+     </td>
+     <td align="Left" width="25%" valign="CENTER">       <img src="pics/rightEnd.gif" width="19" height="30"><a href="index.html" target="_parent"><img src="pics/home.gif" border="0" alt="RCOS.java Home Page" width="38" height="30"></a><a href="what.html" target="body"><img src="pics/back.gif" border="0" alt="What" width="38" height="30"></a><a href="structure.html" target="body"><img src="pics/forward.gif" border="0" alt="Structure" width="38" height="30"></a><img src="pics/leftEnd.gif" alt="" width="19" height="30"><br>
+     </td>
+   </tr>
+ 
+  </tbody>
+</table>
+   <b>Goals for RCOS.java Version 1.0:</b>   
+<ul>
+     
+  <li> written in Java 1.3 code only, </li>
+  <li> run multiple programs at the same time (multi-task), </li>
+  <li> support the use of semaphores and share memory in programs (IPC), 
+   </li>
+  <li> support programs that use file I/O (File Manager, Disk Scheduler), 
+    </li>
+  <li> be written in good object orientated code (paper to come), </li>
+  <li> provide animation of files system data structures, disk allocation, 
+       shared memory, semaphores, memory management, terminal
+       allocation and process scheduling, </li>
+  <li> compile C/C++ code into P-Code, </li>
+  <li> provide the ability to implement interactive, guided introductions 
+       to operating system concepts (recorder/playback), and </li>
+  <li> be fully documented and integrated into a web site.</li>
+</ul>
+   
+<p><b>3rd July, 2001</b></p>
+<p>
+Alpha 3-1 is Alpha 3 with improved instructions, Soma web server and fixes
+to the shell scripts for Unix so they don't have line feeds.
+</p>
+<p><b>13th June, 2001</b></p>
+<p>
+I decided to release the current state of the code as Alpha 3.&nbsp; This
+means that most of the bugs found in Alpha 2 are now fixed.&nbsp;  However, I
+didn't get a chance to finish the compiler.  So that will be in Alpha 4 along
+with shared memory.  It means that there will be an Alpha 5 with
+the disk stuff in it and the help system.&nbsp; You can download Alpha 3 from
+<a href="http://prdownloads.sourceforge.net/rcosjava/RCOSjavaAlpha3.zip">here</A>.
+</p>
+<p><b>3rd June, 2001</b></p>
+<p>
+After many weeks of not having a chance to do any development, I'm finally
+back into it.&nbsp; The features listed below should be available by June 11th.
+&nbsp;Note: It will be a C compiler not a C/C++ compiler.
+</p>
+<p><b>26th April, 2001</b></p>
+<p>The <a href="http://prdownloads.sourceforge.net/rcosjava/RCOSjavaAlpha2.zip">
+second alpha</a> is out now.&nbsp; Many bugs causing stability issues have
+been resolved.&nbsp; The IPC Manager is now enabled and debugged.&nbsp; Shared
+memory has been delayed until some demonstration code is available.&nbsp;
+The "Step" and "Kill" functionaility in the Process Manager now functions
+correctly.&nbsp; The next alpha is planned for two to three weeks and will
+include: changing process priority, C/C++ compiler, shared memory, documentation
+and help system. </p>
+<p><b>15th April, 2001</b>   </p>
+<p> The first alpha release is now <a href="http://prdownloads.sourceforge.net/rcosjava/RCOSjavaAlpha1.zip">
+available</a>.&nbsp; This includes the Ant build script, scheduler with
+FIFO, LIFO and Priority queueing, the recording/playback and better
+documentation.&nbsp; Bugs that have been discovered are in the bug tracking
+system.&nbsp; Fixes to these bugs and a properly working IPC Manager will
+be in the next release, hopefully a week or so away.&nbsp; Any feedback
+would be appreciated. &nbsp;
+</p>
+<b>2nd March, 2001</b>   
+<p>RCOS.java has undergone more development recently.  A concerted effort
+to finish development is being made.&nbsp; Currently, the system is
+semi-functional although some major work (mainly reintergration of
+broken code) is still needed.&nbsp; The recording is also in place.&nbsp;
+However, it is significenlty slow and still a little buggy.  The UI is yet
+to be complete.&nbsp; There is also a basic Ant build script in place.
+The JUnit tests are yet to be integrated.&nbsp; All Java (with the
+exception of KOML) is now JDK 1.3 compliant.
+</p>
+</body>
+</html>

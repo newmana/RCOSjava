@@ -1,0 +1,314 @@
+<HTML>
+<HEAD>
+  <TITLE>
+mshare.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+mshare.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : MSHARE - Shared Memory for Interprocess Communication module *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: This module contains the Kernel IPC functions to support 	  *
+//	     named and anonynomous shared memory blocks.		  *
+//  HISTORY:                                                              *
+//    18-APR-94 First Version						  *
+//*************************************************************************
+
+#include "exec.hh"	    // related header
+#include "kernel.hh"	    // can't put this in header due recursion
+
+
+///////////////////////////////////////////////////////////////////////////
+//	 Class Methods for Shared Memory Descriptor List Object
+//-------------------------------------------------------------------------
+// Constructor must Init the queue type (FIFO) .. destructor will
+// cleanup any memory in use (in case of a dis-orderly shut-down)
+//
+QmMgr::QmMgr (void) : DblList(FALSE) { }
+
+QmMgr::~QmMgr (void)
+{
+  PMS pMs = (PMS)DblGetHead();
+  while (pMs) {
+    delete pMs->pstName;
+    DELETE_ARRAY pMs->pData;
+    DblDelete();
+    pMs = (PMS)DblGetHead();
+  }
+}
+
+//////////////
+// Walk the list looking for a block with the passed name
+// RETURNS: TRUE  .. it exists (and is now "current")
+//          FALSE .. never heard of it
+//
+BOOL QmMgr::QmExists (char *pszName, PMS *p)
+{
+  PMS pMs = (PMS)DblGetHead();
+  while (pMs)
+    if (*pMs->pstName == pszName) {
+      *p = pMs;
+      return TRUE;
+    }
+    pMs = (PMS)DblGetNext();
+  return FALSE;
+}
+
+//////////////
+// Walk the list looking for a block with the passed ID
+// RETURNS: TRUE  .. it exists (and is now "current")
+//          FALSE .. never heard of it
+//
+BOOL QmMgr::QmExists (UINT16 nFindID, PMS *p)
+{
+  PMS pMs = (PMS)DblGetHead();
+  while (pMs)
+    if (pMs->nID == nFindID) {
+      *p = pMs;
+      return TRUE;
+    }
+    pMs = (PMS)DblGetNext();
+  return FALSE;
+}
+
+/////////////
+// Increment the usage count of the passed list element (assumes that
+// this call was preceeded by a successful call to <QmExists> )
+//
+void QmMgr::QmIncCnt (UINT16 nTargID)
+{
+  PMS pMs = (PMS)DblGetHead();
+  while (pMs)
+    if (pMs->nID != nTargID)
+      pMs = (PMS)DblGetNext();
+    else {
+      pMs->nCnt++;
+      break;
+    }
+}
+
+/////////////
+// Decrement the usage count of the passed list element (assumes that
+// this call was preceeded by a successful call to <QmExists>). If the
+// usage count becomes zero, delete the element. We flush the data to
+// an unusual value to ease trapping bugs.
+//
+void QmMgr::QmDecCnt (UINT16 nTargID)
+{
+  PMS pMs = (PMS)DblGetHead();
+  while (pMs) {
+    if (pMs->nID == nTargID) {
+      pMs->nCnt--;
+      if (pMs->nCnt == 0) {
+        memset(pMs->pData, 0xb2, (sizeof(UINT16) * pMs->nLen));
+        delete pMs->pstName;
+	DELETE_ARRAY pMs->pData;
+        DblDelete();
+      }
+      break;
+    }
+    pMs = (PMS)DblGetNext();
+  }
+}
+
+///////////////
+// Create a new node for the list with an ID one greater than the last list
+// node, with a data array of the passed size, giving it the passed name.
+// The caller has validated that the name is unique and the size is
+// greater than zero.
+//
+BOOL QmMgr::QmAdd (char *pszNew, UINT16 nSize)
+{
+  MSHARE mShare;
+  PMS p = (PMS)DblGetTail();
+  
+  if (mShare.pData = new INT16[nSize]) {
+    mShare.pstName = new Str(pszNew);
+    if (mShare.pstName == NULL) {
+      DELETE_ARRAY mShare.pData;
+      return FALSE;
+    }
+    memset(mShare.pData, 0xa1, (sizeof(UINT16) * nSize));
+    mShare.nID = ((p == NULL) ? 0 : p->nID) + 1;
+    mShare.nCnt = 1;
+    mShare.nLen = nSize;
+    DblAppend((void*)&mShare, sizeof(MSHARE));
+    return TRUE;
+  }
+  return FALSE;
+}
+
+////////////////
+// Fetch the nth element of the passed shared memory block.
+// RETURNS: TRUE  .. value returned by reference
+//          FALSE .. bad ID or offset value
+//
+BOOL QmMgr::QmGet (UINT16 nID, UINT16 nOff, INT16 *pn)
+{
+  PMS pMs;
+  if (QmExists(nID, &pMs))
+    if (nOff < pMs->nLen) {
+      *pn = *(pMs->pData + nOff);
+      return TRUE;
+    }
+  return FALSE;
+}
+
+////////////////
+// Set the nth element of the passed shared memory block.
+// RETURNS: TRUE  .. previous value returned by reference
+//          FALSE .. bad ID or offset value
+//
+BOOL QmMgr::QmPut (UINT16 nID, UINT16 nOff, INT16 *pn)
+{
+  PMS pMs;
+  INT16 nTemp = *pn;
+  
+  if (QmExists(nID, &pMs))
+    if (nOff < pMs->nLen) {
+      *pn = *(pMs->pData + nOff);
+      *(pMs->pData + nOff) = nTemp;
+      return TRUE;
+    }
+  return FALSE;
+}
+
+////////////////
+// Fetch the length of the referenced block
+// RETURNS: TRUE  .. value returned by reference
+//          FALSE .. bad ID or offset value
+//
+INT16 QmMgr::QmLength (UINT16 nID)
+{
+  PMS pMs;
+  if (QmExists(nID, &pMs))
+    return pMs->nLen;
+  return -1;
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+//	   Kernel methods manage PID lists and PCI requests
+//-------------------------------------------------------------------------
+// Try to create a shared memory block with the passed name and length
+// RETURNS: ID of block created (> 0), or
+//          -1 if unable to create due param error or prior instance
+//
+INT16 Exec::SmCreate (char *psz, UINT16 nLen)
+{
+  PMS p;
+  if (nLen && (ShareMem.QmExists(psz, &p) == FALSE)) {
+    UINT16 nID = ShareMem.QmAdd(psz, nLen);
+    if (nID > 0) {
+      arrPCB[uCurProc].Share.DblAppend((void*)&nID, sizeof(UINT16));
+      return nID;
+    }
+  }
+  return -1;
+}
+
+////////////////
+// Try to open the passed named memory block for the current process. If
+// the process already has it open, ignore the request.
+// RETURNS: ID of block opened (> 0), or
+//          -1 block does not exist
+//
+INT16 Exec::SmOpen (char *psz)
+{
+  PMS p;
+  
+  if (ShareMem.QmExists(psz, &p)) {
+    UINT16 *pOpen = (UINT16*)(arrPCB[uCurProc].Share.DblGetHead());
+    while (pOpen && (*pOpen != p->nID))
+      pOpen = (UINT16*)(arrPCB[uCurProc].Share.DblGetNext());
+    if (pOpen == NULL) {
+      ShareMem.QmIncCnt(p->nID);
+      arrPCB[uCurProc].Share.DblAppend((void*)&p->nID, sizeof(UINT16));
+      return p->nID;
+    }
+  }
+  return -1;
+}
+
+/////////////////
+// The passed PID wants (or has to) close the passed shared memory
+// descriptor. Try to do so.
+// RETURNS: Zero for success or -1 if ID unknown or not open for process
+//
+INT16 Exec::SmClose (UINT16 nProc, UINT16 nID)
+{
+  PMS p;
+  
+  if (ShareMem.QmExists(nID, &p)) {
+    UINT16 *pOpen = (UINT16*)(arrPCB[nProc].Share.DblGetHead());
+    while (pOpen)
+      if (*pOpen != nID)
+        pOpen = (UINT16*)(arrPCB[nProc].Share.DblGetNext());
+      else {
+        ShareMem.QmDecCnt(nID);
+        arrPCB[nProc].Share.DblDelete();
+        return 0;
+      }
+  }
+  return -1;
+}
+
+////////////////////
+// The current process wants to know the size of a shared memory block, so
+// provided the ID is valid and the process has it open, tell it.
+// RETURNS: size of block (in PLL/2 integers) or -1 for error.
+//
+INT16 Exec::SmLength (UINT16 nID)
+{
+  UINT16 *pOpen = (UINT16*)(arrPCB[uCurProc].Share.DblGetHead());
+  while (pOpen)
+    if (*pOpen == nID)
+      return ShareMem.QmLength(nID);
+    else
+      pOpen = (UINT16*)(arrPCB[uCurProc].Share.DblGetNext());
+  return -1;
+}
+
+/////////////
+// If the current process has the passed block open and the passed offset is
+// within bounds, set the value as requested.
+// RETURNS: TRUE  .. value set
+//          FALSE .. unable to set
+//
+BOOL Exec::SmWrite (UINT16 nID, UINT16 nOff, INT16 *pn)
+{
+  UINT16 *pOpen = (UINT16*)(arrPCB[uCurProc].Share.DblGetHead());
+  while (pOpen)
+    if (*pOpen == nID)
+      return ShareMem.QmPut(nID, nOff, pn);
+    else
+      pOpen = (UINT16*)(arrPCB[uCurProc].Share.DblGetNext());
+  return FALSE;
+}
+
+/////////////
+// If the current process has the passed block open and the passed offset is
+// within bounds, get the value as requested.
+// RETURNS: TRUE  .. value set
+//          FALSE .. unable to set
+//
+BOOL Exec::SmRead (UINT16 nID, UINT16 nOff, INT16 *pn)
+{
+  UINT16 *pOpen = (UINT16*)(arrPCB[uCurProc].Share.DblGetHead());
+  while (pOpen)
+    if (*pOpen == nID)
+      return ShareMem.QmGet(nID, nOff, pn);
+    else
+      pOpen = (UINT16*)(arrPCB[uCurProc].Share.DblGetNext());
+  return FALSE;
+}
+
+/////////////////////////////////// eof ////////////////////////////////////
+
+</PRE>
+</BODY>
+</HTML>

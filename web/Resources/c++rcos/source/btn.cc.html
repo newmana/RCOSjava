@@ -1,0 +1,170 @@
+<HTML>
+<HEAD>
+  <TITLE>
+btn.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+btn.cc
+  </H1>
+<PRE>
+/*************************************************************************
+*  MODULE : Btn - Class Body						 *
+*  AUTHOR : Ron Chernich						 *
+*  PURPOSE: Class actions used to build "button" like objects used in	 *
+*	     RCOS system.  These actions support button construction and *
+*	     activation only.  All visual aspects are handled by a class *
+*	     based on this class.					 *
+*  HISTORY:								 *
+*   18-JAN-93  First (MSC/C++ 7.00) version				 *
+*   04-JUN-93  Allocation of button label made conditional		 *
+*   29-MAR-94  Button class being deleted twice (allow to DblList do it) *
+*************************************************************************/
+
+
+#include "btn.hh"
+
+
+/////////////////
+// table used to lookup the raw key values returned by ALT keys
+//
+static unsigned char RawKey[] = {
+  ALT_A, ALT_B, ALT_C, ALT_D, ALT_E, ALT_F, ALT_G, ALT_H, ALT_I,
+  ALT_J, ALT_K, ALT_L, ALT_M, ALT_N, ALT_O, ALT_P, ALT_Q, ALT_R,
+  ALT_S, ALT_T, ALT_U, ALT_V, ALT_W, ALT_X, ALT_Y, ALT_Z, ALT_0,
+  ALT_1, ALT_2, ALT_3, ALT_4, ALT_5, ALT_6, ALT_7, ALT_8, ALT_9
+};
+
+
+//////////////////////////////////////////////////////////////////////////
+// Class destructor:  Kills off all buttons in a linked list,
+// and then the list itself
+//
+Btn::~Btn()
+{
+
+  pb = (btn*)DblGetHead();
+  while (pb) {
+    if (pb->pst)
+      delete pb->pst;
+    pb = (btn*)DblGetNext();
+  }
+  DblDrop();
+  pb = NULL;
+};
+
+/////////////////
+// Add a new button to the linked list.  The params decode as:
+//     n .. the ID to be returned when the button is activated
+//   str .. Button label (with optional hot key char prefixed by "&")
+// x1,y1 .. Upper-Left boundary for "hot reigon"
+// x2,y2 .. width and height of hot area from upper-left reference
+// RETURNS: TRUE  .. action complete (Btn::pb references new data object)
+//	    FALSE .. unable to allocate storage for item
+//
+BOOL Btn::BtnNew(const UINT16 n, char *str, rect &r)
+{
+  btn  *p;
+  int  idx;
+  char *cp;
+  BOOL bOk = FALSE;
+
+  if (p = new btn) {
+    p->r  = r;
+    p->Id = n;
+    p->status = 0;
+    if (strlen(str) == 0)
+      p->pst = NULL;
+    else {
+      p->pst = new Str(str);
+      if (cp = strchr(str, '&')) {
+	++cp;
+	idx = (((*cp >= 'a') && (*cp <= 'z')) ? (int)(*cp - 'a') :
+	      ((*cp >= 'A') && (*cp <= 'Z')) ? (int)(*cp - 'A') :
+	      ((*cp >= '0') && (*cp <= '9')) ? (26 + (int)(*cp - '0')) : -1);
+	p->HotKey = ((idx >= 0) ? RawKey[idx] : 0);
+      }
+    }
+    if (DblAppend((void*)p, (UINT16)sizeof(btn)))
+      bOk = TRUE;
+    else
+      delete p->pst;
+  }
+  if (pb = p)  // bit naughty: combined assignment and test (not comparison!)
+    delete p;
+  return bOk;
+}
+
+///////////////
+// See if a member button has the passed Hot Key code
+// RETURNS:  button reference (or NULL if Hot Key unsegistered)
+//
+btn *Btn::BtnHit (const char ch)
+{
+  pb = (btn*)DblGetHead();
+  while (pb) {
+    if (ch == pb->HotKey)
+      break;
+    pb = (btn*)DblGetNext();
+  }
+  return pb;
+}
+
+///////////////
+// See if the passed point lies in a member button Hot Zone
+// RETURNS:  button reference (or NULL if point unsegistered)
+//
+btn *Btn::BtnHit (point &pt)
+{
+
+  pb = (btn*)DblGetHead();
+  while (pb) {
+    if (pb->r.InRect(pt))
+      break;
+    pb = (btn*)DblGetNext();
+  }
+  return pb;
+}
+
+/////////////
+// Locate button by ID
+// RETURNS: TRUE  .. ID found, pb -> data
+//	    FALSE .. unknown ID
+//
+BOOL Btn::BtnFind (const UINT16 id)
+{
+
+  pb = (btn*)DblGetHead();
+  while (pb) {
+    if (pb->Id == id)
+      return TRUE;
+    pb = (btn*)DblGetNext();
+  }
+  return FALSE;
+}
+
+/////////////
+// Delete string label of button with passed ID from list, then allow
+// the linked list class to free the rest.  If the passed ID is ZERO
+// (an illegal ID), kill off all controls in the list.
+//
+void Btn::BtnKill (const UINT16 nTarg)
+{
+
+  pb = (btn*)DblGetHead();
+  while (pb) {
+    if (!nTarg || (pb->Id == nTarg)) {
+      if (pb->pst)
+        delete pb->pst;
+      DblDelete();
+      break;
+    }
+    pb = (btn*)DblGetNext();
+  }
+}
+
+/************************************ EOF ********************************/
+</PRE>
+</BODY>
+</HTML>

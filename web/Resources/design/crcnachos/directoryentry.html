@@ -1,0 +1,78 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    DirectoryEntry CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>DirectoryEntry</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      DirectoryEntry
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+ The following class defines a "directory entry", representing a file
+ in the directory.  Each entry gives the name of the file, and where
+ the file's header is to be found on disk.
+<P>
+ Internal data structures kept public so that Directory operations can
+ access them directly.         
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+<PRE>
+class DirectoryEntry {
+  public:
+    bool inUse;                         // Is this directory entry in use?
+    int sector;                         // Location on disk to find the
+                                        //   FileHeader for this file
+    char name[FileNameMaxLen + 1];      // Text name for file, with +1 for
+                                        // the trailing '\0'
+};          
+</PRE>
+
+</BODY>
+</HTML>

@@ -1,0 +1,724 @@
+<HTML>
+<HEAD>
+  <TITLE>
+ctrls.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+ctrls.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Ctrls - Class bodies code for Pb, Rb and Sys objects	  *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Provides MS Windows-like GUI controls for graphic DOS mode   *
+//           programs, specifically:                                      *
+//              Check Box (Cb)                                            *
+//              Push Buttons (Pb)                                         *
+//              Radio Buttons (Rb)                                        *
+//              System Controls (Sys)                                     *
+//  HISTORY:                                                              *
+//   19-JAN-93  First (MSC/C++ 7.00) version                              *
+//   24-JAN-93	Modified to use Clipping where speed was low.		  *
+//   02-FEB-94  ALT-F5 redraw key added to system control gadget.         *
+//   04-FEB-94  BIOS_GET_TICKS macro changed to Timer::GetTock func call  *
+//*************************************************************************
+
+#include "ctrls.hh"
+
+
+//////////////////////////////////////////////////////////////////////////
+// Routine to label a Push Button, Radio Button or Check Box ..
+//
+// An optional ampersand in the string is used as an escape char to place an
+// underline under the following character (which is the accelerator). Labels
+// longer than 128 characters will be truncated (character-wise).  All labels
+// are clipped (horizontally and vertically) into the passed bounding
+// rectangle.  The text justification relative to x1/x2 is specified in
+// <mode>.  You can fool this routine in several ways, but it was designed
+// to be fast, not bullet proof.
+//
+static void CtrlTxtLab (char *st, rect &r, UINT16 uMode, UINT16 nColor)
+{
+  #define MAXLEN 128
+
+  INT16 x, y, dx, dy, xln;
+  char  *cp, str[MAXLEN], st1[2];
+
+  if ((dx = MAX(0, r.lr.x-r.ul.x)) && (dy = MAX(0, r.lr.y-r.ul.y))) {
+    xln = -1;
+    y = r.ul.y + ((dy - GfxTextHeight()) >> 1) + 1;
+    strncpy(str, st, MAXLEN-1);
+    str[MIN(strlen(st),MAXLEN-1)] = '\0';
+    if (cp = strchr(str, '&')) {
+      *cp = '\0';
+      xln = GfxTextExtent(str);
+      strcpy(cp, cp+1);
+      st1[0] = *cp, st1[1] = '\0';
+    }
+    x = r.ul.x + 1;
+    if (uMode == CTLS_Centre)
+      x += (dx - GfxTextExtent(str)) >> 1;
+    if (uMode == CTLS_RJustify)
+      x += (dx - GfxTextExtent(str));
+    GfxTextColor(nColor);
+    GfxSetClip(r.ul.x, r.ul.y, r.lr.x, r.lr.y);
+    Mickey.AutoPointer(r.ul.x, r.ul.y, r.lr.x, r.lr.y);
+    GfxText(x, y, str, GFX_Transparent);
+    if (xln >= 0) {
+      x += xln;
+      y += (GfxTextHeight() - GFX_UlnOffset);
+      GfxMoveTo(x, y), GfxLineTo(x+GfxTextExtent(st1), y);
+    }
+    Mickey.ShowPointer();
+    GfxClrClip();
+  }
+}
+
+//////////////
+// A (horrible) time consumer - used to ensure hardware independant
+// graphic button activation simulation..
+//
+static void CtrlDelay (UINT32 lTks)
+{
+  UINT32 lLim, lNow;
+
+  lNow = Clock.GetTocks();
+  lLim = lNow + lTks;
+  while (lLim > lNow)
+    lNow = Clock.GetTocks();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Perform initial rendering of passed push button
+//
+void PbCtrl::Render (btn *p)
+{
+  INT16 x1, y1, x2, y2;
+
+  x1 = p->r.ul.x + 1;
+  y1 = p->r.ul.y + 1;
+  x2 = p->r.lr.x - 1;
+  y2 = p->r.lr.y - 1;
+  GfxRect(x1, y1, x2, y2, GFX_Fill, _White);
+  GfxTextColor(_DarkGrey);
+  GfxMoveTo(x1, y2), GfxLineTo(x2, y2), GfxLineTo(x2, y1);
+  GfxMoveTo(x1, y2-1), GfxLineTo(x2-1, y2-1), GfxLineTo(x2-1, y1);
+  GfxTextColor(_BrightWhite);
+  GfxMoveTo(x1, y2), GfxLineTo(x1, y1), GfxLineTo(x2, y1);
+  GfxMoveTo(x1+1, y2-1), GfxLineTo(x1+1, y1+1), GfxLineTo(x2-1, y1+1);
+  GfxTextColor(_Black);
+  GfxMoveTo(x1, y1-1), GfxLineTo(x2, y1-1);
+  GfxMoveTo(x1-1, y1), GfxLineTo(x1-1, y2);
+  GfxMoveTo(x1, y2+1), GfxLineTo(x2, y2+1);
+  GfxMoveTo(x2+1, y1), GfxLineTo(x2+1, y2);
+  if (p->pst) {
+    rect rr = p->r;
+    rr.ul.y += 2, rr.lr.y -= 2, rr.ul.x += 4, rr.lr.x -= 4;
+    CtrlTxtLab(p->pst->StrGet(), rr, CTLS_Centre);
+  }
+}
+
+/////////////
+// Toggle button status and redraw its graphic state accordingly.
+//
+void PbCtrl::Toggle (btn *p)
+{
+  PIMBUF pImage;
+  INT16  x1, y1, x2, y2;
+
+  x1 = p->r.ul.x + 1, y1 = p->r.ul.y + 1;
+  x2 = p->r.lr.x - 1, y2 = p->r.lr.y - 1;
+  p->status = (p->status & 0xfffe) | ((p->status & 0x01) ^ 0x01);
+  if (p->status & 0x01) {
+    if (pImage = GfxGetImage(x1+2, y1+2, x2-2, y2-2)) {
+      GfxPutImage(x1+4, y1+4, pImage);
+      GfxFreeImage(pImage);
+    }
+    GfxTextColor(_DarkGrey);
+    GfxMoveTo(x1, y2), GfxLineTo(x1, y1), GfxLineTo(x2, y1);
+    GfxTextColor(_White);
+    GfxMoveTo(x1+1, y2), GfxLineTo(x1+1, y1+1), GfxLineTo(x2, y1+1);
+    GfxMoveTo(x1+2, y2), GfxLineTo(x1+2, y1+2), GfxLineTo(x2, y1+2);
+    GfxMoveTo(x1+3, y2), GfxLineTo(x1+3, y1+3), GfxLineTo(x2, y1+3);
+  }
+  else {
+    if (pImage = GfxGetImage(x1+4, y1+4, x2, y2)) {
+      GfxPutImage(x1+2, y1+2, pImage);
+      GfxFreeImage(pImage);
+    }
+    GfxTextColor(_DarkGrey);
+    GfxMoveTo(x1+1, y2), GfxLineTo(x2, y2), GfxLineTo(x2, y1-1);
+    GfxMoveTo(x1+2, y2-1), GfxLineTo(x2-1, y2-1), GfxLineTo(x2-1, y1-1);
+    GfxTextColor(_BrightWhite);
+    GfxMoveTo(x1, y2), GfxLineTo(x1, y1), GfxLineTo(x2, y1);
+    GfxMoveTo(x1+1, y2-1), GfxLineTo(x1+1, y1+1), GfxLineTo(x2-1, y1+1);
+  }
+}
+
+/////////////
+// Create a new push button as defined by the passed params and draw it.
+// The four coords define the upper-left and lower right limits of the
+// button graphic (we assume the deltas are positive!).
+// RETURNS: TRUE  .. button added to list
+//          FALSE .. unable to create button
+//
+BOOL PbCtrl::Create (UINT16 n, char *st, 
+                     INT16 x1, INT16 y1, INT16 x2, INT16 y2)
+{
+  btn *pb;
+  BOOL bOk;
+  rect r(point(x1, y1), point(x1+x2, y1+y2));
+
+  if (bOk = BtnNew(n, st, r)) {
+    pb = (btn*)DblGetTail();
+    Render(pb);
+  }
+  return bOk;
+}
+
+///////////////
+// Remove button with passed ID from the list (if it exists)
+// RETURNS: TRUE  .. button destroyed
+//	    FALSE .. did not exist!
+//
+BOOL PbCtrl::Destroy (UINT16 n)
+{
+  BOOL bRes = BtnFind(n);
+
+  if (bRes)
+    BtnKill(n);
+  return bRes;
+}
+
+//////////////////////
+// Whack through the list to see if any button corresponds to the passed
+// ALT-key scan code.  If so, graphiically "click" it and return its ID.
+// RETURNS: ZERO if code unknown, or ID of button pressed.
+//
+UINT16 PbCtrl::Scan (char ch)
+{
+
+  if (BtnHit(ch)) {
+    Mickey.AutoPointer(pb->r.ul.x, pb->r.ul.y, pb->r.lr.x, pb->r.lr.y);
+    Toggle(pb);
+    CtrlDelay();
+    Toggle(pb);
+    Mickey.ShowPointer();
+    return pb->Id;
+  }
+  return 0;
+}
+
+///////////////
+// Same as above, but using a point as the event trigger..
+// RETURNS: ZERO if code unknown, or ID of Push button clicked..
+//
+UINT16 PbCtrl::Scan (point& Pt)
+{
+
+  if (BtnHit(Pt)) {
+    Mickey.HidePointer();
+    Toggle(pb);
+    CtrlDelay();
+    Toggle(pb);
+    Mickey.ShowPointer();
+    return pb->Id;
+  }
+  return 0;
+}
+
+///////////////
+// Repaint all defined push buttons
+//
+void PbCtrl::Refresh (void)
+{
+  btn *pb;
+
+  pb = (btn*)DblGetHead();
+  while (pb) {
+    Render(pb);
+    pb = (btn*)DblGetNext();
+  }
+}
+  
+//////////////////////////////////////////////////////////////////////////
+// Draw and optionally label a Radio Button.
+//
+void RbCtrl::Render (btn *p)
+{
+
+  p->status = (p->status & 0xfffe) | ((p->status & 0x01) ^ 0x01);
+  Toggle(p);
+  if (p->pst) {
+    rect rr = p->r;
+    rr.ul.x += (RB_Radius << 1) + GfxTextExtent(" ");
+    CtrlTxtLab(p->pst->StrGet(), rr, CTLS_LJustify);
+  }
+}
+
+/////////////////
+// This constructor could have been in the class definition, but a little
+// explaination is in order.. Every "group" (instance) of Radio Buttons
+// must act in a mutually exclusive way (only one ON at any one time).
+// When an instance is created, a default param sets the state to OFF, but
+// this can be over-ridden.  The boolean <bNoDefault> is cleared after
+// the first button is created in the ON state, preventing a (dumb) user
+// from creating an impossible situation with further ON buttons.
+//
+RbCtrl::RbCtrl ()
+{
+
+  bNoDefault = TRUE;
+}
+
+/////////////
+// Toggle button status and redraw its graphic state accordingly.
+//
+void RbCtrl::Toggle (btn *p)
+{
+  BOOL bOn;
+  INT16 x1, y1;
+
+  x1 = p->r.ul.x + RB_Radius;
+  y1 = p->r.ul.y + ((p->r.lr.y - p->r.ul.y) >> 1);
+  p->status = (p->status & 0xfffe) | ((p->status & 0x01) ^ 0x01);
+  bOn = (BOOL)(p->status & 0x01);
+  Mickey.AutoPointer(p->r.ul.x, p->r.ul.y,
+    p->r.ul.x+(RB_Radius << 1), p->r.ul.y+(RB_Radius << 1));
+  GfxCircle(x1, y1, RB_LedRad, GFX_Fill, (bOn ? _Red : _White));
+  GfxArc(x1, y1, RB_Radius, 225.0, 45.0, (bOn ? _DarkGrey : _BrightWhite));
+  GfxArc(x1, y1, RB_Radius, 45.0, 225.0, (bOn ? _BrightWhite : _DarkGrey));
+  Mickey.ShowPointer();
+}
+
+/////////////
+// Create a new Radio Button as defined by the passed params and draw it.
+// The coords define the centre of the actual button.  A "Hot" area is
+// developed from this to include the button label.
+// RETURNS: TRUE  .. button added to list
+//          FALSE .. unable to create button
+//
+BOOL RbCtrl::Create (UINT16 n, char *st, INT16 x, INT16 y, BOOL bDefault)
+{
+  btn *rb;
+  BOOL bOk;
+  rect r;
+
+  r.ul.x = MAX(0, x - RB_Radius);
+  r.ul.y = MAX(0, y - MAX(RB_Radius, GfxTextHeight() >> 1));
+  r.lr.y = y + MAX(RB_Radius, GfxTextHeight() >> 1);
+  r.lr.x = x + GfxTextExtent(" ") + (RB_Radius << 1);
+  r.lr.x += GfxTextExtent(st);
+  if (strchr(st, '&'))
+    r.lr.x -= GfxTextExtent("&");
+  if (bOk = BtnNew(n, st, r)) {
+    rb = (btn*)DblGetTail();
+  if (bDefault)
+    if (bNoDefault) {
+      bNoDefault = FALSE;
+      rb->status |= 0x01;
+    }
+    Render(rb);
+  }
+  return bOk;
+}
+
+///////////////
+// Remove button with passed ID from the list (if it exists)
+// RETURNS: TRUE  .. button destroyed
+//	    FALSE .. did not exist!
+//
+BOOL RbCtrl::Destroy (UINT16 n)
+{
+  BOOL bRes = BtnFind(n);
+
+  if (bRes)
+    BtnKill(n);
+  return bRes;
+}
+
+//////////////////////
+// Wreave through the list to see if any button corresponds to the passed
+// ALT-key scan code.  If so, graphically set "off" all other buttons
+// (there should only be one!) and set it "on", returning its ID.
+// RETURNS: ZERO if code unknown, or ID of radio button set.
+//
+UINT16 RbCtrl::Scan (char ch)
+{
+
+  if (BtnHit(ch)) {
+    btn *p = (btn*)DblGetHead();
+    while (p) {
+      if (p->status & 0x01) {
+	if (p != pb) {
+	  Toggle(p);
+  	  break;
+	}
+      }
+      p = (btn*)DblGetNext();
+    }
+    if ((pb->status & 0x01) == 0)
+      Toggle(pb);
+    return pb->Id;
+  }
+  return 0;
+}
+
+///////////////
+// Same as above, but using a point as the event trigger..
+// RETURNS: ZERO if code unknown, or ID of radio button set.
+//
+UINT16 RbCtrl::Scan (point& Pt)
+{
+
+  if (BtnHit(Pt)) {
+    btn *p = (btn*)DblGetHead();
+    while (p) {
+      if (p->status & 0x01) {
+	if (p != pb) {
+	  Toggle(p);
+	  break;
+	}
+      }
+      p = (btn*)DblGetNext();
+    }
+    if ((pb->status & 0x01) == 0)
+      Toggle(pb);
+    return pb->Id;
+  }
+  return 0;
+}
+
+///////////////
+// Repaint all defined radio buttons
+//
+void RbCtrl::Refresh (void)
+{
+  btn *pb;
+
+  pb = (btn*)DblGetHead();
+  while (pb) {
+    Render(pb);
+    pb = (btn*)DblGetNext();
+  }
+}
+  
+//////////////////////////////////////////////////////////////////////////
+// Draw and optionally label a Check Box.
+//
+void CbCtrl::Render (btn *p)
+{
+  INT16 x, y;
+
+  x = p->r.ul.x;
+  y = p->r.ul.y + ((p->r.lr.y - p->r.ul.y - CB_Height) >> 1);
+  GfxTextColor(_DarkGrey);
+  GfxMoveTo(x+CB_Width, y), GfxLineTo(x, y), GfxLineTo(x, y+CB_Height);
+  GfxTextColor(_BrightWhite);
+  GfxLineTo(x+CB_Width, y+CB_Height), GfxLineTo(x+CB_Width, y+1);
+  p->status ^= 0x01;
+  Toggle(p);
+  if (p->pst) {
+    rect rr = p->r;
+    rr.ul.x += CB_Width + GfxTextExtent(" ");
+    CtrlTxtLab(p->pst->StrGet(), rr, CTLS_LJustify);
+  }
+}
+
+/////////////
+// Toggle Check Box status and redraw its graphic state accordingly.
+//
+void CbCtrl::Toggle (btn *p)
+{
+  INT16 x, y;
+
+  x = p->r.ul.x + 1;
+  y = p->r.ul.y + ((p->r.lr.y - p->r.ul.y - CB_Height) >> 1) + 1;
+  Mickey.AutoPointer(x, y, x+CB_Height, y+CB_Width);
+  GfxRect(x, y, x+CB_Width-2, y+CB_Height-2, GFX_Fill, _White);
+  p->status = (p->status & 0xfffe) | ((p->status & 0x01) ^ 0x01);
+  if (p->status & 0x01) {
+    GfxTextColor(_Black);
+    GfxMoveTo(x, y), GfxLineTo(x+CB_Width-2, y+CB_Height-2);
+    GfxMoveTo(x+CB_Width-2, y), GfxLineTo(x, y+CB_Height-2);
+  }
+  Mickey.ShowPointer();
+}
+
+/////////////
+// Create a new Check Box as defined by the passed params and draw it.
+// The coords define the centre of the actual Box.  A "Hot" area is
+// developed from this to include the control's label.
+// RETURNS: TRUE  .. button added to list
+//          FALSE .. unable to create button
+//
+BOOL CbCtrl::Create (UINT16 n, char *st, INT16 x, INT16 y, BOOL bSet)
+{
+  btn *cb;
+  BOOL bOk;
+  rect r;
+
+  r.ul.x = MAX(0, x - (CB_Width >> 1));
+  r.ul.y = MAX(0, y - (MAX(CB_Height, GfxTextHeight()) >> 1));
+  r.lr.y = y + (MAX(CB_Height, GfxTextHeight()) >> 1);
+  r.lr.x = x + CB_Width + GfxTextExtent(" ") + GfxTextExtent(st);
+  if (strchr(st, '&'))
+    r.lr.x -= GfxTextExtent("&");
+  if (bOk = BtnNew(n, st, r)) {
+    cb = (btn*)DblGetTail();
+    if (bSet)
+      cb->status |= 0x01;
+    Render(cb);
+  }
+  return bOk;
+}
+
+///////////////
+// Remove button with passed ID from the list (if it exists)
+// RETURNS: TRUE  .. button destroyed
+//	    FALSE .. did not exist!
+//
+BOOL CbCtrl::Destroy (UINT16 n)
+{
+  BOOL bRes = BtnFind(n);
+
+  if (bRes)
+    BtnKill(n);
+  return bRes;
+}
+
+//////////////////////
+// Wander through the list to see if any Box corresponds to the
+// passed ALT-key scan code.  If so, graphically toggle its state.
+// RETURNS: ZERO if code unknown, or ID of Check Box toggled.
+//
+UINT16 CbCtrl::Scan (char ch)
+{
+
+  if (BtnHit(ch)) {
+    Toggle(pb);
+    return pb->Id;
+  }
+  return 0;
+}
+
+///////////////
+// Same as above, but using a point as the event trigger..
+// RETURNS: ZERO if code unknown, or ID of radio button set.
+//
+UINT16 CbCtrl::Scan (point& Pt)
+{
+
+  if (BtnHit(Pt)) {
+    Toggle(pb);
+    return pb->Id;
+  }
+  return 0;
+}
+
+///////////////////
+// Routine to return the state (on/off) of check box with the passed ID
+// RETURNS: TRUE  .. state stored in passed reference var
+//	    FALSE .. unknown check box ID
+//
+BOOL CbCtrl::State (UINT16 id, BOOL &bState)
+{
+  if (BtnFind(id)) {
+    bState = (BOOL)(pb->status & 0x01);
+    return TRUE;
+  }
+  return FALSE;
+}
+
+///////////////
+// Repaint all defined check boxes
+//
+void CbCtrl::Refresh (void)
+{
+  btn *pb;
+
+  pb = (btn*)DblGetHead();
+  while (pb) {
+    Render(pb);
+    pb = (btn*)DblGetNext();
+  }
+}
+  
+//////////////////////////////////////////////////////////////////////////
+// Here is the system menu gadget.  For a change we need a constructor..
+// This will draw a DESK TOP Title area with optional close gadget and
+// title text.
+//
+SysMenu::SysMenu (char *st, BOOL bCloseGadget)
+{
+
+  RenderTB();
+  if (bCloseGadget) {
+    rect rr(0, 0, SYS_Width-1, SYS_Height-1);
+    if (BtnNew(ID_CLOSE, "", rr)) {
+      btn *sb = (btn*)DblGetTail();
+      sb->HotKey = ALT_F4;
+      RenderCG(FALSE);
+    }
+    rr.lr.x = rr.lr.y = 0;
+    if (BtnNew(ID_HELP, "", rr)) {
+      btn *sb = (btn*)DblGetTail();
+      sb->HotKey = F1_KEY;
+    }
+    if (BtnNew(ID_REDRAW, "", rr)) {
+      btn *sb = (btn*)DblGetTail();
+      sb->HotKey = ALT_F5;
+    }
+  }
+  if (st) {
+    stTitle = st;
+    rect rt(SYS_Width, 0, GFX_Xmin-1, SYS_Height-1);
+    CtrlTxtLab(st, rt, CTLS_Centre, _BrightWhite);
+  }
+}
+
+///////////////////
+// Draw the Title bar
+//
+void SysMenu::RenderTB (void)
+{
+  rect r(0, 0, GFX_Xmin-1, SYS_Height-1);
+
+  GfxTextColor(_Black);
+  GfxMoveTo(0, SYS_Height), GfxLineTo(GFX_Xmin-1, SYS_Height);
+  if (SYS_BarPatFgnd == SYS_BarPatBkgnd)
+    GfxRect(0, 0, GFX_Xmin-1, SYS_Height, GFX_Fill, SYS_BarPatBkgnd);
+  else {
+    GfxPattern(GFX_HalfTone);
+    GfxTextColorBg(SYS_BarPatFgnd);
+    GfxRect(0, 0, GFX_Xmin-1, SYS_Height, GFX_Fill, SYS_BarPatBkgnd);
+    GfxPattern(GFX_Solid);
+  }
+  if (stTitle.StrGetLen()) {
+    r.ul.x = SYS_Width;
+    char *psz = stTitle.StrGet();
+    CtrlTxtLab(psz, r, CTLS_Centre, _BrightWhite);
+  }
+}
+
+///////////////////
+// Draw the close gadget in one of its two states
+//
+void SysMenu::RenderCG (BOOL bSel)
+{
+  UINT16 nBg = (bSel ? _DarkGrey : _White),
+         nBar = (bSel ? _BrightWhite : _Black),
+         nShad = (bSel ? _White : _DarkGrey);
+
+  Mickey.AutoPointer(0, 0, SYS_Width, SYS_Height);
+  GfxRect(0, 0, SYS_Width-1, SYS_Height-1, GFX_Fill, nBg);
+  GfxRect(4, 7, 13, 10, GFX_Fill, _BrightWhite);
+  GfxRect(3, 7, 14, 10, GFX_Frame, nBar);
+  GfxTextColor(nShad);
+  GfxMoveTo(5, 11), GfxLineTo(15, 11), GfxLineTo(15, 9);
+  GfxTextColor(_Black);
+  GfxMoveTo(SYS_Width, SYS_Height), GfxLineTo(SYS_Width, 0);
+  Mickey.ShowPointer();
+}
+
+//////////////////////
+// Walk through the system menu gadget list to see if anything corresponds
+// to the passed Hot Key code.  Possibilities are system gadgets (Iconize,
+// Maximise/Minimise and Close) or a user defined Pop-up Menu.  Some, you
+// may notice, are not yet implemented (NYI).
+// RETURNS: ZERO if code unknown, or ID of item selected.
+//
+UINT16 SysMenu::Scan (char ch)
+{
+
+  if (BtnHit(ch)) {
+    if (pb->Id == ALT_F4) {
+      RenderCG(TRUE);
+      CtrlDelay();
+      RenderCG(FALSE);
+    }
+    return pb->Id;
+  }
+  return 0;
+}
+
+///////////////
+// This does the double click for the close gadget. On the click that "sets"
+// the graphic to clicked, ws store the time.  On the next click, we see if
+// the difference is within the double-click delay and respond accordingly.
+// RETURNS: ZERO if code unknown or clicks too far apart, ID otherwise..
+//
+UINT16 SysMenu::Scan (point& Pt)
+{
+  static long lDblClk1, lDblClk2;
+  static BOOL bState = TRUE;
+
+  if (BtnHit(Pt)) {
+    Mickey.HidePointer();
+    RenderCG(bState);
+    Mickey.ShowPointer();
+    if (bState) {
+      lDblClk1 = Clock.GetTocks();      
+      bState = FALSE;
+      return 0;
+    }
+    lDblClk2 = Clock.GetTocks();      
+    bState = TRUE;
+    return (lDblClk2 - lDblClk1 <= SYS_DBLclick) ? pb->Id : 0;
+  }
+  return 0;
+}
+
+////////////////
+// Change the Application title.  Bit tricky.. we need to erase the area
+// occupied by the previous title (if any) having regard for whether the
+// title bar is a plain color or patterned.  Both this and the text
+// replacement (again, if any) need to adjust the location to account for
+// possible presence of the close gadget.
+//
+void SysMenu::SysTitle (char* st, rect &r)
+{
+  INT16 nOffset = r.ul.x + (BtnHit(ALT_F4) ? SYS_Width : 0);
+
+  if (stTitle.StrGetLen()) {
+    INT16 y1 = r.ul.y + ((SYS_Height - GfxTextHeight()) >> 1);
+    INT16 y2 = y1 + GfxTextHeight();
+    INT16 x2 = GfxTextExtent(stTitle.StrGet());
+    INT16 x1 = nOffset + ((r.lr.x - nOffset - x2) >> 1);
+    x2 += x1;
+    Mickey.AutoPointer(x1, y1, x2, y2);
+    if (SYS_BarPatFgnd == SYS_BarPatBkgnd)
+      GfxRect(x1, y1, x2, y2, GFX_Fill, SYS_BarPatBkgnd);
+    else {
+      GfxSetClip(x1, y1, x2, y2);
+      GfxPattern(GFX_HalfTone);
+      GfxTextColorBg(SYS_BarPatFgnd);
+      GfxRect(x1, y1, x2, y2, GFX_Fill, SYS_BarPatBkgnd);
+      GfxPattern(GFX_Solid);
+      GfxClrClip();
+    }
+    Mickey.ShowPointer();
+  }
+  stTitle = st;
+  if (stTitle.StrGetLen()) {
+    rect r(nOffset, 0, GFX_Xmin-1, SYS_Height-1);
+    CtrlTxtLab(st, r, CTLS_Centre, _BrightWhite);
+  }
+}
+
+///////////////
+// Repaint all defined system gadgets, menus, etc..
+//
+void SysMenu::Refresh (void)
+{
+  RenderTB();
+  if (BtnHit(ALT_F4))
+    RenderCG(FALSE);
+}
+  
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

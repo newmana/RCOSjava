@@ -1,0 +1,93 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class FsIface
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>FsIface</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+       FsIface
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+  Everything a PID needs to know about the interface to any file system..
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+ class FsIface {
+ private:
+    Knl    *pTx;                 // copy of Exec Message dispatcher
+    UINT16  uID;                 // copy of Exec unique identifier
+    UINT16  uMagic;              // "magic" number to offset array base
+    PXFCB   pXfcb[MAX_FILES];    // files per process
+    BOOL    ExpandName (char*, char*, UINT16); // expand name with wild card
+    inline  UINT16 Idx (HANDLE h) { return (UINT16)h - uMagic; }
+  public:
+    FsIface (UINT16, Knl*);
+   ~FsIface (void);
+    UINT16 IsEof (HANDLE);                       // check for End of File
+    UINT16 Open (HANDLE, UINT16 = FS_Ok);        // open existing file
+    UINT16 Close (HANDLE, UINT16 = FS_Ok);       // close and maybe flush
+    UINT16 Delete (HANDLE, UINT16 = FS_Ok);      // delete if exists
+    UINT16 Creat (HANDLE, UINT16 = FS_Ok);       // create new
+    UINT16 CloseAll (UINT16 = FS_Ok);            // close and flush all
+    UINT16 Read (HANDLE, char&, UINT16 = FS_Ok); // read a char
+    UINT16 Read (HANDLE, char*, UINT16 = FS_Ok); // read delimited string
+    UINT16 Write (HANDLE, char, UINT16 = FS_Ok); // write single char
+    UINT16 Write (HANDLE, char*,UINT16 = FS_Ok); // write null terminated
+    UINT16 Stat (HANDLE, UINT16 = FS_Ok);        // get (open) file size
+    UINT16 FindFirst (HANDLE, UINT16 = FS_Ok);   // locate first by template
+    UINT16 FindNext (HANDLE, UINT16 = FS_Ok);    // repeat for next match
+    UINT16 Allocate (HANDLE&, char*);            // ask for a new XFCB
+  };
+      </PRE> 
+
+</BODY>
+</HTML>

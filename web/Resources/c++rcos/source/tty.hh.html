@@ -1,0 +1,114 @@
+<HTML>
+<HEAD>
+  <TITLE>
+tty.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+tty.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : TTY - Class definition for a simple teletype emulator        *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: This class used by RCOS to receive and dispatch input from   *
+//           the keyboard and display *any* textual output                *
+//  HISTORY:                                                              *
+//   05-APR-93  Second Implementation following previous flawed design    *
+//   08-APR-93  ANSI terminal driver and Error Signals 41, 42 added       *
+//   05-FEB-94  "Cursor" changed to "TtyCursor" 'cause of Xlib clash.     *
+//*************************************************************************
+
+
+#ifndef _RCOS_TTY_
+
+  #include <ctype.h>
+  #include <string.h>
+  #include <memory.h>
+  #include <stdlib.h>
+
+  #include "rcos.hh"
+  #include "message.hh"
+  #include "gfx.hh"
+  #include "rng.hh"
+  #include "obj.hh"
+  #include "timer.hh"
+
+
+  //////////////
+  // ASCII defines for characters significamt to the TTY driver
+  //
+  #define ABEL           7          // ASCII Bell (alert, even)
+  #define BKSP           8          // Back space (non-destructive)
+  #define ALF           10          // line feed
+  #define AFF           12          // form feed clears screen, homes cursor
+  #define ACR           13          // carriage return
+  #define ESC           27          // Escape lead-in to ANSI control seq.
+  #define DEL           127         // last printable char + 1
+
+
+  ////////////////////
+  // attribute bits for mode word .. note that combinations are possible
+  //
+  #define TTY_Silent    0x0001      // <for compatibility>
+  #define TTY_AutoLF    0x0002      // Auto line feed on carriage return
+  #define TTY_UseANSI   0x0004      // interperate ANSI escape sequences
+  #define TTY_UConly    0x0008      // convert all input to upper case
+  #define TTY_Simplex   0x0010      // instant echo of input mode
+  #define TTY_Active    0x0020      // update changes to VGA display
+  #define TTY_NoWrap    0x0040      // set to prevent wrap-around of display
+  #define TTY_Failed    0x0800      // initialisation failed (or worse..)
+  #define TTY_CsrMask   0xC000      // Mask for Cursor shapes..
+  #define TTY_InvBlk    0x4000      // Inverse video block is default
+  #define TTY_IBar      0x8000      // "I" bar cursor
+  #define TTY_Uscore    0xC000      // Underscore cursor
+  #define TTY_CursorOff 0x0000      // Hide cursor
+
+  #define ON            TRUE        // states for cursor control..
+  #define OFF           FALSE       // stored in top 2 bits of mode word
+
+
+  ///////////////////
+  // Like all good RCOS Device Drivers, tty is based on the abstract
+  // class <port> - meaning tty's constructor must invoke port's constructor
+  // before it (itself) runs AND we must overload port's pure virtual
+  // function "RxPort" for receiving messages from the switcher (Kernel).
+  //
+  class tty : public port {
+    char  *pVmem;                   // array of chars for "Video RAM"
+    UINT16 uDest, uCnt;             // who wants 'em and how many they want
+    UINT16 nBgnd, nFgnd;            // Background and Foreground colors
+    INT16  nEscape;                 // > 0 while processing ANSI sequence
+    INT16  n1, n2, ddy;             // Esc seq numerics and top pixel offset
+    INT16  xcurr, ycurr;            // current location for output
+    INT16  nRows, nCols;            // size of diasplay from x/y pixels
+    INT16  x, y, dx, dy;            // origin and size of display area
+    INT16  nMode, idx, jdx;         // current mode and index into video RAM
+    INT16  AnsiDriver (char);       // interperate ANSI Escape sequences
+    void   Reset (BOOL);            // Clear screen and input buffer
+    void   Scroll (void);           // do conventional VDU scroll
+    void   PutKey (char);           // process a user input key
+    void   GetKey (PMSG);           // process a user request for data
+    void   TtyCursor (UINT16);      // hide/display cursor
+    void   Display (char*, INT16);  // display characters
+    Rng    RngBuf;                  // Buffer chars from the "keyboard"
+  public:
+    tty (UINT16, UINT16, Knl*, rect&, UINT16, UINT16);
+    ~tty (void);
+    void   RxPort  (PMSG);          // supply virtual member of "port"
+    INT16  SetMode (INT16);         // change mode, returning old mode
+    void   ReFresh (BOOL = TRUE);   // force a full refresh of the display
+    inline INT16 GetMode (void)     // return current terminal mode
+      { return nMode; }
+  };
+
+
+  #define _RCOS_TTY_
+
+#endif
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,94 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class pcb
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>pcb</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	pcb
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   Process Control Block - built when a process is created (forked off)
+   contains all details of process context.
+
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+ typedef struct pcb {
+    char   *pszName;            // user name for process, if any
+    INT16   nPriority,          // process priority
+            nQuantum;           // max permissable ticks per scheduling
+    UINT16  uPid,               // unique ID for process (PID)
+            uPidp,              // parent PID of process
+            uIP, uSP, uBP,      // Instruction, Stack and Base pointers
+            uStatus,            // current status
+            uDevCnt;            // count of devices open by process
+    PMSG    pReply;             // message associated with wake-up
+    UINT32  lStarted,           // time process started/created (mS).
+            luTicks,            // amount of processor time in user mode
+            leTicks,            // time consumed in executive mode
+            lCode;              // 32 bit instruction at IP for animator
+    LnDrv  *pDev;               // pointer line protocol driver
+    UINT16  arrDev[MAX_DEV];    // Devices needed before process can start
+    UINT16  uTos;               // fetched values at top of stack
+    UINT16  uSemOpen,           // Bit map of semaphore ID's opened by PID
+            uSemSet,            //   map of semaphores set by this process
+            uSemWait;           //   map of semaphores we are waiting on
+    DblList Share;              // List of open shared memory block ID's
+    FsIface *pFile;             // File sysem Interface package
+  } PCB, *PPCB;
+
+      </PRE> 
+
+</BODY>
+</HTML>

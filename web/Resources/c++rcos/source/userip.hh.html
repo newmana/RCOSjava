@@ -1,0 +1,86 @@
+<HTML>
+<HEAD>
+  <TITLE>
+userip.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+userip.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Userip - Module defines high level user input classes        *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Definition of classes to provide interrupt service for mouse *
+//           and keyboard services based on the "PAL" module.             *
+//  HISTORY:                                                              *
+//   21-JAN-93	First (MSC/C++ 7.00) version				  *
+//   08-APR-93	Start/Stop added and GetTicks adjusted for 1mS (hah!)	  *
+//   27-OCT-93  Smart pointer hiding added (mouse int, fn 16)             *
+//   30-OCT-93  Massive simplification through the PAL abstraction module * 
+//   04-FEB-94  "Tock" size changed to 32 bits                            *
+//*************************************************************************
+
+#ifndef _RCOS_USERIP_
+
+  #include "rcos.hh"
+  #include "rng.hh"
+  #include "obj.hh"
+  #include "pal.hh"
+
+
+  ////////////
+  // ID of two keypress ring buffers
+  //
+  enum { _ASC = 1, _ALT };
+
+
+  //////////////////
+  // This class defines an object to perform all Host keyboard input
+  //
+  class Kbd {
+    Rng *pasc, *palt;			// circular queues for key input
+  public:
+    Kbd();
+    ~Kbd();
+    char KeyGet (UINT16);		// Get a key from specified queue
+    BOOL KeyHit (UINT16);		// returns TRUE is queue has data
+    void KeyFill (void);		// Empty BIOS buffer into ours
+    void KeyFlush (UINT16);		// Disgard contents of this queue
+    void KeyPut (UINT16, char);		// Put character is selected queue
+  };
+
+
+  ///////////////
+  // Class for DOS mouse support..
+  // (Details hidden by Program Abstraction Layer module <PAL>.. )
+  //
+  class Mouse {
+    BOOL  bInstalled;				// set when driver detected
+  public:
+    Mouse (void);
+    ~Mouse (void);
+    BOOL GetEvent (point&);			// Get co-ords and reset flag
+    void ShowPointer (void);			// Draw the pointer
+    void HidePointer (void);            	// Restore area under pointer
+    void AutoPointer (INT16,INT16,INT16,INT16); // Hide when in region
+  };
+
+
+  //////////////////
+  // I really wanted these to be private to the timer class, but I
+  // don't seem to be able to get either DOS compiler to wear that!
+  //
+  extern Kbd   KbdIn;
+  extern Mouse Mickey;
+
+
+  #define _RCOS_USERIP_
+
+#endif
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

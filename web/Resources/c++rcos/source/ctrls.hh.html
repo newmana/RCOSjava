@@ -1,0 +1,147 @@
+<HTML>
+<HEAD>
+  <TITLE>
+ctrls.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+ctrls.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Pb - Class definitions for Pb, Rb and Sys objects            *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Definition of a MW Windows GUI-like graphic control gadgets. *
+//  HISTORY:                                                              *
+//   19-JAN-93  First (MSC/C++ 7.00) version (sans mouse support)         *
+//   11-APR-93  Mouse activation code added				  *
+//   19-OCT-93  Double click on close gadget added                        *
+//   02-FEB-94  Refresh gadget chain function added for X convenience     *
+//*************************************************************************
+
+#ifndef _RCOS_CTRLS
+
+  #include "btn.hh"
+  #include "gfx.hh"
+  #include "timer.hh"
+  #include "userip.hh"
+
+
+  #define CTLS_Centre       1     // Constants for control label placement
+  #define CTLS_LJustify     2
+  #define CTLS_RJustify     3
+
+  #define RB_Radius         5     // Radio Button Indicator sizes
+  #define RB_LedRad         3
+
+  #define CB_Width         10     // Check Box Indicator sizes
+  #define CB_Height        10
+
+  #define SYS_Width        18     // Height for system menu and title bar
+  #define SYS_Height	   18
+
+  #define ID_CLOSE	 9000	  // System gadget identifiers
+  #define ID_HELP	 9001  
+  #define ID_REDRAW	 9002
+
+  #define SYS_ClickDelay    2	  // TOD ticks to delay when graphic clicks
+  #define SYS_DBLclick      3	  // Close gadget double click delay
+
+  #define SYS_BarPatBkgnd   _Green	   // Title Bar Color Combos
+  #define SYS_BarPatFgnd    _Blue	   // set to -1 for solid color
+  #define SYS_TextColor     _BrightWhite   // will default to _Black
+
+
+  /////////////////
+  // Static support function prototypes used internally by these
+  // classes which would gain nothing by being friends to them...
+  //
+  static void CtrlTxtLab (char*, rect&, UINT16, UINT16 = _Black);
+  static void CtrlDelay  (UINT32 = SYS_ClickDelay);
+
+
+  //////////////////////////////////////
+  // This class defines a list of "Push Buttons", FIFO ordered by
+  // button ID (no check made for duplicates).  Buttons are activated
+  // ONE AT A TIME (no roll-over) by calling PbScan with either a Hot
+  // Key character (an ALT-key scan code), or a graphic point.  A non
+  // zero return indicates the ID of the defined button that has
+  // acknowledged the "Click".
+  //
+  class PbCtrl : public Btn {
+    void Render (btn*);
+    void Toggle (btn*);
+  public:
+    UINT16 Scan (char);
+    UINT16 Scan (point&);
+    void   Refresh (void);
+    BOOL   Create (UINT16, char*, INT16, INT16, INT16, INT16);
+    BOOL   Destroy (UINT16);
+  };
+
+  ////////////////////////
+  // This class defines a list of MUTUALLY EXCLUSIVE "Radio Buttons",
+  // FIFO ordered.  A Button is set (returning its ID) when it acknowledges
+  // its Hot Key character, or a point lying inside its bounding rectangle
+  // which comprises the button and the label.  Setting a button causes
+  // any other set button to be reset - cleared - turned off...
+  //
+  class RbCtrl : public Btn {
+    BOOL bNoDefault;
+    void Render (btn*);
+    void Toggle (btn*);
+  public:
+    RbCtrl ();
+    ~RbCtrl () { };
+    UINT16 Scan (char);
+    UINT16 Scan (point&);
+    void   Refresh (void);
+    BOOL   Create (UINT16, char*, INT16, INT16, BOOL = FALSE);
+    BOOL   Destroy (UINT16);
+  };
+
+  ////////////////////////
+  // This class defines a list of FIFO ordered "Check Boxes" - these act
+  // like latching Push Buttons.  A Check Box is set (returning its ID)
+  // when it acknowledges its Hot Key character, or a point lying inside
+  // its bounding rectangle which comprises the Box and the label.  The
+  // state (set/unset) of a particular Box may be queried.
+  //
+  class CbCtrl : public Btn {
+    void Render (btn*);
+    void Toggle (btn*);
+  public:
+    BOOL State (UINT16, BOOL&);
+    UINT16 Scan (char);
+    UINT16 Scan (point&);
+    void   Refresh (void);
+    BOOL   Create (UINT16, char*, INT16, INT16, BOOL = FALSE);
+    BOOL   Destroy (UINT16);
+  };
+
+  ////////////////////////
+  // And finally, this class defines a "System Menu" thing comprising a
+  // list of FIFO ordered objects which do MS Windows menu-like things.
+  // At this point, only the Title Bar and close gadget are implemented.
+  //
+  class SysMenu : public Btn {
+    Str  stTitle;
+    void RenderTB (void);
+    void RenderCG (BOOL);
+  public:
+    SysMenu (char* = NULL, BOOL = TRUE);
+    UINT16 Scan (char);
+    UINT16 Scan (point&);
+    void   Refresh (void);
+    void   SysTitle (char*, rect&);
+    BOOL   Create (UINT16, char*, char*, UINT16) { return FALSE; };
+  };
+
+  #define _RCOS_CTRLS
+#endif
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

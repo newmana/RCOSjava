@@ -1,0 +1,51 @@
+<HTML>
+<HEAD>
+  <TITLE>
+rng.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+rng.hh
+  </H1>
+<PRE>
+//***********************************************************************
+//  MODULE : Rng - Circular queue (ring buffer) Class Header            *
+//  AUTHOR : Ron Chernich                                               *
+//  PURPOSE: Ring buffer service class for the RCOS system              *
+//  HISTORY:                                                            *
+//   18-JAN-93  First (MSC/C++ 7.00) version                            *
+//   11-APR-93  Flusher member added					*
+//***********************************************************************
+
+#ifndef _RCOS_RNG
+  #define _RCOS_RNG
+
+  #include <stdio.h>
+  #include <memory.h>
+
+  #include "rcos.hh"
+
+
+  /////////////////////
+  // A simple character ring buffer class
+  //
+  class Rng {
+    char *buf;
+    unsigned short head, tail, size;
+  public:
+    Rng(UINT16 = 16);
+    ~Rng();
+    void RngPut (char); 	    // Add a char to the buffer
+    char RngGet (void); 	    // Get next char from the buffer
+    BOOL RngStat (void);	    // indicate state of buffer
+    inline void RngFlush (void)	    // inline function flushes contents
+      { head = tail; }
+  };
+
+#endif
+
+//************************************ EOF ******************************
+</PRE>
+</BODY>
+</HTML>

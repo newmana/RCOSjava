@@ -1,0 +1,86 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class port
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>port</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+	port
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      All Device drivers must be based on this Class.  The constructor
+      will be supplied with an ID and a pointer to a Knl class, which
+      will handle message passing for the driver (normally the Kernel!)
+      Drivers communicate by messages. These can be "posted" by calling
+      the Knl class member "PostMsg" - which uses a FIFO queue to effect
+      ascynchronous transfers, or by calling "SendMsg". This causes a
+      direct (synchronous) transfer where the switcher directly invokes
+      the recieve member of the distination port before returning to the
+      sender.  The actual message receiver is declared as a "pure virtual"
+      meaning each instantiation MUST overload the function.
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+ class port {
+  public:
+    UINT16 uID;                         // Unique ID of driver
+    Knl   *pTx;                         // pointer to the message dispatcher
+    port (UINT16, UINT16, Knl*);        // const. gets ID, class and Tx ptr
+    void DevError (INT16, BOOL);        // Issue device error message
+    virtual void RxPort (PMSG) = 0;     // Dispatcher for received messages
+  };
+
+      </PRE> 
+
+</BODY>
+</HTML>

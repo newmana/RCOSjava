@@ -1,0 +1,133 @@
+<HTML>
+<HEAD>
+  <TITLE>
+str.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+str.cc
+  </H1>
+<PRE>
+//***********************************************************************
+//  MODULE : Str - Class Body						*
+//  AUTHOR : Ron Chernich						*
+//  PURPOSE: Derived from the Microsoft C/C++ tutorial material:	*
+//	     \C700\SAMPLES\CPPTUTOR\STRNG.CPP				*
+//  HISTORY:								*
+//   12-JAN-93	First (MSC/C++ 7.00) version				*
+//   19-MAY-93	Memory leakage through delete of array fixed		*
+//***********************************************************************
+
+#include "str.hh"
+
+
+//////////////
+// Default constructor
+//
+Str::Str ()
+{
+  buf = NULL;
+  length = 0;
+}
+
+//////////////
+// Constructor that takes a const char *
+//
+Str::Str (const char *s)
+{
+  length = strlen(s);
+  buf = new char[length + 1];
+  strcpy(buf, s);
+}
+
+/////////////
+// Constructor that takes a char and an int
+//
+Str::Str (char c, INT16 n)
+{
+  length = n;
+  buf = new char[length + 1];
+  memset(buf, c, length);
+  buf[length] = '\0';
+}
+
+////////////
+// Copy constructor
+//
+Str::Str (const Str &other)
+{
+  length = other.length;
+  buf = new char[length + 1];
+  strcpy(buf, other.buf);
+}
+
+////////////////
+// Assign one string to another (watch out for both being same string!)
+//
+Str &Str::operator = (const Str &other)
+{
+  if (&other == this)
+    return *this;
+  DELETE_ARRAY buf;
+  length = other.length;
+  buf = new char[length + 1];
+  strcpy(buf, other.buf);
+  return *this;
+}
+
+///////////
+// test for buffer contents equal to char array
+// RETURNS: TRUE  .. same
+//          FLASE .. different
+//
+BOOL Str::operator == (const char *psz)
+{
+  return (strncmp(buf, psz, length) == 0) ? TRUE : FALSE;
+}
+
+////////////
+// Set a character in a String
+//
+void Str::StrSet (INT16 index, char newchar)
+{
+  if ((index > 0) && (index <= length))
+    buf[index - 1] = newchar;
+}
+
+////////////
+// Get a character in a String
+//
+char Str::StrGet (INT16 index) const
+{
+  return (((index > 0) && (index <= length)) ? buf[index - 1] : 0);
+}
+
+////////////////
+// adds char(s) to tail of String
+//
+void Str::StrAppend (const char *addition)
+{
+  char *temp;
+
+  length += strlen(addition);
+  temp = new char[length + 1];	  // Allocate new buffer
+  strcpy(temp, buf);		  // Copy contents of old buffer
+  strcat(temp, addition);	  // Append new string
+  DELETE_ARRAY buf;		  // Deallocate old buffer
+  buf = temp;			  // reassign to new buffer
+}
+
+///////////////
+// Destructor for a String
+//
+Str::~Str()
+{
+  DELETE_ARRAY buf;	 // Works even for empty String since delete 0 is safe
+}
+
+
+/********************************** EOF ***********************************/
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,62 @@
+<HTML>
+<HEAD>
+  <TITLE>
+obj.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+obj.hh
+  </H1>
+<PRE>
+//***********************************************************************
+//  MODULE : Obj - Class Header                                         *
+//  AUTHOR : Ron Chernich                                               *
+//  PURPOSE: Class header for geometric objects used by RCOS            *
+//  HISTORY:                                                            *
+//   18-JAN-93  First (MSC/C++ 7.00) version                            *
+//***********************************************************************
+
+#ifndef _RCOS_OBJ
+
+  #define _RCOS_OBJ
+
+  #include "rcos.hh"
+
+
+  ////////////////
+  // (typically) a screen location in pixels
+  //
+  class point {
+  public:
+    INT16 x, y;                         // xy location of point
+    point (INT16 = 0, INT16 = 0);
+    point (point& pt) { x = pt.x, y = pt.y; }
+    ~point () {};
+    point& operator= (point&);
+    BOOL operator >= (point&);
+    BOOL operator <= (point&);
+    void MovePt (INT16, INT16);
+  };
+
+  ///////////////////
+  // an area bounded by two points
+  //
+  class rect {
+  public:
+    point ul, lr;                               // upper-left, lower-right
+    rect ()  {};
+    ~rect () {};
+    rect (point&, point&);
+    rect (point&, INT16, INT16);
+    rect (INT16, INT16, INT16, INT16);
+    BOOL InRect (point&);
+  };
+
+
+#endif
+
+/************************************ EOF ********************************/
+</PRE>
+</BODY>
+</HTML>

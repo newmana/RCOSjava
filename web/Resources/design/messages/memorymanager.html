@@ -1,0 +1,137 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    MemoryManager Messages
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999">
+
+<P ALIGN=LEFT>
+[ <A HREF="../index.html"> RCOS.java Home </A> ]<BR>
+<P>
+
+<H1>
+  MemoryManager Messages
+</H1>
+
+  <BLOCKQUOTE>
+  <H2>
+    Related components
+  </H2>
+
+    <TABLE BORDER=2>
+      <TR>
+        <TH>
+          <H3>Component</H3>
+        </TH>
+        <TH>
+          <H3>Messages to</H3>
+        </TH>
+        <TH>
+          <H3>Messages from</H3>
+        </TH>
+      </TR>
+      <TR>
+        <TD ALIGN=LEFT VALIGN=TOP>
+        </TD>
+        <TD ALIGN=LEFT VALIGN=TOP>
+        </TD>
+        <TD ALIGN=LEFT VALIGN=TOP>
+        </TD>
+      </TR>
+    </TABLE>
+
+  <H2>
+    Messages to MemoryManager
+  </H2>
+
+  <TABLE BORDER=2>
+    <TR>
+      <TH>
+        <H3>Message parts</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        <B>From<BR>
+           Type<BR>
+           Body<BR></B>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        ProcessScheduler<BR>
+        AllocateCodePage<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Kernel | ProcessScheduler | IPCManager | FileSystem | DiskDrive<BR>
+        AllocateStackPage<BR>
+        stack page is a data page
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        ProcessScheduler | IPCManager | FileSystem | DiskDrive<BR>
+        DeallocatePage
+        <TT>PageId</TT>
+      </TD>
+    </TR>
+  </TABLE>
+
+  <H2>
+    Messages from MemoryManager
+  </H2>
+
+  <TABLE BORDER=2>
+    <TR>
+      <TH>
+        <H3>Message parts</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+      <TH>
+        <H3>Message</H3>
+      </TH>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        <B>To<BR>
+           Type<BR>
+           Body<BR></B>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        ProcessScheduler | Kernel | DiskScheduler | IPCManager | FileSystem<BR>
+        PageAllocated<BR>
+        <TT>PageId</TT> 
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+      </TD>
+    </TR>
+  </TABLE>
+
+  </BLOCKQUOTE>
+
+<P>
+  <P> <A HREF="http://cq-pan.cqu.edu.au/validate/">
+    <IMG SRC="http://cq-pan.cqu.edu.au/validate/images/valid_html.mcom.gif" 
+    ALT="HTML HaL Mozilla Checked!" ALIGN=LEFT></A>
+
+<FONT SIZE=1>
+  <B>URL:</B> http://cq-pan.cqu.edu.au/david-jones/papers/projects/rcos/java/messages/memorymanager.html <BR>
+  <B>Last modified:</B> DATE <BR>
+  <B>Author:</B> <A HREF="mailto:d.jones@cqu.edu.au">David Jones</A><BR>
+</FONT>       
+</BODY>
+</HTML>

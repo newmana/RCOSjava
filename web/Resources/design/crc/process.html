@@ -1,0 +1,87 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    Process CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>Process</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Process
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Data structure to store information about process currently
+      including both thread of execution and resource ownership.  Later
+      version should probably seperate these out and support multiple
+      threads.
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      <A HREF="processcontext.html">ProcessContext</A> - process information 
+        from CPU <BR>
+      <A HREF="processstatistics.html">ProcessStatistics</A>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+  <UL>
+    <LI> list of data taken from RCOS (with some modification)<BR>
+ <PRE>
+         String name;            // user name for process, if any
+         int   priority, quantum;  // max permissable ticks per scheduling
+         int pid,               // unique ID for process (PID)
+             pPid;              // parent PID of process
+         ProcessContext theContext;
+         int uStatus,            // current status
+         int   uDevCnt;            // count of devices open by process
+         Message pReply;             // message associated with wake-up
+         ProcessStatistics theStats // stats about process
+         Tty theTerminal;               // pointer line protocol driver
+         ??UINT16  uTos;               // fetched values at top of stack
+         BitMap semaphores;    // bit set of semaphores owned
+         ?? Files, SharedMemory ??
+ </PRE>
+  </UL>
+
+</BODY>
+</HTML>

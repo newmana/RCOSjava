@@ -1,0 +1,79 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class Preferences
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+<P>
+    
+<H1>
+  RCOS C++ CRC for class <TT>Preferences</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+       Preferences
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   A class to hold private INI file data
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+  class Preferences {
+    ifstream ini;
+    BOOL bOpen;
+    char *pBuffer;
+    char *FindKey (const char*);
+  public:
+    Preferences (void);
+   ~Preferences (void);
+    UINT16 GetPrefInt (const char*, UINT16);
+    UINT16 GetPrefStr (const char*, const char*, char*, UINT16);
+  };
+      </PRE> 
+
+</BODY>
+</HTML>

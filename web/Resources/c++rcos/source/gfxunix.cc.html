@@ -1,0 +1,589 @@
+<HTML>
+<HEAD>
+  <TITLE>
+gfxunix.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+gfxunix.cc
+  </H1>
+<PRE>
+//  Program:       initx.c
+//  Source:        Taken from page 8 of X Window Applications Programming
+//                 by Johnson and Reichard
+//  Purpose:       Inistialization code to talk to the X Server
+
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/keysym.h>
+#include <stdlib.h>
+#include <string.h>
+#include <iostream.h>
+#include <math.h>
+#include "gfx.hh"
+
+//
+// Private prototypes
+//
+
+Window openWindow (int, int, int, int, int);
+void closeWindow (Window);
+int createGC (Window, GC *);
+void setColor (char *, int);
+XFontStruct *initFont (char *);
+
+//
+//  Private Globals.
+//
+
+Display *theDisplay;
+Window theWindow;
+GC theGC;
+Colormap theColormap;
+XFontStruct *theFont;
+
+int theScreen;
+int theDepth;
+
+int nFgColor, nBgColor;
+
+static char *colors[16] =
+{
+  "Black", "Blue", "Green", "Cyan", "Red", "Magenta", "Brown", "White",
+  "DarkSlateGrey", "LightBlue", "LimeGreen", "LightBlue", "OrangeRed",
+  "Magenta", "Yellow", "White"
+};
+
+// temporary variables used in GfxMoveTo and GfxLineTo
+
+INT16 _startx, _starty;
+
+//#include "pal_unix.cc"
+
+//
+// BOOL GfxInit( void )
+// - sets up the connection to the X server and stores information about
+//   the environment
+//
+
+BOOL 
+GfxInit (void)
+{
+  int event_mask = KeyPressMask | ButtonReleaseMask;
+
+  // Establish connection to the X Server
+  theDisplay = XOpenDisplay (NULL);
+
+  // Check the connection
+  if (theDisplay == NULL)
+    {
+      cerr << "GfxInit: Cannot Establish a connection to the X Server\n";
+      return FALSE;
+    }
+
+
+  // check for the default screen and color plane depth
+
+  theScreen = DefaultScreen (theDisplay);
+  theDepth = DefaultDepth (theDisplay, theScreen);
+  theColormap = DefaultColormap (theDisplay, theScreen);
+
+  theWindow = openWindow (10, 10, 640, 480, 0);
+  setColor (colors[_DarkGrey], 2);
+
+  if (theWindow == 0)
+    {
+      cerr << "GfxInit: Cannot open the window\n";
+      return FALSE;
+    }
+
+  // Initalise what events we want the window to receive
+
+  XSelectInput (theDisplay, theWindow, event_mask);
+
+  if ((theFont = initFont ("6x13")) == NULL)
+    {
+      cerr << "GfxInit: Cannot open the font\n";
+      GfxClose ();
+      return FALSE;
+    }
+
+  XSetFont (theDisplay, theGC, theFont->fid);
+
+  XFlush (theDisplay);
+  return TRUE;
+}
+
+//
+// void GfxClose( void )
+// - close the connection to the X server
+//
+
+void 
+GfxClose (void)
+{
+  closeWindow (theWindow);
+  XFreeFont (theDisplay, theFont);
+  XCloseDisplay (theDisplay);
+}
+
+//
+// GfxFill
+// - not yet implemented under X
+//
+
+void 
+GfxFill (INT16 x, INT16 y, UINT16 nBound, UINT16 nColor)
+{
+  return;
+}
+
+//
+// GfxPattern
+// - not yet implemented under X
+//
+
+void 
+GfxPattern (UINT16 nStyle)
+{
+  return;
+}
+
+//
+// void GfxMoveTo( int, int )
+//
+
+void 
+GfxMoveTo (INT16 x, INT16 y)
+{
+  _startx = x;
+  _starty = y;
+}
+
+//
+// void GfxLineTo( INT16, INT16 )
+//
+
+void 
+GfxLineTo ( INT16 x, INT16 y)
+{
+  XDrawLine (theDisplay, theWindow, theGC, _startx, _starty, x, y);
+
+//  XFlush( theDisplay );
+
+  // make sure the next LineTo starts where this one finished
+  _startx = x;
+  _starty = y;
+}
+
+//
+// void GfxTextColor( int )
+// - set foreground (??text only??) color
+
+void 
+GfxTextColor (UINT16 nColor)
+{
+  nFgColor = nColor;
+  setColor (colors[nFgColor], 0);
+}
+
+//
+// void GfxTextColorBg( int )
+// - set background (??text only??) color
+
+void 
+GfxTextColorBg (UINT16 nColor)
+{
+  nBgColor = nColor;
+  setColor (colors[nBgColor], 1);
+}
+
+//
+// void GfxText( int x, int y, char *st, int nStyle )
+// - draw the passed text string at the passed location in the passed style
+// - x, y is the top/left of the text extent
+// - PROBLEM with X11, y marks the text base line, SOLN, subtract the
+//   ascent (height above the base line) from y
+// - for now nStyle is ignored
+//
+
+void 
+GfxText (INT16 x, INT16 y, char *st, UINT16 nStyle)
+{
+  setColor (colors[nFgColor], 0);
+  if (nStyle == GFX_Replace)
+    {
+      XDrawImageString (theDisplay, theWindow, theGC, x, y + theFont->ascent,
+			st, strlen (st));
+    }
+  else
+    {
+      XDrawString (theDisplay, theWindow, theGC, x, y + theFont->ascent,
+		   st, strlen (st));
+    }
+  // XFlush( theDisplay );
+}
+
+//
+// int GfxTextExtent( char * )
+// - return the number of pixels the string argument will occupy
+//
+
+UINT16
+GfxTextExtent (char *str)
+{
+  return XTextWidth (theFont, str, strlen (str));
+}
+
+//
+// int GfxTextHeight( void )
+// - return the height in pixels of a text character cell
+//
+
+UINT16
+GfxTextHeight (void)
+{
+  return (theFont->ascent + theFont->descent);
+}
+
+//
+// PIMBUF GfxGetImage( int x1, int y1, int x2, int y2 )
+// - store the bounded screen image bit map in the passed buffer
+// - for X must translate a width, height
+//
+
+PIMBUF 
+GfxGetImage (INT16 x1, INT16 y1, INT16 x2, INT16 y2 )
+{
+  PIMBUF p;
+
+  p = (pixmap_data *) malloc (sizeof (pixmap_data));
+
+  if (p == NULL)
+    {
+      cerr << "GfxGetImage: couldn't create pixmap_data\n";
+      return NULL;
+    }
+
+  p->width = x2 - x1;
+  p->height = y2 - y1;
+
+  p->pix = XCreatePixmap (theDisplay, theWindow, p->width, p->height,
+			  theDepth);
+  // XFlush( theDisplay );
+  XCopyArea (theDisplay, theWindow, p->pix, theGC, x1, y1, p->width, p->height,
+	     0, 0);
+  // XFlush( theDisplay );
+  return p;
+}
+
+//
+// BOOL GfxPutImage( int x, int y, PIMBUF p )
+// - place image at x, y 
+//
+
+BOOL 
+GfxPutImage (INT16 x, INT16 y, PIMBUF p)
+{
+
+  XCopyArea (theDisplay, p->pix, theWindow, theGC,
+	     0, 0, p->width, p->height,
+	     x, y);
+  // XFlush( theDisplay );
+  return TRUE;
+}
+
+//
+// GfxFreeImage( PIMBUF )
+// - free up memory used by image
+//
+
+void 
+GfxFreeImage (PIMBUF p)
+{
+  XFreePixmap (theDisplay, p->pix);
+  delete p;
+  // XFlush( theDisplay );
+}
+
+//
+// void GfxSetClip( int x1, int y1, int x2, int y2 )
+// - set the clipping area for graphics
+//
+
+void 
+GfxSetClip (INT16 x1, INT16 y1, INT16 x2, INT16 y2)
+{
+  XRectangle clipRects[1];
+
+  clipRects[0].x = x1;
+  clipRects[0].y = y1;
+  clipRects[0].width = x2 - x1;
+  clipRects[0].height = y2 - y1;
+
+  XSetClipRectangles (theDisplay, theGC, 0, 0, clipRects, 1, Unsorted);
+  // XFlush( theDisplay );
+}
+
+//
+// void GfxClrClip( void )
+// - return clip to entire region
+//
+
+void 
+GfxClrClip (void)
+{
+  XSetClipMask (theDisplay, theGC, None);
+  // XFlush( theDisplay );
+}
+
+//
+// void GfxRect
+// - draw a rectangle
+//
+
+void 
+GfxRect (INT16 x1, INT16 y1, INT16 x2, INT16 y2, UINT16 nStyle, UINT16 nColor)
+{
+  setColor (colors[nColor], 0);
+
+  switch (nStyle)
+    {
+    case GFX_Fill:
+      XFillRectangle (theDisplay, theWindow, theGC,
+		      x1, y1, x2 - x1, y2 - y1);
+      break;
+    case GFX_Frame:
+      XDrawRectangle (theDisplay, theWindow, theGC,
+		      x1, y1, x2 - x1, y2 - y1);
+    }
+  // XFlush( theDisplay );
+  setColor (colors[nFgColor], 0);
+
+}
+
+//
+// void GfxCircle
+// - draw a circle either filled or framed
+// - X(Draw)(Fill)Arc draws an arc within a rectangle
+//   modify input x, y, nRad to get upper left corner and width
+//
+
+void 
+GfxCircle (INT16 x, INT16 y, INT16 nRad, UINT16 nStyle, UINT16 nColor)
+{
+  int lx, ly, nWidth;
+
+  lx = x - nRad;
+  ly = y - nRad;
+  nWidth = 2 * nRad;
+
+  setColor (colors[nColor], 0);
+  if (nStyle == GFX_Fill)
+    {
+      XFillArc (theDisplay, theWindow, theGC, lx, ly, nWidth, nWidth,
+		0, 360 * 64);
+    }
+  else
+    {
+      XDrawArc (theDisplay, theWindow, theGC, lx, ly, nWidth, nWidth,
+		0, 360 * 64);
+    }
+  // XFlush( theDisplay );
+  setColor (colors[nFgColor], 0);
+}
+
+//
+// void GfxArc
+// - draw an arc centred on x,y with radius nRad, beginning at dStart
+//   degress (0 is straight up), ending at dEnd degrees
+//
+
+void 
+GfxArc (INT16 x, INT16 y, INT16 nRad, double dStart, double dEnd, UINT16 nColor)
+{
+  // XDrawArc starts at 3 o'clock angles are specified in units of
+  // degrees * 64, see GfxCircle, note 360*64 (and are integers),  
+  // x, y again specify bounding box (see GfxCircle)
+
+  int lx, ly, nWidth, nStart, nEnd;
+
+  lx = x - nRad;
+  ly = y - nRad;
+  nWidth = nRad * 2;
+
+  nStart = (int) rint ((dStart) * 64) + 90;
+  nEnd = (((int) rint ((dEnd))) + 90) * 64;
+
+//  cout << "start at " << nStart << " finish at " << nEnd << '\n';
+
+  setColor (colors[nColor], 0);
+
+  XDrawArc (theDisplay, theWindow, theGC, lx, ly, nWidth, nWidth,
+	    nStart, nEnd);
+
+  setColor (colors[nFgColor], 0);
+}
+
+//**************************************************************************
+// X Windows specific functions
+
+//
+// Widow openWindow( int x, int y, int width, int height, int flag )
+// - open a window a x,y with width,height
+// - if flag > 0 then window is a pop-up
+//
+
+Window 
+openWindow (int x, int y, int width, int height, int flag)
+{
+  XSetWindowAttributes theWindowAttributes;
+  XSizeHints theSizeHints;
+  unsigned long theWindowMask;
+  Window theNewWindow;
+
+  // set up some of the window attributes
+  theWindowAttributes.border_pixel = WhitePixel (theDisplay, theScreen);
+  theWindowAttributes.background_pixel = BlackPixel (theDisplay, theScreen);
+  theWindowAttributes.override_redirect = False;
+
+  nBgColor = BlackPixel (theDisplay, theScreen);
+  nFgColor = WhitePixel (theDisplay, theScreen);
+
+  theWindowMask = CWBackPixel | CWBorderPixel | CWOverrideRedirect;
+
+  // open the window
+  theNewWindow = XCreateWindow (theDisplay, RootWindow (theDisplay, theScreen),
+				x, y, width, height, 2, theDepth,
+				InputOutput, CopyFromParent, theWindowMask,
+				&theWindowAttributes);
+
+  // tell window manager about the size and location of the window
+  theSizeHints.flags = PPosition | PSize;
+  theSizeHints.x = x;
+  theSizeHints.y = y;
+  theSizeHints.width = width;
+  theSizeHints.height = height;
+
+  XSetNormalHints (theDisplay, theNewWindow, &theSizeHints);
+
+  // Create a graphics context
+  if (createGC (theNewWindow, &theGC) == 0)
+    {
+      XDestroyWindow (theDisplay, theNewWindow);
+      return ((Window) 0);
+    }
+
+  // place the window onto the screen
+  XMapWindow (theDisplay, theNewWindow);
+
+  // Flush out all the queued up X requests
+  XFlush (theDisplay);
+
+  return theNewWindow;
+}
+
+// void closeWindow( Window toClose )
+// - close the passed in window
+//
+
+void 
+closeWindow (Window toClose)
+{
+  XDestroyWindow (theDisplay, toClose);
+}
+
+//
+// int createGC( Window, GC *)
+// - create the graphics context for the given window
+//
+
+int 
+createGC (Window theNewWindow, GC * theNewGC)
+{
+  XGCValues theGCValues;
+
+  *theNewGC = XCreateGC (theDisplay, theNewWindow, (unsigned long) 0,
+			 &theGCValues);
+
+  if (*theNewGC == 0)
+    {
+      cerr << "createGC: unable to create a GC\n";
+      return 0;
+    }
+  else
+    {
+      XSetForeground (theDisplay, *theNewGC, BlackPixel (theDisplay, theScreen));
+      XSetBackground (theDisplay, *theNewGC, WhitePixel (theDisplay, theScreen));
+      return 1;
+    }
+}
+
+//
+// void setColor( char *, int )
+// - accept a name describing the color and set color to it
+// - if which = 0 then set foreground 
+// - if which = 1 then set background
+// - if which = 2 then set window background
+//
+
+void 
+setColor (char *theName, int which)
+{
+  XColor theRGBColor, theHardwareColor;
+  int theStatus;
+
+  if (theDepth > 1)
+    {
+      theStatus = XLookupColor (theDisplay, theColormap, theName,
+				&theRGBColor, &theHardwareColor);
+
+      if (theStatus != 0)
+	{
+	  theStatus = XAllocColor (theDisplay, theColormap, &theHardwareColor);
+
+	  if (theStatus != 0)
+	    {
+	      if (which == 0)
+		XSetForeground (theDisplay, theGC, theHardwareColor.pixel);
+	      else if (which == 1)
+		XSetBackground (theDisplay, theGC, theHardwareColor.pixel);
+	      else if (which == 2)
+		{
+		  XSetWindowBackground (theDisplay, theWindow, theHardwareColor.pixel);
+		  XClearWindow (theDisplay, theWindow);
+		}
+	      // XFlush( theDisplay );
+	    }
+	}
+    }
+}
+
+//
+// XFontStruct *initFont( GC, char *)
+// - initialize a font for use
+// - return NULL on an error
+//
+
+XFontStruct *
+initFont (char *fontName)
+{
+  XFontStruct *fontStruct;
+
+  fontStruct = XLoadQueryFont (theDisplay, fontName);
+
+  if (fontStruct != 0)
+    {
+      XSetFont (theDisplay, theGC, fontStruct->fid);
+    }
+  else
+    {
+      return (NULL);
+    }
+
+  return fontStruct;
+}
+</PRE>
+</BODY>
+</HTML>

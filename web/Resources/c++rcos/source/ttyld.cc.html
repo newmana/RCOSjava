@@ -1,0 +1,233 @@
+<HTML>
+<HEAD>
+  <TITLE>
+ttyld.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+ttyld.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : TTYLD.CPP - Line Dicipline driver for Terminal devices	  *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: This class used by RCOS to perform text line input for a	  *
+//	     Terminal. It performs simple editing (destructive backspace) *
+//	     input echo and "break" condition checks. One is instantiated *
+//	     the Kernel when a terminal is OPENED in buffered mode.	  *
+//	     Concept and design based on Chapter 10 of Bach, M.J. (1986): *
+//	     "The Design of the Unix Operating System", Prentice-Hall Inc *
+//  HISTORY:                                                              *
+//   20-APR-93	Material split from CONX module.			  *
+//   14-MAY-93	Bug!  <LnReq> not advancing nStart after posting message  *
+//   20-APR-94  Memory leak through CbNew fixed (Ron, use the Stack!)	  *
+//*************************************************************************
+
+
+#include "ttyld.hh"
+#include "kernel.hh"
+
+
+/////////////
+// globals define ansi sequences to destructively backspace, etc
+//
+#define LEN_BKSP    4		// length of array declared in LnEdit()
+#define CLR_SCRN    AFF 	// char to clear screen and home cursor
+
+
+
+///////////////////////////////////////////////////////////////////////////
+//		Line Protocol Character Block Methods
+//-------------------------------------------------------------------------
+// We can initialsze new CBLOCKS on the stack, 'cause the Double Link List
+// class copies the passed data to memory allocated from the heap.
+//
+PCBLOCK Cblock::CbNew (void)
+{
+  CBLOCK NewCb;
+  NewCb.nStart = NewCb.nEnd = 0;
+  return (PCBLOCK)DblAppend((void*)&NewCb, sizeof(CBLOCK));
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+//			TTY Line Driver Methods
+//-------------------------------------------------------------------------
+// Initialize our Tx/Rx ports, register with the kernel and ask the her
+// for a terminal.  If we get a terminal (and we bloody well better, since
+// the kernel has made sure one is available before calling us into being),
+// we clear its screen, then request a character. This effectively puts us
+// to sleep, waiting on some input.
+//
+LnDrv::LnDrv (UINT16 n, UINT16 id, Knl *pK)
+     : port(id, CLS_SysRes, pK), uPid(n)
+{
+  bBreakOn = TRUE;
+  cDelim = (char)ACR;
+  nChReq = nBlkReq = 0;
+  MSG msg(uID, KM_Open, CLS_VDU, (void*)(TTY_UseANSI));
+  pTx->SendMsg(ID_Kernel, &msg);
+  if ((uTerm = msg.wParam) != ID_NULL) {
+    MSG msg(uID, KM_Read);
+    pTx->PostMsg(uTerm, &msg);
+  }
+}
+
+////////////////
+// Destructor closes the terminal (which flushes its buffers) and closes
+// our Registration with the Kernel. The DblList destructor will cleanup
+// any unused CBLOCKS.
+//
+LnDrv::~LnDrv (void)
+{
+  MSG msg(uID, KM_Close, uTerm);
+  pTx->SendMsg(ID_Kernel, &msg);
+  msg = message(uID, KM_CheckOut);
+  pTx->SendMsg(ID_Kernel, &msg);
+}
+
+///////////////////
+// Line Driver receive port Write requests may only come from our "owner"
+// PID, or the Kernel, so just process 'em.  Read messages can be requests
+// from the PID (normally block requests), or raw data from terminal.  Raw
+// data goes through the edit routine (and thence, back to the terminal).
+// NOTE NASTY TRICK - if an IoCtrl message is not a Break On/Off, it FALLS
+// THROUGH and is sent/posted to the TTY driver.
+//
+void LnDrv::RxPort (PMSG pM)
+{
+  switch (pM->wMsgType & ~MM_Sync) {
+    case KM_IoCtrl:
+      if ((pM->wParam == DM_BreakOn) || (pM->wParam == DM_BreakOff)) {
+	bBreakOn = (BOOL)(pM->wParam == DM_BreakOn);
+	return;
+      }
+    case KM_Write:
+    case KM_WriteBlk:
+      pM->wSender = uID;
+      if (IS_SYNCH(pM->wMsgType))
+	pTx->SendMsg(uTerm, pM);
+      else
+	pTx->PostMsg(uTerm, pM);
+      break;
+    case KM_ReadBlk:
+      LnReq();
+      break;
+    case KM_Read:
+      if (pM->wSender == uTerm)
+	LnEdit((char)pM->wParam);
+      else {
+	PCBLOCK pCB = Cblk.CbHead();
+	if (pCB == NULL)
+	  ++nChReq;
+	else {
+	  pM->wSender = uID;
+	  pM->wParam = (UINT16)(pCB->cBuf[pCB->nStart++]);
+	  if (pCB->nStart >= CBLOCK_LEN)
+	    Cblk.CbDrop();
+	  pTx->PostMsg(uPid, pM);
+	}
+      }
+      break;
+  default :
+    DevError(ET_NoSupport, FALSE);
+  }
+}
+
+//////////////
+// Input and line editing routine.  If the char is a backspace (and we
+// have something to backspace into), backup the buffered data and sned
+// an appropriate sequence to the terminal. Otherwise put the char in the
+// buffer(s) and if it was a block delimiter and we have any outstanding
+// requests for a data block, process the buffer.
+//
+// NOTE: At this time, all delimiters are CR's, but in the future, our
+//   PLL/2 compiler may want to READ space delimited numeric variables..
+//   hence the two tests for <cDelim> and <ACR>.
+//
+void LnDrv::LnEdit (char ch)
+{
+  MSG msg;
+  PCBLOCK pCB = Cblk.CbTail();
+  static char arrBksp[] = { BKSP, ESC, '[', 'K' };
+
+  if ((ch == BREAK_CHAR) && bBreakOn) {
+    msg = message(uID, KM_Break, uTerm);
+    pTx->PostMsg(uPid, &msg);
+    return;
+  }
+  if ((ch == BKSP) && pCB) {
+    char *cp = new char[LEN_BKSP];
+    memcpy(cp, arrBksp, LEN_BKSP);
+    msg = message(uID, KM_WriteBlk, LEN_BKSP, (void*)cp);
+    pTx->PostMsg(uTerm, &msg);
+    if (--(pCB->nEnd) < 0)
+      Cblk.CbDrop();
+  }
+  if ((ch == ACR) || ((ch >= ' ') && (ch < DEL))) {
+    if (pCB == NULL)
+      pCB = Cblk.CbNew();
+    pCB->cBuf[pCB->nEnd++] = ch;
+    if (pCB->nEnd >= CBLOCK_LEN)
+      Cblk.CbNew();
+    msg = message(uID, KM_Write, (UINT16)ch);
+    pTx->SendMsg(uTerm, &msg);
+    if (nBlkReq && ((ch == cDelim) || (ch == ACR)))
+      LnReq();
+  }
+  msg = message(uID, KM_Read);
+  pTx->PostMsg(uTerm, &msg);
+}
+
+////////////////////
+// This routine is called when we have an outstanding request for data,
+// AND we have just received a block terminator char, OR WHEN we have no
+// idea if we have a full block or not, but a request has been received.
+// In the latter case, if it turns out the data is yet to be terminated,
+// we simply up the count on the number of blocks we are waiting for.
+// The process is not as wastefull as it looks.  A request may cause a
+// single, fruitless char scan through the buffer(s) for a terminator,
+// but the request itself has put the sender to sleep - we will wake it
+// up when the terminator finally arrives.
+//
+// NOTE: The actual terminator is removed from the buffer, but not
+//	 included in the posted data block count.
+//
+void LnDrv::LnReq (void)
+{
+  INT16 n = 0;
+  PCBLOCK pCB = Cblk.CbHead();
+
+  while (pCB) {
+    for (INT16 i = pCB->nStart; i < pCB->nEnd; i++, n++) {
+      if ((pCB->cBuf[i] == cDelim) || (pCB->cBuf[i] == ACR)) {
+	pCB = Cblk.CbHead();
+	char *pBlk = new char[n];
+	for (i = 0; i <= n; i++) {
+	  if (i == n)
+	    pCB->nStart++;
+	  else
+	    pBlk[i] = pCB->cBuf[pCB->nStart++];
+	  if (pCB->nStart >= CBLOCK_LEN) {
+	    Cblk.CbDrop();
+	    pCB = Cblk.CbHead();
+	  }
+	}
+	MSG msg(uID, KM_ReadBlk, n, (void*)pBlk);
+	pTx->PostMsg(uPid, &msg);
+	if (nBlkReq)
+	  --nBlkReq;
+	return;
+      }
+    }
+    pCB = Cblk.CbNext();
+  }
+  ++nBlkReq;
+}
+
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,662 @@
+<HTML>
+<HEAD>
+  <TITLE>
+exec.cc
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+exec.cc
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : Exec - Process creation and management module                *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: This object contains an array of process descriptors and a   *
+//           number of queues containing array indicies, plus the means   *
+//           to create, destroy and move them around.                     *
+//  HISTORY:                                                              *
+//    21-APR-93 First version                                             *
+//    14-MAY-93 Process animation "calls" inserted                        *
+//    02-JUN-93 "Kill" not de-allocating memory                           *
+//    03-FEB-94 Allow un-blocking process to pre-empt current on priority *
+//    18-APR-94 Kill and Fork modified to accomodate shared memory        *
+//    01-SEP-94 File object support added to Fork and Kill                *
+//    17-SEP-94 LoSked allowed unallocated PID to be scheduled!           *
+//    21-MAR-94 Quantum made a constructor parameter                      *
+//*************************************************************************
+
+
+#include "exec.hh"         // related header
+#include "kernel.hh"       // can't put this in header due recursion
+#include "fsiface.hh"      // ..or this (see header about cheshier cat)
+
+
+#define PROC0_TEXT      8   // Minimum requirement for process zero code
+#define PROC0_STACK     60  // Minimum stack allocation for process zero
+#define PROC0_NAME  "CONX"  // Name for console process
+
+
+///////////////////////////////////////////////////////////////////////////
+//          Class Member Functions for the Process Control Stuff
+//-------------------------------------------------------------------------
+// Initialize Process descriptors to empty, then create (but don't start)
+// the primary process - this should be customizable and the Prime Proc
+// should be a trusted p-code program - but in this release, for simplicity,
+// the process is fixed and coded in C++.
+//
+Exec::Exec (Knl *pK, UINT16 nMs) : PqReady(TRUE)
+{
+  pTx = pK;
+  uProcCnt = 0;
+  nQuantum = nMs;
+  uCurProc = NO_PROC;
+  memset(arrPCB, 0, sizeof(PCB) * MAX_PROC);
+  for (INT16 i = 0; i < MAX_PROC; i++) {
+    memset(&arrPCB[i], 0, sizeof(PCB));
+    arrPCB[i].uPid = NO_PROC;
+    for (INT16 j = 0; j < MAX_DEV; j++)
+      arrPCB[i].arrDev[j] = NO_PROC;
+  }
+  CreateCon();
+}
+
+//////////////////
+// Somewhat gracefull death for the Execution unit - really the operator
+// should delete any running programs, so the only operation required is
+// to kill off the console process, but..
+//
+Exec::~Exec (void)
+{
+  for (INT16 idx = 0; idx < MAX_PROC; idx++)
+    if (arrPCB[idx].uPid != NO_PROC)
+       Kill(idx);
+}
+
+/////////////////////
+// Call here when we want to execute some application code.  Run the
+// scheduler if there is no current process, otherwise simply call
+// the p-code interpreter UNLESS the PID is ZERO (which is special, being
+// the first process) in which case we call the specified operator proc.
+// After the process has run we do accumulated and quantum time accounting.
+//
+// If the process has done something causing it to yield, it is put into
+// the Blocked Q.  If it has run out of Quantum allocation, it gets put
+// back into the Ready Q (this process temporarily reduces its priority
+// ensures that processes at equal priority run round-robin).
+//
+// RETURNS: TRUE  .. something got run (used by single-step logic)
+//          FALSE .. no go
+//
+BOOL Exec::Dispatch (void)
+{
+  MSG msg;
+
+  if (uCurProc == NO_PROC)
+    Sked();
+  else {
+    UINT32 lMark = Clock.GetTicks();
+    if (arrPCB[uCurProc].uPid == 0)
+      RunCon(arrPCB[uCurProc]);
+    else
+      RunProc(arrPCB[uCurProc], arrMCB[uCurProc]);
+    UINT16 uIntVal = MAX(1, (UINT16)(Clock.GetTicks() - lMark));
+    arrPCB[uCurProc].luTicks += (UINT32)uIntVal;
+    arrPCB[uCurProc].nQuantum -= uIntVal;
+    switch (arrPCB[uCurProc].uStatus) {
+      case PS_Halted:
+      case PS_Illegal:
+        msg = message(ID_Kernel, ((arrPCB[uCurProc].uStatus = PS_Illegal) ?
+                      ANI_HALT_BAD : ANI_HALT_OK), uCurProc);
+        pTx->SendMsg(ID_ANIM, &msg);
+        Kill(uCurProc);
+        uCurProc = NO_PROC;
+        break;
+      case PS_Ready:
+    /*    if (arrPCB[uCurProc].nQuantum <= 0) {
+          PqReady.PqAdd(arrPCB[uCurProc]);
+          if (arrPCB[uCurProc].nQuantum > PCD_PREEMPT) {
+            msg = message(ID_Kernel, ANI_RUN_RDY, uCurProc);
+            pTx->SendMsg(ID_ANIM, &msg);
+          }
+          uCurProc = NO_PROC;
+        }*/
+        break;
+      default:
+        PqBlocked.PqAdd(arrPCB[uCurProc]);
+        msg = message(ID_Kernel, ANI_RUN_BLK, uCurProc);
+        pTx->SendMsg(ID_ANIM, &msg);
+        uCurProc = NO_PROC;
+    }
+    return TRUE;
+  }
+  return FALSE;
+}
+
+////////////////////
+// Basic Prime Proc initialization must stop short of allocating memory
+// because we won't have a MMU device registered yet!
+//
+void Exec::CreateCon (void)
+{
+  if (arrPCB[0].uPid == NO_PROC) {
+    arrPCB[0].uStatus = PS_Zombie;
+    arrPCB[0].uPid = arrPCB[0].uPidp = 0;
+    arrPCB[0].nPriority = MAX_PRIORITY;
+    arrPCB[0].pReply = NULL;
+    arrPCB[0].arrDev[0] = CLS_VDU;
+    arrPCB[0].uBP = 1;
+    if (arrPCB[0].pszName = new char[strlen(PROC0_NAME)+1])
+      strcpy(arrPCB[0].pszName, PROC0_NAME);
+    arrPCB[0].uStatus = PS_Created;
+    PqIn.PqAdd(arrPCB[0]);
+    ++uProcCnt;
+  }
+}
+
+//////////////////
+// Called when the supervisor "RUN" button has been clicked for the first
+// time - we must complete the Prime Proc initializations that could not
+// be done before (we should now have a MMU and FS), then call the Low
+// Level Scheduler which should be able to allocate a TTY and line driver
+// to the console and move it into the Ready Queue.
+//
+void Exec::StartCon (void)
+{
+  MSG mess(ID_Kernel, KM_Open, PROC0_TEXT);
+  pTx->SendMsg(ID_MMU, &mess);
+  arrMCB[0].hText = mess.wParam;
+  mess = message(ID_Kernel, KM_Open, PROC0_STACK);
+  pTx->SendMsg(ID_MMU, &mess);
+  arrMCB[0].hStack = mess.wParam;
+  if(arrMCB[0].hText && arrMCB[0].hStack) {
+    MMU_MSG mms;
+    INT16 ret_frame[3] = {0, 0, -1 };
+    UINT16 csp_exec[2] = { 0x08, 0x06 };
+    mms.pData = (UINT16*)&csp_exec[0], mms.uOffset = 0, mms.uLen = 2;
+    mess = message(ID_CON, KM_WriteBlk, arrMCB[0].hText, &mms);
+    pTx->SendMsg(ID_MMU, &mess);
+    mms.pData = (UINT16*)&ret_frame[0], mms.uOffset = 0, mms.uLen = 3;
+    mess = message(ID_CON, KM_WriteBlk, arrMCB[0].hStack, &mms);
+    pTx->SendMsg(ID_MMU, &mess);
+    arrPCB[0].uSP = 3;
+    if (LoSked(0))
+      InitCon();
+  }
+}
+
+////////////////////
+// Low level scheduler starts the passed process provided it is able to
+// allocate the resources contained in the PID's device list. Called in
+// response to a console or batch GO command or to start the Prime Proc.
+//
+// Note that VDU devices are not allocated direct - we merely see if one
+// is free and instantiate a Line Protocol Driver (which will get the TTY).
+//
+// *** INCOMPLETE: failed startup does not release allocated devices! ***
+//
+BOOL Exec::LoSked (UINT16 uGo)
+{
+  INT16 idx = 0;
+  BOOL bCanStart;
+  
+  bCanStart = (NO_PROC == arrPCB[uGo].uPid) ? FALSE : TRUE;
+  while (bCanStart && (idx < MAX_DEV) &&
+        (arrPCB[uGo].arrDev[idx] != NO_PROC)) {
+    MSG msg;
+    UINT16 uNeed = arrPCB[uGo].arrDev[idx];
+    switch (uNeed) {
+      case CLS_VDU:
+        msg = message(uGo, KM_Open, CLS_VDU);
+        pTx->SendMsg(ID_Kernel, &msg);
+        if (msg.wParam == 0)
+          bCanStart = FALSE;
+        else {
+          msg.wMsgType = KM_Close;
+          pTx->SendMsg(ID_Kernel, &msg);
+          arrPCB[uGo].pDev =
+            new LnDrv(arrPCB[uGo].uPid, ID_LNDRV+arrPCB[uGo].uPid, pTx);
+          bCanStart = (BOOL)(arrPCB[uGo].pDev != NULL);
+        }
+        break;
+      case CLS_MTU:
+        break;
+      case CLS_PRN:
+        break;
+      case CLS_FSF:
+        break;
+    }
+    ++idx;
+  }
+  if (bCanStart) {
+    arrPCB[uGo].uStatus = PS_Ready;
+    PqReady.PqAdd(arrPCB[PqIn.PqGet(uGo)]);
+    MSG msg(ID_Kernel, ANI_IN_RDY, uGo);
+    pTx->SendMsg(ID_ANIM, &msg);
+  }
+  return bCanStart;
+}
+
+//////////////////////
+// Process scheduler - first, see if there are any blocked processes that
+// have become unblocked and if so, feed them back into the right Queue.
+// Then, if there is anything at the head of the priority Ready Queue,
+// make its context current, preparing it for dispatch to the CPU.
+//
+// If an unblocking process was blocked on a semaphore wait, we temporarily
+// elevate its priority to ensure it will re-schedule ahead of the proc
+// that has just signaled and hence been pre-empted (assuming they are at
+// the same priority) - so, after insretion to the ready Q, return its
+// priority to original.
+//
+void Exec::Sked (void)
+{
+  INT16 i;
+  UINT16  arrProcs[MAX_PROC];
+
+  PqBlocked.PqImage(arrProcs);
+  for (i = 0; i < MAX_PROC; i++) {
+    if (arrProcs[i] == NO_PROC)
+      break;
+    if (!(arrPCB[arrProcs[i]].uStatus & PS_Blocked)) {
+      INT16 idx = PqBlocked.PqGet(arrProcs[i]);
+      arrPCB[idx].uStatus |= PS_Ready;
+      if (arrPCB[idx].uSemSet)
+        ++arrPCB[idx].nPriority;
+      PqReady.PqAdd(arrPCB[idx]);
+      if (arrPCB[idx].uSemSet)
+        --arrPCB[idx].nPriority;
+      MSG msg(ID_Kernel, ANI_BLK_RDY, arrPCB[idx].uPid);
+      pTx->SendMsg(ID_ANIM, &msg);
+    }
+  }
+  PqSusBlock.PqImage(arrProcs);
+  for (i = 0; i < MAX_PROC; i++) {
+    if (arrProcs[i] == NO_PROC)
+      break;
+    if (!(arrPCB[arrProcs[i]].uStatus & PS_Blocked)) {
+      INT16 idx = PqSusBlock.PqGet(arrProcs[i]);
+      arrPCB[idx].uStatus |= PS_Ready;
+      PqSusReady.PqAdd(arrPCB[idx]);
+      MSG msg(ID_Kernel, ANI_SBLK_SRDY, arrPCB[idx].uPid);
+      pTx->SendMsg(ID_ANIM, &msg);
+    }
+  }
+  PqReady.PqImage(arrProcs);
+  uCurProc = PqReady.PqGet();
+  if (uCurProc != NO_PROC) {
+    arrPCB[uCurProc].nQuantum = nQuantum;
+    MSG msg(ID_Kernel, ANI_RDY_RUN, uCurProc);
+    pTx->SendMsg(ID_ANIM, &msg);
+  }
+}
+
+//////////////////////
+// The current process has posted a message which the Kernel has decided
+// cannot be serviced immediatly.  Remove Ready Status and assert Blocked.
+// The Dispatcher will do the Queue movements later.
+//
+void Exec::Block (void)
+{
+  if (uCurProc != NO_PROC) {
+    arrPCB[uCurProc].uStatus &= ~PS_Ready;
+    arrPCB[uCurProc].uStatus |= PS_Blocked;
+    arrPCB[uCurProc].pReply = NULL;
+  }
+}
+
+////////////////
+// Suspend this process - always an operator initiated action.  Find the
+// process and suspend the bugger (can't suspend the running process, only
+// ready or blocked ones).
+// RETURNS: TRUE  .. process suspemded
+//          FALSE .. unknown process or already suspended!
+//
+BOOL Exec::Suspend (UINT16 uTarg)
+{
+  if (uTarg == PqReady.PqGet(uTarg)) {
+    arrPCB[uTarg].uStatus |= PS_Suspended;
+    PqSusReady.PqAdd(arrPCB[uTarg]);
+    MSG msg(ID_Kernel, ANI_RDY_SRDY, uTarg);
+    pTx->SendMsg(ID_ANIM, &msg);
+    return TRUE;
+  }
+  if (uTarg == PqBlocked.PqGet(uTarg)) {
+    arrPCB[uTarg].uStatus |= PS_Suspended;
+    PqSusBlock.PqAdd(arrPCB[uTarg]);
+    MSG msg(ID_Kernel, ANI_BLK_SBLK, uTarg);
+    pTx->SendMsg(ID_ANIM, &msg);
+    return TRUE;
+  }
+  return FALSE;
+}
+
+////////////////
+// Resume a Suspend process - always an operator initiated action.
+// Find the process and move her back to the appropriate queue.
+// RETURNS: TRUE  .. process moved
+//          FALSE .. unknown process or not suspended!
+//
+BOOL Exec::Resume (UINT16 uTarg)
+{
+  if (uTarg == PqSusBlock.PqGet(uTarg)) {
+    arrPCB[uTarg].uStatus &= ~PS_Suspended;
+    PqBlocked.PqAdd(arrPCB[uTarg]);
+    MSG msg(ID_Kernel, ANI_SBLK_BLK, uTarg);
+    pTx->SendMsg(ID_ANIM, &msg);
+    return TRUE;
+  }
+  if (uTarg == PqSusReady.PqGet(uTarg)) {
+    arrPCB[uTarg].uStatus &= ~PS_Suspended;
+    PqReady.PqAdd(arrPCB[uTarg]);
+    MSG msg(ID_Kernel, ANI_SRDY_RDY, uTarg);
+    pTx->SendMsg(ID_ANIM, &msg);
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/////////////////
+// Add the passed message to the reply message queue of process <uProc>
+// (which will cause it to un-block next time the scheduler runs).  In
+// this release of RCOS, the reply queue is limited to one message for
+// simplicity.  If the process was suspended, move it to the Suspended
+// Ready queue.
+//
+// If the unblocking process is free to run and has a higher priority
+// than the current process (if any), of the reason for the unblocking
+// is <KM_Signal> (ie an IPC message), the current process gets pre-empted
+// by unilaterally clobbering its remaining quantum.
+//
+void Exec::PostReply (UINT16 uProc, PMSG pM)
+{
+  if (arrPCB[uProc].uPid != NO_PROC) {
+    arrPCB[uProc].pReply = new MSG(*pM);
+    arrPCB[uProc].uStatus &= ~PS_Blocked;
+    if (arrPCB[uProc].uStatus & PS_Suspended) {
+      if (uProc == PqSusBlock.PqGet(uProc)) {
+        PqSusReady.PqAdd(arrPCB[uProc]);
+        MSG msg(ID_Kernel, ANI_SBLK_SRDY, uProc);
+        pTx->SendMsg(ID_ANIM, &msg);
+      }
+    }
+    else
+      if ((uCurProc != NO_PROC) &&
+         ((arrPCB[uProc].nPriority > arrPCB[uCurProc].nPriority) ||
+          (pM->wMsgType == KM_Signal))) {
+        arrPCB[uCurProc].nQuantum = PCD_PREEMPT;
+        MSG msg(ID_Kernel, ANI_PREEMPT, uProc);
+        pTx->SendMsg(ID_ANIM, &msg);
+      }
+  }
+}
+
+//////////////////////
+// Remove all trace of this process and its memory allocation - including
+// any shared memory blocks.
+// NOTE :: This is VERY incomplete - frinstance, we unilaterally dispose
+// of memory - what if the process is sharing text with another, eh?
+// RETURNS: TRUE  .. process deleted Ok
+//          FALSE .. invalid process ID
+//
+BOOL Exec::Kill (UINT16 uTarg)
+{
+  if (arrPCB[uTarg].uPid != NO_PROC) {
+    MSG msg(ID_Kernel, KM_Close, (UINT16)arrMCB[uTarg].hText);
+    pTx->SendMsg(ID_MMU, &msg);
+    arrMCB[uTarg].hText = (HANDLE)ID_NULL;
+    msg = message(ID_Kernel, KM_Close, arrMCB[uTarg].hStack);
+    pTx->SendMsg(ID_MMU, &msg);
+    arrMCB[uTarg].hStack = (HANDLE)ID_NULL;
+    if (arrPCB[uTarg].pszName) {
+      DELETE_ARRAY arrPCB[uTarg].pszName;
+      arrPCB[uTarg].pszName = NULL;
+    }
+    if (arrPCB[uTarg].pDev) {
+      delete arrPCB[uTarg].pDev;
+      arrPCB[uTarg].pDev = NULL;
+    }
+    UINT16 *pn;
+    while (pn = (UINT16*)arrPCB[uTarg].Share.DblGetHead())
+      SmClose(uTarg, *pn);
+    if (arrPCB[uTarg].pFile)
+      delete arrPCB[uTarg].pFile;
+    arrPCB[uTarg].pFile = NULL;
+    arrPCB[uTarg].uPid = NO_PROC;
+    --uProcCnt;
+    return TRUE;
+  }
+  return FALSE;
+}
+
+//////////////////////
+// Create a new process - Only way to do this is for the current process
+// to fork (are processes like bacteria?), but Process ZERO pulls a trick.
+// It is not a p-code process, but it has stack and text segments allocated
+// to it which we will duplicate for its child.  Before invoking <fork>, it
+// has set the p-code to <execl> and loaded the name of the replacement
+// program onto its stack - so when the new process (Child of Conx) gets
+// the CPU, it's first action is to load itself.  P-code processes that
+// fork will duplicate their stack and text, retaining any handles to shared
+// memory, semiphores and open streams. Note that shared memory blocks must
+// have their usage count increased.
+//
+// RETURNS: PID      Of child created, or
+//          NO_PROC  if process could not be created
+//
+UINT16 Exec::Fork (void)
+{
+  if (uProcCnt < MAX_PROC) {
+    for (INT16 i = 1; i < MAX_PROC; i++)
+      if (arrPCB[i].uPid == NO_PROC)
+        break;
+    arrPCB[i].uStatus = PS_Zombie;
+    MSG msg(ID_Kernel, MMU_Duplicate, arrMCB[uCurProc].hText);
+    pTx->SendMsg(ID_MMU, &msg);
+    if (arrMCB[i].hText = (HANDLE)msg.wParam) {
+      msg = message(ID_Kernel, MMU_Duplicate, arrMCB[uCurProc].hStack);
+      pTx->SendMsg(ID_MMU, &msg);
+      if (0 == (arrMCB[i].hStack = (HANDLE)msg.wParam)) {
+        msg = message(ID_Kernel, KM_Close, arrMCB[i].hText);
+        pTx->SendMsg(ID_MMU, &msg);
+      }
+      else {
+        ++uProcCnt;
+        arrPCB[i].uPid = i;
+        arrPCB[i].uPidp = uCurProc;
+        arrPCB[i].nPriority = DEF_PRIORITY;
+        arrPCB[i].pReply = NULL;
+        arrPCB[i].pFile = NULL;
+        arrPCB[i].uIP = arrPCB[uCurProc].uIP;
+        arrPCB[i].uSP = arrPCB[uCurProc].uSP;
+        arrPCB[i].uBP = arrPCB[uCurProc].uBP;
+        arrPCB[i].uStatus = PS_Created;
+        PqIn.PqAdd(arrPCB[i]);
+        UINT16 *pn = (UINT16*)arrPCB[uCurProc].Share.DblGetHead();
+        while (pn) {
+          ShareMem.QmIncCnt(*pn);
+          arrPCB[i].Share.DblAppend((void*)pn, sizeof(UINT16));
+          pn = (UINT16*)arrPCB[uCurProc].Share.DblGetNext();
+        }
+        msg = message(ID_Kernel, ANI_FORKS, i);
+        pTx->SendMsg(ID_ANIM, &msg);
+        return i;
+      }
+    }
+  }
+  return NO_PROC;
+}
+
+////////////
+// Take a "snapshot" of the current contents for the Animator..
+//
+void Exec::GetQcom (UINT16 uWhich, PMSG_ANIQ pUarr)
+{
+  if (uWhich == 0) {
+    PqIn.PqImage(pUarr->arr[0]);
+    PqReady.PqImage(pUarr->arr[1]);
+    PqBlocked.PqImage(pUarr->arr[2]);
+    PqSusReady.PqImage(pUarr->arr[3]);
+    PqSusBlock.PqImage(pUarr->arr[4]);
+  }
+  else {
+    switch ((uWhich >> 8) & 0xff) {
+      case INPUT_Q: PqIn.PqImage(pUarr->arr[0]); break;
+      case READY_Q: PqReady.PqImage(pUarr->arr[0]); break;
+      case BLOKED_Q: PqBlocked.PqImage(pUarr->arr[0]); break;
+      case SUSRDY_Q: PqSusReady.PqImage(pUarr->arr[0]); break;
+      case SUSBLK_Q: PqSusBlock.PqImage(pUarr->arr[0]); break;
+    }
+    switch (uWhich & 0xff) {
+      case INPUT_Q: PqIn.PqImage(pUarr->arr[1]); break;
+      case READY_Q: PqReady.PqImage(pUarr->arr[1]); break;
+      case BLOKED_Q: PqBlocked.PqImage(pUarr->arr[1]); break;
+      case SUSRDY_Q: PqSusReady.PqImage(pUarr->arr[1]); break;
+      case SUSBLK_Q: PqSusBlock.PqImage(pUarr->arr[1]); break;
+    }
+  }
+}
+
+/////////////
+// Fill in details of current process for animator..
+//
+void Exec::GetPcom (PMSG_ANIP pM)
+{
+  if (uCurProc == NO_PROC)
+    pM->uNr[0] = NO_PROC;
+  else {
+    pM->uNr[0] = arrPCB[uCurProc].uPid;
+    pM->uNr[1] = arrPCB[uCurProc].uPidp;
+    pM->uNr[2] = arrPCB[uCurProc].uBP;
+    pM->uNr[3] = arrPCB[uCurProc].uIP;
+    pM->uNr[4] = arrPCB[uCurProc].uSP;
+    pM->uNr[5] = arrPCB[uCurProc].uTos;
+    pM->uNr[6] = arrPCB[uCurProc].nQuantum;
+    pM->nPri   = arrPCB[uCurProc].nPriority;
+    pM->pszName = arrPCB[uCurProc].pszName;
+    DeCode(arrPCB[uCurProc].lCode, pM->szPCD);
+  }
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+//                 Class Member Functions for the Priority Queue
+//-------------------------------------------------------------------------
+// Create a priority queue for processes.  No limit placed on size, since
+// no more than MAX_PROC can ever be created - so even if they all arrive
+// in this queue at the same time (unlikeley), the total size is limited.
+// Ordered instatntiations will hold entries in descending priority.
+//
+Pque::Pque (BOOL bOrd) : DblList(DESCENDING)
+{
+  bOrdered = bOrd;
+}
+
+Pque::~Pque (void)
+{
+  PQMBR pD = (PQMBR)DblGetHead();
+  while (pD) {
+    DblDelete();
+    pD = (PQMBR)DblGetNext();
+  }
+}
+
+//////////
+// Check for any elements in queue
+// RETURNS: TRUE  .. yes there is
+//          FALSE .. no there 'aint
+//
+BOOL Pque::PqEmpty (void)
+{
+  return ((DblGetHead() == NULL) ? TRUE : FALSE);
+}
+
+///////////
+// Add a PID to this queue.  If the queue is ordered, insert at priority
+// one less than actual, then adjust back to correct.  This ensures that
+// processes at equal priority are served Round-Robin.
+//
+void Pque::PqAdd (PCB& proc)
+{
+  QMBR temp;
+  temp.uPid = proc.uPid;
+  temp.nKey = proc.nPriority - 1;
+  if (!bOrdered)
+    DblAppend((void*)&temp, sizeof(QMBR));
+  else {
+    PQMBR pLoc = (PQMBR)DblInsert((void*)&temp, sizeof(QMBR));
+    pLoc->nKey++;
+  }
+}
+
+/////////////////
+// Remove member from head queue - use with ordered queue to "get" member
+// with highest "key" (normally priority, but could be quantum, whatever..)
+// RETURNS: PID # removed, or
+//          NO_PROC if queue empty
+//
+UINT16 Pque::PqGet (void)
+{
+  PQMBR pD = (PQMBR)DblGetHead();
+  if (pD) {
+    UINT16 uPid = pD->uPid;
+    DblDelete();
+    return uPid;
+  }
+  return NO_PROC;
+}
+
+/////////////////
+// Remove member with passed process ID from queue
+// RETURNS: PID # removed, or
+//          NO_PROC if queue empty
+//
+UINT16 Pque::PqGet (UINT16 uTarg)
+{
+  PQMBR pD = (PQMBR)DblGetHead();
+  while (pD)
+    if (pD->uPid != uTarg)
+      pD = (PQMBR)DblGetNext();
+    else {
+      UINT16 uPid = pD->uPid;
+      DblDelete();
+      return uPid;
+    }
+  return NO_PROC;
+}
+
+//////////////////
+// See if passed PID is in this list
+// RETURNS: TRUE  .. yes it is
+//          FALSE .. no it ain't
+//
+BOOL Pque::PqFind (UINT16 uTarg)
+{
+  PQMBR pD = (PQMBR)DblGetHead();
+  while (pD) {
+    if (pD->uPid == uTarg)
+      return TRUE;
+    pD = (PQMBR)DblGetNext();
+  }
+  return FALSE;
+}
+
+/////////////
+// The passed pointer references an array [MAX_PROC] of UINT. This routine
+// copies the queues PID numbers into the array, setting empty elements to
+// 0xffff (why didn't I just use signed ints in the first place?).
+//
+void Pque::PqImage (UINT16 *p)
+{
+  PQMBR pD = (PQMBR)DblGetHead();
+  for (INT16 i = 0; i < MAX_PROC; i++) {
+    *(p + i) = ((pD) ? pD->uPid : NO_PROC);
+    if (pD)
+      pD = (PQMBR)DblGetNext();
+  }
+}
+
+/////////////////////////////////// eof ////////////////////////////////////
+</PRE>
+</BODY>
+</HTML>

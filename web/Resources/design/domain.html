@@ -1,0 +1,722 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS.java - Domain Analysis
+  </TITLE>
+</HEAD>
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999">
+<TABLE WIDTH="100%">
+  <TR>
+    <TD ALIGN=LEFT>
+      <H4>/ <A HREF="../../resources.html" TARGET="body">Resources</A> /
+      <A HREF="index.html">Design</A> / Domain Analysis</H4>
+    </TD>
+    <TD ALIGN=LEFT WIDTH=25% VALIGN="CENTER">
+      <IMG SRC="../../pics/rightEnd.gif" WIDTH="19" HEIGHT="30"><A HREF="../../index.html" TARGET="_parent"><IMG SRC="../../pics/home.gif" BORDER="0" ALT="RCOS.java Home Page" WIDTH="38" HEIGHT="30"></A><A HREF="overview.html" TARGET="body"><IMG SRC="../../pics/back.gif" BORDER=0 ALT="Structural Overview" WIDTH="38" HEIGHT="30"></A><A HREF="application.html" TARGET="body"><IMG SRC="../../pics/forward.gif" BORDER=0 ALT="Application Analysis" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../pics/leftEnd.gif" ALT="" WIDTH="19" HEIGHT="30"><BR>
+    </TD>
+  </TR>
+</TABLE>
+  RCOS.java is to be an object-oriented (<A HREF="http://java.sun.com/">Java</A>
+  is an OO language), animated operating system used for operating system
+  education.  Relelvant domains include object-oriented operating systems and 
+  other educational operating systems
+<H3>
+  Object-Oriented Operating Systems
+</H3>
+
+<H4>
+  Choices
+</H4>
+
+<BLOCKQUOTE>
+  <A HREF="http://choices.uiuc.edu/">Choices</A> is an object oriented
+  operating system written in C++.  It is considerablly more OO than the
+  original RCOS code and as a project Choices has shown that OO operating
+  systems provide significant software engineering advantages.  A PhD thesis
+  describing the Choices application interface, process management and memory
+  management is available from the Internet (follow the link to Choices above).
+  I have a paper based copy.
+<P>
+  The same thesis concludes that there aren't a great many "truly" OO
+  operating systems.  RCOS falls under the category of kernel based operating
+  system.
+<P>
+  Choices is a complete OO environment.  Even application programs are designed
+  to be OO and make use of OS services by a specialised means.  This is probably
+  beyond the scope of RCOS.java.
+</BLOCKQUOTE>
+
+<H4>
+  8088 Details
+</H4>
+
+<BLOCKQUOTE>
+  <H4>
+    Memory
+  </H4>
+
+    Divided into 8 bit bytes, instructions can also operate on 16 bit words.
+  <P>
+    8088 can address 1Mb of RAM by using 20 bit physical addresses (PCs 
+    reserve addresses greater than 640K for console display and ROM s/w).
+  <P>
+    Uses two 16 bit logical addresses to form the one 20 bit physical
+    address of the form SEGMENT:OFFSET.  Translation is performed by 
+    SEGMENT*16 + OFFSET.  Multiplying by 16 = to add low-order 0.
+  <P>
+    8088 does not support any form of memory management
+
+  <H4>
+    Interrupts
+  </H4>
+
+    First 1K of memory from 00000 to 003FF is used for interrupt vectors.
+    Interrupt vector is a four byte segment:offset address of code to be
+    executed upon receipt of a h/w or s/w interrupt.  1K gives space for
+    256 interrupt vectors.
+
+  <H4>
+    Registers
+  </H4>
+
+    8088 contains 12 16-bit registers, an instruction pointer and a 16-bit 
+    FLAGS register, summarised in following table.
+
+    <TABLE>
+      <TR>
+        <TH>
+          Register
+        </TH>
+        <TH>
+          Use
+        </TH>
+      </TR>
+
+      <TR>
+        <TD>
+          AX
+        </TD>
+        <TD>
+          general purpose
+        </TD>
+      </TR>
+
+      <TR>
+        <TD>
+   	  BX
+        </TD>
+        <TD>
+          general purpose
+        </TD>
+      </TR>
+
+      <TR>
+        <TD>
+   	  CX
+        </TD>
+        <TD>
+          general purpose
+        </TD>
+      </TR>
+
+      <TR>
+        <TD>
+          DX
+        </TD>
+        <TD>
+          general purpose
+        </TD>
+      </TR>
+
+      <TR>
+        <TD>
+          SP  
+        </TD>
+        <TD>
+         stack pointer
+        </TD>
+      </TR>
+
+      <TR>
+        <TD>
+          BP
+        </TD>
+        <TD>
+          base pointer
+        </TD>
+      </TR>
+
+      <TR>
+        <TD>
+          SI
+        </TD>
+        <TD>
+          source index
+        </TD>
+      </TR>
+
+      <TR>
+        <TD>
+          DI
+        </TD>
+        <TD>
+          destination index
+        </TD>
+      </TR>
+
+      <TR>
+        <TD>
+          CS
+        </TD>
+        <TD>
+          code segment 
+        </TD>
+      </TR>
+
+      <TR>
+        <TD>
+          DS
+        </TD>
+        <TD>
+          data segment
+        </TD>
+      </TR>
+
+
+      <TR>
+        <TD>
+          ES
+        </TD>
+        <TD>
+          extra segment
+        </TD>
+      </TR>
+
+      <TR>
+        <TD>
+          SS  
+        </TD>
+        <TD>
+          stack segment
+        </TD>
+      </TR>
+
+      <TR>
+        <TD>
+          IP
+        </TD>
+        <TD>
+          instruction pointer
+        </TD>
+      </TR>
+
+      <TR>
+        <TD>
+          FLAGS
+        </TD>
+        <TD>
+          flags word
+        </TD>
+      </TR>
+   </TABLE>
+
+   CS:IP - segment:offset address of the next instruction<BR>
+   DS:?? - offset for data<BR>
+   SS:SP - stack address<BR>
+   SS:BP - point to the stack frame on the run-time stack<BR>
+</BLOCKQUOTE>
+
+<H3>
+  Educational Operating Systems
+</H3>
+
+<BLOCKQUOTE>
+  <H4>
+    Problems students have with Operating Systems
+  </H4>
+
+  The content of an OS course is often very theoretical.  Most of the problems
+  in operating systems is taking general, theoretical discussion and extending
+  it and seeing it in a real life situation.  <I>A realistic project is 
+  especially important in undergraduate operating systems courses, where many
+  of the concepts are best taught, we believe, by example and experimentation.
+  <B>Nachos paper</B></I> Problems that students have 
+  include
+  <H4> Big picture or base knowledge </H4>
+  <UL>
+    <LI> what actually is an OS
+    <LI> what are the components of an OS
+    <LI> how are they structured and what are the advantages of the different
+         methods
+    <LI> what is an interrupt
+    <LI> four classes of interrupts and examples
+    <LI> interrupt handling
+    <LI> instruction execution cycle
+    <LI> the interaction between user, user program (relationship between
+         programming language and machine language), system call,
+         operating system and hardware 
+  </ul>
+    <H4> Processes </H4>
+  <ul>
+    <LI> what is a process, program
+    <LI> difference between thread of execution (thread) and resource 
+         ownership (process)
+    <LI> difference between a process switch and a context switch
+    <LI> process scheduling algorithms 
+    <LI> important characteristics for process scheduling (throughput, turnaround time..)
+    <LI> priorities and starvation
+  </ul>  
+    <H4> Concurrency </H4>
+  <ul>
+    <LI> what is a critical sections, 
+    <LI> why do we need mutual exclusion, 
+    <LI> what is a race condition, 
+    <LI> what is deadlock
+    <LI> how do semaphores, shared memory, monitors, message passing etc work
+    <LI> the difference between create and open of semaphores/shared memory
+  </ul>
+    <H4> Memory Management </H4>
+  <ul>
+    <LI> how various MM algorithms actually work, their data structures etc
+    <LI> characteristics of MM algorithms
+    <LI> resident set versus working set
+    <LI> difference between page placement and page replacement
+    <LI> the close ties between hardware and OS in address translation and
+         which part is done where
+    <LI> use of caches, where and when
+    <LI> difference between paging and segementation, where would you
+         use them, the advantages of both
+  </ul>
+    <H4> Disk and File management </H4>
+  <ul>
+    <LI> disk scheduling how and why do it
+    <LI> the concept of a layered file system, which responsibilities
+         go where, what are those responsibilities
+    <LI> data structures used to track block allocation to files, files
+         to directories and free blocks
+  </UL>
+</BLOCKQUOTE>
+
+<H3>
+  RCOS
+</H3>
+
+<BLOCKQUOTE>
+  Most obvious candidate, the experience of designing (at least observing
+  the design) and using RCOS will aid development of RCOS.java.  Problems
+  with RCOS that need fixing
+  <UL>
+    <LI> design that is not truly OO, needs some redesign to be more portable
+         and also to work within restrictions (no pointers, multiple 
+         inheritance) and advantages (inherent portability means no longer any
+         need for platform abstraction layer) of Java
+    <LI> amount and level of comments throughout source code below what is
+         needed for CQU students
+    <LI> the simulation is less than clear in areas including
+         <UL>
+           <LI> interrupts   
+           <LI> instruction execution cycle 
+           <LI> separation between h/w and OS, students still having
+                difficulty knowing which code belongs where 
+        </UL>
+    <LI> portability of the code is questionable, won't run on some machines
+         (MS-DOS), won't run mouse etc, troubles compiling
+    <LI> lack of documentation that explains structure
+  </UL>
+</BLOCKQUOTE>
+
+<H3>
+  <A HREF="http://http.cs.berkeley.edu/~tea/nachos/">Nachos</A>
+</H3>
+
+<BLOCKQUOTE>
+  <BLOCKQUOTE>
+    Wayne A. Christopher, Steven J. Procter, Thomas E. Anderson, <B>
+    The Nachos Instructional Operating System</B>, Proceedings Usenix
+    Winter Technical Conferences, San Diego, January 1993, pp 25-29
+  </BLOCKQUOTE>
+
+
+  Challenges in building Nachos
+  <UL>
+    <LI> tradeoff between simplicity and realism
+    <LI> balance between time students spend reading code versus adding
+         features to existing code versus learning new concepts
+  </UL>
+  <P>
+  Nachos assignments used to demonstrate
+  <UL>
+    <LI> computer system design,
+    <LI> concurrency and synchronization,
+    <LI> caching and locality,
+    <LI> tradeoff between simplicity and performance,
+    <LI> building reliability from unreliable components
+    <LI> dynamic scheduling
+    <LI> the power of a level of translation
+    <LI> layering
+    <LI> distributed computing
+  </UL> 
+  <P>
+  Aim is to provide the simplest implementation for each sub-system to 
+  provide a working base.  The students are asked to add functionality and
+  improve performance.  Nachos is about 2500 lines of code, half of which
+  are devoted to interface descriptions and comments.
+  <P>
+  Nachos features
+  <UL>
+    <LI> UNIX based.
+    <LI> use programs are C programs compiled for the MIPS R2/3000 integer
+         instructions
+    <LI> can simulate a network of workstations with separate Nachos processes
+         communicating
+    <LI> deterministic simulation via a simulated time that is incremented
+         whenever user program executes or low-level OS routines are called.
+         Interrupt handlers are then invoked when the simulated time reaches the 
+         appropriate point
+    <LI> simulation is randomizable
+    <LI> h/w simulation routines are hidden from the reas of nachos via 
+         machine-dependent interface layer
+    <LI> implemented in a subset of C++
+    <LI> assignments take a quantitative approach to operating system design
+  </UL>
+  <P>
+  Nachos threads normally non-preemptive but has a command line option
+  that causes threads to be time-sliced at "random".
+
+  <H4>
+    Nachos CRC
+  </H4>
+     
+    Please note the information contained on the following pages is obtained
+    directly from the Nachos source code.
+   <P>
+  
+   <TABLE>
+     <TR>
+       <TH>
+         Devices
+       </TH>
+       <TH>
+         Interrupts
+       </TH>
+       <TH>
+         CPU and machine
+       </TH>
+     </TR>
+
+     <TR>
+       <TD VALIGN=TOP>
+         <UL>
+           <LI> <A HREF="crcnachos/console.html">Console</A>
+           <LI> <A HREF="crcnachos/disk.html">Disk</A>
+         </UL>
+       </TD>
+       <TD VALIGN=TOP>
+         <UL>
+           <LI> <A HREF="crcnachos/interrupt.html">Interrupt</A>
+           <LI> <A HREF="crcnachos/pendinginterrupt.html">PendingInterrupt</A>
+         </UL>
+       </TD>
+       <TD VALIGN=TOP>
+         <UL>
+           <LI> <A HREF="crcnachos/instruction.html">Instruction</A>
+           <LI> <A HREF="crcnachos/machine.html">Machine</A>
+           <LI> <A HREF="crcnachos/timer.html">Timer</A>
+           <LI> <A HREF="crcnachos/translationentry.html">TranslationEntry</A>
+         </UL>
+       </TD>
+     </TR>
+
+     <TR>
+       <TH>
+         Network
+       </TH>
+       <TH>
+         File System
+       </TH>
+       <TH>
+         Threads
+       </TH>
+     </TR>
+
+     <TR>
+       <TD VALIGN=TOP>
+         <UL>
+           <LI> <A HREF="crcnachos/packetheader.html">PacketHeader</A>
+           <LI> <A HREF="crcnachos/network.html">Network</A>
+           <LI> <A HREF="crcnachos/mailheader.html">MailHeader</A>
+           <LI> <A HREF="crcnachos/mail.html">Mail</A>
+           <LI> <A HREF="crcnachos/mailbox.html">MailBox</A>
+           <LI> <A HREF="crcnachos/postoffice.html">PostOffice</A>
+         </UL>
+       </TD>
+       <TD VALIGN=TOP>
+         <UL>
+           <LI> <A HREF="crcnachos/directoryentry.html">DirectoryEntry</A>
+           <LI> <A HREF="crcnachos/directory.html">Directory</A>
+           <LI> <A HREF="crcnachos/fileheader.html">FileHeader</A>
+           <LI> <A HREF="crcnachos/filesystem.html">FileSystem</A>
+           <LI> <A HREF="crcnachos/openfile.html">OpenFile</A>
+           <LI> <A HREF="crcnachos/synchdisk.html">SynchDisk</A>
+         </UL>
+       </TD>
+       <TD VALIGN=TOP>
+         <UL>
+           <LI> <A HREF="crcnachos/scheduler.html">Scheduler</A>
+           <LI> <A HREF="crcnachos/thread.html">Thread</A>
+         </UL>
+       </TD>
+     </TR>
+
+     <TR>
+       <TH>
+         Synchronization
+       </TH>
+       <TH>
+         User Programs
+       </TH>
+       <TH>
+         Miscelanous
+       </TH>
+     </TR>
+
+     <TR>
+       <TD VALIGN=TOP>
+         <UL>
+           <LI> <A HREF="crcnachos/semaphore.html">Semaphore</A>
+           <LI> <A HREF="crcnachos/lock.html">Lock</A>
+           <LI> <A HREF="crcnachos/condition.html">Condition</A>
+           <LI> <A HREF="crcnachos/synchlist.html">SynchList</A>
+         </UL>
+       </TD>
+       <TD VALIGN=TOP>
+         <UL>
+           <LI> <A HREF="crcnachos/addrspace.html">AddrSpace</A>
+         </UL>
+       </TD>
+       <TD VALIGN=TOP>
+         <UL>
+           <LI> <A HREF="crcnachos/statistics.html">Statistics</A>
+           <LI> <A HREF="crcnachos/listelement.html">ListElement</A>
+           <LI> <A HREF="crcnachos/list.html">List</A>
+           <LI> <A HREF="crcnachos/bitmap.html">BitMap</A>
+         </UL>
+       </TD>
+     </TR>
+   </TABLE>
+
+</BLOCKQUOTE>
+
+<H3>
+  Tunix
+</H3>
+
+<BLOCKQUOTE>
+    <BLOCKQUOTE>
+      Robert Switzer, <B>Operating Systems: A Practical Approach</B>,
+      Prentice-Hall, 1993
+    </BLOCKQUOTE>
+
+    Operating system in C but with architecture similar to RCOS including
+    <UL>
+      <LI> kernel responsible for 
+        <UL>
+          <LI> message passing
+          <LI> catching page faults and sending messages to MM
+          <LI> catching interrupts from peripheral devices and sending messages
+               to PM (process manager)
+          <LI> catch interrupts from system clock and send messages to PM
+          <LI> carry out task switches on the h/w level with appropriate CPU 
+               instructions
+          <LI> build and destroy page tables according to directions from MM
+        </UL>
+      <LI> file manager
+      <LI> drivers
+      <LI> memory manager
+      <LI> inter-process communication manager (messages etc)
+    </UL>
+  <P>
+    All Tunix processes (MM, FM, IPCM etc) are implemented as independent 
+    UNIX processes.
+  <P>
+    <B>You can't execute user programs with TUNIX</B> not directly anyway.
+    You can by linking a UNIX C program with some stubs that uses messages
+    to communicate.
+  <P>
+  
+  <H4>
+     Tunix Threads
+  </H4>
+
+  Following table summarises Tunix threads.
+
+  <TABLE>
+    <TR>
+      <TH>
+        Function
+      </TH>
+      <TH>
+        Purpose
+      </TH>
+    </TR>
+
+    <TR>
+      <TD>
+        <TT> thrd_init() </TT>   
+      </TD>
+      <TD>
+        Called only once and must be called before other thread routines. 
+        Initializes the thread system and saves the context.  Used for when
+        a thread_end is reached, control passes back to instruction just
+        after thread_init.
+      </TD>
+    </TR>
+
+    <TR>
+      <TD>
+        <TT> thrd_start() </TT>   
+      </TD>
+      <TD>
+        Start new thread (and generate new context)
+      </TD>
+    </TR>
+
+    <TR>
+      <TD>
+        <TT> thrd_end() </TT>   
+      </TD>
+      <TD>
+        terminates previously started thread and destroy corresponding
+        context, switch to any non-suspended threads, otherwise restart
+        context saved by thread_init 
+      </TD>
+    </TR>
+
+    <TR>
+      <TD>
+        <TT> thrd_sleep( EVENT ev ) </TT>   
+      </TD>
+      <TD>
+        suspend thread until EVENT occurs, if other threads active switch
+        to them otherwise start context saved by thrd_init 
+      </TD>
+    </TR>
+
+    <TR>
+      <TD>
+        <TT> thrd_wakeup( EVENT ev ) </TT>   
+      </TD>
+      <TD>
+        All threads that are suspended on EVENT are waken up.
+      </TD>
+    </TR>
+  </TABLE>
+
+  <H4>
+    File System
+  </H4>
+ 
+  Implements a very UNIX like file system with superblocks, inodes etc
+  Modules in Tunix file system include
+  <UL>
+    <LI> fm - main module
+    <LI> knows who the client processes are and keeps information about them
+         in particular the process file table
+    <LI> sys - manages the table of all open files, mediates between proc
+         and the more basic routines in inode, buffer, etc
+    <LI> dir - implements the concepts directory and path
+    <LI> super - implements super blocks, disk inodes, free list for linear blocks
+    <LI> inode - implements data abstraction inode
+    <LI> buffer 
+    <LI> kcall - implements system requests to kernel
+    <LI> devcall - implements communication with device drivers
+    <LI> raw - implements direct data transfers between device driver and user
+    <LI> comm - implements receive and reply
+    <LI> chan - implements communication channels
+    <LI> thread - implements the threads
+  </UL> 
+
+  <H4>
+    Memory Management
+  </H4>
+
+  Uses the abstraction region (also used by Unix).  Each process owns several
+  regions
+  <UL>
+    <LI> TEXT (code)
+    <LI> DATA_W (initialized data)
+    <LI> BSS (uninitialized data, blank static storage)
+    <LI> DATA_R (read-only data)
+    <LI> STACK
+  </UL>
+  Tunix further divides regions into pages and assumes that it has h/w paging
+  support.
+  <P>
+  Modules in Tunix MM include
+  <UL>
+    <LI> MM - manages communication with the other processes
+    <LI> pregion - maintains a process region table for all processes
+    <LI> region - implements the concept region
+    <LI> frame - i mplementes the abstract data type frame
+    <LI> swap - implements the actual swapping in and out
+    <LI> fmcall - manages communication with FM
+    <LI> kcall - manages system requests to the kernel
+    <LI> memmap - administers the heap for the arrays in region
+    <LI> devcall - manages communication with the driver of the swap device
+  </UL> 
+
+  <H4>
+    Process Management
+  </H4>
+
+  Implements management system between RCOS and UNIX, closer to UNIX.
+  <P>
+  Modules include
+  <UL>
+    <LI> pm - manages communication between PM and other processes
+    <LI> proc - administers the process table, implements system calls
+    <LI> callout - implements the callout table for the system call alarm
+    <LI> fmcall - manages the communication with FM
+    <LI> mmcall
+    <LI> ipccall
+    <LI> kcall
+  </UL>
+
+  <H4>
+    IPC
+  </H4>
+
+  Implement semaphores, messages and shared memory.
+
+
+  
+
+</BLOCKQUOTE>
+
+<H3>
+  OSP
+</H3>
+
+  <H3>
+    Tunis
+  </H3>
+    <BLOCKQUOTE>
+      Holt, R.  <B>Concurrent Euclid, the UNIX System and TUNIS</B>,
+      Addison-Wesley, 1983
+    </BLOCKQUOTE>
+
+  <H3>
+    Minix
+  </H3>
+
+  <H3>
+    Xinu
+  </H3>
+
+  <H3>
+    PRMS
+  </H3>
+
+</BLOCKQUOTE>
+</BODY>
+</HTML>

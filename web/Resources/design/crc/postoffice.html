@@ -1,0 +1,85 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    PostOffice CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>PostOffice</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      PostOffice
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Class derived from MessageHandler??, responsible for delivering all
+      messages to components within the system.  All components contain
+      a pointer to the PostOffice (this should be part of the MessageHandler
+      class) ?? so PostOffice is a data member of the class its derived from??
+      Or should the PostOffice be a global variable??
+      <P>
+      All components must register with PostOffice with unique string ID.
+      All messages sent by components are delivered first to the PostOffice
+      who then delivers them to appropriate recipent.
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      <A HREF="messagehandler.html">MessageHandler</A> <BR>
+      <A HREF="message.html">Message</A> <BR>
+      
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+  <UL>
+    <P>
+      <LI> <B>Register( String id, MessageHandler theDestination )</B><BR>
+           - add a MessageHandler to the PostOffice with the appropriate
+             id
+           - called by the actual MessageHandler
+      <LI> <B>ReceiveMessage( Message theMessage )</B><BR>
+           - accept the message and place it onto the message Q
+      <LI> <B>SendMessage( Message theMessage )</B><BR>
+      <LI> ....
+  </UL>
+
+</BODY>
+</HTML>

@@ -1,0 +1,88 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    SynchList CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>SynchList</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      SynchList
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+ The following class defines a "synchronized list" -- a list for which:
+ these constraints hold:
+ <OL>
+    <LI> Threads trying to remove an item from a list will
+      wait until the list has an element on it.
+    <LI> One thread at a time can access list data structures
+ </OL>
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+<PRE>
+class SynchList {
+  public:
+    SynchList();                // initialize a synchronized list
+    ~SynchList();               // de-allocate a synchronized list
+
+    void Append(void *item);    // append item to the end of the list,
+                                // and wake up any thread waiting in remove
+    void *Remove();             // remove the first item from the front of
+                                // the list, waiting if the list is empty
+                                // apply function to every item in the list
+    void Mapcar(VoidFunctionPtr func);
+
+  private:
+    List *list;                 // the unsynchronized list
+    Lock *lock;                 // enforce mutual exclusive access to the list
+    Condition *listEmpty;       // wait in Remove if the list is empty
+};                 
+</PRE>
+
+</BODY>
+</HTML>

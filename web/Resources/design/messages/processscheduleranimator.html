@@ -1,0 +1,118 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS.java - ProcessSchedulerAnimator Messages
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999">
+<TABLE WIDTH="100%">
+  <TR>
+    <TD ALIGN=LEFT>
+      <H4>/ <A HREF="../../../resources.html" TARGET="body">Resources</A> /
+      <A HREF="../index.html">Design</A> / <A HREF="index.html">Messages</A>
+      / ProcessSchedulerAnimator </H4>
+    </TD>
+    <TD ALIGN=LEFT WIDTH=25% VALIGN="CENTER">
+      <IMG SRC="../../../pics/rightEnd.gif" WIDTH="19" HEIGHT="30"><A HREF="../../../index.html" TARGET="_parent"><IMG SRC="../../../pics/home.gif" BORDER="0" ALT="RCOS.java Home Page" WIDTH="38" HEIGHT="30"></A><A HREF="processmanageranimator.html" TARGET="body"><IMG SRC="../../../pics/back.gif" BORDER=0 ALT="ProcessManagerAnimator" WIDTH="38" HEIGHT="30"></A><A HREF="ProgramManagerAnimator.html" TARGET="body"><IMG SRC="../../../pics/forward.gif" BORDER=0 ALT="ProgramManagerAnimator" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../../pics/leftEnd.gif" ALT="" WIDTH="19" HEIGHT="30"><BR>
+    </TD>
+  </TR>
+</TABLE>
+This currently has fairly limited interaction by a user.  They can modify
+the Quantum and the speed at which the animation runs.  It also allows
+a person to click on the CPU to view its status.
+<p>
+By taking all messages from all the various components of the OS it
+illustrates what the current processes are doing.
+<H3>Sent by ProcessSchedulerAnimator</H3>
+  <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+    <TR>
+      <TH>
+        To
+      </TH>
+      <TH>
+        Name
+      </TH>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Kernel<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Quantum<BR>
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        CPUAnimator<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        CPUShow<BR>
+      </TD>
+    </TR>
+  </TABLE>
+<BR>
+<H3>
+  Processed by ProcessSchedulerAnimator
+</H3>
+  <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=0>
+    <TR>
+      <TH>
+        From
+      </TH>
+      <TH>
+        Name
+      </TH>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        ProgramManager<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        KillProcess<BR>
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        ProcessScheduler<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        GetTerminal, ProcessSwitch<BR>
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        Kernel<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        ProcessFinished, RunningToBlocked, RunningToReady<BR>
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        IPC<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        BlockedToReady<BR>
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        SoftwareTerminal<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        BlockedToReady<BR>
+      </TD>
+    </TR>
+    <TR>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        TerminalManager<BR>
+      </TD>
+      <TD ALIGN=LEFT VALIGN=TOP>
+        ProcessToTerminalAllocation<BR>
+      </TD>
+    </TR>
+  </TABLE>
+</FONT>       
+</BODY>
+</HTML>

@@ -1,0 +1,64 @@
+<HTML>
+<HEAD>
+  <TITLE>
+dbllist.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+dbllist.hh
+  </H1>
+<PRE>
+//***********************************************************************
+//  MODULE : DblList - Class definition 				*
+//  AUTHOR : Ron Chernich						*
+//  PURPOSE: Maintains Double linked Lists with pointer to data.	*
+//  HISTORY:								*
+//   10-JAN-93	First (MSC/C++ 7.00) version				*
+//***********************************************************************
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h> 
+
+#include "rcos.hh"
+
+#ifndef DBLLIST
+
+  #define ASCENDING   1
+  #define DESCENDING -1
+
+  typedef struct dbltag {
+    struct   dbltag *prev;
+    struct   dbltag *next;
+    unsigned nBytes;
+    void     *data;
+  } DBLT, *PDBLT;
+
+  class DblList {
+    INT16 order;
+    PDBLT pBase;
+    PDBLT pCrnt;
+    PDBLT pTemp;
+    PDBLT create (void*, UINT16);
+  public:
+    DblList (INT16 = ASCENDING);
+    ~DblList (void);
+    void DblDelete (void);		// dispose of <crnt> data object
+    void DblDrop (void);		// purge entire list contents
+    void *DblGetHead (void); 		// return ptr to first data object
+    void *DblGetTail (void); 		// return ptr to last data object
+    void *DblGetNext (void); 		// return ptr to next, or NULL
+    void *DblGetPrev (void); 		// return ptr to previous, or NULL
+    void *DblAppend (void*, UINT16);	// add passed object at end
+    void *DblInsert (void*, UINT16);	// add passed obj in priority order
+  };
+
+
+  #define DBLLIST
+#endif
+
+//--------------------------------- EOF ------------------------------------
+</PRE>
+</BODY>
+</HTML>

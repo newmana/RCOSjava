@@ -1,0 +1,102 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class App
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>App</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+       App
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   And this is an "Application".  There can be only one of these and it
+   has the system timer ISR, the base Window and the Message switching
+   centre for window action traffic.
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+  class App : private DblList {
+    struct msgstruct {
+      INT16  dest;              // who it's from
+      UINT16 message;           // what it is
+      UINT16 wParam;            // optional 16 bit param
+      UINT32 lParam;            // and 32 bit param (usually a pointer)
+    };
+    BOOL bGfxOpen;
+    msgstruct *pm;
+    void AppRun (void);
+  public:
+    AppWindow *pMain;
+    App (char* = NULL);
+    ~App ();
+    void AppTitle   (char *st)
+      { pMain->Title(st); };
+    BOOL AppDestroy (UINT16 n, UINT16 id)
+      { return pMain->Destroy(n, id); };
+    BOOL AppCreate  (UINT16 n, UINT16 id, char *st,
+                     int p1, int p2, int p3 = 0, int p4 = 0)
+      { return pMain->Create(n, id, st, p1, p2, p3, p4); };
+    BOOL AppGetMsg  (UINT16&, UINT16&, UINT32&);
+    BOOL AppRunning (void)
+      { return bGfxOpen; };
+    BOOL AppChildWin (UINT16 md, char *st,
+                      INT16 x1, INT16 y1, INT16 x2, INT16 y2,
+                      UINT16 n1 = _Green, UINT16 n2 = _BrightWhite)
+      { return pMain->Open(md, st, x1, y1, x2, y2, n1, n2); };
+    void AppCloseWin (void)
+      { pMain->Close(); };
+    BOOL AppCBstate (UINT16 uId, BOOL &bCB)
+      { return pMain->CBstate(uId, bCB); };
+  };
+      </PRE> 
+
+</BODY>
+</HTML>

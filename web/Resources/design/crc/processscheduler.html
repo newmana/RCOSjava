@@ -1,0 +1,86 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    ProcessScheduler CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>ProcessScheduler</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      ProcessScheduler
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+       Responsible for managing process creation, termination and scheduling.
+            Handles messages such as fork process, exec process, kill process, schedule
+            new process, block process etc. Maintains all disk queues and includes
+            methods such as runningToReady, runningToBlocked,
+            getNextRunningProcess. 
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      <A HREF="process.html">Process</A> <BR>
+      <A HREF="processcontext.html">ProcessContext</A> ???<BR>
+      <A HREF="messagehandler.html">MessageHandler</A><BR>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+  <UL>
+    <P>
+       <LI> <B>runningToReady( ) </B> 
+       <LI> <B>runningToReady( ) </B> 
+       <LI> <B>runningToBlocked() </B>
+       <LI> <B>runningToZombie() </B>
+       <LI> <B>blockedToReady( int processId) </B>
+       <LI> <B>suspendedToReady( int processId ) </B> 
+       <LI> <B>suspendedToBlocked( int processId ) </B> 
+       <LI> <B>forkProcess( int parentProcessId )</B>
+       <LI> <B>execProcess( int parentProcessId )</B>
+       <LI> <B>addToReady( int processId )</B>
+       <LI> <B>getNextRunningProcess() </B>
+       <LI> <B>readyToRunning( int processId ) </B>
+       <LI> <B>killProcess( int processId )</B>
+  </UL>
+
+</BODY>
+</HTML>

@@ -1,0 +1,90 @@
+<HTML>
+<HEAD>
+  <TITLE>
+ttyld.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+ttyld.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : LnDrv.hh - Line Discipline Driver for terminal devices	  *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: This class used by RCOS processes which open a terminal	  *
+//	     device in buffered mode [Bach, ch 10 - see CPP file].  Unix  *
+//	     does this in the kernel through numerous lists - being able  *
+//	     to do this with a class really simplifies matters. 	  *
+//  HISTORY:                                                              *
+//    20-APR-93	First version						  *
+//    29-OCT-93 User break char changed to Control+C                      *
+//    20-APR-94 Memory leak through Cblock destructor fixed		  *
+//*************************************************************************
+
+#ifndef _RCOS_LNDRV_
+
+  #include "rcos.hh"
+  #include "dbllist.hh"
+  #include "tty.hh"
+
+  #define CBLOCK_LEN	8		// input block segment length
+  #define BREAK_CHAR	3		// break detect on Ctrl+C
+
+
+  /////////////
+  // Like Unix, we hold edited input in Cblocks - but we have a reliable (?)
+  // double linked list class to base this structure on. First, the struct..
+  //
+  typedef struct cblock {
+    INT16 nStart, nEnd;
+    char  cBuf[CBLOCK_LEN];
+  } CBLOCK, *PCBLOCK;
+  //
+  // now define the class based on DblList to provide functionality..
+  //
+  class Cblock : private DblList {
+  public:
+    Cblock (void) { }
+   ~Cblock (void)         { DblDrop();   }
+    void    CbDrop (void) { DblDelete(); }
+    PCBLOCK CbHead (void) { return (PCBLOCK)DblGetHead(); }
+    PCBLOCK CbTail (void) { return (PCBLOCK)DblGetTail(); }
+    PCBLOCK CbNext (void) { return (PCBLOCK)DblGetNext(); }
+    PCBLOCK CbNew (void);
+  };
+
+
+  ///////////////////
+  // This class processes user input commands from a terminal running
+  // in full duplex mode.  It performs simple input editing by destructive
+  // backspace, echoing the user's input and passing on the owner processes
+  // output.  Edited input is held in a chain of CBLOCK structs (like Unix)
+  // from which delimited blocks can be retrieved to satisfy data requests.
+  //
+  // This (initial) version performs line (CR delimited) buffering only
+  // and does not expand TAB characters.
+  //
+  class LnDrv : public port {
+    Cblock  Cblk;
+    UINT16  uPid, uTerm;		// who makes 'em and who eats 'em
+    INT16   nBlkReq, nChReq;		// outstanding request counts.
+    char    cDelim;			// Data block delimiter char
+    BOOL    bBreakOn;			// control break detection
+    void LnReq (void);			// process User Process request
+    void LnEdit (char); 		// process data from terminal
+  public:
+    LnDrv (UINT16, UINT16, Knl*);	// constructor
+    ~LnDrv ();				// destructor
+    void RxPort (PMSG); 		// Receive port body for virtual
+  };
+
+
+  #define _RCOS_LNDRV_
+
+#endif
+
+/********************************** eof **********************************/
+</PRE>
+</BODY>
+</HTML>

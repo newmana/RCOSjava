@@ -1,0 +1,91 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS.java - Class Definition - Disk Drive
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+<TABLE WIDTH="100%">
+  <TR>
+    <TD ALIGN=LEFT>
+      <H4>/ <A HREF="../../../resources.html" TARGET="body">Resources</A> /
+      <A HREF="../index.html">Design</A> / <A HREF="../class.html">Class Definitions</A> /
+      DiskDrive</H4>
+    </TD>
+    <TD ALIGN=LEFT WIDTH=25% VALIGN="CENTER">
+      <IMG SRC="../../../pics/rightEnd.gif" WIDTH="19" HEIGHT="30"><A HREF="../../../index.html" TARGET="_parent"><IMG SRC="../../../pics/home.gif" BORDER="0" ALT="RCOS.java Home Page" WIDTH="38" HEIGHT="30"></A><A HREF="instruction.html" TARGET="body"><IMG SRC="../../../pics/back.gif" BORDER=0 ALT="Instruction" WIDTH="38" HEIGHT="30"></A><A HREF="transition.html" TARGET="body"><IMG SRC="../../../pics/forward.gif" BORDER=0 ALT="Transitions" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../../pics/leftEnd.gif" ALT="" WIDTH="19" HEIGHT="30"><BR>
+    </TD>
+  </TR>
+</TABLE>
+<H1>
+  <TT>DiskDrive</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Class:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Disk
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      DiskDrive
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      Simulates a physical disk drive and follows these steps
+      <PRE>
+  DiskScheduler makes a read/write request
+  if the disk can't satisfy this request then
+    CPU.generateInterrupt( disk_access_error, NOW )
+  else
+    compute how long it will take to perform request
+    CPU.generateInterrupt( type_of_transfer_complete, TIME ) 
+      </PRE>
+     Should possibly add the presence of a disk buffer provided by
+     the disk along the lines of Nachos' track buffer
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      <A HREF="disktransfer.html">DiskTransfer</A> - contain information about
+          whether the transfer is a read or write and to where<BR>
+      <A HREF="interrupt.html">Interrupt</A> - raised after disk has computed
+          how long it will take to finish the request<BR>
+      <A HREF="disktype.html">DiskType</A> - parameters about disk
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+  <UL>
+    <LI> DiskDrive( DiskType theDiskType ) - initialise disk with various
+         parameters
+    <LI> DiskRequest( DiskTransfer theTransfer ) - receive the type of
+         transfer to perform
+    <LI> int time = ComputeTime( DiskTransfer theTransfer ) - calculate how
+         long to satisfy request
+  </UL>
+
+</BODY>
+</HTML>

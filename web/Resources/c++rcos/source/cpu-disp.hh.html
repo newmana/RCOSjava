@@ -1,0 +1,150 @@
+<HTML>
+<HEAD>
+  <TITLE>
+cpu-disp.hh
+  </TITLE>
+</HEAD>
+<BODY>
+  <H1>
+cpu-disp.hh
+  </H1>
+<PRE>
+//*************************************************************************
+//  MODULE : CPU Display header for the RCOS operating system simulator   *
+//  AUTHOR : Ron Chernich                                                 *
+//  PURPOSE: Define function protos and any constants                     *
+//  HISTORY:                                                              *
+//   26-MAR-93  Cut from Test #6 code file.                               *
+//   29-APR-93	Bug animation points added				  *
+//   25-AUG-94  Isolated funcs colected into a class based on WinPainter  *
+//*************************************************************************
+
+
+#ifndef _CPU_DISP_
+
+  #include "rcos.hh"
+  #include "message.hh"
+  #include "gfx.hh"
+  #include "obj.hh"
+  #include "display.h"
+
+
+  ///////////////
+  // Give unique identifiers to the screen objects (used for animation)
+  //
+  #define INPUT_Q	1	// the Input waiting queue
+  #define READY_Q	2	// the Ready process queue
+  #define SUSRDY_Q	3	// the Suspended Ready process queue
+  #define BLOKED_Q	4	// the Blocked process queue
+  #define SUSBLK_Q	5	// the Suspended Blocked process queue
+  #define CPROC_BOX	6	// the Process Descriptor Block display
+
+
+  /////////////////////
+  // Process display "box" sizes and locations
+  //
+  #define  MAX_SLOTS	MAX_PROC	// nur slots in each queue
+  #define  CPROC_ITEM	7		// nur items in CPU box
+  #define  SLOT_DX	20		// width of a slot box
+  #define  SLOT_DY	20		// height of a slot box
+  #define  INPUT_QX	40		// absolute location, everything
+  #define  INPUT_QY	22		//	 else is relative to here.
+  #define  CPROC_DX	196		// width of PDB box
+  #define  READY_QX	INPUT_QX
+  #define  READY_QY	(INPUT_QY+64)
+  #define  SUSRDY_QX	READY_QX
+  #define  SUSRDY_QY	(READY_QY+200)
+  #define  BLOKED_QX	(GFX_Xmin-READY_QX-(SLOT_DX*MAX_SLOTS))
+  #define  BLOKED_QY	READY_QY
+  #define  SUSBLK_QX	BLOKED_QX
+  #define  SUSBLK_QY	SUSRDY_QY
+  #define  CPROC_DDY	SLOT_DY
+  #define  CPROC_DY	(CPROC_DDY*CPROC_ITEM)
+  #define  CPROC_X	((GFX_Xmin-CPROC_DX)/2)
+  #define  CPROC_Y	(READY_QY+(SUSRDY_QY-READY_QY-CPROC_DY+SLOT_DY)/2)
+  #define  CPROC_X2	(CPROC_X+86)
+
+
+  /////////////////
+  // animation path termination points.  The L/R suffixes refer to
+  // left and right positions for animation turning/termination points.
+  // All points (PT_) refer to the center of the animation bug.
+  //
+  #define BUG_RAD	4		  // radius of thing wot runs around
+  #define PT_BUG_XMIN	(READY_QX/2)
+  #define PT_BUG_XMAX	(GFX_Xmin-PT_BUG_XMIN)
+  #define PT_BUG_YMIN	(READY_QY-(BUG_RAD*3))
+  #define PT_INPUT_LX	(INPUT_QX-(BUG_RAD+2))
+  #define PT_INPUT_LY	(INPUT_QY+(SLOT_DY/2))
+  #define PT_READY_LX	(READY_QX-(BUG_RAD+2))
+  #define PT_READY_LY	(READY_QY+(SLOT_DY/2))
+  #define PT_READY_RX	(READY_QX+(SLOT_DX*MAX_SLOTS)+BUG_RAD+2)
+  #define PT_READY_RY	PT_READY_LY
+  #define PT_CPROC_X	(CPROC_X+(CPROC_DX/2))
+  #define PT_CPROC_Y	(CPROC_Y-(BUG_RAD+2))
+  #define PT_BLOKED_LX  (BLOKED_QX-(BUG_RAD+2))
+  #define PT_BLOKED_LY  PT_READY_LY
+  #define PT_BLOKED_RX  (BLOKED_QX+(SLOT_DX*MAX_SLOTS)+BUG_RAD+2)
+  #define PT_BLOKED_RY  PT_BLOKED_LY
+  #define PT_SUSRDY_LX	(SUSRDY_QX-(BUG_RAD+2))
+  #define PT_SUSRDY_LY	(SUSRDY_QY+(SLOT_DY/2))
+  #define PT_SUSRDY_RX	PT_READY_RX
+  #define PT_SUSRDY_RY	PT_SUSRDY_LY
+  #define PT_SUSBLK_LX	(SUSBLK_QX-(BUG_RAD+2))
+  #define PT_SUSBLK_LY	(SUSBLK_QY+(SLOT_DY/2))
+  #define PT_SUSBLK_RX	PT_BLOKED_RX
+  #define PT_SUSBLK_RY	PT_SUSBLK_LY
+
+
+  //////////////////////////////
+  // Colors used for process display
+  //
+  #define  SLOT_TXT   _BrightWhite
+  #define  PROC_BG    _Blue
+  #define  SLOT_BG    _White
+  #define  BUG_BLOT   _BrightWhite
+  #define  BUG_TAIL   _LightRed
+  #define  PROC_TXT   _Black
+
+
+  #if defined(MSC700) || defined(SYM60)
+    #define TEXT_OFS  2 	    // shift factor to opsition text ..
+    #define SLOT_BDR  _Black
+  #elif defined(BC31)
+    #define TEXT_OFS  1 	    // .. under the process queues.
+    #define SLOT_BDR  _BrightWhite
+  #endif
+
+  #ifdef UNIX
+	#define TEXT_OFS 1
+	#define SLOT_BDR _Black
+  #endif
+
+
+  ////////////////
+  // A class to perform all Window Painting..
+  //
+  class CpuAnim : public WinPainter {
+    BOOL bVis[8];	  // intuition gives 9 possible undirected paths
+    void DrawQueue (INT16, INT16, char*);
+    void MoveBug (point, point, BOOL);
+    void DispQ (UINT16*, INT16, INT16, INT16 = -SLOT_DX);
+  public:
+    CpuAnim (void);
+   ~CpuAnim (void) { }
+    void Paint (void);
+    void Anim (INT16, INT16, BOOL = FALSE);
+
+    void PaintBox (PMSG_ANIP);
+    void RefreshQ (UINT16, UINT16*);
+    void PaintAllQ (MSG_ANIQ&);
+  };
+
+  #define _CPU_DISP_
+
+#endif
+
+///////////////////////////////// EOF //////////////////////////////////////
+</PRE>
+</BODY>
+</HTML>

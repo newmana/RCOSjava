@@ -1,0 +1,98 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    RCOS C++ CRC for class tty
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../index.html">
+      C++ RCOS Home 
+    </A>
+  |
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  RCOS C++ CRC for class <TT>tty</TT>
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+       tty
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+   Like all good RCOS Device Drivers, tty is based on the abstract
+   class  - meaning tty's constructor must invoke port's constructor
+   before it (itself) runs AND we must overload port's pure virtual
+   function "RxPort" for receiving messages from the switcher (Kernel).
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+    </TD>
+  </TR>
+</TABLE>
+
+      <H3>Responsibilities:</H3>
+
+      <PRE>
+ class tty : public port {
+    char  *pVmem;                   // array of chars for "Video RAM"
+    UINT16 uDest, uCnt;             // who wants 'em and how many they want
+    UINT16 nBgnd, nFgnd;            // Background and Foreground colors
+    INT16  nEscape;                 // > 0 while processing ANSI sequence
+    INT16  n1, n2, ddy;             // Esc seq numerics and top pixel offset
+    INT16  xcurr, ycurr;            // current location for output
+    INT16  nRows, nCols;            // size of diasplay from x/y pixels
+    INT16  x, y, dx, dy;            // origin and size of display area
+    INT16  nMode, idx, jdx;         // current mode and index into video RAM
+    INT16  AnsiDriver (char);       // interperate ANSI Escape sequences
+    void   Reset (BOOL);            // Clear screen and input buffer
+    void   Scroll (void);           // do conventional VDU scroll
+    void   PutKey (char);           // process a user input key
+    void   GetKey (PMSG);           // process a user request for data
+    void   TtyCursor (UINT16);      // hide/display cursor
+    void   Display (char*, INT16);  // display characters
+    Rng    RngBuf;                  // Buffer chars from the "keyboard"
+  public:
+    tty (UINT16, UINT16, Knl*, rect&, UINT16, UINT16);
+    ~tty (void);
+    void   RxPort  (PMSG);          // supply virtual member of "port"
+    INT16  SetMode (INT16);         // change mode, returning old mode
+    void   ReFresh (BOOL = TRUE);   // force a full refresh of the display
+    inline INT16 GetMode (void)     // return current terminal mode
+      { return nMode; }
+  };
+
+      </PRE> 
+
+</BODY>
+</HTML>

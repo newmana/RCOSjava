@@ -1,0 +1,112 @@
+<HTML>
+<HEAD>
+  <TITLE>
+    PendingInterrupt CRC
+  </TITLE>
+</HEAD>
+
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
+
+<P ALIGN=CENTER>
+  [
+    <A HREF="../../index.html">
+      RCOS.java Home 
+    </A>
+  |
+    <A HREF="../../../index.html">
+      RCOS Home 
+    </A>
+  |
+    <A HREF="../../../../../david-jones.html">
+      David's Home 
+    </A>
+  ]
+    
+<H1>
+  <TT>PendingInterrupt</TT> CRC
+</H1>
+
+<TABLE>
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Name:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      PendingInterrupt
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Comment:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+      In order to emulate the hardware, we need to keep track of all
+      interrupts the hardware devices would cause, and when they
+      are supposed to occur.
+<P>
+      This module also keeps track of simulated time.  Time advances
+      only when the following occur:
+      <UL>
+        <LI>      interrupts are re-enabled
+        <LI>      a user instruction is executed
+        <LI>      there is nothing in the ready queue
+      </UL>
+<P>
+      As a result, unlike real hardware, interrupts (and thus time-slice
+      context switches) cannot occur anywhere in the code where interrupts
+      are enabled, but rather only at those places in the code where
+      simulated time advances (so that it becomes time to invoke an
+      interrupt in the hardware simulation).                
+    </TD>
+  </TR>
+
+  <TR>
+    <TD VALIGN=TOP>
+      <H3>Collaborators:</H3>
+    </TD>
+    <TD VALIGN=TOP>
+<PRE>
+// Interrupts can be disabled (IntOff) or enabled (IntOn)
+enum IntStatus { IntOff, IntOn };
+
+// Nachos can be running kernel code (SystemMode), user code (UserMode),
+// or there can be no runnable thread, because the ready list
+// is empty (IdleMode).
+enum MachineStatus {IdleMode, SystemMode, UserMode};
+
+// IntType records which hardware device generated an interrupt.
+// In Nachos, we support a hardware timer device, a disk, a console
+// display and keyboard, and a network.
+enum IntType { TimerInt, DiskInt, ConsoleWriteInt, ConsoleReadInt,
+                                NetworkSendInt, NetworkRecvInt};
+
+// The following class defines an interrupt that is scheduled
+// to occur in the future.  The internal data structures are
+// left public to make it simpler to manipulate. 
+<PRE>
+    </TD>
+  </TR>
+</TABLE>
+
+  <H3>
+      Responsibilities:
+  </H3>
+  
+<PRE>
+class PendingInterrupt {
+  public:
+    PendingInterrupt(VoidFunctionPtr func, int param, int time, IntType kind);
+                                // initialize an interrupt that will
+                                // occur in the future
+
+    VoidFunctionPtr handler;    // The function (in the hardware device
+                                // emulator) to call when the interrupt occurs
+    int arg;                    // The argument to the function.
+    int when;                   // When the interrupt is supposed to fire
+    IntType type;               // for debugging
+};                 
+</PRE>
+
+</BODY>
+</HTML>
