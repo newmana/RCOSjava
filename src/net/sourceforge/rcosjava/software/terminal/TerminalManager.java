@@ -390,7 +390,7 @@ import net.sourceforge.rcosjava.software.util.FIFOQueue;
    }
    catch (Exception e)
    {
-      System.out.println("Error processing message: "+e);
+      System.err.println("Error processing message: "+e);
       e.printStackTrace();
     }
   }
@@ -403,7 +403,7 @@ import net.sourceforge.rcosjava.software.util.FIFOQueue;
    }
    catch (Exception e)
    {
-      System.out.println("Error processing message: "+e);
+      System.err.println("Error processing message: "+e);
       e.printStackTrace();
     }
   }

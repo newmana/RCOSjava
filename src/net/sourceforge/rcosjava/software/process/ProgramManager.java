@@ -209,7 +209,7 @@ import net.sourceforge.rcosjava.software.util.*;
     }
     catch (Exception e)
     {
-      System.out.println("Error processing: "+e.getMessage());
+      System.err.println("Error processing: "+e.getMessage());
       e.printStackTrace();
     }
   }
@@ -222,7 +222,7 @@ import net.sourceforge.rcosjava.software.util.*;
     }
     catch (Exception e)
     {
-      System.out.println("Error processing: "+e.getMessage());
+      System.err.println("Error processing: "+e.getMessage());
       e.printStackTrace();
     }
   }
