@@ -8,6 +8,7 @@ import org.rcosjava.software.animator.cpu.CPUAnimator;
 import org.rcosjava.software.animator.disk.DiskSchedulerAnimator;
 import org.rcosjava.software.animator.filesystem.FileSystemAnimator;
 import org.rcosjava.software.animator.ipc.IPCManagerAnimator;
+import org.rcosjava.software.animator.memory.MemoryManagerAnimator;
 import org.rcosjava.software.animator.multimedia.MultimediaAnimator;
 import org.rcosjava.software.animator.process.ProcessManagerAnimator;
 import org.rcosjava.software.animator.process.ProcessSchedulerAnimator;
@@ -90,6 +91,15 @@ public class AnimatorMessageAdapter extends MessageAdapter
    * @param theElement Description of Parameter
    */
   public void doMessage(IPCManagerAnimator theElement)
+  {
+  }
+
+  /**
+   * Description of the Method
+   *
+   * @param theElement Description of Parameter
+   */
+  public void doMessage(MemoryManagerAnimator theElement)
   {
   }
 
