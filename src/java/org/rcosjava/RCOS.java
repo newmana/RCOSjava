@@ -57,8 +57,7 @@ import org.apache.log4j.*;
  * case sensitive even in Windows 95/NT. </DD>
  * <DD> 13/10/98 Started converting to Java 1.1.</DD> </DT>
  * <P>
- * @author Andrew Newman
- * @created 21st January 1996
+ * @author Andrew Newman (created 21st January 1996)
  * @version 0.5 $Date$
  */
 public class RCOS extends javax.swing.JApplet implements Runnable
