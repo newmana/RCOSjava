@@ -10,17 +10,43 @@ package net.sourceforge.rcosjava.software.memory.paged;
  */
 public class PageTableEntry
 {
+  /**
+   * The type of memory (current 1 and 2 for stack and program).
+   */
   private byte type;
+
+  /**
+   * The process id that uses the memory.
+   */
   private byte pid;
+
+  /**
+   * The array of indexed pages that are being used.
+   */
   private short[] pages;
+
+  /**
+   * The number of total pages (really the length of the pages array).
+   */
   private short noPages;
 
+  /**
+   * Initializes the page table.  Type and pid are set to non-valid values.
+   */
   public PageTableEntry()
   {
     type = -1;
     pid = -1;
   }
 
+  /**
+   * Create a new page table entry.
+   *
+   * @param newPID the process to own this group of pages.
+   * @param newType the type of memory owned by the particular user.
+   * @param newPages the array of indices to the memory blocks.
+   * @param newNoPage the number of pages allocated.
+   */
   public PageTableEntry(byte newPID, byte newType, short[] newPages,
     short newNoPages)
   {
@@ -30,21 +56,33 @@ public class PageTableEntry
     noPages = newNoPages;
   }
 
+  /**
+   * @return the type (currently 1 or 2).
+   */
   public byte getType()
   {
     return type;
   }
 
+  /**
+   * @return the process id.
+   */
   public byte getPID()
   {
     return pid;
   }
 
+  /**
+   * @return the index of pages.
+   */
   public short[] getPages()
   {
     return pages;
   }
 
+  /**
+   * @return the number of pages allocated.
+   */
   public short getTotalNumberOfPages()
   {
     return noPages;
