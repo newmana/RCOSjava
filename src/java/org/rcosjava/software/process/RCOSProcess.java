@@ -47,7 +47,7 @@ public class RCOSProcess implements Serializable, Comparable
   /**
    * Size of process' code (in bytes)
    */
-  private int fileSize;
+  private long fileSize;
 
   /**
    * Number of stack pages.
@@ -133,7 +133,7 @@ public class RCOSProcess implements Serializable, Comparable
    * @param newCodePages the number of code pages (based on file size) for this
    *      process.
    */
-  public RCOSProcess(int newPID, String newFileName, int newFileSize,
+  public RCOSProcess(int newPID, String newFileName, long newFileSize,
       int newStackPages, int newCodePages)
   {
     this(newPID, newFileName);
@@ -247,7 +247,7 @@ public class RCOSProcess implements Serializable, Comparable
    *
    * @return The FileSize value
    */
-  public int getFileSize()
+  public long getFileSize()
   {
     return fileSize;
   }
@@ -344,7 +344,7 @@ public class RCOSProcess implements Serializable, Comparable
   public int hashCode()
   {
     return getPID() ^ getPriority().hashCode() ^ getFileName().hashCode() ^
-        getFileSize() ^ getState().hashCode() ^ getCPUTicks();
+        (int) getFileSize() ^ getState().hashCode() ^ getCPUTicks();
   }
 
   /**

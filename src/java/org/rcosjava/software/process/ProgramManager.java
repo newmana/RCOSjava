@@ -136,7 +136,7 @@ public class ProgramManager extends OSMessageHandler
    * @param fileName file name to read.
    * @return the file size. This method will return -1 if no file was selected.
    */
-  public int getFileSize(String fileName)
+  public long getFileSize(String fileName)
   {
     return theFileClient.statExeFile(fileName);
   }
@@ -164,10 +164,8 @@ public class ProgramManager extends OSMessageHandler
     // Create a new message body to send to Process Scheduler.
     // Contains file information and code
     open();
-
     Memory fileContents = getFileContents(fileName);
-    int fileSize = getFileSize(fileName);
-
+    long fileSize = getFileSize(fileName);
     close();
 
     //Send the message with the given cotents.

@@ -196,7 +196,7 @@ public class ProcessScheduler extends OSMessageHandler
     // Write code to allocated bytes - should check for successful
     // allocation really.
     newMemoryRequest = new MemoryRequest(newPID, MemoryManager.CODE_SEGMENT,
-        newTmpProcess.getFileSize(), messageBody.getMemory());
+        (int) newTmpProcess.getFileSize(), messageBody.getMemory());
     WriteBytes wbMsg = new WriteBytes(this, newMemoryRequest);
     sendMessage(wbMsg);
 
