@@ -1,168 +1,216 @@
-<HTML>
-<HEAD>
-  <TITLE>
-    RCOSjava - Class Definitions
-  </TITLE>
-</HEAD>
-
-<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999">
-<TABLE WIDTH="100%">
-  <TR>
-    <TD ALIGN=LEFT>
-      <H4>/ <A HREF="../../resources.html" TARGET="body">Resources</A> /
-      <A HREF="index.html">Design</A> / Class Definitions</H4>
-    </TD>
-    <TD ALIGN=LEFT WIDTH=25% VALIGN="CENTER">
-      <IMG SRC="../../pics/rightEnd.gif" WIDTH="19" HEIGHT="30"><A HREF="../../index.html" TARGET="_parent"><IMG SRC="../../pics/home.gif" BORDER="0" ALT="RCOS.java Home Page" WIDTH="38" HEIGHT="30"></A><A HREF="overview.html" TARGET="body"><IMG SRC="../../pics/back.gif" BORDER=0 ALT="Structure Overview" WIDTH="38" HEIGHT="30"></A><A HREF="transition.html" TARGET="body"><IMG SRC="../../pics/forward.gif" BORDER=0 ALT="Transitions" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../pics/leftEnd.gif" ALT="" WIDTH="19" HEIGHT="30"><BR>
-    </TD>
-  </TR>
-</TABLE>
-    The following is a list of the main classes, grouped by the packages
-    in which they appear:
-    <H4>Hardware</h4>
-    <UL>
-      <LI>CPU
-        <UL>
-          <LI> <A HREF="crc/cpu.html">CPU</A>
-          <LI> <A HREF="crc/context.html">Context</A>
-          <LI> <A HREF="crc/instruction.html">Instruction</A>
-        </UL>
-      <LI>Disk
-        <UL>
-          <LI> <A HREF="crc/disk.html">Disk</A> 
-        </UL>
-      <LI>Memory
-        <UL>
-          <LI>MainMemory
-          <LI><A HREF="crc/ram.html">Memory</A>
-        </UL>
-      <LI><!--A HREF="crc/"-->NetworkInterface<!--/A--> - To be designed.
-      <LI><!--A HREF="crc/"-->Terminal<!--/A-->
-        <UL>
-          <LI> <!--A HREF="crc/tmp.html"-->HardwareTerminal<!--/A-->
-          <LI> <!--A HREF="crc/tmp.html"-->HardwareTerminalScreen<!--/A-->
-        </UL>
-    </UL>
-    <P>
-    <h4>Operating System</h4>
-      <UL>
-        <LI>Disk
-          <UL>
-            <LI> <A HREF="crc/diskScheduler.html">Disk Scheduler</A> 
-            <LI> <A HREF="crc/diskManager.html">Disk Manager</A> 
-          </UL>
-        <LI> <A HREF="crc/fileSystem.html">FileSystem</A>
-          <UL>
-            <LI> <A HREF="crc/fidTableData.html">FID Table Data</A>
-            <LI> <A HREF="crc/fileSystem.html">File System</A>
-            <LI> <A HREF="crc/fileSystemManagement.html">File System Management</A>
-            <LI> <A HREF="crc/requestTableEntry.html">Request Table Entry</A>
-          </UL>
-        <LI>Interrupt
-          <UL>
-            <LI> <!--A HREF="crc/"-->Interrupt Handler</A>
-          </UL>
-      <LI>IPC
-          <UL>
-            <LI> <!--A HREF="crc/memoryblock.html"-->IPC<!--/A-->
-            <LI> <!--A HREF="crc/memoryblock.html"-->Semaphore<!--/A-->
-            <LI> <!--A HREF="crc/memoryblock.html"-->Shrm<!--/A-->
-          </UL>
-      <LI>Kernel
-          <UL>
-            <LI> <A HREF="crc/kernel.html">Kernel</A>
-          </UL>
-      <LI>Memory</A>
-          <UL>
-            <LI> <A HREF="crc/memoryManagement.html">Memory Management</A>
-            <LI> <A HREF="crc/memoryManager.html">Memory Manager</A>
-          </UL>
-      <LI>MessageSystem
-          <UL>
-            <LI> <A HREF="crc/messagehandler.html">MessageSystem</A><BR>
-            All the components of the operating system will be based on
-            this class.
-            <LI> <A HREF="crc/animatorMessageHandler.html">AnimatorMessageHandler</A>
-            <LI> <A HREF="crc/animatorOffice.html">AnimatorOffice</A>
-            <LI> <A HREF="crc/message.html">Message</A>
-            <LI> <A HREF="crc/messageData.html">MessageData</A>
-            <LI> <A HREF="crc/postOffice.html">PostOffice</A>
-            <LI> <A HREF="crc/tmp.html">TerminalAllocationMessageBody</A>
-            <LI> <A HREF="crc/tmp.html">TerminalMessage</A>
-          </UL>
-      <LI>Process
-          <UL>
-            <LI> <A HREF="crc/processScheduler.html">ProcessScheduler</A>
-            <LI> <A HREF="crc/programManager.html">ProgramManager</A>
-            <LI> <A HREF="crc/rcosProcess.html">RCOSProcess</A>
-          </UL>
-      <LI>Terminal
-          <UL>
-            <LI> <A HREF="crc/softwareTermainl.html">SoftwareTerminal</A>
-            <LI> <A HREF="crc/terminalManager.html">TerminalManager</A>
-          </UL>
-      </UL>
-      <P>
-      <h4>Animation</h4>
-      <UL>
-      <LI> <!--A HREF="crc/"-->About<!--/A-->
-      <LI> <!--A HREF="crc/"-->ButtonFilter<!--/A-->
-      <LI> <!--A HREF="crc/"-->CPUAnimator<!--/A-->
-      <LI> <!--A HREF="crc/"-->CPUFrame<!--/A-->
-      <LI> <!--A HREF="crc/"-->DiskSchedulerAnimator<!--/A-->
-      <LI> <!--A HREF="crc/"-->FileSystemAnimator<!--/A-->
-      <LI> <!--A HREF="crc/"-->GraphicButton<!--/A-->
-      <LI> <!--A HREF="crc/"-->GreyOutImage<!--/A-->
-      <LI> <!--A HREF="crc/"-->Help<!--/A-->
-      <LI> <!--A HREF="crc/"-->HighlightFilter<!--/A-->
-      <LI> <!--A HREF="crc/"-->HrefButtonArea<!--/A-->
-      <LI> <!--A HREF="crc/"-->ImageMapArea<!--/A-->
-      <LI> <!--A HREF="crc/"-->IPCManagerAnimator<!--/A-->
-      <LI> <!--A HREF="crc/"-->IPCManagerFrame<!--/A-->
-      <LI> <!--A HREF="crc/"-->MemoryGraphic<!--/A-->
-      <LI> <!--A HREF="crc/"-->MTGOS<!--/A-->
-      <UL>
-        <LI> <!--A HREF="crc/"-->Chain<!--/A-->
-        <LI> <!--A HREF="crc/"-->GraphicsEngine<!--/A-->
-        <LI> <!--A HREF="crc/"-->MTGO<!--/A-->
-      </UL>
-      <LI> <!--A HREF="crc/"-->MultimediaTourAnimator<!--/A-->
-      <LI> <!--A HREF="crc/"-->NewLabel<!--/A--> 
-      <LI> <!--A HREF="crc/"-->Overview<!--/A-->
-      <LI> <!--A HREF="crc/"-->Positions<!--/A-->
-      <UL>
-        <LI> <!--A HREF="crc/"-->Movement<!--/A-->
-        <LI> <!--A HREF="crc/"-->Positions<!--/A-->
-      </UL>
-      <LI> <!--A HREF="crc/"-->ProcessManagerAnimator<!--/A-->
-      <LI> <!--A HREF="crc/"-->ProcessSchedulerAnimator<!--/A-->
-      <LI> <!--A HREF="crc/"-->ProcessManagerFrame<!--/A--> 
-      <LI> <!--A HREF="crc/"-->ProcessSchedulerFrame<!--/A-->
-      <LI> <!--A HREF="crc/"-->ProgramManagerFrame<!--/A-->
-      <LI> <!--A HREF="crc/"-->ProgramManagerAnimatorThreaded<!--/A-->
-      <LI> <!--A HREF="crc/"-->ProgramManagerAnimator<!--/A-->
-      <LI> <!--A HREF="crc/"-->RCOSBox<!--/A-->
-      <LI> <!--A HREF="crc/"-->RCOSList<!--/A-->
-      <LI> <!--A HREF="crc/"-->RCOSRectangle<!--/A-->
-      <LI> <!--A HREF="crc/"-->RCOSWindow<!--/A-->
-      <LI> <!--A HREF="crc/"-->StartProgram<!--/A-->
-      <LI> <!--A HREF="crc/"-->TerminalManagerFrame<!--/A-->
-      <LI> <!--A HREF="crc/"-->TerminalManagerAnimator<!--/A-->
-      </UL>
-      <P>
-      <h4>Support Classes</h4>
-      <UL>
-      <LI> <A HREF="crc/priorityqueue.html">FIFOQueue</A>
-      <LI> <A HREF="crc/priorityqueue.html">FileClient</A>
-      <LI> <A HREF="crc/priorityqueue.html">FileServer</A>
-      <LI> <A HREF="crc/priorityqueue.html">IndexedList</A>
-      <LI> <A HREF="crc/priorityqueue.html">LIFOQueue</A>
-      <LI> <A HREF="crc/priorityqueue.html">LinkedList</A>
-      <LI> <A HREF="crc/priorityqueue.html">PriorityQueue</A>
-      <LI> <A HREF="crc/priorityqueue.html">ProcessQueue</A>
-      <LI> <A HREF="crc/priorityqueue.html">QueueClass</A>
-      <LI> <A HREF="crc/tmp.html">SemaphoreQueue</A>
-      <LI> <A HREF="crc/tmp.html">TerminalQueue</A>
-      </UL>
-</BODY>
-</HTML>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>RCOSjava - Class Definitions</title>
+</head>
+ <body text="#eeeeee" bgcolor="#000000" link="#ffff00" vlink="#999999">
+ 
+<table width="100%">
+   <tbody>
+    <tr>
+     <td align="left">       
+      <h4>/ <a href="../../resources.html" target="body">Resources</a> / 
+     <a href="index.html">Design</a> / Class Definitions</h4>
+     </td>
+     <td align="left" width="25%" valign="CENTER">       <img src="../../pics/rightEnd.gif" width="19" height="30">
+      <a href="../../index.html" target="_parent"><img src="../../pics/home.gif" border="0" alt="RCOS.java Home Page" width="38" height="30">
+      </a><a href="overview.html" target="body"><img src="../../pics/back.gif" border="0" alt="Structure Overview" width="38" height="30">
+      </a><a href="transition.html" target="body"><img src="../../pics/forward.gif" border="0" alt="Transitions" width="38" height="30">
+      </a><img src="../../pics/leftEnd.gif" alt="" width="19" height="30">
+      <br>
+     </td>
+   </tr>
+ 
+  </tbody>
+</table>
+     The following is a list of the main classes, grouped by the packages 
+    in which they appear:     
+<h4>Hardware</h4>
+     
+<ul>
+       <li>CPU         
+    <ul>
+           <li> <a href="crc/cpu.html">CPU</a>           </li>
+      <li> <a href="crc/context.html">Context</a>           </li>
+      <li> <a href="crc/instruction.html">Instruction</a>         </li>
+    </ul>
+       </li>
+  <li>Disk         
+    <ul>
+           <li> <a href="crc/disk.html">Disk</a>          </li>
+    </ul>
+       </li>
+  <li>Memory         
+    <ul>
+           <li>Main Memory           </li>
+      <li><a href="crc/ram.html">Memory</a>         </li>
+    </ul>
+       </li>
+  <li><!--A HREF="crc/"-->NetworkInterface<!--/A--> - To be designed.   
+   </li>
+  <li><!--A HREF="crc/"-->Terminal<!--/A-->         
+    <ul>
+           <li> <!--A HREF="crc/tmp.html"-->Hardware Terminal<!--/A-->  
+        </li>
+      <li> <!--A HREF="crc/tmp.html"-->Hardware Terminal Screen<!--/A--> 
+       </li>
+    </ul>
+     </li>
+</ul>
+     
+<p>     </p>
+<h4>Operating System</h4>
+       
+<ul>
+         <li>Disk           
+    <ul>
+             <li> <a href="crc/diskScheduler.html">Disk Scheduler</a>   
+          </li>
+      <li> <a href="crc/diskManager.html">Disk Manager</a>            </li>
+    </ul>
+         </li>
+  <li> <a href="crc/fileSystem.html">File System</a>           
+    <ul>
+             <li> <a href="crc/fidTableData.html">FID Table Data</a>    
+        </li>
+      <li> <a href="crc/fileSystem.html">File System</a>             </li>
+      <li> <a href="crc/fileSystemManagement.html">File System Management</a>
+             </li>
+      <li> <a href="crc/requestTableEntry.html">Request Table Entry</a> 
+         </li>
+    </ul>
+         </li>
+  <li>Interrupt           
+    <ul>
+             <li> <!--A HREF="crc/"-->Interrupt Handler           </li>
+    </ul>
+       </li>
+  <li>IPC           
+    <ul>
+             <li> <!--A HREF="crc/memoryblock.html"-->IPC<!--/A-->      
+      </li>
+      <li> <!--A HREF="crc/memoryblock.html"-->Semaphore<!--/A-->       
+     </li>
+      <li> <!--A HREF="crc/memoryblock.html"-->Shrm<!--/A-->           </li>
+    </ul>
+       </li>
+  <li>Kernel           
+    <ul>
+             <li> <a href="crc/kernel.html">Kernel</a>           </li>
+    </ul>
+       </li>
+  <li>Memory           
+    <ul>
+             <li> <a href="crc/memoryManagement.html">Memory Management</a>
+             </li>
+      <li> <a href="crc/memoryManager.html">Memory Manager</a>          
+      </li>
+    </ul>
+       </li>
+  <li>MessageSystem           
+    <ul>
+             <li> <a href="crc/messagehandler.html">Message System</a><br>
+             All the components of the operating system will be based on 
+           this class.             </li>
+      <li> <a href="crc/animatorMessageHandler.html">Animator Message Handler</a>
+             </li>
+      <li> <a href="crc/animatorOffice.html">Animator Office</a>        
+    </li>
+      <li> <a href="crc/message.html">Message</a>             </li>
+      <li> <a href="crc/messageData.html">Message Data</a>             </li>
+      <li> <a href="crc/postOffice.html">PostOffice</a>             </li>
+      <li> <a href="crc/tmp.html">Terminal Allocation Message Body</a>  
+          </li>
+      <li> <a href="crc/tmp.html">Terminal Message</a>           </li>
+    </ul>
+       </li>
+  <li>Process           
+    <ul>
+             <li> <a href="crc/processScheduler.html">Process Scheduler</a>
+             </li>
+      <li> <a href="crc/programManager.html">Program Manager</a>        
+    </li>
+      <li> <a href="crc/rcosProcess.html">RCOS Process</a>           </li>
+    </ul>
+       </li>
+  <li>Terminal           
+    <ul>
+             <li> <a href="crc/softwareTermainl.html">Software Terminal</a>
+             </li>
+      <li> <a href="crc/terminalManager.html">Terminal Manager</a>      
+    </li>
+    </ul>
+       </li>
+</ul>
+       
+<p>       </p>
+<h4>Animation</h4>
+       
+<ul>
+       <li> <!--A HREF="crc/"-->About<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->Button Filter<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->CPU Animator<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->CPU Frame<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->Disk Scheduler Animator<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->File System Animator<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->Graphic Button<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->Grey Out Image<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->Help<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->Highlight Filter<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->Href Button Area<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->Image Map Area<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->IPC Manager Animator<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->IPC Manager Frame<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->Memory Graphic<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->MTGOS<!--/A-->       
+    <ul>
+         <li> <!--A HREF="crc/"-->Chain<!--/A-->         </li>
+      <li> <!--A HREF="crc/"-->Graphics Engine<!--/A-->         </li>
+      <li> <!--A HREF="crc/"-->MTGO<!--/A-->       </li>
+    </ul>
+       </li>
+  <li> <!--A HREF="crc/"-->Multimedia Tour Animator<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->New Label<!--/A-->        </li>
+  <li> <!--A HREF="crc/"-->Overview<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->Positions<!--/A-->       
+    <ul>
+         <li> <!--A HREF="crc/"-->Movement<!--/A-->         </li>
+      <li> <!--A HREF="crc/"-->Positions<!--/A-->       </li>
+    </ul>
+       </li>
+  <li> <!--A HREF="crc/"-->Process Manager Animator<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->Process Scheduler Animator<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->Process Manager Frame<!--/A-->        </li>
+  <li> <!--A HREF="crc/"-->Process Scheduler Frame<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->Program Manager Frame<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->Program Manager Animator Threaded<!--/A-->   
+   </li>
+  <li> <!--A HREF="crc/"-->Program Manager Animator<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->RCOS Box<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->RCOS List<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->RCOS Rectangle<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->RCOS Window<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->Start Program<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->Terminal Manager Frame<!--/A-->       </li>
+  <li> <!--A HREF="crc/"-->Terminal Manager Animator<!--/A-->       </li>
+</ul>
+       
+<p>       </p>
+<h4>Support Classes</h4>
+       
+<ul>
+       <li> <a href="crc/priorityqueue.html">FIFO Queue</a>       </li>
+  <li> <a href="crc/priorityqueue.html">File Client</a>       </li>
+  <li> <a href="crc/priorityqueue.html">File Server</a>       </li>
+  <li> <a href="crc/priorityqueue.html">Indexed List</a>       </li>
+  <li> <a href="crc/priorityqueue.html">LIFO Queue</a>       </li>
+  <li> <a href="crc/priorityqueue.html">Linked List</a>       </li>
+  <li> <a href="crc/priorityqueue.html">Priority Queue</a>       </li>
+  <li> <a href="crc/priorityqueue.html">Process Queue</a>       </li>
+  <li> <a href="crc/priorityqueue.html">Queue Class</a>       </li>
+  <li> <a href="crc/tmp.html">Semaphore Queue</a>       </li>
+  <li> <a href="crc/tmp.html">Terminal Queue</a>       </li>
+</ul>
+ 
+</body>
+</html>
