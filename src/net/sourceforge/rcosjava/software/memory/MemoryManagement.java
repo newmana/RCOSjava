@@ -1,7 +1,5 @@
 package net.sourceforge.rcosjava.software.memory;
 
-import java.util.Hashtable;
-import net.sourceforge.rcosjava.software.memory.MemoryReturn;
 import net.sourceforge.rcosjava.hardware.memory.Memory;
 
 /**
@@ -60,4 +58,3 @@ public interface MemoryManagement
   public void writeBytes(int pid, byte type, int size, int offset,
     Memory memory);
 }
-
