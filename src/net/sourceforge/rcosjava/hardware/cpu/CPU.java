@@ -199,16 +199,19 @@ public class CPU
       {
         System.err.println("IO Exception while executing code: " +
           e.getMessage());
+        e.printStackTrace();
       }
       catch (java.lang.NullPointerException e2)
       {
         System.err.println("Null Pointer while executing code: " +
           e2.getMessage());
+        e2.printStackTrace();
       }
       catch (java.lang.Exception e3)
       {
         System.err.println("Exception while executing code: " +
           e3.getMessage());
+        e3.printStackTrace();
       }
     }
     //Check again to see if we came to the end of the program during
