@@ -1,7 +1,13 @@
 int global;
 
+/**
+ * Tests if/else/elseif for >, ==, !=, <
+ **/
 void main()
 {
+  int local;
+  int local2;
+
   global = 1;
 
   printf("Global variable test\n");
@@ -11,25 +17,45 @@ void main()
     printf("Global greater than 0\n");
     
   }
-
-  if ((global == 0))
+  else
   {
-    printf("Global equal to 0\n");
+    printf("Global less than or equal to 0\n");
   }
 
   if ((global == 1))
   {
     printf("Global equal to 1\n");
   }
-
-  if ((global < 1))
+  else
   {
-    printf("Global less than 1\n");
+    printf("Not equal to 1\n");
   }
 
   if ((global < 2))
   {
     printf("Global less than 2\n");
   }
-}
+  else
+  {
+    printf("Global greater than or equal to 2\n");
+  }
 
+  local = 1;
+  global = 2;
+  local2 = 123;
+
+  if ((global == 1))
+  {
+    if ((local != 2))
+    {
+      printf("Something went wrong\n");
+    }
+  }
+  if ((global == 2))
+  {  
+    if ((local == 1))
+    {
+      printf("Global is 2 and local is 1\n");
+    }
+  }
+}
