@@ -1,6 +1,6 @@
 package org.rcosjava.software.animator;
 
-import java.awt.*;
+import java.awt.Component;
 import org.rcosjava.messaging.postoffices.animator.AnimatorMessageHandler;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 
