@@ -16,115 +16,77 @@ package org.rcosjava.software.filesystem;
 public interface FileSystem
 {
   /**
-   * Description of the Method
+   * Handle a mount request.  Creates a new device and sets its status to
+   * mounted.
    *
-   * @param mvNewMountPoint Description of Parameter
-   * @param mvNewDeviceName Description of Parameter
+   * @param newMountPoint The name of the new mount point e.g. "C"
+   * @param newDeviceName The name of the new device name e.g. "DISK1"
    */
-  public void mount(String mvNewMountPoint, String mvNewDeviceName);
+  public void mount(String newMountPoint, String newDeviceName);
+
+  /**
+   * Perfoms an allocation of the file. Creats an entry in the FID table
+   * and inits it.
+   *
+   * @param requestId unique identifier for this request.
+   * @param fileName the name of the file to allocate.
+   * @return the data structure indicating a success or failure.
+   */
+  public FileSystemReturnData allocate(int requestId, String fileName);
+
+  /**
+   * Sets up a directory entry for the file and sets it to a 0 length file.
+   *
+   * @param requestId unique identifier for this request.
+   * @param fsFileNumber unique identifier of the file.
+   * @return the data structure indicating a success or failure.
+   */
+  public FileSystemReturnData create(int requestId, int fsFileNumber);
+
+  /**
+   * Opens the specified file for reading.
+   *
+   * @param requestId unique identifier for this request.
+   * @param fsFileNumber unique identifier of the file.
+   * @return the data structure indicating a success or failure.
+   */
+  public FileSystemReturnData open(int requestId, int fsFileNumber);
+
+  /**
+   * Reads from the file if it is in the right mode.
+   *
+   * @param requestId unique identifier for this request.
+   * @param fsFileNumber unique identifier of the file.
+   * @return the data structure indicating a success or failure.
+   */
+  public FileSystemReturnData read(int requestId, int fsFileNumber);
 
   /**
    * Description of the Method
    *
-   * @param iRequestID Description of Parameter
-   * @param sFileName Description of Parameter
-   * @return Description of the Returned Value
-   */
-  public FileSystemReturnData allocate(int iRequestID, String sFileName);
-
-  /**
-   * Description of the Method
-   *
-   * @param iRequestID Description of Parameter
-   * @param iFSFileNo Description of Parameter
-   * @return Description of the Returned Value
-   */
-  public FileSystemReturnData eof(int iRequestID, int iFSFileNo);
-
-  /**
-   * Description of the Method
-   *
-   * @param iRequestID Description of Parameter
-   * @param iFSFileNo Description of Parameter
-   * @return Description of the Returned Value
-   */
-  public FileSystemReturnData delete(int iRequestID, int iFSFileNo);
-
-  /**
-   * Delete file.
-   *
-   * @param iRequestID Description of the Parameter
-   * @param msdosFile Description of the Parameter
-   * @param path Description of the Parameter
-   * @return Description of the Return Value
-   * @throws MSDOSFATException Description of the Exception
-   * @throws MSDOSDirectoryException Description of the Exception
-   */
-  public FileSystemReturnData delete(int iRequestID, FileSystemFile file,
-      String path) throws AllocationTableException, DirectoryException;
-
-  /**
-   * Description of the Method
-   *
-   * @param iRequestID Description of Parameter
-   * @param iFSFileNo Description of Parameter
-   * @return Description of the Returned Value
-   */
-  public FileSystemReturnData create(int iRequestID, int iFSFileNo);
-
-  /**
-   * Description of the Method
-   *
-   * @param iRequestID Description of Parameter
-   * @param iFSFileNo Description of Parameter
-   * @return Description of the Returned Value
-   */
-  public FileSystemReturnData close(int iRequestID, int iFSFileNo);
-
-  /**
-   * Description of the Method
-   *
-   * @param iRequestID Description of Parameter
-   * @param iFSFileNo Description of Parameter
-   * @return Description of the Returned Value
-   */
-  public FileSystemReturnData open(int iRequestID, int iFSFileNo);
-
-  /**
-   * Description of the Method
-   *
-   * @param iRequestID Description of Parameter
-   * @param iFSFileNo Description of Parameter
-   * @return Description of the Returned Value
-   */
-  public FileSystemReturnData read(int iRequestID, int iFSFileNo);
-
-  /**
-   * Description of the Method
-   *
-   * @param iRequestID Description of Parameter
+   * @param requestId Description of Parameter
    * @param msdosFile Description of the Parameter
    * @param path Description of the Parameter
    * @return Description of the Returned Value
    * @throws AllocationTableException Description of the Exception
    * @throws DirectoryException Description of the Exception
    */
-  public FileSystemReturnData read(int iRequestID, FileSystemFile file,
+  public FileSystemReturnData read(int requestId, FileSystemFile file,
       String path) throws AllocationTableException, DirectoryException;
 
   /**
-   * Description of the Method
+   * If the mode is correct, this starts or contines writing a file.
    *
-   * @param iRequestID Description of Parameter
-   * @param iFSFileNo Description of Parameter
-   * @return Description of the Returned Value
+   * @param requestId unique identifier for this request.
+   * @param fsFileNumber unique identifier of the file.
+   * @return the data structure indicating a success or failure.
    */
-  public FileSystemReturnData write(int iRequestID, int iFSFileNo);
+  public FileSystemReturnData write(int requestId, int fsFileNumber);
 
   /**
    * Description of the Method
    *
-   * @param iRequestID Description of Parameter
+   * @param requestId Description of Parameter
    * @param msdosFile Description of the Parameter
    * @param data Description of the Parameter
    * @param path Description of the Parameter
@@ -132,88 +94,96 @@ public interface FileSystem
    * @throws MSDOSFATException Description of the Exception
    * @throws MSDOSDirectoryException Description of the Exception
    */
-  public FileSystemReturnData write(int iRequestID, FileSystemFile file,
+  public FileSystemReturnData write(int requestId, FileSystemFile file,
       String data, String path) throws AllocationTableException,
       DirectoryException;
 
   /**
-   * Gets the DirectoryPosition attribute of the FileSystem object
+   * Closes a file and removes it from the FID table.  First writes the
+   * current buffer and the directory blocks to disk.
    *
-   * @param mvFilename Description of Parameter
-   * @return The DirectoryPosition value
-   */
-  public int getDirectoryPosition(String mvFilename);
-
-  /**
-   * Gets the FreeEntry attribute of the FileSystem object
-   *
-   * @param mvDeviceNumber Description of Parameter
-   * @return The FreeEntry value
-   */
-  public int getFreeEntry(int mvDeviceNumber);
-
-  /**
-   * Description of the Method
-   *
-   * @param mvDeviceNumber Description of Parameter
+   * @param requestId Description of Parameter
+   * @param fsFileNumber Description of Parameter
    * @return Description of the Returned Value
    */
-  public boolean diskFull(int mvDeviceNumber);
+  public FileSystemReturnData close(int requestId, int fsFileNumber);
 
   /**
-   * Gets the FreeBlock attribute of the FileSystem object
+   * Replys to the sender of the message 1 if at end of file
+   * 0 if not.
    *
-   * @param mvDeviceNumber Description of Parameter
-   * @return The FreeBlock value
+   * @param requestId unique identifier for this request.
+   * @param fsFileNumber unique identifier of the file.
+   * @return the data structure indicating a success or failure.
    */
-  public int getFreeBlock(int mvDeviceNumber);
+  public FileSystemReturnData eof(int requestId, int fsFileNumber);
 
   /**
-   * Description of the Method
+   * Free's all disk structures associated with the specified file. Leaves the
+   * file in the PID table though.
+   *
+   * @param requestId unique identifier for this request.
+   * @param fsFileNumber unique identifier of the file.
+   * @return the data structure indicating a success or failure.
+   */
+  public FileSystemReturnData delete(int requestId, int fsFileNumber);
+
+  /**
+   * Delete file.
+   *
+   * @param requestId Description of the Parameter
+   * @param msdosFile Description of the Parameter
+   * @param path Description of the Parameter
+   * @return Description of the Return Value
+   * @throws MSDOSFATException Description of the Exception
+   * @throws MSDOSDirectoryException Description of the Exception
+   */
+  public FileSystemReturnData delete(int requestId, FileSystemFile file,
+      String path) throws AllocationTableException, DirectoryException;
+
+  /**
+   * Checks to see if the file system indicated by device number is full.
+   *
+   * @param deviceNumber the unique device number to check.
+   * @return true if the device has no free blocks or free directory entries.
+   */
+  public boolean diskFull(int deviceNumber);
+
+  /**
+   * Store the current file system's state.
    */
   public void recordSystemFile();
 
   /**
-   * Description of the Method
+   * Request a previously stored system file to be loaded.
    *
-   * @return Description of the Return Value
+   * @return a fully create system file.
    */
   public FileSystem requestSystemFile();
 
   /**
-   * Gets the NextDirectoryEntry attribute of the FileSystem object
+   * Returns the mount point based on the given file name.
    *
-   * @param mvDirEntry Description of Parameter
-   * @param mvDeviceNumber Description of Parameter
-   * @return The NextDirectoryEntry value
+   * @param fileName the name of file which contains the mount point e.g.
+   *   "C:fred.doc".
+   * @return the mount point e.g. "C".
    */
-  public int getNextDirectoryEntry(int mvDirEntry, int mvDeviceNumber);
+  public String getMountPoint(String fileName);
 
   /**
-   * Description of the Method
+   * Displays a file's entry on a devices directory as a string.
    *
-   * @param mvEntryNumber Description of Parameter
-   * @param mvDeviceNumber Description of Parameter
+   * @param deviceNumber the unique device number to check.
+   * @param fsFileNumber unique identifier of the file.
+   * @return a string representation of the file's directory entry.
    */
-  public void deallocateEntry(int mvEntryNumber, int mvDeviceNumber);
+  public String dumpDirectoryEntry(int deviceNumber, int fsFileNumber);
 
   /**
-   * Gets the MountPoint attribute of the FileSystem object
+   * Displays a file's entry on a devices directory as a string.
    *
-   * @param mvFilename Description of Parameter
-   * @return The MountPoint value
+   * @param fsFileNumber unique identifier of the file.
+   * @return a string representation of the file's directory entry.
    */
-  public String getMountPoint(String mvFilename);
-
-  /**
-   * Will display the specified data to the screen.
-   * Operation can be "DIR" or "BUFFER". For DIR, item1 will indicate
-   * the entry to dump, item2 will indicate the device. For Buffer,
-   * item1 is the FID.
-   *
-   * @param Operation Description of Parameter
-   * @param item1 Description of Parameter
-   * @param item2 Description of Parameter
-   */
-  public String dump(String Operation, int item1, int item2);
+  public String dumpBuffer(int fsFileNumber);
 }
