@@ -32,13 +32,6 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
   protected OSOffice postOffice;
 
   /**
-   *  Do nothing constructor.
-   */
-  public OSMessageHandler()
-  {
-  }
-
-  /**
    * Register the handler with the given Id to the given postoffice.  Adds a
    * handler to the post office to handle passing messages to this component.
    *
@@ -47,9 +40,7 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
    */
   public OSMessageHandler(String newId, OSOffice newPostOffice)
   {
-    id = newId;
-    // Save myId and a pointer the PostOffice
-    postOffice = newPostOffice;
+    super(newId, newPostOffice);
     // Tell the PostOffice that I'm alive
     AddHandler newMessage = new AddHandler(this, newId, this);
     newPostOffice.processMessage(newMessage);

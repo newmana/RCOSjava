@@ -20,13 +20,6 @@ public class OSMessageRecorder extends OSMessageHandler
   private UniversalMessageRecorder recorder;
 
   /**
-   * Null constructor.  Does nothing.
-   */
-  public OSMessageRecorder()
-  {
-  }
-
-  /**
    * Constructs a message recorder to listen to all the message of a particular
    * post office.
    *

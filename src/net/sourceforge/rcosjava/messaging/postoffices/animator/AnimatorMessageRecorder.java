@@ -20,13 +20,6 @@ public class AnimatorMessageRecorder extends AnimatorMessageHandler
   public UniversalMessageRecorder recorder;
 
   /**
-   * Null constructor.  Currently does nothing.
-   */
-  public AnimatorMessageRecorder()
-  {
-  }
-
-  /**
    * Constructs a message recorder to listen to all the message of a particular
    * post office.
    *

@@ -12,14 +12,9 @@ import net.sourceforge.rcosjava.messaging.postoffices.SimpleMessageHandler;
  */
 public class RemoveHandler extends MessageAdapter
 {
-  /**
-   * The unique id of the handler to add.
-   */
-  private String deviceId;
-
-  public RemoveHandler(String newDeviceId)
+  public RemoveHandler(SimpleMessageHandler newSource)
   {
-    deviceId = newDeviceId;
+    super(newSource);
   }
 
   /**
@@ -28,6 +23,6 @@ public class RemoveHandler extends MessageAdapter
    */
   public void doMessage(PostOffice theElement)
   {
-    theElement.removeHandler(deviceId);
+    theElement.removeHandler(getSource().getId());
   }
 }

@@ -99,8 +99,8 @@ public class UniversalMessageRecorder
    */
   public void recordOff()
   {
-    osRecorder.localSendMessage(new RemoveHandler(osRecorder.getId()));
-    animatorRecorder.localSendMessage(new RemoveHandler(animatorRecorder.getId()));
+    osRecorder.localSendMessage(new RemoveHandler(osRecorder));
+    animatorRecorder.localSendMessage(new RemoveHandler(animatorRecorder));
   }
 
   public void createDirectory(String directory)
