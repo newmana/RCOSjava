@@ -126,7 +126,6 @@ public class ProcessSchedulerTest extends TestCase
           scheduler.getReadyQueue().getProcess(1).equals(tmpProcess1));
 
       // Null process
-      scheduler.nullProcess();
       assertTrue("Executing queue should be empty",
           scheduler.getExecutingProcess() == null);
       assertTrue("Executing queue should be empty",
@@ -210,7 +209,6 @@ public class ProcessSchedulerTest extends TestCase
           scheduler.getReadyQueue().getProcess(1).equals(tmpProcess1));
 
       // Null process
-      scheduler.nullProcess();
       assertTrue("Executing queue should be empty",
           scheduler.getExecutingProcess() == null);
       assertTrue("Executing queue should be empty",
@@ -238,7 +236,6 @@ public class ProcessSchedulerTest extends TestCase
           scheduler.getBlockedQueue().getProcess(1).equals(tmpProcess1));
 
       // Null process
-      scheduler.nullProcess();
       assertTrue("Executing queue should be empty",
           scheduler.getExecutingProcess() == null);
       assertTrue("Executing queue should be empty",
