@@ -149,44 +149,44 @@ public class CPUPanel extends RCOSPanel
 
     // Middle/CPU section
     cpu.setLayout(new GridLayout(8, 2));
-
-    titleFont = new Font("TimesRoman", Font.BOLD, 12);
+    Font registerFont = new Font("TimesRoman", Font.PLAIN, 14);
+    Font registerFontTitle = new Font("TimesRoman", Font.BOLD, 14);
 
     irTitle = new JLabel("Instruction Register", JLabel.CENTER);
     irTitle.setForeground(defaultFgColour);
     irTitle.setBackground(defaultBgColour);
-    irTitle.setFont(titleFont);
+    irTitle.setFont(registerFontTitle);
     irValue = new JLabel("None", JLabel.CENTER);
     irValue.setForeground(defaultFgColour);
     irValue.setBackground(defaultBgColour);
-    irValue.setFont(defaultFont);
+    irValue.setFont(registerFont);
 
     pcTitle = new JLabel("Program Counter", JLabel.CENTER);
     pcTitle.setForeground(defaultFgColour);
     pcTitle.setBackground(defaultBgColour);
-    pcTitle.setFont(titleFont);
+    pcTitle.setFont(registerFontTitle);
     pcValue = new JLabel("0", JLabel.CENTER);
     pcValue.setForeground(defaultFgColour);
     pcValue.setBackground(defaultBgColour);
-    pcValue.setFont(defaultFont);
+    pcValue.setFont(registerFont);
 
     spTitle = new JLabel("Stack Pointer", JLabel.CENTER);
     spTitle.setForeground(defaultFgColour);
     spTitle.setBackground(defaultBgColour);
-    spTitle.setFont(titleFont);
+    spTitle.setFont(registerFontTitle);
     spValue = new JLabel("0", JLabel.CENTER);
     spValue.setForeground(defaultFgColour);
     spValue.setBackground(defaultBgColour);
-    spValue.setFont(defaultFont);
+    spValue.setFont(registerFont);
 
     bpTitle = new JLabel("Base Pointer", JLabel.CENTER);
     bpTitle.setForeground(defaultFgColour);
     bpTitle.setBackground(defaultBgColour);
-    bpTitle.setFont(titleFont);
+    bpTitle.setFont(registerFontTitle);
     bpValue = new JLabel("0", JLabel.CENTER);
     bpValue.setForeground(defaultFgColour);
     bpValue.setBackground(defaultBgColour);
-    bpValue.setFont(defaultFont);
+    bpValue.setFont(registerFont);
 
     cpu.add(irTitle);
     cpu.add(irValue);
