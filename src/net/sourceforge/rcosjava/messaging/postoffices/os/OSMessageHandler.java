@@ -15,12 +15,12 @@ import net.sourceforge.rcosjava.messaging.messages.AddHandler;
  * 21/03/2001 Fixed local send message to call process message instead of
  * local send message of the post office (class cast exception).
  * </DD></DT>
- *
+ * <P>
+ * @see net.sourceforge.rcosjava.messaging.postoffices.SimpleMessageHandler
  * @author Andrew Newman
  * @author Bruce Jamieson
  * @created 21 October 2000
  * @version 1.00 $Date$
- * @see MessageSystem.postoffices.SimpleMessageHandler
  */
 public abstract class OSMessageHandler extends SimpleMessageHandler
 {
