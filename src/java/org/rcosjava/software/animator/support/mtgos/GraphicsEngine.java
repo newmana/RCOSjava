@@ -8,7 +8,9 @@ import javax.swing.*;
  * This is the basic engine which uses the MTGO objects.
  * <P>
  * <DT> <B>History:</B>
- * <DD> 23/04/2001 Fixed remove MTGO bug and updated style. </DD> </DT>
+ * <DD> 23/04/2001 Fixed remove MTGO bug and updated style. </DD>
+ * <DD> 20/01/2003 Fixed bug preventing removal of last object in chain. </DD>
+ * </DT>
  * <P>
  * @author Andrew Newman.
  * @created 1st January 1997
@@ -89,15 +91,15 @@ public class GraphicsEngine extends JPanel
     {
       while (tempObjectChain != null)
       {
-        mob = tempObjectChain.object;
-        if (mob.isVisible)
+        mob = tempObjectChain.getMTGO();
+        if (mob.isVisible())
         {
           if (mob.isInside(mx, my))
           {
-            return mob.text;
+            return mob.getName();
           }
         }
-        tempObjectChain = tempObjectChain.nextChain;
+        tempObjectChain = tempObjectChain.getNextChain();
       }
     }
     catch (Exception e)
@@ -125,8 +127,7 @@ public class GraphicsEngine extends JPanel
   public void addMTGO(MTGO newMTGO, ImageObserver observer)
   {
     objectChain = new Chain(newMTGO, objectChain);
-    newMTGO.imageHeight = newMTGO.picture.getHeight(observer);
-    newMTGO.imageWidth = newMTGO.picture.getWidth(observer);
+    newMTGO.setDimensions(observer);
   }
 
   /**
@@ -136,42 +137,33 @@ public class GraphicsEngine extends JPanel
    */
   public void removeMTGO(String mtgoText)
   {
-    Chain tempObjectChain = new Chain(objectChain.object, objectChain.nextChain);
-    Chain newObjectChain = new Chain(objectChain.object, objectChain.nextChain);
-    Chain startObjectChain = newObjectChain;
-    MTGO mob = tempObjectChain.object;
+    Chain startObjectChain = objectChain;
+    MTGO mob = startObjectChain.getMTGO();
 
-    // Check to see whether the first one is the one we want
-    if (mob.text.compareTo(mtgoText) == 0)
+    // Check to see whether the first one is the one we want.  If so skip it and
+    // exit.
+    if (mob.getName().compareTo(mtgoText) == 0)
     {
-      startObjectChain = tempObjectChain.nextChain;
-      tempObjectChain = tempObjectChain.nextChain;
+      startObjectChain = startObjectChain.getNextChain();
     }
-
-    while (tempObjectChain != null)
+    else
     {
-      // If the current one is the one we are looking
-      // for, skip the current one.
-      if (mob.text.compareTo(mtgoText) == 0)
-      {
-        if (tempObjectChain.nextChain != null)
-        {
-          newObjectChain.nextChain = tempObjectChain.nextChain;
-        }
-        else
-        {
-          newObjectChain.nextChain = null;
-        }
-      }
-      else
-      {
-        newObjectChain = tempObjectChain;
-      }
+      Chain previousObjectChain = startObjectChain;
+      Chain currentObjectChain = startObjectChain.getNextChain();
 
-      tempObjectChain = tempObjectChain.nextChain;
-      if (tempObjectChain != null)
+      while (currentObjectChain != null)
       {
-        mob = tempObjectChain.object;
+        mob = currentObjectChain.getMTGO();
+
+        // If the current one is the one we are looking
+        // for, skip the current one.
+        if (mob.getName().compareTo(mtgoText) == 0)
+        {
+          previousObjectChain.setNextChain(currentObjectChain.getNextChain());
+        }
+
+        previousObjectChain = currentObjectChain;
+        currentObjectChain = currentObjectChain.getNextChain();
       }
     }
     objectChain = startObjectChain;
@@ -190,14 +182,14 @@ public class GraphicsEngine extends JPanel
 
     while (!found)
     {
-      if (tempObjectChain.object.text.compareTo(mtgoText) == 0)
+      if (tempObjectChain.getMTGO().getName().compareTo(mtgoText) == 0)
       {
         found = true;
-        return tempObjectChain.object;
+        return tempObjectChain.getMTGO();
       }
-      if (tempObjectChain.nextChain != null)
+      if (tempObjectChain.getNextChain() != null)
       {
-        tempObjectChain = tempObjectChain.nextChain;
+        tempObjectChain = tempObjectChain.getNextChain();
       }
       else
       {
@@ -230,12 +222,12 @@ public class GraphicsEngine extends JPanel
       // Draw MTGOs ms
       while (tempObjectChain != null)
       {
-        mob = tempObjectChain.object;
-        if (mob.isVisible)
+        mob = tempObjectChain.getMTGO();
+        if (mob.isVisible())
         {
           pad = mob.paint(pad);
         }
-        tempObjectChain = tempObjectChain.nextChain;
+        tempObjectChain = tempObjectChain.getNextChain();
       }
     }
 
@@ -252,32 +244,33 @@ public class GraphicsEngine extends JPanel
    */
   public Chain sortMTGOsAscending()
   {
-    Chain tempObjectChain = new Chain(objectChain.object, null);
+    Chain tempObjectChain = new Chain(objectChain.getMTGO(), null);
     Chain ordered = tempObjectChain;
-    Chain unordered = objectChain.nextChain;
+    Chain unordered = objectChain.getNextChain();
     MTGO mob;
 
     while (unordered != null)
     {
-      mob = unordered.object;
-      unordered = unordered.nextChain;
+      mob = unordered.getMTGO();
+      unordered = unordered.getNextChain();
       ordered = tempObjectChain;
       while (ordered != null)
       {
-        if (mob.priority < ordered.object.priority)
+        if (mob.getPriority() < ordered.getMTGO().getPriority())
         {
-          ordered.nextChain = new Chain(ordered.object, ordered.nextChain);
-          ordered.object = mob;
+          ordered.setNextChain(new Chain(ordered.getMTGO(),
+              ordered.getNextChain()));
+          ordered.setMTGO(mob);
           ordered = null;
         }
-        else if (ordered.nextChain == null)
+        else if (ordered.getNextChain() == null)
         {
-          ordered.nextChain = new Chain(mob, null);
+          ordered.setNextChain(new Chain(mob, null));
           ordered = null;
         }
         else
         {
-          ordered = ordered.nextChain;
+          ordered = ordered.getNextChain();
         }
       }
     }
@@ -293,32 +286,33 @@ public class GraphicsEngine extends JPanel
    */
   public Chain sortMTGOsDescending()
   {
-    Chain tempObjectChain = new Chain(objectChain.object, null);
+    Chain tempObjectChain = new Chain(objectChain.getMTGO(), null);
     Chain ordered = tempObjectChain;
-    Chain unordered = objectChain.nextChain;
+    Chain unordered = objectChain.getNextChain();
     MTGO mob;
 
     while (unordered != null)
     {
-      mob = unordered.object;
-      unordered = unordered.nextChain;
+      mob = unordered.getMTGO();
+      unordered = unordered.getNextChain();
       ordered = tempObjectChain;
       while (ordered != null)
       {
-        if (mob.priority > ordered.object.priority)
+        if (mob.getPriority() > ordered.getMTGO().getPriority())
         {
-          ordered.nextChain = new Chain(ordered.object, ordered.nextChain);
-          ordered.object = mob;
+          ordered.setNextChain(new Chain(ordered.getMTGO(),
+              ordered.getNextChain()));
+          ordered.setMTGO(mob);
           ordered = null;
         }
-        else if (ordered.nextChain == null)
+        else if (ordered.getNextChain() == null)
         {
-          ordered.nextChain = new Chain(mob, null);
+          ordered.setNextChain(new Chain(mob, null));
           ordered = null;
         }
         else
         {
-          ordered = ordered.nextChain;
+          ordered = ordered.getNextChain();
         }
       }
     }
@@ -333,7 +327,7 @@ public class GraphicsEngine extends JPanel
    */
   public int centerX(MTGO mtgo)
   {
-    float temp = mtgo.imageWidth / 2;
+    float temp = mtgo.getImageWidth() / 2;
     return ((int) (centerX - temp));
   }
 
@@ -345,7 +339,7 @@ public class GraphicsEngine extends JPanel
    */
   public int centerY(MTGO mtgo)
   {
-    float temp = mtgo.imageHeight / 2;
+    float temp = mtgo.getImageHeight() / 2;
     return ((int) (centerY - temp));
   }
 

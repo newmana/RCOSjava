@@ -185,7 +185,31 @@ public class ProcessSchedulerPanel extends RCOSPanel
    */
   public void setupLayout(Component c)
   {
+    // Initialise the graphics engine.
     engine = new GraphicsEngine();
+
+    // Setup the process graphics.
+    boxHeight = 25;
+    boxWidth = 25;
+
+    BufferedImage process;
+    Graphics processGraphics;
+
+    // Set-up green process
+    process = new BufferedImage(boxWidth, boxHeight,
+                                BufferedImage.TYPE_INT_ARGB);
+    processGraphics = process.createGraphics();
+    processGraphics.setColor(new Color(51, 255, 153));
+    processGraphics.fillOval(0, 0, boxWidth, boxHeight);
+    myImages[0] = process;
+
+    // Set-up blue process
+    process = new BufferedImage(boxWidth, boxHeight,
+                                BufferedImage.TYPE_INT_ARGB);
+    processGraphics = process.createGraphics();
+    processGraphics.setColor(new Color(153, 153, 255));
+    processGraphics.fillOval(0, 0, boxWidth, boxHeight);
+    myImages[1] = process;
 
     JPanel optionsPanel = new JPanel();
     JPanel processPanel = new JPanel();
@@ -354,39 +378,18 @@ public class ProcessSchedulerPanel extends RCOSPanel
    */
   void setupMovement()
   {
-    boxHeight = 25;
-    boxWidth = 25;
-
-    BufferedImage process;
-    Graphics processGraphics;
-
-    // Set-up green process
-    process = new BufferedImage(boxWidth, boxHeight,
-        BufferedImage.TYPE_INT_ARGB);
-    processGraphics = process.createGraphics();
-    processGraphics.setColor(new Color(51, 255, 153));
-    processGraphics.fillOval(0, 0, boxWidth, boxHeight);
-    myImages[0] = process;
-
-    // Set-up blue process
-    process = new BufferedImage(boxWidth, boxHeight,
-      BufferedImage.TYPE_INT_ARGB);
-    processGraphics = process.createGraphics();
-    processGraphics.setColor(new Color(153, 153, 255));
-    processGraphics.fillOval(0, 0, boxWidth, boxHeight);
-    myImages[1] = process;
-
-    cpuPic = new MTGO(myImages[2], "RCOS CPU", false);
-    cpuPic.priority = 1;
-    engine.addMTGO(cpuPic, this);
-    cpuPic.xPosition = engine.centerX(cpuPic);
-    cpuPic.yPosition = 0;
-    tmpPic = new MTGO(myImages[0], "TEMP", false);
-    tmpPic.priority = 2;
+    tmpPic = new MTGO(myImages[0], "TEMP", true);
+    tmpPic.setPriority(2);
     engine.addMTGO(tmpPic, this);
 
+    cpuPic = new MTGO(myImages[2], "RCOS CPU", false);
+    cpuPic.setPriority(1);
+    engine.addMTGO(cpuPic, this);
+    cpuPic.setXPosition(engine.centerX(cpuPic));
+    cpuPic.setYPosition(0);
+
     width = engine.getWidth();
-    height = (engine.getHeight() - cpuPic.imageHeight) / 3;
+    height = (engine.getHeight() - cpuPic.getImageHeight()) / 3;
     leftIndent = 50;
     rightIndent = width - leftIndent;
 
@@ -435,7 +438,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     }
 
     // Process going through line out of CPI.
-    int cpuLine = (cpuPic.imageHeight / 2) - (boxWidth / 2);
+    int cpuLine = (cpuPic.getImageHeight() / 2) - (boxWidth / 2);
     int middleOfReady = height + fm.getHeight() + 5;
     int middleOfBlocked = (height * 2) + fm.getHeight() + 5;
     int middleOfZombie = (height * 3) + fm.getHeight() + 5;
@@ -527,8 +530,8 @@ public class ProcessSchedulerPanel extends RCOSPanel
       cpuToReadyMovement.addPosition(cpuToReadyPositions[count]);
       cpuToBlockedMovement.addPosition(cpuToBlockedPositions[count]);
     }
-    engine.removeMTGO("TEMP");
 
+    engine.removeMTGO("TEMP");
     movementSetup = true;
   }
 
@@ -544,7 +547,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
     if (tmpMTGO != null)
     {
-      tmpMTGO.isVisible = false;
+      tmpMTGO.setInvisible();
       engine.removeMTGO("P" + pid);
     }
     syncPaint(delay);
@@ -575,15 +578,18 @@ public class ProcessSchedulerPanel extends RCOSPanel
    */
   synchronized void cpuToBlocked(int pid)
   {
-    MTGO tmpMTGO = engine.returnMTGO("P" + pid);
-
-    cpuToBlockedMovement.start();
-    while (!cpuToBlockedMovement.finished())
+    if (movementSetup)
     {
-      cpuToBlockedMovement.step();
-      tmpMTGO.xPosition = cpuToBlockedMovement.getCurrentX();
-      tmpMTGO.yPosition = cpuToBlockedMovement.getCurrentY();
-      syncPaint(delay);
+      MTGO tmpMTGO = engine.returnMTGO("P" + pid);
+
+      cpuToBlockedMovement.start();
+      while (!cpuToBlockedMovement.finished())
+      {
+        cpuToBlockedMovement.step();
+        tmpMTGO.setXPosition(cpuToBlockedMovement.getCurrentX());
+        tmpMTGO.setYPosition(cpuToBlockedMovement.getCurrentY());
+        syncPaint(delay);
+      }
     }
   }
 
@@ -594,15 +600,18 @@ public class ProcessSchedulerPanel extends RCOSPanel
    */
   synchronized void blockedToReady(int pid)
   {
-    MTGO tmpMTGO = engine.returnMTGO("P" + pid);
-
-    blockedToReadyMovement.start();
-    while (!blockedToReadyMovement.finished())
+    if (movementSetup)
     {
-      blockedToReadyMovement.step();
-      tmpMTGO.xPosition = blockedToReadyMovement.getCurrentX();
-      tmpMTGO.yPosition = blockedToReadyMovement.getCurrentY();
-      syncPaint(delay);
+      MTGO tmpMTGO = engine.returnMTGO("P" + pid);
+
+      blockedToReadyMovement.start();
+      while (!blockedToReadyMovement.finished())
+      {
+        blockedToReadyMovement.step();
+        tmpMTGO.setXPosition(blockedToReadyMovement.getCurrentX());
+        tmpMTGO.setYPosition(blockedToReadyMovement.getCurrentY());
+        syncPaint(delay);
+      }
     }
   }
 
@@ -613,15 +622,18 @@ public class ProcessSchedulerPanel extends RCOSPanel
    */
   synchronized void cpuToReady(int pid)
   {
-    MTGO tmpMTGO = engine.returnMTGO("P" + pid);
-
-    cpuToReadyMovement.start();
-    while (!cpuToReadyMovement.finished())
+    if (movementSetup)
     {
-      cpuToReadyMovement.step();
-      tmpMTGO.xPosition = cpuToReadyMovement.getCurrentX();
-      tmpMTGO.yPosition = cpuToReadyMovement.getCurrentY();
-      syncPaint(delay);
+      MTGO tmpMTGO = engine.returnMTGO("P" + pid);
+
+      cpuToReadyMovement.start();
+      while (!cpuToReadyMovement.finished())
+      {
+        cpuToReadyMovement.step();
+        tmpMTGO.setXPosition(cpuToReadyMovement.getCurrentX());
+        tmpMTGO.setYPosition(cpuToReadyMovement.getCurrentY());
+        syncPaint(delay);
+      }
     }
   }
 
@@ -632,15 +644,18 @@ public class ProcessSchedulerPanel extends RCOSPanel
    */
   synchronized void readyToCPU(int pid)
   {
-    MTGO tmpMTGO = engine.returnMTGO("P" + pid);
-
-    readyToCPUMovement.start();
-    while (!readyToCPUMovement.finished())
+    if (movementSetup)
     {
-      readyToCPUMovement.step();
-      tmpMTGO.xPosition = readyToCPUMovement.getCurrentX();
-      tmpMTGO.yPosition = readyToCPUMovement.getCurrentY();
-      syncPaint(delay);
+      MTGO tmpMTGO = engine.returnMTGO("P" + pid);
+
+      readyToCPUMovement.start();
+      while (!readyToCPUMovement.finished())
+      {
+        readyToCPUMovement.step();
+        tmpMTGO.setXPosition(readyToCPUMovement.getCurrentX());
+        tmpMTGO.setYPosition(readyToCPUMovement.getCurrentY());
+        syncPaint(delay);
+      }
     }
   }
 
@@ -661,12 +676,12 @@ public class ProcessSchedulerPanel extends RCOSPanel
     {
       tmpPic = new MTGO(myImages[1], "P" + pid, true, Color.darkGray);
     }
-    tmpPic.priority = 2;
-    tmpPic.xPosition = engine.centerX(tmpPic);
-    tmpPic.yPosition = height + boxHeight;
+    tmpPic.setPriority(2);
+    tmpPic.setXPosition(engine.centerX(tmpPic));
+    tmpPic.setYPosition(height + boxHeight);
+
     engine.addMTGO(tmpPic, this);
   }
-
 
   /**
    * The first thing that a process does once allocated a terminal is to move
@@ -679,13 +694,16 @@ public class ProcessSchedulerPanel extends RCOSPanel
   {
     MTGO tmpMTGO = engine.returnMTGO("P" + pid);
 
-    zombieToReadyMovement.start();
-    while (!zombieToReadyMovement.finished())
+    if (movementSetup)
     {
-      zombieToReadyMovement.step();
-      tmpMTGO.xPosition = zombieToReadyMovement.getCurrentX();
-      tmpMTGO.yPosition = zombieToReadyMovement.getCurrentY();
-      syncPaint(delay);
+      zombieToReadyMovement.start();
+      while (!zombieToReadyMovement.finished())
+      {
+        zombieToReadyMovement.step();
+        tmpMTGO.setXPosition(zombieToReadyMovement.getCurrentX());
+        tmpMTGO.setYPosition(zombieToReadyMovement.getCurrentY());
+        syncPaint(delay);
+      }
     }
   }
 
@@ -694,7 +712,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid Description of Parameter
    */
-  synchronized void movereadyQueue(int pid)
+  synchronized void moveReadyQueue(int pid)
   {
     MTGO tmpMTGO = engine.returnMTGO("P" + pid);
 
@@ -705,8 +723,8 @@ public class ProcessSchedulerPanel extends RCOSPanel
     while (!readyMovement.finished(iPos))
     {
       readyMovement.step();
-      tmpMTGO.xPosition = readyMovement.getCurrentX();
-      tmpMTGO.yPosition = readyMovement.getCurrentY();
+      tmpMTGO.setXPosition(readyMovement.getCurrentX());
+      tmpMTGO.setYPosition(readyMovement.getCurrentY());
       syncPaint(delay);
     }
   }
@@ -716,7 +734,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid Description of Parameter
    */
-  synchronized void moveblockedQueue(int pid)
+  synchronized void moveBlockedQueue(int pid)
   {
     MTGO tmpMTGO = engine.returnMTGO("P" + pid);
 
@@ -727,8 +745,8 @@ public class ProcessSchedulerPanel extends RCOSPanel
     while (!blockedMovement.finished(iPos))
     {
       blockedMovement.step();
-      tmpMTGO.xPosition = blockedMovement.getCurrentX();
-      tmpMTGO.yPosition = blockedMovement.getCurrentY();
+      tmpMTGO.setXPosition(blockedMovement.getCurrentX());
+      tmpMTGO.setYPosition(blockedMovement.getCurrentY());
       syncPaint(delay);
     }
   }
@@ -738,7 +756,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid process id to move.
    */
-  synchronized void movezombieQueue(int pid)
+  synchronized void moveZombieQueue(int pid)
   {
     MTGO tmpMTGO = engine.returnMTGO("P" + pid);
 
@@ -749,8 +767,8 @@ public class ProcessSchedulerPanel extends RCOSPanel
     while (!zombieMovement.finished(pos))
     {
       zombieMovement.step();
-      tmpMTGO.xPosition = zombieMovement.getCurrentX();
-      tmpMTGO.yPosition = zombieMovement.getCurrentY();
+      tmpMTGO.setXPosition(zombieMovement.getCurrentX());
+      tmpMTGO.setYPosition(zombieMovement.getCurrentY());
       syncPaint(delay);
     }
   }
@@ -769,16 +787,25 @@ public class ProcessSchedulerPanel extends RCOSPanel
     {
       case ProcessScheduler.READYQ:
         readyQueue.insert(processId);
-        movereadyQueue(pid);
-        break;
+        if (movementSetup)
+        {
+          moveReadyQueue(pid);
+        }
+      break;
       case ProcessScheduler.BLOCKEDQ:
         blockedQueue.insert(processId);
-        moveblockedQueue(pid);
-        break;
+        if (movementSetup)
+        {
+          moveBlockedQueue(pid);
+        }
+      break;
       case ProcessScheduler.ZOMBIEQ:
         zombieQueue.insert(processId);
-        movezombieQueue(pid);
-        break;
+        if (movementSetup)
+        {
+          moveZombieQueue(pid);
+        }
+      break;
     }
     refreshQueue(queueType);
   }
@@ -795,13 +822,13 @@ public class ProcessSchedulerPanel extends RCOSPanel
     {
       case ProcessScheduler.READYQ:
         removeProcId(pid, readyQueue);
-        break;
+      break;
       case ProcessScheduler.BLOCKEDQ:
         removeProcId(pid, blockedQueue);
-        break;
+      break;
       case ProcessScheduler.ZOMBIEQ:
         removeProcId(pid, zombieQueue);
-        break;
+      break;
     }
     refreshQueue(queueType);
   }
@@ -890,16 +917,18 @@ public class ProcessSchedulerPanel extends RCOSPanel
         3 * (height) - 5);
 
     //Horizontal lines off CPU
-    engine.getPad().drawLine(leftIndent, cpuPic.imageHeight / 2,
-        engine.centerX(cpuPic), cpuPic.imageHeight / 2);
-    engine.getPad().drawLine(engine.centerX(cpuPic) + cpuPic.imageWidth / 2,
-        cpuPic.imageHeight / 2, rightIndent, cpuPic.imageHeight / 2);
+    engine.getPad().drawLine(leftIndent, cpuPic.getImageHeight() / 2,
+        engine.centerX(cpuPic), cpuPic.getImageHeight() / 2);
+    engine.getPad().drawLine(
+        engine.centerX(cpuPic) + cpuPic.getImageHeight() / 2,
+        cpuPic.getImageHeight() / 2, rightIndent, cpuPic.getImageHeight() / 2);
 
     //2 Vertical lines
-    engine.getPad().drawLine(leftIndent, cpuPic.imageHeight / 2, leftIndent,
+    engine.getPad().drawLine(leftIndent,
+        cpuPic.getImageHeight() / 2, leftIndent,
         (3 * height) + fm.getHeight() + 5 + (boxHeight / 2));
-    engine.getPad().drawLine(rightIndent, cpuPic.imageHeight / 2, rightIndent,
-        (3 * height) + fm.getHeight() + 5 + (boxHeight / 2));
+    engine.getPad().drawLine(rightIndent, cpuPic.getImageHeight() / 2,
+        rightIndent, (3 * height) + fm.getHeight() + 5 + (boxHeight / 2));
   }
 
   /**
@@ -918,13 +947,13 @@ public class ProcessSchedulerPanel extends RCOSPanel
     {
       case ProcessScheduler.READYQ:
         tmpQ = readyQueue;
-        break;
+      break;
       case ProcessScheduler.BLOCKEDQ:
         tmpQ = blockedQueue;
-        break;
+      break;
       case ProcessScheduler.ZOMBIEQ:
         tmpQ = zombieQueue;
-        break;
+      break;
     }
     tmpQ.goToHead();
     while (!tmpQ.atTail())
@@ -932,8 +961,8 @@ public class ProcessSchedulerPanel extends RCOSPanel
       String procID = (String) tmpQ.peek();
       MTGO tmpMTGO = engine.returnMTGO(procID);
 
-      tmpMTGO.xPosition = xPosition;
-      tmpMTGO.yPosition = yPosition;
+      tmpMTGO.setXPosition(xPosition);
+      tmpMTGO.setYPosition(yPosition);
       xPosition = xPosition + boxWidth;
       tmpQ.goToNext();
     }

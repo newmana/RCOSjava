@@ -53,9 +53,9 @@ public class OpCode implements Serializable
   public final static OpCode CALL = new OpCode(0x4, "CAL");
 
   /**
-   * Constant for INTerval (?) call
+   * Constant for INcrement T-Register (Stack Pointer) call
    */
-  public final static OpCode INTERVAL = new OpCode(0x5, "INT");
+  public final static OpCode INCREMENT_T_REGISTER = new OpCode(0x5, "INT");
 
   /**
    * Constant for JuMP call

@@ -30,7 +30,8 @@ public class Instruction implements Cloneable, Serializable
   /**
    * Literal instruction.
    */
-  public static final Instruction LIT_INSTRUCTION = new Instruction(OpCode.LITERAL)
+  public static final Instruction LIT_INSTRUCTION = new Instruction(
+    OpCode.LITERAL)
   {
     void execute(CPU cpu)
     {
@@ -43,7 +44,8 @@ public class Instruction implements Cloneable, Serializable
   /**
    * Operation instruction.
    */
-  public static final Instruction OPR_INSTRUCTION = new Instruction(OpCode.OPERATION)
+  public static final Instruction OPR_INSTRUCTION = new Instruction(
+    OpCode.OPERATION)
   {
     void execute(CPU cpu)
     {
@@ -54,7 +56,8 @@ public class Instruction implements Cloneable, Serializable
   /**
   * Load instruction.
   */
-  public static final Instruction LOD_INSTRUCTION = new Instruction(OpCode.LOAD)
+  public static final Instruction LOD_INSTRUCTION = new Instruction(
+    OpCode.LOAD)
   {
     void execute(CPU cpu)
     {
@@ -81,7 +84,8 @@ public class Instruction implements Cloneable, Serializable
   /**
    * Store instruction.
    */
-  public static final Instruction STO_INSTRUCTION = new Instruction(OpCode.STORE)
+  public static final Instruction STO_INSTRUCTION = new Instruction(
+    OpCode.STORE)
   {
     void execute(CPU cpu)
     {
@@ -110,7 +114,8 @@ public class Instruction implements Cloneable, Serializable
   /**
    * Call instruction.
    */
-  public static final Instruction CAL_INSTRUCTION = new Instruction(OpCode.CALL)
+  public static final Instruction CAL_INSTRUCTION = new Instruction(
+    OpCode.CALL)
   {
     void execute(CPU cpu)
     {
@@ -129,9 +134,10 @@ public class Instruction implements Cloneable, Serializable
   };
 
   /**
-   * Interval instruction.
+   * Increment T Register (Stack Pointer) instruction.
    */
-  public static final Instruction INT_INSTRUCTION = new Instruction(OpCode.INTERVAL)
+  public static final Instruction INT_INSTRUCTION = new Instruction(
+    OpCode.INCREMENT_T_REGISTER)
   {
     void execute(CPU cpu)
     {
@@ -156,7 +162,8 @@ public class Instruction implements Cloneable, Serializable
   /**
    * Jump on condition instruction.
    */
-  public static final Instruction JPC_INSTRUCTION = new Instruction(OpCode.JUMP_ON_CONDITION)
+  public static final Instruction JPC_INSTRUCTION = new Instruction(
+    OpCode.JUMP_ON_CONDITION)
   {
     void execute(CPU cpu)
     {
@@ -174,7 +181,8 @@ public class Instruction implements Cloneable, Serializable
   /**
    * Call system procedure instruction.
    */
-  public static final Instruction CSP_INSTRUCTION = new Instruction(OpCode.CALL_SYSTEM_PROCEDURE)
+  public static final Instruction CSP_INSTRUCTION = new Instruction(
+    OpCode.CALL_SYSTEM_PROCEDURE)
   {
     void execute(CPU cpu)
     {
@@ -192,7 +200,8 @@ public class Instruction implements Cloneable, Serializable
   /**
    * Load indexed instruction.
    */
-  public static final Instruction LODX_INSTRUCTION = new Instruction(OpCode.LOAD_INDEXED)
+  public static final Instruction LODX_INSTRUCTION = new Instruction(
+    OpCode.LOAD_INDEXED)
   {
     void execute(CPU cpu)
     {
@@ -208,7 +217,8 @@ public class Instruction implements Cloneable, Serializable
   /**
    * Store indexed instruction.
    */
-  public static final Instruction STOX_INSTRUCTION = new Instruction(OpCode.STORE_INDEXED)
+  public static final Instruction STOX_INSTRUCTION = new Instruction(
+    OpCode.STORE_INDEXED)
   {
     void execute(CPU cpu)
     {
@@ -226,7 +236,8 @@ public class Instruction implements Cloneable, Serializable
   /**
    * Illegal instruction.
    */
-  public static final Instruction ILL_INSTRUCTION = new Instruction(OpCode.ILLEGAL)
+  public static final Instruction ILL_INSTRUCTION = new Instruction(
+    OpCode.ILLEGAL)
   {
     void execute(CPU cpu)
     {
@@ -392,9 +403,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Character In instruction
+   * Returns true if the instruction is a Character In instruction.
    *
-   * @return The ChIn value
+   * @return true if the instruction is a Character In instruction.
    */
   public boolean isChIn()
   {
@@ -402,9 +413,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Character Out instruction
+   * Returns true if the instruction is a Character Out instruction.
    *
-   * @return The ChOut value
+   * @return true if the instruction is a Character Out instruction.
    */
   public boolean isChOut()
   {
@@ -412,9 +423,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Number In instruction
+   * Returns true if the instruction is a Number In instruction.
    *
-   * @return The NumIn value
+   * @return true if the instruction is a Number In instruction.
    */
   public boolean isNumIn()
   {
@@ -422,9 +433,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Number Out instruction
+   * Returns true if the instruction is a Number Out instruction.
    *
-   * @return The NumOut value
+   * @return true if the instruction is a Number Out instruction.
    */
   public boolean isNumOut()
   {
@@ -442,9 +453,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Semaphore Close instruction
+   * Returns true if the instruction is a Semaphore Close instruction.
    *
-   * @return The SemaphoreClose value
+   * @return true if the instruction is a Semaphore Close instruction.
    */
   public boolean isSemaphoreClose()
   {
@@ -583,19 +594,19 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Interval instruction
+   * Returns true if the instruction is a Increment T-Register instruction.
    *
-   * @return The Interval value
+   * @return true if the instruction is a Increment T-Register.
    */
-  public boolean isInterval()
+  public boolean isIncrementTRegister()
   {
-    return (opCode == OpCode.INTERVAL);
+    return (opCode == OpCode.INCREMENT_T_REGISTER);
   }
 
   /**
-   * Returns true if the instruction is a Jump instruction
+   * Returns true if the instruction is a Jump instruction.
    *
-   * @return The Jump value
+   * @return true if the instruction is a Jump instruction.
    */
   public boolean isJump()
   {
@@ -603,9 +614,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Jump on Compare instruction
+   * Returns true if the instruction is a Jump on Compare instruction.
    *
-   * @return The JumpCompare value
+   * @return true if the instruction is a Jump on Compare instruction.
    */
   public boolean isJumpCompare()
   {
@@ -613,9 +624,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Literal instruction
+   * Returns true if the instruction is a Literal instruction.
    *
-   * @return The Literal value
+   * @return true if the instruction is a Literal instruction.
    */
   public boolean isLiteral()
   {
@@ -623,9 +634,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Load instruction
+   * Returns true if the instruction is a Load instruction.
    *
-   * @return The Load value
+   * @return true if the instruction is a Load instruction.
    */
   public boolean isLoad()
   {
@@ -633,9 +644,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Load X instruction
+   * Returns true if the instruction is a Load X instruction.
    *
-   * @return The LoadX value
+   * @return true if the instruction is a Load X instruction.
    */
   public boolean isLoadX()
   {
@@ -644,9 +655,10 @@ public class Instruction implements Cloneable, Serializable
 
   /**
    * Returns true if the instruction is a Operation (logical or arithmetic)
-   * instruction
+   *   instruction.
    *
-   * @return The Operation value
+   * @return true if the instruction is a Operation (logical or arithmetic)
+   *   instruction.
    */
   public boolean isOperation()
   {
@@ -654,9 +666,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Store instruction
+   * Returns true if the instruction is a Store instruction.
    *
-   * @return The Store value
+   * @return true if the instruction is a Store instruction.
    */
   public boolean isStore()
   {
@@ -664,9 +676,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Store X instruction
+   * Returns true if the instruction is a Store X instruction.
    *
-   * @return The StoreX value
+   * @return true if the instruction is a Store X instruction.
    */
   public boolean isStoreX()
   {
@@ -674,9 +686,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Add instruction
+   * Returns true if the instruction is a Add instruction.
    *
-   * @return The Add value
+   * @return true if the instruction is a Add instruction.
    */
   public boolean isAdd()
   {
@@ -684,7 +696,7 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a And instruction
+   * Returns true if the instruction is a And instruction.
    *
    * @return The And value
    */
@@ -694,9 +706,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Copy instruction
+   * Returns true if the instruction is a Copy instruction.
    *
-   * @return The Copy value
+   * @return true if the instruction is a Copy instruction.
    */
   public boolean isCopy()
   {
@@ -704,9 +716,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Decrement instruction
+   * Returns true if the instruction is a Decrement instruction.
    *
-   * @return The Decrement value
+   * @return true if the instruction is a Decrement instruction.
    */
   public boolean isDecrement()
   {
@@ -714,9 +726,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Divide instruction
+   * Returns true if the instruction is a Divide instruction.
    *
-   * @return The Divide value
+   * @return true if the instruction is a Divide instruction.
    */
   public boolean isDivide()
   {
@@ -724,9 +736,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a logical Equals instruction
+   * Returns true if the instruction is a logical Equals instruction.
    *
-   * @return The Equals value
+   * @return true if the instruction is a logical Equals instruction.
    */
   public boolean isEquals()
   {
@@ -735,9 +747,10 @@ public class Instruction implements Cloneable, Serializable
 
   /**
    * Returns true if the instruction is a logical Greater than or equals to
-   * instruction
+   *   instruction.
    *
-   * @return The GreaterThanOrEqualTo value
+   * @return true if the instruction is a logical Greater than or equals to
+   *   instruction.
    */
   public boolean isGreaterThanOrEqualTo()
   {
@@ -745,9 +758,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a logical Greater Than instruction
+   * Returns true if the instruction is a logical Greater Than instruction.
    *
-   * @return The GreaterThan value
+   * @return true if the instruction is a logical Greater Than instruction.
    */
   public boolean isGreaterThan()
   {
@@ -755,9 +768,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Increment instruction
+   * Returns true if the instruction is a Increment instruction.
    *
-   * @return The Increment value
+   * @return true if the instruction is a Increment instruction.
    */
   public boolean isIncrement()
   {
@@ -766,9 +779,10 @@ public class Instruction implements Cloneable, Serializable
 
   /**
    * Returns true if the instruction is a logical Less than or equal to
-   * instruction
+   *   instruction.
    *
-   * @return The LessThanOrEqualTo value
+   * @return true if the instruction is a logical Less than or equal to
+   *   instruction.
    */
   public boolean isLessThanOrEqualTo()
   {
@@ -776,9 +790,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Low bit instruction
+   * Returns true if the instruction is a Low bit instruction.
    *
-   * @return The Low value
+   * @return true if the instruction is a Low bit instruction.
    */
   public boolean isLow()
   {
@@ -786,9 +800,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a logical Less Than instruction
+   * Returns true if the instruction is a logical Less Than instruction.
    *
-   * @return The LessThan value
+   * @return true if the instruction is a logical Less Than instruction.
    */
   public boolean isLessThan()
   {
@@ -796,9 +810,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Modulus instruction
+   * Returns true if the instruction is a Modulus instruction.
    *
-   * @return The Modulus value
+   * @return true if the instruction is a Modulus instruction.
    */
   public boolean isModulus()
   {
@@ -806,9 +820,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Multiply instruction
+   * Returns true if the instruction is a Multiply instruction.
    *
-   * @return The Multiply value
+   * @return true if the instruction is a Multiply instruction.
    */
   public boolean isMultiply()
   {
@@ -816,9 +830,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a logical Not Equal to instruction
+   * Returns true if the instruction is a logical Not Equal to instruction.
    *
-   * @return The NotEqualTo value
+   * @return true if the instruction is a logical Not Equal to instruction.
    */
   public boolean isNotEqualTo()
   {
@@ -826,9 +840,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a Negative instruction
+   * Returns true if the instruction is a Negative instruction.
    *
-   * @return The Negative value
+   * @return true if the instruction is a Negative instruction.
    */
   public boolean isNegative()
   {
@@ -836,9 +850,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a logical Not instruction
+   * Returns true if the instruction is a logical Not instruction.
    *
-   * @return The Not value
+   * @return true if the instruction is a logical Not instruction.
    */
   public boolean isNot()
   {
@@ -846,9 +860,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a logical Or instruction
+   * Returns true if the instruction is a logical Or instruction.
    *
-   * @return The Or value
+   * @return true if the instruction is a logical Or instruction.
    */
   public boolean isOr()
   {
@@ -856,9 +870,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a return instruction
+   * Returns true if the instruction is a return instruction.
    *
-   * @return The Return value
+   * @return true if the instruction is a return instruction.
    */
   public boolean isReturn()
   {
@@ -866,9 +880,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a bitwise shift left instruction
+   * Returns true if the instruction is a bitwise shift left instruction.
    *
-   * @return The ShiftLeft value
+   * @return true if the instruction is a bitwise shift left instruction.
    */
   public boolean isShiftLeft()
   {
@@ -876,9 +890,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a bitwise shift right instruction
+   * Returns true if the instruction is a bitwise shift right instruction.
    *
-   * @return The ShiftRight value
+   * @return true if the instruction is a bitwise shift right instruction.
    */
   public boolean isShiftRight()
   {
@@ -886,9 +900,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a subtract instruction
+   * Returns true if the instruction is a subtract instruction.
    *
-   * @return The Subtract value
+   * @return true if the instruction is a subtract instruction.
    */
   public boolean isSubtract()
   {
@@ -896,9 +910,9 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
-   * Returns true if the instruction is a logical xor instruction
+   * Returns true if the instruction is a logical xor instruction.
    *
-   * @return The Xor value
+   * @return true if the instruction is a logical xor instruction.
    */
   public boolean isXor()
   {
