@@ -77,6 +77,11 @@ import org.apache.log4j.*;
 public class Kernel extends OSMessageHandler
 {
   /**
+   * Serial id.
+   */
+  private static final long serialVersionUID = 8922262686985556996L;
+
+  /**
    * Logging class.
    */
   private final static Logger log = Logger.getLogger(Kernel.class);

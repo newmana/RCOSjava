@@ -25,6 +25,11 @@ import org.apache.log4j.*;
 public class OSMessageHandler extends SimpleMessageHandler
 {
   /**
+   * Serial id.
+   */
+  private static final long serialVersionUID = -3208076811777456137L;
+
+  /**
    * Logging class.
    */
   private final static Logger log = Logger.getLogger(OSMessageHandler.class);

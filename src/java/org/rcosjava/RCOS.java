@@ -58,6 +58,11 @@ import org.rcosjava.software.terminal.TerminalManager;
 public class RCOS extends javax.swing.JApplet implements Runnable
 {
   /**
+   * Serial id.
+   */
+  private static final long serialVersionUID = 8487458619933951295L;
+
+  /**
    * Messaging constant for OS Post Office.
    */
   public final static String OS_POST_OFFICE_ID = "OSPOSTOFFICE";

@@ -35,6 +35,11 @@ import org.rcosjava.software.util.LIFOQueue;
 public class ProcessSchedulerPanel extends RCOSPanel
 {
   /**
+   * Serial id.
+   */
+  private static final long serialVersionUID = 5574586892694168300L;
+
+  /**
    * The process scheduler display area.
    */
   private GraphicsEngine engine;
@@ -183,7 +188,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param newProcessSchedulerAnimator the new process scheduler animator.
    */
-  synchronized void setManager(ProcessSchedulerAnimator newProcessSchedulerAnimator)
+  void setManager(ProcessSchedulerAnimator newProcessSchedulerAnimator)
   {
     myProcessScheduler = newProcessSchedulerAnimator;
   }
@@ -195,7 +200,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param c Description of Parameter
    */
-  public synchronized void setupLayout(Component c)
+  public void setupLayout(Component c)
   {
     // Initialise the graphics engine.
     engine = new GraphicsEngine();
@@ -333,7 +338,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     optionsPanel.add(schedulerOption);
     schedulerOption.addItemListener(new SchedulerSelection());
 
-    engine.setBackgroundColour(defaultBgColour);
+    engine.setBackground(Color.white);
     engine.addMouseListener(new MTGOSelection());
     processPanel.add(engine);
 
@@ -346,7 +351,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param delay the delay value that was set.
    */
-  synchronized void setDelay(long newDelay)
+  void setDelay(long newDelay)
   {
     if (newDelay == 1)
     {
@@ -375,7 +380,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param newQuantum the quantum value to select.
    */
-  synchronized void setQuantum(int newQuantum)
+  void setQuantum(int newQuantum)
   {
     Integer newValue = new Integer(newQuantum);
     quantumOption.setSelectedItem(newValue.toString());
@@ -385,7 +390,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
   /**
    * Sets the currently selected item for the queue type.
    */
-  synchronized void setQueueType(int newQueueType)
+  void setQueueType(int newQueueType)
   {
     if (newQueueType == 1)
     {
@@ -410,7 +415,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param g graphics object.
    */
-  public synchronized void paintComponent(Graphics g)
+  public void paintComponent(Graphics g)
   {
     super.paintComponent(g);
 
@@ -447,7 +452,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    * Perhaps a rather dumb way of creating the movement arrays between the CPU
    * and queues. There must be a better way?
    */
-  synchronized void setupMovement()
+  void setupMovement()
   {
     cpuPic = new MTGO(myImages[0], "RCOS CPU", false);
     cpuPic.setPriority(1);
@@ -608,7 +613,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid Description of Parameter
    */
-  synchronized void processFinished(int pid)
+  void processFinished(int pid)
   {
     MTGO tmpMTGO = engine.returnMTGO("P" + pid);
 
@@ -626,7 +631,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid Description of Parameter
    */
-  synchronized void killProcess(int pid)
+  void killProcess(int pid)
   {
     // Remove it from any queues.
     processFinished(pid);
@@ -638,7 +643,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid is the unique process identifier.
    */
-  synchronized void cpuToBlocked(int pid)
+  void cpuToBlocked(int pid)
   {
     if (movementSetup)
     {
@@ -660,7 +665,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid is the unique process indentifier.
    */
-  synchronized void blockedToReady(int pid)
+  void blockedToReady(int pid)
   {
     if (movementSetup)
     {
@@ -682,7 +687,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid is the unique process identifier.
    */
-  synchronized void cpuToReady(int pid)
+  void cpuToReady(int pid)
   {
     if (movementSetup)
     {
@@ -704,7 +709,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid is the unique process identifier.
    */
-  synchronized void readyToCPU(int pid)
+  void readyToCPU(int pid)
   {
     if (movementSetup)
     {
@@ -727,7 +732,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid Description of Parameter
    */
-  synchronized void newProcess(int pid)
+  void newProcess(int pid)
   {
     MTGO tmpPic;
 
@@ -754,7 +759,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid Description of Parameter
    */
-  synchronized void zombieToReady(int pid)
+  void zombieToReady(int pid)
   {
     MTGO tmpMTGO = engine.returnMTGO("P" + pid);
 
@@ -776,7 +781,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid Description of Parameter
    */
-  synchronized void moveReadyQueue(int pid, int itemCount)
+  void moveReadyQueue(int pid, int itemCount)
   {
     if (movementSetup)
     {
@@ -799,7 +804,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid Description of Parameter
    */
-  synchronized void moveBlockedQueue(int pid, int itemCount)
+  void moveBlockedQueue(int pid, int itemCount)
   {
     if (movementSetup)
     {
@@ -822,7 +827,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid process id to move.
    */
-  synchronized void moveZombieQueue(int pid, int itemCount)
+  void moveZombieQueue(int pid, int itemCount)
   {
     if (movementSetup)
     {
@@ -922,7 +927,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param queueType the type of the queue ready, blocked or zombie.
    */
-  synchronized void refreshQueue(int queueType, LIFOQueue queue)
+  void refreshQueue(int queueType, LIFOQueue queue)
   {
     int xPosition = engine.getCenterX() - ((noBoxes / 2) * boxWidth);
     int yPosition = (queueType * height) + fm.getHeight() + 5;
@@ -946,7 +951,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param int processId the id of the process to display.
    */
-  private synchronized void displayPCB(int processId)
+  private void displayPCB(int processId)
   {
     myProcessScheduler.displayPCB(processId);
   }

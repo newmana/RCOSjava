@@ -30,6 +30,11 @@ import org.apache.log4j.*;
 public class AnimatorOffice extends PostOffice
 {
   /**
+   * Serial id.
+   */
+  private static final long serialVersionUID = 1157444033773059874L;
+
+  /**
    * Logging class.
    */
   private final static Logger log = Logger.getLogger(AnimatorOffice.class);

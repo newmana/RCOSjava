@@ -25,6 +25,11 @@ import org.apache.log4j.*;
 public class OSOffice extends PostOffice
 {
   /**
+   * Serial id.
+   */
+  private static final long serialVersionUID = -145608613943167252L;
+
+  /**
    * Logging class.
    */
   private final static Logger log = Logger.getLogger(OSOffice.class);

@@ -26,6 +26,11 @@ import org.rcosjava.software.util.LIFOQueue;
 public class IPCManagerPanel extends RCOSPanel
 {
   /**
+   * Serial id.
+   */
+  private static final long serialVersionUID = 1389081753585298701L;
+
+  /**
    * Default display when there is no semaphore or shared memory segments to
    * display.
    */

@@ -39,6 +39,11 @@ import org.rcosjava.software.util.FIFOQueue;
 public class HardwareTerminal extends RCOSFrame
 {
   /**
+   * Serial id.
+   */
+  private static final long serialVersionUID = 6062073892507797646L;
+
+  /**
    * The physical output terminal display hardware (the screen).
    */
   private HardwareTerminalScreen myScreen;

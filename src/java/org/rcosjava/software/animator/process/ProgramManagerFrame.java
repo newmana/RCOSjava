@@ -31,6 +31,11 @@ import org.rcosjava.software.util.FIFOQueue;
 public class ProgramManagerFrame extends RCOSFrame
 {
   /**
+   * Serial id.
+   */
+  private static final long serialVersionUID = -5939612647673221196L;
+
+  /**
    * Description of the Field
    */
   private ProgramManagerAnimator myProgramManager;

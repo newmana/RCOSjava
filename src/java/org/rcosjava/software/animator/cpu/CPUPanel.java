@@ -16,6 +16,11 @@ import org.rcosjava.software.animator.RCOSPanel;
 public class CPUPanel extends RCOSPanel
 {
   /**
+   * Serial id.
+   */
+  private static final long serialVersionUID = -4236608608873955755L;
+
+  /**
    * My peer animator.
    */
   private CPUAnimator cpuAnimator;

@@ -28,6 +28,11 @@ import org.rcosjava.software.process.ProcessPriority;
 public class ProcessManagerFrame extends RCOSFrame
 {
   /**
+   * Serial id.
+   */
+  private static final long serialVersionUID = 5731170970748003127L;
+
+  /**
    * The process manager that I am representing.
    */
   private ProcessManagerAnimator myProcessManager;
