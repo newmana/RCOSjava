@@ -1,0 +1,8 @@
+# This file is part of the Soma web server, release .80
+# virtual.hosts - HTTP/1.1 v-hosts
+#
+
+
+# If nothing else, fill this in with a a valid path!
+localhost=/source/test/dist
+
