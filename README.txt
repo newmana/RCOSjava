@@ -53,8 +53,9 @@ shell files all live in the same directory.  So if you generate the classes
 in a different directory copy the required batch/script file and the pll2
 directory.
 
-The only executable guaranteed to work in "numbers.pcd".  The others will
-work soon but this one is the only tested one so far.
+The executables guaranteed to work are "sem.pcd", "sem2.pcd", "third.pcd"
+and "numbers.pcd".  The others will work soon but this one is the only 
+tested one so far.
 
 For 95/98 and NT users please ensure that 'hosts' file is set-up correctly.
 The program can appear to hang if it can't resolve your computers name.
@@ -106,10 +107,10 @@ to bring up the hypertext.
 ** Known bugs **
 ===================
 The currently known bugs are:
-* When a program is running any secondary programs will occassionaly run
-incorrectly (this is getting better though).
 * You must be able to connect to the Internet to access the DTD for the
 XML based recording.  If you are not connected then playback will fail.
+* The server side client sometimes crashes.  Although this is getting
+better.
 
 Please submit any bugs (with OS, Java VM, Browser and any other details)
 to the email addresses below.
@@ -126,4 +127,4 @@ newmana@netscape.net
 David Jones
 d.jones@cqu.edu.au
 
-Last Update: 2/4/2001
+Last Update: 25th April 2001
