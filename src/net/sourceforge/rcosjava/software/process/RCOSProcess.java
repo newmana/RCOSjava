@@ -208,6 +208,11 @@ public class RCOSProcess implements Serializable
     return priority;
   }
 
+  public void setPriority(int newPriority)
+  {
+    priority = newPriority;
+  }
+
   public String getFileName()
   {
     return fileName;
