@@ -1,7 +1,7 @@
 // ************************************************************
 // FILE:    SharedMemory.java
 // PURPOSE: Base Shared Memory class - uses Memory class
-//		      as the storage type.
+//          as the storage type.
 // AUTHOR:  Bruce Jamieson
 // MODIFIED: Andrew Newman
 // HISTORY: 30/03/96  Completed.
@@ -100,8 +100,8 @@ public class SharedMemory
       // Do a write
       ShrmBlock.write(aOffset, aByte);
       //return sOldValue;
-			//return ShrmBlock.read(aOffset,1);
-			return 0;
+      //return ShrmBlock.read(aOffset,1);
+      return 0;
     }
   }
 
