@@ -18,72 +18,67 @@ import java.lang.reflect.Method;
  * @created 22nd July 2002
  * @version 1.00 $Date$
  */
-public class RCOSPanel extends JPanel implements Serializable
+public abstract class RCOSPanel extends JPanel implements Serializable
 {
   /**
    * Default colour to display text on all buttons (Yellow).
    */
-  public static Color buttonColour = Color.yellow;
+  public transient static Color buttonColour = Color.yellow;
 
   /**
    * Default colour to display on all radio text colours (Dark Gray).
    */
-  public static Color choiceColour = Color.darkGray;
+  public transient static Color choiceColour = Color.darkGray;
 
   /**
    * Default colour of text to display on all drop down menus (Dark Gray).
    */
-  public static Color listColour = Color.darkGray;
+  public transient static Color listColour = Color.darkGray;
 
   /**
    * Default colour to use on all text boxes (Dark Gray).
    */
-  public static Color textBoxColour = Color.darkGray;
+  public transient static Color textBoxColour = Color.darkGray;
 
   /**
    * Default text colour of all terminals (Green).
    */
-  public static Color terminalColour = Color.green;
+  public transient static Color terminalColour = Color.green;
 
   /**
    * Default background of all windows (Black).
    */
-  public static Color defaultBgColour = Color.black;
+  public transient static Color defaultBgColour = Color.black;
 
   /**
    * Default foreground colour of all text (White).
    */
-  public static Color defaultFgColour = Color.white;
+  public transient static Color defaultFgColour = Color.white;
 
   /**
    * Default font size (TimesRoman, Plain, 12).
    */
-  public static Font defaultFont = new Font("TimesRoman", Font.PLAIN, 11);
+  public transient static Font defaultFont = new Font("TimesRoman", Font.PLAIN, 11);
 
   /**
    * Default label font size (TimesRoman, Plain, 14).
    */
-  public static Font labelFont = new Font("TimesRoman", Font.PLAIN, 11);
+  public transient static Font labelFont = new Font("TimesRoman", Font.PLAIN, 11);
 
   /**
    * Default button font size (Courier, Bold, 14).
    */
-  public static Font buttonFont = new Font("Courier", Font.BOLD, 11);
+  public transient static Font buttonFont = new Font("Courier", Font.BOLD, 11);
 
   /**
    * Default terminal font size (Courier, Plain, 10).
    */
-  public static Font terminlFont = new Font("Courier", Font.PLAIN, 10);
+  public transient static Font terminlFont = new Font("Courier", Font.PLAIN, 10);
 
   /**
    * Default title font size (TimesRoman, Plain, 16).
    */
-  public static Font titleFont = new Font("TimesRoman", Font.PLAIN, 16);
-
-  /**
-   * Description of the Field
-   */
-  protected Component myComponent;
+  public transient static Font titleFont = new Font("TimesRoman", Font.PLAIN, 16);
 
   /**
    * Constructor for the RCOSFrame object
@@ -111,10 +106,7 @@ public class RCOSPanel extends JPanel implements Serializable
    *
    * @param c Description of Parameter
    */
-  public void setupLayout(Component c)
-  {
-    myComponent = c;
-  }
+  public abstract void setupLayout(Component c);
 
   /**
    * Added for KOML support. Does nothing.

@@ -58,11 +58,6 @@ public class IPCManagerPanel extends RCOSPanel
   private IPCManagerAnimator myAnimator;
 
   /**
-   * Component used for UI display.
-   */
-  private Component myComponent;
-
-  /**
    * Window dimensions.
    */
   private int windowWidth, windowHeight;
@@ -130,8 +125,6 @@ public class IPCManagerPanel extends RCOSPanel
    */
   public void setupLayout(Component c)
   {
-    super.setupLayout(c);
-
     // Label and constraints used by all the following code for layout.
     JLabel tmpLabel;
     JComponent tmpPanel;

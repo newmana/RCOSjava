@@ -36,11 +36,6 @@ public class MemoryManagerPanel extends RCOSPanel
   private MemoryManagerAnimator myAnimator;
 
   /**
-   * Component used for UI display.
-   */
-  private Component myComponent;
-
-  /**
    * Window dimensions.
    */
   private int windowWidth, windowHeight;
@@ -77,8 +72,6 @@ public class MemoryManagerPanel extends RCOSPanel
    */
   public void setupLayout(Component c)
   {
-    super.setupLayout(c);
-
     setBackground(defaultBgColour);
     setForeground(defaultFgColour);
     setLayout(new BorderLayout());

@@ -64,11 +64,10 @@ public class ProgramManagerAnimator extends RCOSAnimator
    * @param postOffice the post office to register to.
    * @param pmImages the images to use for process and buttons.
    */
-  public ProgramManagerAnimator(AnimatorOffice postOffice,
-      ImageIcon[] pmImages)
+  public ProgramManagerAnimator(AnimatorOffice postOffice)
   {
     super(MESSENGING_ID, postOffice);
-    pmFrame = new ProgramManagerFrame(325, 300, pmImages, this);
+    pmFrame = new ProgramManagerFrame(325, 300, this);
   }
 
   /**

@@ -41,11 +41,6 @@ public class ProgramManagerFrame extends RCOSFrame
   private JTextField fileNameTextField = new JTextField(20);
 
   /**
-   * Description of the Field
-   */
-  private Image myImages[];
-
-  /**
    * List of directories.
    */
   private JList directoryListBox;
@@ -80,22 +75,13 @@ public class ProgramManagerFrame extends RCOSFrame
    *
    * @param x Description of Parameter
    * @param y Description of Parameter
-   * @param pmImages Description of Parameter
    * @param thisProgramManager Description of Parameter
    */
-  public ProgramManagerFrame(int x, int y, ImageIcon[] images,
+  public ProgramManagerFrame(int x, int y,
       ProgramManagerAnimator thisProgramManager)
   {
     super();
     setTitle("Program Manager");
-    if (images != null)
-    {
-      myImages = new Image[images.length];
-      for (int index = 0; index < images.length-1; index++)
-      {
-        myImages[index] = images[index].getImage();
-      }
-    }
     myProgramManager = thisProgramManager;
     setSize(x, y);
   }
