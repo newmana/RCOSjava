@@ -1,5 +1,6 @@
 package net.sourceforge.rcosjava.messaging.messages;
 
+import net.sourceforge.rcosjava.messaging.postoffices.SimpleMessageHandler;
 import net.sourceforge.rcosjava.messaging.postoffices.PostOffice;
 
 /**
@@ -11,6 +12,18 @@ import net.sourceforge.rcosjava.messaging.postoffices.PostOffice;
  */
 public class RemoveAllHandlers extends MessageAdapter
 {
+  /**
+   * Creates a message with a known body (should be serializable) and a known
+   * source.
+   *
+   * @param newSource sets the source of the message.
+   * @param newBody the message contents.
+   */
+  public RemoveAllHandlers(SimpleMessageHandler newSource, Object newBody)
+  {
+    super(newSource, newBody);
+  }
+
   /**
    * Upon receiving the message the post office clearHandlers is called.
    *

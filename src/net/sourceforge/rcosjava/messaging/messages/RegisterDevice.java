@@ -1,5 +1,6 @@
 package net.sourceforge.rcosjava.messaging.messages;
 
+import net.sourceforge.rcosjava.messaging.postoffices.SimpleMessageHandler;
 import net.sourceforge.rcosjava.messaging.postoffices.PostOffice;
 
 /**
@@ -13,5 +14,16 @@ import net.sourceforge.rcosjava.messaging.postoffices.PostOffice;
  */
 public class RegisterDevice extends MessageAdapter
 {
+  /**
+   * Creates a message with a known body (should be serializable) and a known
+   * source.
+   *
+   * @param newSource sets the source of the message.
+   * @param newBody the message contents.
+   */
+  public RegisterDevice(SimpleMessageHandler newSource, Object newBody)
+  {
+    super(newSource, newBody);
+  }
 }
 
