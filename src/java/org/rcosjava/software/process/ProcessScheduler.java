@@ -1,6 +1,7 @@
 package org.rcosjava.software.process;
 
 import java.io.*;
+import java.util.*;
 
 import org.rcosjava.RCOS;
 import org.rcosjava.messaging.messages.os.AllocatePages;
@@ -60,6 +61,11 @@ public class ProcessScheduler extends OSMessageHandler
    * The numeric identifier of the Zombie Queue.
    */
   public final static int ZOMBIEQ = 3;
+
+  /**
+   * The current set of queues whether zombie, ready, blocked or executing.
+   */
+  private static HashMap allProcesses = new HashMap();
 
   /**
    * Represents a queue for each of the different type of processes.
@@ -173,6 +179,9 @@ public class ProcessScheduler extends OSMessageHandler
     // Create new RCOSProcess.
     RCOSProcess newTmpProcess = new RCOSProcess(newPID, messageBody);
 
+    // Add to set of new queues
+    allProcesses.put(new Integer(newTmpProcess.getPID()), newTmpProcess);
+
     MemoryRequest newMemoryRequest;
     int numberOfPages;
 
@@ -232,11 +241,11 @@ public class ProcessScheduler extends OSMessageHandler
   public void processAllocatedTerminal(RCOSProcess newProcess,
       String newTerminalId)
   {
-    // Try and retrieve the next process in the ZombieQ
-    RCOSProcess tmpProcess = removeFromZombieCreatedQ(newProcess.getPID());
-
-    if (tmpProcess != null)
+    try
     {
+      // Try and retrieve the next process in the ZombieQ
+      RCOSProcess tmpProcess = removeFromZombieCreatedQ(newProcess.getPID());
+
       // If a process is retrieve allocate terminal and move
       // to Ready Q.
       tmpProcess.setTerminalId(newTerminalId);
@@ -244,6 +253,12 @@ public class ProcessScheduler extends OSMessageHandler
 
       ZombieToReady newMessage = new ZombieToReady(this, tmpProcess);
       sendMessage(newMessage);
+    }
+    catch (ProcessNotFoundException pnfe)
+    {
+      System.err.println("Failed to remove zombie process in allocate " +
+          "terminal: " + newProcess.getPID());
+      pnfe.printStackTrace();
     }
   }
 
@@ -266,9 +281,18 @@ public class ProcessScheduler extends OSMessageHandler
    */
   public void runningToReady(RCOSProcess newProcess)
   {
-    RCOSProcess rm = removeExecutingProcess(newProcess.getPID());
-    newProcess.setStatus(ProcessState.READY);
-    insertIntoReadyQueue(newProcess);
+    try
+    {
+      RCOSProcess rm = removeExecutingProcess(newProcess.getPID());
+      newProcess.setStatus(ProcessState.READY);
+      insertIntoReadyQueue(newProcess);
+    }
+    catch (ProcessNotFoundException pnfe)
+    {
+      System.err.println("Failed to remove executing process in Running to " +
+          "blocked: " + newProcess.getPID());
+      pnfe.printStackTrace();
+    }
   }
 
   /**
@@ -279,9 +303,18 @@ public class ProcessScheduler extends OSMessageHandler
    */
   public void runningToBlocked(RCOSProcess newProcess)
   {
-    RCOSProcess tmpProcess = removeExecutingProcess(newProcess.getPID());
-    newProcess.setStatus(ProcessState.BLOCKED);
-    insertIntoBlockedQ(newProcess);
+    try
+    {
+      RCOSProcess tmpProcess = removeExecutingProcess(newProcess.getPID());
+      newProcess.setStatus(ProcessState.BLOCKED);
+      insertIntoBlockedQ(newProcess);
+    }
+    catch (ProcessNotFoundException pnfe)
+    {
+      System.err.println("Failed to remove executing process in Running to " +
+          "blocked: " + newProcess.getPID());
+      pnfe.printStackTrace();
+    }
   }
 
   /**
@@ -293,12 +326,21 @@ public class ProcessScheduler extends OSMessageHandler
    */
   public void blockedToReady(RCOSProcess process)
   {
-    // Get the process from the blocked Q
-    RCOSProcess tmpProcess = removeFromBlockedQ(process.getPID());
+    try
+    {
+      // Get the process from the blocked Q
+      RCOSProcess tmpProcess = removeFromBlockedQ(process.getPID());
 
-    // Set it to READY status and move it to the Ready Q.
-    tmpProcess.setStatus(ProcessState.READY);
-    insertIntoReadyQueue(tmpProcess);
+      // Set it to READY status and move it to the Ready Q.
+      tmpProcess.setStatus(ProcessState.READY);
+      insertIntoReadyQueue(tmpProcess);
+    }
+    catch (ProcessNotFoundException pnfe)
+    {
+      System.err.println("Failed to remove blocked process in Blocked to " +
+          "Ready: " + process.getPID());
+      pnfe.printStackTrace();
+    }
   }
 
   /**
@@ -309,8 +351,17 @@ public class ProcessScheduler extends OSMessageHandler
    */
   public void processFinished(RCOSProcess oldProcess)
   {
-    removeExecutingProcess(oldProcess.getPID());
-    cleanupResources(oldProcess);
+    try
+    {
+      removeExecutingProcess(oldProcess.getPID());
+      cleanupResources(oldProcess);
+    }
+    catch (ProcessNotFoundException pnfe)
+    {
+      System.err.println("Failed to remove executing process in Running to " +
+          "blocked: " + oldProcess.getPID());
+      pnfe.printStackTrace();
+    }
   }
 
   /**
@@ -321,28 +372,39 @@ public class ProcessScheduler extends OSMessageHandler
    */
   public void killProcess(RCOSProcess process)
   {
-    RCOSProcess tmpProcess = process;
+    // Get the real process
+    RCOSProcess tmpProcess = (RCOSProcess)
+        allProcesses.get(new Integer(process.getPID()));
+    ProcessState state = tmpProcess.getState();
 
-    //Find it if it's running
-    tmpProcess = removeExecutingProcess(process.getPID());
-    if (tmpProcess == null)
+    try
     {
+      // Do not remove it if it's running - handle this with kernel's
+      // ProcessFinished
+
       // If it's in ready q.
-      tmpProcess = removeFromReadyQueue(process.getPID());
-      if (tmpProcess == null)
+      if (state == ProcessState.READY)
       {
-        // If it's in blocked q.
+        tmpProcess = removeFromReadyQueue(process.getPID());
+      }
+      // If it's in blocked q.
+      else if (state == ProcessState.BLOCKED)
+      {
         tmpProcess = removeFromBlockedQ(process.getPID());
-        if (tmpProcess == null)
-        {
-          // If it's in zombie q.
-          tmpProcess = removeFromZombieCreatedQ(process.getPID());
-        }
       }
-      if (tmpProcess != null)
+      // If it's in zombie q.
+      else if (state == ProcessState.ZOMBIE)
       {
-        cleanupResources(tmpProcess);
+        tmpProcess = removeFromZombieCreatedQ(process.getPID());
       }
+
+      cleanupResources(tmpProcess);
+    }
+    catch (ProcessNotFoundException pnfe)
+    {
+      System.err.println("Failed to kill process.  State: " +
+          process.getState() + ", PID: " + process.getPID());
+      pnfe.printStackTrace();
     }
   }
 
@@ -613,20 +675,14 @@ public class ProcessScheduler extends OSMessageHandler
    * Removes a given process from the Zombie Created Queue.
    *
    * @param pid the process to remove
-   * @return Description of the Returned Value
+   * @return the process that was removed.
+   * @throws ProcessNotFoundException if the given pid was not found on the
+   *     executing queue.
    */
   private RCOSProcess removeFromZombieCreatedQ(int pid)
+      throws ProcessNotFoundException
   {
-    try
-    {
-      return zombieCreatedQueue.removeProcess(pid);
-    }
-    catch (ProcessNotFoundException pnfe)
-    {
-      pnfe.printStackTrace();
-      System.err.println("Couldn't find the process id: " + pid);
-      return null;
-    }
+    return zombieCreatedQueue.removeProcess(pid);
   }
 
   /**
@@ -643,20 +699,14 @@ public class ProcessScheduler extends OSMessageHandler
    * Removes a given process from the Blocked Queue.
    *
    * @param pid the process to remove
-   * @return Description of the Returned Value
+   * @return the process in the queue.
+   * @throws ProcessNotFoundException if the given pid was not found on the
+   *   executing queue.
    */
   private RCOSProcess removeFromBlockedQ(int pid)
+      throws ProcessNotFoundException
   {
-    try
-    {
-      return blockedQueue.removeProcess(pid);
-    }
-    catch (ProcessNotFoundException pnfe)
-    {
-      pnfe.printStackTrace();
-      System.err.println("Couldn't find the process id: " + pid);
-      return null;
-    }
+    return blockedQueue.removeProcess(pid);
   }
 
   /**
@@ -673,40 +723,28 @@ public class ProcessScheduler extends OSMessageHandler
    * Removes a given process from the Ready Queue.
    *
    * @param pid the process to remove
-   * @return Description of the Returned Value
+   * @return the process in the queue.
+   * @throws ProcessNotFoundException if the given pid was not found on the
+   *   executing queue.
    */
   private RCOSProcess removeFromReadyQueue(int pid)
+      throws ProcessNotFoundException
   {
-    try
-    {
-      return readyQueue.removeProcess(pid);
-    }
-    catch (ProcessNotFoundException pnfe)
-    {
-      pnfe.printStackTrace();
-      System.err.println("Couldn't find the process id: " + pid);
-      return null;
-    }
+    return readyQueue.removeProcess(pid);
   }
 
   /**
    * Removes a given process from the Executing Queue.
    *
    * @param pid the process id to remove it from.
-   * @return Description of the Returned Value
+   * @return the process that was removed.
+   * @throws ProcessNotFoundException if the given pid was not found on the
+   *     executing queue.
    */
   private RCOSProcess removeExecutingProcess(int pid)
+      throws ProcessNotFoundException
   {
-    try
-    {
-      return executingQueue.removeProcess(pid);
-    }
-    catch (ProcessNotFoundException pnfe)
-    {
-      pnfe.printStackTrace();
-      System.err.println("Couldn't find the process id: " + pid);
-      return null;
-    }
+    return executingQueue.removeProcess(pid);
   }
 
   /**
@@ -721,15 +759,16 @@ public class ProcessScheduler extends OSMessageHandler
     {
       TerminalRelease msg = new TerminalRelease(this,
           oldProcess.getTerminalId());
-
       sendMessage(msg);
     }
 
     // Deallocate Memory
     DeallocateMemory deallocateMsg = new DeallocateMemory(this,
         oldProcess.getPID());
-
     sendMessage(deallocateMsg);
+
+    // Remove from all process hash map
+    allProcesses.remove(new Integer(oldProcess.getPID()));
   }
 
   /**
