@@ -15,6 +15,7 @@ public class KOMLConstants {
 //    public static final String KOML_DTD
 //	= "http://www.inria.fr/koala/XML/koml12.dtd";
     public static String KOML_DTD = "http://localhost/pll2/koml12.dtd";
+    public static String XML_PROPERTIES = "XML.properties";
 //     backward compatibility with an old version ..
     public static final String OLD_VERSION = "24, September 1998";
     public static final int MAJOR_VERSION = 1;
