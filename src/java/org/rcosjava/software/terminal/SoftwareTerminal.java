@@ -18,6 +18,8 @@ import org.rcosjava.software.interrupt.TerminalInterruptHandler;
 import org.rcosjava.software.process.RCOSProcess;
 import org.rcosjava.software.util.LIFOQueue;
 
+import org.apache.log4j.*;
+
 /**
  * OS software that manages a hardware terminal. The basic idea is that there is
  * a hardware terminal representing the physical properties of the screen and
@@ -36,6 +38,11 @@ import org.rcosjava.software.util.LIFOQueue;
  */
 public class SoftwareTerminal extends OSMessageHandler
 {
+  /**
+   * Logging class.
+   */
+  private final static Logger log = Logger.getLogger(SoftwareTerminal.class);
+
   /**
    * The physical hardware terminal screen to receive and display input/output.
    */
@@ -147,6 +154,11 @@ public class SoftwareTerminal extends OSMessageHandler
     {
       KeyEvent theEvent = (KeyEvent) softwareBuffer.retrieve();
 
+      if (log.isInfoEnabled())
+      {
+        log.info("ChIn event: " + theEvent.getKeyChar());
+      }
+
       // Print the output.
       hardwareTerminal.printChr(theEvent.getKeyChar());
 
@@ -159,9 +171,7 @@ public class SoftwareTerminal extends OSMessageHandler
     else
     {
       processBlocked = true;
-
       BlockCurrentProcess msg = new BlockCurrentProcess(this);
-
       sendMessage(msg);
     }
   }
@@ -181,6 +191,11 @@ public class SoftwareTerminal extends OSMessageHandler
 
       while (!softwareBuffer.atTail())
       {
+        if (log.isInfoEnabled())
+        {
+          log.info("NumIn event: " + ((KeyEvent) softwareBuffer.peek()).getKeyChar());
+        }
+
         if (isNumber((KeyEvent) softwareBuffer.peek()))
         {
           found = true;
@@ -203,15 +218,12 @@ public class SoftwareTerminal extends OSMessageHandler
 
       // return character back
       ReturnValue msg = new ReturnValue(this, (short) number);
-
       sendMessage(msg);
     }
     else
     {
       processBlocked = true;
-
       BlockCurrentProcess msg = new BlockCurrentProcess(this);
-
       sendMessage(msg);
     }
   }
@@ -223,9 +235,19 @@ public class SoftwareTerminal extends OSMessageHandler
    */
   public void keyPress()
   {
+    if (log.isInfoEnabled())
+    {
+      log.info("Keypress is buffer empty: " + hardwareTerminal.bufferEmpty());
+    }
+
     if (!hardwareTerminal.bufferEmpty())
     {
       KeyEvent theEvent = hardwareTerminal.getKeyFromBuffer();
+
+      if (log.isInfoEnabled())
+      {
+        log.info("Keypress event: " + theEvent);
+      }
 
       // perform checks on type of key
       // this should eventually be moved into a seperate function
@@ -237,7 +259,6 @@ public class SoftwareTerminal extends OSMessageHandler
         if (currentProcess != -1)
         {
           Kill msg = new Kill(this, currentProcess);
-
           sendMessage(msg);
         }
       }
@@ -266,7 +287,6 @@ public class SoftwareTerminal extends OSMessageHandler
   public void sendInterrupt(Interrupt newInterrupt)
   {
     HandleInterrupt msg = new HandleInterrupt(this, newInterrupt);
-
     sendMessage(msg);
   }
 
@@ -277,7 +297,6 @@ public class SoftwareTerminal extends OSMessageHandler
   {
     int terminalNo = Integer.parseInt(hardwareTerminal.getTitle().substring(9));
     TerminalToggle msg = new TerminalToggle(this, terminalNo);
-
     sendMessage(msg);
   }
 

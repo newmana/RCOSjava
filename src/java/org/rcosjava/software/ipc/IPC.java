@@ -27,6 +27,8 @@ import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.messaging.postoffices.os.OSOffice;
 import org.rcosjava.software.util.SemaphoreQueue;
 
+import org.apache.log4j.*;
+
 /**
  * Provide Shared memory and semaphore facilities to the system.
  * <P>
@@ -41,6 +43,11 @@ import org.rcosjava.software.util.SemaphoreQueue;
  */
 public class IPC extends OSMessageHandler
 {
+  /**
+   * Logging class.
+   */
+  private final static Logger log = Logger.getLogger(IPC.class);
+
   /**
    * Unique message id for the os messaging queue.
    */
@@ -108,6 +115,12 @@ public class IPC extends OSMessageHandler
     {
       semaphoreCount++;
 
+      if (log.isInfoEnabled())
+      {
+        log.info("Creating semaphore: " + semaphoreName + " count " +
+          semaphoreCount + " pid " + pid + " init value " + initValue);
+      }
+
       // We give this nice process a semaphore
       Semaphore newSemaphore = new Semaphore(semaphoreName, semaphoreCount, pid,
           initValue);
@@ -141,6 +154,11 @@ public class IPC extends OSMessageHandler
    */
   public void semaphoreOpen(String semaphoreName, int pid)
   {
+    if (log.isInfoEnabled())
+    {
+      log.info("Opening semaphore: " + semaphoreName + " pid " + pid);
+    }
+
     // Check that the semaphore exists - if it does then open it
     if (getSemaphoreTable().isMember(semaphoreName))
     {
@@ -152,15 +170,18 @@ public class IPC extends OSMessageHandler
 
       int semId = existingSemaphore.getId();
 
+      if (log.isInfoEnabled())
+      {
+        log.info("Opened semaphore: " + semaphoreName + " id " + semId);
+      }
+
       // Done.  Now we return a message with the id?
       ReturnValue returnMessage = new ReturnValue(this, (short) semId);
-
       sendMessage(returnMessage);
 
       //Let other components know that the semaphore was created
       SemaphoreOpened openedMessage = new SemaphoreOpened(this,
           existingSemaphore.getName(), pid, existingSemaphore.getValue());
-
       sendMessage(openedMessage);
     }
     else
@@ -168,7 +189,6 @@ public class IPC extends OSMessageHandler
       // The semaphore does not exist (someone trying to open
       // a "non created" semaphore)
       ReturnValue returnMessage = new ReturnValue(this, (short) -1);
-
       sendMessage(returnMessage);
     }
   }
@@ -181,6 +201,11 @@ public class IPC extends OSMessageHandler
    */
   public void semaphoreWait(int semaphoreId, int pid)
   {
+    if (log.isInfoEnabled())
+    {
+      log.info("Waiting semaphore: " + semaphoreId + " pid " + pid);
+    }
+
     if (getSemaphoreTable().isMember(semaphoreId))
     {
       // The semaphore exists - now do a wait on it
@@ -268,6 +293,12 @@ public class IPC extends OSMessageHandler
    */
   public void sempahoreClose(int semaphoreId, int pid)
   {
+    if (log.isInfoEnabled())
+    {
+      log.info("Closing: " + semaphoreId + " process id: " + pid);
+      log.info("Found semaphore: " + getSemaphoreTable().isMember(semaphoreId));
+    }
+
     if (getSemaphoreTable().isMember(semaphoreId))
     {
       // Check that the semaphore exists - it does
@@ -278,6 +309,10 @@ public class IPC extends OSMessageHandler
 
       if (noConnectedProcesses == 0)
       {
+        if (log.isInfoEnabled())
+        {
+          log.info("Removing semaphore: " + existingSemaphore);
+        }
         // Ok - That was the last connected PID
         // Remove sempahore
         getSemaphoreTable().remove(existingSemaphore);
