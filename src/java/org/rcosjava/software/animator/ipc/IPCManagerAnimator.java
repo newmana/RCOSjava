@@ -6,7 +6,6 @@ import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.software.animator.RCOSAnimator;
 import org.rcosjava.software.animator.RCOSPanel;
-import org.rcosjava.software.animator.memory.MemoryGraphic;
 import org.rcosjava.software.ipc.SharedMemory;
 import org.rcosjava.software.memory.MemoryRequest;
 import org.rcosjava.software.memory.MemoryReturn;
@@ -22,12 +21,12 @@ import org.rcosjava.software.memory.MemoryReturn;
 public class IPCManagerAnimator extends RCOSAnimator
 {
   /**
-   * Description of the Field
+   * Unique identifier to register to the animator post office.
    */
   private final static String MESSENGING_ID = "IPCManagerAnimator";
 
   /**
-   * Description of the Field
+   * The panel in which to display all of the results to.
    */
   private IPCManagerPanel panel;
 
@@ -44,9 +43,9 @@ public class IPCManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * Setup the layout of the frame (menus, etc).
    *
-   * @param c Description of Parameter
+   * @param c the parent component.
    */
   public void setupLayout(Component c)
   {
@@ -61,73 +60,6 @@ public class IPCManagerAnimator extends RCOSAnimator
   public RCOSPanel getPanel()
   {
     return panel;
-  }
-
-  /**
-   * Calls allocatedPages on the associated frame.
-   *
-   * @param returnedMemory the object representing the allocated memory.
-   */
-  public void allocatedPages(MemoryReturn returnedMemory)
-  {
-    panel.allocatedPages(returnedMemory);
-  }
-
-  /**
-   * Calls deallocatedPages on the associated frame.
-   *
-   * @param returnedMemory the object representing the deallocated memory.
-   */
-  public void deallocatedPages(MemoryReturn returnedMemory)
-  {
-    panel.deallocatedPages(returnedMemory);
-  }
-
-  /**
-   * Calls readingMemory on the associated frame.
-   *
-   * @param requestedMemory the data structure with the process id and the type
-   *      of memory.
-   */
-  public void readingMemory(MemoryRequest requestedMemory)
-  {
-    panel.readingMemory(requestedMemory.getPID(),
-        requestedMemory.getMemoryType());
-  }
-
-  /**
-   * Calls writingMemory on the associated frame.
-   *
-   * @param requestedMemory Description of Parameter
-   */
-  public void writingMemory(MemoryRequest requestedMemory)
-  {
-    panel.writingMemory(requestedMemory.getPID(),
-        requestedMemory.getMemoryType());
-  }
-
-  /**
-   * Calls finishedReadingMemory on the associated frame.
-   *
-   * @param requestedMemory the data structure containing the process id and the
-   *      type of memory that has just been read.
-   */
-  public void finishedReadingMemory(MemoryRequest requestedMemory)
-  {
-    panel.finishedReadingMemory(requestedMemory.getPID(),
-        requestedMemory.getMemoryType());
-  }
-
-  /**
-   * Calls finishedWritingMemory on the associated frame.
-   *
-   * @param requestedMemory the data structure containing the process id and the
-   *      type of memory that is being written to.
-   */
-  public void finishedWritingMemory(MemoryRequest requestedMemory)
-  {
-    panel.finishedWritingMemory(requestedMemory.getPID(),
-        requestedMemory.getMemoryType());
   }
 
   /**
