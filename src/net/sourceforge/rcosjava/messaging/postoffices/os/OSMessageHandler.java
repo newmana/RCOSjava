@@ -116,8 +116,6 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
   {
     try
     {
-      System.out.println("Class: " + this.getClass());
-      System.out.println("Message: " + message.getClass());
       Class[] classes = {this.getClass()};
       Method method = message.getClass().getMethod(
         "doMessage", classes);
