@@ -445,7 +445,6 @@ public class TerminalManager extends OSMessageHandler
    */
   private void writeObject(ObjectOutputStream os) throws IOException
   {
-    System.out.println("TM writing!!");
     os.writeObject(waitingProcesses);
     os.writeInt(maxTerminals);
 
