@@ -6,10 +6,10 @@ import MessageSystem.Messages.MessageAdapter;
 /**
  * Abstract class to provide base class for message handlers.
  * <P>
- * <B>History:</B><BR>
+ * <DT><B>History:</B><DD>
  * 17/03/96 Modified to include LocalSendMessage to allow broadcasting of
  * messages to just local post office.
- * <P>
+ * </DD></DT>
  * @author Andrew Newman.
  * @author Bruce Jamieson.
  * @version 1.00 $Date$

@@ -10,9 +10,13 @@ import java.io.Serializable;
 /**
  * Provide sending and receiving facilities for all classes.
  * <P>
- * <DT><B>History:</B><DD>
+ * <DT><B>History:</B>
+ * <DD>
+ * 21/03/2001 Fixed local send message to call process message instead of
+ * local send message of the post office (class cast exception).
+ * </DD><DD>
  * 25/02/2001 Added serialization handlers.
- * </DD>
+ * </DD></DT>
  * <P>
  * @author Andrew Newman
  * @author Bruce Jamieson
@@ -86,7 +90,7 @@ public abstract class AnimatorMessageHandler extends SimpleMessageHandler
    */
   public void localSendMessage(MessageAdapter message)
   {
-    postOffice.localSendMessage(message);
+    postOffice.processMessage(message);
   }
 
   /**

@@ -8,7 +8,13 @@ import MessageSystem.PostOffices.PostOffice;
 import MessageSystem.Messages.AddHandler;
 
 /**
- *  Provide sending and receiving facilities for all classes.
+ * Provide sending and receiving facilities for all classes.
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 21/03/2001 Fixed local send message to call process message instead of
+ * local send message of the post office (class cast exception).
+ * </DD></DT>
  *
  * @author Andrew Newman
  * @author Bruce Jamieson
@@ -20,7 +26,7 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
   /**
    *  Description of the Field
    */
-  protected OSOffice mhThePostOffice;
+  protected OSOffice postOffice;
 
   /**
    *  Constructor for the OSMessageHandler object
@@ -32,79 +38,79 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
   /**
    * Constructor for the OSMessageHandler object
    *
-   * @param newID
-   * @param mhNewPostOffice
+   * @param newId
+   * @param newPostOffice
    */
-  public OSMessageHandler(String newID, OSOffice mhNewPostOffice)
+  public OSMessageHandler(String newId, OSOffice newPostOffice)
   {
-    id = newID;
+    id = newId;
     // Save myId and a pointer the PostOffice
-    mhThePostOffice = mhNewPostOffice;
+    postOffice = newPostOffice;
     // Tell the PostOffice that I'm alive
-    AddHandler newMessage = new AddHandler(this, newID, this);
-    mhNewPostOffice.processMessage(newMessage);
+    AddHandler newMessage = new AddHandler(this, newId, this);
+    newPostOffice.processMessage(newMessage);
   }
 
   /**
    *  Description of the Method
    *
-   * @param  aMessage  Description of Parameter
+   * @param  adapter  Description of Parameter
    */
-  public void sendMessage(MessageAdapter aMessage)
+  public void sendMessage(MessageAdapter adapter)
   {
-    mhThePostOffice.sendMessage(aMessage);
+    postOffice.sendMessage(adapter);
   }
 
   /**
    *  Description of the Method
    *
-   * @param  aMessage  Description of Parameter
+   * @param  adapter  Description of Parameter
    */
-  public void sendMessage(UniversalMessageAdapter aMessage)
+  public void sendMessage(UniversalMessageAdapter adapter)
   {
-    mhThePostOffice.sendMessage(aMessage);
+    postOffice.sendMessage(adapter);
   }
 
   /**
    *  Description of the Method
    *
-   * @param  aMessage  Description of Parameter
+   * @param  adapter  Description of Parameter
    */
-  public void sendMessage(OSMessageAdapter aMessage)
+  public void sendMessage(OSMessageAdapter adapter)
   {
-    localSendMessage(aMessage);
+    localSendMessage(adapter);
   }
 
   /**
    *  Description of the Method
    *
-   * @param  aMessage  Description of Parameter
+   * @param  adapter  Description of Parameter
    */
-  public void localSendMessage(MessageAdapter aMessage)
+  public void localSendMessage(MessageAdapter adapter)
   {
-    mhThePostOffice.localSendMessage(aMessage);
+    postOffice.processMessage(adapter);
   }
 
   /**
    *  Description of the Method
    *
-   * @param  aMessage  Description of Parameter
+   * @param  adapter  Description of Parameter
    */
-  public void localSendMessage(OSMessageAdapter aMessage)
+  public void localSendMessage(OSMessageAdapter adapter)
   {
-    mhThePostOffice.localSendMessage(aMessage);
+    postOffice.localSendMessage(adapter);
   }
 
   /**
    *  Description of the Method
    *
-   * @param  mMessage  Description of Parameter
+   * @param  message  Description of Parameter
    */
-  public void processMessage(MessageAdapter mMessage)
+  public void processMessage(MessageAdapter message)
   {
     try
     {
-      processMessage((UniversalMessageAdapter) mMessage);
+      processMessage((UniversalMessageAdapter) message);
     }
     catch (Exception e)
     {
@@ -115,14 +121,14 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
   /**
    *  Description of the Method
    *
-   * @param  mMessage  Description of Parameter
+   * @param  message  Description of Parameter
    */
-  public abstract void processMessage(OSMessageAdapter mMessage);
+  public abstract void processMessage(OSMessageAdapter message);
 
   /**
    *  Description of the Method
    *
-   * @param  mMessage  Description of Parameter
+   * @param  message  Description of Parameter
    */
-  public abstract void processMessage(UniversalMessageAdapter mMessage);
+  public abstract void processMessage(UniversalMessageAdapter message);
 }

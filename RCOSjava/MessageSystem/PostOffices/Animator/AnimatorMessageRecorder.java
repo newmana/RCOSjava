@@ -5,7 +5,7 @@ import MessageSystem.Messages.Universal.UniversalMessageAdapter;
 import MessageSystem.PostOffices.Universal.UniversalMessageRecorder;
 
 /**
- *  Recording facilities for all animator messages.
+ * Recording facilities for all animator messages.
  *
  * @author Andrew Newman
  * @created 25th February 2001
@@ -47,7 +47,6 @@ public class AnimatorMessageRecorder extends AnimatorMessageHandler
    */
   public void processMessage(AnimatorMessageAdapter newMessage)
   {
-    System.out.println("Animator Got Animator Message: " + newMessage);
     recorder.processAnimatorMessage(newMessage);
   }
 
@@ -59,7 +58,6 @@ public class AnimatorMessageRecorder extends AnimatorMessageHandler
    */
   public void processMessage(UniversalMessageAdapter newMessage)
   {
-    System.out.println("Animator Got Universal Message: " + newMessage);
     recorder.processAnimatorUniversalMessage(newMessage);
   }
 }

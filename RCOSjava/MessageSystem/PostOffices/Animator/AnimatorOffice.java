@@ -57,31 +57,31 @@ public class AnimatorOffice extends PostOffice
     {
       //Go through the hashtable returning all the handlers
       //registered.  Send the message to all of them.
-			for (Enumeration e = getHandlers().elements(); e.hasMoreElements();)
-			{
-			  AnimatorMessageHandler theDestination = (AnimatorMessageHandler) e.nextElement();
-			  //Send the message to the destination
-			  theDestination.processMessage(maMessage);
-			}
-		}
-	}
-
-	public void localSendMessage(AnimatorMessageAdapter maMessage)
-  {
-		if (maMessage.forPostOffice(this))
-		{
-			//Go through the hashtable returning all the handlers
-			//registered.  Send the message to all of them.
-			for (Enumeration e = getHandlers().elements(); e.hasMoreElements();)
-			{
-			  AnimatorMessageHandler theDestination = (AnimatorMessageHandler) e.nextElement();
-			  //Send the message to the destination
-			  theDestination.processMessage(maMessage);
-			}
-		}
+      for (Enumeration e = getHandlers().elements(); e.hasMoreElements();)
+      {
+        AnimatorMessageHandler theDestination = (AnimatorMessageHandler) e.nextElement();
+	//Send the message to the destination
+	theDestination.processMessage(maMessage);
+      }
+    }
   }
 
-	public void sendToPostOffices(MessageAdapter maMessage)
+  public void localSendMessage(AnimatorMessageAdapter maMessage)
+  {
+    if (maMessage.forPostOffice(this))
+    {
+      //Go through the hashtable returning all the handlers
+      //registered.  Send the message to all of them.
+      for (Enumeration e = getHandlers().elements(); e.hasMoreElements();)
+      {
+        AnimatorMessageHandler theDestination = (AnimatorMessageHandler) e.nextElement();
+	//Send the message to the destination
+	theDestination.processMessage(maMessage);
+      }
+    }
+  }
+
+  public void sendToPostOffices(MessageAdapter maMessage)
   {
     PostOffice poTmpPostOffice;
 
@@ -97,7 +97,7 @@ public class AnimatorOffice extends PostOffice
         }
       }
     }
-	}
+  }
 
   public void processMessage(MessageAdapter maMsg)
   {

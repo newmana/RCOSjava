@@ -7,8 +7,8 @@ import MessageSystem.PostOffices.Universal.UniversalMessageRecorder;
 /**
  *  Recording facilities for all operating system messages.
  *
- * @author     Andrew Newman
- * @created    25th February 2001
+ * @author Andrew Newman
+ * @created 25th February 2001
  * @version 1.00 $Date$
  */
 public class OSMessageRecorder extends OSMessageHandler
@@ -47,7 +47,6 @@ public class OSMessageRecorder extends OSMessageHandler
    */
   public void processMessage(OSMessageAdapter newMessage)
   {
-    System.out.println("OS Got OS Message: " + newMessage);
     recorder.processOSMessage(newMessage);
   }
 
@@ -59,7 +58,6 @@ public class OSMessageRecorder extends OSMessageHandler
    */
   public void processMessage(UniversalMessageAdapter newMessage)
   {
-    System.out.println("OS Got Universal Message: " + newMessage);
     recorder.processOSUniversalMessage(newMessage);
   }
 }
