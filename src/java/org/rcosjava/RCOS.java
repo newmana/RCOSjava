@@ -387,49 +387,57 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 
     URL tmpURL;
 
-    for (int count = 0; count < NUMBER_OF_PEOPLE; count++)
+    try
     {
+      for (int count = 0; count < NUMBER_OF_PEOPLE; count++)
+      {
+        tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
+          "/images/p" + count + ".jpg");
+
+        // TODO Check for null before calling this
+        aboutImages[count] = new ImageIcon(tmpURL);
+      }
+
+      for (int count = 0; count < NUMBER_OF_BUTTONS; count++)
+      {
+        tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
+          "/images/b" + count + "up.jpg");
+        upButtons[count] = new ImageIcon(tmpURL);
+
+        tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
+          "/images/b" + count + "down.jpg");
+        downButtons[count] = new ImageIcon(tmpURL);
+      }
+
       tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-        "/images/p" + count + ".jpg");
+        "/images/termon.jpg");
+      terminalImages[0] = new ImageIcon(tmpURL);
+      tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
+        "/images/termoff.jpg");
+      terminalImages[1] = new ImageIcon(tmpURL);
+      tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
+        "/images/process1.gif");
+      processImages[0] = new ImageIcon(tmpURL);
+      tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
+        "/images/process2.gif");
+      processImages[1] = new ImageIcon(tmpURL);
+      tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
+        "/images/rcoscpu.jpg");
+      processImages[2] = new ImageIcon(tmpURL);
+      tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
+        "/images/memory.jpg");
+      ipcImages[0] = new ImageIcon(tmpURL);
 
-      // TODO Check for null before calling this
-      aboutImages[count] = new ImageIcon(tmpURL);
+      terminalImages[2] = upButtons[1];
+      terminalImages[3] = downButtons[1];
+      processManagerImages[0] = upButtons[1];
+      processManagerImages[1] = downButtons[1];
     }
-
-    for (int count = 0; count < NUMBER_OF_BUTTONS; count++)
+    catch (NullPointerException npe)
     {
-      tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-        "/images/b" + count + "up.jpg");
-      upButtons[count] = new ImageIcon(tmpURL);
-
-      tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-        "/images/b" + count + "down.jpg");
-      downButtons[count] = new ImageIcon(tmpURL);
+      System.err.println("Failed to load images!");
+      npe.printStackTrace();
     }
-
-    tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-      "/images/termon.jpg");
-    terminalImages[0] = new ImageIcon(tmpURL);
-    tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-      "/images/termoff.jpg");
-    terminalImages[1] = new ImageIcon(tmpURL);
-    tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-      "/images/process1.gif");
-    processImages[0] = new ImageIcon(tmpURL);
-    tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-      "/images/process2.gif");
-    processImages[1] = new ImageIcon(tmpURL);
-    tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-      "/images/rcoscpu.jpg");
-    processImages[2] = new ImageIcon(tmpURL);
-    tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-      "/images/memory.jpg");
-    ipcImages[0] = new ImageIcon(tmpURL);
-
-    terminalImages[2] = upButtons[1];
-    terminalImages[3] = downButtons[1];
-    processManagerImages[0] = upButtons[1];
-    processManagerImages[1] = downButtons[1];
   }
 
   /**
@@ -518,7 +526,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     mmAnimator = new MultimediaAnimator(animatorPostOffice, 250, 250,
         processManagerImages, recorder, player);
 
-    aboutAnimator = new AboutAnimator(animatorPostOffice, 250, 250,
+    aboutAnimator = new AboutAnimator(animatorPostOffice, 300, 300,
         aboutImages);
   }
 
@@ -579,6 +587,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     menuItem = new JMenuItem("Help Topics");
     menu.add(menuItem);
     menuItem = new JMenuItem("About");
+    menuItem.addActionListener(new AboutListener());
     menu.add(menuItem);
 
     Container contentPane = getContentPane();
@@ -678,16 +687,29 @@ public class RCOS extends javax.swing.JApplet implements Runnable
    */
   public class KillProcessListener implements ActionListener
   {
+    /**
+     * Animator to use to send the kill message.
+     */
     private ProcessManagerAnimator animator;
 
+    /**
+     * Create a new kill process listener.
+     *
+     * @param newAnimator the animator to call the change in process priority.
+     */
     public KillProcessListener(ProcessManagerAnimator newAnimator)
     {
       animator = newAnimator;
     }
 
+    /**
+     * Actioned performed on the button in the UI to kill a process.
+     *
+     * @param e the event which contains the numeric id of the process to
+     *     kill.
+     */
     public void actionPerformed(ActionEvent e)
     {
-      System.err.println("Kill Process" + e.getActionCommand());
       animator.sendKillMessage(Integer.parseInt(e.getActionCommand()));
     }
   }
@@ -697,16 +719,29 @@ public class RCOS extends javax.swing.JApplet implements Runnable
    */
   public class ChangePriorityListener implements ActionListener
   {
+    /**
+     * Animator to use to send the change in priority.
+     */
     private ProcessManagerAnimator animator;
 
+    /**
+     * Create a new priority listener
+     *
+     * @param newAnimator the animator to call the change in process priority.
+     */
     public ChangePriorityListener(ProcessManagerAnimator newAnimator)
     {
       animator = newAnimator;
     }
 
+    /**
+     * Actioned performed on the button in the UI to change a given process.
+     *
+     * @param e the event which contains the numeric id of the process to
+     *     change.
+     */
     public void actionPerformed(ActionEvent e)
     {
-      System.err.println("Change Process " + e.getActionCommand());
       animator.sendRequestProcessPriority(
           Integer.parseInt(e.getActionCommand()));
     }
@@ -719,7 +754,6 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   {
     public void actionPerformed(ActionEvent e)
     {
-      System.err.println("Step CPU");
       if (!theKernel.isPaused())
       {
         pauseRunMenuItem.setText("Run");
@@ -729,11 +763,19 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     }
   }
 
+  /**
+   * Listens for a change in whether RCOS is running or paused.  Toggles it from
+   * one state to the other.
+   */
   private class PauseRunCPUListener implements ActionListener
   {
+    /**
+     * The item has been selected.
+     *
+     * @param e the event cause by selecting the item.
+     */
     public void actionPerformed(ActionEvent e)
     {
-      System.err.println("Pause/Run CPU");
       if (!theKernel.isPaused())
       {
         pauseRunMenuItem.setText("Run");
@@ -748,16 +790,29 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   }
 
   /**
+   * Listens for a change to show about information.
+   */
+  private class AboutListener implements ActionListener
+  {
+    /**
+     * The item has been selected.
+     *
+     * @param e the event cause by selecting the item.
+     */
+    public void actionPerformed(ActionEvent e)
+    {
+      aboutAnimator.showFrame();
+    }
+  }
+
+  /**
    * A mouse adapter which attachs itself to the buttons displayed by the main
    * screen. It accepts the animator to call show on when the button is pressed.
-   *
-   * @author administrator
-   * @created 28 April 2002
    */
   private class ShowAnimator extends MouseAdapter
   {
     /**
-     * Description of the Field
+     * The object that contains the frame to show.
      */
     private Object parent;
 
