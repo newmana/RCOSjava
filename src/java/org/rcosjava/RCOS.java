@@ -509,8 +509,6 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 
     aboutAnimator = new AboutAnimator(animatorPostOffice, 250, 250,
         aboutImages);
-//    overviewanimator = new Overview("Overviewanimator", animatorPostOffice, defX,
-//      defY, );
   }
 
   /**
@@ -529,11 +527,14 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     menuBar.add(menu);
 
     menuItem = new JMenuItem("New Process");
+    menuItem.addActionListener(new NewProcessListener());
     menu.add(menuItem);
     menuItem = new JMenuItem("Kill Process");
     menu.add(menuItem);
+    menuItem.addActionListener(new KillProcessListener());
     menuItem = new JMenuItem("Change Priority");
     menu.add(menuItem);
+    menuItem.addActionListener(new ChangePriorityListener());
 
     menu = new JMenu("CPU");
     menu.setMnemonic(KeyEvent.VK_C);
@@ -576,7 +577,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     tabbedPane.add(psAnimator.getPanel(), "Process Scheduler");
     tabbedPane.add(cpuAnimator.getPanel(), "CPU");
     tabbedPane.add(memoryAnimator.getPanel(), "Memory");
-//    tabbedPane.add(ipcAnimator.getPanel(), "IPC");
+    tabbedPane.add(ipcAnimator.getPanel(), "IPC");
     tabbedPane.add(new JPanel(), "Disk Scheduler");
     tabbedPane.add(new JPanel(), "File System");
 
@@ -644,6 +645,30 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     if (kernelThread != null)
     {
       kernelThread = null;
+    }
+  }
+
+  private class NewProcessListener implements ActionListener
+  {
+    public void actionPerformed(ActionEvent e)
+    {
+      pmAnimator.showFrame();
+    }
+  }
+
+  private class KillProcessListener implements ActionListener
+  {
+    public void actionPerformed(ActionEvent e)
+    {
+      System.err.println("Kill Process");
+    }
+  }
+
+  private class ChangePriorityListener implements ActionListener
+  {
+    public void actionPerformed(ActionEvent e)
+    {
+      System.err.println("Change Process");
     }
   }
 
