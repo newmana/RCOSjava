@@ -13,7 +13,7 @@ import org.rcosjava.software.memory.MemoryReturn;
  * @created 28th April 2002
  * @version 1.00 $Date$
  */
-public class MemoryGraphic extends JPanel
+public class MemoryGraphic extends JComponent
 {
   /**
    * The colour of the graphic when it is being read.
@@ -61,6 +61,11 @@ public class MemoryGraphic extends JPanel
   private int defaultHeight;
 
   /**
+   * The dimensions of the memory graphic.
+   */
+  private Dimension totalSize;
+
+  /**
    * The current colour of the memory graphic.
    */
   private Color currentColour = unallocatedColour;
@@ -103,10 +108,7 @@ public class MemoryGraphic extends JPanel
     memoryImage = newImage;
     defaultWidth = memoryImage.getWidth(getParent());
     defaultHeight = memoryImage.getHeight(getParent());
-    System.out.println("Width:" + defaultWidth);
-    System.out.println("Height:" + defaultHeight);
-    setMinimumSize(new Dimension(defaultWidth, defaultHeight));
-    setSize(defaultWidth, defaultHeight);
+    totalSize = new Dimension(defaultWidth, defaultHeight);
   }
 
   /**
@@ -157,6 +159,26 @@ public class MemoryGraphic extends JPanel
   {
     return ((id == memoryId) && (memoryType == memoryType));
   }
+
+  /**
+    * Gets the MinimumSize attribute of the RCOSRectangle object
+    *
+    * @return The MinimumSize value
+    */
+   public Dimension getMinimumSize()
+   {
+     return getPreferredSize();
+   }
+
+   /**
+    * Gets the PreferredSize attribute of the RCOSRectangle object
+    *
+    * @return The PreferredSize value
+    */
+   public Dimension getPreferredSize()
+   {
+     return totalSize;
+   }
 
   /**
    * Paints the memory graphic.
