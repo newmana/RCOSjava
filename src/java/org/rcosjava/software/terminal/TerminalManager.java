@@ -1,5 +1,7 @@
 package org.rcosjava.software.terminal;
 
+import java.io.*;
+import org.rcosjava.RCOS;
 import org.rcosjava.hardware.terminal.HardwareTerminal;
 import org.rcosjava.messaging.messages.os.AllocateTerminal;
 import org.rcosjava.messaging.messages.universal.ProcessAllocatedTerminalMessage;
@@ -32,11 +34,11 @@ import org.rcosjava.software.util.TerminalQueue;
  */
 public class TerminalManager extends OSMessageHandler
 {
-
   /**
    * The name of the terminal manager.
    */
   private final static String MESSENGING_ID = "TerminalManager";
+
   /**
    * The collection of terminals that have been allocated to a terminal.
    */
@@ -436,5 +438,49 @@ public class TerminalManager extends OSMessageHandler
       }
     }
     return false;
+  }
+
+  /**
+   * Handle the serialization of the contents.
+   */
+  private void writeObject(ObjectOutputStream os) throws IOException
+  {
+    System.out.println("TM writing!!");
+    os.writeObject(waitingProcesses);
+    os.writeInt(maxTerminals);
+
+    for (int index = 1; index < terminalOn.length; index++)
+    {
+      os.writeBoolean(terminalOn[index]);
+    }
+  }
+
+  /**
+   * Handle deserialization of the contents.  Ensures non-serializable
+   * components correctly created.
+   *
+   * @param is stream that is being read.
+   */
+  private void readObject(ObjectInputStream is) throws IOException,
+      ClassNotFoundException
+  {
+    register(MESSENGING_ID, RCOS.getOSPostOffice());
+
+    waitingProcesses = (FIFOQueue) is.readObject();
+    maxTerminals = is.readInt();
+
+    allocatedTerminals = new TerminalQueue(maxTerminals, 1);
+    unallocatedTerminals = new TerminalQueue(maxTerminals, 1);
+
+    terminalOn = new boolean[maxTerminals];
+    for (int index = 1; index < maxTerminals; index++)
+    {
+      boolean tmpTerminalOn = is.readBoolean();
+
+      if (tmpTerminalOn)
+      {
+        addTerminal(index);
+      }
+    }
   }
 }
