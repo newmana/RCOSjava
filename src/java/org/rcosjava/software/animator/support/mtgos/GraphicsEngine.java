@@ -80,7 +80,7 @@ public class GraphicsEngine extends JPanel
    * @param my y position of object
    * @return the name of the object at the given co-ordinates.
    */
-  public String isInside(int mx, int my)
+  public synchronized String isInside(int mx, int my)
   {
     Chain tempObjectChain = sortMTGOsDescending();
     MTGO mob;
@@ -204,7 +204,7 @@ public class GraphicsEngine extends JPanel
    *
    * @param g Description of Parameter
    */
-  public void paintComponent(Graphics g)
+  public synchronized void paintComponent(Graphics g)
   {
     super.paintComponent(g);
     if (!graphicsSetup)

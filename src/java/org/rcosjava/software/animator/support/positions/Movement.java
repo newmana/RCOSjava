@@ -88,7 +88,7 @@ public class Movement
   /**
    * @return the current x value
    */
-  public int getCurrentX()
+  public synchronized int getCurrentX()
   {
     return currentX;
   }
@@ -96,7 +96,7 @@ public class Movement
   /**
    * @return the current y value
    */
-  public int getCurrentY()
+  public synchronized int getCurrentY()
   {
     return currentY;
   }
@@ -104,7 +104,7 @@ public class Movement
   /**
    * @return the current position in queue of Positions
    */
-  public int currentPosition()
+  public synchronized int currentPosition()
   {
     return positions.getPointer();
   }
@@ -114,7 +114,7 @@ public class Movement
    *
    * @param newPosition The feature to be added to the Position attribute
    */
-  public void addPosition(Position newPosition)
+  public synchronized void addPosition(Position newPosition)
   {
     positions.insert(newPosition);
   }
@@ -176,7 +176,7 @@ public class Movement
   /**
    * Move to the next position.
    */
-  private void forward()
+  private synchronized void forward()
   {
     if ((positions.itemCount() > 1) && (!finishedMoving))
     {
