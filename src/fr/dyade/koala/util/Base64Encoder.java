@@ -13,8 +13,8 @@ import java.io.IOException;
  * @author  Philippe Le Hegaret
  */
 public class Base64Encoder {
-    
-    final static int encoding[] = 
+
+    final static int encoding[] =
     {
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',         // 0-7
         'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',         // 8-15
@@ -27,10 +27,10 @@ public class Base64Encoder {
         '='                                             // 64
     };
 
-    private static void encodeAtom(OutputStream out, byte[] data, 
+    private static void encodeAtom(OutputStream out, byte[] data,
 				   int offset, int len)
 	    throws IOException {
-	
+
         byte a, b, c;
 
         if (len == 1) {
@@ -57,7 +57,7 @@ public class Base64Encoder {
             out.write(encoding[((a << 4) & 0x30) + ((b >>> 4) & 0xf)]);
             out.write(encoding[((b << 2) & 0x3c) + ((c >>> 6) & 0x3)]);
             out.write(encoding[c & 0x3F]);
-        }    
+        }
     }
 
     public static void encode(OutputStream out, byte[] data,
@@ -66,7 +66,7 @@ public class Base64Encoder {
 	int     j;
         int     numBytes;
         byte    tmpbuffer[] = new byte[57];
-	
+
         while (true) {
 	    if (length > 57) {
 		numBytes = 57;
@@ -95,7 +95,8 @@ public class Base64Encoder {
     public static void encode(OutputStream out, String s)
 	    throws IOException {
 	byte[] data = new byte[s.length()];
-	s.getBytes(0, data.length, data, 0);
+        s.getBytes();
+	//s.getBytes(0, data.length, data, 0);
 	Base64Encoder.encode(System.out, data, 0, data.length);
     }
 
