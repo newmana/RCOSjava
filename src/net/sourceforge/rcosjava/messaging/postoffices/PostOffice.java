@@ -18,11 +18,6 @@ public abstract class PostOffice extends SimpleMessageHandler
   protected ArrayList postOffices = new ArrayList(1);
 
   /**
-   * The type of post office (name of the class).
-   */
-  protected String type;
-
-  /**
    * Constructor for the PostOffice object
    */
   public PostOffice()
@@ -37,9 +32,6 @@ public abstract class PostOffice extends SimpleMessageHandler
   public PostOffice(String newId)
   {
     id = newId;
-    type = this.getClass().getName();
-    //Add myself so that I can get registration messages/etc.
-    addHandler(getId(), this);
   }
 
   /**
