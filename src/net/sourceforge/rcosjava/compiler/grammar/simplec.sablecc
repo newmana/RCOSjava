@@ -123,9 +123,9 @@ Tokens
     volatile = 'volatile';
     sizeof = 'sizeof';
 
-    string_control_string = '%s';
-    character_control_string = '%c';
-    integer_control_string = '%i';
+    string_control_string = '"%s"';
+    character_control_string = '"%c"';
+    integer_control_string = '"%i"';
 
     origin_seek_set = 'SEEK_SET';
     origin_seek_cur = 'SEEK_CUR';
@@ -401,16 +401,22 @@ Productions
     rcos_statement = 
         {printf1}      printf l_par string_litteral r_par semicolon |
         {printf2}      printf l_par [control]:printf_control_strings comma value r_par semicolon |
+        {printf3}      printf l_par [control]:printf_control_strings comma arrayref r_par semicolon |
         {scanf}        scanf l_par [control]:scanf_control_strings comma value r_par semicolon |
+        {scanf2}       scanf l_par [control]:scanf_control_strings comma arrayref r_par semicolon |
         {getc}         getc l_par [file_stream]:value r_par semicolon |
+        {getc2}        getc l_par [file_stream]:arrayref r_par semicolon |
         {putc}         putc l_par [ch_in]:value comma [file_stream]:value r_par semicolon |
+        {putc2}        putc l_par [ch_in]:arrayref comma [file_stream]:value r_par semicolon |
         {fclose}       fclose l_par [file_stream]:value r_par semicolon |
         {feof}         feof l_par [file_stream]:value r_par semicolon |
         {fputs}        fputs l_par [string_in]:value comma [file_stream]:value r_par semicolon |
         {fgets}        fgets l_par [string_out]:value [c1]:comma [length]:value [c2]:comma [file_stream]:value r_par semicolon |
         {fseek}        fseek l_par [file_stream]:value [c1]:comma [no_bytes]:value [c2]:comma origin_value r_par semicolon |
         {fprintf}      fprintf l_par [file_stream]:value [c1]:comma [control]:printf_control_strings [c2]:comma value r_par semicolon |
+        {fprintf2}     fprintf l_par [file_stream]:value [c1]:comma [control]:printf_control_strings [c2]:comma arrayref r_par semicolon |
         {fscanf}       fscanf l_par [file_stream]:value [c1]:comma [control]:value [c2]:comma value r_par semicolon |
+        {fscanf2}      fscanf l_par [file_stream]:value [c1]:comma [control]:value [c2]:comma arrayref r_par semicolon |
         {semclose}     semclose l_par [handle]:identifier r_par semicolon |
         {semcreate1}   semcreate l_par [handle]:value r_par semicolon |
         {semcreate2}   semcreate l_par [handle]:value comma [init_value]:value r_par semicolon |
@@ -452,10 +458,10 @@ Productions
     rhs = 
         {binary} binary_expression |
         {unary}  unary_expression;
-
+ 
     binary_expression =
-        {identifier} l_par identifier binop value r_par | // will be removed from AST
-        {constant}   l_par constant binop value r_par | // will be removed from AST
+        {identifier}       l_par identifier binop value r_par |    // will be removed from AST
+        {constant}         l_par constant binop value r_par |      // will be removed from AST
 
 // For modified AST
         ( l_par [l_value]:value binop [r_value]:value r_par );
