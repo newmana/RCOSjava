@@ -4,7 +4,6 @@ import net.sourceforge.rcosjava.software.process.ProgramManager;
 import net.sourceforge.rcosjava.messaging.postoffices.animator.AnimatorMessageHandler;
 import net.sourceforge.rcosjava.software.kernel.Kernel;
 import net.sourceforge.rcosjava.hardware.cpu.Interrupt;
-import net.sourceforge.rcosjava.software.animator.process.StartProgram;
 
 /**
  * Creates a new file based on the given filename.
