@@ -7,7 +7,10 @@ import fr.dyade.koala.xml.sax.*;
 import java.io.*;
 import java.net.*;
 import java.util.StringTokenizer;
+
 import org.rcosjava.hardware.memory.Memory;
+
+import org.apache.log4j.*;
 
 /**
  * Implementation that will contact a server and communicate with it. The
@@ -24,6 +27,11 @@ import org.rcosjava.hardware.memory.Memory;
  */
 public class FileClient
 {
+  /**
+   * Logging class.
+   */
+  private final static Logger log = Logger.getLogger(FileClient.class);
+
   /**
    * Connection to the server.
    */
@@ -156,7 +164,7 @@ public class FileClient
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      log.fatal("Failed to deserialize class", e);
     }
     finally
     {
@@ -173,9 +181,9 @@ public class FileClient
   }
 
   /**
-   * Description of the Method
+   * Attempts to open a socket to the server.
    *
-   * @return Description of the Returned Value
+   * @return true if it succeeds.
    */
   public boolean openConnection()
   {
@@ -189,7 +197,7 @@ public class FileClient
     }
     catch (IOException exception)
     {
-      exception.printStackTrace();
+      log.error("Failed to open socket to server", exception);
       return false;
     }
   }
