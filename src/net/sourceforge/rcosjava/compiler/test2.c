@@ -3,7 +3,7 @@ int global2;
 int global3;
 
 /**
- * Tests if/else/elseif for >, ==, !=, <
+ * Tests if/else/elseif for >, ==, !=, < and tunary ? operator.
  **/
 int main()
 {
@@ -17,7 +17,7 @@ int main()
   if ((global > 0))
   {
     printf("Global greater than 0\n");
-    
+
   }
   else
   {
@@ -54,7 +54,7 @@ int main()
     }
   }
   if ((global == 2))
-  {  
+  {
     if ((local == 1))
     {
       printf("Global is 2 and local is 1\n");

@@ -6,9 +6,10 @@ int main()
   int local;
   int local2;
   int local3;
-  char hello[100] = "hello world";
+  char *hello;
   char a;
 
+  hello = "hello world";
   local3 = (2 + 5);
   printf("local3 is:");
   printf("%i", local3);
@@ -38,11 +39,10 @@ int main()
   printf("\n");
   printf("char a is: ");
   printf("%c", a);
-  printf("\n");  
+  printf("\n");
 
-  hello[0] = 'j';
-  hello[11] = 's';
-  
+  hello = "jello worlds";
+
   printf("Wobbly planets: ");
   printf("%s", hello);
   printf("\n");

@@ -1,5 +1,5 @@
 /**
- * Tests arrays of characters and ints with while and for loops 
+ * Tests arrays of characters and ints with while and for loops
  * as well as printing them out.
  **/
 int main()
@@ -9,8 +9,9 @@ int main()
   int one;
   int counter;
   int index;
+  char *hello;
 
-  char hello[] = "hello world";
+  hello = "hello world";
   a = 'a';
   ten[0] = 1;
   ten[1] = 10;
@@ -24,18 +25,18 @@ int main()
     printf(" in array ten: ");
     printf("%i", ten[counter]);
     printf("\n");
-    ten[counter] = (ten[0] + one);
+    ten[counter] = (ten[0]) + 1;
   }
 
   counter = 0;
-  while (counter < 3)
+  while ((counter < 3))
   {
     printf("After addition element ");
     printf("%i", counter);
     printf(" in array ten: ");
     printf("%i", ten[counter]);
     printf("\n");
-    counter = counter + 1;
+    counter = (counter + 1);
   }
 
   printf("Print out in reverse character by character\n");
@@ -43,8 +44,12 @@ int main()
   do
   {
     printf("%c", hello[index]);
-    index = index - 1;
-  } while (hello[index] != 'h');
+    a = hello[index];
+    index = (index - 1);
+  }
+  while ((a != 'h'));
+
+  printf("\nFirst Char:");
   printf("%c", hello[0]);
   printf("\n");
 }
