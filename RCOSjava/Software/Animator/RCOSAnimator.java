@@ -18,10 +18,12 @@ import MessageSystem.Messages.Universal.UniversalMessageAdapter;
  */
 public abstract class RCOSAnimator extends AnimatorMessageHandler
 {
-  //By default registers to the post office.
-  public RCOSAnimator (String myId, AnimatorOffice aPostOffice)
+  /**
+   * By default registers to the post office.
+   */
+  public RCOSAnimator (String newId, AnimatorOffice newPostOffice)
   {
-    super(myId, aPostOffice);
+    super(newId, newPostOffice);
   }
 
   //Interface to frame.
@@ -32,4 +34,3 @@ public abstract class RCOSAnimator extends AnimatorMessageHandler
   public abstract void processMessage(AnimatorMessageAdapter aMsg);
   public abstract void processMessage(UniversalMessageAdapter aMsg);
 }
-

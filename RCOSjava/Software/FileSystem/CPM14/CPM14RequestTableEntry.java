@@ -1,14 +1,14 @@
 //############################################################################
-// Class    : CPM14RequestTableEntry 
+// Class    : CPM14RequestTableEntry
 // Author   : Brett Carter
 // Date     : 25/3/96 Created.
-//            
+//
 // Purpose  : To contain the data for an entry in the CPM14 FS Request table.
-//            
+//
 
 package Software.FileSystem.CPM14;
 
-class CPM14RequestTableEntry extends Object
+class CPM14RequestTableEntry
 {
   public String Source;
   public String Type;

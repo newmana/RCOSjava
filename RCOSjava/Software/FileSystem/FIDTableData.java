@@ -1,63 +1,62 @@
-// ************************************************************************//
-// FILENAME : FIDTableData.java
-// PACKAGE  : FileSystem
-// PURPOSE  : To contain the data for an entry in the FSMan File ID table.       
-// AUTHOR   : Brett Carter
-// MODIFIED : Andrew Newman
-// HISTORY  : 25/3/96 Created.
-//            
-// ************************************************************************//
-
 package Software.FileSystem;
 
-class FIDTableData extends Object
+/**
+ * Contains the data for an entry in the FSMan File ID table.
+ * <P>
+ * @author Andrew Newman.
+ * @author Brett Carter.
+ * @version 1.00 $Date$
+ * @created 25th March 1996
+ */
+class FIDTableData
 {
-  private int iPID;
-  private String sFSID;    
-  private int iFSFileNo;
+  private int processId;
+  private String fileSystemId;
+  private int fileNo;
 
-  public FIDTableData(int iNewPID, String sNewFSID, int iNewFSFileNo)
+  public FIDTableData(int newProcessId, String newFileSystemId,
+    int newFileNo)
   {
-    iPID = iPID;
-    sFSID = sFSID;
-    iFSFileNo = iFSFileNo;
+    processId = processId;
+    fileSystemId = fileSystemId;
+    fileNo = fileNo;
   }
 
   public FIDTableData()
   {
-    iPID = -1;
-    sFSID = null;
-    iFSFileNo = -1;
+    processId = -1;
+    fileSystemId = null;
+    fileNo = -1;
   }
 
-  public int getPID()
+  public int getProcessId()
   {
-    return iPID;
+    return processId;
   }
-  
-  public void setPID(int iNewPID)
+
+  public void setProcessId(int newProcessId)
   {
-    iPID = iNewPID;
+    processId = newProcessId;
   }
-  
-  public String getFSID()
+
+  public String getFileSystemId()
   {
-    return sFSID;
+    return fileSystemId;
   }
-  
-  public void setFSID(String sNewFSID)
+
+  public void setFileSystemId(String newFileSystemId)
   {
-    sFSID = sNewFSID;
+    fileSystemId = newFileSystemId;
   }
-  
-  public int getFSFileNo()
+
+  public int getFileNo()
   {
-    return iFSFileNo;
+    return fileNo;
   }
-  
-  public void setFSFileNo(int iNewFSFileNo)
+
+  public void setFileNo(int newFileNo)
   {
-    iFSFileNo = iNewFSFileNo;
+    fileNo = newFileNo;
   }
 }
 

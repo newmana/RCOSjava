@@ -4,7 +4,7 @@
 // PURPOSE  : Handles the creation/deletion of physical disks, their
 //            scheduler and other attributes.
 // AUTHOR   : Andrew Newman
-// MODIFIED : 
+// MODIFIED :
 // HISTORY  : 10/08/99 Created.
 //*************************************************************************//
 
@@ -19,7 +19,7 @@ import Software.Interrupt.CPM14DiskInterruptHandler;
 
 public class DiskManager extends OSMessageHandler
 {
-	private static final String MESSENGING_ID = "DiskManager";
+  private static final String MESSENGING_ID = "DiskManager";
 
   // Constructor. Sets up variables and registers with the post office.
   public DiskManager(OSOffice mhPostOffice)
@@ -28,7 +28,7 @@ public class DiskManager extends OSMessageHandler
     //cvRequestQueue = new FIFOQueue (10, 5);
     // Create and Register the InterruptHandler.
     //cvIntHandler = new CPM14DiskInterruptHandler( id, mvPostOffice,
-    //                                     id+":INT", id);   
+    //                                     id+":INT", id);
     //Message mvIHReg = new Message ( id, "KERNEL", "RegisterInterruptHandler",
     //                                  cvIntHandler);
   }
@@ -36,7 +36,7 @@ public class DiskManager extends OSMessageHandler
 	public void processMessage(UniversalMessageAdapter aMsg)
 	{
 	}
-	
+
 	public void processMessage(OSMessageAdapter aMsg)
   {
 //    if ( mvTheMessage.getType().equalsIgnoreCase("DiskRequestComplete"))
@@ -55,14 +55,14 @@ public class DiskManager extends OSMessageHandler
 //    System.out.println("CPM14Disk: ProcessMessage - Finish"); // DEBUG
 
     try
-    {          
-      aMsg.doMessage(this);        
+    {
+      aMsg.doMessage(this);
     }
     catch (Exception e)
     {
       System.out.println("Error processing message: "+e);
       e.printStackTrace();
-    }  
+    }
   }
 
   public synchronized void queueRequest(String mvSource, DiskRequest mvTheRequest)
@@ -80,7 +80,7 @@ public class DiskManager extends OSMessageHandler
     /*if (!cvBusy)
     {
       cvBusy = true;
-      if (!cvRequestQueue.queueEmpty()) 
+      if (!cvRequestQueue.queueEmpty())
       {
 //        System.out.println("Setting current request"); // DEBUG
 
@@ -113,14 +113,14 @@ public class DiskManager extends OSMessageHandler
 //      System.out.println("Reading Block"); // DEBUG
       mvReturnData = readBlock( cvCurrentRequest.getDiskRequest().DiskBlock );
     }
-    else 
+    else
     {
 //      System.out.println("Writing Block"); // DEBUG
       mvReturnData = null;
       writeBlock (cvCurrentRequest.getDiskRequest().DiskBlock,
                          cvCurrentRequest.getDiskRequest().Data );
     }*/
-//    DiskRequest mvTheReturnData = new DiskRequest ( 
+//    DiskRequest mvTheReturnData = new DiskRequest (
                                      //cvCurrentRequest.getDiskRequest().FSRequestID,
                                      //cvCurrentRequest.getDiskRequest().DiskBlock,
 //			             mvReturnData);
@@ -136,7 +136,7 @@ public class DiskManager extends OSMessageHandler
 //    System.out.println("CMP14Disk: ReqComp - end"); // DEBUG
   }
 
-  // Note: This proceedure is part of the Simulation. In a real system, this 
+  // Note: This proceedure is part of the Simulation. In a real system, this
   // is where the device driver talks to the disk.
   //public byte[] readBlock(int mvBlockNumber)
   //{
@@ -152,7 +152,7 @@ public class DiskManager extends OSMessageHandler
     return mvReadData;*/
   //}
 
-  // Note: This proceedure is part of the Simulation. In a real system, this 
+  // Note: This proceedure is part of the Simulation. In a real system, this
   // is where the device driver talks to the disk.
   public void writeBlock(int mvBlockNumber, byte[] mvWriteData)
   {

@@ -40,7 +40,7 @@ public class FileSystemManager extends OSMessageHandler
   public final static String F_DEL = "F_DEL";
   public final static String F_READ = "F_READ";
   public final static String F_WRITE = "F_WRITE";
-	private static final String MESSENGING_ID = "FileSystemManager";
+  private static final String MESSENGING_ID = "FileSystemManager";
 
   public FileSystemManager(String myID, OSOffice myPO)
   {
@@ -83,7 +83,7 @@ public class FileSystemManager extends OSMessageHandler
   // File System type is the class name of the file system.
   // e.g. FileSystem.CPM14.CPM14FileSystem
   // File System name is the unique identifier of the file system.  e.g. CPM14.
-	// One file system name per file system type.
+  // One file system name per file system type.
   public void register(String sFSName, String sFSType)
   {
     if (!cvFileSystems.containsKey(sFSName))
@@ -109,7 +109,7 @@ public class FileSystemManager extends OSMessageHandler
   // e.g. sFSName - CPM14, sMountPoint - C (drive), sDeviceName - cdrom/Disk1/Orion/Infinity/etc
   public void mount(String sFSName, String sMountPoint, String sDeviceName)
   {
-		FileSystem fsExistingFS = (FileSystem) cvFileSystems.get(sFSName);
+    FileSystem fsExistingFS = (FileSystem) cvFileSystems.get(sFSName);
 
     if (fsExistingFS == null)
     {
@@ -132,54 +132,54 @@ public class FileSystemManager extends OSMessageHandler
 
   public void allocate(DiskRequestData drdNewRequest)
   {
-		FileSystem fsExistingFS = getFSForFile(drdNewRequest.getFileName());
-	  if (fsExistingFS == null)
-	  {
-			replyError(drdNewRequest.getPID());
-	  }
-	  else
-	  {
-			int iRequestID = addRequest(drdNewRequest);
-			if (iRequestID == -1)
-			{
-		    replyError(drdNewRequest.getPID());
- 				return;
-			}
-			else
-			{
-				fsExistingFS.allocate(iRequestID, drdNewRequest.getFileName());
-			}
-		}
+    FileSystem fsExistingFS = getFSForFile(drdNewRequest.getFileName());
+    if (fsExistingFS == null)
+    {
+      replyError(drdNewRequest.getProcessId());
+    }
+    else
+    {
+      int iRequestID = addRequest(drdNewRequest);
+      if (iRequestID == -1)
+      {
+        replyError(drdNewRequest.getProcessId());
+        return;
+      }
+      else
+      {
+        fsExistingFS.allocate(iRequestID, drdNewRequest.getFileName());
+      }
+    }
   }
 
-	public void handleRequest(DiskRequestData drdNewRequest)
-	{
-		FileSystem fsExistingFS = getFSForFile(drdNewRequest.getFileName());
-		if (fsExistingFS == null)
-	  {
-			replyError(drdNewRequest.getPID());
-	  }
-	  else
-	  {
-			if (addRequest(drdNewRequest) == -1)
-			{
-		    replyError(drdNewRequest.getPID());
- 				return;
-			}
-			else
-			{
-				drdNewRequest.doRequest(fsExistingFS, 1);
-			}
-		}
-	}
+  public void handleRequest(DiskRequestData drdNewRequest)
+  {
+    FileSystem fsExistingFS = getFSForFile(drdNewRequest.getFileName());
+    if (fsExistingFS == null)
+    {
+      replyError(drdNewRequest.getProcessId());
+    }
+    else
+    {
+      if (addRequest(drdNewRequest) == -1)
+      {
+        replyError(drdNewRequest.getProcessId());
+        return;
+      }
+      else
+      {
+        drdNewRequest.doRequest(fsExistingFS, 1);
+      }
+    }
+  }
 
   // Handles the return value from requests sent to the file systems.
   synchronized void handleReturnValue(OSMessageAdapter mvTheMessage)
   {
     FileSystemReturnData mvReturnData =
-           (FileSystemReturnData) mvTheMessage.getBody();
+      (FileSystemReturnData) mvTheMessage.getBody();
     RequestTableData mvRequestData =
-           (RequestTableData) cvRequestTable.getItem(mvReturnData.getRequestID());
+      (RequestTableData) cvRequestTable.getItem(mvReturnData.getRequestID());
     if (mvRequestData == null)
     {
       return;
@@ -191,9 +191,9 @@ public class FileSystemManager extends OSMessageHandler
       if (mvReturnData.getReturnValue() >= 0)
       {
         FIDTableData mvNewFID = new FIDTableData();
-        mvNewFID.setPID(mvRequestData.getPID());
-        mvNewFID.setFSID(mvTheMessage.getSource().getId());
-        mvNewFID.setFSFileNo(mvReturnData.getReturnValue());
+        mvNewFID.setProcessId(mvRequestData.getProcessId());
+        mvNewFID.setFileSystemId(mvTheMessage.getSource().getId());
+        mvNewFID.setFileNo(mvReturnData.getReturnValue());
         mvToReturn = cvFIDTable.add(mvNewFID);
       }
       else
@@ -212,11 +212,10 @@ public class FileSystemManager extends OSMessageHandler
         //FileSystemReturnData mvOriginalRequestData =
         //          (FileMessageData)mvOriginalRequest.getData();
 
-        //int mvFID = mvOriginalRequestData.getFID();
-				int mvFID = 0;
+        //int mvFID = mvOriginalRequestData.getFileId();
+        int mvFID = 0;
         cvFIDTable.remove(mvFID);
         mvToReturn = 0;
-
       }
       else
       {
@@ -227,7 +226,7 @@ public class FileSystemManager extends OSMessageHandler
     {
       mvToReturn = mvReturnData.getReturnValue();
     }
-    reply(mvRequestData.getPID(), mvToReturn);
+    reply(mvRequestData.getProcessId(), mvToReturn);
     // Remove request from queue
     int mvCheck = cvRequestTable.remove(mvReturnData.getRequestID());
   }
@@ -270,27 +269,27 @@ public class FileSystemManager extends OSMessageHandler
 
  	// Returns the Files entry stored in the
   private FIDTableData getTableData(DiskRequestData drdNewRequest)
-	{
-		// Get FID table entry
-    FIDTableData mvFileData = (FIDTableData) cvFIDTable.getItem(drdNewRequest.getFID());
+  {
+    // Get FID table entry
+    FIDTableData mvFileData = (FIDTableData) cvFIDTable.getItem(drdNewRequest.getFileId());
     if (mvFileData == null)
     {
-      replyError(drdNewRequest.getPID());
+      replyError(drdNewRequest.getProcessId());
       return null;
     }
     // Check Matching PID's
-    if (mvFileData.getPID() != drdNewRequest.getPID())
+    if (mvFileData.getProcessId() != drdNewRequest.getProcessId())
     {
-      replyError(drdNewRequest.getPID());
+      replyError(drdNewRequest.getProcessId());
       return null;
     }
-		return mvFileData;
-	}
+    return mvFileData;
+  }
 
   private int addRequest(DiskRequestData drdNewRequest)
   {
     //RequestTableData rtdNewEntry = new RequestTableData(drdNewRequest);
     //return(cvRequestTable.add(rtdNewEntry));
-		return 0;
+    return 0;
   }
 }

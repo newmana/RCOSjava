@@ -329,7 +329,7 @@ import Software.Util.FIFOQueue;
         String terminalId = new String(terminalPrefix +
           String.valueOf(terminalNumber));
         HardwareTerminal newTerminal = new
-          HardwareTerminal(terminalId, mhThePostOffice);
+          HardwareTerminal(terminalId, postOffice);
         unallocatedTerminals.insert(newTerminal);
         allocateWaitingProcesses();
         return true;

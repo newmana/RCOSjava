@@ -1,70 +1,68 @@
-//*************************************************************************//
-// FILENAME : RequestTableData 
-// PACKAGE  : FileSystem
-// PURPOSE  : To contain the data for an entry in the FSMan Request table.
-// AUTHOR   : Brett Carter
-// MODIFIED : Andrew Newman
-// HISTORY  : 25/3/96 Created.
-//            
-//*************************************************************************//
-
 package Software.FileSystem;
 
-class RequestTableData extends Object
+/**
+ * Contain the data for an entry in the FSMan Request table.
+ * <P>
+ * @author Andrew Newman.
+ * @author Brett Carter.
+ * @version 1.00 $Date$
+ * @created 25th March 1996
+ */
+class RequestTableData
 {
-  private int iPID;
-  private String sType;   
-  private Object oData; 
+  private int processId;
+  private String type;
+  private Object data;
 
-  public RequestTableData(DiskRequestData drdRequest, String sNewType)
+  public RequestTableData(DiskRequestData newRequest, String newType)
   {
-    iPID = drdRequest.getPID();
-	sType = sNewType;
-	oData = drdRequest.clone();
+    processId = newRequest.getProcessId();
+    type = newType;
+    data = newRequest.clone();
   }
-  
-  public RequestTableData(int thePID, String theType, Object theData)
+
+  public RequestTableData(int newProcessId, String newType, Object newData)
   {
-    iPID = thePID;
-    sType = theType;
-    oData = theData;
+    processId = newProcessId;
+    type = newType;
+    data = newData;
   }
 
   public RequestTableData()
   {
-    iPID = -1;
-    sType = null;
-    oData = null;
+    processId = -1;
+    type = null;
+    data = null;
   }
 
-  public int getPID()
+  public int getProcessId()
   {
-    return iPID;
+    return processId;
   }
-  
-  public void setPID(int iNewPID)
+
+  public void setProcessId(int newProcessId)
   {
-    iPID = iNewPID;
+    processId = newProcessId;
   }
-  
+
   public String getType()
   {
-    return sType;
+    return type;
   }
-  
-  public void setType(String sNewType)
+
+  public void setType(String newType)
   {
-    sType = sNewType;
+    type = newType;
   }
-  
-  public void setData(Object oNewData)
+
+  public void setData(Object newData)
   {
-    oData = oNewData;
+    data = newData;
   }
-  
+
   public Object getData()
   {
-    return oData;
+    return data;
   }
 }
 

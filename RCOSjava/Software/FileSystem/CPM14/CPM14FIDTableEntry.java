@@ -2,12 +2,12 @@
 // Class    : CPM14FIDTableEntry
 // Author   : Brett Carter
 // Date     : 25/3/96 Created.
-//            
+//
 // Purpose  : To contain the data for an entry in the CPM14 FS File ID table.
 
 package Software.FileSystem.CPM14;
 
-public class CPM14FIDTableEntry extends Object
+public class CPM14FIDTableEntry
 {
   public String Filename;
   public int Device;  // Use device number to access the device table.
