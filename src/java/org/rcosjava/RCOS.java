@@ -28,6 +28,7 @@ import org.rcosjava.software.animator.multimedia.MultimediaAnimator;
 import org.rcosjava.software.animator.process.ProcessManagerAnimator;
 import org.rcosjava.software.animator.process.ProcessSchedulerAnimator;
 import org.rcosjava.software.animator.process.ProgramManagerAnimator;
+import org.rcosjava.software.animator.support.ErrorDialog;
 import org.rcosjava.software.animator.support.GraphicButton;
 import org.rcosjava.software.animator.support.NewLabel;
 import org.rcosjava.software.animator.support.Overview;
@@ -38,6 +39,8 @@ import org.rcosjava.software.memory.MemoryManager;
 import org.rcosjava.software.process.ProcessScheduler;
 import org.rcosjava.software.process.ProgramManager;
 import org.rcosjava.software.terminal.TerminalManager;
+
+import org.apache.log4j.*;
 
 /**
  * Main startup file for RCOSjava Version 0.4.1
@@ -61,6 +64,11 @@ public class RCOS extends javax.swing.JApplet implements Runnable
    * Serial id.
    */
   private static final long serialVersionUID = 8487458619933951295L;
+
+  /**
+   * Logging class.
+   */
+  private final static Logger log = Logger.getLogger(RCOS.class);
 
   /**
    * Messaging constant for OS Post Office.
@@ -305,9 +313,14 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     try
     {
       baseDomain = getParameter("baseDomain");
+      if (baseDomain == null)
+      {
+        baseDomain = defaultDomain;
+      }
     }
     catch (Exception e)
     {
+      log.error("Failed to get base domain parameter", e);
       baseDomain = defaultDomain;
     }
 
@@ -330,8 +343,10 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   /**
    * Loads all the images and sounds required for use by the animators and the
    * default panel. Loads them directly out of the jar file.
+   *
+   * @return true if all images and sounds were successfully loaded.
    */
-  public void getImagesAndSound()
+  public boolean getImagesAndSound()
   {
     String rootDir = "org/rcosjava/software/animator";
 
@@ -362,9 +377,14 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     }
     catch (NullPointerException npe)
     {
-      System.err.println("Failed to load images!");
-      npe.printStackTrace();
+      new ErrorDialog("Fatal Error - Failed to Load Images", "Please ensure " +
+          "that the images are available in the same place that RCOSjava was " +
+          "started. Typically, in the JAR or project directory.").show();
+      log.error("Failed to load images", npe);
+      return false;
     }
+
+    return true;
   }
 
   /**
@@ -385,11 +405,18 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   public void init()
   {
     getParameters();
-    getImagesAndSound();
-    initialiseMessaging();
-    initialiseOperatingSystem();
-    initialiseAnimators();
-    initialiseScreen();
+    boolean gotImages = getImagesAndSound();
+    if (gotImages)
+    {
+      initialiseMessaging();
+      initialiseOperatingSystem();
+      initialiseAnimators();
+      initialiseScreen();
+    }
+    else
+    {
+      System.exit(-1);
+    }
   }
 
   /**
