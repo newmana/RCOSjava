@@ -380,7 +380,7 @@ public class ProgramManagerFrame extends RCOSFrame
         String selected = (String) directoryListModel.getElementAt(
             directoryListBox.getSelectedIndex());
 
-        if (selected.compareTo(".") == 0)
+        if (selected.compareTo("..") == 0)
         {
           myProgramManager.upDirectory();
         }
