@@ -128,7 +128,7 @@ Please submit any bugs (with OS, Java VM, Browser and any other details)
 to the email addresses below.
 
 Andrew Newman
-newmana@sourceforge.net
+newmana@users.sourceforge.net
 
 David Jones
 d.jones@cqu.edu.au
