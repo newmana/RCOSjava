@@ -618,7 +618,6 @@ public class Kernel extends OSMessageHandler
       // send the message
       SemaphoreCreate message = new SemaphoreCreate(
           this, getName(), getCurrentProcess().getPID(), initValue);
-
       sendMessage(message);
     }
     else if (call.isSemaphoreOpen())
@@ -634,17 +633,15 @@ public class Kernel extends OSMessageHandler
     {
       int semaphoreId = myCPU.getProcessStack().read(myCPU.getContext().
           getStackPointer());
+      myCPU.getContext().decStackPointer();
 
       if (log.isDebugEnabled())
       {
         log.debug("Kernel SemClose got: " + semaphoreId + "," + getCurrentProcess().getPID());
       }
 
-      myCPU.getContext().decStackPointer();
-
       SemaphoreClose message = new SemaphoreClose(
           this, semaphoreId, getCurrentProcess().getPID());
-
       sendMessage(message);
     }
     else if (call.isSemaphoreSignal())
@@ -664,7 +661,6 @@ public class Kernel extends OSMessageHandler
 
       SemaphoreSignal message = new SemaphoreSignal(
           this, semaphoreId, getCurrentProcess().getPID());
-
       sendMessage(message);
     }
     else if (call.isSemaphoreWait())
