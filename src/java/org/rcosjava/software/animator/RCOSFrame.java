@@ -131,7 +131,7 @@ public class RCOSFrame extends JFrame implements Serializable
     setBackground(defaultBgColour);
     setForeground(defaultFgColour);
     setFont(defaultFont);
-    setLayout(new BorderLayout());
+    getContentPane().setLayout(new BorderLayout());
   }
 
   /**
