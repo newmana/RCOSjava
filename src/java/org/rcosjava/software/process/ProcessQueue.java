@@ -10,16 +10,10 @@ import org.rcosjava.software.util.BaseQueue;
  * <P>
  * <DT> <B>History:</B>
  * <DD> 01/09/1997 Tidy up and modified. AN </DD> 14/04/2001 Modified to have
- * different queue types instead of FIFO hard coded. </DD> </DT> <P>
- *
- *
- *
+ * different queue types instead of FIFO hard coded. </DD> </DT>
+ * <P>
  * @author Andrew Newman.
  * @created 24th March 1996
- * @see org.rcosjava.software.util.FIFOQueue
- * @see org.rcosjava.software.util.LIFOQueue
- * @see org.rcosjava.software.util.PriorityQueue
- * @see org.rcosjava.software.util.Queue
  * @version 1.00 $Date$
  */
 public class ProcessQueue
@@ -64,20 +58,25 @@ public class ProcessQueue
    *
    * @param pid Description of Parameter
    * @return The Process value
+   * @throws ProcessNotFoundException if there is not process given by the PID.
    */
-  public RCOSProcess getProcess(int pid)
+  public RCOSProcess getProcess(int pid) throws ProcessNotFoundException
   {
     return findProcess(pid);
   }
 
   /**
-   * Insert a process using Queue's insert method.
+   * Insert a process using Queue's insert method.  Does not insert it if its
+   * already in the queue.
    *
    * @param newProcess the process to add to the queue.
    */
   public void insertProcess(RCOSProcess newProcess)
   {
-    processes.insert(newProcess);
+    if (!processes.contains(newProcess))
+    {
+      processes.insert(newProcess);
+    }
   }
 
   /**
@@ -136,16 +135,12 @@ public class ProcessQueue
    *
    * @param pid the process identifier to find in the queue.
    * @return the process with the given PID or null if not found.
+   * @throws ProcessNotFoundException
    */
-  public RCOSProcess removeProcess(int pid)
+  public RCOSProcess removeProcess(int pid) throws ProcessNotFoundException
   {
     RCOSProcess tmpProcess = findProcess(pid);
-
-    if (tmpProcess != null)
-    {
-      processes.retrieveCurrent();
-    }
-
+    processes.retrieveCurrent();
     return tmpProcess;
   }
 
@@ -155,7 +150,7 @@ public class ProcessQueue
    * @param pid the process identifier to find in the queue.
    * @return Description of the Returned Value
    */
-  private RCOSProcess findProcess(int pid)
+  private RCOSProcess findProcess(int pid) throws ProcessNotFoundException
   {
     RCOSProcess tmpProcess = null;
 
@@ -175,6 +170,12 @@ public class ProcessQueue
       }
       tmpProcess = null;
       processes.goToNext();
+    }
+
+    if (tmpProcess == null)
+    {
+      throw new ProcessNotFoundException("Couldn't find process with id: " +
+          pid);
     }
 
     return tmpProcess;
