@@ -1,8 +1,8 @@
 package org.rcosjava.software.animator.process;
-import java.applet.*;
 
+import java.applet.*;
 import java.awt.*;
-import javax.swing.ImageIcon;
+import javax.swing.*;
 import java.net.*;
 import java.util.*;
 import org.rcosjava.messaging.messages.universal.NewFile;
