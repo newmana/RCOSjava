@@ -26,7 +26,7 @@ public class DiskRequest
 {
   private int requestId;
   private int diskBlock;
-  public byte[] data;
+  private byte[] data;
 
   public DiskRequest()
   {
@@ -42,5 +42,19 @@ public class DiskRequest
     data = newData;
   }
 
+  public byte[] getData() {
+
+    return data;
+  }
+
+  public int getDiskBlock() {
+
+    return diskBlock;
+  }
+
+  public int getRequestId() {
+
+    return requestId;
+  }
 }
 
