@@ -6,8 +6,8 @@ import net.sourceforge.rcosjava.messaging.messages.MessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.animator.AnimatorMessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import net.sourceforge.rcosjava.messaging.postoffices.MessageHandler;
-import java.util.Iterator;
-import java.util.SortedMap;
+import net.sourceforge.rcosjava.software.util.FIFOQueue;
+import java.util.*;
 
 /**
  * Provide message handling centre of operations.  Variation on PostOffice -
@@ -35,6 +35,16 @@ public class AnimatorOffice extends PostOffice
   private OSOffice theOSPostOffice;
 
   /**
+   * The local messages to be sent.
+   */
+  private FIFOQueue localMessages = new FIFOQueue(5,1);;
+
+  /**
+   * The message to be sent to post offices.
+   */
+  private FIFOQueue postOfficeMessages = new FIFOQueue(5,1);
+
+  /**
    * Attach animator to another post office.
    *
    * @param newId the string identifier to register the post office to the
@@ -50,29 +60,38 @@ public class AnimatorOffice extends PostOffice
     this.addPostOffice(theOSPostOffice);
     // Register the Animator with the OSPostOffice
     theOSPostOffice.addPostOffice(this);
+
+    LocalMessageSender internalSender = new LocalMessageSender();
+    internalSender.start();
+    PostOfficeMessageSender poSender = new PostOfficeMessageSender();
+    poSender.start();
   }
 
   public void sendMessage(MessageAdapter message)
   {
-    //Send to all other registered post offices.
-    sendToPostOffices(message);
-    //Send to locally registered components.
-    localSendMessage(message);
+    //Send to all other registered post offices by adding it to the list.
+    //The send thread should move it along.
+    postOfficeMessages.add(message);
+
+    //Send to locally registered components by adding it to the list
+    localMessages.add(message);
   }
 
   /**
    * Send a message to all registered post office and to all locally registered
    * components.
+   *
+   * @param message the message to send.
    */
-  public void sendMessage(UniversalMessageAdapter aMessage)
+  public void sendMessage(UniversalMessageAdapter message)
   {
-    sendMessage((MessageAdapter) aMessage);
+    sendMessage((MessageAdapter) message);
   }
 
   /**
-   * To be done
+   * Sends messages to all conpontents registered to this post office.
    *
-   * @param message To be done
+   * @param message the message to send.
    */
   public void sendMessage(AnimatorMessageAdapter message)
   {
@@ -81,24 +100,7 @@ public class AnimatorOffice extends PostOffice
 
   public void localSendMessage(MessageAdapter message)
   {
-    if (message.forPostOffice(this))
-    {
-      //Go through the hashtable returning all the handlers
-      //registered.  Send the message to all of them.
-
-     Iterator tmpIter = this.getHandlers().values().iterator();
-
-      synchronized (this.getHandlers())
-      {
-        while(tmpIter.hasNext())
-        {
-          AnimatorMessageHandler theDestination = (AnimatorMessageHandler)
-            tmpIter.next();
-          //Send the message to the destination
-          theDestination.processMessage(message);
-        }
-      }
-    }
+    localMessages.add(message);
   }
 
  /**
@@ -108,53 +110,115 @@ public class AnimatorOffice extends PostOffice
    */
   public void localSendMessage(AnimatorMessageAdapter message)
   {
-    if (message.forPostOffice(this))
-    {
-      //Go through the hashtable returning all the handlers
-      //registered.  Send the message to all of them.
-      Iterator tmpIter = this.getHandlers().values().iterator();
-
-      synchronized (this.getHandlers())
-      {
-        while(tmpIter.hasNext())
-        {
-          AnimatorMessageHandler theDestination = (AnimatorMessageHandler)
-            tmpIter.next();
-          //Send the message to the destination
-          theDestination.processMessage(message);
-        }
-      }
-    }
+    localSendMessage((MessageAdapter) message);
   }
 
   public void sendToPostOffices(MessageAdapter message)
   {
-    PostOffice poTmpPostOffice;
-
-    if (!postOffices.isEmpty())
-    {
-      int iCount;
-      for (iCount = 0; iCount < postOffices.size(); iCount++)
-      {
-        poTmpPostOffice = getPostOffice(iCount);
-        if (message.forPostOffice(poTmpPostOffice))
-        {
-          poTmpPostOffice.localSendMessage(message);
-        }
-      }
-    }
+    postOfficeMessages.add(message);
   }
 
-  public void processMessage(MessageAdapter maMsg)
+  public void processMessage(MessageAdapter message)
   {
     try
     {
-      maMsg.doMessage(this);
+      message.doMessage(this);
     }
     catch (Exception e)
     {
       System.err.println("Error Processing Message: "+e.getMessage());
       e.printStackTrace();
+    }
+  }
+
+  private class PostOfficeMessageSender extends Thread
+  {
+    public void run()
+    {
+      while (true)
+      {
+        try
+        {
+          Thread.sleep(5);
+        }
+        catch (java.lang.InterruptedException ie)
+        {
+        }
+        synchronized(postOfficeMessages)
+        {
+          if (AnimatorOffice.this.postOfficeMessages.size() > 0)
+          {
+            PostOffice tmpPostOffice;
+            //Retrieve first message off the blocks
+            MessageAdapter message = (MessageAdapter)
+              AnimatorOffice.this.postOfficeMessages.retrieveCurrent();
+
+            if (!postOffices.isEmpty())
+            {
+              int count;
+              for (count = 0; count < postOffices.size(); count++)
+              {
+                tmpPostOffice = getPostOffice(count);
+                if (message.forPostOffice(tmpPostOffice))
+                {
+                  tmpPostOffice.localSendMessage(message);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private class LocalMessageSender extends Thread
+  {
+    public void run()
+    {
+      while(true)
+      {
+        try
+        {
+          Thread.sleep(5);
+        }
+        catch (java.lang.InterruptedException ie)
+        {
+        }
+        synchronized(localMessages)
+        {
+          //Retrieve first message off the blocks
+          if (AnimatorOffice.this.localMessages.size() > 0)
+          {
+            MessageAdapter message = (MessageAdapter)
+              AnimatorOffice.this.localMessages.retrieveCurrent();
+
+            if (message.forPostOffice(AnimatorOffice.this))
+            {
+              //Go through the hashtable returning all the handlers
+              //registered.  Send the message to all of them.
+
+             Iterator tmpIter = AnimatorOffice.this.getHandlers().values().iterator();
+
+              synchronized (AnimatorOffice.this.getHandlers())
+              {
+                while(tmpIter.hasNext())
+                {
+                  AnimatorMessageHandler theDestination = (AnimatorMessageHandler)
+                    tmpIter.next();
+                  //Send the message to the destination
+
+                  if (message instanceof AnimatorMessageAdapter)
+                    theDestination.processMessage((AnimatorMessageAdapter) message);
+                  else if (message instanceof UniversalMessageAdapter)
+                    theDestination.processMessage((UniversalMessageAdapter) message);
+                  else
+                    theDestination.processMessage(message);
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -1,8 +1,8 @@
 package net.sourceforge.rcosjava.software.kernel;
 
 import java.io.*;
-import java.util.Vector;
-import java.util.Hashtable;
+import java.util.*;
+
 import net.sourceforge.rcosjava.hardware.cpu.CPU;
 import net.sourceforge.rcosjava.hardware.cpu.Context;
 import net.sourceforge.rcosjava.hardware.cpu.Interrupt;
@@ -85,6 +85,8 @@ public class Kernel extends OSMessageHandler
   boolean runningProcess;
   private Schedule scheduleMessage = new Schedule(this);
   private RCOSProcess currentProcess;
+  private Object waitObj = new Object();
+  private boolean isWaiting = true;
 
   /**
    * Initialise Kernel
@@ -185,7 +187,7 @@ public class Kernel extends OSMessageHandler
    * Performs one execution cycle on the CPU if there is a running process.
    * Handles the interrupts and increments the CPU tick.
    */
-  public synchronized void performInstructionExecutionCycle()
+  public void performInstructionExecutionCycle()
   {
     sendMessage(this.scheduleMessage);
     myCPU.performInstructionExecutionCycle();
@@ -193,6 +195,22 @@ public class Kernel extends OSMessageHandler
     //Sends context and current instruction.
     if (runningProcess())
     {
+      try
+      {
+        synchronized(waitObj)
+        {
+          if (isWaiting)
+          {
+            waitObj.wait();
+            isWaiting = false;
+          }
+        }
+      }
+      catch (InterruptedException ie)
+      {
+        ie.printStackTrace();
+      }
+
       SetContext contextMsg = new SetContext(this, myCPU.getContext());
       sendMessage(contextMsg);
       InstructionExecution executionMsg = new
@@ -223,6 +241,7 @@ public class Kernel extends OSMessageHandler
     currentProcess = newProcess;
     myCPU.setContext(currentProcess.getContext());
     runningProcess = true;
+    isWaiting = true;
 
     //Get new memory
     MemoryRequest memRead = new MemoryRequest(newProcess.getPID(),
@@ -256,6 +275,11 @@ public class Kernel extends OSMessageHandler
   public void setProcessStack(Memory newMemory)
   {
     myCPU.setProcessStack(newMemory);
+    synchronized(waitObj)
+    {
+      if (isWaiting)
+        waitObj.notify();
+    }
   }
 
   /**
@@ -330,6 +354,8 @@ public class Kernel extends OSMessageHandler
   /**
    * Performs the necessary actions for the CSP instruction.  Uses the current
    * values of the CPU.
+   *
+   * @throws java.io.IOException
    */
   public void handleSystemCall()
     throws java.io.IOException

@@ -105,37 +105,62 @@ public abstract class SimpleMessageHandler
 
   /**
    * If the simple message handler is a post office you register message
-   * handlers with it.
+   * handlers with it.  This will register the message handler with the post
+   * office (or other class).  To remove the handler call removeHandler.
    *
    * @param newId name of the message handler.
    * @param newHandler the message handler to add.
    */
-  public void addHandler(String newId, MessageHandler newHandler)
+  public synchronized void addHandler(String newId, MessageHandler newHandler)
   {
     registeredHandlers.put(newId, newHandler);
   }
 
-  public MessageHandler getHandler(String handlerToGet)
+  /**
+   * Searchs the currently registered handlers for the one registered with
+   * a given string value.
+   *
+   * @param handlerToGet the unique identifier of the registered object.
+   * @return the message handler object related to the name given.
+   */
+  public synchronized MessageHandler getHandler(String handlerToGet)
   {
     return ((MessageHandler) registeredHandlers.get(handlerToGet));
   }
 
-  public TreeMap getHandlers()
+  /**
+   * @return a copy of all the tree handlers.
+   */
+  public synchronized TreeMap getHandlers()
   {
-    return(registeredHandlers);
+    return((TreeMap) registeredHandlers.clone());
   }
 
-  public Iterator getKeysHandlers()
+  /**
+   * @return an iterator containing all the keys (as string values).
+   */
+  public synchronized Iterator getKeysHandlers()
   {
     return registeredHandlers.keySet().iterator();
   }
 
-  public void removeHandler(String oldId)
+  /**
+   * If the simple message handler is a post office you register message
+   * handlers with it.  This will deregister the message handler from the post
+   * office.
+   *
+   * @param newId name of the message handler.
+   * @param newHandler the message handler to add.
+   */
+  public synchronized void removeHandler(String oldId)
   {
     registeredHandlers.remove(oldId);
   }
 
-  public void clearHandlers()
+  /**
+   * This is remove all handlers registered with the class.
+   */
+  public synchronized void clearHandlers()
   {
     registeredHandlers.clear();
   }
@@ -173,6 +198,12 @@ public abstract class SimpleMessageHandler
 //    in.defaultReadObject();
   }
 
+  /**
+   * A SimpleMessageHandler is equal if the handler has the same id property.
+   *
+   * @param obj the object to compare this one with.
+   * @return if the objects are equal.
+   */
   public boolean equals(Object obj)
   {
     if (obj != null && (obj.getClass().equals(this.getClass())))
@@ -186,6 +217,16 @@ public abstract class SimpleMessageHandler
     return false;
   }
 
+  /**
+   * This allows comparison of the handlers based on the id property of the
+   * handlers only.  It does not compare the contents of the registered handler
+   * or the post office that it's registered to.
+   *
+   * @param obj1 the object to compare to.
+   * @param obj2 the object to compare with.
+   * @return the comparison of the two strings.
+   * @throws ClassCastException if either object is not of the correct type.
+   */
   public int compare(Object obj1, Object obj2)
     throws ClassCastException
   {

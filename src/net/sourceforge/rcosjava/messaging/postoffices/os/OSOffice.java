@@ -5,8 +5,8 @@ import net.sourceforge.rcosjava.messaging.messages.MessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.os.OSMessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import net.sourceforge.rcosjava.messaging.postoffices.MessageHandler;
-import java.util.Iterator;
-import java.util.SortedMap;
+import net.sourceforge.rcosjava.software.util.FIFOQueue;
+import java.util.*;
 
 /**
  * Provide message handling centre of operations.
@@ -23,6 +23,16 @@ import java.util.SortedMap;
 public class OSOffice extends PostOffice
 {
   /**
+   * The local messages to be sent.
+   */
+  private FIFOQueue localMessages = new FIFOQueue(5,1);
+
+  /**
+   * The message to be sent to post offices.
+   */
+  private FIFOQueue postOfficeMessages = new FIFOQueue(5,1);
+
+  /**
    * To be done
    *
    * @param newId To be done
@@ -30,16 +40,21 @@ public class OSOffice extends PostOffice
   public OSOffice(String newId)
   {
     id = newId;
-    // Register ourselves
-    //addHandler(sMyID, this);
+
+    LocalMessageSender internalSender = new LocalMessageSender();
+    internalSender.start();
+    PostOfficeMessageSender poSender = new PostOfficeMessageSender();
+    poSender.start();
   }
 
   public void sendMessage(MessageAdapter message)
   {
-    //Send to all other registered post offices.
-    sendToPostOffices(message);
-    //Send to locally registered components.
-    localSendMessage(message);
+    //Send to all other registered post offices by adding it to the list.
+    //The send thread should move it along.
+    postOfficeMessages.add(message);
+
+    //Send to locally registered components by adding it to the list
+    localMessages.add(message);
   }
 
   /**
@@ -53,18 +68,21 @@ public class OSOffice extends PostOffice
   }
 
   /**
-   * To be done
+   * Sends messages to all conpontents registered to this post office.  Calls
+   * localSendMessage.
    *
-   * @param message To be done
+   * @param message the message to send.
    */
   public void sendMessage(OSMessageAdapter message)
   {
-    sendMessage((MessageAdapter) message);
+    localSendMessage((MessageAdapter) message);
   }
 
   public void localSendMessage(MessageAdapter message)
   {
-    if (message.forPostOffice(this))
+    localMessages.add(message);
+
+/*    if (message.forPostOffice(this))
     {
       //Go through the hashtable returning all the handlers
       //registered.  Send the message to all of them.
@@ -80,7 +98,7 @@ public class OSOffice extends PostOffice
           theDestination.processMessage(message);
         }
       }
-    }
+    }*/
   }
 
   /**
@@ -90,7 +108,9 @@ public class OSOffice extends PostOffice
    */
   public void localSendMessage(OSMessageAdapter message)
   {
-    if (message.forPostOffice(this))
+    localSendMessage((MessageAdapter) message);
+
+  /*    if (message.forPostOffice(this))
     {
       //Go through the hashtable returning all the handlers
       //registered.  Send the message to all of them.
@@ -106,12 +126,13 @@ public class OSOffice extends PostOffice
           theDestination.processMessage(message);
         }
       }
-    }
+    }*/
   }
 
   public void sendToPostOffices(MessageAdapter message)
   {
-    PostOffice tmpPostOffice;
+    postOfficeMessages.add(message);
+/*    PostOffice tmpPostOffice;
 
     if (!postOffices.isEmpty())
     {
@@ -124,7 +145,7 @@ public class OSOffice extends PostOffice
           tmpPostOffice.localSendMessage(message);
         }
       }
-    }
+    }*/
   }
 
   public void processMessage(MessageAdapter message)
@@ -137,6 +158,99 @@ public class OSOffice extends PostOffice
     {
       System.err.println("Error Processing Message: " + e.getMessage());
       e.printStackTrace();
+    }
+  }
+
+  private class PostOfficeMessageSender extends Thread
+  {
+    public void run()
+    {
+      while (true)
+      {
+        try
+        {
+          Thread.sleep(5);
+        }
+        catch (java.lang.InterruptedException ie)
+        {
+        }
+        synchronized(postOfficeMessages)
+        {
+          if (OSOffice.this.postOfficeMessages.size() > 0)
+          {
+
+            PostOffice tmpPostOffice;
+            //Retrieve first message off the blocks
+            MessageAdapter message = (MessageAdapter)
+              OSOffice.this.postOfficeMessages.retrieveCurrent();
+
+            if (!postOffices.isEmpty())
+            {
+              int count;
+              for (count = 0; count < postOffices.size(); count++)
+              {
+                tmpPostOffice = getPostOffice(count);
+                if (message.forPostOffice(tmpPostOffice))
+                {
+                  tmpPostOffice.localSendMessage(message);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private class LocalMessageSender extends Thread
+  {
+    public void run()
+    {
+      while (true)
+      {
+        try
+        {
+          Thread.sleep(5);
+        }
+        catch (java.lang.InterruptedException ie)
+        {
+        }
+        synchronized(localMessages)
+        {
+          if (OSOffice.this.localMessages.size() > 0)
+          {
+
+            //Retrieve first message off the blocks
+            MessageAdapter message = (MessageAdapter)
+              OSOffice.this.localMessages.retrieveCurrent();
+
+            //System.out.println("OS got message: " + message);
+            if (message.forPostOffice(OSOffice.this))
+            {
+              //Go through the hashtable returning all the handlers
+              //registered.  Send the message to all of them.
+
+             Iterator tmpIter = OSOffice.this.getHandlers().values().iterator();
+
+              synchronized (OSOffice.this.getHandlers())
+              {
+                while(tmpIter.hasNext())
+                {
+                  OSMessageHandler theDestination = (OSMessageHandler)
+                    tmpIter.next();
+                  //Send the message to the destination
+                  if (message instanceof OSMessageAdapter)
+                    theDestination.processMessage((OSMessageAdapter) message);
+                  else if (message instanceof UniversalMessageAdapter)
+                    theDestination.processMessage((UniversalMessageAdapter) message);
+                  else
+                    theDestination.processMessage(message);
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
