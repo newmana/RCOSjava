@@ -1,7 +1,7 @@
 package org.rcosjava.software.process;
 
 import java.util.*;
-import org.rcosjava.software.util.BaseQueue;
+import org.rcosjava.software.util.Queue;
 
 /**
  * Implement a queue of processes used by the process scheduler. It stores the
@@ -19,16 +19,16 @@ import org.rcosjava.software.util.BaseQueue;
 public class ProcessQueue
 {
   /**
-   * Description of the Field
+   * The internal queue being stored.
    */
-  private BaseQueue processes;
+  private Queue processes;
 
   /**
    * Create a new process queue.
    *
    * @param newProcessQueue initialise the queues with given value.
    */
-  public ProcessQueue(BaseQueue newProcessQueue)
+  public ProcessQueue(Queue newProcessQueue)
   {
     processes = newProcessQueue;
   }
@@ -39,7 +39,7 @@ public class ProcessQueue
    * @param newProcessQueue the process queue to set assumes that the queue
    *      contains all the existing values.
    */
-  public void setProcessQueue(BaseQueue newProcessQueue)
+  public void setProcessQueue(Queue newProcessQueue)
   {
     processes = newProcessQueue;
   }
