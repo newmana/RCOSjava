@@ -21,7 +21,7 @@ import org.sablecc.simplec.tool.Version;
 public class VariableCompiler extends DepthFirstAdapter
 {
   private static boolean isInFunction;
-  private static short variableStackPointer = 1;
+  private static short variableStackPointer = 0;
   private static int basePosition = 0;
   private static HashMap globalVarsTable = new HashMap();
   private HashMap localVarsTable = new HashMap();
@@ -88,13 +88,14 @@ public class VariableCompiler extends DepthFirstAdapter
     if (node.getTypeSpecifier() instanceof ASignedIntTypeSpecifier ||
       node.getTypeSpecifier() instanceof AUnsignedIntTypeSpecifier ||
       node.getTypeSpecifier() instanceof ASignedShortTypeSpecifier ||
-      node.getTypeSpecifier() instanceof AUnsignedShortTypeSpecifier)
+      node.getTypeSpecifier() instanceof AUnsignedShortTypeSpecifier ||
+      node.getTypeSpecifier() instanceof ACharTypeSpecifier)
     {
-      allocateVariable(node.getDeclarator().toString(), 2,
-        getArraySize(node.getDeclarator().toString()));
-    }
-    else if (node.getTypeSpecifier() instanceof ACharTypeSpecifier)
-    {
+//      allocateVariable(node.getDeclarator().toString(), 2,
+//        getArraySize(node.getDeclarator().toString()));
+//    }
+//    else if ()
+//    {
       allocateVariable(node.getDeclarator().toString(), 1,
         getArraySize(node.getDeclarator().toString()));
     }
@@ -141,13 +142,13 @@ public class VariableCompiler extends DepthFirstAdapter
     {
       System.out.println("Allocating local: " + name + " position:" +
         variableStackPointer);
-      localVarsTable.put(name, new Integer(variableStackPointer));
+      localVarsTable.put(name, new Short(variableStackPointer));
     }
     else
     {
       System.out.println("Allocating global: " + name + " position:" +
         variableStackPointer);
-      globalVarsTable.put(name, new Integer(variableStackPointer));
+      globalVarsTable.put(name, new Short(variableStackPointer));
     }
     variableStackPointer += noBits * size;
   }
@@ -157,17 +158,17 @@ public class VariableCompiler extends DepthFirstAdapter
     return variableStackPointer;
   }
 
-  public int getVariableLocation(String name)
+  public short getVariableLocation(String name)
   {
-    int location = -1;
+    short location = -1;
     name = name.trim();
     if (localVarsTable.containsKey(name))
     {
-      location = ((Integer) localVarsTable.get(name)).intValue();
+      location = ((Short) localVarsTable.get(name)).shortValue();
     }
     else if (globalVarsTable.containsKey(name))
     {
-      location = ((Integer) globalVarsTable.get(name)).intValue();
+      location = ((Short) globalVarsTable.get(name)).shortValue();
     }
     return location;
   }
