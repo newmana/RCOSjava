@@ -1,8 +1,9 @@
 package org.rcosjava.hardware.terminal;
+
 import java.awt.*;
 import java.awt.event.*;
-
 import java.io.*;
+
 import org.rcosjava.hardware.cpu.Interrupt;
 import org.rcosjava.messaging.postoffices.os.OSOffice;
 import org.rcosjava.software.animator.RCOSFrame;
@@ -96,8 +97,6 @@ public class HardwareTerminal extends RCOSFrame
   {
     softwareTerminal.setCurrentProcess(newCurrentProcess);
   }
-
-  //Setup screen layout.
 
   /**
    * Setup the screen layout by setting the title, default colours of the screen
@@ -216,7 +215,8 @@ public class HardwareTerminal extends RCOSFrame
         hardwareBuffer.insert(e);
 
         // Send msg to CPU to generate Interrupt
-        Interrupt theInt = new Interrupt(-1, TerminalInterruptHandler.myType);
+        Interrupt theInt = new Interrupt(-1, TerminalInterruptHandler.myType +
+            "_" + theTitle);
         softwareTerminal.sendInterrupt(theInt);
       }
     }

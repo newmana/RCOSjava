@@ -1,4 +1,5 @@
 package org.rcosjava.software.interrupt;
+
 import java.io.Serializable;
 import org.rcosjava.messaging.messages.os.OSMessageAdapter;
 import org.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
