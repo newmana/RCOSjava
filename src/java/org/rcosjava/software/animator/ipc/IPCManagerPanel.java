@@ -622,13 +622,17 @@ public class IPCManagerPanel extends RCOSPanel
       SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
           semaphoreMap.get(myAnimator.getSelectedSemaphoreName());
 
-      semValue.setText(((Integer) tmpGraphic.getValue()).toString());
-
-      FIFOQueue queue = tmpGraphic.getAttachedProcesses();
-
-      for (int index = 0; index < queue.size(); index++)
+      // We may have a semaphore selected but it may not be available anymore
+      // in the queue (due to the updates dones in invokeLater thread).
+      if (tmpGraphic != null)
       {
-        semQueue.addToQueue("P" + ((Integer) queue.peek(index)).toString());
+        semValue.setText(((Integer) tmpGraphic.getValue()).toString());
+        FIFOQueue queue = tmpGraphic.getAttachedProcesses();
+
+        for (int index = 0; index < queue.size(); index++)
+        {
+          semQueue.addToQueue("P" + ((Integer) queue.peek(index)).toString());
+        }
       }
     }
     semQueue.repaint();
@@ -650,13 +654,18 @@ public class IPCManagerPanel extends RCOSPanel
       SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
         sharedMemoryMap.get(myAnimator.getSelectedSharedMemoryName());
 
-      String tmpValue = (String) tmpGraphic.getValue();
-      shmList.setText(tmpValue);
-      FIFOQueue queue = tmpGraphic.getAttachedProcesses();
-
-      for (int index = 0; index < queue.size(); index++)
+      // We may have a semaphore selected but it may not be available anymore
+      // in the queue (due to the updates dones in invokeLater thread).
+      if (tmpGraphic != null)
       {
-        semQueue.addToQueue("P" + ((Integer) queue.peek(index)).toString());
+        String tmpValue = (String) tmpGraphic.getValue();
+        shmList.setText(tmpValue);
+        FIFOQueue queue = tmpGraphic.getAttachedProcesses();
+
+        for (int index = 0; index < queue.size(); index++)
+        {
+          semQueue.addToQueue("P" + ((Integer) queue.peek(index)).toString());
+        }
       }
     }
     shmQueue.repaint();
