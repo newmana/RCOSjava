@@ -731,7 +731,6 @@ public class StatementCompiler extends DepthFirstAdapter
 
   private void doVarDeclarator(String name)
   {
-
     short size;
 
 //    System.out.println("Adding: "+ node.getDeclarator().toString());
@@ -749,9 +748,9 @@ public class StatementCompiler extends DepthFirstAdapter
       }
       else
       {
-//          System.out.println("Type: " + node.getTypeSpecifier().toString());
-          System.out.println("Name: " + name);
-          System.out.println("VAR DEC Compiler Level: " + Compiler.getLevel());
+//        System.out.println("Type: " + node.getTypeSpecifier().toString());
+        System.out.println("Name: " + name);
+        System.out.println("VAR DEC Compiler Level: " + Compiler.getLevel());
         size = 1;
         Variable newVar = new Variable(name,
             Compiler.getLevel(), Compiler.getInstructionIndex());
@@ -772,9 +771,9 @@ public class StatementCompiler extends DepthFirstAdapter
     }
     catch (ParserException pe)
     {
-      throw new RuntimeException(pe.getMessage() + " at line: " +
-          pe.getStartLine() + " at position: " +
-          pe.getStartPos());
+      throw new RuntimeException(pe.getToken().getText() + " at line: " +
+          pe.getToken().getLine() + " at position: " +
+          pe.getToken().getPos());
     }
     catch (Exception e)
     {

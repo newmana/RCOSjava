@@ -35,7 +35,7 @@ public class SymbolTable
   /**
    * Location offset of variable in memory.
    */
-  private short symbolIndex;
+  private short symbolIndex = 3;
 
   /**
    * Create the hashmap.
@@ -84,8 +84,7 @@ public class SymbolTable
       else
       {
         throw new org.sablecc.simplec.parser.ParserException(
-          Compiler.getLexer().peek().getLine(),
-          Compiler.getLexer().peek().getPos(),
+          Compiler.getLexer().peek(),
           "Duplicate declaration of " + newSymbol.getName());
       }
     }
