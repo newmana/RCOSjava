@@ -204,4 +204,16 @@ public interface FileSystem
    * @return The MountPoint value
    */
   public String getMountPoint(String mvFilename);
+
+  /**
+   * Will display the specified data to the screen.
+   * Operation can be "DIR" or "BUFFER". For DIR, item1 will indicate
+   * the entry to dump, item2 will indicate the device. For Buffer,
+   * item1 is the FID.
+   *
+   * @param Operation Description of Parameter
+   * @param item1 Description of Parameter
+   * @param item2 Description of Parameter
+   */
+  public String dump(String Operation, int item1, int item2);
 }
