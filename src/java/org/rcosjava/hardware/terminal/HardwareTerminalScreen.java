@@ -2,6 +2,7 @@ package org.rcosjava.hardware.terminal;
 import java.awt.*;
 
 import java.io.*;
+import org.rcosjava.RCOS;
 import org.rcosjava.software.animator.RCOSFrame;
 
 /**
@@ -257,7 +258,7 @@ public class HardwareTerminalScreen extends Canvas
       //Should use getFontMetrics but this is easier (and faster).
 
       graphicsBuffer.setFont(TERMINAL_FONT);
-      graphicsBuffer.setColor(RCOSFrame.DEFAULT_BG_COLOUR);
+      graphicsBuffer.setColor(RCOS.DEFAULT_BG_COLOUR);
       graphicsBuffer.fillRect(0, 0, imageBuffer.getWidth(this),
           imageBuffer.getHeight(this));
       graphicsBuffer.setColor(TERMINAL_COLOUR);

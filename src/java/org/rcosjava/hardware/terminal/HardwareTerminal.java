@@ -106,8 +106,8 @@ public class HardwareTerminal extends RCOSFrame
   public void setupLayout()
   {
     setTitle(theTitle);
-    getContentPane().setBackground(DEFAULT_BG_COLOUR);
-    getContentPane().setForeground(DEFAULT_FG_COLOUR);
+    getContentPane().setForeground(defaultFgColour);
+    getContentPane().setBackground(defaultBgColour);
     getContentPane().setFont(defaultFont);
 
     SymWindow2 symWindow2 = new SymWindow2();
