@@ -16,7 +16,7 @@ import org.rcosjava.messaging.messages.MessageAdapter;
  * @created 24th January 1996
  * @version 1.00 $Date$
  */
-public interface MessageHandler extends Comparator
+public interface MessageHandler extends Comparable
 {
   /**
    * Set the unique identifier for the message handler. Post offices will use
