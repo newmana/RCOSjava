@@ -48,8 +48,7 @@ public class MainMemory
     throws NoFreeMemoryException
   {
     // Find first deallocated page.
-    int count;
-    for (count = 0; count < totalUnits; count++)
+    for (int count = 0; count < totalUnits; count++)
     {
       if (myMemory[count].isFree())
       {

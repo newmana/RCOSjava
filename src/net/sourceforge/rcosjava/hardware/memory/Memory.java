@@ -23,7 +23,7 @@ public class Memory implements Serializable, Cloneable
 
   private short memorySegment[];
   //Segment status is either allocated or free.
-  private boolean allocated;
+  private boolean allocated = false;
   private int segmentSize;
 
    //Constructors
@@ -34,10 +34,10 @@ public class Memory implements Serializable, Cloneable
     setFree();
   }
 
-  public Memory(int iNewSegmentSize)
+  public Memory(int newSegmentSize)
   {
-    memorySegment = new short[iNewSegmentSize];
-    segmentSize = iNewSegmentSize;
+    memorySegment = new short[newSegmentSize];
+    segmentSize = newSegmentSize;
     setFree();
   }
 
@@ -53,6 +53,11 @@ public class Memory implements Serializable, Cloneable
     allocated = false;
   }
 
+  public void setAllocated()
+  {
+   allocated = true;
+  }
+
   public boolean isFree()
   {
    return(!allocated);
@@ -61,11 +66,6 @@ public class Memory implements Serializable, Cloneable
   public boolean isAllocated()
   {
    return(allocated);
-  }
-
-  public void setAllocated()
-  {
-   allocated = true;
   }
 
   public int getSegmentSize()
@@ -154,6 +154,14 @@ public class Memory implements Serializable, Cloneable
     for (int count = 0; count < myMemory.length; count++)
     {
       memorySegment[count] = (short) myMemory[count];
+    }
+  }
+
+  public void write(short[] myMemory)
+  {
+    for (int count = 0; count < myMemory.length; count++)
+    {
+      memorySegment[count] = myMemory[count];
     }
   }
 
