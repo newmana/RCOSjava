@@ -663,13 +663,13 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   }
 
   /**
-   * Returns the terminal images.
+   * Returns the terminal manager animator.
    *
-   * @return the terminal images.
+   * @return the terminal manager animator.
    */
-  public static ImageIcon[] getTerminalImages()
+  public static TerminalManagerAnimator getTerminalAnimator()
   {
-    return terminalImages;
+    return tmAnimator;
   }
 
   /**
