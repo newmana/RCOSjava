@@ -49,7 +49,7 @@
     </uptodate>
 
     <!-- Test whether to generate simple c grammar file-->
-    <uptodate property="sablecc.required" targetfile="${src.dir}/net/sourceforge/rcosjava/compiler/grammar">
+    <uptodate property="sablecc.required" targetfile="${src.dir}/net/sourceforge/rcosjava/compiler/grammar/simplec.sablecc">
       <srcfiles dir="${lib.dir}" includes="${grammar.jar}"/>
     </uptodate>
   </target>
