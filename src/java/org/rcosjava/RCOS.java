@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.applet.AppletContext;
 import java.awt.event.*;
@@ -91,6 +92,18 @@ public class RCOS extends javax.swing.JApplet implements Runnable
    * Default foreground colour of all text (White).
    */
   public final static Color DEFAULT_FG_COLOUR = Color.white;
+
+  /**
+   * Default font size (TimesRoman, Plain, 12).
+   */
+  public static final Font defaultFont = new Font("TimesRoman",
+      Font.PLAIN, 11);
+
+  /**
+   * Default title font size (TimesRoman, Plain, 18).
+   */
+  public static final Font titleFont = new Font("TimesRoman",
+      Font.PLAIN, 16);
 
   /**
    * Welcome message to be displayed.
