@@ -47,7 +47,7 @@ public class HardwareTerminalScreen extends Canvas
   {
   	super();
     contents = new char[MAXROWS*MAXCOLS];
-    FontMetrics fm = getFontMetrics(RCOSFrame.fTerminlFont);
+    FontMetrics fm = getFontMetrics(RCOSFrame.terminlFont);
     iTextHeight = fm.getHeight();
     iTextWidth = fm.charWidth(' ');
 
@@ -157,11 +157,11 @@ public class HardwareTerminalScreen extends Canvas
     {
       //Should use getFontMetrics but this is easier (and faster).
 
-      gGraphicsBuffer.setFont(RCOSFrame.fTerminlFont);
-      gGraphicsBuffer.setColor(RCOSFrame.cDefaultBgColour);
+      gGraphicsBuffer.setFont(RCOSFrame.terminlFont);
+      gGraphicsBuffer.setColor(RCOSFrame.defaultBgColour);
       gGraphicsBuffer.fillRect(0,0,iImageBuffer.getWidth(this),
                                iImageBuffer.getHeight(this));
-      gGraphicsBuffer.setColor(RCOSFrame.cTerminalColour);
+      gGraphicsBuffer.setColor(RCOSFrame.terminalColour);
 
       // Prints out each line row by row.
 

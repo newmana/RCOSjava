@@ -1,33 +1,55 @@
-//*******************************************************************/
-// FILE     : Context.java
-// PURPOSE  : Implements Context for simple PCODE CPU
-// AUTHOR   : David Jones
-// MODIFIED : Andrew Newman.
-// VERSION  : 1.00
-// HISTORY  : 23/03/96 Separate from CPU.java into own
-//                     file due to move to packages. DJ
-//            04/10/97 Modified for getters and setters.
-//                     AN
-//
-//*******************************************************************/
+/**
+ * Implements Context for simple PCODE CPU.  Models the context of current CPU.
+ *
+ * Usage example:
+ * <CODE>
+ * 	Context newContext = new Context();
+ * </CODE>
+ *
+ * @see Hardware.CPU.Instruction
+ * @see Hardware.CPU.Interrupt
+ * @version 1.00 $Date$
+ * @author Andrew Newman.
+ * @author David Jones
+ **/
 
 package Hardware.CPU;
 
-// Context class
-// - model the context of current CPU
-
 public class Context implements Cloneable
 {
+  /**
+   * The currently executing instruction.
+   */
   private Instruction instructionRegister;
-  private short programCounter; // address for next instruction to execute
-  private short stackPointer;   // top of the stack
-  private short basePointer;    // base of the stack for current procedure block
 
+  /**
+   * Address for next instruction to execute
+   */
+  private short programCounter;
+
+  /**
+   * Top of the stack.
+   */
+  private short stackPointer;
+
+  /**
+   * Base of the stack for current procedure block
+   */
+  private short basePointer;
+
+  /**
+   * Null constructor.  Initialises the object.
+   * @see initialise
+   */
   public Context()
   {
     initialise();
   }
 
+  /**
+   * Initialises the program counter, stack pointer and base pointer to 0.
+   * Creates a new instruction register.
+   */
   public void initialise()
   {
     programCounter = 0;
@@ -36,74 +58,124 @@ public class Context implements Cloneable
     instructionRegister = new Instruction();
   }
 
+  /**
+   * Returns the value of the program counter.
+   */
   public short getProgramCounter()
   {
     return programCounter;
   }
 
+  /**
+   * Increments the program counter by one.
+   */
   public void incProgramCounter()
   {
     programCounter++;
   }
 
+  /**
+   * Decrements the program counter by one.
+   */
   public void decProgramCounter()
   {
     programCounter--;
   }
 
-  public void setProgramCounter(short sNewProgramCounter)
+  /**
+   * Sets the program counter to the newly given value.
+   *
+   * @newProgramCounter the new value to set the program counter to.
+   */
+  public void setProgramCounter(short newProgramCounter)
   {
-    programCounter = sNewProgramCounter;
+    programCounter = newProgramCounter;
   }
 
+  /**
+   * Returns the value of the stack pointer.
+   */
   public short getStackPointer()
   {
     return stackPointer;
   }
 
+  /**
+   * Increments the stack pointer by one.
+   */
   public void incStackPointer()
   {
     stackPointer++;
   }
 
+  /**
+   * Decrements the stack pointer by one.
+   */
   public void decStackPointer()
   {
     stackPointer--;
   }
 
-  public void setStackPointer(short sNewStackPointer)
+  /**
+   * Sets the stack pointer to the newly given value.
+   *
+   * @newStackPointer the new value to set the stack pointer to.
+   */
+  public void setStackPointer(short newStackPointer)
   {
-    stackPointer = sNewStackPointer;
+    stackPointer = newStackPointer;
   }
 
+  /**
+   * Returns the value of the base pointer.
+   */
   public short getBasePointer()
   {
     return basePointer;
   }
 
+  /**
+   * Increments the base pointer by one.
+   */
   public void incBasePointer()
   {
     basePointer++;
   }
 
+  /**
+   * Decrements the base pointer by one.
+   */
   public void decBasePointer()
   {
     basePointer--;
   }
 
-  public void setBasePointer(short sNewBasePointer)
+  /**
+   * Sets the base pointer to the newly given value.
+   *
+   * @newBasePointer the new value to set the base pointer to.
+   */
+  public void setBasePointer(short newBasePointer)
   {
-    basePointer = sNewBasePointer;
+    basePointer = newBasePointer;
   }
 
+  /**
+   * Returns a copy (value) of the instruction register.
+   */
   public Instruction getInstructionRegister()
   {
-    return instructionRegister;
+    return (Instruction) instructionRegister.clone();
   }
 
-  public void setInstructionRegister(Instruction iNewInstructionRegister)
+  /**
+   * Sets the instructions to the newly given object.
+   *
+   * @newInstructionRegister the new instruction register object.
+   */
+  public void setInstructionRegister(Instruction newInstructionRegister)
   {
-    instructionRegister = iNewInstructionRegister;
+    instructionRegister = newInstructionRegister;
   }
 
   public Object clone()
