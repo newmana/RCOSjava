@@ -34,7 +34,6 @@ int main()
       shrValue = shrread(shrId, offset);
       printf("\nThe value is: ");
       printf("%i", shrValue);
-      printf("\n");
       printf("\nThe offset is: ");
       printf("%i", offset);
       printf("\n");
