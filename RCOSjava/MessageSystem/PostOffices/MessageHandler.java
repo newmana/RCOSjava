@@ -9,13 +9,15 @@ import MessageSystem.Messages.MessageAdapter;
  * <DT><B>History:</B><DD>
  * 17/03/96 Modified to include LocalSendMessage to allow broadcasting of
  * messages to just local post office.
+ * </DD><DD>
+ * 01/04/98 Modified to use TreeMap.
  * </DD></DT>
  * @author Andrew Newman.
  * @author Bruce Jamieson.
  * @version 1.00 $Date$
  * @created 24th January 1996
  **/
-public interface MessageHandler
+public interface MessageHandler extends Comparator
 {
   /**
    * Set the unique identifier for the message handler.  Post offices will use
@@ -64,12 +66,12 @@ public interface MessageHandler
   /**
    * Returns the entire collection of preregistered handlers.
    */
-  public Hashtable getHandlers();
+  public TreeMap getHandlers();
 
   /**
    * Returns the keys (the names) of all the handlers.
    */
-  public Enumeration getKeysHandlers();
+  public Iterator getKeysHandlers();
 
   /**
    * Removes the handler from the list of handlers based on the unique id.

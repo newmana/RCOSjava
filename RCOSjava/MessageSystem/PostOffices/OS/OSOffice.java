@@ -5,10 +5,16 @@ import MessageSystem.Messages.MessageAdapter;
 import MessageSystem.Messages.OS.OSMessageAdapter;
 import MessageSystem.Messages.Universal.UniversalMessageAdapter;
 import MessageSystem.PostOffices.MessageHandler;
-import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.SortedMap;
 
 /**
- * Provide message handling centre of operations
+ * Provide message handling centre of operations.
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 01/04/98 Modified to use TreeMap.
+ * </DD></DT>
  * <P>
  * @author Bruce Jamieson
  * @author Andrew Newman
@@ -72,9 +78,12 @@ public class OSOffice extends PostOffice
     {
       //Go through the hashtable returning all the handlers
       //registered.  Send the message to all of them.
-      for (Enumeration e = getHandlers().elements(); e.hasMoreElements(); )
+
+      Iterator tmpIter = this.getHandlers().values().iterator();
+
+      while(tmpIter.hasNext())
       {
-        OSMessageHandler theDestination = (OSMessageHandler) e.nextElement();
+        OSMessageHandler theDestination = (OSMessageHandler) tmpIter.next();
         //Send the message to the destination
         theDestination.processMessage(maMessage);
       }
@@ -86,17 +95,20 @@ public class OSOffice extends PostOffice
    *
    * @param  maMessage  Description of Parameter
    */
-  public void localSendMessage(OSMessageAdapter maMessage)
+  public void localSendMessage(OSMessageAdapter message)
   {
-    if (maMessage.forPostOffice(this))
+    if (message.forPostOffice(this))
     {
       //Go through the hashtable returning all the handlers
       //registered.  Send the message to all of them.
-      for (Enumeration e = getHandlers().elements(); e.hasMoreElements(); )
+
+      Iterator tmpIter = this.getHandlers().values().iterator();
+
+      while(tmpIter.hasNext())
       {
-        OSMessageHandler theDestination = (OSMessageHandler) e.nextElement();
+        OSMessageHandler theDestination = (OSMessageHandler) tmpIter.next();
         //Send the message to the destination
-        theDestination.processMessage(maMessage);
+        theDestination.processMessage(message);
       }
     }
   }
@@ -106,19 +118,19 @@ public class OSOffice extends PostOffice
    *
    * @param  maMessage  Description of Parameter
    */
-  public void sendToPostOffices(MessageAdapter maMessage)
+  public void sendToPostOffices(MessageAdapter message)
   {
-    PostOffice poTmpPostOffice;
+    PostOffice tmpPostOffice;
 
     if (!postOffices.isEmpty())
     {
-      int iCount;
-      for (iCount = 0; iCount < postOffices.size(); iCount++)
+      int count;
+      for (count = 0; count < postOffices.size(); count++)
       {
-        poTmpPostOffice = getPostOffice(iCount);
-        if (maMessage.forPostOffice(poTmpPostOffice))
+        tmpPostOffice = getPostOffice(count);
+        if (message.forPostOffice(tmpPostOffice))
         {
-          poTmpPostOffice.localSendMessage(maMessage);
+          tmpPostOffice.localSendMessage(message);
         }
       }
     }
@@ -129,11 +141,11 @@ public class OSOffice extends PostOffice
    *
    * @param  maMsg  Description of Parameter
    */
-  public void processMessage(MessageAdapter maMsg)
+  public void processMessage(MessageAdapter message)
   {
     try
     {
-      maMsg.doMessage(this);
+      message.doMessage(this);
     }
     catch (Exception e)
     {

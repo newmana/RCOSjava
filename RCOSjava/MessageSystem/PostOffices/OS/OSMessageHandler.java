@@ -40,13 +40,8 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
    * Register the handler with the given Id to the given postoffice.  Adds a
    * handler to the post office to handle passing messages to this component.
    *
-<<<<<<< OSMessageHandler.java
    * @param newId the unique identifier used to register to the post office.
    * @param newPostOffice the post office to register to.
-=======
-   * @param newId
-   * @param newPostOffice
->>>>>>> 1.6
    */
   public OSMessageHandler(String newId, OSOffice newPostOffice)
   {
@@ -58,16 +53,7 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
     newPostOffice.processMessage(newMessage);
   }
 
-<<<<<<< OSMessageHandler.java
   public void sendMessage(MessageAdapter adapter)
-=======
-  /**
-   *  Description of the Method
-   *
-   * @param  adapter  Description of Parameter
-   */
-  public void sendMessage(MessageAdapter adapter)
->>>>>>> 1.6
   {
     postOffice.sendMessage(adapter);
   }
@@ -75,11 +61,7 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
   /**
    * Call the post office's sendMessage.
    *
-<<<<<<< OSMessageHandler.java
    * @param adapter the message being sent and determines the method called.
-=======
-   * @param  adapter  Description of Parameter
->>>>>>> 1.6
    */
   public void sendMessage(UniversalMessageAdapter adapter)
   {
@@ -89,27 +71,14 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
   /**
    * Call the post office's sendMessage.
    *
-<<<<<<< OSMessageHandler.java
    * @param adapter the message being sent and determines the method called.
-=======
-   * @param  adapter  Description of Parameter
->>>>>>> 1.6
    */
   public void sendMessage(OSMessageAdapter adapter)
   {
     localSendMessage(adapter);
   }
 
-<<<<<<< OSMessageHandler.java
   public void localSendMessage(MessageAdapter adapter)
-=======
-  /**
-   *  Description of the Method
-   *
-   * @param  adapter  Description of Parameter
-   */
-  public void localSendMessage(MessageAdapter adapter)
->>>>>>> 1.6
   {
     postOffice.processMessage(adapter);
   }
@@ -118,27 +87,14 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
    * Call the post office's process message, meaning that it will only be
    * processed locally by the post office and not sent on anywhere.
    *
-<<<<<<< OSMessageHandler.java
    * @param adapter the message being sent and determines the method called.
-=======
-   * @param  adapter  Description of Parameter
->>>>>>> 1.6
    */
   public void localSendMessage(OSMessageAdapter adapter)
   {
     postOffice.localSendMessage(adapter);
   }
 
-<<<<<<< OSMessageHandler.java
   public void processMessage(MessageAdapter message)
-=======
-  /**
-   *  Description of the Method
-   *
-   * @param  message  Description of Parameter
-   */
-  public void processMessage(MessageAdapter message)
->>>>>>> 1.6
   {
     try
     {
@@ -151,26 +107,14 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
   }
 
   /**
-<<<<<<< OSMessageHandler.java
    * The method that is called by the post office of a registered handler of
    * the message.  This is for only OS Messages.
-=======
-   *  Description of the Method
-   *
-   * @param  message  Description of Parameter
->>>>>>> 1.6
    */
   public abstract void processMessage(OSMessageAdapter message);
 
   /**
-<<<<<<< OSMessageHandler.java
    * The method that is called by the post office of a registered handler of
    * the message.  This is for only Universal Messages.
-=======
-   *  Description of the Method
-   *
-   * @param  message  Description of Parameter
->>>>>>> 1.6
    */
   public abstract void processMessage(UniversalMessageAdapter message);
 }

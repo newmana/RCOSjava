@@ -6,7 +6,8 @@ import MessageSystem.Messages.MessageAdapter;
 import MessageSystem.Messages.Animator.AnimatorMessageAdapter;
 import MessageSystem.Messages.Universal.UniversalMessageAdapter;
 import MessageSystem.PostOffices.MessageHandler;
-import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.SortedMap;
 
 /**
  * Provide message handling centre of operations.  Variation on PostOffice -
@@ -20,6 +21,8 @@ import java.util.Enumeration;
  * 20/05/97 Changed message system
  * </DD><DD>
  * 05/05/98 Removed sendToAll (now does this by default)
+ * </DD><DD>
+ * 01/04/98 Modified to use TreeMap.
  * </DD></DT>
  * <P>
  * @author Andrew Newman.
@@ -71,9 +74,13 @@ public class AnimatorOffice extends PostOffice
     {
       //Go through the hashtable returning all the handlers
       //registered.  Send the message to all of them.
-      for (Enumeration e = getHandlers().elements(); e.hasMoreElements();)
+
+     Iterator tmpIter = this.getHandlers().values().iterator();
+
+     while(tmpIter.hasNext())
       {
-        AnimatorMessageHandler theDestination = (AnimatorMessageHandler) e.nextElement();
+        AnimatorMessageHandler theDestination = (AnimatorMessageHandler)
+          tmpIter.next();
 	//Send the message to the destination
 	theDestination.processMessage(maMessage);
       }
@@ -91,9 +98,12 @@ public class AnimatorOffice extends PostOffice
     {
       //Go through the hashtable returning all the handlers
       //registered.  Send the message to all of them.
-      for (Enumeration e = getHandlers().elements(); e.hasMoreElements();)
+      Iterator tmpIter = this.getHandlers().values().iterator();
+
+      while(tmpIter.hasNext())
       {
-        AnimatorMessageHandler theDestination = (AnimatorMessageHandler) e.nextElement();
+        AnimatorMessageHandler theDestination = (AnimatorMessageHandler)
+          tmpIter.next();
 	//Send the message to the destination
 	theDestination.processMessage(maMessage);
       }

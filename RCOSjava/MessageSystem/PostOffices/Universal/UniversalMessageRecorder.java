@@ -151,6 +151,7 @@ public class UniversalMessageRecorder
   {
     myClient = new FileClient(host, port);
     myClient.openConnection();
+    System.out.println("Recording: " + newMessage.getClass().getName());
     try
     {
       myClient.writeRecFile("/" + fileName + counter + ".xml", newMessage);

@@ -2,8 +2,9 @@ package MessageSystem.PostOffices;
 
 import MessageSystem.Messages.MessageAdapter;
 import MessageSystem.Messages.AddHandler;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import Software.Util.PriorityQueue;
+import java.util.Iterator;
+import java.util.TreeMap;
 
 //Serialization support
 import fr.dyade.koala.serialization.GeneratorInputStream;
@@ -14,12 +15,15 @@ import java.io.Serializable;
  * Provide sending and receiving facilities for all classes.
  * <P>
  * <DT><B>History:</B><DD>
- * ??/??/96 Fixed bug nolonger registers to postoffice automatically.
+ * ??/??/1996 Fixed bug nolonger registers to postoffice automatically.
  * </DD><DD>
  * 20/05/97 Changed message system.
  * </DD><DD>
- * 21/05/97 Added LocalSendMessage to all posting of a message
+ * 21/05/1997 Added LocalSendMessage to all posting of a message
  * to the local Post Office instead of broadcasting it everywhere.
+ * </DD><DD>
+ * 01/04/2001 Changed to using TreeMap for handler storage.  Implemented
+ * compare and equals.
  * </DD></DT>
  * @author Andrew Newman.
  * @author Bruce Jamieson.
@@ -31,7 +35,7 @@ public abstract class SimpleMessageHandler
 {
   protected PostOffice registeredPostOffice;
   protected String id;
-  private Hashtable registeredHandlers = new Hashtable();
+  private TreeMap registeredHandlers = new TreeMap();
 
   /**
    * Null construct does nothing.
@@ -117,14 +121,14 @@ public abstract class SimpleMessageHandler
     return ((MessageHandler) registeredHandlers.get(handlerToGet));
   }
 
-  public Hashtable getHandlers()
+  public TreeMap getHandlers()
   {
     return(registeredHandlers);
   }
 
-  public Enumeration getKeysHandlers()
+  public Iterator getKeysHandlers()
   {
-    return registeredHandlers.keys();
+    return registeredHandlers.keySet().iterator();
   }
 
   public void removeHandler(String oldId)
@@ -168,5 +172,31 @@ public abstract class SimpleMessageHandler
     throws IOException, ClassNotFoundException
   {
 //    in.defaultReadObject();
+  }
+
+  public boolean equals(Object obj)
+  {
+    if (obj != null && (obj.getClass().equals(this.getClass())))
+    {
+      SimpleMessageHandler handler = (SimpleMessageHandler) obj;
+      if (handler.getId().equals(this.getId()))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public int compare(Object obj1, Object obj2)
+    throws ClassCastException
+  {
+    if ( obj1.getClass().equals(this.getClass()) &&
+         obj2.getClass().equals(this.getClass()) )
+    {
+      SimpleMessageHandler handler1 = (SimpleMessageHandler) obj1;
+      SimpleMessageHandler handler2 = (SimpleMessageHandler) obj2;
+      return handler1.getId().compareTo(handler2.getId());
+    }
+    throw new ClassCastException();
   }
 }

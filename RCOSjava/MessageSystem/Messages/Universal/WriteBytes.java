@@ -11,41 +11,33 @@ package MessageSystem.Messages.Universal;
 
 import Software.Memory.MemoryRequest;
 import Software.Animator.IPC.IPCManagerAnimator;
-import MessageSystem.Messages.Universal.FinishedMemoryRead;
-import MessageSystem.Messages.Universal.FinishedMemoryWrite;
 import Software.Memory.MemoryManager;
-import Software.Kernel.Kernel;
-import Software.Process.ProcessScheduler;
 import MessageSystem.PostOffices.OS.OSMessageHandler;
 
 public class WriteBytes extends UniversalMessageAdapter
 {
-  private MemoryRequest mrRequest;
+  private MemoryRequest request;
 
   public WriteBytes(OSMessageHandler theSource,
-    MemoryRequest mrNewRequest)
+    MemoryRequest newRequest)
   {
     super(theSource);
-    mrRequest = mrNewRequest;
+    request = newRequest;
   }
 
-  public void setMemoryRequest(MemoryRequest mrNewRequest)
+  public void setMemoryRequest(MemoryRequest newRequest)
   {
-    mrRequest = mrNewRequest;
+    request = newRequest;
   }
 
   public void doMessage(IPCManagerAnimator theElement)
   {
-    theElement.writingMemory(mrRequest);
+    theElement.writingMemory(request);
   }
 
   public void doMessage(MemoryManager theElement)
   {
-    theElement.writeBytes(mrRequest.getPID(), mrRequest.getMemoryType(),
-      mrRequest.getSize(),
-      mrRequest.getOffset(), mrRequest.getMemory());
-    FinishedMemoryWrite aMessage = new FinishedMemoryWrite(theElement, mrRequest);
-    theElement.sendMessage(aMessage);
+    theElement.writeBytes(request);
   }
 }
 

@@ -6,7 +6,7 @@ import MessageSystem.PostOffices.PostOffice;
 /**
  * Adds a handler to a given object.  Each handler can have other handlers
  * attached to them that are informed when a message is sent.
- *
+ * <P>
  * @author Andrew Newman
  * @version 1.00 $Date$
  * @created 21st October 2000

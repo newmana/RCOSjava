@@ -22,6 +22,8 @@ import MessageSystem.PostOffices.OS.OSOffice;
 import MessageSystem.Messages.Universal.AllocatedPages;
 import MessageSystem.Messages.Universal.DeallocatedPages;
 import MessageSystem.Messages.Universal.UniversalMessageAdapter;
+import MessageSystem.Messages.Universal.FinishedMemoryRead;
+import MessageSystem.Messages.Universal.FinishedMemoryWrite;
 import Hardware.Memory.Memory;
 
 public class MemoryManager extends OSMessageHandler
@@ -96,6 +98,14 @@ public class MemoryManager extends OSMessageHandler
   public void writeBytes(int iPID, int iType, int iSize, int iOffset, Memory newMemory)
   {
     thePageHandler.writeBytes(iPID, iType, iSize, iOffset, newMemory);
+  }
+
+  public void writeBytes(MemoryRequest request)
+  {
+    writeBytes(request.getPID(), request.getMemoryType(),
+      request.getSize(), request.getOffset(), request.getMemory());
+    FinishedMemoryWrite tmpMsg = new FinishedMemoryWrite(this, request);
+    sendMessage(tmpMsg);
   }
 
   public void processMessage(OSMessageAdapter aMsg)
