@@ -24,7 +24,7 @@ public class OSMessageRecorder extends OSMessageHandler
    *
    * @param newId the string identifier to register as.
    * @param newPostOffice the post office to register to.
-   * @param newRecorder Description of Parameter
+   * @param newRecorder the parent recorder object.
    */
   public OSMessageRecorder(String newId, OSOffice newPostOffice,
       UniversalMessageRecorder newRecorder)
@@ -41,6 +41,7 @@ public class OSMessageRecorder extends OSMessageHandler
    */
   public void processMessage(OSMessageAdapter newMessage)
   {
+    // Record on if undoable.
     if (newMessage.undoableMessage())
     {
       recorder.processOSMessage(newMessage);
@@ -55,6 +56,7 @@ public class OSMessageRecorder extends OSMessageHandler
    */
   public void processMessage(UniversalMessageAdapter newMessage)
   {
+    // Record on if undoable.
     if (newMessage.undoableMessage())
     {
       recorder.processOSUniversalMessage(newMessage);

@@ -24,7 +24,7 @@ public class AnimatorMessageRecorder extends AnimatorMessageHandler
    *
    * @param newId the string identifier to register as.
    * @param newPostOffice the post office to register to.
-   * @param newRecorder Description of Parameter
+   * @param newRecorder the parent recorder object.
    */
   public AnimatorMessageRecorder(String newId, AnimatorOffice newPostOffice,
       UniversalMessageRecorder newRecorder)
