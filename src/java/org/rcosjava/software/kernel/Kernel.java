@@ -809,7 +809,7 @@ public class Kernel extends OSMessageHandler
       // decrement program counter to force the blocking
       // instruction to be re-executed when the process is woken up
       // BUT only do it if the body of the message is null
-//      oldCurrent.getContext().decProgramCounter();
+      //oldCurrent.getContext().decProgramCounter();
 
       // no need to get a copy of the code as it won't change
       // Send a message to the ProcessScheduler to update old current
