@@ -152,7 +152,6 @@ public class UniversalMessageRecorder extends OSMessageHandler
   public void setRecordingName(String newRecordingName)
   {
     recordingName = newRecordingName;
-    System.err.println("Recording name: " + recordingName);
   }
 
   /**
