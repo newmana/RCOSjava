@@ -15,31 +15,45 @@ import Hardware.CPU.Instruction;
  * RCOS which was adapted from a series of articles in Byte magazine in the
  * late 1970s.
  * <P>
- * HISTORY: 14/01/96 Created parses pcode object file interprets Hello World
- *          program most pcode implemented. DJ.<BR>
- *          21/01/96 Finally worked out the public static stuff up LODX, STOX
- *          working putting into stand-alone class to work with Applet.
- *          Performed numerous modifications to organisation including new
- *          class Context and extensions to Instruction. Fixed problem with CPY
- *          and CAL now executes PRIMES.PCD. DJ<BR>
- *          28/01/96 reorganised classes and methods mainly to remove large
- *          unnecessary switch statements.  Moved class Instruction into
- *          separate file. DJ<BR>
- *          13/02/96 Modifying to use Kernel. Kernel will contain the CPU.
- *          CPU no longer extends SimpleMessageHandler. DJ<BR>
- *          23/03/96 Add InterruptQueue and GenerateInterrupt method. Moved
- *          into CPU package. Context class moved into separate file. Added
- *          HandleInterrupt to cycle. DJ<BR>
- *          30/03/96 Stack, Context etc taken from Kernel.CurrentProcess. DJ<BR>
- *          01/01/97 Sends process switch to process Scheduler. AN<BR>
- *          04/03/97 Checked implementation and fixed some bugs. AN<BR>
- *          01/07/97 Uses Memory class instead of bytes for processes. AN<BR>
- *          03/09/97 Added LOD 255,0 support. AN<BR>
- *          04/09/97 Removed CPU from message system. Access through Kernel
- *          only. AN<BR>
- *          05/09/98 Removed all messages sending from CPU. AN<BR>
- *          10/10/98 Finished removal of String based opcodes. AN<BR>
- * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 14/01/96 Created parses pcode object file interprets Hello World
+ * program most pcode implemented. DJ.
+ * </DD><DD>
+ * 21/01/96 Finally worked out the public static stuff up LODX, STOX
+ * working putting into stand-alone class to work with Applet.
+ * Performed numerous modifications to organisation including new
+ * class Context and extensions to Instruction. Fixed problem with CPY
+ * and CAL now executes PRIMES.PCD. DJ
+ * </DD><DD>
+ * 28/01/96 reorganised classes and methods mainly to remove large
+ * unnecessary switch statements.  Moved class Instruction into
+ * separate file. DJ
+ * </DD><DD>
+ * 13/02/96 Modifying to use Kernel. Kernel will contain the CPU.
+ * CPU no longer extends SimpleMessageHandler. DJ
+ * </DD><DD>
+ * 23/03/96 Add InterruptQueue and GenerateInterrupt method. Moved
+ * into CPU package. Context class moved into separate file. Added
+ * HandleInterrupt to cycle. DJ
+ * </DD><DD>
+ * 30/03/96 Stack, Context etc taken from Kernel.CurrentProcess. DJ
+ * </DD><DD>
+ * 01/01/97 Sends process switch to process Scheduler. AN
+ * </DD><DD>
+ * 04/03/97 Checked implementation and fixed some bugs. AN
+ * </DD><DD>
+ * 01/07/97 Uses Memory class instead of bytes for processes. AN
+ * </DD><DD>
+ * 03/09/97 Added LOD 255,0 support. AN
+ * </DD><DD>
+ * 04/09/97 Removed CPU from message system. Access through Kernel
+ * only. AN
+ * </DD><DD>
+ * 05/09/98 Removed all messages sending from CPU. AN
+ * </DD><DD>
+ * 10/10/98 Finished removal of String based opcodes. AN
+ * </DD></DT>
  * @author David Jones
  * @author Andrew Newman
  * @version 1.00 $Date$

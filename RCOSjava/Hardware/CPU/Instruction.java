@@ -6,12 +6,13 @@ import java.io.Serializable;
  * The P-Code Instruction class.  Contains data for a single P-Code instruction.
  * Each value is stored as an integer but a string representation can be
  * returned.  This is mainly for the user to understand.
- *
- * Usage example:
+ * <P>
+ * <DT><B>Usage Example:</B><DD>
  * <CODE>
  *      Instruction newInstruction = new Instruction(0, 0, 0);
  * </CODE>
- *
+ * </DD></DT>
+ * <P>
  * @see Hardware.CPU
  * @version 1.00 $Date$
  * @author Andrew Newman.

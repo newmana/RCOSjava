@@ -6,8 +6,9 @@ import MessageSystem.Messages.MessageAdapter;
 /**
  * Abstract class to provide base class for message handlers.
  * <P>
- * HISTORY: 17/03/96 Modified to include LocalSendMessage to allow
- *          broadcasting of messages to just local post office.<BR>
+ * <B>History:</B><BR>
+ * 17/03/96 Modified to include LocalSendMessage to allow broadcasting of
+ * messages to just local post office.
  * <P>
  * @author Andrew Newman.
  * @author Bruce Jamieson.

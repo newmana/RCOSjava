@@ -4,12 +4,12 @@ import java.io.Serializable;
 
 /**
  * Implements Context for simple PCODE CPU.  Models the context of current CPU.
- *
- * Usage example:
+ * <P>
+ * <DT><B>Usage Example:</B><DD>
  * <CODE>
  * 	Context newContext = new Context();
  * </CODE>
- *
+ * </DD></DT>
  * @author Andrew Newman.
  * @author David Jones
  * @version 1.00 $Date$
@@ -39,7 +39,6 @@ public class Context implements Cloneable, Serializable
 
   /**
    * Null constructor.  Initialises the object.
-   * @see initialise
    */
   public Context()
   {

@@ -13,13 +13,14 @@ import java.io.Serializable;
 /**
  * Provide sending and receiving facilities for all classes.
  * <P>
- * HISTORY: ??/??/96 Fixed bug nolonger registers to postoffice
- *          automatically.<BR>
- *          20/05/97 Changed message system.<BR>
- *          21/05/97 Added LocalSendMessage to all posting of a message
- *          to the local Post Office instead of broadcasting
- *          it everywhere.<BR>
- * <P>
+ * <DT><B>History:</B><DD>
+ * ??/??/96 Fixed bug nolonger registers to postoffice automatically.
+ * </DD><DD>
+ * 20/05/97 Changed message system.
+ * </DD><DD>
+ * 21/05/97 Added LocalSendMessage to all posting of a message
+ * to the local Post Office instead of broadcasting it everywhere.
+ * </DD></DT>
  * @author Andrew Newman.
  * @author Bruce Jamieson.
  * @version 1.00 $Date$

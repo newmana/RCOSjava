@@ -9,9 +9,11 @@ import java.io.Serializable;
 
 /**
  * Provide sending and receiving facilities for all classes.
- *
- * HISTORY:    25/02/2001   Added serialization handlers.
- *
+ * <P>
+ * <DT><B>History:</B><DD>
+ * 25/02/2001 Added serialization handlers.
+ * </DD>
+ * <P>
  * @author Andrew Newman
  * @author Bruce Jamieson
  * @version 1.00 $Date$

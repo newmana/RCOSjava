@@ -17,17 +17,17 @@ import pll2.FileClient;
  * Recorder.  It will record all messages and the relay them to the file system
  * to be saved.  This will enable the system to read these files and reconstruct
  * what occurred.
- *
- * Usage example:
+ * <P>
+ * <DT><B>Usage example:</B><DD>
  * <CODE>
  *      To be done.
  * </CODE>
- *
+ * </DD></DT>
  * @author Andrew Newman.
  * @version 1.00 $Date$
  * @created 2nd January 2001
- * @see MessageSystem.PostOffices.OS.OSMessageRecorder;
- * @see MessageSystem.PostOffices.Animator.AnimatorMessageRecorder;
+ * @see MessageSystem.PostOffices.OS.OSMessageRecorder
+ * @see MessageSystem.PostOffices.Animator.AnimatorMessageRecorder
  **/
  public class UniversalMessageRecorder
 {

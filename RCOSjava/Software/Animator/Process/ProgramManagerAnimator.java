@@ -146,7 +146,8 @@ public class ProgramManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Handle updating the list.  Send the @see UpdateList message.
+   * Handle updating the list.  Send the
+   * @see MessageSystem.Messages.Universal.UpdateList message.
    */
   public void updateList()
   {
