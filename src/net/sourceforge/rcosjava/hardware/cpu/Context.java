@@ -31,17 +31,17 @@ public class Context implements Cloneable, Serializable
   /**
    * Address for next instruction to execute
    */
-  private short programCounter;
+  private short programCounter = -1;
 
   /**
    * Top of the stack.
    */
-  private short stackPointer;
+  private short stackPointer = -1;
 
   /**
    * Base of the stack for current procedure block
    */
-  private short basePointer;
+  private short basePointer = -1;
 
   /**
    * Null constructor.  Initialises the object.
