@@ -85,8 +85,8 @@ public class GraphicsEngineTest extends TestCase
       testEngine.removeMTGO("test1");
       testEngine.removeMTGO("test4");
       testEngine.removeMTGO("test6");
-      assertEquals("Retrieving 2nd object", "test2", testEngine.returnMTGO("test2").text);
-      assertEquals("Retrieving 3rd object", "test3", testEngine.returnMTGO("test3").text);
+      assertEquals("Retrieving 2nd object", "test2", testEngine.returnMTGO("test2").getName());
+      assertEquals("Retrieving 3rd object", "test3", testEngine.returnMTGO("test3").getName());
     }
     catch (Exception e)
     {
