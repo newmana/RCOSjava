@@ -3,8 +3,7 @@ package org.rcosjava.software.filesystem.cpm14;
 /**
  * Enumerated type of the different modes that a file can be in.
  * <P>
- * @author Andrew Newman
- * @created 28 July 2003
+ * @author Andrew Newman (created 28 July 2003)
  */
 public class CPM14Mode
 {

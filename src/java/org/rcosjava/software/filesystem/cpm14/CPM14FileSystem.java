@@ -18,9 +18,8 @@ import java.util.*;
 /**
  * Implementation of a CPM file System.
  * <P>
- * @author Brett Carter
+ * @author Brett Carter (created 28 March 1996)
  * @author Andrew Newman
- * @created 28 March 1996
  */
 public class CPM14FileSystem extends OSMessageHandler implements FileSystem
 {
@@ -188,7 +187,6 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
   {
     CPM14FIDTableEntry fidEntry =
         (CPM14FIDTableEntry) fidTable.getItem(fsFileNumber);
-
     CPM14DeviceTableEntry device =
         (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.getDeviceNumber());
 
@@ -236,6 +234,7 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
 
     // Setup the initial data.
     fidEntry.setFileNumber(dirEntry);
+    System.out.println("Create's Fid numbeR: " + fidEntry.getFileNumber());
     fidEntry.isWriting();
     fidEntry.setCurrentPosition(0);
 
@@ -255,17 +254,15 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
         (CPM14FIDTableEntry) fidTable.getItem(fsFileNumber);
     CPM14DeviceTableEntry device =
         (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.getDeviceNumber());
-    int deviceNumber = fidEntry.getDeviceNumber();
 
     if (fidEntry.hasBeenAllocated())
     {
-      int mvTheFile;
-
-      if ((mvTheFile = getNextDirectoryEntry(1, 1)) != -1)
+      System.out.println("Open's Fid numbeR: " + fidEntry.getFileNumber());
+      if (fidEntry.getFileNumber() != -1)
       {
         // init for first read.
         fidEntry.isReading();
-        fidEntry.setFileNumber(mvTheFile);
+//        fidEntry.setFileNumber(mvTheFile);
         fidEntry.setCurrentPosition(0);
         return (new FileSystemReturnData(requestId, 0));
       }
@@ -296,6 +293,8 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
         (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.getDeviceNumber());
     int deviceNumber = fidEntry.getDeviceNumber();
 
+    System.out.println("Read's Fid Number: " + fidEntry.getFileNumber());
+
     // Check the current mode.
     if (fidEntry.isBeingRead())
     {
@@ -308,6 +307,7 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
            CPM14TableOffset.DATA_BLOCKS + 15))
         {
           //this.dumpToScreen("DIR",0,fidEntry.getFileNumber());
+          System.out.println("Read's new fid number: " + fidEntry.getFileNumber());
           int newEntry = getNextDirectoryEntry(fidEntry.getFileNumber(),
               deviceNumber);
 
@@ -317,6 +317,7 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
           }
 
           fidEntry.setFileNumber(newEntry);
+          System.out.println("Read's new fid number: " + fidEntry.getFileNumber());
           fidEntry.setCurrentDiskBlock(SVB2I & device.getByteInEntry(
               (newEntry * DIR_ENTRY_SIZE) + CPM14TableOffset.DATA_BLOCKS));
         }
@@ -1019,8 +1020,13 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
     CPM14FIDTableEntry fidEntry =
         (CPM14FIDTableEntry) fidTable.getItem(fsFileNumber);
 
-    data.append(fidEntry.getFileName() + ",");
-    data.append(fidEntry.mode);
+    // Could've returned null if not found
+    if (fidEntry != null)
+    {
+
+      data.append(fidEntry.getFileName() + ",");
+      data.append(fidEntry.mode);
+    }
 
     return data.toString();
   }
@@ -1366,7 +1372,7 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
 
     // Loop through until we find a free block.
     int counter = 0;
-    while (counter < TOTAL_DISK_BLOCKS && (device.isBlockFree(counter)))
+    while ((counter < TOTAL_DISK_BLOCKS) && device.isBlockAllocated(counter))
     {
       counter++;
     }

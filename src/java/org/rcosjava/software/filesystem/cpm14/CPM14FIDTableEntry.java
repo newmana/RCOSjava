@@ -1,11 +1,10 @@
 package org.rcosjava.software.filesystem.cpm14;
 
 /**
- * To contain the data for an entry in the CPM14 FS File ID table.
+ * Contains the data for an entry in the CPM14 FS File ID table.
  * <P>
- * @author Brett Carter
+ * @author Brett Carter (created 25 March 1996)
  * @author Andrew Newman
- * @created 25 March 1996
  */
 public class CPM14FIDTableEntry
 {
@@ -30,17 +29,17 @@ public class CPM14FIDTableEntry
   public int currentPosition;
 
   /**
-   * Description of the Field
+   * The current disk block that is being used.
    */
   public int currentDiskBlock;
 
   /**
-   * Description of the Field
+   * The current mode of the entry - reading, writing, etc.
    */
   public int mode;
 
   /**
-   * Description of the Field
+   * The buffer.
    */
   public byte[] buffer;
 
@@ -283,5 +282,17 @@ public class CPM14FIDTableEntry
   public void setByteInBuffer(int offset, byte value)
   {
     buffer[offset] = value;
+  }
+
+  /**
+   * Prints out the attributes of the object.
+   *
+   * @return the attributes of the object.
+   */
+  public String toString()
+  {
+    return "Filename: " + fileName + ", Device No: " + deviceNumber +
+        ", Filenumber: " + fileNumber + ".  Buffer:" + new String(buffer) +
+        " Position: " + currentPosition + ", Status: " + mode;
   }
 }

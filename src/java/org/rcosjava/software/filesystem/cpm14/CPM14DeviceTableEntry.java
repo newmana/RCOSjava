@@ -3,11 +3,10 @@ package org.rcosjava.software.filesystem.cpm14;
 import java.util.*;
 
 /**
- * To contain the data for an entry in the CPM14 FS Mount table.
+ * Contains the data for an entry in the CPM14 FS Mount table.
  * <P>
- * @author Brett Carter
+ * @author Brett Carter (created 25 March 1996)
  * @author Andrew Newman
- * @created 25 March 1996
  */
 class CPM14DeviceTableEntry
 {
@@ -171,12 +170,12 @@ class CPM14DeviceTableEntry
   }
 
   /**
-   * Returns true if a given entry free.
+   * Returns true if a block is allocated.
    *
-   * @param offset the entry to check to see if it's available.
-   * @return true if a given entry if free.
+   * @param offset the entry to check to see if it's allocated.
+   * @return true if the block is allocated.
    */
-  public boolean isBlockFree(int offset)
+  public boolean isBlockAllocated(int offset)
   {
     return blockList[offset];
   }
@@ -285,5 +284,16 @@ class CPM14DeviceTableEntry
   public boolean isMounted()
   {
     return status == 1;
+  }
+
+  /**
+   * Prints out the attributes of the object.
+   *
+   * @return the attributes of the object.
+   */
+  public String toString()
+  {
+    return "Device Name: " + deviceName + ", Directory Table: " +
+        new String(directoryTable);
   }
 }
