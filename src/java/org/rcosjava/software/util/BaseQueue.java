@@ -154,23 +154,7 @@ public class BaseQueue extends ArrayList implements Queue
    */
   public int position(Object item)
   {
-    int where;
-    int currentPos;
-
-    where = 0;
-    currentPos = pointer;
-    goToHead();
-    while (!atTail())
-    {
-      if (compare(item, retrieveCurrent()) == 0)
-      {
-        where = pointer;
-        pointer = currentPos;
-        return where;
-      }
-      goToNext();
-    }
-    return -1;
+    return indexOf(item);
   }
 
   /**
