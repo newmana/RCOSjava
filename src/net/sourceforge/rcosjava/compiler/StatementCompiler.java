@@ -133,8 +133,6 @@ public class StatementCompiler extends DepthFirstAdapter
   {
     inAIfThenElseStatement(node);
 
-    Compiler.incLevel();
-
     ARelConditionalExpression expr = (ARelConditionalExpression)
       node.getConditionalExpression();
     PValue expression1 = expr.getLeft();
@@ -159,10 +157,47 @@ public class StatementCompiler extends DepthFirstAdapter
     finishPosition = Compiler.getInstructionIndex();
     writePCode(startPosition,
       new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
-      (short) (finishPosition+Compiler.getLevel())));
+      (short) (finishPosition+2)));
 
-    Compiler.decLevel();
     outAIfThenElseStatement(node);
+  }
+
+  /**
+   * While statement
+   */
+  public void caseAWhileStatement(AWhileStatement node)
+  {
+    inAWhileStatement(node);
+
+    ARelConditionalExpression expr = (ARelConditionalExpression)
+      node.getConditionalExpression();
+    PValue expression1 = expr.getLeft();
+    PValue expression2 = expr.getRight();
+
+    // With the left hand load the variable or literal
+    handlePValueLoad(expression1);
+
+    // With the right hand load the variable or literal
+    handlePValueLoad(expression2);
+
+    expr.apply(this);
+
+    short startPosition = Compiler.getInstructionIndex();
+
+    node.getCompoundStatement().apply(this);
+
+    // Start position -1 because we are inserting the JPC.
+    writePCode(
+      new Instruction(OpCode.JUMP.getValue(), (byte) 0,
+      (short) (startPosition-1)));
+
+    short finishPosition = Compiler.getInstructionIndex();
+
+    writePCode(startPosition,
+      new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
+      (short) (finishPosition+3)));
+
+    outAWhileStatement(node);
   }
 
   /**
@@ -171,8 +206,6 @@ public class StatementCompiler extends DepthFirstAdapter
   public void caseAIfStatement(AIfStatement node)
   {
     inAIfStatement(node);
-
-    Compiler.incLevel();
 
     ARelConditionalExpression expr = (ARelConditionalExpression)
       node.getConditionalExpression();
@@ -192,8 +225,6 @@ public class StatementCompiler extends DepthFirstAdapter
     writePCode(startPosition,
       new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
       (short) (finishPosition+Compiler.getLevel())));
-
-    Compiler.decLevel();
 
     outAIfStatement(node);
   }
@@ -238,6 +269,13 @@ public class StatementCompiler extends DepthFirstAdapter
 //    System.out.println("EQ Node: " + node);
     writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
       Operator.EQUAL.getValue()));
+  }
+
+  public void caseAScanf1RcosStatement(AScanf1RcosStatement node)
+  {
+    PScanfControlStrings control = node.getControl();
+    PValue value = node.getValue();
+    scanIn(control, value);
   }
 
   /**
@@ -383,16 +421,18 @@ public class StatementCompiler extends DepthFirstAdapter
    */
   public void caseAFunctionBody(AFunctionBody node)
   {
+    inAFunctionBody(node);
     Compiler.incLevel();
 
-    inAFunctionBody(node);
-    if(node.getLBrace() != null)
+    if (node.getLBrace() != null)
     {
       node.getLBrace().apply(this);
     }
 
+    System.out.println("Compiler level:"+ Compiler.getLevel());
+
     Object temp[] = node.getVariableDeclaration().toArray();
-    for(int i = 0; i < temp.length; i++)
+    for (int i = 0; i < temp.length; i++)
     {
       ((PVariableDeclaration) temp[i]).apply(this);
     }
@@ -402,28 +442,26 @@ public class StatementCompiler extends DepthFirstAdapter
       ((short) (table.getVariableSize() + 3))));
 
     Object temp2[] = node.getStatement().toArray();
-    for(int i = 0; i < temp2.length; i++)
+    for (int i = 0; i < temp2.length; i++)
     {
       ((PStatement) temp2[i]).apply(this);
     }
 
-    if(node.getStopStatement() != null)
+    if (node.getStopStatement() != null)
     {
       node.getStopStatement().apply(this);
     }
-    if(node.getRBrace() != null)
+
+    if (node.getRBrace() != null)
     {
       node.getRBrace().apply(this);
     }
-    outAFunctionBody(node);
 
-    //System.out.println("Out of function!");
-    //Modify the jump point code
     writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
       Operator.RETURN.getValue()));
-    //localVarsTable = new HashMap();
 
     Compiler.decLevel();
+    outAFunctionBody(node);
   }
 
   /**
@@ -456,7 +494,7 @@ public class StatementCompiler extends DepthFirstAdapter
         else
         {
 //          System.out.println("Type: " + node.getTypeSpecifier().toString());
-//          System.out.println("Level: " + Compiler.getLevel());
+          System.out.println("Compiler Level: " + Compiler.getLevel());
           Variable newVar = new Variable(name,
               Compiler.getLevel(), Compiler.getInstructionIndex());
           table.addSymbol(newVar);
@@ -636,6 +674,39 @@ public class StatementCompiler extends DepthFirstAdapter
     {
       writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
         (byte) 0, SystemCall.STRING_OUT.getValue()));
+    }
+  }
+
+  private void scanIn(PScanfControlStrings control, PValue value)
+  {
+    if (control instanceof AIntControlScanfControlStrings)
+    {
+      writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
+        (byte) 0, SystemCall.NUMBER_IN.getValue()));
+    }
+    else if (control instanceof AChrControlScanfControlStrings)
+    {
+      writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
+        (byte) 0, SystemCall.CHARACTER_IN.getValue()));
+    }
+
+    try
+    {
+      String varName = value.toString().trim();
+
+      if (isArray(varName))
+      {
+        currentSymbol = table.getArray(varName, Compiler.getLevel());
+      }
+      else
+      {
+        currentSymbol = table.getSymbol(varName, Compiler.getLevel());
+      }
+
+      currentSymbol.handleStore(this);
+    }
+    catch (Exception e)
+    {
     }
   }
 }

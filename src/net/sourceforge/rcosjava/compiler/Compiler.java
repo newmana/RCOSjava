@@ -21,7 +21,7 @@ import org.sablecc.simplec.parser.*;
 public class Compiler
 {
   private static ArrayList instructions = new ArrayList();
-  private static short level = 1;
+  private static short level = 0;
   private static short instructionIndex;
   private static SymbolTable table;
   private static Lexer lexer;
