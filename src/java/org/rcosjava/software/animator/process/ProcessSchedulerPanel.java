@@ -86,7 +86,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
   /**
    * Pictures to display.
    */
-  private MTGO tmpPic, cpuPic;
+  private MTGO cpuPic;
 
   /**
    * Holds which processes are the the queue.
@@ -107,7 +107,12 @@ public class ProcessSchedulerPanel extends RCOSPanel
   /**
    * Images to use to display.
    */
-  private Image myImages[] = new Image[5];
+  private Image myImages[] = new Image[1];
+
+  /**
+   * Process images.
+   */
+  private Image processImages[] = new Image[2];
 
   /**
    * Center of the window.
@@ -164,7 +169,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
       ProcessSchedulerAnimator newProcessScheduler)
   {
     myImages = new Image[images.length];
-    for (int index = 0; index < images.length-1; index++)
+    for (int index = 0; index < images.length; index++)
     {
       myImages[index] = images[index].getImage();
     }
@@ -201,7 +206,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     processGraphics = process.createGraphics();
     processGraphics.setColor(new Color(51, 255, 153));
     processGraphics.fillOval(0, 0, boxWidth, boxHeight);
-    myImages[0] = process;
+    processImages[0] = process;
 
     // Set-up blue process
     process = new BufferedImage(boxWidth, boxHeight,
@@ -209,7 +214,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     processGraphics = process.createGraphics();
     processGraphics.setColor(new Color(153, 153, 255));
     processGraphics.fillOval(0, 0, boxWidth, boxHeight);
-    myImages[1] = process;
+    processImages[1] = process;
 
     JPanel optionsPanel = new JPanel();
     JPanel processPanel = new JPanel();
@@ -378,14 +383,10 @@ public class ProcessSchedulerPanel extends RCOSPanel
    */
   void setupMovement()
   {
-    tmpPic = new MTGO(myImages[0], "TEMP", true);
-    tmpPic.setPriority(2);
-    engine.addMTGO(tmpPic, this);
-
-    cpuPic = new MTGO(myImages[2], "RCOS CPU", false);
+    cpuPic = new MTGO(myImages[0], "RCOS CPU", false);
     cpuPic.setPriority(1);
     engine.addMTGO(cpuPic, this);
-    cpuPic.setXPosition(engine.centerX(cpuPic));
+    cpuPic.setXPosition(engine.centerImageWidth(cpuPic.getImageWidth()));
     cpuPic.setYPosition(0);
 
     width = engine.getWidth();
@@ -478,12 +479,12 @@ public class ProcessSchedulerPanel extends RCOSPanel
         middleOfReady, 0, -2);
     readyToCPUPositions[2] = new Position(leftIndent - (boxWidth / 2), cpuLine,
         2, 0);
-    readyToCPUPositions[3] = new Position(engine.centerX(tmpPic), cpuLine,
-        0, 0);
+    readyToCPUPositions[3] = new Position(engine.centerImageWidth(boxWidth),
+        cpuLine, 0, 0);
 
     // Movement of process from CPU to Ready
-    cpuToReadyPositions[0] = new Position(engine.centerX(tmpPic), cpuLine,
-        2, 0);
+    cpuToReadyPositions[0] = new Position(engine.centerImageWidth(boxWidth),
+        cpuLine, 2, 0);
     cpuToReadyPositions[1] = new Position(rightIndent - (boxWidth / 2),
         cpuLine, 0, 2);
     cpuToReadyPositions[2] = new Position(rightIndent - (boxWidth / 2),
@@ -492,8 +493,8 @@ public class ProcessSchedulerPanel extends RCOSPanel
         middleOfReady, 0, 0);
 
     // Movement of process from CPU to Blocked
-    cpuToBlockedPositions[0] = new Position(engine.centerX(tmpPic), cpuLine,
-        2, 0);
+    cpuToBlockedPositions[0] = new Position(engine.centerImageWidth(boxWidth),
+        cpuLine, 2, 0);
     cpuToBlockedPositions[1] = new Position(rightIndent - (boxWidth / 2),
         cpuLine, 0, 2);
     cpuToBlockedPositions[2] = new Position(rightIndent - (boxWidth / 2),
@@ -667,17 +668,19 @@ public class ProcessSchedulerPanel extends RCOSPanel
    */
   synchronized void newProcess(int pid)
   {
+    MTGO tmpPic;
+
     //Alternate between blue and green processes.
     if ((pid % 2) == 1)
     {
-      tmpPic = new MTGO(myImages[0], "P" + pid, true, Color.darkGray);
+      tmpPic = new MTGO(processImages[0], "P" + pid, true, Color.darkGray);
     }
     else
     {
-      tmpPic = new MTGO(myImages[1], "P" + pid, true, Color.darkGray);
+      tmpPic = new MTGO(processImages[1], "P" + pid, true, Color.darkGray);
     }
     tmpPic.setPriority(2);
-    tmpPic.setXPosition(engine.centerX(tmpPic));
+    tmpPic.setXPosition(engine.centerImageWidth(tmpPic.getImageWidth()));
     tmpPic.setYPosition(height + boxHeight);
 
     engine.addMTGO(tmpPic, this);
@@ -918,10 +921,12 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
     //Horizontal lines off CPU
     engine.getPad().drawLine(leftIndent, cpuPic.getImageHeight() / 2,
-        engine.centerX(cpuPic), cpuPic.getImageHeight() / 2);
+        engine.centerImageWidth(cpuPic.getImageWidth()),
+        cpuPic.getImageHeight() / 2);
     engine.getPad().drawLine(
-        engine.centerX(cpuPic) + cpuPic.getImageHeight() / 2,
-        cpuPic.getImageHeight() / 2, rightIndent, cpuPic.getImageHeight() / 2);
+        engine.centerImageWidth(cpuPic.getImageWidth()) +
+        cpuPic.getImageHeight() / 2, cpuPic.getImageHeight() / 2, rightIndent,
+        cpuPic.getImageHeight() / 2);
 
     //2 Vertical lines
     engine.getPad().drawLine(leftIndent,
