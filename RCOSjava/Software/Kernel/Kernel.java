@@ -376,7 +376,7 @@ public class Kernel extends OSMessageHandler
     if (iCall == Instruction.SYS_CHIN)
     {
       ChIn aMessage = new
-        ChIn(this, getCurrentProcess().getTerminalID());
+        ChIn(this, getCurrentProcess().getTerminalId());
       sendMessage(aMessage);
     }
     else if (iCall == Instruction.SYS_CHOUT)
@@ -384,7 +384,7 @@ public class Kernel extends OSMessageHandler
       //Decrement of stack pointer before getting value. Bug fix.
       myCPU.getContext().decStackPointer();
       ChOut aMessage = new
-        ChOut(this, getCurrentProcess().getTerminalID(),
+        ChOut(this, getCurrentProcess().getTerminalId(),
         (char)
         myCPU.getProcessStack().read(myCPU.getContext().getStackPointer()));
       sendMessage(aMessage);
@@ -393,13 +393,13 @@ public class Kernel extends OSMessageHandler
     {
       NumIn aMessage = new
         NumIn(this,
-          getCurrentProcess().getTerminalID());
+          getCurrentProcess().getTerminalId());
       sendMessage(aMessage);
     }
     else if (iCall == Instruction.SYS_NUMOUT)
     {
       NumOut aMessage = new
-        NumOut(this, getCurrentProcess().getTerminalID(),
+        NumOut(this, getCurrentProcess().getTerminalId(),
           (short) myCPU.getProcessStack().read(
           myCPU.getContext().getStackPointer()));
       sendMessage(aMessage);
@@ -417,7 +417,7 @@ public class Kernel extends OSMessageHandler
            count++)
       {
         ChOut aMessage = new
-          ChOut(this, getCurrentProcess().getTerminalID(),
+          ChOut(this, getCurrentProcess().getTerminalId(),
             (char) myCPU.getProcessStack().read(count));
         sendMessage(aMessage);
       }

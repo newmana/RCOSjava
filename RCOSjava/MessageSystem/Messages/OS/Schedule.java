@@ -10,9 +10,6 @@ import MessageSystem.PostOffices.OS.OSMessageHandler;
  * @author Andrew Newman.
  * @version 1.00 $Date$
  * @created 28th March 1997
- */ * @author Andrew Newman.
- * @version 1.00 $Date$
- * @created 2nd April 2001
  */
 public class Schedule extends OSMessageAdapter
 {
