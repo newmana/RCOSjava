@@ -53,7 +53,7 @@ public class CPU
   /**
    * The number of periods (10) that the CPU is call the Timer Interrupt.
    */
-  public final int TIMER_PERIOD = 10;
+  public static final int TIMER_PERIOD = 10;
 
   /**
    * Internal flag to determine if the CPU has currently stopped execution
@@ -107,35 +107,6 @@ public class CPU
    * A reference to the kernel that is currently using this CPU.
    */
   private Kernel myKernel;
-
-  /**
-   * Index of instruction.
-   */
-  public Instruction instructions[] =
-  {
-    Instruction.LIT_INSTRUCTION, Instruction.OPR_INSTRUCTION,
-    Instruction.LOD_INSTRUCTION, Instruction.STO_INSTRUCTION,
-    Instruction.CAL_INSTRUCTION, Instruction.INT_INSTRUCTION,
-    Instruction.JMP_INSTRUCTION, Instruction.JPC_INSTRUCTION,
-    Instruction.CSP_INSTRUCTION, Instruction.ILL_INSTRUCTION,
-    Instruction.ILL_INSTRUCTION, Instruction.ILL_INSTRUCTION,
-    Instruction.ILL_INSTRUCTION, Instruction.ILL_INSTRUCTION,
-    Instruction.ILL_INSTRUCTION, Instruction.ILL_INSTRUCTION,
-    Instruction.ILL_INSTRUCTION, Instruction.ILL_INSTRUCTION,
-    Instruction.LODX_INSTRUCTION, Instruction.STOX_INSTRUCTION,
-    Instruction.ILL_INSTRUCTION
-  };
-
-  public Operator operations[] =
-  {
-    Operator.RETURN, Operator.NEGATIVE, Operator.ADD, Operator.SUBTRACT,
-    Operator.MULTIPLY, Operator.DIVIDE, Operator.LOW_BIT, Operator.MODULUS,
-    Operator.EQUAL, Operator.NOT_EQUAL, Operator.LESS_THAN,
-    Operator.GREATER_THAN_OR_EQUAL, Operator.GREATER_THAN,
-    Operator.LESS_THAN_OR_EQUAL, Operator.OR, Operator.AND, Operator.XOR,
-    Operator.NOT, Operator.SHIFT_LEFT, Operator.SHIFT_RIGHT,
-    Operator.INCREMENT, Operator.DECREMENT, Operator.COPY
-  };
 
   /**
    * Initialise the CPU by making it aware that the kernel exists.
@@ -494,7 +465,7 @@ public class CPU
     short instr2 = (short) processCode.read(address * 8 + 6);
     short loc = (short) ((256 * (instr1 & 255)) + (instr2 & 255));
 
-    Instruction tmpInstruction = instructions[
+    Instruction tmpInstruction = Instruction.INSTRUCTIONS[
       processCode.read(address * 8) & 0xff];
     tmpInstruction.setByteParameter(((byte) processCode.read(address * 8 + 4)));
     tmpInstruction.setWordParameter(loc);
@@ -529,206 +500,8 @@ public class CPU
    */
   void handleOperator()
   {
-//    Instruction call = getContext().getInstructionRegister();
-//    Operator tmpOperator = operations[call.getOpCode().getValue()];
-//    tmpOperator.execute(this);
     Instruction call = getContext().getInstructionRegister();
-
-    if (call.isReturn())
-    {
-      getContext().setStackPointer((short) (getContext().getBasePointer() - 1));
-      getContext().setBasePointer((short)
-          (processStack.read(getContext().getStackPointer() + 2)));
-      getContext().setProgramCounter((short)
-          (processStack.read(getContext().getStackPointer() + 3)));
-      //codeToExecute = !(getContext().getBasePointer() <= 0);
-
-      processFinished = getContext().getBasePointer() <= 0;
-      codeToExecute = !processFinished;
-    }
-    else if (call.isNegative())
-    {
-      processStack.write(getContext().getStackPointer(),
-          (short) (0 - processStack.read(getContext().getStackPointer())));
-    }
-    else if (call.isAdd())
-    {
-      getContext().decStackPointer();
-      processStack.write(getContext().getStackPointer(),
-          (short) (processStack.read(getContext().getStackPointer()) +
-          processStack.read(getContext().getStackPointer() + 1)));
-    }
-    else if (call.isSubtract())
-    {
-      getContext().decStackPointer();
-      processStack.write(getContext().getStackPointer(),
-          (short) (processStack.read(getContext().getStackPointer()) -
-          processStack.read(getContext().getStackPointer() + 1)));
-    }
-    else if (call.isMultiply())
-    {
-      getContext().decStackPointer();
-      processStack.write(getContext().getStackPointer(),
-          (short) (processStack.read(getContext().getStackPointer()) *
-          processStack.read(getContext().getStackPointer() + 1)));
-    }
-    else if (call.isDivide())
-    {
-      getContext().decStackPointer();
-      processStack.write(getContext().getStackPointer(),
-          (short) (processStack.read(getContext().getStackPointer()) /
-          processStack.read(getContext().getStackPointer() + 1)));
-    }
-    else if (call.isLow())
-    {
-      processStack.write(getContext().getStackPointer(),
-          (short) (processStack.read(getContext().getStackPointer()) & 1));
-    }
-    else if (call.isModulus())
-    {
-      getContext().decStackPointer();
-      processStack.write(getContext().getStackPointer(),
-          (short) (processStack.read(getContext().getStackPointer()) %
-          processStack.read(getContext().getStackPointer() + 1)));
-    }
-    else if (call.isEquals())
-    {
-      getContext().decStackPointer();
-      if (processStack.read(getContext().getStackPointer()) ==
-          processStack.read(getContext().getStackPointer() + 1))
-      {
-        processStack.write(getContext().getStackPointer(), 1);
-      }
-      else
-      {
-        processStack.write(getContext().getStackPointer(), 0);
-      }
-    }
-    else if (call.isNotEqualTo())
-    {
-      getContext().decStackPointer();
-      if (processStack.read(getContext().getStackPointer()) !=
-          processStack.read(getContext().getStackPointer() + 1))
-      {
-        processStack.write(getContext().getStackPointer(), 1);
-      }
-      else
-      {
-        processStack.write(getContext().getStackPointer(), 0);
-      }
-    }
-    else if (call.isLessThan())
-    {
-      getContext().decStackPointer();
-      if (processStack.read(getContext().getStackPointer()) <
-          processStack.read(getContext().getStackPointer() + 1))
-      {
-        processStack.write(getContext().getStackPointer(), 1);
-      }
-      else
-      {
-        processStack.write(getContext().getStackPointer(), 0);
-      }
-    }
-    else if (call.isGreaterThanOrEqualTo())
-    {
-      getContext().decStackPointer();
-      if (processStack.read(getContext().getStackPointer()) >=
-          processStack.read(getContext().getStackPointer() + 1))
-      {
-        processStack.write(getContext().getStackPointer(), 1);
-      }
-      else
-      {
-        processStack.write(getContext().getStackPointer(), 0);
-      }
-    }
-    else if (call.isGreaterThan())
-    {
-      getContext().decStackPointer();
-      if (processStack.read(getContext().getStackPointer()) >
-          processStack.read(getContext().getStackPointer() + 1))
-      {
-        processStack.write(getContext().getStackPointer(), 1);
-      }
-      else
-      {
-        processStack.write(getContext().getStackPointer(), 0);
-      }
-    }
-    else if (call.isLessThanOrEqualTo())
-    {
-      getContext().decStackPointer();
-      if (processStack.read(getContext().getStackPointer()) <=
-          processStack.read(getContext().getStackPointer() + 1))
-      {
-        processStack.write(getContext().getStackPointer(), 1);
-      }
-      else
-      {
-        processStack.write(getContext().getStackPointer(), 0);
-      }
-    }
-    else if (call.isOr())
-    {
-      getContext().decStackPointer();
-      processStack.write(getContext().getStackPointer(),
-          (processStack.read(getContext().getStackPointer()) |
-          processStack.read(getContext().getStackPointer() + 1)));
-    }
-    else if (call.isAnd())
-    {
-      getContext().decStackPointer();
-      processStack.write(getContext().getStackPointer(),
-          (processStack.read(getContext().getStackPointer()) &
-          processStack.read(getContext().getStackPointer() + 1)));
-    }
-    else if (call.isXor())
-    {
-      getContext().decStackPointer();
-      getContext().decStackPointer();
-      processStack.write(getContext().getStackPointer(),
-          (processStack.read(getContext().getStackPointer()) ^
-          processStack.read(getContext().getStackPointer() + 1)));
-    }
-    else if (call.isNot())
-    {
-      processStack.write(getContext().getStackPointer(),
-          (short) ~processStack.read(getContext().getStackPointer()));
-    }
-    else if (call.isShiftLeft())
-    {
-      getContext().decStackPointer();
-      processStack.write(getContext().getStackPointer(),
-          (processStack.read(getContext().getStackPointer()) <<
-          processStack.read(getContext().getStackPointer() + 1)));
-    }
-    else if (call.isShiftRight())
-    {
-      getContext().decStackPointer();
-      processStack.write(getContext().getStackPointer(),
-          (processStack.read(getContext().getStackPointer()) >>
-          processStack.read(getContext().getStackPointer() + 1)));
-    }
-    else if (call.isIncrement())
-    {
-      processStack.write(getContext().getStackPointer(),
-          (short) processStack.read(getContext().getStackPointer()) + 1);
-    }
-    else if (call.isDecrement())
-    {
-      processStack.write(getContext().getStackPointer(),
-          (short) processStack.read(getContext().getStackPointer()) - 1);
-    }
-    else if (call.isCopy())
-    {
-      getContext().incStackPointer();
-      processStack.write(getContext().getStackPointer(),
-          processStack.read(getContext().getStackPointer() - 1));
-    }
-    else
-    {
-      System.err.println("Illegal Instruction");
-    }
+    Operator tmpOperator = Operator.OPERATIONS[call.getWordParameter()];
+    tmpOperator.execute(this);
   }
 }

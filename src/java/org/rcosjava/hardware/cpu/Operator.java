@@ -381,6 +381,17 @@ public class Operator extends WordParameter
     }
   };
 
+  public static final Operator OPERATIONS[] =
+  {
+    Operator.RETURN, Operator.NEGATIVE, Operator.ADD, Operator.SUBTRACT,
+    Operator.MULTIPLY, Operator.DIVIDE, Operator.LOW_BIT, Operator.MODULUS,
+    Operator.EQUAL, Operator.NOT_EQUAL, Operator.LESS_THAN,
+    Operator.GREATER_THAN_OR_EQUAL, Operator.GREATER_THAN,
+    Operator.LESS_THAN_OR_EQUAL, Operator.OR, Operator.AND, Operator.XOR,
+    Operator.NOT, Operator.SHIFT_LEFT, Operator.SHIFT_RIGHT,
+    Operator.INCREMENT, Operator.DECREMENT, Operator.COPY
+  };
+
   /**
    * The internal value of the operator. Current valid between 0 and 22.
    */

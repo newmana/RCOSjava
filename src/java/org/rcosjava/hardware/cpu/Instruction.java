@@ -235,6 +235,24 @@ public class Instruction implements Cloneable, Serializable
   };
 
   /**
+   * Index of instruction.
+   */
+  public static final Instruction INSTRUCTIONS[] =
+  {
+    Instruction.LIT_INSTRUCTION, Instruction.OPR_INSTRUCTION,
+    Instruction.LOD_INSTRUCTION, Instruction.STO_INSTRUCTION,
+    Instruction.CAL_INSTRUCTION, Instruction.INT_INSTRUCTION,
+    Instruction.JMP_INSTRUCTION, Instruction.JPC_INSTRUCTION,
+    Instruction.CSP_INSTRUCTION, Instruction.ILL_INSTRUCTION,
+    Instruction.ILL_INSTRUCTION, Instruction.ILL_INSTRUCTION,
+    Instruction.ILL_INSTRUCTION, Instruction.ILL_INSTRUCTION,
+    Instruction.ILL_INSTRUCTION, Instruction.ILL_INSTRUCTION,
+    Instruction.ILL_INSTRUCTION, Instruction.ILL_INSTRUCTION,
+    Instruction.LODX_INSTRUCTION, Instruction.STOX_INSTRUCTION,
+    Instruction.ILL_INSTRUCTION
+  };
+
+  /**
    * Opcode of the instruction.
    */
   private OpCode opCode;
