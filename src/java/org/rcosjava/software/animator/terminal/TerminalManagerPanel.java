@@ -18,6 +18,11 @@ import org.rcosjava.software.animator.support.GraphicButton;
 public class TerminalManagerPanel extends RCOSPanel
 {
   /**
+   * Serial id.
+   */
+  private static final long serialVersionUID = 1033792888032824673L;
+
+  /**
    * Maximum number of terminals
    */
   private int maxTerminals;
