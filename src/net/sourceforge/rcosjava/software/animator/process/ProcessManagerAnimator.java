@@ -94,9 +94,9 @@ public class ProcessManagerAnimator extends RCOSAnimator
    *
    * @param process the process id of the process to remove
    */
-  public void newProcess(Integer process)
+  public void newProcess(int process)
   {
-    currentProcesses.insert(process);
+    currentProcesses.insert(new Integer(process));
     updateProcessList();
   }
 
