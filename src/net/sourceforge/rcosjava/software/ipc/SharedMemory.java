@@ -24,11 +24,6 @@ import net.sourceforge.rcosjava.software.memory.*;
 public class SharedMemory
 {
   /**
-   * The size in bytes of the shared memory block.
-   */
-  private int memorySize = -1;
-
-  /**
    * A list of all the processes with open connections to this memory block.
    */
   private List processConnections = new ArrayList();
@@ -57,15 +52,14 @@ public class SharedMemory
    * @param newSize the size of the shared memory block.
    */
   public SharedMemory(String newName, int newSharedMemoryId,
-      int newOriginalProcessId, int newSize)
+    int newOriginalProcessId, int newSize)
   {
     name = newName;
     sharedMemoryId = newSharedMemoryId;
 
     // Connect the creating process to this memory block
     open(newOriginalProcessId);
-    memorySize =  newSize;
-    sharedMemoryBlock = new Memory(memorySize);
+    sharedMemoryBlock = new Memory(newSize);
 
     // Assume Higher level will detect duplicate Shrm Segs
     // (aID) and return error - not to be done here?
@@ -89,6 +83,16 @@ public class SharedMemory
   public String getName()
   {
     return name;
+  }
+
+  /**
+   * Returns the memory stored.
+   *
+   * @return the memory stored.
+   */
+  public Memory getMemory()
+  {
+    return sharedMemoryBlock;
   }
 
   /**
@@ -126,7 +130,7 @@ public class SharedMemory
    */
   public short read(int offset)
   {
-    if (offset >= memorySize)
+    if (offset >= size())
     {
       // A read past the end of the block - not on!
       return -1;
@@ -147,7 +151,7 @@ public class SharedMemory
    */
   public short write(int offset, short newValue)
   {
-    if (offset >= memorySize)
+    if (offset >= size())
     {
       // A write past the end of the block - not on!
       return -1;
@@ -156,7 +160,6 @@ public class SharedMemory
     {
       // Do a write
       sharedMemoryBlock.write(offset, newValue);
-      System.out.println("SM wrote from: " + offset + " value: " + newValue);
       return 0;
     }
   }
@@ -168,6 +171,6 @@ public class SharedMemory
    */
   public int size()
   {
-    return memorySize;
+    return sharedMemoryBlock.getSegmentSize();
   }
 }
