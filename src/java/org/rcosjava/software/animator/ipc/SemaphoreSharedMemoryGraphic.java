@@ -33,7 +33,7 @@ public class SemaphoreSharedMemoryGraphic
   public SemaphoreSharedMemoryGraphic(int newProcess, Object newValue)
   {
     attachedProcesses = new LIFOQueue(10, 1);
-    attachedProcesses.add(new Integer(newProcess));
+    addProcess(newProcess);
     value = newValue;
   }
 
@@ -75,7 +75,8 @@ public class SemaphoreSharedMemoryGraphic
   public int removeFirstProcess()
   {
     attachedProcesses.goToHead();
-    return ((Integer) attachedProcesses.retrieveCurrent()).intValue();
+    int tmpPID = ((Integer) attachedProcesses.retrieveCurrent()).intValue();
+    return tmpPID;
   }
 
   /**
