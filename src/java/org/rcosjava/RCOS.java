@@ -616,7 +616,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 
     // Add animators
     list.add(tmAnimator);
-//    list.add(psAnimator);
+    list.add(psAnimator);
 //    list.add(memoryAnimator);
 //    list.add(ipcAnimator);
 //    list.add(cpuAnimator);
@@ -625,11 +625,11 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 //    list.add(mmAnimator);
 
     // Add operating system
-//    list.add(theKernel);
+    list.add(theKernel);
     list.add(theTerminalManager);
-//    list.add(theProcessScheduler);
-//    list.add(theIPC);
-//    list.add(theMemoryManager);
+    list.add(theProcessScheduler);
+    list.add(theIPC);
+    list.add(theMemoryManager);
 //    list.add(theProgramManager);
 
     return list;
@@ -645,7 +645,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   {
     // Load animators.
     tmAnimator = (TerminalManagerAnimator) rcosComponents.get(0);
-//    psAnimator = (ProcessSchedulerAnimator) rcosComponents.get(1);
+    psAnimator = (ProcessSchedulerAnimator) rcosComponents.get(1);
 //    memoryAnimator = (MemoryManagerAnimator) rcosComponents.get(2);
 //    ipcAnimator = (IPCManagerAnimator) rcosComponents.get(3);
 //    cpuAnimator = (CPUAnimator) rcosComponents.get(4);
@@ -654,11 +654,11 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 //    mmAnimator = (MultimediaAnimator) rcosComponents.get(7);
 
     // Load OS.
-//    theKernel = (Kernel) rcosComponents.get(1);
-    theTerminalManager = (TerminalManager) rcosComponents.get(1);
-//    theProcessScheduler = (ProcessScheduler) rcosComponents.get(10);
-//    theIPC = (IPC) rcosComponents.get(11);
-//    theMemoryManager = (MemoryManager) rcosComponents.get(12);
+    theKernel = (Kernel) rcosComponents.get(2);
+    theTerminalManager = (TerminalManager) rcosComponents.get(3);
+    theProcessScheduler = (ProcessScheduler) rcosComponents.get(4);
+    theIPC = (IPC) rcosComponents.get(5);
+    theMemoryManager = (MemoryManager) rcosComponents.get(6);
 //    theProgramManager = (ProgramManager) rcosComponents.get(13);
   }
 
@@ -690,6 +690,16 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   public static TerminalManagerAnimator getTerminalAnimator()
   {
     return tmAnimator;
+  }
+
+  /**
+   * Returns the process scheduler animator.
+   *
+   * @return the process scheduler animator.
+   */
+  public static ProcessSchedulerAnimator getProcessSchedulerAnimator()
+  {
+    return psAnimator;
   }
 
   /**
