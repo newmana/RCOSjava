@@ -25,7 +25,7 @@ public class StatementCompiler extends DepthFirstAdapter
   private Stack statementPosition;
   private boolean inAFunction = false;
   private short numberOfVariables = 3;
-  private Symbol currentSymbol;
+  private Symbol currentSymbol = new Variable("", (short) 0, (short) 0);
   private int noLoops = 0;
 
   public StatementCompiler()
@@ -68,7 +68,7 @@ public class StatementCompiler extends DepthFirstAdapter
 
   public void inAShrcreateRcosStatement(AShrcreateRcosStatement node)
   {
-    handleIdentifierLoad(node.getVarname());
+    handlePValueLoad(node.getId());
     handlePValueLoad(node.getSize());
     writeSemShrRest(node.getVarname(), node.getSize(),
       SystemCall.SHARED_MEMORY_CREATE);
@@ -251,6 +251,15 @@ public class StatementCompiler extends DepthFirstAdapter
       start.apply(this);
     }
 
+    short beforeIter = Compiler.getInstructionIndex();
+
+    // Set-up the iterator
+    PBasicStatement iter = node.getIter();
+    if (iter != null)
+    {
+      iter.apply(this);
+    }
+
     PConditionalExpression cond = node.getConditionalExpression();
 
     if (cond != null)
@@ -276,27 +285,20 @@ public class StatementCompiler extends DepthFirstAdapter
       }
     }
 
-    short startPosition = Compiler.getInstructionIndex();
-
-    // Set-up the iterator
-    PBasicStatement iter = node.getIter();
-    if (iter != null)
-    {
-      iter.apply(this);
-    }
+    short afterCond = Compiler.getInstructionIndex();
 
     // Do what is inside the for statement.
     node.getCompoundStatement().apply(this);
 
     short finishPosition = Compiler.getInstructionIndex();
 
-    writePCode(startPosition,
+    writePCode(afterCond,
       new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
-      (short) (finishPosition+2+(noLoops*2))));
+      (short) (finishPosition+3+noLoops)));
 
     writePCode(
       new Instruction(OpCode.JUMP.getValue(), (byte) 0,
-      (short) (startPosition+2+noLoops)));
+      (short) (beforeIter+1+noLoops)));
 
     noLoops--;
     outAForStatement(node);
@@ -491,6 +493,9 @@ public class StatementCompiler extends DepthFirstAdapter
     {
       String varName = node.getVarname().toString().trim();
 
+      PRhs rhs = node.getRhs();
+      rhs.apply(this);
+
       if (isArray(varName))
       {
         currentSymbol = table.getArray(varName, Compiler.getLevel());
@@ -499,9 +504,6 @@ public class StatementCompiler extends DepthFirstAdapter
       {
         currentSymbol = table.getSymbol(varName, Compiler.getLevel());
       }
-
-      PRhs rhs = node.getRhs();
-      rhs.apply(this);
 
       currentSymbol.handleStore(this);
     }
@@ -543,8 +545,6 @@ public class StatementCompiler extends DepthFirstAdapter
     {
       node.getLBrace().apply(this);
     }
-
-    System.out.println("Compiler level:"+ Compiler.getLevel());
 
     Object temp[] = node.getVariableDeclaration().toArray();
     for (int i = 0; i < temp.length; i++)
