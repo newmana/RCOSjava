@@ -2,6 +2,7 @@ package org.rcosjava.software.process;
 
 import java.awt.*;
 import java.lang.Thread;
+import java.io.*;
 import java.net.*;
 
 import org.rcosjava.hardware.cpu.Interrupt;
@@ -39,7 +40,6 @@ import org.rcosjava.software.util.FIFOQueue;
  */
 public class ProgramManager extends OSMessageHandler
 {
-
   /**
    * The name of the manager to register as with the post office.
    */
@@ -48,7 +48,7 @@ public class ProgramManager extends OSMessageHandler
   /**
    * The file client which is used to talk to the server to load files, etc.
    */
-  private FileClient theFileClient;
+  private transient FileClient theFileClient;
 
   /**
    * A simple list of strings of all the available directories excluding . and
@@ -77,18 +77,31 @@ public class ProgramManager extends OSMessageHandler
   private String fileName;
 
   /**
+   * The host to connect to.
+   */
+  private String host;
+
+  /**
+   * The port to connect to.
+   */
+  private int port;
+
+  /**
    * Sets up internal data and registers with the PostOffice.
    *
    * @param newPostOffice the post office to register to.
-   * @param host the host that this should connect to.
-   * @param port the port to connect to.
+   * @param newHost the host that this should connect to.
+   * @param newPort the port to connect to.
    * @param newKernel link to RCOS to control some of the threading stuff
    *      directly.
    */
-  public ProgramManager(OSOffice newPostOffice, String host, int port,
+  public ProgramManager(OSOffice newPostOffice, String newHost, int newPort,
       Kernel newKernel)
   {
     super(MESSENGING_ID, newPostOffice);
+
+    host = newHost;
+    port = newPort;
     myKernel = newKernel;
 
     // Create a new client to get files and directory
@@ -218,6 +231,21 @@ public class ProgramManager extends OSMessageHandler
   public void close()
   {
     theFileClient.closeConnection();
+  }
+
+  /**
+   * Handle the creation of non-serializable components.
+   *
+   * @param is stream that is being read.
+   */
+  private void readObject(ObjectInputStream is) throws IOException,
+      ClassNotFoundException
+  {
+    // Deserialize the document
+    is.defaultReadObject();
+
+    // Create new connection
+    theFileClient = new FileClient(host, port);
   }
 
   /**
