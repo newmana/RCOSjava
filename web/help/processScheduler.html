@@ -10,8 +10,8 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <meta name=ProgId content=Word.Document>
 <meta name=Generator content="Microsoft Word 10">
 <meta name=Originator content="Microsoft Word 10">
-<link rel=File-List href="images/processScheduler/filelist.xml">
-<link rel=Edit-Time-Data href="images/processScheduler/editdata.mso">
+<link rel=File-List href="./images/processScheduler/filelist.xml">
+<link rel=Edit-Time-Data href="./images/processScheduler/editdata.mso">
 <!--[if !mso]>
 <style>
 v\:* {behavior:url(#default#VML);}
@@ -27,15 +27,15 @@ w\:* {behavior:url(#default#VML);}
   <o:Template>Normal</o:Template>
   <o:LastAuthor>Noone Nobody</o:LastAuthor>
   <o:Revision>2</o:Revision>
-  <o:Created>2002-11-26T11:04:00Z</o:Created>
-  <o:LastSaved>2002-11-26T11:04:00Z</o:LastSaved>
-  <o:Pages>3</o:Pages>
-  <o:Words>1847</o:Words>
-  <o:Characters>10530</o:Characters>
+  <o:Created>2003-01-08T10:57:00Z</o:Created>
+  <o:LastSaved>2003-01-08T10:57:00Z</o:LastSaved>
+  <o:Pages>8</o:Pages>
+  <o:Words>2130</o:Words>
+  <o:Characters>10439</o:Characters>
   <o:Company>Noone</o:Company>
-  <o:Lines>87</o:Lines>
-  <o:Paragraphs>21</o:Paragraphs>
-  <o:CharactersWithSpaces>12931</o:CharactersWithSpaces>
+  <o:Lines>274</o:Lines>
+  <o:Paragraphs>132</o:Paragraphs>
+  <o:CharactersWithSpaces>14912</o:CharactersWithSpaces>
   <o:Version>10.1412</o:Version>
  </o:DocumentProperties>
 </xml><![endif]--><!--[if gte mso 9]><xml>
@@ -423,154 +423,165 @@ ul
 
 <div class=Section1>
 
-<h1><span lang=EN-US>Process Scheduler</span></h1>
+<h1><span style='mso-ansi-language:EN-AU'>Process Scheduler<o:p></o:p></span></h1>
 
-<p class=MsoNormal><span lang=EN-US>On a modern computer system there can be
-many programs being executed at any one time.<span style="mso-spacerun:
-yes">&nbsp; </span>It’s the responsibility of the CPU (Central Processing Unit)
-to actually execute the instructions for these programs. However, with multiple
-programs somewhere between</span></p>
-
-<p class=MsoNormal><span lang=EN-US>start and finish at the same time something
-has to keep track all these programs. Tracking these programs includes knowing
-where they are up to, what they are doing and what resources they own. One of
-the responsibilities of the operating system is to keep track of this
-information. It does this by using processes.<span style="mso-spacerun:
-yes">&nbsp; </span>Nearly all of the work, in some operating systems all of the
-work, is performed by processes. The concepts presented by RCOSjava includes:</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>On a modern computer
+system there can be many programs being executed at any one time.<span
+style="mso-spacerun: yes">&nbsp; </span>It’s the responsibility of the CPU
+(Central Processing Unit) to actually execute the instructions for these
+programs. However, with multiple programs somewhere between the start and
+finish at the same time something has to keep track all these programs.
+Tracking these programs includes knowing where they are up to, what they are
+doing and what resources they own. One of the responsibilities of the operating
+system is to keep track of this information. It does this by using
+processes.<span style="mso-spacerun: yes">&nbsp; </span>Nearly all of the work,
+in some operating systems all of the work, is performed by processes. The
+concepts presented by RCOSjava includes:<o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l17 level1 lfo10;tab-stops:list 36.0pt'><span
-     lang=EN-US>process</span></li>
+     style='mso-ansi-language:EN-AU'><b>Processes<o:p></o:p></b></span></li>
 </ul>
 
-<p class=MsoBodyTextIndent><span lang=EN-US>What is a process?</span></p>
+<p class=MsoBodyTextIndent><span style='mso-ansi-language:EN-AU'>As mentioned
+above, a process is an instance of running program.<o:p></o:p></span></p>
 
-<p class=MsoBodyTextIndent><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoBodyTextIndent><span style='mso-ansi-language:EN-AU'><span
+style="mso-spacerun: yes">&nbsp;</span><o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l1 level1 lfo6;tab-stops:list 36.0pt'><span
-     lang=EN-US>process states</span></li>
+     style='mso-ansi-language:EN-AU'><b>Process States<o:p></o:p></b></span></li>
 </ul>
 
-<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US>During its
-lifetime a process will move through a number of different states. Each state
-has its own characteristics and there are limitations on which state
-transitions make sense.</span></p>
+<p class=MsoNormal style='margin-left:36.0pt'><span style='mso-ansi-language:
+EN-AU'>During its lifetime a process will move through a number of different
+states. Each state has its own characteristics and there are limitations on
+which state transitions make sense.<o:p></o:p></span></p>
 
-<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal style='margin-left:36.0pt'><span style='mso-ansi-language:
+EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l1 level1 lfo6;tab-stops:list 36.0pt'><span
-     lang=EN-US>process description</span></li>
+     style='mso-ansi-language:EN-AU'><b>Process Description<o:p></o:p></b></span></li>
 </ul>
 
-<p class=MsoBodyTextIndent><span lang=EN-US>The operating system must be able
-to keep track of processes and the resources they own. This information is
-stored in a number of operating system data structures including Process
-Control Blocks (PCBs).</span></p>
+<p class=MsoBodyTextIndent><span style='mso-ansi-language:EN-AU'>The operating
+system must be able to keep track of processes and the resources they own. This
+information is stored in a number of operating system data structures including
+Process Control Blocks (PCBs).<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l1 level1 lfo6;tab-stops:list 36.0pt'><span
-     lang=EN-US>operations on processes</span></li>
+     style='mso-ansi-language:EN-AU'><b>Operations on Processes<o:p></o:p></b></span></li>
 </ul>
 
-<p class=MsoBodyTextIndent2 style='margin-left:36.0pt'><span lang=EN-US>There
-are a number of standard operations which are performed with operating systems,
-including creation, termination and switching.</span></p>
+<p class=MsoBodyTextIndent2 style='margin-left:36.0pt'><span style='mso-ansi-language:
+EN-AU'>There are a number of standard operations that are performed with
+operating systems, including creation, termination and switching.<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l1 level1 lfo6;tab-stops:list 36.0pt'><span
-     lang=EN-US>process scheduling</span></li>
+     style='mso-ansi-language:EN-AU'><b>Process Scheduling<o:p></o:p></b></span></li>
 </ul>
 
-<p class=MsoBodyTextIndent><span lang=EN-US>Typically there are multiple
-processes on a computer which much share the computers resources, particularly
-the Central Processing Unit (CPU). Process Scheduling deals with the decisions
-of how to share those resources amongst processes.</span></p>
+<p class=MsoBodyTextIndent><span style='mso-ansi-language:EN-AU'>Typically
+there are multiple processes on a computer, which must share the computers
+resources, particularly the Central Processing Unit (CPU). Process Scheduling
+deals with the decisions of how to share those resources amongst processes.<o:p></o:p></span></p>
 
-<h2><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></h2>
+<h2><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></h2>
 
-<h2><span lang=EN-US>Process</span></h2>
+<h2><span style='mso-ansi-language:EN-AU'>Process<o:p></o:p></span></h2>
 
-<p class=MsoNormal><span lang=EN-US>A process is a program in execution;
-process execution must progress in a sequential fashion. </span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>A process is a program
+in execution; process execution must progress in a sequential fashion. <o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>Generally, a process includes: </span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>In RCOSjava a process
+includes: <o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l8 level1 lfo2;tab-stops:list 36.0pt'><span
-     lang=EN-US>program counter </span></li>
+     style='mso-ansi-language:EN-AU'>A program counter.<o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l8 level1 lfo2;tab-stops:list 36.0pt'><span
-     lang=EN-US>stack </span></li>
+     style='mso-ansi-language:EN-AU'>A stack.<o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l8 level1 lfo2;tab-stops:list 36.0pt'><span
-     lang=EN-US>data section </span></li>
+     style='mso-ansi-language:EN-AU'>A data section.<o:p></o:p></span></li>
 </ul>
 
-<h2><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></h2>
+<h2><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></h2>
 
-<h2><span lang=EN-US>Process States</span></h2>
+<h2><span style='mso-ansi-language:EN-AU'>Process States<o:p></o:p></span></h2>
 
-<p class=MsoNormal><span lang=EN-US>As a process executes, it changes state: </span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>As a process executes,
+it changes state: <o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l20 level1 lfo3;tab-stops:list 36.0pt'><span
-     lang=EN-US>new: The process is being created. </span></li>
+     style='mso-ansi-language:EN-AU'>New: The process is being created. <o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l20 level1 lfo3;tab-stops:list 36.0pt'><span
-     lang=EN-US>running: Instructions are being executed. </span></li>
+     style='mso-ansi-language:EN-AU'>Running: Instructions are being executed. <o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l20 level1 lfo3;tab-stops:list 36.0pt'><span
-     lang=EN-US>waiting: The process is waiting for some event to occur. </span></li>
+     style='mso-ansi-language:EN-AU'>Waiting: The process is waiting for some
+     event (such as an I/O event) to occur. <o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l20 level1 lfo3;tab-stops:list 36.0pt'><span
-     lang=EN-US>ready: The process is waiting to be assigned to a processor. </span></li>
+     style='mso-ansi-language:EN-AU'>Ready: The process is waiting to be
+     assigned to a processor. <o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l20 level1 lfo3;tab-stops:list 36.0pt'><span
-     lang=EN-US>terminated: The process has finished execution. </span></li>
+     style='mso-ansi-language:EN-AU'>Terminated: The process has finished
+     execution. <o:p></o:p></span></li>
 </ul>
 
-<h2><span lang=EN-US>Process Description</span></h2>
+<h2><span style='mso-ansi-language:EN-AU'>Process Description<o:p></o:p></span></h2>
 
-<p class=MsoNormal><span lang=EN-US>The Process Control Block is information
-associated with each process.<span style="mso-spacerun: yes">&nbsp; </span>Each
-process in RCOSjava contains the following information: </span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>The Process Control
+Block is information associated with each process.<span style="mso-spacerun:
+yes">&nbsp; </span>Each process in RCOSjava contains the following information:
+<o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l15 level1 lfo7;tab-stops:list 36.0pt'><span
-     lang=EN-US>Process ID,</span></li>
+     style='mso-ansi-language:EN-AU'>Process ID,<o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l15 level1 lfo7;tab-stops:list 36.0pt'><span
-     lang=EN-US>Process priority,</span></li>
+     style='mso-ansi-language:EN-AU'>Process priority,<o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l15 level1 lfo7;tab-stops:list 36.0pt'><span
-     lang=EN-US>Process state,</span></li>
+     style='mso-ansi-language:EN-AU'>Process state,<o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l15 level1 lfo7;tab-stops:list 36.0pt'><span
-     lang=EN-US>Program counter,</span></li>
+     style='mso-ansi-language:EN-AU'>Program counter,<o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l15 level1 lfo7;tab-stops:list 36.0pt'><span
-     lang=EN-US>Stack Pointer, </span></li>
+     style='mso-ansi-language:EN-AU'>Stack Pointer, <o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l15 level1 lfo7;tab-stops:list 36.0pt'><span
-     lang=EN-US>Base Pointer, </span></li>
+     style='mso-ansi-language:EN-AU'>Base Pointer, <o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l15 level1 lfo7;tab-stops:list 36.0pt'><span
-     lang=EN-US>Priority,</span></li>
+     style='mso-ansi-language:EN-AU'>Priority,<o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l15 level1 lfo7;tab-stops:list 36.0pt'><span
-     lang=EN-US>Memory management information including code and stack Pages,</span></li>
+     style='mso-ansi-language:EN-AU'>Memory management information including
+     Code and Stack Pages,<o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l15 level1 lfo7;tab-stops:list 36.0pt'><span
-     lang=EN-US>Accounting information including CPU ticks, and</span></li>
+     style='mso-ansi-language:EN-AU'>Accounting information including CPU
+     ticks, and<o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l15 level1 lfo7;tab-stops:list 36.0pt'><span
-     lang=EN-US>I/O status information including file name and file size.</span></li>
+     style='mso-ansi-language:EN-AU'>I/O status information including file name
+     and file size.<o:p></o:p></span></li>
 </ul>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>To display the current PCB of a process
-simply click on the process represented by a coloured circle in the process
-scheduler.<span style="mso-spacerun: yes">&nbsp; </span>A type example of the
-process scheduler running looks like:</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>To display the current
+PCB of a process simply click on the process represented by a coloured circle
+in the process scheduler.<span style="mso-spacerun: yes">&nbsp; </span>A type
+example of the process scheduler running looks like:<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><!--[if gte vml 1]><v:shapetype id="_x0000_t75"
- coordsize="21600,21600" o:spt="75" o:preferrelative="t" path="m@4@5l@4@11@9@11@9@5xe"
- filled="f" stroked="f">
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><!--[if gte vml 1]><v:shapetype
+ id="_x0000_t75" coordsize="21600,21600" o:spt="75" o:preferrelative="t"
+ path="m@4@5l@4@11@9@11@9@5xe" filled="f" stroked="f">
  <v:stroke joinstyle="miter"/>
  <v:formulas>
   <v:f eqn="if lineDrawn pixelLineWidth 0"/>
@@ -588,511 +599,569 @@ process scheduler running looks like:</span></p>
  </v:formulas>
  <v:path o:extrusionok="f" gradientshapeok="t" o:connecttype="rect"/>
  <o:lock v:ext="edit" aspectratio="t"/>
-</v:shapetype><v:shape id="_x0000_i1025" type="#_x0000_t75" style='width:6in;
+</v:shapetype><v:shape id="_x0000_i1028" type="#_x0000_t75" style='width:6in;
  height:230pt'>
- <v:imagedata src="images/processScheduler/image001.jpg" o:title="processScheduler1.jpg"/>
+ <v:imagedata src="./images/processScheduler/image001.jpg" o:title="processScheduler1.jpg"/>
 </v:shape><![endif]--><![if !vml]><img width=432 height=230
-src="images/processScheduler/image002.jpg" v:shapes="_x0000_i1025"><![endif]></span></p>
+src="./images/processScheduler/image002.jpg" v:shapes="_x0000_i1028"><![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>This shows the two processes, “Process 1”
-(“P1”, green circle) and “Process 2” (“P2”, blue circle).<span
-style="mso-spacerun: yes">&nbsp; </span>By clicking on the “Process 1” circle
-you get the separate process control block window:</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>This shows the two
+processes, “Process 1” (“P1”, green circle) and “Process 2” (“P2”, blue
+circle).<span style="mso-spacerun: yes">&nbsp; </span>By clicking on the
+“Process 1” circle you get the separate process control block window:<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><!--[if gte vml 1]><v:shape id="_x0000_i1026"
- type="#_x0000_t75" style='width:255pt;height:166pt'>
- <v:imagedata src="images/processScheduler/image003.jpg" o:title="processScheduler3.jpg"/>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><!--[if gte vml 1]><v:shape
+ id="_x0000_i1029" type="#_x0000_t75" style='width:255pt;height:166pt'>
+ <v:imagedata src="./images/processScheduler/image003.jpg" o:title="processScheduler3.jpg"/>
 </v:shape><![endif]--><![if !vml]><img width=255 height=166
-src="images/processScheduler/image004.jpg" v:shapes="_x0000_i1026"><![endif]></span></p>
+src="./images/processScheduler/image004.jpg" v:shapes="_x0000_i1029"><![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>By selecting these options you can open up
-each of these categories:</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>By selecting these
+options you can open up each of these categories:<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><!--[if gte vml 1]><v:shape id="_x0000_i1027"
- type="#_x0000_t75" style='width:255pt;height:166pt'>
- <v:imagedata src="images/processScheduler/image005.jpg" o:title="processScheduler2.jpg"/>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><!--[if gte vml 1]><v:shape
+ id="_x0000_i1030" type="#_x0000_t75" style='width:255pt;height:166pt'>
+ <v:imagedata src="./images/processScheduler/image005.jpg" o:title="processScheduler2.jpg"/>
 </v:shape><![endif]--><![if !vml]><img width=255 height=166
-src="images/processScheduler/image006.jpg" v:shapes="_x0000_i1027"><![endif]></span></p>
+src="./images/processScheduler/image006.jpg" v:shapes="_x0000_i1030"><![endif]><o:p></o:p></span></p>
 
-<h2><span lang=EN-US>Operations on Processes</span></h2>
+<h2><span style='mso-ansi-language:EN-AU'>Operations on Processes<o:p></o:p></span></h2>
 
-<p class=MsoNormal><span lang=EN-US>Processes in RCOSjava are created, undergo
-switching and are terminated.</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>Processes in RCOSjava
+are created, undergo switching and are finally terminated.<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<h3><span lang=EN-US>Process Creation</span></h3>
+<h3><span style='mso-ansi-language:EN-AU'>Process Creation<o:p></o:p></span></h3>
 
-<p class=MsoNormal><span lang=EN-US>RCOSjava creates a process using the
-following steps:</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>RCOSjava creates a
+process using the following steps:<o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l19 level1 lfo11;tab-stops:list 36.0pt'><span
-     lang=EN-US>Reading in executable code of a program from the file system,</span></li>
+     style='mso-ansi-language:EN-AU'>Reading in executable code of a program
+     from the file system,<o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l19 level1 lfo11;tab-stops:list 36.0pt'><span
-     lang=EN-US>Allocation of a new process by the Process Scheduler,</span></li>
+     style='mso-ansi-language:EN-AU'>Allocation of a new process by the Process
+     Scheduler,<o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l19 level1 lfo11;tab-stops:list 36.0pt'><span
-     lang=EN-US>Requesting and allocation if available of memory, and finally</span></li>
+     style='mso-ansi-language:EN-AU'>Requesting and allocation if available of
+     memory, and finally<o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l19 level1 lfo11;tab-stops:list 36.0pt'><span
-     lang=EN-US>Requesting and allocation if available of a terminal to be used
-     by the process.</span></li>
+     style='mso-ansi-language:EN-AU'>Requesting and allocation if available of
+     a terminal to be used by the process.<o:p></o:p></span></li>
 </ul>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>To create a new process go to the “File”,
-“New Process” menu:</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>To create new
+processes go to the “File”, “New Process” menu:<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><!--[if gte vml 1]><v:shape id="_x0000_i1028"
- type="#_x0000_t75" style='width:6in;height:230pt'>
- <v:imagedata src="images/processScheduler/image007.jpg" o:title="processScheduler4.jpg"/>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><!--[if gte vml 1]><v:shape
+ id="_x0000_i1025" type="#_x0000_t75" style='width:6in;height:230pt'>
+ <v:imagedata src="./images/processScheduler/image007.jpg" o:title="processScheduler4.jpg"/>
 </v:shape><![endif]--><![if !vml]><img width=432 height=230
-src="images/processScheduler/image008.jpg" v:shapes="_x0000_i1028"><![endif]></span></p>
+src="./images/processScheduler/image008.jpg" v:shapes="_x0000_i1025"><![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>This displays the available executable
-files:</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>This displays the
+available executable files:<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><!--[if gte vml 1]><v:shape id="_x0000_i1029"
- type="#_x0000_t75" style='width:228pt;height:195pt'>
- <v:imagedata src="images/processScheduler/image009.jpg" o:title="processScheduler5.jpg"/>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><!--[if gte vml 1]><v:shape
+ id="_x0000_i1026" type="#_x0000_t75" style='width:228pt;height:195pt'>
+ <v:imagedata src="./images/processScheduler/image009.jpg" o:title="processScheduler5.jpg"/>
 </v:shape><![endif]--><![if !vml]><img width=228 height=195
-src="images/processScheduler/image010.jpg" v:shapes="_x0000_i1029"><![endif]></span></p>
+src="./images/processScheduler/image010.jpg" v:shapes="_x0000_i1026"><![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>You can pick whether or not to create a new
-terminal when loading the process leaving selected “Automatically start
-terminal”.<span style="mso-spacerun: yes">&nbsp; </span>Either double click on
-the process name or select the process name and hit “Open”.<span
-style="mso-spacerun: yes">&nbsp; </span>The process will automatically start
-running.</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>The options available
+include whether or not to create a new terminal when loading the process
+leaving selected “Automatically start terminal”.<span style="mso-spacerun:
+yes">&nbsp; </span>Either double click on the process name or select the
+process name and hit “Open”.<span style="mso-spacerun: yes">&nbsp; </span>The
+process will automatically start running.<o:p></o:p></span></p>
 
-<h3><span lang=EN-US>Switching</span></h3>
+<h3><span style='mso-ansi-language:EN-AU'>Switching<o:p></o:p></span></h3>
 
-<p class=MsoNormal><span lang=EN-US>Process and context switching are closely
-related concepts, but they are not the same.<span style="mso-spacerun:
-yes">&nbsp; </span>It is important that the difference between a process and a
-context switch is made.</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>Process and context
+switching are closely related concepts, but they are not the same.<span
+style="mso-spacerun: yes">&nbsp; </span>It is important that the difference
+between a process and a context switch is made.<o:p></o:p></span></p>
 
-<h3><span lang=EN-US>Context</span></h3>
+<h3><span style='mso-ansi-language:EN-AU'>Context<o:p></o:p></span></h3>
 
-<p class=MsoNormal><span lang=EN-US>First, let’s define what the context
-actually is. All CPUs contain a number of registers that provide information
-about the current state of execution. Some of these were mentioned previously
-include such registers as the program counter, stack pointer and base
-pointer.<span style="mso-spacerun: yes">&nbsp;&nbsp; </span>It is this
-information that specifies the current execution state of the CPU.</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>First, let’s define
+what the context actually is. All CPUs contain a number of registers that
+provide information about the current state of execution. Some of these were
+mentioned previously include such registers as the program counter, stack
+pointer and base pointer.<span style="mso-spacerun: yes">&nbsp;&nbsp; </span>It
+is this information that specifies the current execution state of the CPU.<o:p></o:p></span></p>
 
-<h3><span lang=EN-US>Context Switch</span></h3>
+<h3><span style='mso-ansi-language:EN-AU'>Context Switch<o:p></o:p></span></h3>
 
-<p class=MsoNormal><span lang=EN-US>A context switch involves saving the
-current context of the CPU and replacing it with another context. What this
-does is saves the current program/process, allows you to run another
-program/process and then at a later stage return back to the original process
-by restoring its context. As far as the original program/process knows, nothing
-interesting has happened.</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>A context switch
+involves saving the current context of the CPU and replacing it with another
+context. What this does is saves the current program/process, allowing another
+program/process and to run and then at a later stage the original process can
+be restored by using its context. As far as the original program/process knows,
+nothing interesting has happened.<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>Context switches usually happen whenever
-there is an interrupt. There are four general types of interrupts, software,
-hardware, error and timer.</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>Context switches
+usually happen whenever there is an interrupt. There are four general types of
+interrupts, software, hardware, error and timer.<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>Context is a hardware concept; it is tied
-to the CPU of the system.<span style="mso-spacerun: yes">&nbsp; </span>Context
-switches are performed hundreds, thousands and even millions of times a second
-and are usually supported by hardware in someway.</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>Context is a hardware
+concept; it is tied to the CPU of the system.<span style="mso-spacerun:
+yes">&nbsp; </span>Context switches are performed hundreds, thousands and even
+millions of times a second and are usually supported by hardware in someway.<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>To view the current CPU context go to the
-CPU Animator screen.</span><span lang=EN-US style='font-size:11.5pt;font-family:
-Times-Bold'><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>To view the current
+CPU context go to the CPU Animator screen.</span><span style='font-size:11.5pt;
+font-family:Times-Bold;mso-ansi-language:EN-AU'><o:p></o:p></span></p>
 
-<h3><span lang=EN-US>Process Switch</span></h3>
+<h3><span style='mso-ansi-language:EN-AU'>Process Switch<o:p></o:p></span></h3>
 
-<p class=MsoNormal><span lang=EN-US>Process switching is where the current
-running process is replaced by another process. This occurs in a number of
-situations including:</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>Process switching is
+where the current running process is replaced by another process. This occurs
+in a number of situations including:<o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l21 level1 lfo12;tab-stops:list 36.0pt'><span
-     lang=EN-US>the current running process finishes,</span></li>
+     style='mso-ansi-language:EN-AU'>The current running process finishes.<o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l21 level1 lfo12;tab-stops:list 36.0pt'><span
-     lang=EN-US>the current running process requests some I/O and moves from
-     the running to the waiting state,</span></li>
+     style='mso-ansi-language:EN-AU'>The current running process requests some
+     I/O and moves from the running to the waiting state.<o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l21 level1 lfo12;tab-stops:list 36.0pt'><span
-     lang=EN-US>the current running process uses up its time on the CPU and
-     moves from the running to the ready state.</span></li>
+     style='mso-ansi-language:EN-AU'>The current running process uses up its
+     time on the CPU and moves from the running to the ready state.<o:p></o:p></span></li>
 </ul>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>Since it involves processes, remember
-processes are an operating system construct; a process switch relies heavily on
-operating system code and data structures. The steps involved in a process
-switch include:</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>Since it involves
+processes, remember processes are an operating system construct; a process
+switch relies heavily on operating system code and data structures. The steps
+involved in a process switch include:<o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l7 level1 lfo13;tab-stops:list 36.0pt'><span
-     lang=EN-US>interrupt occurs</span></li>
+     style='mso-ansi-language:EN-AU'><b>An Interrupt Occurs<o:p></o:p></b></span></li>
 </ul>
 
-<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US>All process
-switches will be initiated by an interrupt. When a process finishes it usually
-executes a system call (implemented as a software interrupt) called exit that
-destroys the process. When a processes share of time on the CPU is finished
-this is indicated by a timer interrupt. When a process moves from the blocked
-state to the ready state it is usually because of an I/O interrupt. Moving from
-running to blocked<span style="mso-spacerun: yes">&nbsp; </span>it is usually
+<p class=MsoNormal style='margin-left:36.0pt'><span style='mso-ansi-language:
+EN-AU'>All process switches will be initiated by an interrupt. When a process
+finishes it usually executes a system call (implemented as a software
+interrupt) called exit that destroys the process. When a processes share of
+time on the CPU is finished this is indicated by a timer interrupt. When a
+process moves from the blocked state to the ready state it is usually because
+of an I/O interrupt. Moving from being executed to the blocked queue is usually
 because of a request to do I/O (a software interrupt).<span
-style="mso-spacerun: yes">&nbsp; </span></span></p>
+style="mso-spacerun: yes">&nbsp; </span><o:p></o:p></span></p>
 
-<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal style='margin-left:36.0pt'><span style='mso-ansi-language:
+EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US>Since the
-process switch almost always starts with an interrupt the first thing that
-happens is a context switch from the current running process to the interrupt
-handler of the operating system.</span></p>
+<p class=MsoNormal style='margin-left:36.0pt'><span style='mso-ansi-language:
+EN-AU'>Since the process switch almost always starts with an interrupt the
+first thing that happens is a context switch from the current running process
+to the interrupt handler of the operating system.<o:p></o:p></span></p>
 
-<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
-
-<ul style='margin-top:0cm' type=disc>
- <li class=MsoNormal style='mso-list:l7 level1 lfo13;tab-stops:list 36.0pt'><span
-     lang=EN-US>saving the context of the current running process</span></li>
-</ul>
-
-<p class=MsoNormal style='margin-left:18.0pt'><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal style='margin-left:36.0pt'><span style='mso-ansi-language:
+EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l7 level1 lfo13;tab-stops:list 36.0pt'><span
-     lang=EN-US>restore the context of the operating system, in particular the
-     interrupt handler</span></li>
+     style='mso-ansi-language:EN-AU'><b>Saving Context</b></span><span
+     style='mso-ansi-language:EN-AU'><o:p></o:p></span></li>
 </ul>
 
-<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US>The interrupt
+<p class=MsoBodyTextIndent><span style='mso-ansi-language:EN-AU'>The context of
+the current running process is copied to another section of memory from the
+CPU.<span style="mso-spacerun: yes">&nbsp; </span><o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:18.0pt'><span style='mso-ansi-language:
+EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+
+<ul style='margin-top:0cm' type=disc>
+ <li class=MsoNormal style='mso-list:l7 level1 lfo13;tab-stops:list 36.0pt'><span
+     style='mso-ansi-language:EN-AU'><b>Restore the Context of the Operating
+     System<o:p></o:p></b></span></li>
+</ul>
+
+<p class=MsoBodyTextIndent><span style='mso-ansi-language:EN-AU'>The interrupt
 handler determines which part of the operating system will handle the
 interrupt. Timer, software and I/O interrupts will be handled by different
 sections of the operating system. However, some part of these operating system
 sections will eventually initiate a process switch, which uses exactly the same
-steps.</span></p>
+steps.<o:p></o:p></span></p>
 
-<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
-
-<ul style='margin-top:0cm' type=disc>
- <li class=MsoNormal style='mso-list:l10 level1 lfo14;tab-stops:list 36.0pt'><span
-     lang=EN-US>change the PCB of the old running process to represent the
-     change in state</span></li>
-</ul>
-
-<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US>The process
-could be going from running to blocked, zombie, or ready.</span></p>
-
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal style='margin-left:36.0pt'><span style='mso-ansi-language:
+EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l10 level1 lfo14;tab-stops:list 36.0pt'><span
-     lang=EN-US>move the PCB of the old running process to the queue associated
-     with its new state</span></li>
+     style='mso-ansi-language:EN-AU'><b>Change the PCB of the Previously
+     Running Process</b></span><span style='mso-ansi-language:EN-AU'> <o:p></o:p></span></li>
 </ul>
 
-<p class=MsoBodyTextIndent><span lang=EN-US>In many cases this will entail
-simply changing a pointer. Remember, it is important that this process be very
-efficient so it can be done quickly. Copying large amounts of data (e.g. the
-PCB) every time there is a process switch just wouldn’t make good sense.</span></p>
+<p class=MsoBodyTextIndent><span style='mso-ansi-language:EN-AU'>The process
+control block is modified to represent its changed in state.<span
+style="mso-spacerun: yes">&nbsp; </span>The process could be going from running
+to blocked, zombie, or ready.<o:p></o:p></span></p>
 
-<p class=MsoBodyTextIndent><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l10 level1 lfo14;tab-stops:list 36.0pt'><span
-     lang=EN-US>select another process from the ready queue</span></li>
+     style='mso-ansi-language:EN-AU'><b>Move the PCB of the Old Running Process</b></span><span
+     style='mso-ansi-language:EN-AU'><o:p></o:p></span></li>
 </ul>
 
-<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US>This is a very
-important step. It is important because it can take a long time (by far the
-largest portion of a process switch) but also because which process is chosen
-can directly influence the performance of the</span></p>
+<p class=MsoNormal style='margin-left:36.0pt'><span style='mso-ansi-language:
+EN-AU'>The PCB of the process is moved to the queue associated with its new
+state<o:p></o:p></span></p>
 
-<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoBodyTextIndent><span style='mso-ansi-language:EN-AU'>In many cases
+this will entail simply changing a pointer. Remember, it is important that this
+process be very efficient so it can be done quickly. Copying large amounts of
+data (e.g. the PCB) every time there is a process switch just wouldn’t make
+good sense.<o:p></o:p></span></p>
+
+<p class=MsoBodyTextIndent><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l10 level1 lfo14;tab-stops:list 36.0pt'><span
-     lang=EN-US>change the PCB of the chosen process to represent its new state</span></li>
+     style='mso-ansi-language:EN-AU'><b>Select Another Process from the Ready
+     Queue<o:p></o:p></b></span></li>
 </ul>
 
-<p class=MsoNormal style='margin-left:18.0pt'><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal style='margin-left:36.0pt'><span style='mso-ansi-language:
+EN-AU'>This is a very important step. It is important because it can take a
+long time (by far the largest portion of a process switch) but also because
+which process is chosen can directly influence the performance of the<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><span style='mso-ansi-language:
+EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l10 level1 lfo14;tab-stops:list 36.0pt'><span
-     lang=EN-US>&quot;move&quot; the PCB of the new process from its current
-     queue to running</span></li>
+     style='mso-ansi-language:EN-AU'><b>Change the PCB of the New Process</b></span><span
+     style='mso-ansi-language:EN-AU'> <o:p></o:p></span></li>
 </ul>
 
-<p class=MsoNormal style='margin-left:18.0pt'><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoBodyTextIndent><span style='mso-ansi-language:EN-AU'>The new
+process’s PCB is modified to represent its new state.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:18.0pt'><span style='mso-ansi-language:
+EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l10 level1 lfo14;tab-stops:list 36.0pt'><span
-     lang=EN-US>replace the context of the kernel with that of the new
-     process.<span style="mso-spacerun: yes">&nbsp; </span>After this step the
-     new running process starts off from where it left off the last time it
-     executed.</span></li>
+     style='mso-ansi-language:EN-AU'><b>Move the PCB of the New Process</b></span><span
+     style='mso-ansi-language:EN-AU'> <o:p></o:p></span></li>
 </ul>
 
-<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoBodyTextIndent><span style='mso-ansi-language:EN-AU'>The PCB of the
+new process is moved from its current queue to running.<o:p></o:p></span></p>
 
-<h3><span lang=EN-US>Process and context switch: the relationship</span></h3>
+<p class=MsoNormal style='margin-left:18.0pt'><span style='mso-ansi-language:
+EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>A context switch doesn’t mean a process
-switch occurs.<span style="mso-spacerun: yes">&nbsp; </span>For example, one of
-the types of interrupts is the timer interrupt.<span style="mso-spacerun:
-yes">&nbsp; </span>Most computer systems have a timer, which generates an
-interrupt at regular intervals. What usually happens at a timer interrupt is
-the following:</span></p>
+<ul style='margin-top:0cm' type=disc>
+ <li class=MsoNormal style='mso-list:l10 level1 lfo14;tab-stops:list 36.0pt'><span
+     style='mso-ansi-language:EN-AU'><b>Replace the Context of the Kernel<o:p></o:p></b></span></li>
+</ul>
+
+<p class=MsoBodyTextIndent><span style='mso-ansi-language:EN-AU'>The existing
+context is replaced with that of the new process.<span style="mso-spacerun:
+yes">&nbsp; </span>After this step the new running process starts off from
+where it left off the last time it executed.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><span style='mso-ansi-language:
+EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+
+<h3><span style='mso-ansi-language:EN-AU'>Process and Context Switch<o:p></o:p></span></h3>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>A context switch
+doesn’t mean a process switch occurs.<span style="mso-spacerun: yes">&nbsp;
+</span>For example, one of the types of interrupts is the timer interrupt.<span
+style="mso-spacerun: yes">&nbsp; </span>Most computer systems have a timer,
+which generates an interrupt at regular intervals. What usually happens at a
+timer interrupt is the following:<o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l4 level1 lfo15;tab-stops:list 36.0pt'><span
-     lang=EN-US>there is a context switch to an interrupt handler (part of the
-     operating system)</span></li>
+     style='mso-ansi-language:EN-AU'>There is a context switch to an interrupt
+     handler (part of the operating system).<o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l4 level1 lfo15;tab-stops:list 36.0pt'><span
-     lang=EN-US>the interrupt handler decides whether the timer interrupt means
-     that anything should change</span></li>
+     style='mso-ansi-language:EN-AU'>The interrupt handler decides whether the
+     timer interrupt means that anything should change.<o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l4 level1 lfo15;tab-stops:list 36.0pt'><span
-     lang=EN-US>if it decides, no, then it restores the context of the
-     previously running process.</span></li>
+     style='mso-ansi-language:EN-AU'>If it decides, no, then it restores the
+     context of the previously running process.<o:p></o:p></span></li>
 </ul>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>This is an example of where a context
-switch does not mean a process switch.</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>This is an example of
+where a context switch does not mean a process switch.<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>However a process switch always involves a
-context switch (perhaps even more than one).<span style="mso-spacerun:
-yes">&nbsp; </span>Looking through the rough list of steps of what occurs
-during a process switch you will see that there are a number of context
-switches within a process switch.</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>However, a process
+switch always involves a context switch (perhaps even more than one).<span
+style="mso-spacerun: yes">&nbsp; </span>Looking through the rough list of steps
+of what occurs during a process switch you will see that there are a number of
+context switches within a process switch.<o:p></o:p></span></p>
 
-<h2><span lang=EN-US>Process Termination</span></h2>
+<h2><span style='mso-ansi-language:EN-AU'>Process Termination<o:p></o:p></span></h2>
 
-<p class=MsoNormal><span lang=EN-US>A process will terminate when it either
-exits or aborts:</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>A process will
+terminate when it either exits or aborts:<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l9 level1 lfo16;tab-stops:list 36.0pt'><span
-     lang=EN-US>When a process finished executing its last statement it asks the
-     operating system to delete it (exit).</span></li>
+     style='mso-ansi-language:EN-AU'>When a process finished executing its last
+     statement it asks the operating system to delete it (exit).<o:p></o:p></span></li>
  <ul style='margin-top:0cm' type=circle>
   <li class=MsoNormal style='mso-list:l9 level2 lfo16;tab-stops:list 72.0pt'><span
-      lang=EN-US>Output data from child to parent (via wait). </span></li>
+      style='mso-ansi-language:EN-AU'>Output data from child to parent (via
+      wait). <o:p></o:p></span></li>
   <li class=MsoNormal style='mso-list:l9 level2 lfo16;tab-stops:list 72.0pt'><span
-      lang=EN-US>Process' resources are deallocated by operating system. </span></li>
+      style='mso-ansi-language:EN-AU'>Process' resources are deallocated by
+      operating system. <o:p></o:p></span></li>
  </ul>
  <li class=MsoNormal style='mso-list:l9 level1 lfo16;tab-stops:list 36.0pt'><span
-     lang=EN-US>Parent may terminate execution of children processes (abort). </span></li>
+     style='mso-ansi-language:EN-AU'>Parent may terminate execution of children
+     processes (abort). <o:p></o:p></span></li>
  <ul style='margin-top:0cm' type=circle>
   <li class=MsoNormal style='mso-list:l9 level2 lfo16;tab-stops:list 72.0pt'><span
-      lang=EN-US>Child has exceeded allocated resources. </span></li>
+      style='mso-ansi-language:EN-AU'>Child has exceeded allocated resources. <o:p></o:p></span></li>
   <li class=MsoNormal style='mso-list:l9 level2 lfo16;tab-stops:list 72.0pt'><span
-      lang=EN-US>Task assigned to child is no longer required. </span></li>
+      style='mso-ansi-language:EN-AU'>Task assigned to child is no longer
+      required. <o:p></o:p></span></li>
   <li class=MsoNormal style='mso-list:l9 level2 lfo16;tab-stops:list 72.0pt'><span
-      lang=EN-US>Parent is exiting. </span></li>
+      style='mso-ansi-language:EN-AU'>Parent is exiting. <o:p></o:p></span></li>
   <li class=MsoNormal style='mso-list:l9 level2 lfo16;tab-stops:list 72.0pt'><span
-      lang=EN-US>Operating system does not allow child to continue if its
-      parent terminates. </span></li>
+      style='mso-ansi-language:EN-AU'>Operating system does not allow child to
+      continue if its parent terminates. <o:p></o:p></span></li>
   <li class=MsoNormal style='mso-list:l9 level2 lfo16;tab-stops:list 72.0pt'><span
-      lang=EN-US>Cascading termination. </span></li>
+      style='mso-ansi-language:EN-AU'>Cascading termination. <o:p></o:p></span></li>
  </ul>
 </ul>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>You can terminate a program by selecting a
-currently executing process from the “File”, “Kill Process” menu:</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>You can terminate a
+program by selecting a currently executing process from the “File”, “Kill
+Process” menu:<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><!--[if gte vml 1]><v:shape id="_x0000_i1030"
- type="#_x0000_t75" style='width:129pt;height:61pt'>
- <v:imagedata src="images/processScheduler/image011.jpg" o:title="processScheduler6.jpg"/>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><!--[if gte vml 1]><v:shape
+ id="_x0000_i1027" type="#_x0000_t75" style='width:129pt;height:61pt'>
+ <v:imagedata src="./images/processScheduler/image011.jpg" o:title="processScheduler6.jpg"/>
 </v:shape><![endif]--><![if !vml]><img width=129 height=61
-src="images/processScheduler/image012.jpg" v:shapes="_x0000_i1030"><![endif]></span></p>
+src="./images/processScheduler/image012.jpg" v:shapes="_x0000_i1027"><![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>This shows killing the process with the
-process id of 1.</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>This shows killing the
+process with the process id of 1.<o:p></o:p></span></p>
 
-<h2><span lang=EN-US>Process Scheduling</span></h2>
+<h2><span style='mso-ansi-language:EN-AU'>Process Scheduling<o:p></o:p></span></h2>
 
-<p class=MsoNormal><span lang=EN-US>The process scheduler in RCOSjava monitors
-the following states of a process:</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>The process scheduler
+in RCOSjava monitors the following states of a process:<o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l16 level1 lfo9;tab-stops:list 36.0pt'><span
-     lang=EN-US>Zombie queue – set of processes waiting to have an I/O device
-     allocated. </span></li>
+     style='mso-ansi-language:EN-AU'>Zombie queue – set of processes waiting to
+     have an I/O device allocated. <o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l16 level1 lfo9;tab-stops:list 36.0pt'><span
-     lang=EN-US>Blocked queue – set of processes waiting on an I/O event to
-     occur.</span></li>
+     style='mso-ansi-language:EN-AU'>Blocked queue – set of processes waiting
+     on an I/O event to occur.<o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l16 level1 lfo9;tab-stops:list 36.0pt'><span
-     lang=EN-US>Ready queue - set of all processes residing in main memory,
-     ready and waiting to execute. </span></li>
+     style='mso-ansi-language:EN-AU'>Ready queue - set of all processes
+     residing in main memory, ready and waiting to execute. <o:p></o:p></span></li>
 </ul>
 
 <ul style='margin-top:0cm' type=disc>
  <li class=MsoNormal style='mso-list:l0 level1 lfo8;tab-stops:list 36.0pt'><span
-     lang=EN-US>Process migration between the various queues. </span></li>
+     style='mso-ansi-language:EN-AU'>Process migration between the various
+     queues. <o:p></o:p></span></li>
 </ul>
 
-<p class=MsoNormal><span lang=EN-US style='font-size:18.0pt;font-family:Arial;
-color:black'><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class=MsoNormal><span style='font-size:18.0pt;font-family:Arial;color:black;
+mso-ansi-language:EN-AU'><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
+style='mso-ansi-language:EN-AU'><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>The scheduling of the CPU is done by
-efficiently choosing the process to be executed from the Ready queue.<span
-style="mso-spacerun: yes">&nbsp; </span>It selects from among the processes in
-memory that are ready to execute, and allocates the CPU to one of them. </span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>The scheduling of the
+CPU is done by efficiently choosing the process to be executed from the Ready
+queue.<span style="mso-spacerun: yes">&nbsp; </span>It selects from among the
+processes in memory that are ready to execute, and allocates the CPU to one of
+them. <o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>CPU scheduling decisions may take place
-when a process:</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>CPU scheduling
+decisions may take place when a process:<o:p></o:p></span></p>
 
 <ol style='margin-top:0cm' start=1 type=1>
  <li class=MsoNormal style='mso-list:l18 level1 lfo17;tab-stops:list 36.0pt'><span
-     lang=EN-US>switches from running to waiting state. </span></li>
+     style='mso-ansi-language:EN-AU'>Switches from running to waiting state. <o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l18 level1 lfo17;tab-stops:list 36.0pt'><span
-     lang=EN-US>switches from running to ready state. </span></li>
+     style='mso-ansi-language:EN-AU'>Switches from running to ready state. <o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l18 level1 lfo17;tab-stops:list 36.0pt'><span
-     lang=EN-US>switches from waiting to ready. </span></li>
+     style='mso-ansi-language:EN-AU'>Switches from waiting to ready. <o:p></o:p></span></li>
  <li class=MsoNormal style='mso-list:l18 level1 lfo17;tab-stops:list 36.0pt'><span
-     lang=EN-US>terminates. </span></li>
+     style='mso-ansi-language:EN-AU'>Terminates. <o:p></o:p></span></li>
 </ol>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>Scheduling under 1 and 4 is called
-non-preemptive.<span style="mso-spacerun: yes">&nbsp; </span>RCOSjava performs
-preemptive scheduling i.e. scheduling takes place under all states.</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>Scheduling under 1 and
+4 is called non-pre-emptive.<span style="mso-spacerun: yes">&nbsp;
+</span>RCOSjava performs pre-emptive scheduling i.e. scheduling takes place
+under all states.<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>The criteria for picking a scheduling
-algorithm is based on:</span></p>
-
-<ul style='margin-top:0cm' type=circle>
- <li class=MsoNormal style='mso-list:l6 level1 lfo20;tab-stops:list 36.0pt'><span
-     lang=EN-US>Maximizing CPU utilization - keep the CPU as busy as possible</span></li>
- <li class=MsoNormal style='mso-list:l6 level1 lfo20;tab-stops:list 36.0pt'><span
-     lang=EN-US>Maximizing Throughput – the number of processes that complete
-     their execution per time unit </span></li>
- <li class=MsoNormal style='mso-list:l6 level1 lfo20;tab-stops:list 36.0pt'><span
-     lang=EN-US>Minimizing Turnaround time - amount of time to execute a
-     particular process </span></li>
- <li class=MsoNormal style='mso-list:l6 level1 lfo20;tab-stops:list 36.0pt'><span
-     lang=EN-US>Minimizing Waiting time - amount of time a process has been
-     waiting in the ready queue </span></li>
- <li class=MsoNormal style='mso-list:l6 level1 lfo20;tab-stops:list 36.0pt'><span
-     lang=EN-US>Minimizing Response time - amount of time it takes from when a
-     request was submitted until the first response is produced, not output
-     (for time sharing environment)</span></li>
-</ul>
-
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
-
-<p class=MsoNormal><span lang=EN-US>RCOSjava implements several round robin
-priority scheduling algorithms.</span></p>
-
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
-
-<p class=MsoNormal><span lang=EN-US>Round Robin scheduling is where each
-process gets a small unit of CPU time (time quantum), usually 10--100
-milliseconds. After this time has elapsed, the process is preempted and added
-to the end of the ready queue. </span></p>
-
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
-
-<p class=MsoNormal><span lang=EN-US>If there are n processes in the ready queue
-and the time quantum is q, then each process gets 1/n of the CPU time in chunks
-of at most q time units at once. No process waits more than (n - 1)q time
-units. </span></p>
-
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
-
-<p class=MsoNormal><span lang=EN-US>You can change the quantum of the process
-scheduling at any time using the quantum drop down box display here:</span></p>
-
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
-
-<p class=MsoNormal><span lang=EN-US>If the quantum is to large is too large
-then there is a large waiting time.<span style="mso-spacerun: yes">&nbsp;
-</span>If the quantum is too small there performance is degraded as the
-overhead of context switching increases.</span></p>
-
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
-
-<p class=MsoNormal><span lang=EN-US>RCOSjava implements 3 types of queuing
-algorithms:</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>The criteria for
+picking a scheduling algorithm is based on:<o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=circle>
- <li class=MsoNormal style='mso-list:l12 level1 lfo22;tab-stops:list 36.0pt'><span
-     lang=EN-US>FIFO – First In, First Out</span></li>
+ <li class=MsoNormal style='mso-list:l6 level1 lfo20;tab-stops:list 36.0pt'><span
+     style='mso-ansi-language:EN-AU'>Maximizing CPU utilization - keep the CPU
+     as busy as possible.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l6 level1 lfo20;tab-stops:list 36.0pt'><span
+     style='mso-ansi-language:EN-AU'>Maximizing throughput – the number of
+     processes that complete their execution per time unit.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l6 level1 lfo20;tab-stops:list 36.0pt'><span
+     style='mso-ansi-language:EN-AU'>Minimizing turnaround time - amount of
+     time to execute a particular process.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l6 level1 lfo20;tab-stops:list 36.0pt'><span
+     style='mso-ansi-language:EN-AU'>Minimizing waiting time - amount of time a
+     process has been waiting in the ready queue.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l6 level1 lfo20;tab-stops:list 36.0pt'><span
+     style='mso-ansi-language:EN-AU'>Minimizing response time - amount of time
+     it takes from when a request was submitted until the first response is
+     produced, not output (for time sharing environment).<o:p></o:p></span></li>
 </ul>
 
-<p class=MsoBodyTextIndent2><span lang=EN-US>Each process, irrespective of
-priority, is executed in the order that they are added to the queue.<span
-style="mso-spacerun: yes">&nbsp; </span>The process that was added last on the
-queue is the first to be executed,</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<ul style='margin-top:0cm' type=circle>
- <li class=MsoNormal style='mso-list:l12 level1 lfo22;tab-stops:list 36.0pt'><span
-     lang=EN-US>LIFO – Last In, First Out</span></li>
-</ul>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>RCOSjava implements
+several round robin priority-scheduling algorithms.<o:p></o:p></span></p>
 
-<p class=MsoNormal style='margin-left:18.0pt'><span lang=EN-US>Each process,
-irrespective of priority, is executed in the reverse order that they are added
-to the queue.<span style="mso-spacerun: yes">&nbsp; </span>The process that was
-added to the queue the first is executed first.</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>Round Robin scheduling
+is where each process gets a small unit of CPU time (time quantum), usually a
+number of ticks recorded by the CPU.<span style="mso-spacerun: yes">&nbsp;
+</span>After this time has elapsed, the process is pre-empted and added to the
+end of the ready queue. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>If there are n
+processes in the ready queue and the time quantum is q, then each process gets
+1/n of the CPU time in chunks of at most q time units at once. No process waits
+more than (n - 1)q time units. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>You can change the
+quantum of the process scheduling at any time using the quantum drop down box
+displayed here:<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><!--[if gte vml 1]><v:shape
+ id="_x0000_i1031" type="#_x0000_t75" style='width:102pt;height:79pt'>
+ <v:imagedata src="./images/processScheduler/image013.jpg" o:title="image012.jpg"/>
+</v:shape><![endif]--><![if !vml]><img width=102 height=79
+src="./images/processScheduler/image014.jpg" v:shapes="_x0000_i1031"><![endif]><o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>If the quantum is too
+large there is a long waiting time for each process.<span style="mso-spacerun:
+yes">&nbsp; </span>If the quantum is too small there performance is degraded as
+the overhead of context switching increases.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>RCOSjava implements 3
+types of queuing algorithms:<o:p></o:p></span></p>
 
 <ul style='margin-top:0cm' type=circle>
  <li class=MsoNormal style='mso-list:l12 level1 lfo22;tab-stops:list 36.0pt'><span
-     lang=EN-US>Priority</span></li>
+     style='mso-ansi-language:EN-AU'>FIFO – First In, First Out<o:p></o:p></span></li>
 </ul>
 
-<p class=MsoBodyTextIndent style='margin-left:18.0pt'><span lang=EN-US>Each
-process, is executed based on priority in a FIFO manner.<span
+<p class=MsoBodyTextIndent2><span style='mso-ansi-language:EN-AU'>Each process,
+irrespective of priority, is executed in the order that they are added to the
+queue.<span style="mso-spacerun: yes">&nbsp; </span>The process that was added
+last on the queue is the first to be executed,<o:p></o:p></span></p>
+
+<ul style='margin-top:0cm' type=circle>
+ <li class=MsoNormal style='mso-list:l12 level1 lfo22;tab-stops:list 36.0pt'><span
+     style='mso-ansi-language:EN-AU'>LIFO – Last In, First Out<o:p></o:p></span></li>
+</ul>
+
+<p class=MsoNormal style='margin-left:18.0pt'><span style='mso-ansi-language:
+EN-AU'>Each process, irrespective of priority, is executed in the reverse order
+that they are added to the queue.<span style="mso-spacerun: yes">&nbsp;
+</span>The process that was added to the queue the first is executed first.<o:p></o:p></span></p>
+
+<ul style='margin-top:0cm' type=circle>
+ <li class=MsoNormal style='mso-list:l12 level1 lfo22;tab-stops:list 36.0pt'><span
+     style='mso-ansi-language:EN-AU'>Priority<o:p></o:p></span></li>
+</ul>
+
+<p class=MsoBodyTextIndent style='margin-left:18.0pt'><span style='mso-ansi-language:
+EN-AU'>Each process is executed based on priority in a FIFO manner.<span
 style="mso-spacerun: yes">&nbsp; </span>The process with the highest priority
 is executed first.<span style="mso-spacerun: yes">&nbsp; </span>If the
-priorities of two processes is the same then the process that was added last is
-the first to be executed.</span></p>
+priorities of two processes are the same then the process that was added last
+is the first to be executed.<o:p></o:p></span></p>
 
-<p class=MsoBodyTextIndent style='margin-left:18.0pt'><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoBodyTextIndent style='margin-left:18.0pt'><span style='mso-ansi-language:
+EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>The priority queue allows a demonstration
-of process starvation.<span style="mso-spacerun: yes">&nbsp; </span>Low
-priority processes may never execute.<span style="mso-spacerun: yes">&nbsp;
-</span>The solution is aging - as time progresses the priority of the process
-increases.</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>The priority queue
+allows a demonstration of process starvation.<span style="mso-spacerun:
+yes">&nbsp; </span>Low priority processes may never execute.<span
+style="mso-spacerun: yes">&nbsp; </span>The solution is aging - as time
+progresses the priority of the process increases.<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US>To change a processes priority go to the
-“File”, “Change Priority” menu:</span></p>
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'>To change a processes
+priority go to the “File”, “Change Priority” menu:<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-AU'><!--[if gte vml 1]><v:shape
+ id="_x0000_i1032" type="#_x0000_t75" style='width:129pt;height:65pt'>
+ <v:imagedata src="./images/processScheduler/image015.jpg" o:title="image013.jpg"/>
+</v:shape><![endif]--><![if !vml]><img width=129 height=65
+src="./images/processScheduler/image016.jpg" v:shapes="_x0000_i1032"><![endif]><o:p></o:p></span></p>
 
 </div>
 
