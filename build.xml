@@ -30,7 +30,7 @@
       srcdir="${src.dir}" destdir="${dist.dir}"
       debug="off" optimize="on" deprecation="on"/>
 
-    <!-- Move all the images and sounds too -->
+    <!-- Move all the images and sounds too-->
     <copy todir="${dist.dir}/net/sourceforge/rcosjava/software/animator/images">
       <fileset dir="${src.dir}/net/sourceforge/rcosjava/software/animator/images"/>
     </copy>
@@ -49,6 +49,12 @@
     <jar jarfile="${dist.jar}" basedir="${dist.dir}"/>
     <move file="${dist.jar}" todir="${dist.dir}"/>
     <copy file="${src.dir}/RCOS.html" tofile="${dist.dir}/RCOS.html"/>
+
+    <!-- Clean up dist directory -->
+    <delete dir="${dist.dir}/com"/>
+    <delete dir="${dist.dir}/fr"/>
+    <delete dir="${dist.dir}/net"/>
+    <delete dir="${dist.dir}/org"/>
   </target>
 
   <target name="javadoc" depends="dist">

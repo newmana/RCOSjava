@@ -101,7 +101,6 @@ public class RCOS extends java.applet.Applet implements Runnable
   public String baseDomain;
   public String defaultDomain = new String("localhost");
   public int port;
-  public String docBase;
   private static final String welcome = "Welcome to RCOSjava Version 1.00";
   private static final String info = "Copyright 1995-2001.\nVersion 1.00.\n" +
     "Authors: David Jones, Brett Carter, Bruce Jamieson, and Andrew Newman";
@@ -121,7 +120,6 @@ public class RCOS extends java.applet.Applet implements Runnable
   // Help Variables.
   private static String helpURLStr;
   private static URL helpURL;
-  private static URL docBaseURL;
 
   // animator objects
   private static ProcessSchedulerAnimator psAnimator;
@@ -179,59 +177,50 @@ public class RCOS extends java.applet.Applet implements Runnable
 
     try
     {
-       docBaseURL = new URL("http://" + baseDomain);
-       docBase = docBaseURL.toString();
-    }
-    catch (Exception e)
-    {
-      e.printStackTrace();
-    }
-    try
-    {
       port = (Integer.parseInt(getParameter("port")));
     }
     catch(java.lang.NumberFormatException e)
     {
       port = 4242;
     }
-    helpURLStr = docBase + "/Help/index.html";
+    //helpURLStr = getClass().getResource("/Help/index.html").toString();
   }
 
   /**
    * Loads all the images and sounds required for use by the animators and
-   * the default panel.
+   * the default panel.  Loads them directly out of the jar file.
    */
   public void getImagesAndSound()
   {
-    String rootDir = "net/sourceforge/rcosjava/software/animator";
+    String rootDir = "/net/sourceforge/rcosjava/software/animator";
 
-    clips[0] = getAudioClip(docBaseURL, rootDir + "/audio/start.au");
+    clips[0] = getAudioClip(getClass().getResource(rootDir + "/audio/start.au"));
 
     MediaTracker tracker = new MediaTracker(this);
 
     for (int count = 0; count < numberPeople; count++)
     {
-      imgAbout[count] = getImage(docBaseURL, rootDir + "/images/p" +
-        count + ".jpg");
+      imgAbout[count] = getImage(getClass().getResource(rootDir + "/images/p" +
+        count + ".jpg"));
       tracker.addImage(imgAbout[count],0);
     }
 
     for (int count = 0; count < numberButtons; count++)
     {
-      imgUpButtons[count] = getImage(docBaseURL, rootDir + "/images/b"
-        + count + "up.jpg");
-      imgDownButtons[count] = getImage(docBaseURL, rootDir + "/images/b"
-        + count + "down.jpg");
+      imgUpButtons[count] = getImage(getClass().getResource(rootDir + "/images/b"
+        + count + "up.jpg"));
+      imgDownButtons[count] = getImage(getClass().getResource(rootDir + "/images/b"
+        + count + "down.jpg"));
       tracker.addImage(imgUpButtons[count],1);
       tracker.addImage(imgDownButtons[count],2);
     }
 
-    imgTerminal[0] = getImage(docBaseURL, rootDir + "/images/termon.jpg");
-    imgTerminal[1] = getImage(docBaseURL, rootDir + "/images/termoff.jpg");
-    imgProcess[0] = getImage(docBaseURL, rootDir + "/images/process1.gif");
-    imgProcess[1] = getImage(docBaseURL, rootDir + "/images/process2.gif");
-    imgProcess[2] = getImage(docBaseURL, rootDir + "/images/rcoscpu.jpg");
-    imgIPC[0] = getImage(docBaseURL, rootDir + "/images/memory.jpg");
+    imgTerminal[0] = getImage(getClass().getResource(rootDir + "/images/termon.jpg"));
+    imgTerminal[1] = getImage(getClass().getResource( rootDir + "/images/termoff.jpg"));
+    imgProcess[0] = getImage(getClass().getResource(rootDir + "/images/process1.gif"));
+    imgProcess[1] = getImage(getClass().getResource(rootDir + "/images/process2.gif"));
+    imgProcess[2] = getImage(getClass().getResource(rootDir + "/images/rcoscpu.jpg"));
+    imgIPC[0] = getImage(getClass().getResource(rootDir + "/images/memory.jpg"));
 
     tracker.addImage(imgTerminal[0],3);
     tracker.addImage(imgTerminal[1],3);
@@ -247,8 +236,7 @@ public class RCOS extends java.applet.Applet implements Runnable
     catch (InterruptedException e)
     {
       System.err.println("Image Loading Failed!");
-      updateStatusBar("Images failed to load from " + docBase +
-        rootDir + "/images/");
+      updateStatusBar("Images failed to load.");
     }
     imgTerminal[2] = imgUpButtons[1];
     imgTerminal[3] = imgDownButtons[1];
