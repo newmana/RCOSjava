@@ -177,7 +177,7 @@ public class HardwareTerminal extends RCOSFrame
    * buffer.  It then generates a hardware interrupt of KeyPress and uses the
    * SoftwareTerminal to send this message.
    *
-   * @see Hardware.cpu.Interrupt
+   * @see net.sourceforge.rcosjava.hardware.cpu.Interrupt
    */
   class KeyHandler extends KeyAdapter
   {

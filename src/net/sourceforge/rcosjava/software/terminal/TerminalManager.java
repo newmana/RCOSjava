@@ -196,7 +196,7 @@ import net.sourceforge.rcosjava.software.util.FIFOQueue;
   /**
    * Called to bring the terminal into focus.  Called by
    * @see net.sourceforge.rcosjava.messaging.messages.universal.TerminalBack and
-   * @see net.sourceforge.rcosjava.messaging.messages.universal.TerminalFont
+   * @see net.sourceforge.rcosjava.messaging.messages.universal.TerminalFront
    * messages.
    *
    * @param terminalNumber the terminal to display.
