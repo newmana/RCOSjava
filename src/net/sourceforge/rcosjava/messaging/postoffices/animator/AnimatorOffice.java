@@ -52,10 +52,11 @@ public class AnimatorOffice extends PostOffice
     theOSPostOffice.addPostOffice(this);
   }
 
-
   public void sendMessage(MessageAdapter message)
   {
+    //Send to all other registered post offices.
     sendToPostOffices(message);
+    //Send to locally registered components.
     localSendMessage(message);
   }
 
@@ -68,6 +69,16 @@ public class AnimatorOffice extends PostOffice
     sendMessage((MessageAdapter) aMessage);
   }
 
+  /**
+   * To be done
+   *
+   * @param message To be done
+   */
+  public void sendMessage(AnimatorMessageAdapter message)
+  {
+    sendMessage((MessageAdapter) message);
+  }
+
   public void localSendMessage(MessageAdapter message)
   {
     if (message.forPostOffice(this))
@@ -77,12 +88,15 @@ public class AnimatorOffice extends PostOffice
 
      Iterator tmpIter = this.getHandlers().values().iterator();
 
-     while(tmpIter.hasNext())
+      synchronized (this.getHandlers())
       {
-        AnimatorMessageHandler theDestination = (AnimatorMessageHandler)
-          tmpIter.next();
-	//Send the message to the destination
-	theDestination.processMessage(message);
+        while(tmpIter.hasNext())
+        {
+          AnimatorMessageHandler theDestination = (AnimatorMessageHandler)
+            tmpIter.next();
+          //Send the message to the destination
+          theDestination.processMessage(message);
+        }
       }
     }
   }
@@ -101,12 +115,15 @@ public class AnimatorOffice extends PostOffice
       //registered.  Send the message to all of them.
       Iterator tmpIter = this.getHandlers().values().iterator();
 
-      while(tmpIter.hasNext())
+      synchronized (this.getHandlers())
       {
-        AnimatorMessageHandler theDestination = (AnimatorMessageHandler)
-          tmpIter.next();
-	//Send the message to the destination
-	theDestination.processMessage(message);
+        while(tmpIter.hasNext())
+        {
+          AnimatorMessageHandler theDestination = (AnimatorMessageHandler)
+            tmpIter.next();
+          //Send the message to the destination
+          theDestination.processMessage(message);
+        }
       }
     }
   }

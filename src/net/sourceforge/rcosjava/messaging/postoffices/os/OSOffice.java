@@ -71,11 +71,14 @@ public class OSOffice extends PostOffice
 
       Iterator tmpIter = this.getHandlers().values().iterator();
 
-      while(tmpIter.hasNext())
+      synchronized (this.getHandlers())
       {
-        OSMessageHandler theDestination = (OSMessageHandler) tmpIter.next();
-        //Send the message to the destination
-        theDestination.processMessage(message);
+        while(tmpIter.hasNext())
+        {
+          OSMessageHandler theDestination = (OSMessageHandler) tmpIter.next();
+          //Send the message to the destination
+          theDestination.processMessage(message);
+        }
       }
     }
   }
@@ -94,11 +97,14 @@ public class OSOffice extends PostOffice
 
       Iterator tmpIter = this.getHandlers().values().iterator();
 
-      while(tmpIter.hasNext())
+      synchronized (this.getHandlers())
       {
-        OSMessageHandler theDestination = (OSMessageHandler) tmpIter.next();
-        //Send the message to the destination
-        theDestination.processMessage(message);
+        while(tmpIter.hasNext())
+        {
+          OSMessageHandler theDestination = (OSMessageHandler) tmpIter.next();
+          //Send the message to the destination
+          theDestination.processMessage(message);
+        }
       }
     }
   }

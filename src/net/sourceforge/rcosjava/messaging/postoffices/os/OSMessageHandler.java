@@ -91,7 +91,7 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
    */
   public void localSendMessage(OSMessageAdapter adapter)
   {
-    postOffice.localSendMessage(adapter);
+     postOffice.localSendMessage(adapter);
   }
 
   public void processMessage(MessageAdapter message)
