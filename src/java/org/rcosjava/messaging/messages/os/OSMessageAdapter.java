@@ -22,10 +22,8 @@ import org.rcosjava.software.terminal.TerminalManager;
 /**
  * An adapter for OSMessage. This implements the OSMessage interface but with
  * null methods. This is to prevent extending classes from having to implement
- * each method. <P>
- *
- *
- *
+ * each method.
+ * <P>
  * @author Andrew Newman.
  * @created 24th March 1997
  * @version 1.00 $Date$
