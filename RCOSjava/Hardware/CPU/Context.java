@@ -10,6 +10,12 @@ import java.io.Serializable;
  * 	Context newContext = new Context();
  * </CODE>
  * </DD></DT>
+ * <P>
+ * Creates a new context with the Instruction Register, Program Counter, Stack
+ * Pointer and Base Pointer all at 0.
+ * <P>
+ * @see Hardware.CPU.CPU
+ * @see Software.Kernel.Kernel
  * @author Andrew Newman.
  * @author David Jones
  * @version 1.00 $Date$

@@ -54,11 +54,14 @@ import Hardware.CPU.Instruction;
  * </DD><DD>
  * 10/10/98 Finished removal of String based opcodes. AN
  * </DD></DT>
- *
+ * <P>
  * @author David Jones
  * @author Andrew Newman
  * @version 1.00 $Date$
  * @created 14th January 1996
+ * @see Software.Kernel.Kernel
+ * @see Hardware.CPU.Context
+ * @see Hardware.Memory.Memory
  */
 public class CPU
 {

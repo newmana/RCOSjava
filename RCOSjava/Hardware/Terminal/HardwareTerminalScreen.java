@@ -1,25 +1,3 @@
-//***************************************************************************
-// FILE    : HardwareTerminalScreen.java
-// PURPOSE : Screen in which data is displayed.  Basically emulating
-//           a *very* simple graphics card.
-// AUTHOR  : Andrew Newman (based on code by David Jones)
-// HISTORY : 24/01/96  Created
-//           23/03/96  Moved into package Terminal
-//           24/03/96  Modified to reverse membership
-//                     Terminal now extends Frame and
-//                     has a MessageHandler as a member
-//           29/03/96  Separated into Hardware|SoftwareTerminal
-//           01/12/96  Some bugs to do with displaying on the
-//                     screen are fixed.  Text nolonger has
-//                     a box at the end and updating is done
-//                     by rows instead of each character.
-//           03/12/96  Double buffering for flicker free animation
-//                     and you can set the screen colours too.
-//           14/04/97  Split Hardware Terminal into HardwareTerminal and
-//                     and HardwareTerminalScreen
-//
-//***************************************************************************/
-
 package Hardware.Terminal;
 
 import java.io.*;
@@ -27,29 +5,106 @@ import java.awt.*;
 import Software.Animator.RCOSFrame;
 import Software.Util.FIFOQueue;
 
+/**
+ * Screen in which data is displayed.  Basically emulating a *very* simple
+ * graphics card.  A character based 80x15 display system is emulated.
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 23/03/96  Moved into package Terminal
+ * </DD><DD>
+ * 24/03/96  Modified to reverse membership. Terminal now extends Frame and
+ * has a MessageHandler as a member.
+ * </DD><DD>
+ * 29/03/96  Separated into Hardware|SoftwareTerminal
+ * </DD><DD>
+ * 01/12/96  Some bugs to do with displaying on the screen are fixed.  Text
+ * nolonger has a box at the end and updating is done by rows instead of each
+ * character.
+ * </DD><DD>
+ * 03/12/96  Double buffering for flicker free animation and you can set the
+ * screen colours too.
+ * </DD><DD>
+ * 14/04/97  Split Hardware Terminal into HardwareTerminal and
+ * HardwareTerminalScreen
+ * </DD></DT>
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 24th January 1996
+ * @see Hardware.Terminal.HardwareTerminal
+ */
 public class HardwareTerminalScreen extends Canvas
 {
+  /**
+   * The maximum number of screen rows to display.
+   */
   public static final int MAXROWS = 15;
+
+  /**
+   * The maximum number of columns for the screen to display.
+   */
   public static final int MAXCOLS = 80;
+
+  /**
+   * The row in which to initially place the cursor.
+   */
   public static final int STARTROWS = 1;
+
+  /**
+   * The column in which to initially place the cursor.
+   */
   public static final int STARTCOLS = 1;
 
+  /**
+   * The row and column that the cursor is currently at.
+   */
   private int row, col;
+
+  /**
+   * Whether the echo key presses to the screen.
+   */
   private boolean echo;
+
+  /**
+   * The array of characters representing the screen display.  Screen memory
+   * in other words.
+   */
   private char contents[];
 
-  private Image iImageBuffer;
-  private Graphics gGraphicsBuffer;
-  private int iTextHeight, iTextWidth;
-  private int iWidth, iHeight;
+  /**
+   * The image buffer to write to for double buffering.
+   */
+  private Image imageBuffer;
 
+  /**
+   * The graphic system to write to.
+   */
+  private Graphics graphicsBuffer;
+
+  /**
+   * The size of the characters in pixels.
+   */
+  private int textHeight, textWidth;
+
+  /**
+   * The size in pixels of the graphics area (the screen).
+   */
+  private int width, height;
+
+  /**
+   * Creates a new terminal screen, initialising the screen memory (contents),
+   * setting the size of the screen based on the size of the terminal.
+   *
+   * @param c the image producer in which to create the graphicBuffer.
+   */
   public HardwareTerminalScreen (Component c)
   {
-  	super();
+    super();
     contents = new char[MAXROWS*MAXCOLS];
     FontMetrics fm = getFontMetrics(RCOSFrame.terminlFont);
-    iTextHeight = fm.getHeight();
-    iTextWidth = fm.charWidth(' ');
+    textHeight = fm.getHeight();
+    textWidth = fm.charWidth(' ');
 
     for (int count=0; count < MAXROWS*MAXCOLS; count++)
       contents[count] = ' ';
@@ -57,22 +112,28 @@ public class HardwareTerminalScreen extends Canvas
     row = 0;
     col = 0;
     echo = true;
-    iWidth =(iTextWidth*MAXCOLS)+(2*iTextWidth);
-    iHeight =(iTextHeight*MAXROWS)+(7*iTextHeight);
-    iImageBuffer = c.createImage(iWidth,iHeight);
-    gGraphicsBuffer = iImageBuffer.getGraphics();
-    setSize(iWidth,iHeight);
+    width =(textWidth*MAXCOLS)+(2*textWidth);
+    height =(textHeight*MAXROWS)+(7*textHeight);
+    imageBuffer = c.createImage(width,height);
+    graphicsBuffer = imageBuffer.getGraphics();
+    setSize(width,height);
     repaint();
   }
 
+  /**
+   * @return the height of the screen in pixels.
+   */
   public int getHeight()
   {
-    return iHeight;
+    return height;
   }
 
+  /**
+   * @return the width of the screen in pixels.
+   */
   public int getWidth()
   {
-    return iWidth;
+    return width;
   }
 
   public synchronized void addNotify()
@@ -81,10 +142,12 @@ public class HardwareTerminalScreen extends Canvas
     super.addNotify();
   }
 
-  // place a char or a short onto the terminal
-  // - added the ability to ignore carriage return (\r) and
-  //   form feed (\f)
-
+  /**
+   * Place a char or a short onto the terminal. Added the ability to ignore
+   * carriage return (\r) and form feed (\f).
+   *
+   * @param ch the character to write on the screen.
+   */
   public void printChr (char ch)
   {
     if ((ch != '\r') && (ch != '\f'))
@@ -108,6 +171,12 @@ public class HardwareTerminalScreen extends Canvas
     }
   }
 
+  /**
+   * Displays the number on the screen.  Converts the number to a string,
+   * determines its length and writes the characters to the screen.
+   *
+   * @param num the number to write to the screen.
+   */
   public void printNum (short num)
   {
     StringBuffer tmpString = new
@@ -117,8 +186,11 @@ public class HardwareTerminalScreen extends Canvas
       printChr(tmpString.charAt(count));
   }
 
-  // scroll display up specified number of rows
-
+  /**
+   * Scroll display up specified number of rows
+   *
+   * @param numRows the number of rows to scroll the screen.
+   */
   public void scrollUp (int numRows)
   {
     int cols, rows;
@@ -142,35 +214,39 @@ public class HardwareTerminalScreen extends Canvas
     repaint();
   }
 
-  public void paint (Graphics g)
+  /**
+   * Calls update(g).
+   */
+  public void paint(Graphics g)
   {
     update(g);
   }
 
-  // refresh the screen
-
+  /**
+   * Refresh the screen.
+   */
   public void update (Graphics g)
   {
     int cols, rows;
 
-    if (gGraphicsBuffer != null)
+    if (graphicsBuffer != null)
     {
       //Should use getFontMetrics but this is easier (and faster).
 
-      gGraphicsBuffer.setFont(RCOSFrame.terminlFont);
-      gGraphicsBuffer.setColor(RCOSFrame.defaultBgColour);
-      gGraphicsBuffer.fillRect(0,0,iImageBuffer.getWidth(this),
-                               iImageBuffer.getHeight(this));
-      gGraphicsBuffer.setColor(RCOSFrame.terminalColour);
+      graphicsBuffer.setFont(RCOSFrame.terminlFont);
+      graphicsBuffer.setColor(RCOSFrame.defaultBgColour);
+      graphicsBuffer.fillRect(0,0,imageBuffer.getWidth(this),
+        imageBuffer.getHeight(this));
+      graphicsBuffer.setColor(RCOSFrame.terminalColour);
 
       // Prints out each line row by row.
 
       for (rows=0; rows < MAXROWS; rows++)
       {
-        gGraphicsBuffer.drawChars(contents, rows*MAXCOLS, MAXCOLS,
-        iTextWidth*STARTCOLS, ((rows+1)*iTextHeight)+(STARTROWS*iTextWidth));
+        graphicsBuffer.drawChars(contents, rows*MAXCOLS, MAXCOLS,
+        textWidth*STARTCOLS, ((rows+1)*textHeight)+(STARTROWS*textWidth));
       }
-      g.drawImage(iImageBuffer,0,0,this);
+      g.drawImage(imageBuffer,0,0,this);
     }
   }
 }

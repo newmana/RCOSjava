@@ -7,6 +7,7 @@ package Hardware.Disk;
  * @author Andrew Newman.
  * @version 1.00 $Date$
  * @created 10th of August 1999
+ * @see Hardware.Disk.Disk
  */
 public class SimpleDisk implements Disk
 {

@@ -6,7 +6,10 @@ import java.io.Serializable;
  * Basic Memory type - basically an array of short.  Provides utils for
  * block/single byte read/write.
  * <P>
- * HISTORY: 10/08/1999 Added segment status as a separate property.
+ * <DT><B>History:</B>
+ * <DD>
+ * 10/08/1999 Added segment status as a separate property.
+ * </DD></DT>
  * <P>
  * @author Andrew Newman.
  * @author Bruce Jamieson.

@@ -1,34 +1,3 @@
-//***************************************************************************
-// FILE    : Kernel.java
-// PACKAGE : Kernel
-// PURPOSE : Kernel for RCOS.java (Kernel.java)
-//           - implements micro-kernel responsible for
-//           * sending messages to appropriate components for system calls
-//           * sending messages to appropriate components for interrupts
-//           * receiving messages from various components to do h/w specific
-//             tasks
-// AUTHOR  : David Jones, Andrew Newman
-// MODIFIED:
-// HISTORY : 13/02/96  Created version to handle simple interaction
-//                     between CPU and Terminal. DJ
-//           23/03/96  Modified to use packages. DJ
-//           07/04/97  Fixed hang when multitasking with blocked
-//                     processes. AN
-//           08/04/97  Receives and responds to Quantum message. AN
-//           09/04/97  Fixed CHOUT problem and sent message as id not Kernel.
-//           10/10/97  Fixed semaphore name, was one off. AN
-//           12/10/97  Implementation of File and Shared
-//                     Memory interrupts. AN
-//           11/08/98  Removed String comparison for instructions.  AN
-//           12/08/98  Implemented Shared Memory and File system calls. AN
-//           13/08/98  Fixed incomplete/buggy Semaphore and Shared memory. AN
-//
-// @version	1.0 12th August, 1998
-// @author	David Jones (d.jones@cqu.edu.au), Andrew Newman
-// @see		MessageSystem.SimpleMessageHandler
-//
-//***************************************************************************/
-
 package Software.Kernel;
 
 import java.io.*;
@@ -65,29 +34,106 @@ import Software.Process.RCOSProcess;
 import Software.Memory.MemoryManager;
 import Software.Memory.MemoryRequest;
 
+/**
+ * This is  a simple kernel implementation for RCOS.java.  It is a microkernel
+ * based system responsible for: sending messages to appropriate components for
+ * system calls, sending messages to appropriate components for interrupts,
+ * and receiving messages from various components to do h/w specific tasks.
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 13/02/96 Created version to handle simple interaction between CPU and Terminal. DJ
+ * </DD><DD>
+ * 23/03/96  Modified to use packages. DJ
+ * </DD><DD>
+ * 07/04/97  Fixed hang when multitasking with blocked processes. AN
+ * </DD><DD>
+ * 08/04/97  Receives and responds to Quantum message. AN
+ * </DD><DD>
+ * 09/04/97  Fixed CHOUT problem and sent message as id not Kernel.
+ * </DD><DD>
+ * 10/10/97  Fixed semaphore name, was one off. AN
+ * </DD><DD>
+ * 12/10/97  Implementation of File and Shared Memory interrupts. AN
+ * </DD><DD>
+ * 11/08/98  Removed String comparison for instructions.  AN
+ * </DD><DD>
+ * 12/08/98  Implemented Shared Memory and File system calls. AN
+ * </DD><DD>
+ * 13/08/98  Fixed incomplete/buggy Semaphore and Shared memory. AN
+ * </DD></DT>
+ * <P>
+ * @author Andrew Newman.
+ * @author David Jones.
+ * @version 1.00 $Date$
+ * @created 1st February 1996
+ * @see Hardware.CPU.CPU
+ */
 public class Kernel extends OSMessageHandler
 {
-  private int iQuantum = 2;
-  private int iTimerInterrupts = 0;
-  private int iTimeProcessOn;
-  private CPU myCPU;
-  private Hashtable InterruptHandlers = new Hashtable();
   private static final String MESSENGING_ID = "Kernel";
+
+  private int quantum = 2;
+  private int timerInterrupts = 0;
+  private int timeProcessOn;
+  private CPU myCPU;
+  private Hashtable interruptHandlers = new Hashtable();
   private RCOSProcess currentProcess;
 
-  // Initialise Kernel
-  // @param aPostOffice	central post office for messaging system
-  public Kernel(OSOffice aPostOffice)
+  /**
+   * Initialise Kernel
+   * @param postOffice	central post office for messaging system
+   */
+  public Kernel(OSOffice postOffice)
   {
-    super(MESSENGING_ID, aPostOffice);
+    super(MESSENGING_ID, postOffice);
     myCPU = new CPU(this);
   }
 
+  /**
+   * Sets the quantum (number of execution cycles per process) that the kernel
+   * uses.  Lower values means higher process switching but more processes
+   * are executed within a time period.  Higher values reduces the context
+   * switching but less process are executed.
+   *
+   * @param newQuantum the new value of the quantum.
+   */
+  public void setQuantum(int newQuantum)
+  {
+    quantum = newQuantum;
+  }
+
+  /**
+   * Updates the kernel's own temporary timeProcess on counter from the CPU's
+   * getTicks method.
+   */
+  public void setCurrentProcessTicks()
+  {
+    timeProcessOn = myCPU.getTicks();
+  }
+
+  /**
+   * @return the number of CPU ticks minue the internel kernel value
+   * timeProcessOn.
+   */
+  public int getCurrentProcessTicks()
+  {
+    return(myCPU.getTicks()-timeProcessOn);
+  }
+
+  /**
+   * @return whether there is a current process or not (null or not) currently
+   * being executed..
+   */
   public boolean runningProcess()
   {
     return (currentProcess != null);
   }
 
+  /**
+   * @return the current process being used.  Copies the current process and
+   * context to be returned.
+   */
   public RCOSProcess getCurrentProcess()
   {
     RCOSProcess tmpProcess = new RCOSProcess(currentProcess);
@@ -95,6 +141,14 @@ public class Kernel extends OSMessageHandler
     return tmpProcess;
   }
 
+  /**
+   * Sets the current process and context (from within the RCOSProcess data
+   * structure).  The current process should usually be set to null first
+   * although this is not enforced.
+   *
+   * @param newCurrentProcess the new process to overwrite the current one
+   * with.
+   */
   public void setCurrentProcess(RCOSProcess newCurrentProcess)
   {
 //    System.out.println("Setting Current Process: " + newCurrentProcess);
@@ -102,6 +156,10 @@ public class Kernel extends OSMessageHandler
     setCurrentContext(newCurrentProcess);
   }
 
+  /**
+   * Sets the current process and context as well as the code and stack segments
+   * of the CPU to null.
+   */
   public void setCurrentProcessNull()
   {
 //    System.out.println("Setting Current Process to Null");
@@ -112,6 +170,10 @@ public class Kernel extends OSMessageHandler
 //    System.out.println("Kernel Code to execute: " + this.runningProcess());
   }
 
+  /**
+   * Performs one execution cycle on the CPU if there is a running process.
+   * Handles the interrupts and increments the CPU tick.
+   */
   public void performInstructionExecutionCycle()
   {
     myCPU.performInstructionExecutionCycle();
@@ -129,41 +191,12 @@ public class Kernel extends OSMessageHandler
     myCPU.incTicks();
   }
 
-  public void generateInterrupt(Interrupt newInterrupt)
-  {
-    myCPU.generateInterrupt(newInterrupt);
-  }
-
-  public void handleInterrupt(Interrupt intInterrupt)
-  {
-    if (intInterrupt.getType().compareTo("TimerInterrupt") == 0)
-      handleTimerInterrupt();
-    else if (intInterrupt.getType().compareTo("ProcessFinished") == 0)
-      handleProcessFinishedInterrupt();
-    else
-    {
-      InterruptHandler aIH = (InterruptHandler) InterruptHandlers.get(
-        intInterrupt.getType());
-
-      //If aIH is equal to null then the Interrupt Handler doesn't
-      //exist.  Process otherwise.  May-be add an error message or
-      //something later.
-
-      if (aIH != null)
-        aIH.handleInterrupt();
-    }
-  }
-
-  public void setQuantum(int newQuantum)
-  {
-    iQuantum = newQuantum;
-  }
-
-  public void insertInterruptHandler(InterruptHandler newIH)
-  {
-    InterruptHandlers.put(newIH.getType(), newIH);
-  }
-
+  /**
+   * Sets the current context of the CPU based on a given process.
+   *
+   * @param newProcess the process contains a contex that is accessed using
+   * getContext.
+   */
   public void setCurrentContext(RCOSProcess newProcess)
   {
     if (newProcess != null)
@@ -172,6 +205,11 @@ public class Kernel extends OSMessageHandler
       myCPU.setContext(null);
   }
 
+  /**
+   * When an I/O event or other block event occurs the current process is
+   * removed from the CPU and a RunningToBlocked message is sent with the
+   * oldCurrent process.
+   */
   public void blockCurrentProcess()
   {
     getCurrentProcess().addToCPUTicks(getCurrentProcessTicks());
@@ -194,24 +232,12 @@ public class Kernel extends OSMessageHandler
     }
   }
 
-  public void returnValue(short sValue)
-  {
-    // place return value onto stack
-    myCPU.getContext().incStackPointer();
-    myCPU.getProcessStack().write(
-      myCPU.getContext().getStackPointer(), sValue);
-  }
-
-  public void setCurrentProcessTicks()
-  {
-    iTimeProcessOn = myCPU.getTicks();
-  }
-
-  public int getCurrentProcessTicks()
-  {
-    return(myCPU.getTicks()-iTimeProcessOn);
-  }
-
+  /**
+   * This occurs when a new process is to be executed on the CPU.  If there
+   * was an existing process it's existing stack is saved and the new process
+   * is put in its place.  This include overwriting the exsting code pages and
+   * calling the setCurrentProcess method.
+   */
   public void switchProcess(RCOSProcess newProcess)
   {
 //    System.out.println("-----Start Switch Process-----");
@@ -248,45 +274,95 @@ public class Kernel extends OSMessageHandler
 //    System.out.println("-----End Switch Process-----");
   }
 
-  public void setProcessCode(Memory mMemory)
+  /**
+   * Sets the process code (the non-changing executing program).
+   *
+   * @param newMemory the value to set the process code to.
+   */
+  public void setProcessCode(Memory newMemory)
   {
-    myCPU.setProcessCode(mMemory);
+    myCPU.setProcessCode(newMemory);
   }
 
-  public void setProcessStack(Memory mMemory)
+  /**
+   * Sets the process stacking (the working area of the executing program).
+   *
+   * @param newMemory the value to set the process stack to.
+   */
+  public void setProcessStack(Memory newMemory)
   {
-    myCPU.setProcessStack(mMemory);
+    myCPU.setProcessStack(newMemory);
   }
 
-  public synchronized void processMessage(OSMessageAdapter aMsg)
+  /**
+   * Provides direct access to the CPU to generate an interrupts.  It adds a
+   * new interrupt to be dealt with by the CPU (during a execution cycle
+   * probably).  The interrupts are stored and generated by the CPU not
+   * the Kernel.  The Kernel handles the interrupts.
+   *
+   * @param newInterrupt the new interrupt to add.
+   */
+  public void generateInterrupt(Interrupt newInterrupt)
   {
-    try
+    myCPU.generateInterrupt(newInterrupt);
+  }
+
+  /**
+   * Inserts a new interrupt handler into the list of interrupt handlers.  This
+   * must be done before handleInterrupt is called.
+   *
+   * @param newIH contains the interrupt handler to add.
+   */
+  public void insertInterruptHandler(InterruptHandler newIH)
+  {
+    interruptHandlers.put(newIH.getType(), newIH);
+  }
+
+  /**
+   * Handles an interrupt.  Determines the type of the interrupt and executes
+   * based on these.  Timer Interrupt and Process finished are handled
+   * internally within the kernel.  All others must have a interrupt handler
+   * registered with the kernel.
+   *
+   * @param anInterrupt the interrupt to be handled.
+   */
+  public void handleInterrupt(Interrupt anInterrupt)
+  {
+    if (anInterrupt.getType().compareTo("TimerInterrupt") == 0)
+      handleTimerInterrupt();
+    else if (anInterrupt.getType().compareTo("ProcessFinished") == 0)
+      handleProcessFinishedInterrupt();
+    else
     {
-      aMsg.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing message: "+e);
-      e.printStackTrace();
+      InterruptHandler aIH = (InterruptHandler) interruptHandlers.get(
+        anInterrupt.getType());
+
+      //If aIH is equal to null then the Interrupt Handler doesn't
+      //exist.  Process otherwise.  May-be add an error message or
+      //something later.
+
+      if (aIH != null)
+        aIH.handleInterrupt();
     }
   }
 
-  public synchronized void processMessage(UniversalMessageAdapter aMsg)
+  /**
+   * A return value is usually generated by an system call.
+   *
+   * @param value to set the process stack at the current stack pointer address.
+   */
+  public void returnValue(short value)
   {
-    try
-    {
-      aMsg.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing message: "+e);
-      e.printStackTrace();
-    }
+    // place return value onto stack
+    myCPU.getContext().incStackPointer();
+    myCPU.getProcessStack().write(
+      myCPU.getContext().getStackPointer(), value);
   }
 
-  //**********************************/
-  // perform necessary actions for CSP
-
+  /**
+   * Performs the necessary actions for the CSP instruction.  Uses the current
+   * values of the CPU.
+   */
   public void handleSystemCall()
     throws java.io.IOException
   {
@@ -494,12 +570,12 @@ public class Kernel extends OSMessageHandler
   public void handleTimerInterrupt()
   {
     //System.out.println("-----Start Handling Timer Interrupt-----");
-    iTimerInterrupts++;
+    timerInterrupts++;
 
-    if (iTimerInterrupts >= iQuantum)
+    if (timerInterrupts >= quantum)
     {
       //System.out.println("Quantum Expired");
-      iTimerInterrupts = 0;
+      timerInterrupts = 0;
 
       if (myCPU.hasCodeToExecute())
       {
@@ -518,6 +594,11 @@ public class Kernel extends OSMessageHandler
     //System.out.println("-----Finish Handling Timer Interrupt-----");
   }
 
+  /**
+   * An inbuilt handler for the process finished interrupt.  When a process
+   * if finished execute the old process is removed, the process time
+   * calculated, and a ProcessFinished message is sent.
+   */
   public void handleProcessFinishedInterrupt()
   {
     //System.out.println("-----Start Handling Process Finished-----");
@@ -528,5 +609,31 @@ public class Kernel extends OSMessageHandler
       oldCurrent);
     sendMessage(pfMsg);
     //System.out.println("-----End Handling Process Finished-----");
+  }
+
+  public synchronized void processMessage(OSMessageAdapter aMsg)
+  {
+    try
+    {
+      aMsg.doMessage(this);
+    }
+    catch (Exception e)
+    {
+      System.err.println("Error processing message: "+e);
+      e.printStackTrace();
+    }
+  }
+
+  public synchronized void processMessage(UniversalMessageAdapter aMsg)
+  {
+    try
+    {
+      aMsg.doMessage(this);
+    }
+    catch (Exception e)
+    {
+      System.err.println("Error processing message: "+e);
+      e.printStackTrace();
+    }
   }
 }

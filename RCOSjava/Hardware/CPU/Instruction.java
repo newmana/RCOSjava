@@ -13,10 +13,22 @@ import java.io.Serializable;
  * </CODE>
  * </DD></DT>
  * <P>
+ * Creates LIT 0,0 OP-Code.
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 28/01/96 Created by removing class from CPU.java
+ * reorganised classes and methods mainly to remove large unnecessary switch
+ * statements.
+ * </DD><DD>
+ * 23/03/96 Moved into CPU package.
+ * </DD></DT>
+ * <P>
  * @see Hardware.CPU
- * @version 1.00 $Date$
  * @author Andrew Newman.
  * @author David Jones.
+ * @version 1.00 $Date$
+ * @created 28th of January 1996
  */
 public class Instruction implements Cloneable, Serializable
 {

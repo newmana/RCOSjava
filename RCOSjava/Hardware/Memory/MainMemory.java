@@ -1,15 +1,23 @@
-// ****************************************************/
-// FILE     : MainMemory.java
-// PURPOSE  : Contains total addressable memory.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 01/07/97  Created
-// ****************************************************/
-
 package Hardware.Memory;
 
 import java.lang.Integer;
 
+/**
+ * Contains the total addressable memory available to the hardware sub-system.
+ * <P>
+ * <DT><B>Usage Example:</B><DD>
+ * <CODE>
+ *      MainMemory totalMemory = new MainMemory(64);
+ * </CODE>
+ * </DD></DT>
+ * <P>
+ * Creates 64 memory blocks using the default memory size (1024 bytes) or 64K.
+ * <P>
+ * @see Hardware.Memory.Memory
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 1st July, 1997
+ */
 public class MainMemory
 {
   private int totalUnits;
