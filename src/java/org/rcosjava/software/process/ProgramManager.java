@@ -17,6 +17,7 @@ import org.rcosjava.pll2.FileClient;
 import org.rcosjava.software.interrupt.InterruptHandler;
 import org.rcosjava.software.interrupt.ProgManInterruptHandler;
 import org.rcosjava.software.kernel.Kernel;
+import org.rcosjava.software.process.RCOSProcess;
 import org.rcosjava.software.util.FIFOQueue;
 
 /**
@@ -197,7 +198,7 @@ public class ProgramManager extends OSMessageHandler
   public void kill(int pid)
   {
     // send message to Kernel with Process number
-    KillProcess newMsg = new KillProcess(this, pid);
+    KillProcess newMsg = new KillProcess(this, new RCOSProcess(pid, ""));
     sendMessage(newMsg);
   }
 

@@ -116,7 +116,7 @@ public class ProcessScheduler extends OSMessageHandler
    * @param priority the new priority value to set to the process (between 1 and
    *      100).
    */
-  public void setProcessPriority(int pid, int priority)
+  public void setProcessPriority(int pid, ProcessPriority priority)
   {
     RCOSProcess tmpProcess = locateProcess(pid);
 
@@ -223,25 +223,24 @@ public class ProcessScheduler extends OSMessageHandler
    * trying to be allocated a process. Takes the process from the zombie queue
    * and assigns the process id to it.
    *
-   * @param newTerminalId the unique name of terminal.
-   * @param newPID Description of Parameter
-   * @paran newPID the process id to use to acquire the process from the zombie
+   * @paran newProcess the process to use to acquire the process from the zombie
    *      process queue.
+   * @param newTerminalId the unique name of terminal.
    */
-  public void processAllocatedTerminal(int newPID, String newTerminalId)
+  public void processAllocatedTerminal(RCOSProcess newProcess,
+      String newTerminalId)
   {
     // Try and retrieve the next process in the ZombieQ
-    RCOSProcess newProcess = removeFromZombieCreatedQ(newPID);
+    RCOSProcess tmpProcess = removeFromZombieCreatedQ(newProcess.getPID());
 
-    if (newProcess != null)
+    if (tmpProcess != null)
     {
       // If a process is retrieve allocate terminal and move
       // to Ready Q.
-      newProcess.setTerminalId(newTerminalId);
-      newProcess.setStatus(RCOSProcess.READY);
+      tmpProcess.setTerminalId(newTerminalId);
+      tmpProcess.setStatus(ProcessState.READY);
 
-      ZombieToReady newMessage = new ZombieToReady(this, newProcess);
-
+      ZombieToReady newMessage = new ZombieToReady(this, tmpProcess);
       sendMessage(newMessage);
     }
   }
@@ -267,7 +266,7 @@ public class ProcessScheduler extends OSMessageHandler
   {
     RCOSProcess rm = removeExecutingProcess(newProcess.getPID());
 
-    newProcess.setStatus(RCOSProcess.READY);
+    newProcess.setStatus(ProcessState.READY);
     insertIntoReadyQ(newProcess);
   }
 
@@ -281,23 +280,24 @@ public class ProcessScheduler extends OSMessageHandler
   {
     RCOSProcess tmpProcess = removeExecutingProcess(newProcess.getPID());
 
-    newProcess.setStatus(RCOSProcess.BLOCKED);
+    newProcess.setStatus(ProcessState.BLOCKED);
     insertIntoBlockedQ(newProcess);
   }
 
   /**
    * Takes a blocked process and moves it to the ready queue.
    *
-   * @param pid the process id to find in the blocked queue, removed and then
-   *      inserted into the ready queue after its status is changed to ready.
+   * @param process the process id to find in the blocked queue, removed and
+   *   then inserted into the ready queue after its status is changed to
+   *   ready.
    */
-  public void blockedToReady(int pid)
+  public void blockedToReady(RCOSProcess process)
   {
     // Get the process from the blocked Q
-    RCOSProcess tmpProcess = removeFromBlockedQ(pid);
+    RCOSProcess tmpProcess = removeFromBlockedQ(process.getPID());
 
     // Set it to READY status and move it to the Ready Q.
-    tmpProcess.setStatus(RCOSProcess.READY);
+    tmpProcess.setStatus(ProcessState.READY);
     insertIntoReadyQ(tmpProcess);
   }
 
@@ -317,26 +317,26 @@ public class ProcessScheduler extends OSMessageHandler
    * Seek and destroy and exsting process that is any of the queue or is
    * currently running.
    *
-   * @param pid the unique identifier of the process id.
+   * @param process the process to kill.
    */
-  public void killProcess(int pid)
+  public void killProcess(RCOSProcess process)
   {
-    RCOSProcess tmpProcess = null;
+    RCOSProcess tmpProcess = process;
 
     //Find it if it's running
-    tmpProcess = removeExecutingProcess(pid);
+    tmpProcess = removeExecutingProcess(process.getPID());
     if (tmpProcess == null)
     {
       // If it's in ready q.
-      tmpProcess = removeFromReadyQ(pid);
+      tmpProcess = removeFromReadyQ(process.getPID());
       if (tmpProcess == null)
       {
         // If it's in blocked q.
-        tmpProcess = removeFromBlockedQ(pid);
+        tmpProcess = removeFromBlockedQ(process.getPID());
         if (tmpProcess == null)
         {
           // If it's in zombie q.
-          tmpProcess = removeFromZombieCreatedQ(pid);
+          tmpProcess = removeFromZombieCreatedQ(process.getPID());
         }
       }
       if (tmpProcess != null)
@@ -360,7 +360,7 @@ public class ProcessScheduler extends OSMessageHandler
     if (tmpProcess != null)
     {
       ReturnProcessPriority tmpMsg = new ReturnProcessPriority(this,
-          tmpProcess.getPID(), tmpProcess.getPriority());
+          tmpProcess, tmpProcess.getPriority());
       sendMessage(tmpMsg);
     }
   }
@@ -484,7 +484,7 @@ public class ProcessScheduler extends OSMessageHandler
         RCOSProcess currentProcess = readyQ.retrieveProcess();
 
         setExecutingProcess(currentProcess);
-        currentProcess.setStatus(RCOSProcess.RUNNING);
+        currentProcess.setStatus(ProcessState.RUNNING);
 
         ProcessSwitch tmpMessage = new ProcessSwitch(this, currentProcess);
 
