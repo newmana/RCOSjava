@@ -14,6 +14,8 @@ import org.rcosjava.software.ipc.SharedMemory;
 import org.rcosjava.software.memory.MemoryRequest;
 import org.rcosjava.software.memory.MemoryReturn;
 
+import org.apache.log4j.*;
+
 /**
  * Receives messages from MMU and IPC and manipulates memoryManagerFrame based
  * on messages received.
@@ -24,6 +26,11 @@ import org.rcosjava.software.memory.MemoryReturn;
  */
 public class IPCManagerAnimator extends RCOSAnimator
 {
+  /**
+   * Logging class.
+   */
+  private final static Logger log = Logger.getLogger(IPCManagerAnimator.class);
+
   /**
    * Unique identifier to register to the animator post office.
    */
@@ -168,6 +175,11 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void semaphoreClosed(String semaphoreId, int processId, int value)
   {
+    if (log.isInfoEnabled())
+    {
+      log.info("Semaphore Closing: " + semaphoreId + ", PID: " + processId +
+          " Value: " + value);
+    }
     if (semaphoreMap.containsKey(semaphoreId))
     {
       Semaphore tmpSemaphore = (Semaphore) semaphoreMap.get(semaphoreId);
@@ -177,6 +189,10 @@ public class IPCManagerAnimator extends RCOSAnimator
       // Remove process if this is the last one
       if (tmpSemaphore.getAttachedProcesses().size() == 0)
       {
+        if (log.isDebugEnabled())
+        {
+          log.debug("No attached process left removing from map");
+        }
         semaphoreMap.remove(semaphoreId);
       }
     }
