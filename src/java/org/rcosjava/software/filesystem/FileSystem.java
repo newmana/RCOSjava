@@ -41,7 +41,7 @@ public interface FileSystem
    * @param fsFileNumber unique identifier of the file.
    * @return the data structure indicating a success or failure.
    */
-  public FileSystemReturnData create(int requestId, int fsFileNumber);
+  public FileSystemReturnData create(int requestId, int fileNumber);
 
   /**
    * Opens the specified file for reading.
@@ -79,9 +79,10 @@ public interface FileSystem
    *
    * @param requestId unique identifier for this request.
    * @param fsFileNumber unique identifier of the file.
+   * @param data the data to write.
    * @return the data structure indicating a success or failure.
    */
-  public FileSystemReturnData write(int requestId, int fsFileNumber);
+  public FileSystemReturnData write(int requestId, int fsFileNumber, byte data);
 
   /**
    * Description of the Method

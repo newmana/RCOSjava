@@ -170,9 +170,7 @@ public class CPM14FileSystem implements FileSystem
     // Create the entry and init it.
     CPM14FIDTableEntry fidEntry = new CPM14FIDTableEntry(deviceNumber, filename,
       BLOCK_SIZE);
-
     int FID = fidTable.add(fidEntry);
-
     return (new FileSystemReturnData(requestId, FID));
   }
 
@@ -368,14 +366,15 @@ public class CPM14FileSystem implements FileSystem
   /**
    * If the mode is correct, this starts or contines writing a file.
    *
-   * @param requestId Description of Parameter
-   * @param iFSFileNo Description of Parameter
-   * @return Description of the Returned Value
+   * @param requestId unique identifier for this request.
+   * @param fsFileNumber unique identifier of the file.
+   * @param data the data to write.
+   * @return the data structure indicating a success or failure.
    */
-  public FileSystemReturnData write(int requestId, int iFSFileNo)
+  public FileSystemReturnData write(int requestId, int fsFileNumber, byte data)
   {
     CPM14FIDTableEntry fidEntry =
-        (CPM14FIDTableEntry) fidTable.getItem(iFSFileNo);
+        (CPM14FIDTableEntry) fidTable.getItem(fsFileNumber);
 
     CPM14DeviceTableEntry device =
         (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.getDeviceNumber());
@@ -386,7 +385,8 @@ public class CPM14FileSystem implements FileSystem
       if ((((fidEntry.getCurrentPosition()) % BLOCK_SIZE) == 0)
            && (fidEntry.getCurrentPosition() != 0))
       {
-
+        diskRequest(CPM14RequestTableEntry.FLUSH, fsFileNumber, requestId, data,
+            fidEntry.getCurrentDiskBlock(), fidEntry.getBuffer());
         /*        diskRequest ( devicedeviceName, "FS_WRITE::FLUSH", "WRITE",
                       iFSFileNo, requestId,
                       mvRequestData.getData(), fidEntry.getCurrentDiskBlock(),
@@ -798,7 +798,7 @@ public class CPM14FileSystem implements FileSystem
     CPM14RequestTableEntry mvRequestData =
         (CPM14RequestTableEntry) requestTable.getItem(mvRequestID);
 
-    int mvFID = mvRequestData.FSFileNum;
+    int mvFID = mvRequestData.getFileSystemNumber();
 
     CPM14FIDTableEntry fidEntry =
         (CPM14FIDTableEntry) fidTable.getItem(mvFID);
@@ -806,10 +806,10 @@ public class CPM14FileSystem implements FileSystem
     CPM14DeviceTableEntry device =
         (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.getDeviceNumber());
 
-    if (mvRequestData.Type.equalsIgnoreCase("FS_CLOSE::WRITE_BUFFER"))
+    if (mvRequestData.getRequestType() == mvRequestData.WRITE_BUFFER)
     {
       //     System.out.println("Handle Write byffer return."); // DEBUG
-      mvRequestData.Type = "FS_CLOSE::WRITE_DIR1";
+//      mvRequestData.Type = "FS_CLOSE::WRITE_DIR1";
 
       byte[] mvToWrite = new byte[1024];
 
@@ -825,39 +825,39 @@ public class CPM14FileSystem implements FileSystem
       //                                      "DISKREQUEST", mvNewReq);
       //SendMessage( mvNewMessage );
     }
-    else if (mvRequestData.Type.equalsIgnoreCase("FS_CLOSE::WRITE_DIR1"))
-    {
+//    else if (mvRequestData.Type.equalsIgnoreCase("FS_CLOSE::WRITE_DIR1"))
+//    {
 //      System.out.println("Handle Write dir1 return."); // DEBUG
-      mvRequestData.Type = "FS_CLOSE::WRITE_DIR2";
-
-      byte[] mvToWrite = new byte[1024];
-
-      int counter;
-
-      for (counter = 0; counter < 1024; counter++)
-      {
-        mvToWrite[counter] = device.getByteInEntry(counter + 1024);
-      }
-
-
-      DiskRequest mvNewReq = new DiskRequest(mvRequestID, 1, mvToWrite);
+//      mvRequestData.Type = "FS_CLOSE::WRITE_DIR2";
+//
+//      byte[] mvToWrite = new byte[1024];
+//
+//      int counter;
+//
+//      for (counter = 0; counter < 1024; counter++)
+//      {
+//        mvToWrite[counter] = device.getByteInEntry(counter + 1024);
+//      }
+//
+//
+//      DiskRequest mvNewReq = new DiskRequest(mvRequestID, 1, mvToWrite);
       //Message mvNewMessage = new Message ( id, devicedeviceName,
       //                                      "DISKREQUEST", mvNewReq);
       //SendMessage( mvNewMessage );
-    }
-    else if (mvRequestData.Type.equalsIgnoreCase("FS_CLOSE::WRITE_DIR2"))
-    {
+//    }
+//    else if (mvRequestData.Type.equalsIgnoreCase("FS_CLOSE::WRITE_DIR2"))
+//    {
 //      System.out.println("Handle Write dir2 return."); // DEBUG
 //      System.out.println("About to remove FID "+mvFID); // DEBUG
       //return(new FileSystemReturnData(requestId, 0));
-      if (device.isFileOpen(fidEntry.getFileName()))
-      {
-        device.setFileClosed(fidEntry.getFileName());
-      }
-      fidTable.remove(mvFID);
-      requestTable.remove(mvRequestID);
-    }
-    else if (mvRequestData.Type.equalsIgnoreCase("FS_READ::GETBLOCK"))
+//      if (device.isFileOpen(fidEntry.getFileName()))
+//      {
+//        device.setFileClosed(fidEntry.getFileName());
+//      }
+//      fidTable.remove(mvFID);
+//      requestTable.remove(mvRequestID);
+//    }
+    else if (mvRequestData.getRequestType() == mvRequestData.GET_BLOCK)
     {
       if (mvMessageData.getDiskBlock() >= 0)
       {
@@ -893,7 +893,7 @@ public class CPM14FileSystem implements FileSystem
         //return(new FileSystemReturnData(requestId, -1));
       }
     }
-    else if (mvRequestData.Type.equalsIgnoreCase("FS_WRITE::FLUSH"))
+    else if (mvRequestData.getRequestType() == mvRequestData.FLUSH)
     {
       if (mvMessageData.getDiskBlock() >= 0)
       {
@@ -963,7 +963,7 @@ public class CPM14FileSystem implements FileSystem
           device.setByteInEntry(mvBlockLocation, (byte) mvNewBlock);
           fidEntry.setCurrentDiskBlock((byte) mvNewBlock);
           fidEntry.setByteInBuffer(fidEntry.getCurrentPosition() % BLOCK_SIZE,
-              (byte) mvRequestData.Data);
+              (byte) mvRequestData.getData());
           fidEntry.incCurrentPosition();
           //return(new FileSystemReturnData(requestId, 0));
 //          Dump( "DIR", 0,0); // DEBUG
@@ -1033,20 +1033,16 @@ public class CPM14FileSystem implements FileSystem
    * @param block Description of Parameter
    * @param data Description of Parameter
    */
-  private void diskRequest(int FSFileNo,
+  private void diskRequest(int requestType, int FSFileNo,
       int FSMRequestID, int RequestData, int block, byte[] data)
   {
-    CPM14RequestTableEntry mvQueueEntry = new CPM14RequestTableEntry();
-
-    mvQueueEntry.FSFileNum = FSFileNo;
-    mvQueueEntry.FSMRequestID = FSMRequestID;
-    mvQueueEntry.Data = RequestData;
+    CPM14RequestTableEntry mvQueueEntry = new CPM14RequestTableEntry(
+        requestType, FSFileNo, FSMRequestID, RequestData);
 
     // Request new block
     int iReqNum = requestTable.add(mvQueueEntry);
-    DiskRequest mvTheRequest = new DiskRequest(iReqNum,
-        block,
-        data);
+    DiskRequest mvTheRequest = new DiskRequest(iReqNum, block, data);
+
     //Message mvTheReq = new Message( id,  new String(to),"DISKREQUEST", mvTheRequest);
     //SendMessage ( mvTheReq );
   }

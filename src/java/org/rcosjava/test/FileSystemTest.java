@@ -99,15 +99,24 @@ public class FileSystemTest extends TestCase
           "0 t e s t         p a s 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 " +
           "\n", dump);
 
-      dump = fs.dumpDirectoryEntry(0, 0);
-      System.out.println(dump);
-
       // Write to the file system some bytes.
       for (int counter = 0; counter < 4000; counter++)
       {
-        // (byte) 'b'
-        // fs.write();
+        requestId++;
+        fs.write(requestId, fileId, (byte) 'b');
       }
+
+      dump = fs.dumpDirectoryEntry(0, 0);
+      System.out.println(dump);
+      dump = fs.dumpDirectoryEntry(0, 1);
+      System.out.println(dump);
+
+      data = fs.close(requestId++, fileId);
+
+      dump = fs.dumpDirectoryEntry(0, 0);
+      System.out.println(dump);
+      dump = fs.dumpDirectoryEntry(0, 1);
+      System.out.println(dump);
     }
     catch (Exception e)
     {

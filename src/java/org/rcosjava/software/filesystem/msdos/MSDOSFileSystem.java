@@ -1848,7 +1848,7 @@ public class MSDOSFileSystem implements FileSystem
    * @param iFSFileNo Description of Parameter
    * @return Description of the Returned Value
    */
-  public FileSystemReturnData write(int iRequestID, int iFSFileNo)
+  public FileSystemReturnData write(int iRequestID, int iFSFileNo, byte data)
   {
     return null;
   }
