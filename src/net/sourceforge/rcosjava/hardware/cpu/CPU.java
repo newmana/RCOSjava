@@ -478,7 +478,7 @@ public class CPU
        (processStack.read(
          findBase(getContext().getInstructionRegister().getByteParameter()) +
          getContext().getInstructionRegister().getWordParameter() +
-         getContext().getStackPointer())));
+         processStack.read(getContext().getStackPointer()))));
     }
     else if (instruction.isStore())
     {
@@ -506,8 +506,8 @@ public class CPU
       processStack.write(
         findBase(getContext().getInstructionRegister().getByteParameter()) +
         getContext().getInstructionRegister().getWordParameter() +
-        getContext().getStackPointer(),
-        processStack.read(getContext().getStackPointer()+1));
+        processStack.read(getContext().getStackPointer()-1),
+        processStack.read(getContext().getStackPointer()));
       getContext().decStackPointer();
       getContext().decStackPointer();
     }
