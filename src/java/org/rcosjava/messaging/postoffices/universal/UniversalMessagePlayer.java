@@ -206,7 +206,7 @@ public class UniversalMessagePlayer extends OSMessageHandler
     myClient.openConnection();
 
     // Ask for the file size of the file.
-    int size = myClient.statRecFile(java.io.File.separatorChar +
+    long size = myClient.statRecFile(java.io.File.separatorChar +
         recordingName + java.io.File.separatorChar + messageNumber +
         ".xml");
 
