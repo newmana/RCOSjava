@@ -5,13 +5,13 @@ import org.rcosjava.software.memory.MemoryManager;
 import org.rcosjava.software.memory.MemoryRequest;
 
 /**
- * Write a series of bytes of memory.
+ * Write a series of bytes of shared memory.
  * <P>
  * @author Andrew Newman.
  * @created 3rd August 1997
  * @version 1.00 $Date$
  */
-public class WriteBytes extends UniversalMessageAdapter
+public class SharedMemoryWrite extends UniversalMessageAdapter
 {
   /**
    * The memory request that is used by the receiving objects which holds such
@@ -19,6 +19,7 @@ public class WriteBytes extends UniversalMessageAdapter
    * to write to.
    */
   private MemoryRequest request;
+  private String shmId;
 
   /**
    * Create a new write bytes message from a given source with a given memory
@@ -27,20 +28,11 @@ public class WriteBytes extends UniversalMessageAdapter
    * @param theSource the sender of the message.
    * @param newRequest the object holding the details of the memory to write.
    */
-  public WriteBytes(OSMessageHandler theSource, MemoryRequest newRequest)
+  public SharedMemoryWrite(OSMessageHandler theSource, String newShmId,
+      MemoryRequest newRequest)
   {
     super(theSource);
-    request = newRequest;
-  }
-
-  /**
-   * Allows a new request object to be sent as the payload. So that multiple
-   * messages can be sent without calling the constructor.
-   *
-   * @param newRequest the request that is to be sent with the message.
-   */
-  public void setMemoryRequest(MemoryRequest newRequest)
-  {
+    shmId = newShmId;
     request = newRequest;
   }
 
@@ -61,7 +53,7 @@ public class WriteBytes extends UniversalMessageAdapter
    */
   public void doMessage(MemoryManager theElement)
   {
-    theElement.writeBytes(request);
+    theElement.sharedMemoryWrite(request, shmId);
   }
 }
 
