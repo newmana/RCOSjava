@@ -31,27 +31,84 @@ public class StatementCompiler extends DepthFirstAdapter
   }
 
   /**
-   * If statement
-   */
-  public void inAIfStatement(AIfStatement node)
-  {
-    processIfStatement(node);
-  }
-
-  /**
-   * If-Else statement
-   */
-  public void inAIfElseStatement(AIfElseStatement node)
-  {
-    processIfStatement(node);
-  }
-
-  /**
    * If-Then-Else statement
    */
-  public void inAIfThenElseStatement(AIfThenElseStatement node)
+  public void caseAIfThenElseStatement(AIfThenElseStatement node)
   {
-    processIfStatement(node);
+//    node.getConditionalExpression().apply(this);
+//
+//    processIfStatement(node);
+//
+//    node.getThenCompStmt().apply(this);
+//
+//    processOutIfStatement();
+//
+//    node.getElseCompStmt().apply(this);
+    inAIfThenElseStatement(node);
+
+    Compiler.incLevel();
+
+    ARelConditionalExpression expr = (ARelConditionalExpression)
+      node.getConditionalExpression();
+    PValue expression1 = expr.getLeft();
+    PValue expression2 = expr.getRight();
+
+    // With the left hand load the variable or literal
+    handleIdentifierLoad(expression1);
+
+    // With the right hand load the variable or literal
+    handleIdentifierLoad(expression2);
+
+    expr.apply(this);
+    short startPosition = Compiler.getInstructionIndex();
+    node.getThenCompStmt().apply(this);
+    short finishPosition = Compiler.getInstructionIndex();
+    writePCode(startPosition,
+      new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
+      (short) (finishPosition+Compiler.getLevel()+2)));
+
+    startPosition = Compiler.getInstructionIndex();
+    node.getElseCompStmt().apply(this);
+    finishPosition = Compiler.getInstructionIndex();
+    writePCode(startPosition,
+      new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
+      (short) (finishPosition+Compiler.getLevel()+1)));
+
+    Compiler.decLevel();
+    outAIfThenElseStatement(node);
+  }
+
+  /**
+   * If statement
+   */
+  public void caseAIfStatement(AIfStatement node)
+  {
+    inAIfStatement(node);
+
+    Compiler.incLevel();
+
+    ARelConditionalExpression expr = (ARelConditionalExpression)
+      node.getConditionalExpression();
+    PValue expression1 = expr.getLeft();
+    PValue expression2 = expr.getRight();
+
+    // With the left hand load the variable or literal
+    handleIdentifierLoad(expression1);
+
+    // With the right hand load the variable or literal
+    handleIdentifierLoad(expression2);
+
+    expr.apply(this);
+    short startPosition = Compiler.getInstructionIndex();
+    node.getCompoundStatement().apply(this);
+    short finishPosition = Compiler.getInstructionIndex();
+    writePCode(startPosition,
+      new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
+      (short) (finishPosition+Compiler.getLevel()+1)));
+
+    Compiler.decLevel();
+
+    outAIfStatement(node);
   }
 
   private void processIfStatement(Node node)
@@ -74,44 +131,15 @@ public class StatementCompiler extends DepthFirstAdapter
           ((AIfElseStatement) node).getConditionalExpression();
     }
 
-    System.out.println("If Else stmt: " + node.toString());
-    Compiler.incLevel();
-
-    PValue expression1 = expr.getLeft();
-    PValue expression2 = expr.getRight();
-
-    // With the left hand load the variable or literal
-    handleIdentifierLoad(expression1);
-
-    // With the right hand load the variable or literal
-    handleIdentifierLoad(expression2);
-
-    // Record where the if statement finished so we can put the jump in if it
-    // fails.
-    statementPosition.push(new Integer(Compiler.getInstructionIndex()));
+//    System.out.println("If Else stmt: " + node.toString());
   }
 
-  public void outAIfStatement(AIfStatement node)
-  {
-    processOutIfStatement(node);
-  }
-
-  public void outAIfElseStatement(AIfElseStatement node)
-  {
-    processOutIfStatement(node);
-  }
-
-  public void outAIfThenElseStatement(AIfThenElseStatement node)
-  {
-    processOutIfStatement(node);
-  }
-
-  private void processOutIfStatement(Node node)
+  private void processOutIfStatement()
   {
 //    ArrayList tmpInstr = (ArrayList) previousInstruction.get(instructionIndex-1);
     int position = ((Integer) statementPosition.pop()).intValue();
     Compiler.incInstructionIndex();
-    Compiler.addInstruction(position+1,
+    Compiler.addInstruction(position,
       new Instruction(OpCode.JUMP_ON_CONDITION.getValue(),
       (byte) 0, (short) (Compiler.getInstructionIndex()+2)));
     Compiler.decLevel();
@@ -119,7 +147,7 @@ public class StatementCompiler extends DepthFirstAdapter
 
   public void inAValueConditionalExpression(AValueConditionalExpression node)
   {
-    System.out.println("Identifier: " + node);
+//    System.out.println("Identifier: " + node);
   }
 
   public void caseAGteqRelop(AGteqRelop node)
@@ -167,7 +195,7 @@ public class StatementCompiler extends DepthFirstAdapter
   /**
    * Process simple printf literal statement.
    */
-  public void inAPrintf1RcosStatement(APrintf1RcosStatement node)
+  public void caseAPrintf1RcosStatement(APrintf1RcosStatement node)
   {
     String stringValue = node.getStringLitteral().getText();
     //String name = variableCompiler.allocateVariable(1, stringValue.length());
@@ -180,10 +208,9 @@ public class StatementCompiler extends DepthFirstAdapter
   /**
    * Process non-literal printf statement.
    */
-  public void inAPrintf2RcosStatement(APrintf2RcosStatement node)
+  public void caseAPrintf2RcosStatement(APrintf2RcosStatement node)
   {
     PPrintfControlStrings control = node.getControl();
-    System.out.println("Control: " + control);
   }
 
   /**
@@ -272,8 +299,8 @@ public class StatementCompiler extends DepthFirstAdapter
    */
   public void inAVariableDeclaration(AVariableDeclaration node)
   {
-    System.out.println("Adding: "+ node.getDeclarator().toString());
-    System.out.println("Adding: "+ node.toString());
+//    System.out.println("Adding: "+ node.getDeclarator().toString());
+//    System.out.println("Adding: "+ node.toString());
     // This compiler understands only 16 bit int/short and chars
     if (node.getTypeSpecifier() instanceof ASignedIntTypeSpecifier ||
         node.getTypeSpecifier() instanceof AUnsignedIntTypeSpecifier ||
@@ -293,8 +320,8 @@ public class StatementCompiler extends DepthFirstAdapter
         }
         else
         {
-          System.out.println("Type: " + node.getTypeSpecifier().toString());
-          System.out.println("Level: " + Compiler.getLevel());
+//          System.out.println("Type: " + node.getTypeSpecifier().toString());
+//          System.out.println("Level: " + Compiler.getLevel());
           Variable newVar = new Variable(name,
               Compiler.getLevel(), Compiler.getInstructionIndex());
           table.addSymbol(newVar);
@@ -342,8 +369,8 @@ public class StatementCompiler extends DepthFirstAdapter
     if (arrayStartIndex > 0)
     {
       arrayFinishedIndex = declarator.indexOf("]");
-      System.out.println("Dec: " + (arrayFinishedIndex - arrayStartIndex));
-      System.out.println("Dec: " + declarator);
+//      System.out.println("Dec: " + (arrayFinishedIndex - arrayStartIndex));
+//      System.out.println("Dec: " + declarator);
       if ((arrayFinishedIndex - arrayStartIndex) > 2)
       {
         arraySize = Short.parseShort(declarator.substring(arrayStartIndex+1,
@@ -355,8 +382,14 @@ public class StatementCompiler extends DepthFirstAdapter
 
   public void writePCode(Instruction newInstruction)
   {
-    Compiler.incInstructionIndex();
     Compiler.addInstruction(newInstruction);
+    Compiler.incInstructionIndex();
+  }
+
+  public void writePCode(int index, Instruction newInstruction)
+  {
+    Compiler.addInstruction(index, newInstruction);
+    Compiler.incInstructionIndex();
   }
 
   private void handleIdentifierLoad(PValue expression)
