@@ -291,6 +291,7 @@ public class ProcessScheduler extends OSMessageHandler
   {
     if (log.isDebugEnabled())
     {
+      log.debug("Process: " + newProcess.getPID() + " runningToReady");
       log.debug("Acquiring executingQ and readyQ in runningToReady");
     }
     try
@@ -568,6 +569,11 @@ public class ProcessScheduler extends OSMessageHandler
 
         setExecutingProcess(currentProcess);
         currentProcess.setStatus(ProcessState.RUNNING);
+
+        if (log.isDebugEnabled())
+        {
+          log.debug("Switching to: " + currentProcess.getPID());
+        }
 
         ProcessSwitch tmpMessage = new ProcessSwitch(this, currentProcess);
         sendMessage(tmpMessage);
