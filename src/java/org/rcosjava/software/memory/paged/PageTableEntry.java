@@ -59,6 +59,8 @@ public class PageTableEntry implements Serializable
   }
 
   /**
+   * Return the type of the pages.
+   *
    * @return the type (currently 1 or 2).
    */
   public byte getType()
@@ -67,6 +69,8 @@ public class PageTableEntry implements Serializable
   }
 
   /**
+   * The process id.
+   *
    * @return the process id.
    */
   public byte getPID()
@@ -75,14 +79,20 @@ public class PageTableEntry implements Serializable
   }
 
   /**
-   * @return the index of pages.
+   * Returns a copy of the indexes of pages.
+   *
+   * @return a copy of the indexes of pages.
    */
   public short[] getPages()
   {
-    return pages;
+    short[] pagesCopy = new short[pages.length];
+    System.arraycopy(pages, 0, pagesCopy, 0, pages.length);
+    return pagesCopy;
   }
 
   /**
+   * Return the number of pages allocated.
+   *
    * @return the number of pages allocated.
    */
   public short getTotalNumberOfPages()

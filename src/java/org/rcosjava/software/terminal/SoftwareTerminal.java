@@ -39,6 +39,11 @@ import org.apache.log4j.*;
 public class SoftwareTerminal extends OSMessageHandler
 {
   /**
+   * Serial id.
+   */
+  private static final long serialVersionUID = -2103333939043482911L;
+
+  /**
    * Logging class.
    */
   private final static Logger log = Logger.getLogger(SoftwareTerminal.class);
