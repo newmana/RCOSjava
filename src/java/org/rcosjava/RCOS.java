@@ -575,195 +575,68 @@ public class RCOS extends javax.swing.JApplet implements Runnable
    */
   public void initialiseScreen()
   {
-    setBackground(RCOSFrame.defaultBgColour);
-    setForeground(RCOSFrame.defaultFgColour);
+    JMenuBar menuBar = new JMenuBar();
+    JMenu menu;
+    JMenuItem menuItem;
 
-    JLabel aLabel;
+    setJMenuBar(menuBar);
 
-    GraphicButton tempButton;
+    menu = new JMenu("File");
+    menu.setMnemonic(KeyEvent.VK_F);
+    menuBar.add(menu);
 
-    mainPanel = new JPanel();
+    menuItem = new JMenuItem("New Process");
+    menu.add(menuItem);
+    menuItem = new JMenuItem("Kill Process");
+    menu.add(menuItem);
+    menuItem = new JMenuItem("Change Priority");
+    menu.add(menuItem);
 
-    mainPanel.setBackground(RCOSFrame.defaultBgColour);
-    mainPanel.setForeground(RCOSFrame.defaultFgColour);
+    menu = new JMenu("CPU");
+    menu.setMnemonic(KeyEvent.VK_C);
+    menuBar.add(menu);
 
-    systemAnimatorsPanel = new JPanel();
+    menuItem = new JMenuItem("Pause");
+    menu.add(menuItem);
+    menuItem = new JMenuItem("Stop");
+    menu.add(menuItem);
+    menuItem = new JMenuItem("Run");
+    menu.add(menuItem);
 
-    systemAnimatorsTitlePanel1 = new JPanel();
-    systemAnimatorsTitlePanel1.setBackground(RCOSFrame.defaultBgColour);
-    systemAnimatorsTitlePanel1.setForeground(RCOSFrame.defaultFgColour);
+    menu = new JMenu("Tour");
+    menu.setMnemonic(KeyEvent.VK_T);
+    menuBar.add(menu);
 
-    systemAnimatorsTitlePanel2 = new JPanel();
-    systemAnimatorsTitlePanel2.setBackground(RCOSFrame.defaultBgColour);
-    systemAnimatorsTitlePanel2.setForeground(RCOSFrame.defaultFgColour);
+    menuItem = new JMenuItem("Play");
+    menu.add(menuItem);
+    menuItem = new JMenuItem("Record New");
+    menu.add(menuItem);
+    menuItem = new JMenuItem("Save and Record New");
+    menu.add(menuItem);
 
-    systemInterfacePanel = new JPanel();
-    systemInterfaceTitlePanel = new JPanel();
+    menu = new JMenu("Help");
+    menu.setMnemonic(KeyEvent.VK_H);
+    menuBar.add(menu);
 
-    systemInterfaceTitlePanel1 = new JPanel();
-    systemInterfaceTitlePanel1.setBackground(RCOSFrame.defaultBgColour);
-    systemInterfaceTitlePanel1.setForeground(RCOSFrame.defaultFgColour);
+    menuItem = new JMenuItem("Topics");
+    menu.add(menuItem);
+    menuItem = new JMenuItem("About");
+    menu.add(menuItem);
 
-    systemInterfaceTitlePanel2 = new JPanel();
-    systemInterfaceTitlePanel2.setBackground(RCOSFrame.defaultBgColour);
-    systemInterfaceTitlePanel2.setForeground(RCOSFrame.defaultFgColour);
+    Container contentPane = getContentPane();
+    contentPane.setBackground(RCOSFrame.defaultBgColour);
+    contentPane.setForeground(RCOSFrame.defaultFgColour);
 
-    informationPanel = new JPanel();
-    informationTitlePanel = new JPanel();
-    informationTitlePanel.setBackground(RCOSFrame.defaultBgColour);
-    informationTitlePanel.setForeground(RCOSFrame.defaultFgColour);
+    JTabbedPane tabbedPane = new JTabbedPane();
 
-    getContentPane().setLayout(new BorderLayout());
+    tabbedPane.add(tmAnimator.getPanel(), "Terminals");
+    tabbedPane.add(psAnimator.getPanel(), "Process Scheduler");
+    tabbedPane.add(cpuAnimator.getPanel(), "CPU");
+    tabbedPane.add(ipcAnimator.getPanel(), "IPC Manager");
+    tabbedPane.add(new JPanel(), "Disk Scheduler");
+    tabbedPane.add(new JPanel(), "File System");
 
-    NewLabel lAnimators1 = new NewLabel(menu1, RCOSFrame.titleFont);
-    NewLabel lAnimators2 = new NewLabel(menu2, RCOSFrame.titleFont);
-    NewLabel lInterface1 = new NewLabel(menu3, RCOSFrame.titleFont);
-    NewLabel lInterface2 = new NewLabel(menu4, RCOSFrame.titleFont);
-    NewLabel lInformation = new NewLabel(menu5, RCOSFrame.titleFont);
-
-    GridBagConstraints constraints = new GridBagConstraints();
-    GridBagLayout gridBag = new GridBagLayout();
-
-    mainPanel.setLayout(gridBag);
-
-    systemAnimatorsTitlePanel1.setLayout(new FlowLayout(FlowLayout.CENTER));
-    systemAnimatorsTitlePanel2.setLayout(new FlowLayout(FlowLayout.CENTER));
-    systemAnimatorsTitlePanel1.add(lAnimators1);
-    systemAnimatorsTitlePanel2.add(lAnimators2);
-
-    constraints.gridheight = 1;
-    constraints.gridwidth = 1;
-    constraints.weighty = 1;
-    constraints.weightx = 1;
-
-    gridBag.setConstraints(systemAnimatorsTitlePanel1, constraints);
-    mainPanel.add(systemAnimatorsTitlePanel1);
-
-    tempButton = new GraphicButton(upButtons[0].getImage(),
-      downButtons[0].getImage(), "Terminal Manager", RCOSFrame.defaultFont,
-      RCOSFrame.buttonColour, true);
-    gridBag.setConstraints(tempButton, constraints);
-    mainPanel.add(tempButton);
-    tempButton.addMouseListener(new ShowAnimator(tmAnimator));
-
-    constraints.gridwidth = GridBagConstraints.RELATIVE;
-    tempButton = new GraphicButton(upButtons[0].getImage(),
-      downButtons[0].getImage(), "Process Scheduler", RCOSFrame.defaultFont,
-      RCOSFrame.buttonColour, true);
-    gridBag.setConstraints(tempButton, constraints);
-    mainPanel.add(tempButton);
-    tempButton.addMouseListener(new ShowAnimator(psAnimator));
-
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
-    tempButton = new GraphicButton(upButtons[0].getImage(),
-      downButtons[0].getImage(), "IPC Manager", RCOSFrame.defaultFont,
-      RCOSFrame.buttonColour, true);
-    gridBag.setConstraints(tempButton, constraints);
-    mainPanel.add(tempButton);
-    tempButton.addMouseListener(new ShowAnimator(ipcAnimator));
-
-    constraints.gridwidth = 1;
-    gridBag.setConstraints(systemAnimatorsTitlePanel2, constraints);
-    mainPanel.add(systemAnimatorsTitlePanel2);
-
-    tempButton = new GraphicButton(upButtons[0].getImage(),
-      downButtons[0].getImage(), "File System", RCOSFrame.defaultFont,
-      RCOSFrame.buttonColour, true);
-    gridBag.setConstraints(tempButton, constraints);
-    mainPanel.add(tempButton);
-    //tempButton.addMouseListener(new ShowAnimator(null));
-
-    constraints.gridwidth = GridBagConstraints.RELATIVE;
-    tempButton = new GraphicButton(upButtons[0].getImage(),
-      downButtons[0].getImage(), "Disk Scheduler", RCOSFrame.defaultFont,
-      RCOSFrame.buttonColour, true);
-    gridBag.setConstraints(tempButton, constraints);
-    mainPanel.add(tempButton);
-    //tempButton.addMouseListener(new ShowAnimator(null));
-
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
-    tempButton = new GraphicButton(upButtons[0].getImage(),
-      downButtons[0].getImage(), "CPU", RCOSFrame.defaultFont,
-      RCOSFrame.buttonColour, true);
-    gridBag.setConstraints(tempButton, constraints);
-    mainPanel.add(tempButton);
-    tempButton.addMouseListener(new ShowAnimator(cpuAnimator));
-
-    systemInterfaceTitlePanel1.setLayout(new FlowLayout(FlowLayout.CENTER));
-    systemInterfaceTitlePanel1.add(lInterface1);
-    systemInterfaceTitlePanel2.setLayout(new FlowLayout(FlowLayout.CENTER));
-    systemInterfaceTitlePanel2.add(lInterface2);
-    systemInterfaceTitlePanel.setLayout(new GridLayout(2, 1));
-    systemInterfaceTitlePanel.add(systemInterfaceTitlePanel1);
-    systemInterfaceTitlePanel.add(systemInterfaceTitlePanel2);
-
-    constraints.gridwidth = 1;
-
-    gridBag.setConstraints(systemInterfaceTitlePanel, constraints);
-    mainPanel.add(systemInterfaceTitlePanel);
-
-    tempButton = new GraphicButton(upButtons[1].getImage(),
-      downButtons[1].getImage(), "New Process", RCOSFrame.defaultFont,
-      RCOSFrame.buttonColour, true);
-    gridBag.setConstraints(tempButton, constraints);
-    mainPanel.add(tempButton);
-    tempButton.addMouseListener(new ShowAnimator(pmAnimator));
-
-    constraints.gridwidth = GridBagConstraints.RELATIVE;
-    tempButton = new GraphicButton(upButtons[1].getImage(),
-      downButtons[1].getImage(), "Process Manager", RCOSFrame.defaultFont,
-      RCOSFrame.buttonColour, true);
-    gridBag.setConstraints(tempButton, constraints);
-    mainPanel.add(tempButton);
-    tempButton.addMouseListener(new ShowAnimator(pcmAnimator));
-
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
-    tempButton = new GraphicButton(upButtons[1].getImage(),
-      downButtons[1].getImage(), "Multimedia Tour", RCOSFrame.defaultFont,
-      RCOSFrame.buttonColour, true);
-    gridBag.setConstraints(tempButton, constraints);
-    mainPanel.add(tempButton);
-    tempButton.addMouseListener(new ShowAnimator(mmAnimator));
-
-    informationTitlePanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-    informationTitlePanel.add(lInformation);
-
-    constraints.gridwidth = 1;
-    constraints.gridheight = GridBagConstraints.REMAINDER;
-    gridBag.setConstraints(informationTitlePanel, constraints);
-    mainPanel.add(informationTitlePanel);
-
-    tempButton = new GraphicButton(upButtons[2].getImage(),
-      downButtons[2].getImage(), "About", RCOSFrame.defaultFont,
-      RCOSFrame.buttonColour, true);
-    gridBag.setConstraints(tempButton, constraints);
-    mainPanel.add(tempButton);
-    tempButton.addMouseListener(new ShowAnimator(aboutAnimator));
-
-    constraints.gridwidth = GridBagConstraints.RELATIVE;
-    tempButton = new GraphicButton(upButtons[2].getImage(),
-      downButtons[2].getImage(), "Overview", RCOSFrame.defaultFont,
-      RCOSFrame.buttonColour, true);
-    gridBag.setConstraints(tempButton, constraints);
-    mainPanel.add(tempButton);
-
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
-    tempButton = new GraphicButton(upButtons[2].getImage(),
-      downButtons[2].getImage(), "Help", RCOSFrame.defaultFont,
-      RCOSFrame.buttonColour, true);
-    gridBag.setConstraints(tempButton, constraints);
-    mainPanel.add(tempButton);
-
-    setFont(RCOSFrame.defaultFont);
-    statusBar = new JTextArea(3, 70);
-    statusBar.setEditable(false);
-    statusBar.setBackground(RCOSFrame.defaultBgColour);
-    statusBar.setForeground(RCOSFrame.defaultFgColour);
-    getContentPane().add("South", statusBar);
-
-    getContentPane().add("Center", mainPanel);
-
-    updateStatusBar(welcome);
+    contentPane.add(tabbedPane, BorderLayout.CENTER);
 //    clips[0].play();
   }
 
@@ -820,19 +693,10 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   }
 
   /**
+   * Cleanup and stop the currently running thread.
    */
   public void stop()
   {
-    theProgramManager.close();
-    psAnimator.disposeFrame();
-    pmAnimator.disposeFrame();
-    tmAnimator.disposeFrame();
-    ipcAnimator.disposeFrame();
-//    fsAnimator.disposeFrame();
-//    dsAnimator.disposeFrame();
-    cpuAnimator.disposeFrame();
-    aboutAnimator.disposeFrame();
-    theTerminalManager.disposeFrame();
     if (kernelThread != null)
     {
       kernelThread = null;
