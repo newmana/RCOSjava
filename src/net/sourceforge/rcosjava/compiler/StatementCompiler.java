@@ -26,6 +26,7 @@ public class StatementCompiler extends DepthFirstAdapter
   private boolean inAFunction = false;
   private short numberOfVariables = 3;
   private Symbol currentSymbol;
+  private int noLoops = 0;
 
   public StatementCompiler()
   {
@@ -48,44 +49,85 @@ public class StatementCompiler extends DepthFirstAdapter
   public void inASemcloseRcosStatement(ASemcloseRcosStatement node)
   {
     handlePValueLoad(node.getHandle());
-    writeSemRest(node.getVarname(), null, SystemCall.SEMAPHORE_CLOSE);
+    writeSemShrRest(node.getVarname(), null, SystemCall.SEMAPHORE_CLOSE);
+  }
+
+  public void inAShrcloseRcosStatement(AShrcloseRcosStatement node)
+  {
+    handlePValueLoad(node.getHandle());
+    writeSemShrRest(node.getVarname(), null, SystemCall.SHARED_MEMORY_CLOSE);
   }
 
   public void inASemcreate1RcosStatement(ASemcreate1RcosStatement node)
   {
     handlePValueLoad(node.getHandle());
     handleLiteralLoading("0");
-    writeSemRest(node.getVarname(), node.getHandle(),
+    writeSemShrRest(node.getVarname(), node.getHandle(),
       SystemCall.SEMAPHORE_CREATE);
+  }
+
+  public void inAShrcreateRcosStatement(AShrcreateRcosStatement node)
+  {
+    handleIdentifierLoad(node.getVarname());
+    handlePValueLoad(node.getSize());
+    writeSemShrRest(node.getVarname(), node.getSize(),
+      SystemCall.SHARED_MEMORY_CREATE);
   }
 
   public void inASemcreate2RcosStatement(ASemcreate2RcosStatement node)
   {
     handlePValueLoad(node.getHandle());
     handlePValueLoad(node.getInitValue());
-    writeSemRest(node.getVarname(), node.getHandle(),
+    writeSemShrRest(node.getVarname(), node.getHandle(),
       SystemCall.SEMAPHORE_CREATE);
   }
 
   public void inASemopenRcosStatement(ASemopenRcosStatement node)
   {
     handlePValueLoad(node.getId());
-    writeSemRest(node.getVarname(), null, SystemCall.SEMAPHORE_OPEN);
+    writeSemShrRest(node.getVarname(), null, SystemCall.SEMAPHORE_OPEN);
+  }
+
+  public void inAShropenRcosStatement(AShropenRcosStatement node)
+  {
+    handlePValueLoad(node.getId());
+    writeSemShrRest(node.getVarname(), null, SystemCall.SHARED_MEMORY_OPEN);
   }
 
   public void inASemsignalRcosStatement(ASemsignalRcosStatement node)
   {
     handlePValueLoad(node.getHandle());
-    writeSemRest(node.getVarname(), null, SystemCall.SEMAPHORE_SIGNAL);
+    writeSemShrRest(node.getVarname(), null, SystemCall.SEMAPHORE_SIGNAL);
   }
 
   public void inASemwaitRcosStatement(ASemwaitRcosStatement node)
   {
     handlePValueLoad(node.getHandle());
-    writeSemRest(node.getVarname(), null, SystemCall.SEMAPHORE_WAIT);
+    writeSemShrRest(node.getVarname(), null, SystemCall.SEMAPHORE_WAIT);
   }
 
-  private void writeSemRest(PVarname var, PValue value, SystemCall semType)
+  public void inAShrreadRcosStatement(AShrreadRcosStatement node)
+  {
+    handlePValueLoad(node.getHandle());
+    handlePValueLoad(node.getOffset());
+    writeSemShrRest(node.getVarname(), null, SystemCall.SHARED_MEMORY_READ);
+  }
+
+  public void inAShrwriteRcosStatement(AShrwriteRcosStatement node)
+  {
+    handlePValueLoad(node.getHandle());
+    handlePValueLoad(node.getOffset());
+    this.handleIdentifierLoad(node.getValue());
+    writeSemShrRest(node.getVarname(), null, SystemCall.SHARED_MEMORY_WRITE);
+  }
+
+  public void inAShrsizeRcosStatement(AShrsizeRcosStatement node)
+  {
+    handlePValueLoad(node.getHandle());
+    writeSemShrRest(node.getVarname(), null, SystemCall.SHARED_MEMORY_SIZE);
+  }
+
+  private void writeSemShrRest(PVarname var, PValue value, SystemCall semType)
   {
     byte byteParam = 0;
 
@@ -127,11 +169,43 @@ public class StatementCompiler extends DepthFirstAdapter
   }
 
   /**
+   * If statement
+   */
+  public void caseAIfStatement(AIfStatement node)
+  {
+    inAIfStatement(node);
+    noLoops++;
+
+    ARelConditionalExpression expr = (ARelConditionalExpression)
+      node.getConditionalExpression();
+    PValue expression1 = expr.getLeft();
+    PValue expression2 = expr.getRight();
+
+    // With the left hand load the variable or literal
+    handlePValueLoad(expression1);
+
+    // With the right hand load the variable or literal
+    handlePValueLoad(expression2);
+
+    expr.apply(this);
+    short startPosition = Compiler.getInstructionIndex();
+    node.getCompoundStatement().apply(this);
+    short finishPosition = Compiler.getInstructionIndex();
+    writePCode(startPosition,
+      new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
+      (short) (finishPosition+2+noLoops)));
+
+    noLoops--;
+    outAIfStatement(node);
+  }
+
+  /**
    * If-Then-Else statement
    */
   public void caseAIfThenElseStatement(AIfThenElseStatement node)
   {
     inAIfThenElseStatement(node);
+    noLoops++;
 
     ARelConditionalExpression expr = (ARelConditionalExpression)
       node.getConditionalExpression();
@@ -150,16 +224,82 @@ public class StatementCompiler extends DepthFirstAdapter
     short finishPosition = Compiler.getInstructionIndex();
     writePCode(startPosition,
       new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
-      (short) (finishPosition+Compiler.getLevel()+1)));
+      (short) (finishPosition+2+(noLoops*2))));
 
     startPosition = Compiler.getInstructionIndex();
     node.getElseCompStmt().apply(this);
     finishPosition = Compiler.getInstructionIndex();
     writePCode(startPosition,
       new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
-      (short) (finishPosition+2)));
+      (short) (finishPosition+1+(noLoops*2))));
 
+    noLoops--;
     outAIfThenElseStatement(node);
+  }
+
+  /**
+   * For statement
+   */
+  public void caseAForStatement(AForStatement node)
+  {
+    inAForStatement(node);
+    noLoops++;
+
+    PBasicStatement start = node.getStart();
+    if (start != null)
+    {
+      start.apply(this);
+    }
+
+    PConditionalExpression cond = node.getConditionalExpression();
+
+    if (cond != null)
+    {
+
+      if (cond instanceof ARelConditionalExpression)
+      {
+        ARelConditionalExpression expr = (ARelConditionalExpression) cond;
+        PValue expression1 = expr.getLeft();
+        PValue expression2 = expr.getRight();
+
+        // With the left hand load the variable or literal
+        handlePValueLoad(expression1);
+
+        // With the right hand load the variable or literal
+        handlePValueLoad(expression2);
+
+        expr.apply(this);
+      }
+      else if (cond instanceof AValueConditionalExpression)
+      {
+        cond.apply(this);
+      }
+    }
+
+    short startPosition = Compiler.getInstructionIndex();
+
+    // Set-up the iterator
+    PBasicStatement iter = node.getIter();
+    if (iter != null)
+    {
+      iter.apply(this);
+    }
+
+    // Do what is inside the for statement.
+    node.getCompoundStatement().apply(this);
+
+    short finishPosition = Compiler.getInstructionIndex();
+
+    writePCode(startPosition,
+      new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
+      (short) (finishPosition+2+(noLoops*2))));
+
+    writePCode(
+      new Instruction(OpCode.JUMP.getValue(), (byte) 0,
+      (short) (startPosition+2+noLoops)));
+
+    noLoops--;
+    outAForStatement(node);
   }
 
   /**
@@ -168,6 +308,9 @@ public class StatementCompiler extends DepthFirstAdapter
   public void caseAWhileStatement(AWhileStatement node)
   {
     inAWhileStatement(node);
+    noLoops++;
+
+    short beforeCondPosition = Compiler.getInstructionIndex();
 
     ARelConditionalExpression expr = (ARelConditionalExpression)
       node.getConditionalExpression();
@@ -189,44 +332,16 @@ public class StatementCompiler extends DepthFirstAdapter
     // Start position -1 because we are inserting the JPC.
     writePCode(
       new Instruction(OpCode.JUMP.getValue(), (byte) 0,
-      (short) (startPosition-1)));
+      (short) (beforeCondPosition+1+noLoops)));
 
     short finishPosition = Compiler.getInstructionIndex();
 
     writePCode(startPosition,
       new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
-      (short) (finishPosition+3)));
+      (short) (finishPosition+2+noLoops)));
 
+    noLoops--;
     outAWhileStatement(node);
-  }
-
-  /**
-   * If statement
-   */
-  public void caseAIfStatement(AIfStatement node)
-  {
-    inAIfStatement(node);
-
-    ARelConditionalExpression expr = (ARelConditionalExpression)
-      node.getConditionalExpression();
-    PValue expression1 = expr.getLeft();
-    PValue expression2 = expr.getRight();
-
-    // With the left hand load the variable or literal
-    handlePValueLoad(expression1);
-
-    // With the right hand load the variable or literal
-    handlePValueLoad(expression2);
-
-    expr.apply(this);
-    short startPosition = Compiler.getInstructionIndex();
-    node.getCompoundStatement().apply(this);
-    short finishPosition = Compiler.getInstructionIndex();
-    writePCode(startPosition,
-      new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
-      (short) (finishPosition+Compiler.getLevel())));
-
-    outAIfStatement(node);
   }
 
   public void caseAGteqRelop(AGteqRelop node)
@@ -354,14 +469,14 @@ public class StatementCompiler extends DepthFirstAdapter
 
   public void caseAPlusBinop(APlusBinop node)
   {
-    System.out.println("Plus Node: " + node);
+//    System.out.println("Plus Node: " + node);
     writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
       Operator.ADD.getValue()));
   }
 
   public void caseAMinusBinop(AMinusBinop node)
   {
-    System.out.println("Minus Node: " + node);
+//    System.out.println("Minus Node: " + node);
     writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
       Operator.SUBTRACT.getValue()));
   }
@@ -471,50 +586,69 @@ public class StatementCompiler extends DepthFirstAdapter
    */
   public void inAVariableDeclaration(AVariableDeclaration node)
   {
-//    System.out.println("Adding: "+ node.getDeclarator().toString());
-//    System.out.println("Adding: "+ node.toString());
-    // This compiler understands only 16 bit int/short and chars
     if (node.getTypeSpecifier() instanceof ASignedIntTypeSpecifier ||
         node.getTypeSpecifier() instanceof AUnsignedIntTypeSpecifier ||
         node.getTypeSpecifier() instanceof ASignedShortTypeSpecifier ||
         node.getTypeSpecifier() instanceof AUnsignedShortTypeSpecifier ||
         node.getTypeSpecifier() instanceof ACharTypeSpecifier)
     {
-      try
+
+      // Handle first declaration.
+      doVarDeclarator(node.getDeclarator().toString().trim());
+
+      // Handle others of the same type.
+      LinkedList list = node.getAdditionalDeclarator();
+
+      if ((list != null) && (list.size() > 0))
       {
-        String name = node.getDeclarator().toString().trim();
-        if (isArray(name))
+        Iterator iter = list.iterator();
+        while (iter.hasNext())
         {
-          short size = getArraySize(name);
-          name = name.substring(0, name.indexOf("[")).trim();
-          Array newArray = new Array(name, Compiler.getLevel(),
-              Compiler.getInstructionIndex(), size);
-          table.addSymbol(newArray);
+          AAdditionalDeclarator dec = (AAdditionalDeclarator) iter.next();
+          doVarDeclarator(dec.getDeclarator().toString().trim());
         }
-        else
-        {
-//          System.out.println("Type: " + node.getTypeSpecifier().toString());
-          System.out.println("Compiler Level: " + Compiler.getLevel());
-          Variable newVar = new Variable(name,
-              Compiler.getLevel(), Compiler.getInstructionIndex());
-          table.addSymbol(newVar);
-        }
-      }
-      catch (ParserException pe)
-      {
-        throw new RuntimeException(pe.getMessage() + " at line: " +
-            pe.getStartLine() + " at position: " +
-            pe.getStartPos());
-      }
-      catch (Exception e)
-      {
-        e.printStackTrace();
       }
     }
     else
     {
       //Do some sort of error processing.
-      System.out.println("Variable type not handled!");
+      System.err.println("Variable type not handled!");
+    }
+  }
+
+  private void doVarDeclarator(String name)
+  {
+//    System.out.println("Adding: "+ node.getDeclarator().toString());
+//    System.out.println("Adding: "+ name);
+    // This compiler understands only 16 bit int/short and chars
+    try
+    {
+      if (isArray(name))
+      {
+        short size = getArraySize(name);
+        name = name.substring(0, name.indexOf("[")).trim();
+        Array newArray = new Array(name, Compiler.getLevel(),
+            Compiler.getInstructionIndex(), size);
+        table.addSymbol(newArray);
+      }
+      else
+      {
+//          System.out.println("Type: " + node.getTypeSpecifier().toString());
+//          System.out.println("Compiler Level: " + Compiler.getLevel());
+        Variable newVar = new Variable(name,
+            Compiler.getLevel(), Compiler.getInstructionIndex());
+        table.addSymbol(newVar);
+      }
+    }
+    catch (ParserException pe)
+    {
+      throw new RuntimeException(pe.getMessage() + " at line: " +
+          pe.getStartLine() + " at position: " +
+          pe.getStartPos());
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
     }
   }
 
