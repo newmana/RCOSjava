@@ -12,10 +12,10 @@ package fr.dyade.koala.xml.koml;
 public interface KOMLConstants {
 
     //    public static final String VERSION = "30, Jun 1998";
-    public static final String KOML_DTD
-	= "http://www.inria.fr/koala/XML/koml12.dtd";
 //    public static final String KOML_DTD
-//	= "file:/C:/RCOS/SRC/pll2/koml12.dtd";
+//	= "http://www.inria.fr/koala/XML/koml12.dtd";
+    public static final String KOML_DTD
+	= "http://localhost/pll2/koml12.dtd";
 //     backward compatibility with an old version ..
     public static final String OLD_VERSION = "24, September 1998";
     public static final int MAJOR_VERSION = 1;
