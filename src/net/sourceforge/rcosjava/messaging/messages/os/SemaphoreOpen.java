@@ -1,45 +1,42 @@
-// ************************************************************************
-// FILE:     SemaphoreOpenMessage.java
-// PURPOSE:  Message sent to IPC manager for OPEN/CREATE semaphore
-//           type messages.
-// AUTHOR:   Bruce Jamieson
-// MODIFIED: Andrew Newman
-// HISTORY:  28/03/96 Completed.
-//           08/08/98 Changed to new message system. AN
-//
-// ************************************************************************
-
 package net.sourceforge.rcosjava.messaging.messages.os;
 
 import net.sourceforge.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import net.sourceforge.rcosjava.software.ipc.IPC;
 import net.sourceforge.rcosjava.software.kernel.Kernel;
 
+/**
+ * Message sent to the IPC from the Kernel to open an existing semaphore.
+ * Proceeds the create Semaphore function.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 28th of March 1996
+ */
 public class SemaphoreOpen extends OSMessageAdapter
 {
-  private String sSemaphoreID;
-  private int iPID;
+  private String semaphoreId;
+  private int pid;
 
-  public SemaphoreOpen(OSMessageHandler theSource,
-    String sNewSemaphoreID, int iNewPID)
+  public SemaphoreOpen(OSMessageHandler theSource, String newSemaphoreId,
+    int newPID)
   {
     super(theSource);
-    sSemaphoreID = sNewSemaphoreID;
-    iPID = iNewPID;
+    semaphoreId = newSemaphoreId;
+    pid = newPID;
   }
 
-  public void setSempahoreID(String sNewSemaphoreID)
+  public void setSempahoreID(String newSemaphoreId)
   {
-    sSemaphoreID = sNewSemaphoreID;
+    semaphoreId = newSemaphoreId;
   }
 
-  public void setProcessID(int iNewPID)
+  public void setProcessID(int newPID)
   {
-    iPID = iNewPID;
+    pid = newPID;
   }
 
   public void doMessage(IPC theElement)
   {
-    theElement.semaphoreOpen(sSemaphoreID, iPID);
+    theElement.semaphoreOpen(semaphoreId, pid);
   }
 }

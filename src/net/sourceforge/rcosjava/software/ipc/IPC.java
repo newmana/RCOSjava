@@ -6,6 +6,7 @@ import net.sourceforge.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import net.sourceforge.rcosjava.messaging.postoffices.os.OSOffice;
 import net.sourceforge.rcosjava.messaging.postoffices.MessageHandler;
 import net.sourceforge.rcosjava.messaging.messages.MessageAdapter;
+import net.sourceforge.rcosjava.messaging.messages.os.BlockCurrentProcess;
 import net.sourceforge.rcosjava.messaging.messages.os.OSMessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.os.ShrmInit;
 import net.sourceforge.rcosjava.messaging.messages.os.ShrmRet;
@@ -13,7 +14,9 @@ import net.sourceforge.rcosjava.messaging.messages.os.ShrmSize;
 import net.sourceforge.rcosjava.messaging.messages.os.ShrmRead;
 import net.sourceforge.rcosjava.messaging.messages.os.ShrmWrite;
 import net.sourceforge.rcosjava.messaging.messages.os.ReturnValue;
+import net.sourceforge.rcosjava.messaging.messages.universal.BlockedToReady;
 import net.sourceforge.rcosjava.messaging.messages.universal.SemaphoreCreated;
+import net.sourceforge.rcosjava.messaging.messages.universal.SemaphoreWaiting;
 import net.sourceforge.rcosjava.messaging.messages.universal.BlockedToReady;
 import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import net.sourceforge.rcosjava.hardware.memory.Memory;
@@ -58,8 +61,8 @@ public class IPC extends OSMessageHandler
       // This means that someone has already created this
       // semaphore - we have got to nicely reply "no"
       // Use -1 SemID
-      //ReturnValueMessage aMessage = new ReturnValueMessage(this, -1);
-      //sendMessage(aMessage);
+      ReturnValue message = new ReturnValue(this, (short) -1);
+      sendMessage(message);
     }
     else
     {
@@ -69,11 +72,11 @@ public class IPC extends OSMessageHandler
         semaphoreCount, pid, initValue);
       semaphoreTable.insert(semNewSemaphore);
       //Return the integer value (SemID) of the semaphore created.
-      //ReturnValueMessage aMessage = new ReturnValueMessage(this, (short) semaphoreCount);
-      //sendMessage(aMessage);
-      SemaphoreCreated message = new SemaphoreCreated(this, semaphoreName,
-        pid, initValue);
+      ReturnValue message = new ReturnValue(this, (short) semaphoreCount);
       sendMessage(message);
+      SemaphoreCreated createdMessage = new SemaphoreCreated(this,
+        semaphoreName, pid, initValue);
+      sendMessage(createdMessage);
       // End of story - consider the semaphore created and
       // connected to.. (Value must be > 0 else probs)
     }
@@ -86,22 +89,22 @@ public class IPC extends OSMessageHandler
       {
         // Check that the semaphore exists - it does
         // Open Semaphore
-        Semaphore semExistingSemaphore = (Semaphore)
+        Semaphore existingSemaphore = (Semaphore)
           semaphoreTable.peek(semaphoreName);
-        semExistingSemaphore.open(pid);
-        int semId = semExistingSemaphore.getId();
+        existingSemaphore.open(pid);
+        int semId = existingSemaphore.getId();
         // Done.  Now we return a message
-        //ReturnValueMessage aMessage = new ReturnValueMessage(this, (short) semaphoreCount);
-        //sendMessage(aMessage);
-        //SemaphoreOpenedMessage aMessage = new SemaphoreOpenedMessage(this, semaphoreCount);
-        //sendMessage(aMessage);
+        ReturnValue message = new ReturnValue(this, (short) semaphoreCount);
+        sendMessage(message);
+        //SemaphoreOpened message = new SemaphoreOpenedMessage(this, semaphoreCount);
+        //sendMessage(message);
       }
       else
       {
         // The semaphore does not exist (someone trying to open
         // a "non created" semaphore)
-        //ReturnValueMessage aMessage = new ReturnValueMessage(this, -1);
-        //sendMessage(aMessage);
+        ReturnValue message = new ReturnValue(this, (short) -1);
+        sendMessage(message);
       }
   }
 
@@ -112,26 +115,26 @@ public class IPC extends OSMessageHandler
       {
         // Check that the semaphore exists - it does
         // Now Close it
-        Semaphore semExistingSemaphore = (Semaphore)
+        Semaphore existingSemaphore = (Semaphore)
           semaphoreTable.peek(semaphoreId);
-        int iNoConnectedProcesses = semExistingSemaphore.close(pid);
-        if (iNoConnectedProcesses == 0)
+        int noConnectedProcesses = existingSemaphore.close(pid);
+        if (noConnectedProcesses == 0)
         {
           // Ok - That was the last connected PID
           // Remove sempahore
           semaphoreTable.getSemaphore(semaphoreId);
         }
         // Default Message Back
-        //ReturnValueMessage aMessage = new ReturnValueMessage(this, (short) semaphoreId);
-        //sendMessage(aMessage);
-        //SemaphoreClosedMessage aMessage = new SemaphoreClosedMessage(this, semaphoreId);
-        //sendMessage(aMessage);
+        ReturnValue message = new ReturnValue(this, (short) semaphoreId);
+        sendMessage(message);
+        //SemaphoreClosedMessage message = new SemaphoreClosedMessage(this, semaphoreId);
+        //sendMessage(message);
       }
       else
       {
         // Some mistake?  Sem does NOT exist?
-        //ReturnValueMessage aMessage = new ReturnValueMessage(this, -1);
-        //sendMessage(aMessage);
+        ReturnValue message = new ReturnValue(this, (short) -1);
+        sendMessage(message);
       }
   }
 
@@ -141,28 +144,30 @@ public class IPC extends OSMessageHandler
       if (semaphoreTable.isMember(semaphoreId))
       {
         // The semaphore exists - now issue a signal
-        Semaphore semExistingSemaphore = (Semaphore)
+        Semaphore existingSemaphore = (Semaphore)
           semaphoreTable.peek(semaphoreId);
-        int iProcessID = semExistingSemaphore.signal();
+        System.out.println("Got: " + existingSemaphore);
+        int processId = existingSemaphore.signal();
 
         // Send the reply
-        //ReturnValueMessage aMessage = new ReturnValueMessage(this, (short) iProcessID);
-        //sendMessage(aMessage);
-        //SemaphoreSignalledMessage aMessage = new SemaphoreSignalledMessage(this, iProcessID);
-        //sendMessage(aMessage);
+        ReturnValue message = new ReturnValue(this, (short) processId);
+        sendMessage(message);
+
+        //SemaphoreSignalledMessage message = new SemaphoreSignalledMessage(this, iProcessID);
+        //sendMessage(message);
 
         // NOW - if process id wasn't -1, then we have to wake
         // the process up.
-        if (iProcessID != -1)
+        if (processId != -1)
         {
-          //blockedToReadyMessage aMessage = new BlockedToReadyMessage(this, iProcessID);
-          //sendMessage(aMessage);
+          BlockedToReady toReadyMessage = new BlockedToReady(this, processId);
+          sendMessage(toReadyMessage);
         }
       }
       else
       {
-        //ReturnValueMessage aMessage = new ReturnValueMessage(this, -1);
-        //sendMessage(aMessage);
+        ReturnValue message = new ReturnValue(this, (short) -1);
+        sendMessage(message);
       }
   }
 
@@ -172,26 +177,27 @@ public class IPC extends OSMessageHandler
       if (semaphoreTable.isMember(semaphoreId))
       {
         // The semaphore exists - now do a wait on it
-        Semaphore semExistingSemaphore = (Semaphore)
+        Semaphore existingSemaphore = (Semaphore)
           semaphoreTable.peek(semaphoreId);
-        int iValue = semExistingSemaphore.wait(pid);
+        int value = existingSemaphore.wait(pid);
         // Send the default response
-        //ReturnValueMessage aMessage = new ReturnValueMessage(this, (short) semaphoreId);
-        //sendMessage(aMessage);
-        //aMessage = new MessageAdapter(this, semaphoreId);
-        //sendMessage(aMessage);
+        ReturnValue message = new ReturnValue(this, (short) semaphoreId);
+        sendMessage(message);
+        SemaphoreWaiting waitingMessage = new SemaphoreWaiting(this,
+          existingSemaphore.getName(), pid, value);
+        sendMessage(message);
         // NOW - if the value was -1, then we have to block
         // the process
-        if (iValue == -1)
+        if (value == -1)
         {
-          //BlockCurrentProcessMessage aMessage = new BlockCurrentProcessMessage(this);
-          //sendMessage(aMessage);
+          BlockCurrentProcess blockMessage = new BlockCurrentProcess(this);
+          sendMessage(blockMessage);
         }
       }
       else
       {
-        //ReturnValueMessage aMessage = new ReturnValueMessage(this, -1);
-        //sendMessage(aMessage);
+        ReturnValue message = new ReturnValue(this, (short) -1);
+        sendMessage(message);
       }
   }
 
@@ -201,8 +207,8 @@ public class IPC extends OSMessageHandler
     {
       // This means that someone has already created this
       // shrm block (on that id) - nicely say no.
-      //ReturnValueMessage aMessage = new ReturnValueMessage(this, -1);
-      //sendMessage(aMessage);
+      //ReturnValue message = new ReturnValue(this, -1);
+      //sendMessage(message);
     }
     else
     {
@@ -215,11 +221,11 @@ public class IPC extends OSMessageHandler
       sharedMemoryIdTable.put(iShrmID, shShrm);
       // Two Tables - 1 indexed by the String shrm, one by
       // the simpleint shrm number.
-      //aMessage = new ReturnValueMessage(this, (short) shmCount);
-      //sendMessage(aMessage);
-      //aMessage = new SharedMemoryCreatedMessage(this, shmCount,
+      //message = new ReturnValue(this, (short) shmCount);
+      //sendMessage(message);
+      //message = new SharedMemoryCreatedMessage(this, shmCount,
       //  pid, size);
-      //sendMessage(aMessage);
+      //sendMessage(message);
     }
   }
 
@@ -234,17 +240,17 @@ public class IPC extends OSMessageHandler
       shShrm.open(pid);
       int iSharedMemID = shShrm.getShrmID();
       // Done.  Now we return a message
-      //aMessage = new ReturnValueMessage(this, (short) iSharedMemID);
-      //sendMessage(aMessage);
-      //aMessage = new SharedMemoryOpenedMessage(this, iSharedMemID, pid);
-      //sendMessage(aMessage);
+      //message = new ReturnValue(this, (short) iSharedMemID);
+      //sendMessage(message);
+      //message = new SharedMemoryOpenedMessage(this, iSharedMemID, pid);
+      //sendMessage(message);
     }
     else
     {
       // The shrm does not exist (someone trying to open
       // a "non created" shrm segment)
-      //aMessage = new ReturnValueMessage(this, -1);
-      //sendMessage(aMessage);
+      //message = new ReturnValue(this, -1);
+      //sendMessage(message);
     }
   }
 
@@ -267,18 +273,18 @@ public class IPC extends OSMessageHandler
           // successful message.
         }
         // Was successful return 0 to Kernel.
-        //aMessage = new ReturnValueMessage(this, 0);
-        //sendMessage(aMessage);
+        //message = new ReturnValue(this, 0);
+        //sendMessage(message);
         // Let everyone else know.
-        //aMessage = new SharedMemoryClosedMessage(this,
+        //message = new SharedMemoryClosedMessage(this,
         //  shmId, pid);
-        //sendMessage(aMessage);
+        //sendMessage(message);
       }
       else
       {
         // Some mistake?  Shrm does NOT exist?
-        //aMessage = new ReturnValueMessage(this, -1);
-        //sendMessage(aMessage);
+        //message = new ReturnValue(this, -1);
+        //sendMessage(message);
       }
   }
 
@@ -291,22 +297,22 @@ public class IPC extends OSMessageHandler
       SharedMemory shShrm = (SharedMemory) sharedMemoryIdTable.get(iShrmID);
       short sData = shShrm.read(iOffset);
       // Return result to Kernel
-      //aMessage = new ReturnValueMessage(this, sData);
-      //sendMessage(aMessage);
+      //message = new ReturnValue(this, sData);
+      //sendMessage(message);
       // Was it a success?
       if(sData != -1)
       {
         // Was successful let everyone else know.
-        //aMessage = new SharedMemoryReadedMessage(this,
+        //message = new SharedMemoryReadedMessage(this,
         //  shmId);
-        //sendMessage(aMessage);
+        //sendMessage(message);
       }
     }
     else
     {
       // No such Shrm
-      //aMessage = new ReturnValueMessage(this, -1);
-      //sendMessage(aMessage);
+      //message = new ReturnValue(this, -1);
+      //sendMessage(message);
     }
   }
 
@@ -319,21 +325,21 @@ public class IPC extends OSMessageHandler
         SharedMemory shShrm = (SharedMemory) sharedMemoryIdTable.get(iShrmID);
         short sResult = shShrm.write(offset, newValue);
         // Let kernel know the result
-        //aMessage = new ReturnValueMessage(this, sResult);
-        //sendMessage(aMessage);
+        //message = new ReturnValue(this, sResult);
+        //sendMessage(message);
         // Was it a success?
         if(sResult != -1)
         {
           // Then let others know
-          //aMessage = new MessageAdapter(this, shmId);
-          //sendMessage(aMessage);
+          //message = new MessageAdapter(this, shmId);
+          //sendMessage(message);
         }
     }
     else
     {
       // No such Shrm?
-      //aMessage = new ReturnValueMessage(this, -1);
-      //sendMessage(aMessage);
+      //message = new ReturnValue(this, -1);
+      //sendMessage(message);
     }
   }
 
@@ -347,20 +353,20 @@ public class IPC extends OSMessageHandler
       //  sharedMemoryIdTable.get(shmId);
       //int size = shShrm.size();
       // Let kernel know the result
-      //aMessage = new ReturnValueMessage(this, (short) size);
-      //sendMessage(aMessage);
+      //message = new ReturnValue(this, (short) size);
+      //sendMessage(message);
       //if (size != -1)
       //{
-        //aMessage = new SharedMemorySizeMessage(this,
+        //message = new SharedMemorySizeMessage(this,
         //  shmId);
-        //sendMessage(aMessage);
+        //sendMessage(message);
       //}
     }
     else
     {
       // Don't know about this segment?
-      //aMessage = new ReturnValueMessage(this, -1);
-      //sendMessage(aMessage);
+      //message = new ReturnValue(this, -1);
+      //sendMessage(message);
     }
   }
 
@@ -377,11 +383,11 @@ public class IPC extends OSMessageHandler
     }
   }
 
-  public void processMessage(UniversalMessageAdapter aMessage)
+  public void processMessage(UniversalMessageAdapter message)
   {
     try
     {
-      aMessage.doMessage(this);
+      message.doMessage(this);
     }
     catch (Exception e)
     {

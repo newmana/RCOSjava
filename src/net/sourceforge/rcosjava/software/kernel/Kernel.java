@@ -374,34 +374,34 @@ public class Kernel extends OSMessageHandler
       getInstructionRegister().getWordParameter();
     if (call == Instruction.SYS_CHIN)
     {
-      ChIn msg = new
+      ChIn message = new
         ChIn(this, getCurrentProcess().getTerminalId());
-      sendMessage(msg);
+      sendMessage(message);
     }
     else if (call == Instruction.SYS_CHOUT)
     {
       //Decrement of stack pointer before getting value. Bug fix.
       myCPU.getContext().decStackPointer();
-      ChOut msg = new
+      ChOut message = new
         ChOut(this, getCurrentProcess().getTerminalId(),
         (char)
         myCPU.getProcessStack().read(myCPU.getContext().getStackPointer()));
-      sendMessage(msg);
+      sendMessage(message);
     }
     else if (call == Instruction.SYS_NUMIN)
     {
-      NumIn msg = new
+      NumIn message = new
         NumIn(this,
           getCurrentProcess().getTerminalId());
-      sendMessage(msg);
+      sendMessage(message);
     }
     else if (call == Instruction.SYS_NUMOUT)
     {
-      NumOut msg = new
+      NumOut message = new
         NumOut(this, getCurrentProcess().getTerminalId(),
           (short) myCPU.getProcessStack().read(
           myCPU.getContext().getStackPointer()));
-      sendMessage(msg);
+      sendMessage(message);
       myCPU.getContext().decStackPointer();
     }
     else if (call == Instruction.SYS_STROUT)
@@ -415,10 +415,10 @@ public class Kernel extends OSMessageHandler
            count<=myCPU.getContext().getStackPointer()+length;
            count++)
       {
-        ChOut msg = new
+        ChOut message = new
           ChOut(this, getCurrentProcess().getTerminalId(),
             (char) myCPU.getProcessStack().read(count));
-        sendMessage(msg);
+        sendMessage(message);
       }
     }
     else if (call == Instruction.SYS_SEM_CREATE)
@@ -428,39 +428,42 @@ public class Kernel extends OSMessageHandler
       myCPU.getContext().decStackPointer();
       // get the semaphore's name using getName()
       // send the message
-      SemaphoreCreate msg = new SemaphoreCreate(
+      SemaphoreCreate message = new SemaphoreCreate(
         this, getName(), getCurrentProcess().getPID(), initValue);
-      sendMessage(msg);
+      sendMessage(message);
     }
     else if (call == Instruction.SYS_SEM_OPEN)
     {
       //get the semaphore's name using getName()
       //send the message
-      SemaphoreOpen msg = new SemaphoreOpen(
+      SemaphoreOpen message = new SemaphoreOpen(
         this, getName(), getCurrentProcess().getPID());
-      sendMessage(msg);
+      sendMessage(message);
     }
     else if (call == Instruction.SYS_SEM_CLOSE)
     {
       int semaphoreId = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
       myCPU.getContext().decStackPointer();
-      SemaphoreClose msg = new SemaphoreClose(
+      SemaphoreClose message = new SemaphoreClose(
         this, semaphoreId, getCurrentProcess().getPID());
+      sendMessage(message);
     }
     else if (call == Instruction.SYS_SEM_SIGNAL)
     {
       int semaphoreId = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
+      System.out.println("Doing Semaphore signal" + semaphoreId);
       myCPU.getContext().decStackPointer();
-      SemaphoreSignal msg = new SemaphoreSignal(
+      SemaphoreSignal message = new SemaphoreSignal(
         this, semaphoreId, getCurrentProcess().getPID());
+      sendMessage(message);
     }
     else if (call == Instruction.SYS_SEM_WAIT)
     {
       int semaphoreId = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
       myCPU.getContext().decStackPointer();
-      SemaphoreWait msg = new SemaphoreWait(
+      SemaphoreWait message = new SemaphoreWait(
         this, semaphoreId, getCurrentProcess().getPID());
-      sendMessage(msg);
+      sendMessage(message);
     }
     else if (call == Instruction.SYS_SHR_CREATE)
     {
@@ -469,23 +472,23 @@ public class Kernel extends OSMessageHandler
       myCPU.getContext().decStackPointer();
       //get the shared mem name using getName()
       //send the message
-      //SharedMemoryCreateMessage msg = new SharedMemoryCreateMessage(this,
+      //SharedMemoryCreateMessage message = new SharedMemoryCreateMessage(this,
       //  getName(), myCPU.getCurrentProcess().getPID(), iLength);
-      //sendMessage(msg);
+      //sendMessage(message);
     }
     else if (call == Instruction.SYS_SHR_OPEN)
     {
       //get the shared mem name using getName()
       //send the message
-      //SharedMemoryOpenMessage msg = new SharedMemoryOpenMessage(this,
+      //SharedMemoryOpenMessage message = new SharedMemoryOpenMessage(this,
       //  getName(), myCPU.getCurrentProcess().getPID());
-      //sendMessage(msg);
+      //sendMessage(message);
     }
     else if (call == Instruction.SYS_SHR_CLOSE)
     {
       int shareMemId = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
       myCPU.getContext().decStackPointer();
-      //SharedMemoryCloseMessage msg = new SharedMemoryCloseMessage(this,
+      //SharedMemoryCloseMessage message = new SharedMemoryCloseMessage(this,
       //  iSharedMemID, myCPU.getCurrentProcess().getPID());
     }
     else if (call == Instruction.SYS_SHR_READ)
@@ -494,7 +497,7 @@ public class Kernel extends OSMessageHandler
       myCPU.getContext().decStackPointer();
       int sharedMemId = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
       myCPU.getContext().decStackPointer();
-      //SharedMemoryReadMessage msg = SharedMemoryReadMessage(this,
+      //SharedMemoryReadMessage message = SharedMemoryReadMessage(this,
       //  iSharedMemID, iOffset);
     }
     else if (call == Instruction.SYS_SHR_WRITE)
@@ -504,13 +507,13 @@ public class Kernel extends OSMessageHandler
       int offset = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
       myCPU.getContext().decStackPointer();
       int sharedMemId = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
-      //SharedMemoryWriteMessage msg = SharedMemoryWriteMessage(this,
+      //SharedMemoryWriteMessage message = SharedMemoryWriteMessage(this,
       //  iSharedMemID, iOffset, (short) iNewValue);
     }
     else if (call == Instruction.SYS_SHR_SIZE)
     {
       int sharedMemId = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
-      //SharedMemorySizeMessae msg = SharedMemorySizeMessage(this,
+      //SharedMemorySizeMessae message = SharedMemorySizeMessage(this,
       //  iSharedMemID);
     }
     else if (call == Instruction.SYS_FORK)
@@ -538,14 +541,16 @@ public class Kernel extends OSMessageHandler
   }
 
   // getName
-  // - take a name off the stack from current StackPointer
-  // - fixed a bug where it was missing it by one ie. my_sem
-  //   became amy_se.
 
+  /**
+   * Take a name off the stack from current StackPointer
+   * - fixed a bug where it was missing it by one ie. my_sem
+   *   became amy_se.
+   */
   public String getName()
   {
     int length = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
-//    myCPU.getContext()StackPointer--;
+    //myCPU.getContext().decStackPointer();
 
     char[] name = new char[length];
 

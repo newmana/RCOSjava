@@ -1,44 +1,42 @@
-// ************************************************************************
-// FILE:     SemaphoreSignalMessage.java
-// PURPOSE:  Message sent to IPC manager for Close semaphore
-//           type messages.
-// AUTHOR:   Andrew Newman
-// MODIFIED:
-// HISTORY:  11/08/98 Completed. AN
-//
-// ************************************************************************
-
 package net.sourceforge.rcosjava.messaging.messages.os;
 
 import net.sourceforge.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import net.sourceforge.rcosjava.software.ipc.IPC;
 import net.sourceforge.rcosjava.software.kernel.Kernel;
 
+/**
+ * Message sent to IPC manager for signal semaphore type messages.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 11th of August 1998
+ */
 public class SemaphoreSignal extends OSMessageAdapter
 {
-  private int iSemaphoreID;
-  private int iPID;
+  private int semaphoreId;
+  private int pid;
 
   public SemaphoreSignal(OSMessageHandler theSource,
-    int iNewSemaphoreID, int iNewPID)
+    int newSemaphoreId, int newPID)
   {
     super(theSource);
-    iSemaphoreID = iNewSemaphoreID;
-    iPID = iNewPID;
+    semaphoreId = newSemaphoreId;
+    pid = newPID;
   }
 
-  public void setSemaphoreID(int iNewSemaphoreID)
+  public void setSemaphoreID(int newSemaphoreId)
   {
-    iSemaphoreID = iNewSemaphoreID;
+    semaphoreId = newSemaphoreId;
   }
 
-  public void setProcessID(int iNewPID)
+  public void setProcessID(int newPID)
   {
-    iPID = iNewPID;
+    pid = newPID;
   }
 
   public void doMessage(IPC theElement)
   {
-    theElement.sempahoreSignal(iSemaphoreID, iPID);
+    System.out.println("Message called IPC!");
+    theElement.sempahoreSignal(semaphoreId, pid);
   }
 }
