@@ -22,10 +22,9 @@ public class FileMessages
    */
   public final static String EOF = "[EOF]";
 
-//Possible requests
-/**
- * Description of the Field
- */
+  /**
+   * Description of the Field
+   */
   public final static String Q_HANGUP = "Q000";
 
   /**
@@ -53,86 +52,101 @@ public class FileMessages
    */
   public final static String Q_FILE_STATS = "Q400";
 
-//Possible replies
-//Errors
-/**
- * Description of the Field
- */
+  /**
+   * Description of the Field
+   */
   public final static String A_INVALID_COMMAND = "A001";
+
   /**
    * Description of the Field
    */
   public final static String A_INCORRECT_USAGE = "A002";
+
   /**
    * Description of the Field
    */
   public final static String A_CANNOT_ACCESS_DIRECTORY = "A003";
+
   /**
    * Description of the Field
    */
   public final static String A_DIRECTORY_DOES_NOT_EXIST = "A004";
+
   /**
    * Description of the Field
    */
   public final static String A_CANNOT_ACCESS_FILE = "A005";
+
   /**
    * Description of the Field
    */
   public final static String A_FILE_DOES_NOT_EXIST = "A006";
+
   /**
    * Description of the Field
    */
   public final static String A_CANNOT_CREATE_DIRECTORY = "A007";
+
   /**
    * Description of the Field
    */
   public final static String A_DESC_INCORRECT_USAGE = "Incorrect Usage";
+
   /**
    * Description of the Field
    */
   public final static String A_DESC_CANNOT_ACCESS_DIRECTORY = "Cannot access directory";
+
   /**
    * Description of the Field
    */
   public final static String A_DESC_DIRECTORY_DOES_NOT_EXIST = "Directory doesn't exist";
+
   /**
    * Description of the Field
    */
   public final static String A_DESC_CANNOT_ACCESS_FILE = "Cannot access file";
+
   /**
    * Description of the Field
    */
   public final static String A_DESC_FILE_DOES_NOT_EXIST = "File doesn't exist";
+
   /**
    * Description of the Field
    */
   public final static String A_DESC_CANNOT_CREATE_DIRECTORY = "Couldn't create directory";
 
-//Success
-/**
- * Description of the Field
- */
+  /**
+   * Description of the Field
+   */
   public final static String A_DIRECTORY_LIST = "A100";
+
   /**
    * Description of the Field
    */
   public final static String A_READ_FILE_DATA = "A200";
+
   /**
    * Description of the Field
    */
   public final static String A_WRITE_FILE_DATA = "A300";
+
   /**
    * Description of the Field
    */
   public final static String A_FILE_STATS = "A400";
+
   /**
    * Description of the Field
    */
   public final static String A_DIRECTORY_CREATED = "A500";
+
   /**
    * Description of the Field
    */
   private final static String padding = spacer + "0" + spacer + "1" + spacer;
+
   /**
    * Description of the Field
    */
@@ -142,17 +156,15 @@ public class FileMessages
    * Description of the Field
    */
   private BufferedOutputStream writer;
-//  private DataOutputStream writer;
 
-/**
- * Description of the Field
- */
+  /**
+   * Description of the Field
+   */
   private BufferedInputStream reader;
-//  private DataInputStream reader;
 
-/**
- * Description of the Field
- */
+  /**
+   * Description of the Field
+   */
   private String message, messageData, messageType, previousRequestMessage;
 
   /**
@@ -170,8 +182,6 @@ public class FileMessages
   {
     reader = new BufferedInputStream(newInputStream);
     writer = new BufferedOutputStream(newOutputStream);
-//    reader = new DataInputStream(newInputStream);
-//    writer = new DataOutputStream(newOutputStream);
   }
 
   /**
@@ -224,13 +234,7 @@ public class FileMessages
       String strTmpMessage = "";
       int result;
 
-//      while (!end)
-//      {
-//        strTmpMessage = reader.readUTF();
-//        end = strTmpMessage.endsWith(EOF);
-//        tmpMessage.append(strTmpMessage);
-//      }
-
+      // Read the message until we get to the end of stream or the end of file.
       do
       {
         result = reader.read(buffer);
@@ -239,13 +243,10 @@ public class FileMessages
           strTmpMessage += new String(buffer);
           end = strTmpMessage.endsWith(EOF);
         }
-      } while (!end || result == -1);
+      } while (!end && result != -1);
 
       message = strTmpMessage.substring(0, strTmpMessage.length() -
-                                        EOF.length());
-//
-//      tmpMessage.setLength(tmpMessage.length() - EOF.length());
-//      message = tmpMessage.toString();
+          EOF.length());
 
       if (message != null)
       {
@@ -302,12 +303,12 @@ public class FileMessages
    * @return Description of the Returned Value
    */
   public boolean askDirectoryListing(int directoryIndicator,
-                                     String directoryName)
+    String directoryName)
   {
     if (directoryName != null)
     {
-      return (writeMessage(Q_DIRECTORY_LIST + spacer + directoryIndicator + spacer +
-                           directoryName));
+      return (writeMessage(Q_DIRECTORY_LIST + spacer + directoryIndicator +
+          spacer + directoryName));
     }
     else
     {
@@ -323,12 +324,12 @@ public class FileMessages
    * @return Description of the Returned Value
    */
   public boolean askDirectoryCreate(int directoryIndicator,
-                                    String directoryName)
+    String directoryName)
   {
     if (directoryName != null)
     {
       return (writeMessage(Q_DIRECTORY_CREATE + spacer + directoryIndicator + spacer +
-                           directoryName));
+          directoryName));
     }
     else
     {
@@ -347,8 +348,8 @@ public class FileMessages
   {
     if (filename != null)
     {
-      return (writeMessage(Q_READ_FILE_DATA + spacer + directoryIndicator + spacer +
-                           filename));
+      return (writeMessage(Q_READ_FILE_DATA + spacer + directoryIndicator +
+          spacer + filename));
     }
     else
     {
@@ -365,12 +366,12 @@ public class FileMessages
    * @return Description of the Returned Value
    */
   public boolean askWriteFileData(int directoryIndicator, String filename,
-                                  String fileData)
+    String fileData)
   {
     if (filename != null)
     {
       return (writeMessage(Q_WRITE_FILE_DATA + spacer + directoryIndicator + spacer +
-                           "1" + spacer + filename + spacer + fileData));
+          "1" + spacer + filename + spacer + fileData));
     }
     else
     {
@@ -427,8 +428,8 @@ public class FileMessages
     {
       if (!writeMessage((spacer + directoryList[count]), false))
       {
-      return false;
-    }
+        return false;
+      }
     }
     flushOutStream();
     return true;
@@ -444,7 +445,7 @@ public class FileMessages
   {
     previousRequestSize = fileData.length;
     if (!writeMessage(A_READ_FILE_DATA + spacer + "0" + spacer +
-                      previousRequestSize + spacer, false))
+        previousRequestSize + spacer, false))
     {
       return false;
     }
@@ -466,12 +467,13 @@ public class FileMessages
   }
 
   /**
-   * Description of the Method
+   * Writer the reply to the file stat message with the length in bytes of the
+   * file.
    *
-   * @param fileSize Description of Parameter
-   * @return Description of the Returned Value
+   * @param fileSize length in bytes of the file.
+   * @return if it was successful.
    */
-  public boolean replyFileStat(int fileSize)
+  public boolean replyFileStat(long fileSize)
   {
     return (writeMessage(A_FILE_STATS + spacer + "0" + spacer + fileSize));
   }
@@ -515,7 +517,7 @@ public class FileMessages
   public boolean replyCannotAccessDirectoryMessage()
   {
     return (replyErrorMessage(A_CANNOT_ACCESS_DIRECTORY + padding +
-                              A_DESC_CANNOT_ACCESS_DIRECTORY));
+        A_DESC_CANNOT_ACCESS_DIRECTORY));
   }
 
   /**
@@ -527,7 +529,7 @@ public class FileMessages
   public boolean replyCannotAccessFileMessage(String filename)
   {
     return (replyErrorMessage(A_CANNOT_ACCESS_FILE + padding +
-                              A_DESC_CANNOT_ACCESS_FILE + ": " + filename));
+        A_DESC_CANNOT_ACCESS_FILE + ": " + filename));
   }
 
   /**
@@ -539,7 +541,7 @@ public class FileMessages
   public boolean replyDirectoryDoesNotExistMessage(String directory)
   {
     return (replyErrorMessage(A_DIRECTORY_DOES_NOT_EXIST + padding +
-                              A_DESC_DIRECTORY_DOES_NOT_EXIST + ": " + directory));
+        A_DESC_DIRECTORY_DOES_NOT_EXIST + ": " + directory));
   }
 
   /**
@@ -551,7 +553,7 @@ public class FileMessages
   public boolean replyFileDoesNotExistMessage(String filename)
   {
     return (replyErrorMessage(A_FILE_DOES_NOT_EXIST + padding +
-                              A_DESC_FILE_DOES_NOT_EXIST + ": " + filename));
+        A_DESC_FILE_DOES_NOT_EXIST + ": " + filename));
   }
 
   /**
@@ -563,7 +565,7 @@ public class FileMessages
   public boolean replyCannotCreateDirectory(String filename)
   {
     return (replyErrorMessage(A_CANNOT_CREATE_DIRECTORY + padding +
-                              A_DESC_CANNOT_CREATE_DIRECTORY + ": " + filename));
+        A_DESC_CANNOT_CREATE_DIRECTORY + ": " + filename));
   }
 
   /**
@@ -611,10 +613,10 @@ public class FileMessages
   }
 
   /**
-   * Description of the Method
+   * Write a message, flushing the buffer automatically.
    *
-   * @param message Description of Parameter
-   * @return Description of the Returned Value
+   * @param message the message to write.
+   * @return whether it was sucessful.
    */
   private boolean writeMessage(String message)
   {
@@ -622,11 +624,11 @@ public class FileMessages
   }
 
   /**
-   * Description of the Method
+   * Write the message to the output stream and flush if appropriate.
    *
-   * @param message Description of Parameter
-   * @param flush Description of Parameter
-   * @return Description of the Returned Value
+   * @param message the message as to be converted to a string.
+   * @param flush whether to flush or not.
+   * @return if it was successful.
    */
   private boolean writeMessage(byte[] message, boolean flush)
   {
@@ -634,11 +636,11 @@ public class FileMessages
   }
 
   /**
-   * Description of the Method
+   * Write the message to the output stream and flush if appropriate.
    *
-   * @param message Description of Parameter
-   * @param flush Description of Parameter
-   * @return Description of the Returned Value
+   * @param message the message to write.
+   * @param flush whether to flush the stream or not.
+   * @return if it was successful.
    */
   private boolean writeMessage(String message, boolean flush)
   {
@@ -646,7 +648,6 @@ public class FileMessages
     {
       previousRequestMessage = message;
       writer.write(message.getBytes());
-//      writer.writeUTF(message);
 
       if (flush)
       {
@@ -663,14 +664,13 @@ public class FileMessages
   }
 
   /**
-   * Description of the Method
+   * Write the EOF bytes and flush.
    */
   private void flushOutStream()
   {
     try
     {
       writer.write(EOF.getBytes());
-//      writer.writeUTF(EOF);
       writer.flush();
     }
     catch (IOException ioe)
