@@ -61,12 +61,13 @@ public class SymbolTable
   public void addSymbol(Symbol newSymbol)
     throws ParserException, IOException, LexerException
   {
-    System.out.println("Adding symbol: " + newSymbol.getName());
     if (symbols.containsKey(newSymbol.getName()))
     {
       HashMap symbolMap = (HashMap) symbols.get(newSymbol.getName());
       if (null == symbolMap.get(new Short(newSymbol.getLevel())))
       {
+        short newOffset = (short) (symbolMap.size() + symbols.size() + 3);
+        newSymbol.setOffset(newOffset);
         symbolMap.put(new Short(newSymbol.getLevel()), newSymbol);
       }
       else
@@ -80,6 +81,7 @@ public class SymbolTable
     else
     {
       HashMap symbolMap = new HashMap();
+      newSymbol.setOffset(((short) (symbols.size() + 3)));
       symbolMap.put(new Short(newSymbol.getLevel()), newSymbol);
       symbols.put(newSymbol.getName(), symbolMap);
     }
@@ -135,8 +137,6 @@ public class SymbolTable
    */
   private Symbol getSymbol(String name, short level) throws Exception
   {
-    System.out.println("Getting symbol: " + name);
-    System.out.println("Getting symbol: " + level);
     Symbol symbol = null;
 
     if (symbols.containsKey(name))

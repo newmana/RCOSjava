@@ -63,4 +63,14 @@ public abstract class Symbol
   {
     return offset;
   }
+
+  /**
+   * Sets the location of the variable in the stack.
+   *
+   * @param newOffset the offset in the stack of the variable.
+   */
+  public void setOffset(short newOffset)
+  {
+    offset = newOffset;
+  }
 }
