@@ -28,57 +28,36 @@ import org.rcosjava.software.animator.support.RCOSList;
 public class ProcessManagerFrame extends RCOSFrame
 {
   /**
-   * Description of the Field
+   * The process manager that I am representing.
    */
   private ProcessManagerAnimator myProcessManager;
 
   /**
    * Description of the Field
    */
-  private Image myImages[];
+  private JDialog changePriorityDialog;
 
   /**
    * Description of the Field
    */
-  private Message msg;
+  private JLabel processPrompt;
 
   /**
    * Description of the Field
    */
-  private RCOSList processList;
-
-  /**
-   * Description of the Field
-   */
-  private Dialog changePriorityDialog;
-
-  /**
-   * Description of the Field
-   */
-  private NewLabel processPrompt;
-
-  /**
-   * Description of the Field
-   */
-  private TextField priorityTextField;
+  private JTextField priorityTextField;
 
   /**
    * Constructor for the ProcessManagerFrame object
    *
    * @param x Description of Parameter
    * @param y Description of Parameter
-   * @param images Description of Parameter
    * @param thisProcessManager Description of Parameter
    */
-  public ProcessManagerFrame(int x, int y, ImageIcon[] images,
+  public ProcessManagerFrame(int x, int y,
       ProcessManagerAnimator thisProcessManager)
   {
     setTitle("Process Manager");
-    myImages = new Image[images.length];
-    for (int index = 0; index < images.length; index++)
-    {
-      myImages[index] = images[index].getImage();
-    }
     myProcessManager = thisProcessManager;
     setSize(x, y);
   }
@@ -90,123 +69,47 @@ public class ProcessManagerFrame extends RCOSFrame
    */
   public void setupLayout(Component c)
   {
-    Panel dialogPanel = new Panel();
+    changePriorityDialog = new JDialog(ProcessManagerFrame.this,
+        "Change Priority", false);
+    Container dialogContainer = changePriorityDialog.getContentPane();
+    dialogContainer.setLayout(new BorderLayout());
 
-    changePriorityDialog = new
-        Dialog(ProcessManagerFrame.this, "Change Priority", true);
     changePriorityDialog.setBackground(defaultBgColour);
     changePriorityDialog.setForeground(defaultFgColour);
     changePriorityDialog.setFont(defaultFont);
     changePriorityDialog.setSize(new Dimension(250, 90));
-    processPrompt = new NewLabel("Priority of Process XX (1-100): ", titleFont);
-    dialogPanel.add(processPrompt);
-    priorityTextField = new TextField(2);
+
+    JPanel priorityPanel = new JPanel();
+    priorityPanel.setBackground(defaultBgColour);
+    priorityPanel.setForeground(defaultFgColour);
+    processPrompt = new JLabel("Priority of Process XX (1-100): ");
+    processPrompt.setBackground(defaultBgColour);
+    processPrompt.setForeground(defaultFgColour);
+    priorityPanel.add(processPrompt,  BorderLayout.CENTER);
+    priorityTextField = new JTextField(3);
     priorityTextField.setBackground(defaultBgColour);
     priorityTextField.setForeground(defaultFgColour);
-    dialogPanel.add(priorityTextField);
+    priorityPanel.add(priorityTextField);
 
+    JPanel okCancelPanel = new JPanel();
+    okCancelPanel.setBackground(defaultBgColour);
+    okCancelPanel.setForeground(defaultFgColour);
     JButton tmpOkayButton = new JButton("Ok");
-
     tmpOkayButton.addMouseListener(new OkPriorityDialog());
-    dialogPanel.add(tmpOkayButton);
-
+    okCancelPanel.add(tmpOkayButton);
     JButton tmpCancelButton = new JButton("Cancel");
-
     tmpCancelButton.addMouseListener(new CancelPriorityDialog());
-    dialogPanel.add(tmpCancelButton);
-    changePriorityDialog.add(dialogPanel);
+    okCancelPanel.add(tmpCancelButton, BorderLayout.SOUTH);
 
-    Panel mainPanel = new Panel();
-    Panel closePanel = new Panel();
-    NewLabel tmpLabel;
-
-    GridBagConstraints constraints = new GridBagConstraints();
-    GridBagLayout gridBag = new GridBagLayout();
-
-    mainPanel.setLayout(gridBag);
-    constraints.gridwidth = 1;
-    constraints.gridheight = 1;
-    constraints.weighty = 1;
-    constraints.weightx = 1;
-    constraints.insets = new Insets(3, 1, 3, 1);
-
-    GraphicButton tmpGButton;
-
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
-    constraints.anchor = GridBagConstraints.WEST;
-    tmpLabel = new NewLabel("Processes", titleFont);
-    gridBag.setConstraints(tmpLabel, constraints);
-    mainPanel.add(tmpLabel);
-
-    constraints.gridwidth = 1;
-    constraints.gridheight = 2;
-    constraints.anchor = GridBagConstraints.CENTER;
-    processList = new RCOSList(this, 5, false);
-    gridBag.setConstraints(processList, constraints);
-    mainPanel.add(processList);
-
-    constraints.gridheight = 1;
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
-    constraints.anchor = GridBagConstraints.CENTER;
-    tmpGButton = new GraphicButton(myImages[0], myImages[1],
-        "Priority", defaultFont, buttonColour, true);
-    gridBag.setConstraints(tmpGButton, constraints);
-    mainPanel.add(tmpGButton);
-    tmpGButton.addMouseListener(new ChangePriority());
-
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
-    constraints.anchor = GridBagConstraints.CENTER;
-    tmpGButton = new GraphicButton(myImages[0], myImages[1],
-        "Kill", defaultFont, buttonColour, true);
-    gridBag.setConstraints(tmpGButton, constraints);
-    mainPanel.add(tmpGButton);
-    tmpGButton.addMouseListener(new KillProcess());
-
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
-    constraints.anchor = GridBagConstraints.WEST;
-    tmpLabel = new NewLabel("Command", titleFont);
-    gridBag.setConstraints(tmpLabel, constraints);
-    mainPanel.add(tmpLabel);
-
-    constraints.gridwidth = 1;
-    constraints.anchor = GridBagConstraints.CENTER;
-    tmpGButton = new GraphicButton(myImages[0], myImages[1],
-        "Stop", defaultFont, buttonColour, true);
-    gridBag.setConstraints(tmpGButton, constraints);
-    mainPanel.add(tmpGButton);
-    tmpGButton.addMouseListener(new StopProcess());
-
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
-    constraints.anchor = GridBagConstraints.CENTER;
-    tmpGButton = new GraphicButton(myImages[0], myImages[1],
-        "Run", defaultFont, buttonColour, true);
-    gridBag.setConstraints(tmpGButton, constraints);
-    mainPanel.add(tmpGButton);
-    tmpGButton.addMouseListener(new RunProcess());
-
-    closePanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-    tmpButton = new JButton("Close");
-    closePanel.add(tmpButton);
-    tmpButton.addMouseListener(new CloseAnimator());
-
-    getContentPane().add("Center", mainPanel);
-    getContentPane().add("South", closePanel);
+    dialogContainer.add(priorityPanel, BorderLayout.CENTER);
+    dialogContainer.add(okCancelPanel, BorderLayout.SOUTH);
   }
 
   /**
-   * Adds a feature to the Notify attribute of the ProcessManagerFrame object
-   */
-  public void addNotify()
-  {
-    repaint();
-    super.addNotify();
-  }
-
-  /**
-   * Description of the Method
+   * Display the process prompt and change it to the process id.
    *
-   * @param processId Description of Parameter
-   * @param processPriority Description of Parameter
+   * @param processId the process id to modify.
+   * @param processPriority the current priority of the process.
    */
   public void promptProcessPriority(int processId, int processPriority)
   {
@@ -214,110 +117,6 @@ public class ProcessManagerFrame extends RCOSFrame
     priorityTextField.setText(Integer.toString(processPriority));
     changePriorityDialog.show();
     priorityTextField.transferFocus();
-  }
-
-  /**
-   * Description of the Method
-   */
-  void clearProcesses()
-  {
-    this.processList.removeAll();
-  }
-
-  /**
-   * Adds a feature to the Process attribute of the ProcessManagerFrame object
-   *
-   * @param sNewProcess The feature to be added to the Process attribute
-   */
-  void addProcess(String sNewProcess)
-  {
-    this.processList.add(sNewProcess);
-  }
-
-  /**
-   * Description of the Class
-   *
-   * @author administrator
-   * @created 28 April 2002
-   */
-  class KillProcess extends MouseAdapter
-  {
-    /**
-     * Description of the Method
-     *
-     * @param e Description of Parameter
-     */
-    public void mouseClicked(MouseEvent e)
-    {
-      if (processList.getSelectedItem() != null)
-      {
-        int process = Integer.parseInt(processList.getSelectedItem());
-        myProcessManager.sendKillMessage(process);
-      }
-    }
-  }
-
-  /**
-   * Description of the Class
-   *
-   * @author administrator
-   * @created 28 April 2002
-   */
-  class ChangePriority extends MouseAdapter
-  {
-    /**
-     * Description of the Method
-     *
-     * @param e Description of Parameter
-     */
-    public void mouseClicked(MouseEvent e)
-    {
-      if (processList.getSelectedItem() != null)
-      {
-        int process = Integer.parseInt(processList.getSelectedItem());
-
-        myProcessManager.sendRequestProcessPriority(process);
-      }
-    }
-  }
-
-
-  /**
-   * Description of the Class
-   *
-   * @author administrator
-   * @created 28 April 2002
-   */
-  class StopProcess extends MouseAdapter
-  {
-    /**
-     * Description of the Method
-     *
-     * @param e Description of Parameter
-     */
-    public void mouseClicked(MouseEvent e)
-    {
-      //myProcessManager.sendStopMessage();
-    }
-  }
-
-  /**
-   * Description of the Class
-   *
-   * @author administrator
-   * @created 28 April 2002
-   */
-  class RunProcess extends MouseAdapter
-  {
-    /**
-     * Description of the Method
-     *
-     * @param e Description of Parameter
-     */
-    public void mouseClicked(MouseEvent e)
-    {
-      //myProcessManager.sendRunMessage();
-    }
   }
 
   /**

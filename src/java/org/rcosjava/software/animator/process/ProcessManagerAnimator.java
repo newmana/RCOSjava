@@ -1,6 +1,6 @@
 package org.rcosjava.software.animator.process;
-import java.applet.*;
 
+import java.applet.*;
 import java.awt.*;
 import javax.swing.*;
 import java.net.*;
@@ -33,12 +33,12 @@ public class ProcessManagerAnimator extends AnimatorMessageHandler
   private final static String MESSENGING_ID = "ProcessManagerAnimator";
 
   /**
-   * Description of the Field
+   * Queue containing the current running processes.
    */
   private LIFOQueue currentProcesses;
 
   /**
-   * Description of the Field
+   * Current id of the process running.
    */
   private int currentProcessId;
 
@@ -51,7 +51,16 @@ public class ProcessManagerAnimator extends AnimatorMessageHandler
    * Menu items to add and delete process ids from.
    */
   private JMenuItem processMenuItem, killMenuItem, changeMenuItem;
+
+  /**
+   * Parent menu item that contains the new, kill and change options.
+   */
   private JMenu menu;
+
+  /**
+   * Process manager frame which displays the priority of a selected process.
+   */
+  private ProcessManagerFrame myFrame;
 
   /**
    * Create an animator office, register with the animator office, set the size
@@ -66,8 +75,31 @@ public class ProcessManagerAnimator extends AnimatorMessageHandler
     super(MESSENGING_ID, postOffice);
     rcos = newRCOS;
     currentProcesses = new LIFOQueue(5, 1);
+    myFrame = new ProcessManagerFrame(100, 100, this);
   }
 
+  /**
+   * Setup the layout of the frame (menus, etc).
+   *
+   * @param c the parent component.
+   */
+  public void setupLayout(Component c)
+  {
+    myFrame.setupLayout(c);
+  }
+
+  /**
+   * Adds the menu items to the animator.  This is from RCOS main process and
+   * used to display to the user.  This should only need to be done once, after
+   * this object has been created.
+   *
+   * @param newMenu the parent menu bar.
+   * @param newProcessMenuItem the menu item for loadi1ng new processes.
+   * @param newKillMenuItem the menu item to display all processes currently
+   *   running so they maybe killed.
+   * @param newChangeMenuItem the menu item to display all processes currently
+   *   running so their priority maybe changed.
+   */
   public void addMenuItems(JMenu newMenu, JMenuItem newProcessMenuItem,
       JMenuItem newKillMenuItem, JMenuItem newChangeMenuItem)
   {
@@ -116,6 +148,8 @@ public class ProcessManagerAnimator extends AnimatorMessageHandler
     menu.remove(killMenuItem);
     menu.remove(changeMenuItem);
 
+    // If there are processes still executing setup the menus to have sub menus
+    // and add the existing ones.
     if (!currentProcesses.queueEmpty())
     {
       killMenuItem = new JMenu(killMenuItem.getText());
@@ -140,6 +174,7 @@ public class ProcessManagerAnimator extends AnimatorMessageHandler
         currentProcesses.goToNext();
       }
     }
+    // Create empty menu items if there are no processes executing.
     else
     {
       killMenuItem = new JMenuItem(killMenuItem.getText());
@@ -167,7 +202,7 @@ public class ProcessManagerAnimator extends AnimatorMessageHandler
    * Request the priority values of the process so that they can be displayed
    * and modified by the user.
    *
-   * @param processId Description of Parameter
+   * @param processId used to find the process in order to get the priority.
    */
   public void sendRequestProcessPriority(int processId)
   {
@@ -180,12 +215,12 @@ public class ProcessManagerAnimator extends AnimatorMessageHandler
    * Display a given process Id and it's process priority so that the user may
    * change it. Calls promptProcessPriority in the frame.
    *
-   * @param processId Description of Parameter
-   * @param processPriority Description of Parameter
+   * @param processId process id to display.
+   * @param processPriority the priority of the process.
    */
   public void returnProcessPriority(int processId, int processPriority)
   {
-//    myFrame.promptProcessPriority(processId, processPriority);
+    myFrame.promptProcessPriority(processId, processPriority);
   }
 
   /**
