@@ -36,7 +36,6 @@ public class SemaphoreSignal extends OSMessageAdapter
 
   public void doMessage(IPC theElement)
   {
-    System.out.println("Message called IPC!");
     theElement.sempahoreSignal(semaphoreId, pid);
   }
 }
