@@ -80,10 +80,17 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   private final static String WELCOME = "Welcome to RCOSjava Version 0.5";
 
   /**
+   * Get line separator
+   */
+  private final static String lineSeparator =
+      System.getProperties().getProperty("line.separator");
+
+  /**
    * Copyright notice.
    */
-  private final static String INFO = "Copyright 1995-2002.\nVersion 0.5.\n" +
-      "Authors: David Jones, Brett Carter, Bruce Jamieson, and Andrew Newman";
+  private final static String INFO = "Copyright 1995-2002." + lineSeparator +
+      "Version 0.5." + lineSeparator + "Authors: David Jones, Brett Carter, " +
+      "Bruce Jamieson, and Andrew Newman";
 
   /**
    * How many terminals wide.
@@ -293,6 +300,11 @@ public class RCOS extends javax.swing.JApplet implements Runnable
    * Images for IPC manager.
    */
   private ImageIcon ipcImages[] = new ImageIcon[1];
+
+  /**
+   * Pause/Run menu item.
+   */
+  private JMenuItem pauseRunMenuItem;
 
   /**
    * Gets the Running attribute of the RCOS class
@@ -540,15 +552,14 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     menu.setMnemonic(KeyEvent.VK_C);
     menuBar.add(menu);
 
-    menuItem = new JMenuItem("Pause");
-    menuItem.addActionListener(new PauseCPUListener());
+    menuItem = new JMenuItem("Step");
+    menuItem.setAccelerator(KeyStroke.getKeyStroke('s'));
+    menuItem.addActionListener(new StepCPUListener());
     menu.add(menuItem);
-    menuItem = new JMenuItem("Stop");
-    menuItem.addActionListener(new StopCPUListener());
-    menu.add(menuItem);
-    menuItem = new JMenuItem("Run");
-    menuItem.addActionListener(new RunCPUListener());
-    menu.add(menuItem);
+    pauseRunMenuItem = new JMenuItem("Pause");
+    pauseRunMenuItem.setAccelerator(KeyStroke.getKeyStroke(' '));
+    pauseRunMenuItem.addActionListener(new PauseRunCPUListener());
+    menu.add(pauseRunMenuItem);
 
     menu = new JMenu("Tour");
     menu.setMnemonic(KeyEvent.VK_T);
@@ -675,27 +686,36 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     }
   }
 
-  private class RunCPUListener implements ActionListener
+  private class StepCPUListener implements ActionListener
   {
     public void actionPerformed(ActionEvent e)
     {
-      System.err.println("Run CPU");
+      System.err.println("Step CPU");
+      if (!theKernel.isPaused())
+      {
+        pauseRunMenuItem.setText("Run");
+        theKernel.pause();
+      }
+
+      theKernel.step();
     }
   }
 
-  private class PauseCPUListener implements ActionListener
+  private class PauseRunCPUListener implements ActionListener
   {
     public void actionPerformed(ActionEvent e)
     {
-      System.err.println("Pause CPU");
-    }
-  }
-
-  private class StopCPUListener implements ActionListener
-  {
-    public void actionPerformed(ActionEvent e)
-    {
-      System.err.println("Stop CPU");
+      System.err.println("Pause/Run CPU");
+      if (!theKernel.isPaused())
+      {
+        pauseRunMenuItem.setText("Run");
+        theKernel.pause();
+      }
+      else
+      {
+        pauseRunMenuItem.setText("Pause");
+        theKernel.unpause();
+      }
     }
   }
 
