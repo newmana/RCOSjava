@@ -101,23 +101,20 @@ public class HardwareTerminal extends RCOSFrame
   public void setupLayout()
   {
     setTitle(theTitle);
-    setBackground(defaultBgColour);
-    setForeground(defaultFgColour);
-    setFont(defaultFont);
+    getContentPane().setBackground(defaultBgColour);
+    getContentPane().setForeground(defaultFgColour);
+    getContentPane().setFont(defaultFont);
 
-    SymWindow2 aSymWindow2 = new SymWindow2();
+    SymWindow2 symWindow2 = new SymWindow2();
 
-    this.addWindowListener(aSymWindow2);
-    this.addKeyListener(new KeyHandler());
+    addWindowListener(symWindow2);
+    addKeyListener(new KeyHandler());
 
-    setLayout(new BorderLayout(5, 5));
-
-    Panel pMain = new Panel();
+    getContentPane().setLayout(new BorderLayout(5, 5));
 
     setVisible(true);
     myScreen = new HardwareTerminalScreen(this);
-    pMain.add(myScreen);
-    add("Center", pMain);
+    getContentPane().add(myScreen);
     pack();
     setSize(myScreen.getWidth(), myScreen.getHeight());
     setResizable(false);
