@@ -45,10 +45,12 @@ public class ProgramManagerAnimator extends RCOSAnimator
    * Description of the Field
    */
   private ProgramManagerFrame pmFrame;
+
   /**
    * Description of the Field
    */
   private String currentFile = "";
+
   /**
    * Description of the Field
    */
@@ -64,7 +66,7 @@ public class ProgramManagerAnimator extends RCOSAnimator
       ImageIcon[] pmImages)
   {
     super(MESSENGING_ID, postOffice);
-    pmFrame = new ProgramManagerFrame(200, 200, pmImages, this);
+    pmFrame = new ProgramManagerFrame(250, 250, pmImages, this);
   }
 
   /**
@@ -75,6 +77,11 @@ public class ProgramManagerAnimator extends RCOSAnimator
   public void setupLayout(Component c)
   {
     pmFrame.setupLayout(c);
+  }
+
+  public void showFrame()
+  {
+    pmFrame.setVisible(true);
   }
 
   /**
