@@ -150,6 +150,7 @@ public class Kernel extends OSMessageHandler
    */
   private RCOSProcess getCurrentProcess()
   {
+    currentProcess.setContext(myCPU.getContext());
     return currentProcess;
   }
 
@@ -177,12 +178,11 @@ public class Kernel extends OSMessageHandler
     //Sends context and current instruction.
     if (runningProcess())
     {
-      SetContext contextMsg = new SetContext(this,
-        (Context) myCPU.getContext().clone());
+      SetContext contextMsg = new SetContext(this, myCPU.getContext());
       sendMessage(contextMsg);
-//      InstructionExecution executionMsg = new
-//        InstructionExecution(this, myCPU.getProcessStack());
-//      sendMessage(executionMsg);
+      InstructionExecution executionMsg = new
+        InstructionExecution(this, myCPU.getProcessStack());
+      sendMessage(executionMsg);
     }
   }
 
@@ -207,8 +207,11 @@ public class Kernel extends OSMessageHandler
     getCurrentProcess().addToCPUTicks(getCurrentProcessTicks());
     if (myCPU.hasCodeToExecute())
     {
-      //RCOSProcess oldCurrent = new RCOSProcess( myCPU.currentProcess );
+      //Save current process and process context
       RCOSProcess oldCurrent = getCurrentProcess();
+
+      //Remove process from CPU and Kernel
+      this.processNull();
 
       // decrement program counter to force the blocking
       // instruction to be re-executed when the process is woken up
@@ -235,12 +238,8 @@ public class Kernel extends OSMessageHandler
     //Save memory if program hasn't terminated.
     if (myCPU.hasCodeToExecute())
     {
-      /*MemoryRequest memSave = new
-        MemoryRequest(newProcess.getPID(), MemoryManager.CODE_SEGMENT,
-        myCPU.getProcessCode().getSegmentSize(),
-        myCPU.getProcessCode());
-      WriteBytes msg = new WriteBytes(this, memSave);
-      sendMessage(msg);*/
+      //Assume that the stack is the only thing worth writing back that the
+      //programs cannot modify their own memory?
       MemoryRequest memSave = new MemoryRequest(getCurrentProcess().getPID(),
         MemoryManager.STACK_SEGMENT, myCPU.getProcessStack().getSegmentSize(),
         myCPU.getProcessStack());
@@ -248,6 +247,8 @@ public class Kernel extends OSMessageHandler
       sendMessage(msg);
     }
     currentProcess = newProcess;
+    myCPU.setContext(currentProcess.getContext());
+    runningProcess = true;
 
     //Get new memory
     MemoryRequest memRead = new MemoryRequest(newProcess.getPID(),
@@ -379,8 +380,7 @@ public class Kernel extends OSMessageHandler
     else if (call == Instruction.SYS_NUMIN)
     {
       NumIn message = new
-        NumIn(this,
-          getCurrentProcess().getTerminalId());
+        NumIn(this, getCurrentProcess().getTerminalId());
       sendMessage(message);
     }
     else if (call == Instruction.SYS_NUMOUT)
@@ -506,7 +506,6 @@ public class Kernel extends OSMessageHandler
     else if (call == Instruction.SYS_FORK)
     {
     }
-    //System.out.println( "KERNEL: HandleSystemCall FINISHED" );
   //  System.err.println( "EXEC" );
 //                    break;
   //  System.err.println( "F_ALLOC" );
@@ -586,7 +585,7 @@ public class Kernel extends OSMessageHandler
 
   /**
    * An inbuilt handler for the process finished interrupt.  When a process
-   * if finished execute the old process is removed, the process time
+   * is finished execute the old process is removed, the process time
    * calculated, and a ProcessFinished message is sent.
    */
   public void handleProcessFinishedInterrupt()

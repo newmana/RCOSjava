@@ -378,7 +378,7 @@ public class ProcessScheduler extends OSMessageHandler
    */
   public void runningToBlocked(RCOSProcess newProcess)
   {
-    removeExecutingProcess(newProcess.getPID());
+    RCOSProcess tmpProcess = removeExecutingProcess(newProcess.getPID());
     newProcess.setStatus(RCOSProcess.BLOCKED);
     insertIntoBlockedQ(newProcess);
   }
