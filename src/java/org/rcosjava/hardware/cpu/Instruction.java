@@ -36,7 +36,7 @@ public class Instruction implements Cloneable, Serializable
     void execute(CPU cpu)
     {
       cpu.getContext().incStackPointer();
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
         cpu.getContext().getInstructionRegister().getWordParameter());
     }
   };
@@ -64,16 +64,16 @@ public class Instruction implements Cloneable, Serializable
       // LOD 255, 0
       if (cpu.getContext().getInstructionRegister().getByteParameter() == 255)
       {
-        cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          (short) cpu.getProcessStack().read(
+        cpu.getStack().write(cpu.getContext().getStackPointer(),
+          (short) cpu.getStack().read(
             cpu.getContext().getStackPointer()));
       }
       // LOD L, N
       else
       {
         cpu.getContext().incStackPointer();
-        cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          (cpu.getProcessStack().read(
+        cpu.getStack().write(cpu.getContext().getStackPointer(),
+          (cpu.getStack().read(
           cpu.findBase(
             cpu.getContext().getInstructionRegister().getByteParameter()) +
             cpu.getContext().getInstructionRegister().getWordParameter())));
@@ -92,20 +92,20 @@ public class Instruction implements Cloneable, Serializable
       // STO 255, 0
       if (cpu.getContext().getInstructionRegister().getByteParameter() == 255)
       {
-        cpu.getProcessStack().write(cpu.getProcessStack().read(
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() - 1)),
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer()));
+        cpu.getStack().write(cpu.getStack().read(
+          cpu.getStack().read(cpu.getContext().getStackPointer() - 1)),
+          cpu.getStack().read(cpu.getContext().getStackPointer()));
         cpu.getContext().decStackPointer();
         cpu.getContext().decStackPointer();
       }
       // STO L, N
       else
       {
-        cpu.getProcessStack().write(
+        cpu.getStack().write(
           cpu.findBase(
             cpu.getContext().getInstructionRegister().getByteParameter()) +
             cpu.getContext().getInstructionRegister().getWordParameter(),
-            cpu.getProcessStack().read(cpu.getContext().getStackPointer()));
+            cpu.getStack().read(cpu.getContext().getStackPointer()));
         cpu.getContext().decStackPointer();
       }
     }
@@ -119,12 +119,12 @@ public class Instruction implements Cloneable, Serializable
   {
     void execute(CPU cpu)
     {
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer() + 1,
+      cpu.getStack().write(cpu.getContext().getStackPointer() + 1,
         cpu.findBase(
           cpu.getContext().getInstructionRegister().getByteParameter()));
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer() + 2,
+      cpu.getStack().write(cpu.getContext().getStackPointer() + 2,
         cpu.getContext().getBasePointer());
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer() + 3,
+      cpu.getStack().write(cpu.getContext().getStackPointer() + 3,
         cpu.getContext().getProgramCounter());
       cpu.getContext().setBasePointer(
         (short) (cpu.getContext().getStackPointer() + 1));
@@ -167,7 +167,7 @@ public class Instruction implements Cloneable, Serializable
   {
     void execute(CPU cpu)
     {
-      if (cpu.getProcessStack().read(cpu.getContext().getStackPointer())
+      if (cpu.getStack().read(cpu.getContext().getStackPointer())
            ==
           cpu.getContext().getInstructionRegister().getByteParameter())
       {
@@ -188,7 +188,7 @@ public class Instruction implements Cloneable, Serializable
     {
       try
       {
-        cpu.getKernel().handleSystemCall();
+        cpu.systemCall();
       }
       catch (java.io.IOException ioe)
       {
@@ -205,12 +205,12 @@ public class Instruction implements Cloneable, Serializable
   {
     void execute(CPU cpu)
     {
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-        (cpu.getProcessStack().read(
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
+        (cpu.getStack().read(
           cpu.findBase(
             cpu.getContext().getInstructionRegister().getByteParameter()) +
           cpu.getContext().getInstructionRegister().getWordParameter() +
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer()))));
+          cpu.getStack().read(cpu.getContext().getStackPointer()))));
     }
   };
 
@@ -222,12 +222,12 @@ public class Instruction implements Cloneable, Serializable
   {
     void execute(CPU cpu)
     {
-      cpu.getProcessStack().write(
+      cpu.getStack().write(
         cpu.findBase(
           cpu.getContext().getInstructionRegister().getByteParameter()) +
           cpu.getContext().getInstructionRegister().getWordParameter() +
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() - 1),
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer()));
+          cpu.getStack().read(cpu.getContext().getStackPointer() - 1),
+          cpu.getStack().read(cpu.getContext().getStackPointer()));
       cpu.getContext().decStackPointer();
       cpu.getContext().decStackPointer();
     }

@@ -36,13 +36,13 @@ public class Operator extends WordParameter
     {
       cpu.getContext().setStackPointer((short) (cpu.getContext().getBasePointer() - 1));
       cpu.getContext().setBasePointer((short)
-          (cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 2)));
+          (cpu.getStack().read(cpu.getContext().getStackPointer() + 2)));
       cpu.getContext().setProgramCounter((short)
-          (cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 3)));
+          (cpu.getStack().read(cpu.getContext().getStackPointer() + 3)));
       //codeToExecute = !(cpu.getContext().getBasePointer() <= 0);
 
-      cpu.setProcessFinished(cpu.getContext().getBasePointer() <= 0);
-      cpu.setCodeToExecute(!cpu.processFinished());
+      cpu.setCodeFinished(cpu.getContext().getBasePointer() <= 0);
+      cpu.setCodeToExecute(!cpu.codeFinished());
     }
   };
 
@@ -53,8 +53,8 @@ public class Operator extends WordParameter
   {
     void execute(CPU cpu)
     {
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          (short) (0 - cpu.getProcessStack().read(cpu.getContext().getStackPointer())));
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
+          (short) (0 - cpu.getStack().read(cpu.getContext().getStackPointer())));
     }
   };
 
@@ -66,9 +66,9 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().decStackPointer();
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          (short) (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) +
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
+          (short) (cpu.getStack().read(cpu.getContext().getStackPointer()) +
+          cpu.getStack().read(cpu.getContext().getStackPointer() + 1)));
     }
   };
 
@@ -81,9 +81,9 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().decStackPointer();
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          (short) (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) -
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
+          (short) (cpu.getStack().read(cpu.getContext().getStackPointer()) -
+          cpu.getStack().read(cpu.getContext().getStackPointer() + 1)));
     }
   };
 
@@ -95,9 +95,9 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().decStackPointer();
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          (short) (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) *
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
+          (short) (cpu.getStack().read(cpu.getContext().getStackPointer()) *
+          cpu.getStack().read(cpu.getContext().getStackPointer() + 1)));
     }
   };
 
@@ -109,9 +109,9 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().decStackPointer();
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          (short) (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) /
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
+          (short) (cpu.getStack().read(cpu.getContext().getStackPointer()) /
+          cpu.getStack().read(cpu.getContext().getStackPointer() + 1)));
     }
   };
 
@@ -122,8 +122,8 @@ public class Operator extends WordParameter
   {
     void execute(CPU cpu)
     {
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          (short) (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) & 1));
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
+          (short) (cpu.getStack().read(cpu.getContext().getStackPointer()) & 1));
     }
   };
 
@@ -135,9 +135,9 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().decStackPointer();
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          (short) (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) %
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
+          (short) (cpu.getStack().read(cpu.getContext().getStackPointer()) %
+          cpu.getStack().read(cpu.getContext().getStackPointer() + 1)));
     }
   };
 
@@ -149,14 +149,14 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().decStackPointer();
-      if (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) ==
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1))
+      if (cpu.getStack().read(cpu.getContext().getStackPointer()) ==
+          cpu.getStack().read(cpu.getContext().getStackPointer() + 1))
       {
-        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 1);
+        cpu.getStack().write(cpu.getContext().getStackPointer(), 1);
       }
       else
       {
-        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 0);
+        cpu.getStack().write(cpu.getContext().getStackPointer(), 0);
       }
     }
   };
@@ -169,14 +169,14 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().decStackPointer();
-      if (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) !=
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1))
+      if (cpu.getStack().read(cpu.getContext().getStackPointer()) !=
+          cpu.getStack().read(cpu.getContext().getStackPointer() + 1))
       {
-        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 1);
+        cpu.getStack().write(cpu.getContext().getStackPointer(), 1);
       }
       else
       {
-        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 0);
+        cpu.getStack().write(cpu.getContext().getStackPointer(), 0);
       }
     }
   };
@@ -190,14 +190,14 @@ public class Operator extends WordParameter
     {
       cpu.getContext().decStackPointer();
 
-      if (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) <
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1))
+      if (cpu.getStack().read(cpu.getContext().getStackPointer()) <
+          cpu.getStack().read(cpu.getContext().getStackPointer() + 1))
       {
-        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 1);
+        cpu.getStack().write(cpu.getContext().getStackPointer(), 1);
       }
       else
       {
-        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 0);
+        cpu.getStack().write(cpu.getContext().getStackPointer(), 0);
       }
     }
   };
@@ -210,14 +210,14 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().decStackPointer();
-      if (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) >=
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1))
+      if (cpu.getStack().read(cpu.getContext().getStackPointer()) >=
+          cpu.getStack().read(cpu.getContext().getStackPointer() + 1))
       {
-        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 1);
+        cpu.getStack().write(cpu.getContext().getStackPointer(), 1);
       }
       else
       {
-        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 0);
+        cpu.getStack().write(cpu.getContext().getStackPointer(), 0);
       }
     }
   };
@@ -230,14 +230,14 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().decStackPointer();
-      if (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) >
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1))
+      if (cpu.getStack().read(cpu.getContext().getStackPointer()) >
+          cpu.getStack().read(cpu.getContext().getStackPointer() + 1))
       {
-        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 1);
+        cpu.getStack().write(cpu.getContext().getStackPointer(), 1);
       }
       else
       {
-        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 0);
+        cpu.getStack().write(cpu.getContext().getStackPointer(), 0);
       }
     }
   };
@@ -250,14 +250,14 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().decStackPointer();
-      if (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) <=
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1))
+      if (cpu.getStack().read(cpu.getContext().getStackPointer()) <=
+          cpu.getStack().read(cpu.getContext().getStackPointer() + 1))
       {
-        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 1);
+        cpu.getStack().write(cpu.getContext().getStackPointer(), 1);
       }
       else
       {
-        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 0);
+        cpu.getStack().write(cpu.getContext().getStackPointer(), 0);
       }
     }
   };
@@ -270,9 +270,9 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().decStackPointer();
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) |
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
+          (cpu.getStack().read(cpu.getContext().getStackPointer()) |
+          cpu.getStack().read(cpu.getContext().getStackPointer() + 1)));
     }
   };
 
@@ -284,9 +284,9 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().decStackPointer();
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) &
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
+          (cpu.getStack().read(cpu.getContext().getStackPointer()) &
+          cpu.getStack().read(cpu.getContext().getStackPointer() + 1)));
     }
   };
 
@@ -298,9 +298,9 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().decStackPointer();
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) ^
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
+          (cpu.getStack().read(cpu.getContext().getStackPointer()) ^
+          cpu.getStack().read(cpu.getContext().getStackPointer() + 1)));
     }
   };
 
@@ -311,8 +311,8 @@ public class Operator extends WordParameter
   {
     void execute(CPU cpu)
     {
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          (short) ~cpu.getProcessStack().read(cpu.getContext().getStackPointer()));
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
+          (short) ~cpu.getStack().read(cpu.getContext().getStackPointer()));
     }
   };
 
@@ -324,9 +324,9 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().decStackPointer();
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) <<
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
+          (cpu.getStack().read(cpu.getContext().getStackPointer()) <<
+          cpu.getStack().read(cpu.getContext().getStackPointer() + 1)));
     }
   };
 
@@ -338,9 +338,9 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().decStackPointer();
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) >>
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
+          (cpu.getStack().read(cpu.getContext().getStackPointer()) >>
+          cpu.getStack().read(cpu.getContext().getStackPointer() + 1)));
     }
   };
 
@@ -351,8 +351,8 @@ public class Operator extends WordParameter
   {
     void execute(CPU cpu)
     {
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          (short) cpu.getProcessStack().read(cpu.getContext().getStackPointer()) + 1);
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
+          (short) cpu.getStack().read(cpu.getContext().getStackPointer()) + 1);
     }
   };
 
@@ -363,8 +363,8 @@ public class Operator extends WordParameter
   {
     void execute(CPU cpu)
     {
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          (short) cpu.getProcessStack().read(cpu.getContext().getStackPointer()) - 1);
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
+          (short) cpu.getStack().read(cpu.getContext().getStackPointer()) - 1);
     }
   };
 
@@ -376,8 +376,8 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().incStackPointer();
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
-          cpu.getProcessStack().read(cpu.getContext().getStackPointer() - 1));
+      cpu.getStack().write(cpu.getContext().getStackPointer(),
+          cpu.getStack().read(cpu.getContext().getStackPointer() - 1));
     }
   };
 
@@ -389,14 +389,14 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       // Read stack.
-      int maxRange = cpu.getProcessStack().read(cpu.getContext().getStackPointer());
+      int maxRange = cpu.getStack().read(cpu.getContext().getStackPointer());
 
       // Get random value
       Random random = new Random(System.currentTimeMillis());
       int value = random.nextInt(maxRange);
 
       // Set result
-      cpu.getProcessStack().write(cpu.getContext().getStackPointer(), value);
+      cpu.getStack().write(cpu.getContext().getStackPointer(), value);
     }
   };
 
