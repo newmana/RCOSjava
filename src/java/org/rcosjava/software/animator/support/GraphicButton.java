@@ -90,11 +90,6 @@ public class GraphicButton extends JComponent
   private boolean showText;
 
   /**
-   * Filter to apply over the image (produces greyed out image).
-   */
-  private ImageFilter filter;
-
-  /**
    * Produces a new image (greyed out image).
    */
   private ImageProducer producer;
