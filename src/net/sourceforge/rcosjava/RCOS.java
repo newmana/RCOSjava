@@ -168,13 +168,6 @@ public class RCOS extends java.applet.Applet implements Runnable
   {
     Toolkit toolkit = Toolkit.getDefaultToolkit();
     Dimension screenSize = toolkit.getScreenSize();
-    docBaseURL = getDocumentBase();
-    docBase = docBaseURL.toString();
-    if (docBase.indexOf("RCOS.html",0) > 1)
-    {
-      docBase = docBase.substring(0,(docBase.indexOf("RCOS.html",0)-1));
-    }
-    helpURLStr = docBase + "/Help/index.html";
     try
     {
       baseDomain = getParameter("baseDomain");
@@ -182,6 +175,16 @@ public class RCOS extends java.applet.Applet implements Runnable
     catch (Exception e)
     {
       baseDomain = defaultDomain;
+    }
+
+    try
+    {
+       docBaseURL = new URL("http://" + baseDomain);
+       docBase = docBaseURL.toString();
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
     }
     try
     {
@@ -191,6 +194,7 @@ public class RCOS extends java.applet.Applet implements Runnable
     {
       port = 4242;
     }
+    helpURLStr = docBase + "/Help/index.html";
   }
 
   /**
