@@ -50,8 +50,6 @@ public class NumIn extends OSMessageAdapter
    */
   public void doMessage(SoftwareTerminal theElement)
   {
-    System.out.println("Element id:" + theElement.getId());
-    System.out.println("My id:" + terminalId);
     if (theElement.getId().compareTo(terminalId) == 0)
     {
       theElement.numIn();
