@@ -177,14 +177,6 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   private static int port;
 
   /**
-   * Main panels.
-   */
-  private JPanel mainPanel, systemAnimatorsPanel, systemAnimatorsTitlePanel1,
-      systemAnimatorsTitlePanel2, systemInterfacePanel, systemInterfaceTitlePanel,
-      systemInterfaceTitlePanel1, systemInterfaceTitlePanel2, informationPanel,
-      informationTitlePanel;
-
-  /**
    * Animator post office.
    */
   private static AnimatorOffice animatorPostOffice;
@@ -724,7 +716,14 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     }
   }
 
-  public KillProcessListener createNewKillListener(ProcessManagerAnimator existingAnimator)
+  /**
+   * Creates and returns a new KillProcessListener with the given
+   * ProcessManagareAnimator.
+   *
+   * @param existingAnimator the animator to be called when an even occurs.
+   */
+  public KillProcessListener createNewKillListener(ProcessManagerAnimator
+      existingAnimator)
   {
     return new KillProcessListener(existingAnimator);
   }
@@ -761,6 +760,12 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     }
   }
 
+  /**
+   * Creates and returns a new ChangePriorityListener with the given
+   * ProcessManagareAnimator.
+   *
+   * @param existingAnimator the animator to be called when an even occurs.
+   */
   public ChangePriorityListener createChangePriorityListener(
       ProcessManagerAnimator existingAnimator)
   {
