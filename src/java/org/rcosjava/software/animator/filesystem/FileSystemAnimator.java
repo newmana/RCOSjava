@@ -42,9 +42,7 @@ public class FileSystemAnimator extends RCOSAnimator
    * Constructor for the FileSystemAnimator object
    *
    * @param postOffice Description of Parameter
-   * @param x Description of Parameter
-   * @param y Description of Parameter
-   * @param cpuImages Description of Parameter
+   * @param theFileSystemManager Description of Parameter
    */
   public FileSystemAnimator(AnimatorOffice postOffice,
       FileSystemManager theFileSystemManager)
