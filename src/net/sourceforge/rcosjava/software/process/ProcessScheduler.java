@@ -260,7 +260,7 @@ public class ProcessScheduler extends OSMessageHandler
     numberOfPages = (int) (newTmpProcess.getFileSize() /
       MemoryManager.PAGE_SIZE) + 1;
     newMemoryRequest = new MemoryRequest(newPID, MemoryManager.CODE_SEGMENT,
-      MemoryManager.CODE_SEGMENT, numberOfPages);
+      numberOfPages);
     AllocatePages tmpAllocatePagesMessage = new
       AllocatePages(this, newMemoryRequest);
     sendMessage(tmpAllocatePagesMessage);
@@ -274,7 +274,7 @@ public class ProcessScheduler extends OSMessageHandler
 
     // Allocate memory for stack
     newMemoryRequest = new MemoryRequest(newPID, MemoryManager.STACK_SEGMENT,
-      MemoryManager.STACK_SEGMENT, newTmpProcess.getStackPages());
+      newTmpProcess.getStackPages());
     tmpAllocatePagesMessage = new AllocatePages(this, newMemoryRequest);
     sendMessage(tmpAllocatePagesMessage);
 
