@@ -5,9 +5,7 @@ import net.sourceforge.rcosjava.software.animator.RCOSFrame;
 import net.sourceforge.rcosjava.software.animator.support.GraphicButton;
 import net.sourceforge.rcosjava.software.animator.support.NewLabel;
 import net.sourceforge.rcosjava.software.animator.cpu.CPUAnimator;
-import net.sourceforge.rcosjava.hardware.cpu.Context;
-import net.sourceforge.rcosjava.hardware.cpu.CPU;
-import net.sourceforge.rcosjava.hardware.cpu.Instruction;
+import net.sourceforge.rcosjava.hardware.cpu.*;
 import net.sourceforge.rcosjava.hardware.memory.Memory;
 
 /**
@@ -44,12 +42,21 @@ public class CPUFrame extends RCOSFrame
     myCPUAnimator = thisCPUAnimator;
   }
 
+  /**
+   * Called by the animator message to display this box when the users clicks
+   * on the CPU in the process scheduler frame.
+   */
   void showCPU()
   {
     this.setVisible(true);
     this.toFront();
   }
 
+  /**
+   * Sets up the layout of the frame.  It creates two text boxes either side
+   * of the registers and pointers.  The left box represents the stack and the
+   * right box represents the instructions.
+   */
   public void setupLayout(Component c)
   {
     super.setupLayout(c);
@@ -146,6 +153,10 @@ public class CPUFrame extends RCOSFrame
     add("South", pClose);
   }
 
+  /**
+   * Uses the current values in the CPU animator (the context) and sets the
+   * values of the pointers and registers.
+   */
   void setContext()
   {
     IRvalue.setText(myCPUAnimator.getContext().getInstructionRegister().toString());
@@ -160,7 +171,7 @@ public class CPUFrame extends RCOSFrame
   /**
    * load codeList with new code
    */
-  void loadCode(Memory ProcMemory)
+  void loadCode(Memory processMemory)
   {
     int count, linesOfCode;
 
@@ -168,28 +179,19 @@ public class CPUFrame extends RCOSFrame
       codeList.removeAll();
 
     // test to see if the memory is not null
-    if (ProcMemory != null)
+    if (processMemory != null)
     {
       // Each instruction is 8 bytes long.
 
-      linesOfCode = (int) ProcMemory.getSegmentSize() / 8;
-
- /*     System.out.println("-----=====Begin Memory Dump=====-----");
-      for (count = 0; count <  linesOfCode; count++)
-      {
-        System.out.println(
-          "OPCode: " + new Integer((int) (ProcMemory.getOneMemorySegment(count*8) & 0xff)) +
-          "bParam: " + new Integer((int) ProcMemory.getOneMemorySegment(count*8+4)) +
-          "wParam: " + new Integer((int) ((ProcMemory.getOneMemorySegment(count*8+5) << 8) + ProcMemory.getOneMemorySegment(count*8+6))));
-      }
-      System.out.println("-----=====End Memory Dump=====-----");*/
+      linesOfCode = (int) processMemory.getSegmentSize() / 8;
 
       for (count=0; count < linesOfCode; count++)
       {
-        Instruction theInstruction = new Instruction((ProcMemory.getOneMemorySegment(count*8) & 0xff),
-          ((byte) ProcMemory.getOneMemorySegment(count*8+4)),
-          ((short) ((ProcMemory.getOneMemorySegment(count*8+5) << 8)
-          + ProcMemory.getOneMemorySegment(count*8+6))));
+        Instruction theInstruction = new Instruction(
+          (processMemory.getOneMemorySegment(count*8) & 0xff),
+          ((byte) processMemory.getOneMemorySegment(count*8+4)),
+          ((short) ((processMemory.getOneMemorySegment(count*8+5) << 8)
+          + processMemory.getOneMemorySegment(count*8+6))));
         codeList.add(theInstruction.toString());
       }
       // make the selected instruction the ProgramCounter
@@ -198,7 +200,7 @@ public class CPUFrame extends RCOSFrame
   }
 
   /**
-   * make ProgramCounter instruction be in the middle of the code list
+   * Make program counter instruction be in the middle of the code list
    */
   void updateCode()
   {
@@ -222,6 +224,9 @@ public class CPUFrame extends RCOSFrame
     codeList.select(myCPUAnimator.getContext().getProgramCounter());
   }
 
+  /**
+   * Resets the stack, pointers, resgisters, etc to zero values.
+   */
   void screenReset()
   {
     codeList.removeAll();
@@ -237,7 +242,9 @@ public class CPUFrame extends RCOSFrame
   }
 
   /**
-   * Modify the stack List so that it represents the current state of the stack
+   * Modify the stack list so that it represents the current state of the stack.
+   *
+   * @param theStack the new value of the stack to replace the current one with.
    */
   void updateStack(Memory theStack)
   {
