@@ -12,7 +12,8 @@ import org.rcosjava.software.animator.support.GraphicButton;
  * <P>
  * <DT> <B>History:</B>
  * <DD> 12/01/97 Updated it. </DD>
- * <DD> 13/10/98 Converted to Java 1.1 </DD> </DT>
+ * <DD> 13/10/98 Converted to Java 1.1 </DD>
+ * <DD> 24/07/2003 Added Danielly.</DD> </DT>
  * <P>
  * @author Andrew Newman
  * @created 1st February 1996
@@ -111,9 +112,14 @@ public class AboutFrame extends RCOSFrame
     gridBag.setConstraints(tmpPanel, constraints);
     contentPanel.add(tmpPanel);
 
-    tmpPanel = new JPanel();
+    tmpPanel = new JPanel(new GridLayout(2,1));
     tmpPanel.setBackground(DEFAULT_BG_COLOUR);
     tmpPanel.setForeground(DEFAULT_FG_COLOUR);
+    tmpLabel = new JLabel("Danielly Karine");
+    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
+    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
+    tmpLabel.setFont(defaultFont);
+    tmpPanel.add(tmpLabel);
     tmpLabel = new JLabel("Andrew Newman");
     tmpLabel.setBackground(DEFAULT_BG_COLOUR);
     tmpLabel.setForeground(DEFAULT_FG_COLOUR);
