@@ -20,6 +20,7 @@ import java.util.StringTokenizer;
 import Software.Animator.Support.GraphicButton;
 import Hardware.Memory.Memory;
 import fr.dyade.koala.xml.koml.*;
+import fr.dyade.koala.xml.sax.*;
 
 public class FileClient
 {
@@ -123,14 +124,37 @@ public class FileClient
     return sTheList;
   }
 
-  public Memory getExeFile(String sFileName)
+  public Memory getExeFile(String filename)
   {
-    return new Memory(getFile(1, sFileName));
+    return new Memory(getFile(1, filename));
   }
 
-  public String getRecFile(String sFileName)
+  public Object getRecFile(String filename)
   {
-    return getFile(2, sFileName);
+    String serializedObject = getFile(2, filename);
+    ByteArrayInputStream tmpBuffer = new ByteArrayInputStream(serializedObject.getBytes());
+    KOMLDeserializer deserializer = null;
+    try
+    {
+      deserializer = new KOMLDeserializer(tmpBuffer, false);
+      return deserializer.readObject();
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+    finally
+    {
+      try
+      {
+        deserializer.close();
+      }
+      catch (Exception e)
+      {
+        // ignore
+      }
+    }
+    return null;
   }
 
   // Purpose:  Retrieve the specified file from the server.
@@ -157,13 +181,11 @@ public class FileClient
     throws Exception
   {
     KOMLSerializer serializer = null;
-    System.out.println("Object: " + object);
     ByteArrayOutputStream tmpBuffer = new ByteArrayOutputStream();
     try
     {
       serializer = new KOMLSerializer(tmpBuffer, false);
       serializer.addObject(object);
-      serializer.addObject(new String("fred"));
     }
     catch (Exception e)
     {

@@ -236,7 +236,7 @@ public class FileServer
     // Open (with append) the file and throw an error if it takes exception to it.
     try
     {
-      outputFile = new FileOutputStream(filename, true);
+      outputFile = new FileOutputStream(filename, false);
     }
     catch (FileNotFoundException exception)
     {
