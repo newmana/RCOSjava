@@ -22,7 +22,6 @@ import net.sourceforge.rcosjava.messaging.messages.os.SemaphoreCreate;
 import net.sourceforge.rcosjava.messaging.messages.os.SemaphoreOpen;
 import net.sourceforge.rcosjava.messaging.messages.os.SemaphoreSignal;
 import net.sourceforge.rcosjava.messaging.messages.os.SemaphoreWait;
-import net.sourceforge.rcosjava.messaging.messages.universal.NullProcess;
 import net.sourceforge.rcosjava.messaging.messages.universal.RunningToBlocked;
 import net.sourceforge.rcosjava.messaging.messages.universal.RunningToReady;
 import net.sourceforge.rcosjava.messaging.messages.universal.ProcessFinished;
@@ -155,7 +154,6 @@ public class Kernel extends OSMessageHandler
    */
   public void setCurrentProcess(RCOSProcess newCurrentProcess)
   {
-//    System.out.println("Setting Current Process: " + newCurrentProcess);
     currentProcess = newCurrentProcess;
     setCurrentContext(newCurrentProcess);
   }
@@ -166,8 +164,7 @@ public class Kernel extends OSMessageHandler
    */
   public void setCurrentProcessNull()
   {
-//    System.out.println("Setting Current Process to Null");
-    currentProcess = null;
+    setCurrentProcess(null);
     myCPU.setProcessCode(null);
     myCPU.setProcessStack(null);
 //    System.out.println("CPU Code to execute: " + myCPU.hasCodeToExecute());
@@ -192,8 +189,6 @@ public class Kernel extends OSMessageHandler
         InstructionExecution(this, myCPU.getProcessStack());
       sendMessage(iMsg);
     }
-    myCPU.handleInterrupts();
-    myCPU.incTicks();
   }
 
   /**
@@ -334,9 +329,13 @@ public class Kernel extends OSMessageHandler
   public void handleInterrupt(Interrupt anInterrupt)
   {
     if (anInterrupt.getType().compareTo("TimerInterrupt") == 0)
+    {
       handleTimerInterrupt();
+    }
     else if (anInterrupt.getType().compareTo("ProcessFinished") == 0)
+    {
       handleProcessFinishedInterrupt();
+    }
     else
     {
       InterruptHandler aIH = (InterruptHandler) interruptHandlers.get(

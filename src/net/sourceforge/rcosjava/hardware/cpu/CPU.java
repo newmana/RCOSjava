@@ -72,6 +72,7 @@ public class CPU
   private boolean paused;
   private boolean interruptsEnabled;
   private boolean codeToExecute;
+  private boolean processFinished;
   private int ticks = 0;
   private Context myContext;
   private Memory processStack, processCode;
@@ -91,6 +92,7 @@ public class CPU
     interruptsQueue = new InterruptQueue(10, 10);
     paused = false;
     codeToExecute = false;
+    processFinished = false;
     interruptsEnabled = true;
   }
 
@@ -184,6 +186,7 @@ public class CPU
    */
   public boolean performInstructionExecutionCycle()
   {
+    boolean continueExecuting = true;
     if (hasCodeToExecute())
     {
       // fetch and execute if we aren't on the NullProcess
@@ -191,7 +194,6 @@ public class CPU
       {
         fetchInstruction();
         executeInstruction();
-        return true;
       }
       catch (java.io.IOException e)
       {
@@ -211,12 +213,18 @@ public class CPU
     }
     //Check again to see if we came to the end of the program during
     //the last execution cycle.
-    if (hasCodeToExecute())
+    if (processFinished)
     {
       Interrupt aInt = new Interrupt(-1, "ProcessFinished");
       generateInterrupt(aInt);
+      continueExecuting = false;
+      processFinished = false;
     }
-    return false;
+
+    handleInterrupts();
+    incTicks();
+
+    return continueExecuting;
   }
 
   // build a Vector of String representing code of current program
@@ -432,7 +440,8 @@ public class CPU
         (processStack.read(getContext().getStackPointer()+2)));
       getContext().setProgramCounter((short)
         (processStack.read(getContext().getStackPointer()+3)));
-      codeToExecute = (getContext().getBasePointer() >= 0);
+      codeToExecute = !(getContext().getBasePointer() <= 0);
+      processFinished = getContext().getBasePointer() <= 0;
     }
     else if (iOperator == Instruction.OPERATOR_NEG)
     {
