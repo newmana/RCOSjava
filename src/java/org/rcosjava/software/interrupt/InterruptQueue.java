@@ -32,13 +32,14 @@ public class InterruptQueue extends PriorityQueue
   }
 
   /**
-   * @param iTime Description of Parameter
-   * @return String type of Interrupt to occur at the specified time return null
-   *      if no interrupt
+   * Returns an interrupt if its time is less than the passed time.
+   *
+   * @param time the number of clicks that the CPU has executed.
+   * @return an interrupt that should be generated or null if none is found.
    */
-  public Interrupt getInterrupt(int iTime)
+  public Interrupt getInterrupt(int time)
   {
-    Interrupt intTmp;
+    Interrupt interrupt;
 
     if (queueEmpty())
     {
@@ -53,32 +54,36 @@ public class InterruptQueue extends PriorityQueue
     //   are looking for
     do
     {
-      intTmp = (Interrupt) peek();
-      if (intTmp.getTime() <= iTime)
+      interrupt = (Interrupt) peek();
+      if (interrupt.getTime() <= time)
       {
-        intTmp = (Interrupt) retrieveCurrent();
-        return intTmp;
+        interrupt = (Interrupt) retrieveCurrent();
+        return interrupt;
       }
       goToNext();
     } while (!atTail());
 
-    intTmp = (Interrupt) peek();
-    if (intTmp.getTime() <= iTime)
+    interrupt = (Interrupt) peek();
+    if (interrupt.getTime() <= time)
     {
-      intTmp = (Interrupt) retrieveCurrent();
-      return intTmp;
+      interrupt = (Interrupt) retrieveCurrent();
+      return interrupt;
     }
     return null;
   }
 
   /**
-   * @param first Description of Parameter
-   * @param second Description of Parameter
+   * Return if the object is -1, 0, 1 depending on time that the queue has been
+   * executing on.
+   *
+   * @param first the first object to compare to.
+   * @param second the second object to compare to.
    * @return -1, 0, 1 if first object is less than, equal to or greater than
    *      second object In Interrupt Queue order is based on the time the
    *      Interrupt is scheduled to occur
+   * @throws ClassCastException if the casting of the passed object fails.
    */
-  public int compare(Object first, Object second)
+  public int compare(Object first, Object second) throws ClassCastException
   {
     Interrupt intOne = (Interrupt) first;
     Interrupt intTwo = (Interrupt) second;

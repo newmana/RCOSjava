@@ -125,7 +125,6 @@ public class BaseQueue extends ArrayList implements Queue
     }
 
     Object theObject = get(pointer);
-
     remove(pointer);
     return theObject;
   }
