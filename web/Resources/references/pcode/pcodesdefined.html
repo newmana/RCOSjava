@@ -135,7 +135,7 @@ L, base offset N in stack&nbsp;</td>
 <h3>
 P-Machine Instruction Set</h3>
 POP X means remove the top element of the stack and load it into X (the
-stack is now one smaller. PUSH X means place the value of X onto the top
+stack is now one smaller). PUSH X means place the value of X onto the top
 of the stack (the stack is now one bigger).
 <br>&nbsp;
 <table BORDER CELLSPACING=0 CELLPADDING=2 >
@@ -214,13 +214,13 @@ of the stack (the stack is now one bigger).
 <tr>
 <td>OPR 0,11&nbsp;</td>
 
-<td>test greather than or equal to: POP A, POP B, PUSH (B>=A)&nbsp;</td>
+<td>test greater than or equal to: POP A, POP B, PUSH (B>=A)&nbsp;</td>
 </tr>
 
 <tr>
 <td>OPR 0,12&nbsp;</td>
 
-<td>test great than: POP A, POP B, PUSH (B>A)&nbsp;</td>
+<td>test greater than: POP A, POP B, PUSH (B>A)&nbsp;</td>
 </tr>
 
 <tr>
@@ -244,37 +244,49 @@ of the stack (the stack is now one bigger).
 <tr>
 <td>OPR 0,16&nbsp;</td>
 
-<td>logical NOT: POP A, PUSH (not A)&nbsp;</td>
+<td>logical XOR: POP A, PUSH (xor A)&nbsp;</td>
 </tr>
 
 <tr>
 <td>OPR 0,17&nbsp;</td>
 
-<td>shift left: POP A, POP B, PUSH (B left shifted A bits)&nbsp;</td>
+<td>logical NOT: POP A, PUSH (not A)&nbsp;</td>
 </tr>
 
 <tr>
 <td>OPR 0,18&nbsp;</td>
 
-<td>shift right: POP A, POP B, PUSH (B right shifted A bits)&nbsp;</td>
+<td>shift left: POP A, POP B, PUSH (B left shifted A bits)&nbsp;</td>
 </tr>
 
 <tr>
 <td>OPR 0,19&nbsp;</td>
 
-<td>increment: POP A, PUSH A+1&nbsp;</td>
+<td>shift right: POP A, POP B, PUSH (B right shifted A bits)&nbsp;</td>
 </tr>
 
 <tr>
 <td>OPR 0,20&nbsp;</td>
 
-<td>decrement: POP A, PUSH A-1&nbsp;</td>
+<td>increment: POP A, PUSH A+1&nbsp;</td>
 </tr>
 
 <tr>
 <td>OPR 0,21&nbsp;</td>
 
+<td>decrement: POP A, PUSH A-1&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,22&nbsp;</td>
+
 <td>copy: POP A, PUSH A, PUSH A&nbsp;</td>
+</tr>
+
+<tr>
+<td>OPR 0,23&nbsp;</td>
+
+<td>random number: PUSH generated number&nbsp;</td>
 </tr>
 
 <tr>
