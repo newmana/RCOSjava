@@ -26,7 +26,6 @@ The requirements for running RCOSjava are:
 * Java Runtime Environment Verion 1.3 (http://java.sun.com/j2se/1.3/jre/).
 * 32MB RAM.
 * For older Windows/Mac systems - TCP/IP networking installed.
-* Pentium 166 (or equivalent) or above.  Pentium II recommended.
 
 
 ** Running It **
@@ -43,12 +42,11 @@ RCOSjava requires three programs running to operate successfully:
 To run the RCOSjava server, execute the "runme.sh" (for Unix) or 
 "runme.bat" (for Windows) from within the "bin" directory.
 
-RCOSjava includes a small web server called Soma. It run on the web
+RCOSjava includes a small web server called Soma.  It runs on the web
 port 80 by default.  To run Soma, execute the "soma.sh" (for Unix) or 
 "soma.bat" (for Windows) from within the "bin" directory.
 
-To run the applet you can use a Java 1.3 enabled browser or the 
-appletviewer.  
+To run the applet you can use a Java 1.3 enabled browser.  
 
 The address to use is:
 http://localhost/RCOS.html
@@ -85,13 +83,20 @@ RCOSjava specific extensions) and compiles it into PCode.  To run it execute
 either compiler.bat (for Windows) or compile.sh (for Unix) from the bin
 directory.
 
+There are currently 10 examples that ship with RCOSjava:
+* mem.c, mem2.c - An example of semaphore use.
+* smem.c, smem2.c - An example of shared memory use.
+* test.c, test2.c, test3.c, test4.c, test5.c, test6.c - These are basically
+  the test cases used against the compiler.  Anything not in these files
+  probably will not work. 
+
 For more information on the extentions and limitations see the documentation 
 on the local web site at:
 http://localhost/Resources/compiler/index.html
 
 Once you have compiled the new PCode programs copy them into the
 dist/pll2/executable directory.  The next time you try to load a program it
-will appear there.
+will appear in the files to load.
 
 
 ** Compiling **
@@ -118,14 +123,6 @@ been generated.  Follow the instructions above, after compilation, to run
 it.
 
 To recompile the Simple C SableCC grammar use the "sablecc" target.
-
-
-** Programs in RCOSjava **
-==========================
-
-The executables guaranteed to work are "sem.pcd", "sem2.pcd", "third.pcd"
-and "numbers.pcd".  Some of the others will work but they haven't been 
-tested fully.
 
 
 ** Windows Problems **
@@ -164,8 +161,10 @@ the "port" parameter.  You will also have to change it in the relevant
 =================
 
 The currently known bugs are:
-* File server sometimes crashes,
-* Some odd semaphore based bugs.
+* OS X has problems associated with the graphics.  For example, with 
+Lists (such as in the file load and semaphore value boxes).  Resizing the 
+window fixes these problems.
+* The compiler doesn't implement do-while and functions among other things.
 
 Please submit any bugs (with OS, Java VM, Browser and any other details)
 to the email addresses below.
@@ -176,4 +175,4 @@ newmana@users.sourceforge.net
 David Jones
 d.jones@cqu.edu.au
 
-Last Update: 15th August 2001
+Last Update: 28th April 2002
