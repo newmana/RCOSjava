@@ -405,27 +405,32 @@ public class ProcessScheduler extends OSMessageHandler
    */
   public void killProcess(int pid)
   {
-    if (runningProcess())
+    RCOSProcess tmpProcess = null;
+    //Find it if it's running
+    tmpProcess = removeExecutingProcess(pid);
+    if (tmpProcess == null)
     {
-      if (getExecutingProcess().getPID() == pid)
+      // If it's in ready q.
+      tmpProcess = removeFromReadyQ(pid);
+      if (tmpProcess == null)
       {
-        KillProcess kpMessage = new KillProcess(this, pid, true);
-        //Resend to kernel if okay
-        sendMessage(kpMessage);
-      }
-      else
-      {
-        // If it's blocked, zombie or ready kill it.
-        RCOSProcess rpTmpProcess = removeFromReadyQ(pid);
-        if (rpTmpProcess == null)
+        // If it's in blocked q.
+        tmpProcess = removeFromBlockedQ(pid);
+        if (tmpProcess == null)
         {
-          rpTmpProcess = removeFromBlockedQ(pid);
-        }
-        if (rpTmpProcess == null)
-        {
-          rpTmpProcess = removeFromZombieCreatedQ(pid);
+          // If it's in zombie q.
+          tmpProcess = removeFromZombieCreatedQ(pid);
         }
       }
+      //If it wasn't the executing program clear up resources
+      TerminalRelease msg = new TerminalRelease(this,
+        tmpProcess.getTerminalId());
+      sendMessage(msg);
+
+      // Deallocate Memory
+      DeallocatePages dallocateMsg = new DeallocatePages(this,
+        tmpProcess.getPID());
+      sendMessage(msg);
     }
   }
 
@@ -537,7 +542,7 @@ public class ProcessScheduler extends OSMessageHandler
    * Executed every cycle to make sure that if there is not a currently
    * executing process that one is taken from the ready queue.
    */
-  public void schedule()
+  public synchronized void schedule()
   {
     //System.out.println("----- Start Schuduling-----");
     //Make sure that there isn't a process currently running.

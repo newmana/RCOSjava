@@ -15,7 +15,7 @@ import net.sourceforge.rcosjava.messaging.messages.os.OSMessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.universal.TerminalToggle;
 import net.sourceforge.rcosjava.messaging.messages.os.RegisterInterruptHandler;
 import net.sourceforge.rcosjava.messaging.messages.os.ReturnValue;
-import net.sourceforge.rcosjava.messaging.messages.universal.KillProcess;
+import net.sourceforge.rcosjava.messaging.messages.universal.Kill;
 import net.sourceforge.rcosjava.messaging.messages.universal.BlockedToReady;
 import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import net.sourceforge.rcosjava.software.interrupt.InterruptHandler;
@@ -206,8 +206,7 @@ public class SoftwareTerminal extends OSMessageHandler
         // make sure we've been allocated first
         if (currentProcess != -1)
         {
-          KillProcess msg = new KillProcess(this,
-            currentProcess,false);
+          Kill msg = new Kill(this, currentProcess);
           sendMessage(msg);
         }
       }
