@@ -55,53 +55,53 @@ public class KOMLDeserializer implements Deserializer, TaskCounter {
      * @exception IOException an I/O error occurs.
      */
     public KOMLDeserializer(InputStream in, boolean buffered)
-	    throws IOException {
-	this.buffered = buffered;
-	initialize(in);
+        throws IOException {
+      this.buffered = buffered;
+      initialize(in);
     }
 
     /**
      * Converts the Reader in into a Java ObjectInputStream
      */
     private void initialize(InputStream in) throws IOException {
-	ByteInputOutputStream bytes = null;
+      ByteInputOutputStream bytes = null;
 
-	ObjectOutputHandler out  = null;
-	if (buffered) {
-	    // creates the temporary file with a random number
-	    int i = (int) System.currentTimeMillis();
-	    if (i < 0) {
-		i = - i;
-	    }
-	    input = Integer.toString(i, 10);
-	    out = new GeneratorOutputStream(new FileOutputStream(input));
-	} else {
-	    bytes = new ByteInputOutputStream(1024);
-	    out = new GeneratorOutputStream(bytes);
-	}
-	try {
-	    KOMLParser parser = new KOMLParser();
-	    parser.setObjectOuputHandler(out);
-	    parser.read(in);
-	} catch (Exception e) {
-	    e.printStackTrace();
-	    throw new IOException(e.toString());
-	} finally {
-	    out.close();
-	    in.close();
-	}
+      ObjectOutputHandler out  = null;
+      if (buffered) {
+// creates the temporary file with a random number
+        int i = (int) System.currentTimeMillis();
+        if (i < 0) {
+          i = - i;
+        }
+        input = Integer.toString(i, 10);
+        out = new GeneratorOutputStream(new FileOutputStream(input));
+      } else {
+        bytes = new ByteInputOutputStream(1024);
+        out = new GeneratorOutputStream(bytes);
+      }
+      try {
+        KOMLParser parser = new KOMLParser();
+        parser.setObjectOuputHandler(out);
+        parser.read(in);
+      } catch (Exception e) {
+        e.printStackTrace();
+        throw new IOException(e.toString());
+      } finally {
+        out.close();
+        in.close();
+      }
 
-	if (buffered) {
-	    tmpFile = new File(input);
-	    counter =
-		new TaskCounterInputStream(new FileInputStream(tmpFile),
-					   tmpFile.length());
-	} else {
-	    counter =
-		new TaskCounterInputStream(bytes.getInputStream(),
-					   bytes.getSize());
-	    bytes.close();
-	}
+      if (buffered) {
+        tmpFile = new File(input);
+        counter =
+            new TaskCounterInputStream(new FileInputStream(tmpFile),
+            tmpFile.length());
+      } else {
+        counter =
+            new TaskCounterInputStream(bytes.getInputStream(),
+            bytes.getSize());
+        bytes.close();
+      }
     }
 
     /**
@@ -114,27 +114,27 @@ public class KOMLDeserializer implements Deserializer, TaskCounter {
      * @exception IOException           an I/O error occurs.
      */
     public KOMLDeserializer(Object o, boolean buffered) throws IOException {
-	this.buffered = buffered;
-	if (o instanceof InputStream) {
-	    initialize((InputStream) o);
-	} else if (o instanceof File) {
-	    initialize(new FileInputStream((File) o));
-	} else if (o instanceof URL) {
-	    URLConnection uc = ((URL) o).openConnection();
-	    initialize(uc.getInputStream());
-	} else if (o instanceof URLConnection) {
-	    initialize(((URLConnection) o).getInputStream());
-	} else if (o instanceof String) {
-	    try {
-		URL url = new URL(o.toString());
-		URLConnection uc = url.openConnection();
-		initialize(uc.getInputStream());
-	    } catch (MalformedURLException ex) {
-		initialize(new FileInputStream(o.toString()));
-	    }
-	} else {
-	    throw new IOException("unsupported source " + o.getClass());
-	}
+      this.buffered = buffered;
+      if (o instanceof InputStream) {
+        initialize((InputStream) o);
+      } else if (o instanceof File) {
+        initialize(new FileInputStream((File) o));
+      } else if (o instanceof URL) {
+        URLConnection uc = ((URL) o).openConnection();
+        initialize(uc.getInputStream());
+      } else if (o instanceof URLConnection) {
+        initialize(((URLConnection) o).getInputStream());
+      } else if (o instanceof String) {
+        try {
+          URL url = new URL(o.toString());
+          URLConnection uc = url.openConnection();
+          initialize(uc.getInputStream());
+        } catch (MalformedURLException ex) {
+          initialize(new FileInputStream(o.toString()));
+        }
+      } else {
+        throw new IOException("unsupported source " + o.getClass());
+      }
     }
 
     /**
@@ -144,8 +144,8 @@ public class KOMLDeserializer implements Deserializer, TaskCounter {
      * @exception IOException an I/O error occurs.
      */
     protected ObjectInputStream getObjectInputStream(InputStream in)
-            throws IOException {
-	return new ObjectInputStream(counter);
+        throws IOException {
+      return new ObjectInputStream(counter);
     }
 
     /**
