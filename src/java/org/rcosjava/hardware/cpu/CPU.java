@@ -400,14 +400,14 @@ public class CPU implements Serializable
   }
 
   /**
-   * Handle interrupts.  Calls the registered Kernel's handleInterrupt with the
-   * first interrupt on the queue.
+   * Handle all interrupts for the current time period.  Calls the registered
+   * Kernel's handleInterrupt with the first interrupt on the queue.
    */
   private void handleInterrupts()
   {
-    Interrupt tmpInterrupt = interruptsQueue.getInterrupt(ticks);
-    if (tmpInterrupt != null)
-    {
+    Interrupt tmpInterrupt = null;
+    while ((tmpInterrupt = interruptsQueue.getInterrupt(ticks)) != null) {
+
       myKernel.handleInterrupt(tmpInterrupt);
     }
   }
