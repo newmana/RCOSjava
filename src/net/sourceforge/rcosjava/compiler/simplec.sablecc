@@ -123,6 +123,14 @@ Tokens
     volatile = 'volatile';
     sizeof = 'sizeof';
 
+    string_control_string = '%s';
+    character_control_string = '%c';
+    integer_control_string = '%i';
+
+    origin_seek_set = 'SEEK_SET';
+    origin_seek_cur = 'SEEK_CUR';
+    origin_seek_end = 'SEEK_END';
+
     printf = 'printf';
     scanf = 'scanf';
     fopen = 'fopen';
@@ -152,7 +160,7 @@ Tokens
     identifier = nondigit (digit | nondigit)*;
     floating_constant = fractional_constant exponent_part? floating_suffix? |
         digit_sequence exponent_part floating_suffix?;
-    string_litteral = 'L'? '"' s_char_sequence? '"';
+    string_literal = 'L'? '"' s_char_sequence? '"';
     integer_constant = decimal_constant integer_suffix? | octal_constant integer_suffix? | 
         hexadecimal_constant integer_suffix?;
     character_constant = 'L'? ''' c_char_sequence ''';
@@ -387,34 +395,47 @@ Productions
         {while}        while l_par conditional_expression r_par compound_statement |
         {do}           do compound_statement while l_par conditional_expression r_par semicolon |
         {for}          for l_par [start]:basic_statement? [sc_one]:semicolon conditional_expression? [sc_two]:semicolon [iter]:basic_statement? r_par compound_statement |
-        {switch}       switch l_par value r_par case_statements |
-        {rcos_stmt}    rcos_statement;
+        {switch}       switch l_par value r_par case_statements;
 
-    rcos_statement =
-        {printf} printf l_par value r_par |
-        {scanf} scanf l_par value comma value r_par |
-        {getc} getc l_par value r_par |
-        {putc} putc l_par value command value r_par |
-        {fclose} fclose l_par value r_par |
-        {feof} feof l_par value r_par |
-        {fputs} fputs l_par value comma value r_par |
-        {fgets} fputs l_par value comma value comma value r_par |
-        {fread} fread l_par value comma value comma value comma value r_par |
-        {fwrite} fwrite l_par value comma value comma value comma value r_par |
-        {fseek} fseek l_par value comma value comma origin_value r_par |
-        {fprintf} fprintf l_par value comma value comma value comma value r_par |
-        {fscanf} fscantf l_par value comma value comma value comma value r_par |
-        {semclose} |
-        {semopen} |
-        {semcreate} |
-        {semsignal} |
-        {semwait} |
-        {shrclose} |
-        {shrcreate} |
-        {shropen} |
-        {shrread} |
-        {shrwrite} |
-        {shrsize} ;
+    rcos_statment = 
+        {printf1}      printf l_par string_literal r_par semicolon |
+        {printf2}      printf l_par [control]:printf_control_strings comma value r_par semicolon |
+        {scanf}        scanf l_par [control]:scanf_control_strings comma value r_par semicolon |
+        {getc}         getc l_par [file_stream]:value r_par semicolon |
+        {putc}         putc l_par [ch_in]:value comma [file_stream]:value r_par semicolon |
+        {fclose}       fclose l_par [file_stream]:value r_par semicolon |
+        {feof}         feof l_par [file_stream]:value r_par semicolon |
+        {fputs}        fputs l_par [string_in]:value comma [file_stream]:value r_par semicolon |
+        {fgets}        fgets l_par [string_out]:value [c1]:comma [length]:value [c2]:comma [file_stream]:value r_par semicolon |
+        {fseek}        fseek l_par [file_stream]:value [c1]:comma [no_bytes]:value [c2]:comma origin_value r_par semicolon |
+        {fprintf}      fprintf l_par [file_stream]:value [c1]:comma [control]:printf_control_strings [c2]:comma value r_par semicolon |
+        {fscanf}       fscanf l_par [file_stream]:value [c1]:comma [control]:value [c2]:comma value r_par semicolon |
+        {semclose}     semclose l_par [handle]:identifier r_par semicolon |
+        {semcreate1}   semcreate l_par [handle]:value r_par semicolon |
+        {semcreate2}   semcreate l_par [handle]:value comma [init_value]:value r_par semicolon |
+        {semopen}      semopen l_par [id]:value r_par semicolon |
+        {semsignal}    semsignal l_par [handle]:identifier r_par semicolon |
+        {semwait}      semwait l_par [handle]:identifier r_par semicolon |
+        {shrclose}     shrclose l_par [handle]:identifier r_par semicolon |
+        {shrcreate}    shrcreate l_par [id]:value comma [size]:value r_par semicolon |
+        {shropen}      shropen l_par [id]:value r_par semicolon |
+        {shrread}      shrread l_par [handle]:identifier comma [size]:value r_par semicolon |
+        {shrwrite}     shrwrite l_par [handle]:identifier [c1]:comma [offset]:value [c2]:comma [variable]:identifier [c3]:comma r_par semicolon |
+        {shrsize}      shrsize l_par [handle]:identifier r_par semicolon;
+
+    printf_control_strings =
+        {str_control}  string_control_string | 
+        {chr_control}  character_control_string | 
+        {int_control}  integer_control_string;
+
+    scanf_control_strings =
+        {chr_control}  character_control_string | 
+        {int_control}  integer_control_string;
+
+    origin_value =
+        {set}          origin_seek_set | 
+        {cur}          origin_seek_cur | 
+        {end}          origin_seek_end;    
 
     basic_statement =
         {call_expression}   call_expression |
@@ -444,7 +465,7 @@ Productions
 
     constant =
         {floating}  unop? floating_constant |
-        {string}    unop? string_litteral |
+        {string}    unop? string_literal |
         {integer}   unop? integer_constant |
         {character} unop? character_constant;
 
