@@ -82,7 +82,7 @@ public class MemoryManager extends OSMessageHandler
    * process has ceased functioning and the memory pages allocated to it must be
    * removed.
    */
-  public void deallocatePages(int pid)
+  public void deallocateMemory(int pid)
   {
     MemoryReturn returnedMemory = thePageHandler.close(pid);
     // Return message.
