@@ -4,7 +4,7 @@ import net.sourceforge.rcosjava.messaging.messages.os.OSMessageAdapter;
 import net.sourceforge.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import net.sourceforge.rcosjava.messaging.messages.universal.NewProcess;
 import net.sourceforge.rcosjava.messaging.messages.os.AllocatePages;
-import net.sourceforge.rcosjava.messaging.messages.os.DeallocatePages;
+import net.sourceforge.rcosjava.messaging.messages.os.DeallocateMemory;
 import net.sourceforge.rcosjava.messaging.messages.os.TerminalRelease;
 import net.sourceforge.rcosjava.messaging.messages.universal.GetTerminal;
 import net.sourceforge.rcosjava.messaging.messages.universal.KillProcess;
@@ -385,16 +385,10 @@ public class ProcessScheduler extends OSMessageHandler
   {
     //System.out.println("Process Finished: " + rpOldProcess.getPID());
     removeExecutingProcess(oldProcess.getPID());
-    if (oldProcess.getTerminalId() != null)
-    {
-      TerminalRelease msg = new TerminalRelease(this,
-        oldProcess.getTerminalId());
-      sendMessage(msg);
-    }
-
-    // Deallocate Memory
-    DeallocatePages msg = new DeallocatePages(this, oldProcess.getPID());
-    sendMessage(msg);
+    cleanupResources(oldProcess);
+    NullProcess tmpMessage = new NullProcess(this);
+    sendMessage(tmpMessage);
+    this.setCurrentProcessNull();
   }
 
   /**
@@ -424,17 +418,28 @@ public class ProcessScheduler extends OSMessageHandler
       }
       if (tmpProcess != null)
       {
-        //If it wasn't the executing program clear up resources
-        TerminalRelease msg = new TerminalRelease(this,
-          tmpProcess.getTerminalId());
-        sendMessage(msg);
-
-        // Deallocate Memory
-        DeallocatePages dallocateMsg = new DeallocatePages(this,
-          tmpProcess.getPID());
-        sendMessage(msg);
+        cleanupResources(tmpProcess);
       }
     }
+  }
+
+  /**
+   * Attempts to remove all resources currently used by a process.
+   */
+  private void cleanupResources(RCOSProcess oldProcess)
+  {
+    //If it wasn't the executing program clear up resources
+    if (oldProcess.getTerminalId() != null)
+    {
+      TerminalRelease msg = new TerminalRelease(this,
+        oldProcess.getTerminalId());
+      sendMessage(msg);
+    }
+
+    // Deallocate Memory
+    DeallocateMemory deallocateMsg = new DeallocateMemory(this,
+      oldProcess.getPID());
+    sendMessage(deallocateMsg);
   }
 
   /**
@@ -563,11 +568,6 @@ public class ProcessScheduler extends OSMessageHandler
         ProcessSwitch tmpMessage = new ProcessSwitch(this, currentProcess);
         sendMessage(tmpMessage);
         //System.out.println("Running: " + rpCurrentProcess.getPID());
-      }
-      else
-      {
-        NullProcess tmpMessage = new NullProcess(this);
-        sendMessage(tmpMessage);
       }
     }
     //else
