@@ -1,27 +1,22 @@
 <HTML>
 <HEAD>
   <TITLE>
-    Kernel CRC
+    RCOSjava - Class Definition - Kernel
   </TITLE>
 </HEAD>
-
-<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999"> 
-
-<P ALIGN=CENTER>
-  [
-    <A HREF="../../index.html">
-      RCOS.java Home 
-    </A>
-  |
-    <A HREF="../../../index.html">
-      RCOS Home 
-    </A>
-  |
-    <A HREF="../../../../../david-jones.html">
-      David's Home 
-    </A>
-  ]
-    
+<BODY TEXT="#eeeeee" BGCOLOR="#000000" LINK="#ffff00" VLINK="#999999">
+<TABLE WIDTH="100%">
+  <TR>
+    <TD ALIGN=LEFT>
+      <H4>/ <A HREF="../../../resources.html" TARGET="body">Resources</A> / 
+      <A HREF="../index.html">Design</A> / <A HREF="../class.html">Class Definitions</A> / 
+      Kernel</H4>
+    </TD>
+    <TD ALIGN=LEFT WIDTH=25% VALIGN="CENTER">
+      <IMG SRC="../../../pics/rightEnd.gif" WIDTH="19" HEIGHT="30"><A HREF="../../../index.html" TARGET="_parent"><IMG SRC="../../../pics/home.gif" BORDER="0" ALT="RCOS.java Home Page" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../../pics/blank.gif" BORDER=0 ALT="" WIDTH="38" HEIGHT="30"><A HREF="context.html" TARGET="body"><IMG SRC="../../../pics/forward.gif" BORDER=0 ALT="Context" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../../pics/leftEnd.gif" ALT="" WIDTH="19" HEIGHT="30"><BR>
+    </TD>
+  </TR>
+</TABLE>
 <H1>
   <TT>Kernel</TT> CRC
 </H1>
@@ -32,7 +27,7 @@
       <H3>Name:</H3>
     </TD>
     <TD VALIGN=TOP>
-      Kernel
+      Software, Kernel
     </TD>
   </TR>
 
@@ -41,7 +36,8 @@
       <H3>Comment:</H3>
     </TD>
     <TD VALIGN=TOP>
-      RCOS message passing kernel, possibly with more functionality added
+      A micro kernel based system.  It handles system calls and returns values from other operating system components and
+      process switching .
     </TD>
   </TR>
 
@@ -50,6 +46,11 @@
       <H3>Collaborators:</H3>
     </TD>
     <TD VALIGN=TOP>
+      <A HREF="interrupt.html">Interrupt</A> - store information about type, 
+                                               source etc<BR>
+      <A HREF="interrupt.html">Interrupt</A> - store information about type, 
+                                               source etc<BR>
+      
     </TD>
   </TR>
 </TABLE>
@@ -59,21 +60,18 @@
   </H3>
   
   <UL>
-    <LI> init - perform necessary operations at start
-    <LI> close - shutdown OS
-    <LI> <B>Run()</B><BR>
-         - ?? not sure what will be here
-    <LI> sendMessage
-    <LI> postMessage
-    <LI> handleMessage?
-    <LI> <B>DoSystemCall( int sCall, ..data )</B><BR>
-         called by CPU when it detects a system call
-  <P>
-    <LI> <B>ProcessContext theContext = ReadContext()</B><BR>
-         save the current CPU context onto the appropriate Process
-  <P>
-    <LI> <B>WriteContext( ProcessContext theContext )</B><BR>
-         write a new context
+    <LI> blockCurrentProcess - when a process is blocking.
+    <LI> killProcess - when a process has been killed by the user or external process.
+    <LI> nullProcess - when no process is currently running.
+    <LI> setQuantum - set the number of ticks before a process is pre-empted.
+    <LI> switchProcess - take the current process and replace it with the given process.
+    <LI> pause/unpause - pause and unpause the CPU.
+    <LI> performInstructionCycle - call schedule on process scheduler and perform an instruction on the CPU.
+    <LI> setProcessCode, setProcessStack - set the currently executing process process code and process stack.
+    <LI> setContext - set the currently executing process context.
+    <LI> runningProcess - true if a process is currently executing.
+    <LI> getCurrentProcess - returns the currently executing process.
+    <LI> 
   </UL>
 
 </BODY>

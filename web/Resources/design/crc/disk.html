@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
   <TITLE>
-    RCOS.java - Class Definition - Disk Drive
+    RCOSjava - Class Definition - Disk Drive
   </TITLE>
 </HEAD>
 
@@ -11,7 +11,7 @@
     <TD ALIGN=LEFT>
       <H4>/ <A HREF="../../../resources.html" TARGET="body">Resources</A> /
       <A HREF="../index.html">Design</A> / <A HREF="../class.html">Class Definitions</A> /
-      DiskDrive</H4>
+      Disk Drive</H4>
     </TD>
     <TD ALIGN=LEFT WIDTH=25% VALIGN="CENTER">
       <IMG SRC="../../../pics/rightEnd.gif" WIDTH="19" HEIGHT="30"><A HREF="../../../index.html" TARGET="_parent"><IMG SRC="../../../pics/home.gif" BORDER="0" ALT="RCOS.java Home Page" WIDTH="38" HEIGHT="30"></A><A HREF="instruction.html" TARGET="body"><IMG SRC="../../../pics/back.gif" BORDER=0 ALT="Instruction" WIDTH="38" HEIGHT="30"></A><A HREF="transition.html" TARGET="body"><IMG SRC="../../../pics/forward.gif" BORDER=0 ALT="Transitions" WIDTH="38" HEIGHT="30"></A><IMG SRC="../../../pics/leftEnd.gif" ALT="" WIDTH="19" HEIGHT="30"><BR>
@@ -19,7 +19,7 @@
   </TR>
 </TABLE>
 <H1>
-  <TT>DiskDrive</TT>
+  <TT>Disk</TT>
 </H1>
 
 <TABLE>
@@ -28,7 +28,7 @@
       <H3>Class:</H3>
     </TD>
     <TD VALIGN=TOP>
-      Disk
+      Hardware, Disk
     </TD>
   </TR>
 
@@ -37,7 +37,7 @@
       <H3>Name:</H3>
     </TD>
     <TD VALIGN=TOP>
-      DiskDrive
+      Disk
     </TD>
   </TR>
 
@@ -46,17 +46,15 @@
       <H3>Comment:</H3>
     </TD>
     <TD VALIGN=TOP>
-      Simulates a physical disk drive and follows these steps
-      <PRE>
-  DiskScheduler makes a read/write request
-  if the disk can't satisfy this request then
-    CPU.generateInterrupt( disk_access_error, NOW )
-  else
-    compute how long it will take to perform request
-    CPU.generateInterrupt( type_of_transfer_complete, TIME ) 
-      </PRE>
-     Should possibly add the presence of a disk buffer provided by
-     the disk along the lines of Nachos' track buffer
+      Allows the disk scheduler to similate access times and other characteristics of a a physical disk drive.
+      Also allows reading and writing of disk sectors.  You can perform the follow simulated operations:
+      <OL>
+        <LI>Successive sector read,
+        <LI>Successive track read,
+        <LI>Sequential access of an arbitary length file, and
+        <LI>Random access of an arbitary length file.
+      </OL>
+      Alternatively, your own calculations can be applied by directly accessing the disk characteristics.
     </TD>
   </TR>
 
@@ -65,11 +63,8 @@
       <H3>Collaborators:</H3>
     </TD>
     <TD VALIGN=TOP>
-      <A HREF="disktransfer.html">DiskTransfer</A> - contain information about
-          whether the transfer is a read or write and to where<BR>
-      <A HREF="interrupt.html">Interrupt</A> - raised after disk has computed
-          how long it will take to finish the request<BR>
-      <A HREF="disktype.html">DiskType</A> - parameters about disk
+      <A HREF="diskScheduler.html">Disk Scheduler</A> - Accesses this directly to read/write and to simulate real
+      reading and writing.<BR>
     </TD>
   </TR>
 </TABLE>
@@ -79,12 +74,14 @@
   </H3>
   
   <UL>
-    <LI> DiskDrive( DiskType theDiskType ) - initialise disk with various
-         parameters
-    <LI> DiskRequest( DiskTransfer theTransfer ) - receive the type of
-         transfer to perform
-    <LI> int time = ComputeTime( DiskTransfer theTransfer ) - calculate how
-         long to satisfy request
+    <LI> Constructor - create a disk with track number and size, sector size, latency, start-up time and rotational speed.
+    <LI> Calculate Sectors to Read - given the number of bytes based on the number of sectors.
+    <LI> Calculate Tracks to Read - given the number of bytes base on the number of tracks.
+    <LI> Calculate Seek Time - given the number of tracks return the seek time.
+    <LI> Calculate Transfer Time - given the number of bytes return the time take to get it off the disk.
+    <LI> Calculate Successive Track and Sector Read.
+    <LI> Calculate Sequential and Random access.
+    <Li> Read and write data.
   </UL>
 
 </BODY>
