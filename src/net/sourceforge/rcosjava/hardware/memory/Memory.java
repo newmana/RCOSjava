@@ -71,7 +71,7 @@ public class Memory implements Serializable, Cloneable
   public void setFree()
   {
     allocated = false;
-    memorySegment = new short[DEFAULT_SEGMENT];
+    memorySegment = new short[segmentSize];
   }
 
   /**
