@@ -76,7 +76,7 @@ public class RCOSPanel extends JPanel implements Serializable
   public static Font terminlFont = new Font("Courier", Font.PLAIN, 10);
 
   /**
-   * Default title font size (TimesRoman, Plain, 18).
+   * Default title font size (TimesRoman, Plain, 16).
    */
   public static Font titleFont = new Font("TimesRoman", Font.PLAIN, 16);
 
