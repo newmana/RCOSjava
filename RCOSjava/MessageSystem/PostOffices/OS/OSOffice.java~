@@ -1,0 +1,110 @@
+//***************************************************************************
+// FILE     : OSOffice.java
+// PACKAGE  : MessageSystem
+// PURPOSE  : Provide message handling centre of operations
+// AUTHOR   : Bruce Jamieson
+// MODIFIED : Andrew Newman
+// HISTORY  : 01/01/96 Created
+//            23/01/96 Introduce "type" handling
+//            07/12/96 Removed messaging to Animator
+//            05/05/98 Removed usage of Destination
+//***************************************************************************/
+
+package MessageSystem.PostOffices.OS;
+
+import MessageSystem.PostOffices.PostOffice;
+import MessageSystem.PostOffices.OS.OSOffice;
+import MessageSystem.Messages.MessageAdapter;
+import MessageSystem.Messages.OS.OSMessageAdapter;
+import MessageSystem.Messages.Universal.UniversalMessageAdapter;
+import MessageSystem.PostOffices.MessageHandler;
+import java.util.Enumeration;
+
+public class OSOffice extends PostOffice
+{
+  public OSOffice(String sMyID)
+  {
+		sID = sMyID;
+    // Register ourselves
+    //addHandler(sMyID, this);
+	}
+	
+	public void sendMessage(MessageAdapter aMessage)
+	{
+    //Send to all other registered post offices.
+    sendToPostOffices(aMessage);
+    //Send to locally registered components.
+    localSendMessage(aMessage);
+	}
+	
+	public void sendMessage(UniversalMessageAdapter aMessage)
+	{	
+		sendMessage((MessageAdapter) aMessage);
+	}
+	
+	public void sendMessage(OSMessageAdapter aMessage)
+	{
+		sendMessage((MessageAdapter) aMessage);
+	}
+	
+	public void localSendMessage(MessageAdapter maMessage)
+	{
+		if (maMessage.forPostOffice(this))
+		{
+			//Go through the hashtable returning all the handlers
+			//registered.  Send the message to all of them.
+			for (Enumeration e = getHandlers().elements(); e.hasMoreElements();)
+			{
+			  OSMessageHandler theDestination = (OSMessageHandler) e.nextElement(); 
+			  //Send the message to the destination
+			  theDestination.processMessage(maMessage);
+			}
+    }
+	}
+	
+	public void localSendMessage(OSMessageAdapter maMessage)
+  { 
+		if (maMessage.forPostOffice(this))
+		{
+			//Go through the hashtable returning all the handlers
+			//registered.  Send the message to all of them.
+			for (Enumeration e = getHandlers().elements(); e.hasMoreElements();)
+			{
+			  OSMessageHandler theDestination = (OSMessageHandler) e.nextElement(); 
+			  //Send the message to the destination
+			  theDestination.processMessage(maMessage);
+			}
+    }
+  }
+	
+	public void sendToPostOffices(MessageAdapter maMessage)
+  {
+    PostOffice poTmpPostOffice;
+    
+    if (!vPostOffices.isEmpty())
+    {
+      int iCount;
+      for (iCount = 0; iCount < vPostOffices.size(); iCount++)
+      {
+        poTmpPostOffice = getPostOffice(iCount);
+        if (maMessage.forPostOffice(poTmpPostOffice))
+        {
+          poTmpPostOffice.localSendMessage(maMessage);
+        }
+      }
+    }
+	}
+	
+  public void processMessage(MessageAdapter maMsg)
+  {    
+    try
+    {          
+      maMsg.doMessage(this);        
+    }
+    catch (Exception e)
+    {
+      System.out.println("Error Processing Message: "+e.getMessage());
+      e.printStackTrace();
+    }
+  }
+}

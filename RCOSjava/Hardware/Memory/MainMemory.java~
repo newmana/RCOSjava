@@ -1,0 +1,70 @@
+// ****************************************************/
+// FILE     : MainMemory.java
+// PURPOSE  : Contains total addressable memory.
+// AUTHOR   : Andrew Newman
+// MODIFIED : 
+// HISTORY  : 01/07/97  Created
+// ****************************************************/
+
+package Hardware.Memory;
+
+import java.lang.Integer;
+
+public class MainMemory
+{
+  private int iTotalPages;
+  private int iFreePages;
+  private Memory[] mMemory;
+
+  public MainMemory(int iMaxPages)    
+  {
+    iTotalPages = iMaxPages;
+    iFreePages = iMaxPages;
+    mMemory = new Memory[iMaxPages];
+
+    for(int count = 0; count < iTotalPages; count++)
+    {
+      mMemory[count] = new Memory();
+    }      
+  }
+  
+  public Memory getMemory(int iLocation)
+  {
+    return mMemory[iLocation];
+  }
+  
+  public void setMemory(int iLocation, Memory mNewMemory)
+  {
+    mMemory[iLocation] = mNewMemory;
+  }
+
+  public int findFirstFree()
+  {
+    // Find first deallocated page.
+    for (int count = 0; count < iTotalPages; count++)
+    {
+      if (mMemory[count].isFree())
+      {
+        return count;
+      }
+    }
+    return -1;
+  }
+  
+  public int getFreePages()
+  {
+    return iFreePages;
+  }
+  
+  public void allocateMemory(int iLocation)
+  {
+    mMemory[iLocation].setAllocated();
+    iFreePages--;
+  }
+  
+  public void freeMemory(int iLocation)
+  {
+    mMemory[iLocation].setFree();
+    iFreePages++;
+  }
+}

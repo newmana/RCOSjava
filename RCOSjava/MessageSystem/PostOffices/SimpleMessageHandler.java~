@@ -1,0 +1,95 @@
+//***************************************************************************
+// FILE     : SimpleMessageHandler.java
+// PACKAGE  : MessageSystem
+// PURPOSE  : Provide sending and receiving facilities for all classes.
+// AUTHOR   : Bruce Jamieson
+// MODIFIED : Andrew Newman
+// HISTORY  : 24/01/96 Created
+//            ??/??/96 Fixed bug nolonger registers to postoffice
+//                     automatically.
+//            20/05/97 Changed message system
+//            21/05/97 Added LocalSendMessage to all posting of a message
+//                     to the local Post Office instead of broadcasting
+//                     it everywhere.
+//
+//***************************************************************************/
+
+package MessageSystem.PostOffices;
+
+import MessageSystem.Messages.MessageAdapter;
+import MessageSystem.Messages.AddHandler;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.io.Serializable;
+
+public abstract class SimpleMessageHandler implements MessageHandler, Serializable
+{
+  protected PostOffice mhThePostOffice;
+  protected String sID;      
+  private Hashtable htHandlers = new Hashtable();
+
+	public SimpleMessageHandler()
+	{
+	}
+	
+	public SimpleMessageHandler(String sMyID, PostOffice mhNewPostOffice)
+  {
+    // Save myId and a pointer the PostOffice
+    sID = sMyID;
+    mhThePostOffice = mhNewPostOffice;
+    // Tell the PostOffice that I'm alive
+    AddHandler newMessage = new AddHandler(this, sMyID,
+      mhNewPostOffice);
+    mhNewPostOffice.processMessage(newMessage);
+  }
+	
+	public SimpleMessageHandler(String sNewID)
+	{
+		sID = sNewID;
+	}
+	
+	public void setID(String sNewID)
+  {
+    sID = sNewID;
+  }
+
+  public String getID()
+  {
+    return sID;
+  }
+   
+	public abstract void sendMessage(MessageAdapter aMessage);
+  public abstract void localSendMessage(MessageAdapter maMessage);
+	public abstract void processMessage(MessageAdapter maMessage);
+
+	public void addHandler(String sNewID, MessageHandler mhNewHandler)
+  {
+    htHandlers.put(sNewID, mhNewHandler);
+  }
+  
+  public MessageHandler getHandler(String sHandlerToGet)
+  {
+    //System.out.println("Attempting to get handler " + sHandlerToGet + ":" + htHandlers.get(sHandlerToGet));
+    return ((MessageHandler) htHandlers.get(sHandlerToGet));
+  }
+  
+  public Hashtable getHandlers()
+  {
+    return(this.htHandlers);
+  }
+  
+  public Enumeration getKeysHandlers()
+  {
+    return htHandlers.keys();
+  }
+
+	public void removeHandler(String sOldID)
+  {
+    htHandlers.remove(sOldID);
+  }
+  
+  public void clearHandlers()
+  {
+    htHandlers.clear();
+  }
+}

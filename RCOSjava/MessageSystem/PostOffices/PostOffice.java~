@@ -1,0 +1,52 @@
+//***************************************************************************
+// FILE     : PostOffice.java
+// PACKAGE  : MessageSystem
+// PURPOSE  : Provide message handling centre of operations
+// AUTHOR   : Bruce Jamieson
+// MODIFIED : Andrew Newman
+// HISTORY  : 01/01/96 Created
+//            23/01/96 Introduce "type" handling
+//            07/12/96 Removed messaging to Animator
+//            05/05/98 Removed usage of Destination
+//***************************************************************************/
+
+package MessageSystem.PostOffices;
+
+import java.util.Enumeration;
+import java.util.Vector;
+import MessageSystem.Messages.MessageAdapter;
+
+public abstract class PostOffice extends SimpleMessageHandler
+{   
+  protected Vector vPostOffices = new Vector(1,1);
+  protected String sType;
+  
+  public PostOffice()
+	{
+	}
+	
+	public PostOffice(String sMyID)
+  {
+		sID = sMyID;
+    sType = this.getClass().getName();
+    //Add myself so that I can get registration messages/etc.
+    addHandler(getID(), this);
+  } 
+  
+  public void addPostOffice(PostOffice poNewPostOffice)
+  {
+    vPostOffices.addElement(poNewPostOffice);
+  }
+  
+  public PostOffice getPostOffice(int iIndex)
+  {
+    return ((PostOffice) vPostOffices.elementAt(iIndex));
+  }
+  
+  
+  //Send message globally.  
+	public abstract void sendToPostOffices(MessageAdapter maMessage);
+	public abstract void sendMessage(MessageAdapter maMessage);
+	public abstract void localSendMessage(MessageAdapter maMessage);
+  public abstract void processMessage(MessageAdapter maMsg);
+}
