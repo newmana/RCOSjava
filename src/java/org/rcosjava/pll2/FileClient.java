@@ -151,32 +151,18 @@ public class FileClient
   public Object getRecFile(String filename)
   {
     String serializedObject = getFile(2, filename);
-//    System.out.println("Filename: " + filename);
-//    System.out.println("Got: " + serializedObject);
-    ByteArrayInputStream tmpBuffer = new
-        ByteArrayInputStream(serializedObject.getBytes());
-    KOMLDeserializer deserializer = null;
 
     try
     {
-      deserializer = new KOMLDeserializer(tmpBuffer, false);
-      return deserializer.readObject();
+      ObjectInputStream tmpBuffer = new
+         ObjectInputStream(new ByteArrayInputStream(serializedObject.getBytes()));
+      return tmpBuffer.readObject();
     }
     catch (Exception e)
     {
       log.fatal("Failed to deserialize class", e);
     }
-    finally
-    {
-      try
-      {
-        deserializer.close();
-      }
-      catch (Exception e)
-      {
-        // ignore
-      }
-    }
+
     return null;
   }
 
@@ -229,39 +215,25 @@ public class FileClient
   /**
    * Description of the Method
    *
-   * @param sFileName Description of Parameter
+   * @param fileName Description of Parameter
    * @param object Description of Parameter
    * @exception Exception Description of Exception
    */
-  public void writeRecFile(String sFileName, Object object)
+  public void writeRecFile(String fileName, Object object)
     throws Exception
   {
-    KOMLSerializer serializer = null;
-    ByteArrayOutputStream tmpBuffer = new ByteArrayOutputStream();
-//    ObjectOutputStream tmpBuffer = new ObjectOutputStream(new ByteArrayOutputStream());
+    // Byte buffer to write the object to.
+    ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
 
-    try
-    {
-      serializer = new KOMLSerializer(tmpBuffer, false);
-      serializer.addObject(object);
-    }
-    catch (Exception e)
-    {
-      e.printStackTrace();
-    }
-    finally
-    {
-      try
-      {
-        serializer.close();
-      }
-      catch (Exception e)
-      {
-        // ignore
-      }
-    }
+    // Write the object to the byte buffer.
+    ObjectOutputStream objectBuffer = new ObjectOutputStream(byteBuffer);
+    objectBuffer.writeObject(object);
+
+    // Get the resultant serialized object.
+    String result = byteBuffer.toString();
+
     //2 for recorded area
-    if (messages.askWriteFileData(2, sFileName, tmpBuffer.toString()))
+    if (messages.askWriteFileData(2, fileName, result))
     {
       //Read result
       if (messages.readMessage())
@@ -278,23 +250,23 @@ public class FileClient
   /**
    * Description of the Method
    *
-   * @param sFileName Description of Parameter
+   * @param fileName Description of Parameter
    * @return Description of the Returned Value
    */
-  public int statExeFile(String sFileName)
+  public int statExeFile(String fileName)
   {
-    return statFile(1, sFileName);
+    return statFile(1, fileName);
   }
 
   /**
    * Description of the Method
    *
-   * @param sFileName Description of Parameter
+   * @param fileName Description of Parameter
    * @return Description of the Returned Value
    */
-  public int statRecFile(String sFileName)
+  public int statRecFile(String fileName)
   {
-    return statFile(2, sFileName);
+    return statFile(2, fileName);
   }
 
   /**
@@ -398,14 +370,14 @@ public class FileClient
    * Retrieve the sizeof the specified file
    *
    * @param directoryType Description of Parameter
-   * @param sFileName Description of Parameter
-   * @return Description of the Returned Value
+   * @param fileName Description of Parameter
+   * @return the size of the file or 0 if there was an error.
    */
-  private int statFile(int directoryType, String sFileName)
+  private int statFile(int directoryType, String fileName)
   {
     int messageSize = 0;
 
-    if (messages.askFileStats(directoryType, sFileName))
+    if (messages.askFileStats(directoryType, fileName))
     {
       //Read result
       if (messages.readMessage())

@@ -2,6 +2,7 @@ package org.rcosjava.messaging.postoffices.universal;
 
 import org.rcosjava.RCOS;
 import org.rcosjava.messaging.messages.MessageAdapter;
+import org.rcosjava.messaging.messages.universal.NoNextMessage;
 import org.rcosjava.messaging.messages.animator.AnimatorMessageAdapter;
 import org.rcosjava.messaging.messages.os.OSMessageAdapter;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
@@ -115,15 +116,34 @@ public class UniversalMessagePlayer extends OSMessageHandler
   }
 
   /**
+   * Returns true if there is another message left to read.
+   *
+   * @return true if there is another message left to read.
+   */
+  public boolean hasNextMessage()
+  {
+    return hasMessage(messageCounter + 1);
+  }
+
+  /**
+   * Increment the message counter.
+   */
+  public void incMessageCounter()
+  {
+    messageCounter++;
+  }
+
+  /**
    * Reads the next mesage in order and sends it to the appropriate post
    * offices.  If it comes to the end of the messages it will do nothing.
    *
    * @param newFileName the base file name to read.
+   * @throws EndOfMessagesException if there are no more messages left to read.
    */
-  public void playNextMessage()
+  public void playNextMessage() throws EndOfMessagesException
   {
     // If the object is null then we can assume we're at the end.
-    if (!endOfMessages())
+    if (hasMessage(messageCounter))
     {
       if (messageCounter == 0)
       {
@@ -151,27 +171,50 @@ public class UniversalMessagePlayer extends OSMessageHandler
           animatorPostOffice.localSendMessage((AnimatorMessageAdapter) tmpMessage);
         }
       }
+
+      // Check to see if this is the last message.
+      if (hasNextMessage())
+      {
+        // If it's not the last message increment the message counter.
+        incMessageCounter();
+      }
+      else
+      {
+        // If there is no next message let the multimedia animator know.
+        NoNextMessage msg = new NoNextMessage(this);
+        sendMessage(msg);
+      }
+    }
+    else
+    {
+      throw new EndOfMessagesException("Message number: " + messageCounter +
+          " Was not found.");
     }
   }
 
   /**
    * Returns true if there are no more messages left to read.
    *
+   * @param messageIndex the message index into the number of messages to
+   *   determine if it exists.
    * @return true if there are no more messages left to read.
    */
-  private boolean endOfMessages()
+  private boolean hasMessage(int messageNumber)
   {
+    // Open connection to client.
     myClient = new FileClient(host, port);
     myClient.openConnection();
 
-    Object tmpObject;
+    // Ask for the file size of the file.
     int size = myClient.statRecFile(java.io.File.separatorChar +
-          recordingName + java.io.File.separatorChar + messageCounter +
-          ".xml");
-    boolean endOfMessages = (size == 0);
+        recordingName + java.io.File.separatorChar + messageNumber +
+        ".xml");
 
+    // Close the connection
     myClient.closeConnection();
-    return endOfMessages;
+
+    // A size of 0 indicates not found - ie. no more messages.
+    return (size != 0);
   }
 
   /**
@@ -192,14 +235,16 @@ public class UniversalMessagePlayer extends OSMessageHandler
       tmpObject = myClient.getRecFile(java.io.File.separatorChar +
           recordingName + java.io.File.separatorChar + (messageCounter) +
           ".xml");
-      messageCounter++;
     }
     catch (Exception e)
     {
       tmpObject = null;
       e.printStackTrace();
     }
-    myClient.closeConnection();
+    finally
+    {
+      myClient.closeConnection();
+    }
     return tmpObject;
   }
 }

@@ -44,16 +44,6 @@ public class FileServer
   private Socket fileServerConnection;
 
   /**
-   * The input stream of all incoming files.
-   */
-  private DataInputStream inputStream;
-
-  /**
-   * The output stream of all files to be written.
-   */
-  private DataOutputStream outputStream;
-
-  /**
    * Contains a list of all the message to be used between client and server.
    */
   private FileMessages fileMessage;
@@ -145,9 +135,11 @@ public class FileServer
         System.out.println("Client " +
             fileServerConnection.getInetAddress().getHostName() + " has connected..");
         // Get Input Stream
-        inputStream = new DataInputStream(fileServerConnection.getInputStream());
+        BufferedInputStream inputStream =
+            new BufferedInputStream(fileServerConnection.getInputStream());
         // Set Output Stream
-        outputStream = new DataOutputStream(fileServerConnection.getOutputStream());
+        BufferedOutputStream outputStream =
+            new BufferedOutputStream(fileServerConnection.getOutputStream());
         fileMessage = new FileMessages(inputStream, outputStream);
 
         boolean anotherMessage = true;
@@ -231,8 +223,6 @@ public class FileServer
       System.out.println("Client " +
           fileServerConnection.getInetAddress().getHostName() +
           " has disconnected..");
-      outputStream.close();
-      inputStream.close();
       fileServerConnection.close();
       return false;
     }
@@ -290,7 +280,7 @@ public class FileServer
   {
     // Setup variables.
     FileInputStream inputFile;
-    DataInputStream inputStream;
+    BufferedInputStream inputStream;
     int fileSize;
     byte[] fileData;
 
@@ -305,13 +295,23 @@ public class FileServer
       return;
     }
     // Setup the necessary streams and read the file contents.
-    inputStream = new DataInputStream(inputFile);
+    inputStream = new BufferedInputStream(inputFile);
     try
     {
-      fileSize = inputStream.available();
-      fileData = new byte[fileSize];
-      inputStream.readFully(fileData, 0, fileSize);
+      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+      byte[] buffer = new byte[4096];
+      int bytesRead;
+
+      while ((bytesRead = inputStream.read(buffer)) != -1)
+      {
+        outputStream.write(buffer, 0, bytesRead);
+      }
+
       inputStream.close();
+      outputStream.close();
+
+      fileData = outputStream.toByteArray();
+      fileSize = fileData.length;
     }
     catch (IOException theException)
     {
