@@ -1,14 +1,3 @@
-//***************************************************************************
-// FILE     : ProcessManagerAnimator.java
-// PACKAGE  : Animator
-// PURPOSE  : Interface which allows the recording and playback of messages
-//            that occur in RCOS.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 10/1/97  Created.
-//
-//***************************************************************************/
-
 package Software.Animator.Multimedia;
 
 import java.awt.*;
@@ -23,19 +12,35 @@ import Software.Animator.Support.RCOSList;
 import MessageSystem.Messages.Animator.AnimatorMessageAdapter;
 import MessageSystem.Messages.Universal.UniversalMessageAdapter;
 import MessageSystem.PostOffices.Animator.AnimatorOffice;
+import MessageSystem.PostOffices.Universal.UniversalMessageRecorder;
 
+/**
+ * User interface which allows the recording and playback of messages that
+ * occur in RCOS.
+ * <P>
+ * <DT><B>History:</B>
+ * </DT>
+ *
+ * @author Andrew Newman.
+ * @created 1st January 2001
+ * @version 1.00 $Date$
+ */
 public class MultimediaAnimator extends RCOSAnimator
 {
   private MultimediaFrame mmFrame;
   private static final String MESSENGING_ID = "MultimediaAnimator";
+  private UniversalMessageRecorder recorder;
+  private boolean recording;
 
   public MultimediaAnimator (AnimatorOffice aPostOffice,
-    int x, int y, Image[] pmImages)
+    int x, int y, Image[] pmImages, UniversalMessageRecorder newRecorder)
   {
     super(MESSENGING_ID, aPostOffice);
     mmFrame = new MultimediaFrame(x, y, pmImages, this);
     mmFrame.pack();
     mmFrame.setSize(x,y);
+    recorder = newRecorder;
+    recording = false;
   }
 
   public void setupLayout(Component c)
@@ -56,6 +61,20 @@ public class MultimediaAnimator extends RCOSAnimator
   public void hideFrame()
   {
     mmFrame.setVisible(false);
+  }
+
+  public void recordToggle()
+  {
+    if (!recording)
+    {
+      this.recorder.recordOn("test.xml");
+      recording = true;
+    }
+    else
+    {
+      this.recorder.recordOff();
+      recording = false;
+    }
   }
 
   public void processMessage(AnimatorMessageAdapter aMsg)

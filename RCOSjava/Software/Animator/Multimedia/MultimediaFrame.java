@@ -1,15 +1,3 @@
-//***************************************************************************
-// FILE     : MultimediaFrame.java
-// PACKAGE  : Animator
-// PURPOSE  : It is the interface that allows users to turn on/off or playback
-//            pre-recorded messages.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 10/1/97  Created. AN
-//            23/11/98 Converted to Java 1.1. AN
-//
-//***************************************************************************/
-
 package Software.Animator.Multimedia;
 
 import java.awt.*;
@@ -25,17 +13,29 @@ import MessageSystem.Messages.Message;
 import MessageSystem.PostOffices.MessageHandler;
 import Software.Process.RCOSProcess;
 
+/**
+ * It is the interface that allows users to turn on/off or playback
+ * pre-recorded messages.
+ * <P>
+ * <DT><B>History:</B>
+ * </DT>
+ *
+ * @author Andrew Newman.
+ * @created 1st January 2001
+ * @version 1.00 $Date$
+ */
 public class MultimediaFrame extends RCOSFrame
 {
   private MultimediaAnimator myMultimediaAnimator;
   private Image myImages[];
   private Message msg;
   private RCOSList rMovies;
+  private GraphicButton recordButton, loadButton, pauseButton, playButton;
 
   public MultimediaFrame (int x, int y, Image[] mmImages,
-                          MultimediaAnimator newMultimediaAnimator)
+    MultimediaAnimator newMultimediaAnimator)
   {
-    setTitle("Process Manager");
+    setTitle("Multimedia Tour");
     myImages = mmImages;
     myMultimediaAnimator = newMultimediaAnimator;
     setSize(x,y);
@@ -64,8 +64,6 @@ public class MultimediaFrame extends RCOSFrame
     constraints.weightx=1;
     constraints.insets= new Insets(3,1,3,1);
 
-    GraphicButton tmpGButton;
-
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
     lTmpLabel = new NewLabel("Existing Recordings", titleFont);
@@ -80,11 +78,10 @@ public class MultimediaFrame extends RCOSFrame
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
-    tmpGButton = new GraphicButton (myImages[0], myImages[1],
+    loadButton = new GraphicButton (myImages[0], myImages[1],
       "Load", defaultFont, buttonColour, true);
-    gridBag.setConstraints(tmpGButton,constraints);
-    pMain.add(tmpGButton);
-    //tmpButton.addMouseListener(new KillProcess());
+    gridBag.setConstraints(loadButton,constraints);
+    pMain.add(loadButton);
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
@@ -94,57 +91,53 @@ public class MultimediaFrame extends RCOSFrame
 
     constraints.gridwidth=1;
     constraints.anchor = GridBagConstraints.CENTER;
-    tmpGButton = new GraphicButton (myImages[0], myImages[1],
+    playButton = new GraphicButton (myImages[0], myImages[1],
       "Play", defaultFont, buttonColour, true);
-    gridBag.setConstraints(tmpGButton,constraints);
-    pMain.add(tmpGButton);
-		//tmpButton.addMouseListener(new StepProcess());
+    gridBag.setConstraints(playButton,constraints);
+    pMain.add(playButton);
 
-		constraints.gridwidth=1;
+    constraints.gridwidth=1;
     constraints.anchor = GridBagConstraints.CENTER;
-    tmpGButton = new GraphicButton (myImages[0], myImages[1],
+    pauseButton = new GraphicButton (myImages[0], myImages[1],
       "Pause", defaultFont, buttonColour, true);
-    gridBag.setConstraints(tmpGButton,constraints);
-    pMain.add(tmpGButton);
-    //tmpButton.addMouseListener(new StepProcess());
+    gridBag.setConstraints(pauseButton,constraints);
+    pMain.add(pauseButton);
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
-    tmpGButton = new GraphicButton (myImages[0], myImages[1],
-      "Record", defaultFont, buttonColour, true);
-    gridBag.setConstraints(tmpGButton,constraints);
-    pMain.add(tmpGButton);
-    //tmpButton.addMouseListener(new RunProcess());
+    recordButton = new GraphicButton (myImages[0], myImages[1],
+      "Record", defaultFont, buttonColour, true, true, false);
+
+    gridBag.setConstraints(recordButton,constraints);
+    pMain.add(recordButton);
+    recordButton.addMouseListener(new RecordToggle());
+
+/*    tmpButton = new Button ("Open");
+    pClose.add(tmpButton);
+    tmpButton.addMouseListener(new CloseAnimator());
+
+    tmpButton = new Button ("Save");
+    pClose.add(tmpButton);
+    tmpButton.addMouseListener(new CloseAnimator());*/
 
     pClose.setLayout(new FlowLayout(FlowLayout.RIGHT));
-    tmpButton = new Button ("Open");
+    tmpButton = new Button ("Close");
     pClose.add(tmpButton);
     tmpButton.addMouseListener(new CloseAnimator());
 
-	  tmpButton = new Button ("Save");
-    pClose.add(tmpButton);
-    tmpButton.addMouseListener(new CloseAnimator());
-
-		tmpButton = new Button ("Close");
-    pClose.add(tmpButton);
-    tmpButton.addMouseListener(new CloseAnimator());
-
-    add("Center",pMain);
-    add("South",pClose);
+    add("Center", pMain);
+    add("South", pClose);
   }
 
-/*  class KillProcess extends MouseAdapter
+  class RecordToggle extends MouseAdapter
   {
     public void mouseClicked(MouseEvent e)
     {
-      if (rProcesses.getSelectedItem() != null)
-      {
-        int iProcess = Integer.parseInt(rProcesses.getSelectedItem());
-        myProcessManager.kill(iProcess);
-      }
+      myMultimediaAnimator.recordToggle();
+      recordButton.toggleGrey();
     }
   }
-
+/*
   class StepProcess extends MouseAdapter
   {
     public void mouseClicked(MouseEvent e)
