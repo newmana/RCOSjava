@@ -54,26 +54,28 @@ public class ProcessSchedulerFrame extends RCOSFrame
     cpuToReadyMovement, cpuToBlockedMovement;
   private Panel mainPanel, closePanel, westPanel;
   private Image myImages[] = new Image[5];
-  private int iX, iCountX, iCountY, iIndentL, iIndentR, iWidth, iHeight;
-  private int iBoxHeight, iBoxWidth;
+  private int windowCenter;
+  private int widthCount, heightCount;
+  private int leftIndent, rightIndent;
+  private int width, height;
+  private int boxHeight, boxWidth;
   private MTGO tmpMTGO;
-  private int inX, inY;
-  private long lDelay;
+  private int windowWidth, windowHeight;
+  private long delay;
   private ProcessSchedulerAnimator myProcessScheduler;
-  private Message msg;
-  private RCOSBox rBox;
+  private RCOSBox box;
 
-  public ProcessSchedulerFrame(int x, int y, Image[] psImages,
+  public ProcessSchedulerFrame(int x, int y, Image[] images,
     ProcessSchedulerAnimator thisProcessScheduler)
   {
     setTitle("Process Scheduler Animator");
-    myImages = psImages;
+    myImages = images;
     ZombieQ = new LIFOQueue(10,0);
     BlockedQ = new LIFOQueue(10,0);
     ReadyQ = new LIFOQueue(10,0);
-    inX = x;
-    inY = y;
-    lDelay = 1;
+    windowWidth = x;
+    windowHeight = y;
+    delay = 1;
     myProcessScheduler = thisProcessScheduler;
   }
 
@@ -92,15 +94,15 @@ public class ProcessSchedulerFrame extends RCOSFrame
   {
     drawBackground();
     engine.repaint();
-    rBox.repaint();
+    box.repaint();
   }
 
-  public synchronized void syncPaint(long lTime)
+  public synchronized void syncPaint(long time)
   {
     // do nothing
     try
     {
-      wait(lTime);
+      wait(time);
     }
     catch(Exception v)
     {
@@ -113,21 +115,21 @@ public class ProcessSchedulerFrame extends RCOSFrame
     //Draw the black background or image (if it's set)
     engine.drawBackground();
 
-    int iIncrement;
+    int increment;
 
     engine.pad.setColor(Color.lightGray);
     engine.pad.setFont(titleFont);
     FontMetrics fm = getFontMetrics(titleFont);
 
-    for (iCountY = 1; iCountY <= 3; iCountY++)
+    for (heightCount = 1; heightCount <= 3; heightCount++)
     {
       String title;
 
-      if (iCountY == 1)
+      if (heightCount == 1)
       {
         title="Ready Queue";
       }
-      else if (iCountY == 2)
+      else if (heightCount == 2)
       {
         title="Blocked Queue";
       }
@@ -136,29 +138,29 @@ public class ProcessSchedulerFrame extends RCOSFrame
         title="Zombie Queue";
       }
 
-      iX = (iWidth/2) - (fm.stringWidth(title)/2);
-      engine.pad.drawString(title,iX,(iCountY*(iHeight))+20);
+      windowCenter = (width/2) - (fm.stringWidth(title)/2);
+      engine.pad.drawString(title,windowCenter,(heightCount*(height))+20);
 
-      for (iCountX = -5; iCountX < 5; iCountX++)
+      for (widthCount = -5; widthCount < 5; widthCount++)
       {
-        engine.pad.draw3DRect((engine.iCenterX)+iCountX*iBoxHeight,(iCountY*(iHeight))+iBoxHeight,iBoxHeight,iBoxHeight,true);
+        engine.pad.draw3DRect((engine.iCenterX)+widthCount*boxHeight,(heightCount*(height))+boxHeight,boxHeight,boxHeight,true);
       }
       //Lines out of boxes.
-      engine.pad.drawLine(iIndentL,iCountY*(iHeight)+45,(engine.iCenterX)-150,iCountY*(iHeight)+45);
-      engine.pad.drawLine(engine.iCenterX+150,iCountY*(iHeight)+45,iWidth-iIndentL,iCountY*(iHeight)+45);
+      engine.pad.drawLine(leftIndent,heightCount*(height)+45,(engine.iCenterX)-150,heightCount*(height)+45);
+      engine.pad.drawLine(engine.iCenterX+150,heightCount*(height)+45,width-leftIndent,heightCount*(height)+45);
     }
 
     //Horizontal lines for zombie and blocked
-    engine.pad.drawLine(iIndentL,2*(iHeight)-5,iIndentR,2*(iHeight)-5);
-    engine.pad.drawLine(iIndentL,3*(iHeight)-5,iIndentR,3*(iHeight)-5);
+    engine.pad.drawLine(leftIndent,2*(height)-5,rightIndent,2*(height)-5);
+    engine.pad.drawLine(leftIndent,3*(height)-5,rightIndent,3*(height)-5);
 
     //Horizontal lines off CPU
-    engine.pad.drawLine(iIndentL,cpuPic.iImageHeight/2,engine.CenterX(cpuPic),cpuPic.iImageHeight/2);
-    engine.pad.drawLine(engine.CenterX(cpuPic)+cpuPic.iImageWidth/2,cpuPic.iImageHeight/2,iIndentR,cpuPic.iImageHeight/2);
+    engine.pad.drawLine(leftIndent,cpuPic.iImageHeight/2,engine.CenterX(cpuPic),cpuPic.iImageHeight/2);
+    engine.pad.drawLine(engine.CenterX(cpuPic)+cpuPic.iImageWidth/2,cpuPic.iImageHeight/2,rightIndent,cpuPic.iImageHeight/2);
 
     //2 Vertical lines
-    engine.pad.drawLine(iIndentL,cpuPic.iImageHeight/2,iIndentL,3*(iHeight)+45);
-    engine.pad.drawLine(iIndentR,cpuPic.iImageHeight/2,iIndentR,3*(iHeight)+45);
+    engine.pad.drawLine(leftIndent,cpuPic.iImageHeight/2,leftIndent,3*(height)+45);
+    engine.pad.drawLine(rightIndent,cpuPic.iImageHeight/2,rightIndent,3*(height)+45);
   }
 
 
@@ -172,13 +174,13 @@ public class ProcessSchedulerFrame extends RCOSFrame
   {
     super.setupLayout(c);
 
-    engine = new GraphicsEngine(this, inX, inY);
+    engine = new GraphicsEngine(this, windowWidth, windowHeight);
     engine.backgroundColour = defaultBgColour;
 
-    iWidth = engine.iWidth;
-    iHeight = engine.iHeight / 5;
-    iIndentL = 50;
-    iIndentR = iWidth - iIndentL;
+    width = engine.getWidth();
+    height = engine.getHeight() / 5;
+    leftIndent = 50;
+    rightIndent = width - leftIndent;
 
     setupMovement();
 
@@ -279,8 +281,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
     pTemp.add(schedulerOption);
     schedulerOption.addItemListener(new SchedulerSelection());
 
-    rBox = new RCOSBox(pTemp,new NewLabel("Options", titleFont),3,
-                       3,3,3);
+    box = new RCOSBox(pTemp,new NewLabel("Options", titleFont),3,3,3,3);
 
     westPanel.setLayout(gridBag);
     constraints.gridwidth=1;
@@ -291,8 +292,8 @@ public class ProcessSchedulerFrame extends RCOSFrame
     constraints.insets=new Insets(21,2,1,2);
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.NORTH;
-    gridBag.setConstraints(rBox,constraints);
-    westPanel.add(rBox);
+    gridBag.setConstraints(box,constraints);
+    westPanel.add(box);
 
     closePanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
     tmpButton = new Button("Close");
@@ -322,10 +323,10 @@ public class ProcessSchedulerFrame extends RCOSFrame
     tmpPic = new MTGO(myImages[0], "TEMP", false);
     tmpPic.iPriority = 2;
     engine.addMTGO(tmpPic,this);
-    iBoxHeight = 30;
-    iBoxWidth = 30;
+    boxHeight = 30;
+    boxWidth = 30;
 
-    int count, count2, iIncrement, iArr;
+    int count, count2, increment, iArr;
 
     // Movement inside queues
 
@@ -335,69 +336,69 @@ public class ProcessSchedulerFrame extends RCOSFrame
       {
         if (count2 > -5)
         {
-          iIncrement=-2;
+          increment=-2;
         }
         else
         {
-          iIncrement=0;
+          increment=0;
         }
         iArr = (count2-5) * -1;
         if (count == 1)
         {
-          readyPositions[iArr] = new Position(((count2*iBoxHeight)+engine.iCenterX),
-            ((count*iHeight)+iBoxHeight),iIncrement,0);
+          readyPositions[iArr] = new Position(((count2*boxHeight)+engine.iCenterX),
+            ((count*height)+boxHeight),increment,0);
         }
         if (count == 2)
         {
-          blockedPositions[iArr] = new Position(((count2*iBoxHeight)+engine.iCenterX),
-            ((count*iHeight)+iBoxHeight),iIncrement,0);
+          blockedPositions[iArr] = new Position(((count2*boxHeight)+engine.iCenterX),
+            ((count*height)+boxHeight),increment,0);
         }
         if (count == 3)
         {
-          zombiePositions[iArr] = new Position(((count2*iBoxHeight)+engine.iCenterX),
-            ((count*iHeight)+iBoxHeight),iIncrement,0);
+          zombiePositions[iArr] = new Position(((count2*boxHeight)+engine.iCenterX),
+            ((count*height)+boxHeight),increment,0);
         }
       }
     }
 
     // Movement of process from Zombie to Ready
 
-    zombieToReadyPositions[0] = new Position(engine.iCenterX-180,(3*iHeight)+iBoxHeight,-2,0);
-    zombieToReadyPositions[1] = new Position(iIndentL-(iBoxWidth/2),(3*iHeight)+iBoxHeight,0,-2);
-    zombieToReadyPositions[2] = new Position(iIndentL-(iBoxWidth/2),(2*iHeight)+45+(iBoxHeight/2),2,0);
-    zombieToReadyPositions[3] = new Position(iIndentR-(iBoxWidth/2),(2*iHeight)+45+(iBoxHeight/2),0,-2);
-    zombieToReadyPositions[4] = new Position(iIndentR-(iBoxWidth/2),iHeight+iBoxHeight,-2,0);
-    zombieToReadyPositions[5] = new Position(engine.iCenterX+150,iHeight+iBoxHeight,0,0);
+    zombieToReadyPositions[0] = new Position(engine.iCenterX-180,(3*height)+boxHeight,-2,0);
+    zombieToReadyPositions[1] = new Position(leftIndent-(boxWidth/2),(3*height)+boxHeight,0,-2);
+    zombieToReadyPositions[2] = new Position(leftIndent-(boxWidth/2),(2*height)+45+(boxHeight/2),2,0);
+    zombieToReadyPositions[3] = new Position(rightIndent-(boxWidth/2),(2*height)+45+(boxHeight/2),0,-2);
+    zombieToReadyPositions[4] = new Position(rightIndent-(boxWidth/2),height+boxHeight,-2,0);
+    zombieToReadyPositions[5] = new Position(engine.iCenterX+150,height+boxHeight,0,0);
 
     // Movement of process from Blocked to Ready
 
-    blockedToReadyPositions[0] = new Position(engine.iCenterX-180,(2*iHeight)+iBoxHeight,-2,0);
-    blockedToReadyPositions[1] = new Position(iIndentL-(iBoxWidth/2),(2*iHeight)+iBoxHeight,0,-2);
-    blockedToReadyPositions[2] = new Position(iIndentL-(iBoxWidth/2),iHeight+45+(iBoxHeight/2),2,0);
-    blockedToReadyPositions[3] = new Position(iIndentR-(iBoxWidth/2),iHeight+45+(iBoxHeight/2),0,-2);
-    blockedToReadyPositions[4] = new Position(iIndentR-(iBoxWidth/2),iHeight+iBoxHeight,-2,0);
-    blockedToReadyPositions[5] = new Position(engine.iCenterX+150,iHeight+iBoxHeight,0,0);
+    blockedToReadyPositions[0] = new Position(engine.iCenterX-180,(2*height)+boxHeight,-2,0);
+    blockedToReadyPositions[1] = new Position(leftIndent-(boxWidth/2),(2*height)+boxHeight,0,-2);
+    blockedToReadyPositions[2] = new Position(leftIndent-(boxWidth/2),height+45+(boxHeight/2),2,0);
+    blockedToReadyPositions[3] = new Position(rightIndent-(boxWidth/2),height+45+(boxHeight/2),0,-2);
+    blockedToReadyPositions[4] = new Position(rightIndent-(boxWidth/2),height+boxHeight,-2,0);
+    blockedToReadyPositions[5] = new Position(engine.iCenterX+150,height+boxHeight,0,0);
 
     // Movement of process from Ready to CPU
 
-    readyToCPUPositions[0] = new Position(engine.iCenterX-180,iHeight+iBoxHeight,-2,0);
-    readyToCPUPositions[1] = new Position(iIndentL-(iBoxWidth/2),iHeight+iBoxHeight,0,-2);
-    readyToCPUPositions[2] = new Position(iIndentL-(iBoxWidth/2),iBoxHeight/2,2,0);
-    readyToCPUPositions[3] = new Position(engine.CenterX(tmpPic),iBoxHeight/2,0,0);
+    readyToCPUPositions[0] = new Position(engine.iCenterX-180,height+boxHeight,-2,0);
+    readyToCPUPositions[1] = new Position(leftIndent-(boxWidth/2),height+boxHeight,0,-2);
+    readyToCPUPositions[2] = new Position(leftIndent-(boxWidth/2),boxHeight/2,2,0);
+    readyToCPUPositions[3] = new Position(engine.CenterX(tmpPic),boxHeight/2,0,0);
 
     // Movement of process from CPU to Ready
 
-    cpuToReadyPositions[0] = new Position(engine.CenterX(tmpPic),iBoxHeight/2,2,0);
-    cpuToReadyPositions[1] = new Position(iIndentR-(iBoxWidth/2),iBoxHeight/2,0,2);
-    cpuToReadyPositions[2] = new Position(iIndentR-(iBoxWidth/2),iHeight+iBoxHeight,-2,0);
-    cpuToReadyPositions[3] = new Position(engine.iCenterX+150,iHeight+iBoxHeight,0,0);
+    cpuToReadyPositions[0] = new Position(engine.CenterX(tmpPic),boxHeight/2,2,0);
+    cpuToReadyPositions[1] = new Position(rightIndent-(boxWidth/2),boxHeight/2,0,2);
+    cpuToReadyPositions[2] = new Position(rightIndent-(boxWidth/2),height+boxHeight,-2,0);
+    cpuToReadyPositions[3] = new Position(engine.iCenterX+150,height+boxHeight,0,0);
 
     // Movement of process from CPU to Blocked
 
-    cpuToBlockedPositions[0] = new Position(engine.CenterX(tmpPic),iBoxHeight/2,2,0);
-    cpuToBlockedPositions[1] = new Position(iIndentR-(iBoxWidth/2),iBoxHeight/2,0,2);
-    cpuToBlockedPositions[2] = new Position(iIndentR-(iBoxWidth/2),(2*iHeight)+iBoxHeight,-2,0);
-    cpuToBlockedPositions[3] = new Position(engine.iCenterX+150,(2*iHeight)+iBoxHeight,0,0);
+    cpuToBlockedPositions[0] = new Position(engine.CenterX(tmpPic),boxHeight/2,2,0);
+    cpuToBlockedPositions[1] = new Position(rightIndent-(boxWidth/2),boxHeight/2,0,2);
+    cpuToBlockedPositions[2] = new Position(rightIndent-(boxWidth/2),(2*height)+boxHeight,-2,0);
+    cpuToBlockedPositions[3] = new Position(engine.iCenterX+150,(2*height)+boxHeight,0,0);
 
     // Add all positions to create a movement.
 
@@ -441,7 +442,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
     tmpMTGO = engine.returnMTGO("P" + pid);
     tmpMTGO.bVisible = false;
     engine.removeMTGO("P" + pid);
-    syncPaint(lDelay);
+    syncPaint(delay);
   }
 
   /**
@@ -459,7 +460,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
     removeQueue(ProcessScheduler.READYQ, pid);
     removeQueue(ProcessScheduler.BLOCKEDQ, pid);
     removeQueue(ProcessScheduler.ZOMBIEQ, pid);
-    syncPaint(lDelay);
+    syncPaint(delay);
   }
 
   /**
@@ -476,7 +477,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
       cpuToBlockedMovement.step();
       tmpMTGO.iX = cpuToBlockedMovement.iCurrentX;
       tmpMTGO.iY = cpuToBlockedMovement.iCurrentY;
-      syncPaint(lDelay);
+      syncPaint(delay);
     }
   }
 
@@ -495,7 +496,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
       blockedToReadyMovement.step();
       tmpMTGO.iX = blockedToReadyMovement.iCurrentX;
       tmpMTGO.iY = blockedToReadyMovement.iCurrentY;
-      syncPaint(lDelay);
+      syncPaint(delay);
     }
   }
 
@@ -513,7 +514,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
       cpuToReadyMovement.step();
       tmpMTGO.iX = cpuToReadyMovement.iCurrentX;
       tmpMTGO.iY = cpuToReadyMovement.iCurrentY;
-      syncPaint(lDelay);
+      syncPaint(delay);
     }
   }
 
@@ -532,7 +533,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
       readyToCPUMovement.step();
       tmpMTGO.iX = readyToCPUMovement.iCurrentX;
       tmpMTGO.iY = readyToCPUMovement.iCurrentY;
-      syncPaint(lDelay);
+      syncPaint(delay);
     }
   }
 
@@ -550,7 +551,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
       tmpPic = new MTGO(myImages[1], "P" + pid, true, Color.darkGray);
     tmpPic.iPriority = 2;
     tmpPic.iX = engine.CenterX(tmpPic);
-    tmpPic.iY = iHeight+iBoxHeight;
+    tmpPic.iY = height+boxHeight;
     engine.addMTGO(tmpPic,this);
   }
 
@@ -569,7 +570,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
       zombieToReadyMovement.step();
       tmpMTGO.iX = zombieToReadyMovement.iCurrentX;
       tmpMTGO.iY = zombieToReadyMovement.iCurrentY;
-      syncPaint(lDelay);
+      syncPaint(delay);
     }
   }
 
@@ -581,7 +582,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
   {
     LIFOQueue tmpQ = new LIFOQueue();
     int XPosition = engine.iCenterX-150;
-    int YPosition = iQType*iHeight+iBoxHeight;
+    int YPosition = iQType*height+boxHeight;
     switch (iQType)
     {
       case ProcessScheduler.READYQ:
@@ -601,10 +602,10 @@ public class ProcessSchedulerFrame extends RCOSFrame
       tmpMTGO = engine.returnMTGO(procID);
       tmpMTGO.iX = XPosition;
       tmpMTGO.iY = YPosition;
-      XPosition = XPosition + iBoxWidth;
+      XPosition = XPosition + boxWidth;
       tmpQ.goToNext();
     }
-    syncPaint(lDelay);
+    syncPaint(delay);
   }
 
   synchronized void moveReadyQ(int pid)
@@ -617,7 +618,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
       readyMovement.step();
       tmpMTGO.iX = readyMovement.iCurrentX;
       tmpMTGO.iY = readyMovement.iCurrentY;
-      syncPaint(lDelay);
+      syncPaint(delay);
     }
   }
 
@@ -631,7 +632,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
       blockedMovement.step();
       tmpMTGO.iX = blockedMovement.iCurrentX;
       tmpMTGO.iY = blockedMovement.iCurrentY;
-      syncPaint(lDelay);
+      syncPaint(delay);
     }
   }
 
@@ -645,7 +646,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
       zombieMovement.step();
       tmpMTGO.iX = zombieMovement.iCurrentX;
       tmpMTGO.iY = zombieMovement.iCurrentY;
-      syncPaint(lDelay);
+      syncPaint(delay);
     }
   }
 
@@ -743,23 +744,23 @@ public class ProcessSchedulerFrame extends RCOSFrame
       String whichObject = (String) e.getItem();
       if (whichObject.compareTo("Fastest") == 0)
       {
-        lDelay = 1;
+        delay = 1;
       }
       else if (whichObject.compareTo("Fast") == 0)
       {
-        lDelay = 3;
+        delay = 3;
       }
       else if (whichObject.compareTo("Normal") == 0)
       {
-        lDelay = 6;
+        delay = 6;
       }
       else if (whichObject.compareTo("Slow") == 0)
       {
-        lDelay = 12;
+        delay = 12;
       }
       else if (whichObject.compareTo("Slowest") == 0)
       {
-        lDelay = 24;
+        delay = 24;
       }
     }
   }

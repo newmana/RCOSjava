@@ -1,15 +1,3 @@
-//***************************************************************************
-// FILE     : IPCManagerFrame.java
-// PACKAGE  : Animator
-// PURPOSE  : Based on the commands sent and received to the MMU and IPC
-//            displays graphically what is happening.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 01/09/97 - Created. AN
-//            25/10/98 - Converted to Java 1.1. AN
-//            30/11/98 - Cleaned up. AN
-//***************************************************************************//
-
 package net.sourceforge.rcosjava.software.animator.ipc;
 
 import java.awt.*;
@@ -27,22 +15,36 @@ import net.sourceforge.rcosjava.messaging.messages.Message;
 import net.sourceforge.rcosjava.software.memory.MemoryRequest;
 import net.sourceforge.rcosjava.software.memory.MemoryReturn;
 
+/**
+ * Based on the commands sent and received to the MMU and IPC displays
+ * graphically what is happening.
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 25/10/98 - Converted to Java 1.1. AN
+ * </DD><DD>
+ * 30/11/98 - Cleaned up. AN
+ * </DD></DT>
+ * <P>
+ * @author Andrew Newman
+ * @version 1.00 $Date$
+ * @created 1st August 1997
+ */
 public class IPCManagerFrame extends RCOSFrame
 {
-  private Panel pMain, pClose;
+  private Panel mainPanel, closePanel;
   private Image myImages[];
   private RCOSQueue semQueue, shmQueue;
   private IPCManagerAnimator myIPCManagerAnimator;
-  private Message msg;
   private Component myComponent;
   private int iX, iY;
   private MemoryGraphic[] memoryGraphics = new MemoryGraphic[20];
-  private Choice cSMemOption;
-  private RCOSList rSMemList, rSemList;
-  private Choice cSemOption;
+  private Choice shmOption;
+  private RCOSList shmList, semList;
+  private Choice semOption;
 
   public IPCManagerFrame(int x, int y, Image[] ipcImages,
-                         IPCManagerAnimator thisIPCManager)
+    IPCManagerAnimator thisIPCManager)
   {
     super();
     setTitle("IPC Manager Animator");
@@ -100,14 +102,15 @@ public class IPCManagerFrame extends RCOSFrame
     }
   }
 
-  void shmQueueAdd(String processID)
+  void shmQueueAdd(String processId)
   {
-    shmQueue.addToQueue(processID);
+    shmQueue.addToQueue(processId);
   }
 
-  void semQueueAdd(String processID)
+  void semQueueAdd(String semaphoreId, int pid, int value)
   {
-    semQueue.addToQueue(processID);
+    //semQueue.addToQueue(processId);
+    semOption.add(semaphoreId);
   }
 
   void shmQueueRemove()
@@ -160,8 +163,8 @@ public class IPCManagerFrame extends RCOSFrame
 
     setLayout(new BorderLayout());
 
-    pMain = new Panel();
-    pClose = new Panel();
+    mainPanel = new Panel();
+    closePanel = new Panel();
     Panel pTemp = new Panel();
 
     for(int count=0; count < MemoryManager.MAX_PAGES; count++)
@@ -171,7 +174,7 @@ public class IPCManagerFrame extends RCOSFrame
 
     GridBagConstraints constraints = new GridBagConstraints();
     GridBagLayout gridBag = new GridBagLayout();
-    pMain.setLayout(gridBag);
+    mainPanel.setLayout(gridBag);
     constraints.fill = GridBagConstraints.BOTH;
     constraints.gridwidth=1;
     constraints.gridheight=1;
@@ -187,11 +190,11 @@ public class IPCManagerFrame extends RCOSFrame
       {
         constraints.gridwidth = 1;
         gridBag.setConstraints(memoryGraphics[(iMemRows*10)+iMemCols],constraints);
-        pMain.add(memoryGraphics[(iMemRows*10)+iMemCols]);
+        mainPanel.add(memoryGraphics[(iMemRows*10)+iMemCols]);
       }
       constraints.gridwidth = GridBagConstraints.REMAINDER;
       gridBag.setConstraints(memoryGraphics[(iMemRows*10)+9],constraints);
-      pMain.add(memoryGraphics[(iMemRows*10)+9]);
+      mainPanel.add(memoryGraphics[(iMemRows*10)+9]);
     }
 
     RCOSBox iBox;
@@ -246,24 +249,23 @@ public class IPCManagerFrame extends RCOSFrame
     gridBag.setConstraints(lTmpLabel,constraints);
     pTemp.add(lTmpLabel);
 
-    iBox = new RCOSBox(pTemp,new NewLabel("Key", labelFont),0,
-      2,2,2);
+    iBox = new RCOSBox(pTemp,new NewLabel("Key", labelFont),0,2,2,2);
 
     Panel pSMem, pSem;
-    cSMemOption = new Choice();
-    rSMemList = new RCOSList(this,2,false);
-    cSemOption = new Choice();
-    rSemList = new RCOSList(this,2,false);
+    shmOption = new Choice();
+    shmList = new RCOSList(this,2,false);
+    semOption = new Choice();
+    semList = new RCOSList(this,2,false);
 
-    cSMemOption.addItem("None      ");
-    cSMemOption.setBackground(Color.black);
-    cSMemOption.setForeground(Color.white);
-    cSMemOption.select("None      ");
+    shmOption.addItem("None      ");
+    shmOption.setBackground(Color.black);
+    shmOption.setForeground(Color.white);
+    shmOption.select("None      ");
 
-    cSemOption.addItem("None       ");
-    cSemOption.setBackground(Color.black);
-    cSemOption.setForeground(Color.white);
-    cSemOption.select("None       ");
+    semOption.addItem("None       ");
+    semOption.setBackground(Color.black);
+    semOption.setForeground(Color.white);
+    semOption.select("None       ");
 
     pSMem = new Panel();
 
@@ -291,16 +293,16 @@ public class IPCManagerFrame extends RCOSFrame
     pSMem.add(lTmpLabel);
 
     tmpConstraints.gridwidth=1;
-    tmpGridBag.setConstraints(cSMemOption,tmpConstraints);
-    pSMem.add(cSMemOption);
+    tmpGridBag.setConstraints(shmOption,tmpConstraints);
+    pSMem.add(shmOption);
 
     shmQueue = new RCOSQueue(5, defaultFont);
     tmpGridBag.setConstraints(shmQueue,tmpConstraints);
     pSMem.add(shmQueue);
 
     tmpConstraints.gridwidth=GridBagConstraints.REMAINDER;
-    tmpGridBag.setConstraints(rSMemList,tmpConstraints);
-    pSMem.add(rSMemList);
+    tmpGridBag.setConstraints(shmList,tmpConstraints);
+    pSMem.add(shmList);
 
     pSem = new Panel();
 
@@ -335,8 +337,8 @@ public class IPCManagerFrame extends RCOSFrame
     tmpConstraints.insets=new Insets(1,1,1,1);
     tmpConstraints.gridwidth=1;
     tmpConstraints.anchor = GridBagConstraints.CENTER;
-    tmpGridBag.setConstraints(cSemOption,tmpConstraints);
-    pSem.add(cSemOption);
+    tmpGridBag.setConstraints(semOption,tmpConstraints);
+    pSem.add(semOption);
 
     tmpConstraints.insets=new Insets(1,1,1,1);
     tmpConstraints.anchor = GridBagConstraints.CENTER;
@@ -347,33 +349,31 @@ public class IPCManagerFrame extends RCOSFrame
     tmpConstraints.insets=new Insets(1,1,1,1);
     tmpConstraints.gridwidth=GridBagConstraints.REMAINDER;
     tmpConstraints.anchor = GridBagConstraints.CENTER;
-    tmpGridBag.setConstraints(rSemList,tmpConstraints);
-    pSem.add(rSemList);
+    tmpGridBag.setConstraints(semList,tmpConstraints);
+    pSem.add(semList);
 
     constraints.gridheight = 3;
     constraints.gridwidth = 2;
     gridBag.setConstraints(iBox,constraints);
-    pMain.add(iBox);
+    mainPanel.add(iBox);
 
     constraints.gridheight = 1;
-    rBox = new RCOSBox(pSem,new NewLabel("Semaphores", titleFont),1,
-      1,1,1);
+    rBox = new RCOSBox(pSem,new NewLabel("Semaphores", titleFont),1,1,1,1);
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBag.setConstraints(rBox,constraints);
-    pMain.add(rBox);
+    mainPanel.add(rBox);
 
-    rBox = new RCOSBox(pSMem,new NewLabel("Shared Memory", titleFont),1,
-      1,1,1);
+    rBox = new RCOSBox(pSMem,new NewLabel("Shared Memory", titleFont),1,1,1,1);
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBag.setConstraints(rBox,constraints);
-    pMain.add(rBox);
+    mainPanel.add(rBox);
 
-    pClose.setLayout(new FlowLayout(FlowLayout.RIGHT));
+    closePanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
    	Button tmpAWTButton = new Button("Close");
-    pClose.add(tmpAWTButton);
+    closePanel.add(tmpAWTButton);
     tmpAWTButton.addMouseListener(new RCOSFrame.CloseAnimator());
 
-    add("Center",pMain);
-    add("South",pClose);
+    add("Center",mainPanel);
+    add("South",closePanel);
   }
 }

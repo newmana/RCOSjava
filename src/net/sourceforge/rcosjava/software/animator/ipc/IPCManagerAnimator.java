@@ -1,14 +1,3 @@
-//***************************************************************************
-// FILE     : IPCManagerAnimator.java
-// PACKAGE  : Animator
-// PURPOSE  : Receives messages from MMU and IPC and manipulates
-//            memoryManagerFrame based on messages received.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 10/1/97  Created.
-//
-//***************************************************************************/
-
 package net.sourceforge.rcosjava.software.animator.ipc;
 
 import java.awt.*;
@@ -25,80 +14,127 @@ import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAda
 import net.sourceforge.rcosjava.messaging.messages.Message;
 import net.sourceforge.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 
+/**
+ * Receives messages from MMU and IPC and manipulates memoryManagerFrame
+ * based on messages received.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 10th of January 1997
+ */
 public class IPCManagerAnimator extends RCOSAnimator
 {
-  private Message msg;
-  private IPCManagerFrame ipcFrame;
-	private static final String MESSENGING_ID = "IPCManagerAnimator";
+  private IPCManagerFrame myFrame;
+  private static final String MESSENGING_ID = "IPCManagerAnimator";
 
-  public IPCManagerAnimator (AnimatorOffice aPostOffice,
-                             int x, int y, Image[] mmImages)
+  public IPCManagerAnimator (AnimatorOffice postOffice, int x, int y,
+    Image[] images)
   {
-    super(MESSENGING_ID, aPostOffice);
-    ipcFrame = new IPCManagerFrame(x, y, mmImages, this);
-    ipcFrame.pack();
-    ipcFrame.setSize(x,y);
+    super(MESSENGING_ID, postOffice);
+    myFrame = new IPCManagerFrame(x, y, images, this);
+    myFrame.pack();
+    myFrame.setSize(x,y);
   }
 
   public void setupLayout(Component c)
   {
-    ipcFrame.setupLayout(c);
+    myFrame.setupLayout(c);
   }
 
   public void disposeFrame()
   {
-    ipcFrame.dispose();
+    myFrame.dispose();
   }
 
   public void showFrame()
   {
-    ipcFrame.setVisible(true);
+    myFrame.setVisible(true);
   }
 
   public void hideFrame()
   {
-    ipcFrame.setVisible(false);
+    myFrame.setVisible(false);
   }
 
-  public void allocatedPages(MemoryReturn mrReturn)
+  /**
+   * Calls allocatedPages on the associated frame.
+   *
+   * @param returnedMemory the object representing the allocated memory.
+   */
+  public void allocatedPages(MemoryReturn returnedMemory)
   {
-    ipcFrame.allocatedPages(mrReturn);
+    myFrame.allocatedPages(returnedMemory);
   }
 
-  public void deallocatedPages(MemoryReturn mrReturn)
+  /**
+   * Calls deallocatedPages on the associated frame.
+   *
+   * @param returnedMemory the object representing the deallocated memory.
+   */
+  public void deallocatedPages(MemoryReturn returnedMemory)
   {
-    ipcFrame.deallocatedPages(mrReturn);
+    myFrame.deallocatedPages(returnedMemory);
   }
 
-  public void readingMemory(MemoryRequest mrRequest)
+  /**
+   * Calls readingMemory on the associated frame.
+   *
+   * @param requestedMemory the data structure with the process id and the type
+   * of memory.
+   */
+  public void readingMemory(MemoryRequest requestedMemory)
   {
-    ipcFrame.readingMemory(mrRequest.getPID(), mrRequest.getMemoryType());
+    myFrame.readingMemory(requestedMemory.getPID(),
+      requestedMemory.getMemoryType());
   }
 
-  public void writingMemory(MemoryRequest mrRequest)
+  /**
+   * Calls writingMemory on the associated frame.
+   *
+   * @param requestMemory the data structure with the process id and the type
+   * of memory.
+   */
+  public void writingMemory(MemoryRequest requestedMemory)
   {
-    ipcFrame.writingMemory(mrRequest.getPID(), mrRequest.getMemoryType());
+    myFrame.writingMemory(requestedMemory.getPID(),
+      requestedMemory.getMemoryType());
   }
 
-  public void finishedReadingMemory(MemoryRequest mrRequest)
+  /**
+   * Calls finishedReadingMemory on the associated frame.
+   *
+   * @param requestedMemory the data structure containing the process id and
+   * the type of memory that has just been read.
+   */
+  public void finishedReadingMemory(MemoryRequest requestedMemory)
   {
-    ipcFrame.finishedReadingMemory(mrRequest.getPID(), mrRequest.getMemoryType());
+    myFrame.finishedReadingMemory(requestedMemory.getPID(),
+      requestedMemory.getMemoryType());
   }
 
-  public void finishedWritingMemory(MemoryRequest mrRequest)
+  /**
+   * Calls finishedWritingMemory on the associated frame.
+   *
+   * @param requestedMemory the data structure containing the process id and
+   * the type of memory that is being written to.
+   */
+  public void finishedWritingMemory(MemoryRequest requestedMemory)
   {
-    ipcFrame.finishedWritingMemory(mrRequest.getPID(), mrRequest.getMemoryType());
+    myFrame.finishedWritingMemory(requestedMemory.getPID(),
+      requestedMemory.getMemoryType());
   }
 
-  public void semaphoreCreated()
+  /**
+   * Calls semQueueAdd with a given process id.
+   */
+  public void semaphoreCreated(String semaphoreId, int processId, int value)
   {
-    //Expects process ID
-    ipcFrame.semQueueAdd("");
+    myFrame.semQueueAdd(semaphoreId, processId, value);
   }
 
   public void semaphoreClosed()
   {
-   ipcFrame.semQueueRemove();
+   myFrame.semQueueRemove();
   }
 
   public void semaphoreWaiting()
