@@ -212,12 +212,10 @@ public class CPUFrame extends RCOSFrame
 
     if (programSize > myCPUAnimator.getContext().getProgramCounter())
     {
-      //System.out.println( "MakeVisible pc " + myCPUAnimator.theContext.ProgramCounter );
       codeList.makeVisible(myCPUAnimator.getContext().getProgramCounter());
     }
     else
     {
-      //System.out.println("MakeVisible " + programSize);
       codeList.makeVisible(programSize-1);
     }
     // make the selected instruction the ProgramCounter
