@@ -302,7 +302,6 @@ public class TerminalManager extends OSMessageHandler
 
     ProcessAllocatedTerminalMessage msg = new ProcessAllocatedTerminalMessage
         (this, newTerminal.getTitle(), new RCOSProcess(processId, ""));
-
     sendMessage(msg);
   }
 
