@@ -12,7 +12,7 @@ import org.sablecc.simplec.lexer.*;
 import org.sablecc.simplec.parser.*;
 
 /**
- * Provides a compiler of a simple C like grammar with certain extensions..
+ * Provides a compiler of a simple C like grammar with certain extensions.
  * <P>
  * @author Andrew Newman.
  * @version 1.00 $Date$
@@ -57,7 +57,7 @@ public class Compiler
       addInstruction(0, new Instruction(OpCode.JUMP.getValue(), (byte) 0,
           (short) 1));
 
-      // At the moment hard coded for 3+1 (magic offset plus 1 global variable).
+      // At the moment hard coded for 3+1 (magic offset plus global variables).
       addInstruction(1, new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
         stmtCompiler.getNumberOfVariables()));
 
@@ -82,41 +82,78 @@ public class Compiler
     }
   }
 
+  /**
+   * Add an instruction at the given location into the FIFO array instructions.
+   *
+   * @param index the position to put it in.
+   * @param instruction the instruction to add.
+   */
   protected static void addInstruction(int index, Instruction instruction)
   {
     instructions.add(index, instruction);
   }
 
-  protected static void addInstruction(Instruction instruction)
+  /**
+   * Add an instruction into the FIFO array of instructions.
+   *
+   * @oaram instruction the instruction to add.
+   */
+  public static void addInstruction(Instruction instruction)
   {
     instructions.add(instruction);
   }
 
-  protected static  short getLevel()
+  /**
+   * Returns the current level (how many nested statements i.e. curly braces)
+   * we are currently in.
+   *
+   * @return the current level (how many nested statements i.e. curly braces)
+   * we are currently in.
+   */
+  public static  short getLevel()
   {
     return level;
   }
 
-  protected static void incLevel()
+  /**
+   * If another nest of statements then call this to increment the level.
+   */
+  public static void incLevel()
   {
     level++;
   }
 
-  protected static void decLevel()
+  /**
+   * If we are out of a set of statements then call this to decrement the level.
+   */
+  public static void decLevel()
   {
     level--;
   }
 
-  protected static void incInstructionIndex()
+  /**
+   * Increment an internal instruction index.  This is not fixed to the array
+   * of instructions.
+   */
+  public static void incInstructionIndex()
   {
     instructionIndex++;
   }
 
-  protected static short getInstructionIndex()
+  /**
+   * Decrement an internal instruction index.  This is not fixed to the array
+   * of instructions.
+   */
+  public static short getInstructionIndex()
   {
     return instructionIndex;
   }
 
+  /**
+   * Returns the lexer for use by others for the current position in analysis.
+   *
+   * @return the lexer for use by others for the current position in analysis.
+   */
   public static Lexer getLexer()
   {
     return lexer;
