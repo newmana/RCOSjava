@@ -102,7 +102,7 @@ public class RCOS extends java.applet.Applet implements Runnable
   public String defaultDomain = new String("localhost");
   public int port;
   private static final String welcome = "Welcome to RCOSjava Version 0.4";
-  private static final String info = "Copyright 1995-2001.\nVersion 0.4.\n" +
+  private static final String info = "Copyright 1995-2002.\nVersion 0.4.\n" +
     "Authors: David Jones, Brett Carter, Bruce Jamieson, and Andrew Newman";
 
   // Images and sounds.
