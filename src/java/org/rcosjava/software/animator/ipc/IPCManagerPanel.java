@@ -398,8 +398,6 @@ public class IPCManagerPanel extends RCOSPanel
     SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
         semaphoreMap.get(semaphore.getName());
 
-    tmpGraphic.removeProcess(signalledId);
-
     if (tmpGraphic != null)
     {
       tmpGraphic.setValue(new Integer(semaphore.getValue()));
@@ -419,12 +417,20 @@ public class IPCManagerPanel extends RCOSPanel
     SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
         semaphoreMap.get(semaphore.getName());
 
+    // Remove first process
     if (tmpGraphic != null)
     {
       tmpGraphic.removeFirstProcess();
     }
+
+    // Remove semaphore from all data structures if there are no attached
+    // processes left
     if (tmpGraphic.attachedProcesses() == 0)
     {
+      // Remove from semaphore map.
+      semaphoreMap.remove(semaphore.getName());
+
+      // Remove from semaphore options.
       semOption.removeItem(semaphore.getName());
       if (semOption.getItemCount() == 1)
       {
