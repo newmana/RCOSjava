@@ -580,9 +580,11 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     menuBar.add(menu);
 
     menuItem = new JMenuItem("Play");
+    menuItem.addActionListener(new PlayTourListener());
     menu.add(menuItem);
 
     menuItem = new JMenuItem("Record New");
+    menuItem.addActionListener(new RecordNewListener());
     menu.add(menuItem);
 
     menu = new JMenu("Help");
@@ -791,6 +793,38 @@ public class RCOS extends javax.swing.JApplet implements Runnable
         pauseRunMenuItem.setText("Pause");
         theKernel.unpause();
       }
+    }
+  }
+
+  /**
+   * Listens for when a user selects to play a multimedia tour.
+   */
+  private class PlayTourListener implements ActionListener
+  {
+    /**
+     * The item has been selected.
+     *
+     * @param e the event cause by selecting the item.
+     */
+    public void actionPerformed(ActionEvent e)
+    {
+      mmAnimator.showPlayFrame();
+    }
+  }
+
+  /**
+   * Listens for when a user selects to play a multimedia tour.
+   */
+  private class RecordNewListener implements ActionListener
+  {
+    /**
+     * The item has been selected.
+     *
+     * @param e the event cause by selecting the item.
+     */
+    public void actionPerformed(ActionEvent e)
+    {
+      mmAnimator.showRecordFrame();
     }
   }
 
