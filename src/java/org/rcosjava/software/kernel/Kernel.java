@@ -422,7 +422,7 @@ public class Kernel extends OSMessageHandler
   /**
    * This occurs when a new process is to be executed on the CPU. If there was
    * an existing process it's existing stack is saved and the new process is put
-   * in its place. This include overwriting the exsting code pages and calling
+   * in its place. This include overwriting the existing code pages and calling
    * the setCurrentProcess method.
    *
    * @param newProcess Description of Parameter
@@ -850,6 +850,12 @@ public class Kernel extends OSMessageHandler
 
       if (myCPU.hasCodeToExecute())
       {
+        if (log.isDebugEnabled())
+        {
+          log.debug("Current processes context: " +
+              getCurrentProcess().getContext());
+        }
+
         //Save currently executing process
         RCOSProcess oldProcess = getCurrentProcess();
         oldProcess.addToCPUTicks(getCurrentProcessTicks());
