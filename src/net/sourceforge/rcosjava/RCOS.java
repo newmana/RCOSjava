@@ -194,14 +194,15 @@ public class RCOS extends java.applet.Applet implements Runnable
   {
     String rootDir = "/net/sourceforge/rcosjava/software/animator";
 
-    clips[0] = getAudioClip(getClass().getResource(rootDir + "/audio/start.au"));
+    clips[0] = getAudioClip(getClass().getResource(rootDir +
+      "/audio/start.au"));
 
     MediaTracker tracker = new MediaTracker(this);
 
     for (int count = 0; count < numberPeople; count++)
     {
-      aboutImages[count] = getImage(getClass().getResource(rootDir + "/images/p" +
-        count + ".jpg"));
+      aboutImages[count] = getImage(getClass().getResource(rootDir +
+        "/images/p" + count + ".jpg"));
       tracker.addImage(aboutImages[count],0);
     }
 
@@ -215,12 +216,18 @@ public class RCOS extends java.applet.Applet implements Runnable
       tracker.addImage(downButtons[count],2);
     }
 
-    terminalImages[0] = getImage(getClass().getResource(rootDir + "/images/termon.jpg"));
-    terminalImages[1] = getImage(getClass().getResource( rootDir + "/images/termoff.jpg"));
-    processImages[0] = getImage(getClass().getResource(rootDir + "/images/process1.gif"));
-    processImages[1] = getImage(getClass().getResource(rootDir + "/images/process2.gif"));
-    processImages[2] = getImage(getClass().getResource(rootDir + "/images/rcoscpu.jpg"));
-    ipcImages[0] = getImage(getClass().getResource(rootDir + "/images/memory.jpg"));
+    terminalImages[0] = getImage(getClass().getResource(rootDir +
+      "/images/termon.jpg"));
+    terminalImages[1] = getImage(getClass().getResource( rootDir +
+      "/images/termoff.jpg"));
+    processImages[0] = getImage(getClass().getResource(rootDir +
+      "/images/process1.gif"));
+    processImages[1] = getImage(getClass().getResource(rootDir +
+      "/images/process2.gif"));
+    processImages[2] = getImage(getClass().getResource(rootDir +
+      "/images/rcoscpu.jpg"));
+    ipcImages[0] = getImage(getClass().getResource(rootDir +
+      "/images/memory.jpg"));
 
     tracker.addImage(terminalImages[0],3);
     tracker.addImage(terminalImages[1],3);
@@ -274,11 +281,11 @@ public class RCOS extends java.applet.Applet implements Runnable
     animatorPostOffice = new AnimatorOffice(animatorPostOfficeId, osPostOffice);
 
     //Start the recording subsystem
-    recorder = new UniversalMessageRecorder(this.defaultDomain, this.port,
-      "*Recorder", this.osPostOffice, this.animatorPostOffice);
+    recorder = new UniversalMessageRecorder(defaultDomain, port, "*Recorder",
+      osPostOffice, animatorPostOffice);
 
-    player = new UniversalMessagePlayer(this.defaultDomain, this.port,
-      "*Player", this.osPostOffice, this.animatorPostOffice);
+    player = new UniversalMessagePlayer(defaultDomain, port, "*Player",
+      osPostOffice, animatorPostOffice);
   }
 
   /**
@@ -307,7 +314,8 @@ public class RCOS extends java.applet.Applet implements Runnable
     psAnimator = new ProcessSchedulerAnimator(animatorPostOffice, defX, defY,
       processImages);
 
-    ipcAnimator = new IPCManagerAnimator(animatorPostOffice, defX, defY, ipcImages);
+    ipcAnimator = new IPCManagerAnimator(animatorPostOffice, defX, defY,
+      ipcImages);
 
     cpuAnimator = new CPUAnimator(animatorPostOffice, smallX, smallY, null);
 
@@ -320,7 +328,8 @@ public class RCOS extends java.applet.Applet implements Runnable
     mmAnimator = new MultimediaAnimator(animatorPostOffice, 250, 250,
       processManagerImages, recorder, player);
 
-    aboutAnimator = new AboutAnimator(animatorPostOffice, largeX, largeY, aboutImages);
+    aboutAnimator = new AboutAnimator(animatorPostOffice, largeX, largeY,
+      aboutImages);
 //    overviewanimator = new Overview("Overviewanimator", animatorPostOffice, defX,
 //      defY, );
   }
