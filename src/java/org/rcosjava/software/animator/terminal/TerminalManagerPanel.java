@@ -4,22 +4,18 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.ImageIcon;
-import org.rcosjava.software.animator.RCOSFrame;
+import org.rcosjava.software.animator.RCOSPanel;
 import org.rcosjava.software.animator.support.GraphicButton;
 
 /**
  * A simple array of terminals are displayed to the user. It allows the user to
  * turn on (allocate to the OS) or otherwise manipulate the basic terminals.
  * <P>
- * <DT> <B>History:</B>
- * <DD> 21/02/97 Repaint bugs fixed. </DD>
- * <DD> 25/08/98 Converted to Java 1.1. </DD> </DT>
- * <P>
  * @author Andrew Newman
  * @created 22nd July 2002
  * @version 1.00 $Date$
  */
-public class TerminalManagerFrame extends RCOSFrame
+public class TerminalManagerPanel extends RCOSPanel
 {
   /**
    * Maximum number of terminals
@@ -68,12 +64,11 @@ public class TerminalManagerFrame extends RCOSFrame
    * @param images Description of Parameter
    * @param noTerminalCols Description of Parameter
    */
-  public TerminalManagerFrame(int x, int y, ImageIcon[] images,
+  public TerminalManagerPanel(int x, int y, ImageIcon[] images,
       int noTerminals, int noTerminalCols, int noTerminalRows,
       TerminalManagerAnimator thisTerminalManager)
   {
     super();
-    setTitle("Terminal Manager");
 
     maxTerminals = noTerminals + 1;
     maxTerminalCols = noTerminalCols;
@@ -168,13 +163,7 @@ public class TerminalManagerFrame extends RCOSFrame
       }
     }
 
-    pClose.setLayout(new FlowLayout(FlowLayout.RIGHT));
-    tmpButton = new JButton("Close");
-    pClose.add(tmpButton);
-    tmpButton.addMouseListener(new RCOSFrame.CloseAnimator());
-
     add("Center", pMain);
-    add("South", pClose);
   }
 
   /**

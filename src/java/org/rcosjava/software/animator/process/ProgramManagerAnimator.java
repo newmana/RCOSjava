@@ -10,6 +10,7 @@ import org.rcosjava.messaging.messages.universal.TerminalOn;
 import org.rcosjava.messaging.messages.universal.UpdateList;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.software.animator.RCOSAnimator;
+import org.rcosjava.software.animator.RCOSPanel;
 import org.rcosjava.software.util.FIFOQueue;
 
 /**
@@ -79,6 +80,16 @@ public class ProgramManagerAnimator extends RCOSAnimator
   }
 
   /**
+   * Returns the panel of this component.
+   *
+   * @return the panel of this component.
+   */
+  public RCOSPanel getPanel()
+  {
+    return null;
+  }
+
+  /**
    * Sets the CurrentFile attribute of the ProgramManagerAnimator object
    *
    * @param newFile The new CurrentFile value
@@ -116,40 +127,6 @@ public class ProgramManagerAnimator extends RCOSAnimator
   public String getCurrentDirectory()
   {
     return currentDirectory;
-  }
-
-  /**
-   * Gets the Frame attribute of the ProgramManagerAnimator object
-   *
-   * @return The Frame value
-   */
-  public ProgramManagerFrame getFrame()
-  {
-    return pmFrame;
-  }
-
-  /**
-   * Description of the Method
-   */
-  public void disposeFrame()
-  {
-    pmFrame.dispose();
-  }
-
-  /**
-   * Description of the Method
-   */
-  public void showFrame()
-  {
-    pmFrame.setVisible(true);
-  }
-
-  /**
-   * Description of the Method
-   */
-  public void hideFrame()
-  {
-    pmFrame.setVisible(false);
   }
 
   /**

@@ -6,6 +6,7 @@ import org.rcosjava.hardware.cpu.Context;
 import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.software.animator.RCOSAnimator;
+import org.rcosjava.software.animator.RCOSPanel;
 
 /**
  * Sends and receives messages for the graphical representation of the P-Code
@@ -25,17 +26,19 @@ import org.rcosjava.software.animator.RCOSAnimator;
 public class CPUAnimator extends RCOSAnimator
 {
   /**
-   * Description of the Field
+   * The CPU context to display.
    */
   private static Context theContext;
+
   /**
-   * Description of the Field
+   * What to register to the animator post office as.
    */
   private final static String MESSENGING_ID = "CPUAnimator";
+
   /**
-   * Description of the Field
+   * Panel to display results in.
    */
-  private CPUFrame cpuFrame;
+  private CPUPanel panel;
 
   /**
    * Constructor for the CPUAnimator object
@@ -50,9 +53,7 @@ public class CPUAnimator extends RCOSAnimator
   {
     super(MESSENGING_ID, postOffice);
     theContext = new Context();
-    cpuFrame = new CPUFrame(x, y, cpuImages, this);
-    cpuFrame.pack();
-    cpuFrame.setSize(x, y);
+    panel = new CPUPanel(x, y, cpuImages, this);
   }
 
   /**
@@ -62,7 +63,7 @@ public class CPUAnimator extends RCOSAnimator
    */
   public void setupLayout(Component c)
   {
-    cpuFrame.setupLayout(c);
+    panel.setupLayout(c);
   }
 
   /**
@@ -73,7 +74,7 @@ public class CPUAnimator extends RCOSAnimator
   public void setContext(Context newContext)
   {
     theContext = newContext;
-    cpuFrame.setContext();
+    panel.setContext();
   }
 
   /**
@@ -87,35 +88,13 @@ public class CPUAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * Returns the panel of this component.
+   *
+   * @return the panel of this component.
    */
-  public void disposeFrame()
+  public RCOSPanel getPanel()
   {
-    cpuFrame.dispose();
-  }
-
-  /**
-   * Description of the Method
-   */
-  public void showFrame()
-  {
-    cpuFrame.setVisible(true);
-  }
-
-  /**
-   * Description of the Method
-   */
-  public void hideFrame()
-  {
-    cpuFrame.setVisible(false);
-  }
-
-  /**
-   * Description of the Method
-   */
-  public void showCPU()
-  {
-    cpuFrame.showCPU();
+    return panel;
   }
 
   /**
@@ -125,8 +104,8 @@ public class CPUAnimator extends RCOSAnimator
    */
   public void updateStack(Memory newStack)
   {
-    cpuFrame.updateStack(newStack);
-    cpuFrame.updateCode();
+    panel.updateStack(newStack);
+    panel.updateCode();
   }
 
   /**
@@ -138,7 +117,7 @@ public class CPUAnimator extends RCOSAnimator
   {
     try
     {
-      cpuFrame.loadCode(newCode);
+      panel.loadCode(newCode);
     }
     catch (Exception e)
     {
@@ -151,6 +130,6 @@ public class CPUAnimator extends RCOSAnimator
    */
   public void screenReset()
   {
-    cpuFrame.screenReset();
+    panel.screenReset();
   }
 }

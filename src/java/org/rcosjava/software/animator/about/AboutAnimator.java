@@ -4,6 +4,7 @@ import java.awt.*;
 import javax.swing.ImageIcon;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.software.animator.RCOSAnimator;
+import org.rcosjava.software.animator.RCOSPanel;
 
 /**
  * Class used for showing authors.
@@ -49,6 +50,11 @@ public class AboutAnimator extends RCOSAnimator
   public void setupLayout(Component c)
   {
     myFrame.setupLayout(c);
+  }
+
+  public RCOSPanel getPanel()
+  {
+    return null;
   }
 
   /**

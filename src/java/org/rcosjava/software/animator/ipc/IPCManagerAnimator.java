@@ -5,6 +5,7 @@ import javax.swing.ImageIcon;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.software.animator.RCOSAnimator;
+import org.rcosjava.software.animator.RCOSPanel;
 import org.rcosjava.software.ipc.SharedMemory;
 import org.rcosjava.software.memory.MemoryRequest;
 import org.rcosjava.software.memory.MemoryReturn;
@@ -27,7 +28,7 @@ public class IPCManagerAnimator extends RCOSAnimator
   /**
    * Description of the Field
    */
-  private IPCManagerFrame myFrame;
+  private IPCManagerPanel panel;
 
   /**
    * Constructor for the IPCManagerAnimator object
@@ -41,9 +42,7 @@ public class IPCManagerAnimator extends RCOSAnimator
       ImageIcon[] images)
   {
     super(MESSENGING_ID, postOffice);
-    myFrame = new IPCManagerFrame(x, y, images, this);
-    myFrame.pack();
-    myFrame.setSize(x, y);
+    panel = new IPCManagerPanel(x, y, images, this);
   }
 
   /**
@@ -53,31 +52,17 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void setupLayout(Component c)
   {
-    myFrame.setupLayout(c);
+    panel.setupLayout(c);
   }
 
   /**
-   * Description of the Method
+   * Returns the panel of this component.
+   *
+   * @return the panel of this component.
    */
-  public void disposeFrame()
+  public RCOSPanel getPanel()
   {
-    myFrame.dispose();
-  }
-
-  /**
-   * Description of the Method
-   */
-  public void showFrame()
-  {
-    myFrame.setVisible(true);
-  }
-
-  /**
-   * Description of the Method
-   */
-  public void hideFrame()
-  {
-    myFrame.setVisible(false);
+    return panel;
   }
 
   /**
@@ -87,7 +72,7 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void allocatedPages(MemoryReturn returnedMemory)
   {
-    myFrame.allocatedPages(returnedMemory);
+    panel.allocatedPages(returnedMemory);
   }
 
   /**
@@ -97,7 +82,7 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void deallocatedPages(MemoryReturn returnedMemory)
   {
-    myFrame.deallocatedPages(returnedMemory);
+    panel.deallocatedPages(returnedMemory);
   }
 
   /**
@@ -108,7 +93,7 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void readingMemory(MemoryRequest requestedMemory)
   {
-    myFrame.readingMemory(requestedMemory.getPID(),
+    panel.readingMemory(requestedMemory.getPID(),
         requestedMemory.getMemoryType());
   }
 
@@ -119,7 +104,7 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void writingMemory(MemoryRequest requestedMemory)
   {
-    myFrame.writingMemory(requestedMemory.getPID(),
+    panel.writingMemory(requestedMemory.getPID(),
         requestedMemory.getMemoryType());
   }
 
@@ -131,7 +116,7 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void finishedReadingMemory(MemoryRequest requestedMemory)
   {
-    myFrame.finishedReadingMemory(requestedMemory.getPID(),
+    panel.finishedReadingMemory(requestedMemory.getPID(),
         requestedMemory.getMemoryType());
   }
 
@@ -143,7 +128,7 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void finishedWritingMemory(MemoryRequest requestedMemory)
   {
-    myFrame.finishedWritingMemory(requestedMemory.getPID(),
+    panel.finishedWritingMemory(requestedMemory.getPID(),
         requestedMemory.getMemoryType());
   }
 
@@ -154,7 +139,7 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void semaphoreCreated(String semaphoreId, int processId, int value)
   {
-    myFrame.semaphoreCreated(semaphoreId, processId, value);
+    panel.semaphoreCreated(semaphoreId, processId, value);
   }
 
   /**
@@ -166,7 +151,7 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void semaphoreOpened(String semaphoreId, int processId, int value)
   {
-    myFrame.semaphoreOpened(semaphoreId, processId, value);
+    panel.semaphoreOpened(semaphoreId, processId, value);
   }
 
   /**
@@ -178,7 +163,7 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void semaphoreWaiting(String semaphoreId, int processId, int value)
   {
-    myFrame.semaphoreWaiting(semaphoreId, processId, value);
+    panel.semaphoreWaiting(semaphoreId, processId, value);
   }
 
   /**
@@ -190,7 +175,7 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void semaphoreSignalled(String semaphoreId, int processId, int value)
   {
-    myFrame.semaphoreSignalled(semaphoreId, processId, value);
+    panel.semaphoreSignalled(semaphoreId, processId, value);
   }
 
   /**
@@ -202,7 +187,7 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void semaphoreClosed(String semaphoreId, int processId, int value)
   {
-    myFrame.semaphoreClosed(semaphoreId, processId, value);
+    panel.semaphoreClosed(semaphoreId, processId, value);
   }
 
   /**
@@ -215,7 +200,7 @@ public class IPCManagerAnimator extends RCOSAnimator
   public void sharedMemoryCreated(String sharedMemoryId,
       MemoryReturn memoryReturn, Memory memory)
   {
-    myFrame.sharedMemoryCreated(sharedMemoryId, memoryReturn, memory);
+    panel.sharedMemoryCreated(sharedMemoryId, memoryReturn, memory);
   }
 
   /**
@@ -226,7 +211,7 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void sharedMemoryOpened(String sharedMemoryId, int processId)
   {
-    myFrame.sharedMemoryOpened(sharedMemoryId, processId);
+    panel.sharedMemoryOpened(sharedMemoryId, processId);
   }
 
   /**
@@ -237,7 +222,7 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void sharedMemoryClosed(String sharedMemoryId, int processId)
   {
-    myFrame.sharedMemoryClosed(sharedMemoryId, processId);
+    panel.sharedMemoryClosed(sharedMemoryId, processId);
   }
 
   /**
@@ -249,7 +234,7 @@ public class IPCManagerAnimator extends RCOSAnimator
   public void sharedMemoryRead(String sharedMemoryId, MemoryReturn memoryReturn,
       Memory memory)
   {
-    myFrame.sharedMemoryRead(sharedMemoryId, memoryReturn, memory);
+    panel.sharedMemoryRead(sharedMemoryId, memoryReturn, memory);
   }
 
   /**
@@ -260,7 +245,7 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void sharedMemoryWrote(String sharedMemoryId, Memory memory)
   {
-    myFrame.sharedMemoryWrote(sharedMemoryId, memory);
+    panel.sharedMemoryWrote(sharedMemoryId, memory);
   }
 }
 

@@ -11,6 +11,7 @@ import org.rcosjava.messaging.postoffices.universal.UniversalMessagePlayer;
 import org.rcosjava.messaging.postoffices.universal.UniversalMessageRecorder;
 import org.rcosjava.pll2.FileClient;
 import org.rcosjava.software.animator.RCOSAnimator;
+import org.rcosjava.software.animator.RCOSPanel;
 import org.rcosjava.software.util.FIFOQueue;
 
 /**
@@ -110,6 +111,11 @@ public class MultimediaAnimator extends RCOSAnimator
   public boolean getRecording()
   {
     return this.recording;
+  }
+
+  public RCOSPanel getPanel()
+  {
+    return null;
   }
 
   /**

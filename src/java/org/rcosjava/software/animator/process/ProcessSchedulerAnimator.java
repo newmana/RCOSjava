@@ -14,6 +14,7 @@ import org.rcosjava.messaging.messages.universal.SwitchToLIFO;
 import org.rcosjava.messaging.messages.universal.SwitchToPriority;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.software.animator.RCOSAnimator;
+import org.rcosjava.software.animator.RCOSPanel;
 import org.rcosjava.software.process.ProcessScheduler;
 
 /**
@@ -29,9 +30,9 @@ import org.rcosjava.software.process.ProcessScheduler;
 public class ProcessSchedulerAnimator extends RCOSAnimator
 {
   /**
-   * The frame in which to display all the details to.
+   * The panel in which to display all the details to.
    */
-  private static ProcessSchedulerFrame myFrame;
+  private static ProcessSchedulerPanel panel;
 
   /**
    * The string (e.g. "PID 1") of the current process running.
@@ -57,9 +58,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
       int x, int y, ImageIcon[] images)
   {
     super(MESSENGING_ID, postOffice);
-    myFrame = new ProcessSchedulerFrame(x, y, images, this);
-    myFrame.pack();
-    myFrame.setSize(x, y);
+    panel = new ProcessSchedulerPanel(x, y, images, this);
   }
 
   /**
@@ -69,31 +68,17 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void setupLayout(Component c)
   {
-    myFrame.setupLayout(c);
+    panel.setupLayout(c);
   }
 
   /**
-   * Remove the frame (called when closing the applet).
+   * Returns the panel of this component.
+   *
+   * @return the panel of this component.
    */
-  public void disposeFrame()
+  public RCOSPanel getPanel()
   {
-    myFrame.dispose();
-  }
-
-  /**
-   * Display the frame (setVisible to true)
-   */
-  public void showFrame()
-  {
-    myFrame.setVisible(true);
-  }
-
-  /**
-   * Hide the frame (setVisible to false)
-   */
-  public void hideFrame()
-  {
-    myFrame.setVisible(false);
+    return panel;
   }
 
   /**
@@ -160,7 +145,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void processFinished(int pid)
   {
-    myFrame.processFinished(pid);
+    panel.processFinished(pid);
   }
 
   /**
@@ -171,7 +156,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void killProcess(int pid)
   {
-    myFrame.killProcess(pid);
+    panel.killProcess(pid);
   }
 
   /**
@@ -183,7 +168,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   public void cpuToBlocked(int pid)
   {
     sendMessage(new Stop(this));
-    myFrame.cpuToBlocked(pid);
+    panel.cpuToBlocked(pid);
     addQueue(ProcessScheduler.BLOCKEDQ, pid);
     sendMessage(new Run(this));
   }
@@ -198,7 +183,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   {
     sendMessage(new Stop(this));
     removeQueue(ProcessScheduler.BLOCKEDQ, pid);
-    myFrame.blockedToReady(pid);
+    panel.blockedToReady(pid);
     addQueue(ProcessScheduler.READYQ, pid);
     sendMessage(new Run(this));
   }
@@ -212,7 +197,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   public void cpuToReady(int pid)
   {
     sendMessage(new Stop(this));
-    myFrame.cpuToReady(pid);
+    panel.cpuToReady(pid);
     addQueue(ProcessScheduler.READYQ, pid);
     sendMessage(new Run(this));
   }
@@ -227,7 +212,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   {
     sendMessage(new Stop(this));
     removeQueue(ProcessScheduler.READYQ, pid);
-    myFrame.readyToCPU(pid);
+    panel.readyToCPU(pid);
     sendMessage(new Run(this));
   }
 
@@ -241,7 +226,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   {
     sendMessage(new Stop(this));
     removeQueue(ProcessScheduler.ZOMBIEQ, pid);
-    myFrame.zombieToReady(pid);
+    panel.zombieToReady(pid);
     addQueue(ProcessScheduler.READYQ, pid);
     sendMessage(new Run(this));
   }
@@ -255,7 +240,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   public void zombieCreated(int pid)
   {
     sendMessage(new Stop(this));
-    myFrame.newProcess(pid);
+    panel.newProcess(pid);
     addQueue(ProcessScheduler.ZOMBIEQ, pid);
     sendMessage(new Run(this));
   }
@@ -280,7 +265,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   private void addQueue(int queueType, int pid)
   {
-    myFrame.addQueue(queueType, pid);
+    panel.addQueue(queueType, pid);
   }
 
   /**
@@ -292,6 +277,6 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   private void removeQueue(int queueType, int pid)
   {
-    myFrame.removeQueue(queueType, pid);
+    panel.removeQueue(queueType, pid);
   }
 }

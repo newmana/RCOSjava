@@ -1,6 +1,6 @@
 package org.rcosjava.software.animator.terminal;
-import java.applet.*;
 
+import java.applet.*;
 import java.awt.*;
 import javax.swing.ImageIcon;
 import java.net.*;
@@ -10,6 +10,7 @@ import org.rcosjava.messaging.messages.universal.TerminalFront;
 import org.rcosjava.messaging.messages.universal.TerminalToggle;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.software.animator.RCOSAnimator;
+import org.rcosjava.software.animator.RCOSPanel;
 
 /**
  * Terminal Manager Animator receives responses back from the operating system
@@ -33,9 +34,9 @@ public class TerminalManagerAnimator extends RCOSAnimator
   private final static String MESSENGING_ID = "TerminalManagerAnimator";
 
   /**
-   * Frame to display the results.
+   * Panel to display the results.
    */
-  private TerminalManagerFrame myFrame;
+  private TerminalManagerPanel panel;
 
   /**
    * Create an animator office, register with the animator office, set the size
@@ -57,10 +58,10 @@ public class TerminalManagerAnimator extends RCOSAnimator
       int noTerminalRows)
   {
     super(MESSENGING_ID, postOffice);
-    myFrame = new TerminalManagerFrame(x, y, images, noTerminals,
-        noTerminalColumns, noTerminalRows, this);
-    myFrame.pack();
-    myFrame.setSize(x, y);
+//    myFrame = new TerminalManagerFrame(x, y, images, noTerminals,
+//        noTerminalColumns, noTerminalRows, this);
+    panel = new TerminalManagerPanel(x, y, images, noTerminals,
+      noTerminalColumns, noTerminalRows, this);
   }
 
   /**
@@ -70,31 +71,17 @@ public class TerminalManagerAnimator extends RCOSAnimator
    */
   public void setupLayout(Component c)
   {
-    myFrame.setupLayout(c);
+    panel.setupLayout(c);
   }
 
   /**
-   * Description of the Method
+   * Returns the panel of this component.
+   *
+   * @return the panel of this component.
    */
-  public void disposeFrame()
+  public RCOSPanel getPanel()
   {
-    myFrame.dispose();
-  }
-
-  /**
-   * Description of the Method
-   */
-  public void showFrame()
-  {
-    myFrame.setVisible(true);
-  }
-
-  /**
-   * Description of the Method
-   */
-  public void hideFrame()
-  {
-    myFrame.setVisible(false);
+    return panel;
   }
 
   /**
@@ -105,7 +92,7 @@ public class TerminalManagerAnimator extends RCOSAnimator
    */
   public void terminalOff(int terminalNo)
   {
-    myFrame.terminalOff(terminalNo);
+    panel.terminalOff(terminalNo);
   }
 
   /**
@@ -115,7 +102,7 @@ public class TerminalManagerAnimator extends RCOSAnimator
    */
   public void terminalOn(int terminalNo)
   {
-    myFrame.terminalOn(terminalNo);
+    panel.terminalOn(terminalNo);
   }
 
   /**
@@ -138,7 +125,7 @@ public class TerminalManagerAnimator extends RCOSAnimator
    */
   public void terminalFront(int terminalNo)
   {
-    myFrame.terminalFront(terminalNo);
+    panel.terminalFront(terminalNo);
   }
 
   /**
@@ -160,7 +147,7 @@ public class TerminalManagerAnimator extends RCOSAnimator
    */
   public void terminalBack(int terminalNo)
   {
-    myFrame.terminalBack(terminalNo);
+    panel.terminalBack(terminalNo);
   }
 
   /**

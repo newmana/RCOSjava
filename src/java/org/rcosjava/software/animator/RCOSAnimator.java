@@ -35,17 +35,9 @@ public abstract class RCOSAnimator extends AnimatorMessageHandler
   public abstract void setupLayout(Component c);
 
   /**
-   * Calls dispose frame on the internal frame object.
+   * Returns the associated panel.
+   *
+   * @return the associated panel.
    */
-  public abstract void disposeFrame();
-
-  /**
-   * Calls show frame on the internal frame object.
-   */
-  public abstract void showFrame();
-
-  /**
-   * Calls hide frame on the internal frame object.
-   */
-  public abstract void hideFrame();
+  public abstract RCOSPanel getPanel();
 }

@@ -12,6 +12,7 @@ import org.rcosjava.messaging.messages.universal.SetProcessPriority;
 import org.rcosjava.messaging.messages.universal.Stop;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.software.animator.RCOSAnimator;
+import org.rcosjava.software.animator.RCOSPanel;
 import org.rcosjava.software.util.LIFOQueue;
 
 /**
@@ -76,27 +77,13 @@ public class ProcessManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Remove the frame (called when closing the applet).
+   * Returns the panel of this component.
+   *
+   * @return the panel of this component.
    */
-  public void disposeFrame()
+  public RCOSPanel getPanel()
   {
-    myFrame.dispose();
-  }
-
-  /**
-   * Display the frame (setVisible to true)
-   */
-  public void showFrame()
-  {
-    myFrame.setVisible(true);
-  }
-
-  /**
-   * Hide the frame (setVisible to false)
-   */
-  public void hideFrame()
-  {
-    myFrame.setVisible(false);
+    return null;
   }
 
   /**
