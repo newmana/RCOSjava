@@ -397,8 +397,7 @@ Productions
         {while}        while l_par conditional_expression r_par compound_statement |
         {do}           do compound_statement while l_par conditional_expression r_par semicolon |
         {for}          for l_par [start]:basic_statement? [sc_one]:semicolon conditional_expression? [sc_two]:semicolon [iter]:basic_statement? r_par compound_statement |
-        {switch}       switch l_par value r_par case_statements |
-        {rcos_stmt}    rcos_statement;
+        {switch}       switch l_par value r_par case_statements;
 
     rcos_statement =
         {printf1}      printf l_par string_litteral r_par semicolon |
@@ -513,7 +512,8 @@ Productions
         {unop}       unop identifier |
         {par_unop}   l_par unop identifier r_par |
         {cast}       l_par type_name r_par varname |
-        {cast_const} l_par type_name r_par constant;
+        {cast_const} l_par type_name r_par constant |
+        {rcos_statement} rcos_statement;
 
     simple_expression =
         {varname} varname |
