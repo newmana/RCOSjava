@@ -160,7 +160,6 @@ public class MainMemory implements Serializable
     myMemory = new Memory[totalUnits];
     for (int count = 0; count < totalUnits; count++)
     {
-//      myMemory[count] = new Memory();
       myMemory[count] = (Memory) is.readObject();
     }
   }
