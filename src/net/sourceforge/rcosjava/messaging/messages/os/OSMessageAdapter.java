@@ -30,11 +30,6 @@ import net.sourceforge.rcosjava.messaging.postoffices.SimpleMessageHandler;
 public class OSMessageAdapter extends MessageAdapter
   implements OSMessage, Serializable
 {
-  public OSMessageAdapter()
-  {
-    super();
-  }
-
   /**
    * Calls the MessageAdapters constructor.
    *

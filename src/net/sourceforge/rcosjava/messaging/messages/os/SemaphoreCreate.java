@@ -37,9 +37,9 @@ public class SemaphoreCreate extends OSMessageAdapter
     semaphoreId = newSemaphoreId;
   }
 
-  public void setProcessID(int iNewProcessID)
+  public void setProcessID(int newProcessID)
   {
-    pid = iNewProcessID;
+    pid = newProcessID;
   }
 
   public void setSemaphoreValue(int newValue)
