@@ -2,6 +2,7 @@ package org.rcosjava;
 
 import java.applet.*;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -80,6 +81,16 @@ public class RCOS extends javax.swing.JApplet implements Runnable
    * Messaging constant  for Animator Post Office.
    */
   public final static String ANIMATOR_POST_OFFICE_ID = "ANIMATORPOSTOFFICE";
+
+  /**
+   * Default background of all windows (Black).
+   */
+  public final static Color DEFAULT_BG_COLOUR = Color.black;
+
+  /**
+   * Default foreground colour of all text (White).
+   */
+  public final static Color DEFAULT_FG_COLOUR = Color.white;
 
   /**
    * Welcome message to be displayed.
@@ -264,6 +275,11 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   private ImageIcon ipcImages[] = new ImageIcon[1];
 
   /**
+   * Images for checkbox.
+   */
+  private ImageIcon checkboxImages[] = new ImageIcon[2];
+
+  /**
    * Pause/Run menu item.
    */
   private static JMenuItem pauseRunMenuItem;
@@ -371,6 +387,13 @@ public class RCOS extends javax.swing.JApplet implements Runnable
       // Get Memory Manager images.
       tmpURL = getClass().getResource(rootDir + "/images/memory.jpg");
       ipcImages[0] = new ImageIcon(tmpURL);
+
+      // Get checks and unchecked icons.
+      tmpURL = getClass().getResource(rootDir + "/images/unchecked.gif");
+      checkboxImages[0] = new ImageIcon(tmpURL);
+      tmpURL = getClass().getResource(rootDir + "/images/checked.gif");
+      checkboxImages[1] = new ImageIcon(tmpURL);
+
     }
     catch (NullPointerException npe)
     {
@@ -472,7 +495,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 
     cpuAnimator = new CPUAnimator(animatorPostOffice);
 
-    pmAnimator = new ProgramManagerAnimator(animatorPostOffice);
+    pmAnimator = new ProgramManagerAnimator(animatorPostOffice, checkboxImages);
 
     pcmAnimator = new ProcessManagerAnimator(animatorPostOffice, this);
 
@@ -501,6 +524,9 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     menuBar.add(menu);
 
     JMenuItem processMenuItem = new JMenuItem("New Process");
+    processMenuItem.setMnemonic(KeyEvent.VK_N);
+    processMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
+        KeyEvent.CTRL_MASK));
     processMenuItem.addActionListener(new NewProcessListener());
     menu.add(processMenuItem);
     JMenuItem killMenuItem = new JMenuItem("Kill Process");
@@ -517,12 +543,15 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     menu.setMnemonic(KeyEvent.VK_C);
     menuBar.add(menu);
 
-    menuItem = new JMenuItem("Step");
-    menuItem.setAccelerator(KeyStroke.getKeyStroke('s'));
+    menuItem = new JMenuItem("Step", KeyEvent.VK_S);
+    menuItem.setMnemonic(KeyEvent.VK_S);
+    menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
     menuItem.addActionListener(new StepCPUListener());
     menu.add(menuItem);
     pauseRunMenuItem = new JMenuItem("Pause");
-    pauseRunMenuItem.setAccelerator(KeyStroke.getKeyStroke(' '));
+    pauseRunMenuItem.setMnemonic(KeyEvent.VK_SPACE);
+    pauseRunMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,
+        0));
     pauseRunMenuItem.addActionListener(new PauseRunCPUListener());
     menu.add(pauseRunMenuItem);
 
@@ -531,10 +560,16 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     menuBar.add(menu);
 
     menuItem = new JMenuItem("Play");
+    menuItem.setMnemonic(KeyEvent.VK_P);
+    menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
+        KeyEvent.CTRL_MASK));
     menuItem.addActionListener(new PlayTourListener());
     menu.add(menuItem);
 
     menuItem = new JMenuItem("Record New");
+    menuItem.setMnemonic(KeyEvent.VK_R);
+    menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
+        KeyEvent.CTRL_MASK));
     menuItem.addActionListener(new RecordNewListener());
     menu.add(menuItem);
 
@@ -549,8 +584,8 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     menu.add(menuItem);
 
     Container contentPane = getContentPane();
-    contentPane.setBackground(RCOSFrame.DEFAULT_BG_COLOUR);
-    contentPane.setForeground(RCOSFrame.DEFAULT_FG_COLOUR);
+    contentPane.setBackground(DEFAULT_BG_COLOUR);
+    contentPane.setForeground(DEFAULT_FG_COLOUR);
 
     JTabbedPane tabbedPane = new JTabbedPane();
 
