@@ -35,6 +35,11 @@ public abstract class Symbol
   protected short offset;
 
   /**
+   * The amount of memory required to store the variable.
+   */
+  protected short size;
+
+  /**
    * Returns the name of the symbol.
    *
    * @return the name of the symbol.
@@ -72,5 +77,15 @@ public abstract class Symbol
   public void setOffset(short newOffset)
   {
     offset = newOffset;
+  }
+
+  /**
+   * Returns the size in memory required to store the variable on the stack.
+   *
+   * @return the size in memory required to store the variable on the stack.
+   */
+  public short getSize()
+  {
+    return size;
   }
 }

@@ -33,6 +33,11 @@ public class SymbolTable
   private static SymbolTable instance = null;
 
   /**
+   * The size in memory required to store all variables.
+   */
+  private short size;
+
+  /**
    * Create the hashmap.
    */
   private SymbolTable()
@@ -66,7 +71,7 @@ public class SymbolTable
       HashMap symbolMap = (HashMap) symbols.get(newSymbol.getName());
       if (null == symbolMap.get(new Short(newSymbol.getLevel())))
       {
-        short newOffset = (short) (symbolMap.size() + symbols.size() + 3);
+        short newOffset = (short) (size + symbolMap.size() + 3);
         newSymbol.setOffset(newOffset);
         symbolMap.put(new Short(newSymbol.getLevel()), newSymbol);
       }
@@ -81,10 +86,11 @@ public class SymbolTable
     else
     {
       HashMap symbolMap = new HashMap();
-      newSymbol.setOffset(((short) (symbols.size() + 3)));
+      newSymbol.setOffset(((short) (size + 3)));
       symbolMap.put(new Short(newSymbol.getLevel()), newSymbol);
       symbols.put(newSymbol.getName(), symbolMap);
     }
+    size += newSymbol.getSize();
   }
 
   /**
@@ -135,7 +141,7 @@ public class SymbolTable
    * @param level the level to find the symbol at.
    * @exception Exception if the symbol is not found.
    */
-  private Symbol getSymbol(String name, short level) throws Exception
+  public Symbol getSymbol(String name, short level) throws Exception
   {
     Symbol symbol = null;
 
@@ -161,5 +167,10 @@ public class SymbolTable
       throw new Exception("Symbol not found");
     }
     return symbol;
+  }
+
+  public short getVariableSize()
+  {
+    return size;
   }
 }

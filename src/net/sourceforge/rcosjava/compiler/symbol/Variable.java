@@ -24,5 +24,6 @@ public class Variable extends Symbol
     name = newName;
     level = newLevel;
     offset = newOffset;
+    size = 1;
   }
 }

@@ -28,5 +28,8 @@ public class Array extends Symbol
     level = newLevel;
     offset = newOffset;
     arraySize = newArraySize;
+
+    // This is a separate variable incase it needs to change in the future
+    size = arraySize;
   }
 }
