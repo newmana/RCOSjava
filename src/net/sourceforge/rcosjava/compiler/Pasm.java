@@ -3,14 +3,18 @@ package net.sourceforge.rcosjava.compiler;
 import net.sourceforge.rcosjava.hardware.cpu.Instruction;
 import java.io.*;
 import java.net.*;
+import java.text.DecimalFormat;
 
 /**
- * Provides a simple compiler/decompiler of pcode.
- * <P>
+ * Provides a simple compiler/decompiler of pcode.  Prints out pcodes or
+ * parsers pcodes (to produce the binary format), for example:<BR/>
+ * 00000: JMP 0, 38<BR/>
+ * 00001: JMP 0, 2<BR/>
+ * <P/>
  * <DT><B>Usage Example:</B><DD>
  * <CODE>
- *      pasm -d tmp.pll > result.pcode
- *      pasm -c result.pcode > tmp.pll
+ *      pasm -d tmp.pcd > result.pcode
+ *      pasm -c result.pcode > tmp.pcd
  * </CODE>
  * </DD></DT>
  * <P>
@@ -65,7 +69,13 @@ public class Pasm
 
       byte pcodeInstruction[] = new byte[8];
       int eof;
+      int offset = 0;
       eof = inputStream.read(pcodeInstruction);
+
+      DecimalFormat format = new DecimalFormat();
+      format.setMaximumIntegerDigits(5);
+      format.setMinimumIntegerDigits(5);
+      format.setGroupingUsed(false);
 
       while (eof != -1)
       {
@@ -73,7 +83,9 @@ public class Pasm
           pcodeInstruction[0] & 0xff),
           (pcodeInstruction[4]),
           (short) ((pcodeInstruction[5] << 8) + (pcodeInstruction[6])) );
-        System.out.println(theInstruction);
+
+        System.out.println(format.format(offset) + ": " + theInstruction);
+        offset++;
         eof = inputStream.read(pcodeInstruction);
       }
     }
@@ -102,6 +114,7 @@ public class Pasm
 
       while (instructionLine != null)
       {
+        instructionLine = instructionLine.substring(7);
         Instruction theInstruction = new Instruction(instructionLine);
         System.out.write(theInstruction.toByte(),0,8);
         instructionLine = inputStream.readLine();
