@@ -90,8 +90,6 @@ public class ProcessManagerFrame extends RCOSFrame
    */
   public void setupLayout(Component c)
   {
-    super.setupLayout(c);
-
     Panel dialogPanel = new Panel();
 
     changePriorityDialog = new
@@ -191,8 +189,8 @@ public class ProcessManagerFrame extends RCOSFrame
     closePanel.add(tmpButton);
     tmpButton.addMouseListener(new CloseAnimator());
 
-    add("Center", mainPanel);
-    add("South", closePanel);
+    getContentPane().add("Center", mainPanel);
+    getContentPane().add("South", closePanel);
   }
 
   /**
