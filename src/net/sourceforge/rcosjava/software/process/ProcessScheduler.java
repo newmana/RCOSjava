@@ -422,15 +422,18 @@ public class ProcessScheduler extends OSMessageHandler
           tmpProcess = removeFromZombieCreatedQ(pid);
         }
       }
-      //If it wasn't the executing program clear up resources
-      TerminalRelease msg = new TerminalRelease(this,
-        tmpProcess.getTerminalId());
-      sendMessage(msg);
+      if (tmpProcess != null)
+      {
+        //If it wasn't the executing program clear up resources
+        TerminalRelease msg = new TerminalRelease(this,
+          tmpProcess.getTerminalId());
+        sendMessage(msg);
 
-      // Deallocate Memory
-      DeallocatePages dallocateMsg = new DeallocatePages(this,
-        tmpProcess.getPID());
-      sendMessage(msg);
+        // Deallocate Memory
+        DeallocatePages dallocateMsg = new DeallocatePages(this,
+          tmpProcess.getPID());
+        sendMessage(msg);
+      }
     }
   }
 
