@@ -34,12 +34,12 @@ public abstract class PostOffice extends SimpleMessageHandler
    *
    * @param  sMyID  The unique identifier of the post office.
    */
-  public PostOffice(String newID)
+  public PostOffice(String newId)
   {
-    id = newID;
+    id = newId;
     type = this.getClass().getName();
     //Add myself so that I can get registration messages/etc.
-    addHandler(getID(), this);
+    addHandler(getId(), this);
   }
 
   /**

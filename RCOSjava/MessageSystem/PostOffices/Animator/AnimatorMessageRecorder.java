@@ -1,30 +1,65 @@
 package MessageSystem.PostOffices.Animator;
 
-import MessageSystem.PostOffices.SimpleMessageHandler;
-import MessageSystem.Messages.Universal.UniversalMessageAdapter;
 import MessageSystem.Messages.Animator.AnimatorMessageAdapter;
-import MessageSystem.Messages.MessageAdapter;
-import MessageSystem.PostOffices.PostOffice;
-import MessageSystem.Messages.AddHandler;
+import MessageSystem.Messages.Universal.UniversalMessageAdapter;
+import MessageSystem.PostOffices.Universal.UniversalMessageRecorder;
 
+/**
+ *  Recording facilities for all animator messages.
+ *
+ * @author Andrew Newman
+ * @created 25th February 2001
+ * @version 1.00 $Date$
+ */
 public class AnimatorMessageRecorder extends AnimatorMessageHandler
 {
+  /**
+   * Notified when it receives a message.
+   */
+  public UniversalMessageRecorder recorder;
+
+  /**
+   * Null constructor.  Currently does nothing.
+   */
   public AnimatorMessageRecorder()
   {
   }
 
-  public AnimatorMessageRecorder(String newID, AnimatorOffice mhNewPostOffice)
+  /**
+   * Constructs a message recorder to listen to all the message of a particular
+   * post office.
+   *
+   * @param newId the string identifier to register as.
+   * @param newPostOffice the post office to register to.
+   */
+  public AnimatorMessageRecorder(String newId, AnimatorOffice newPostOffice,
+    UniversalMessageRecorder newRecorder)
   {
-    super(newID, mhNewPostOffice);
+    super(newId, newPostOffice);
+    recorder = newRecorder;
   }
 
-  public void processMessage(AnimatorMessageAdapter mMessage)
+  /**
+   * Processes any and all message of animator message type (animator to
+   * animator in this case).
+   *
+   * @param newMessage the message to accept.
+   */
+  public void processMessage(AnimatorMessageAdapter newMessage)
   {
-    System.out.println("Animator Got Animator Message: " + mMessage);
+    System.out.println("Animator Got Animator Message: " + newMessage);
+    recorder.processAnimatorMessage(newMessage);
   }
 
-  public void processMessage(UniversalMessageAdapter mMessage)
+  /**
+   * Accept the universal messages sent to the post office.  This message
+   * can come from either an animator or operating system component.
+   *
+   * @param newMessage the message to accept.
+   */
+  public void processMessage(UniversalMessageAdapter newMessage)
   {
-    System.out.println("Animator Got Universal Message: " + mMessage);
+    System.out.println("Animator Got Universal Message: " + newMessage);
+    recorder.processAnimatorUniversalMessage(newMessage);
   }
 }

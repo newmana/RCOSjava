@@ -31,14 +31,14 @@ public class TerminalOn extends UniversalMessageAdapter
 
   public void setTerminalNo(int iNewTerminalNo)
   {
-    iTerminalNo = iNewTerminalNo;    
+    iTerminalNo = iNewTerminalNo;
   }
 
   public void doMessage(TerminalManager theElement)
   {
     if (iTerminalNo == 0)
     {
-      iTerminalNo = theElement.setNextTerminal(getSource().getID());
+      iTerminalNo = theElement.setNextTerminal(getSource().getId());
     }
     else
     {

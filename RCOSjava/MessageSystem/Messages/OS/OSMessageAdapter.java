@@ -38,7 +38,7 @@ public class OSMessageAdapter extends MessageAdapter implements OSMessage
 
   public boolean forPostOffice(PostOffice myPostOffice)
   {
-    return (myPostOffice.getID().compareTo(RCOS.sOSPostOfficeID) == 0);
+    return (myPostOffice.getId().compareTo(RCOS.osPostOfficeId) == 0);
   }
 
   public String getAnimatorType()

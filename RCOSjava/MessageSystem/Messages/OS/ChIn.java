@@ -14,22 +14,22 @@ import Software.Kernel.Kernel;
 
 public class ChIn extends OSMessageAdapter
 {
-  private String sTerminalID;
+  private String terminalId;
 
-  public ChIn(OSMessageHandler theSource, String sNewTerminalID)
+  public ChIn(OSMessageHandler theSource, String newTerminalID)
   {
     super(theSource);
-    setTerminalID(sNewTerminalID);
+    setTerminalId(newTerminalID);
   }
 
-  public void setTerminalID(String sNewTerminalID)
+  public void setTerminalId(String newTerminalId)
   {
-    sTerminalID = sNewTerminalID;
+    terminalId = newTerminalId;
   }
 
   public void doMessage (SoftwareTerminal theElement)
   {
-    if (theElement.getID().compareTo(sTerminalID) == 0)
+    if (theElement.getId().compareTo(terminalId) == 0)
       theElement.chIn();
   }
 }

@@ -1,8 +1,8 @@
 //******************************************************/
 // FILE     : NumInMessage.java
-// PURPOSE  : 
+// PURPOSE  :
 // AUTHOR   : Andrew Newman
-// MODIFIED : 
+// MODIFIED :
 // HISTORY  : 24/03/96   Created
 //******************************************************/
 
@@ -14,23 +14,23 @@ import Software.Kernel.Kernel;
 
 public class NumIn extends OSMessageAdapter
 {
-  private String sTerminalID;
+  private String terminalId;
 
-  public NumIn(OSMessageHandler theSource, 
-    String sNewTerminalID)
+  public NumIn(OSMessageHandler theSource,
+    String newTerminalId)
   {
     super(theSource);
-    sTerminalID = sNewTerminalID;
-  }  
-  
-  public void setTerminalID(String sNewTerminalID)
-  {
-    sTerminalID = sNewTerminalID;
+    terminalId = newTerminalId;
   }
-  
+
+  public void setTerminalID(String newTerminalId)
+  {
+    terminalId = newTerminalId;
+  }
+
   public void doMessage(SoftwareTerminal theElement)
   {
-    if (theElement.getID().compareTo(sTerminalID) == 0)    
+    if (theElement.getId().compareTo(terminalId) == 0)
       theElement.numIn();
   }
 }

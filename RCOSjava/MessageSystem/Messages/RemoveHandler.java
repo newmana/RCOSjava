@@ -2,7 +2,7 @@
 // FILE     : RemoveHandlerMessage.java
 // PURPOSE  : Register Message sent to Animators.
 // AUTHOR   : Andrew Newman
-// MODIFIED : 
+// MODIFIED :
 // HISTORY  : 01/07/96   Created
 //******************************************************/
 
@@ -14,6 +14,6 @@ public class RemoveHandler extends MessageAdapter
 {
   public void doMessage(PostOffice theElement)
   {
-    theElement.removeHandler(getSource().getID());
+    theElement.removeHandler(getSource().getId());
   }
 }

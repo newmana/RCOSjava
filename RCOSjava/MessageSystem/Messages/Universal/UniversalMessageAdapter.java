@@ -1,13 +1,3 @@
-//*******************************************************************/
-// FILE     : UniversalMessageAdapter.java
-// PURPOSE  : Adapter for OSMessage and AnimatorMessage
-//            for messages bound to both OS and Animator
-// AUTHOR   : Andrew Newman
-// MODIFIED : 
-// HISTORY  : 24/03/96   Created
-//          : 03/07/98   Used double dispatch
-//*******************************************************************/
-
 package MessageSystem.Messages.Universal;
 
 import java.lang.Object;
@@ -38,7 +28,17 @@ import MessageSystem.PostOffices.Animator.AnimatorMessageHandler;
 import MessageSystem.PostOffices.SimpleMessageHandler;
 import MessageSystem.PostOffices.PostOffice;
 
-public class UniversalMessageAdapter extends MessageAdapter 
+/**
+ * Adapter for OSMessage and AnimatorMessage for messages bound to both OS
+ * and Animator.
+ * <P>
+ * HISTORY: 03/07/98   Used double dispatch<BR>
+ * <P>
+ * @author Andrew Newman
+ * @created 24th March 1996
+ * @version 1.00 $Date$
+ */
+public class UniversalMessageAdapter extends MessageAdapter
   implements OSMessage, AnimatorMessage
 {
   public UniversalMessageAdapter()
@@ -56,18 +56,18 @@ public class UniversalMessageAdapter extends MessageAdapter
     super(theSource);
   }
 
-	public UniversalMessageAdapter(SimpleMessageHandler theSource)
-	{
-		super(theSource);
-	}
-	
+  public UniversalMessageAdapter(SimpleMessageHandler theSource)
+  {
+    super(theSource);
+  }
+
   public boolean forPostOffice(PostOffice myPostOffice)
   {
-		String sPostOfficeID = myPostOffice.getID();
-    return ((sPostOfficeID.compareTo(RCOS.sAnimatorPostOfficeID) == 0) ||
-            (sPostOfficeID.compareTo(RCOS.sOSPostOfficeID) == 0));
+    String postOfficeId = myPostOffice.getId();
+    return ((postOfficeId.compareTo(RCOS.animatorPostOfficeId) == 0) ||
+            (postOfficeId.compareTo(RCOS.osPostOfficeId) == 0));
   }
-  
+
   public String getAnimatorType()
   {
     return "Animator";
@@ -79,7 +79,7 @@ public class UniversalMessageAdapter extends MessageAdapter
     //Change the class, change how it returns the OSMessage type.
     return (getType().substring(getType().indexOf(".")+1));
   }
-  
+
   public void doMessage(DiskScheduler theElement)
   {
   }
@@ -115,7 +115,7 @@ public class UniversalMessageAdapter extends MessageAdapter
   public void doMessage(TerminalManager theElement)
   {
   }
-  
+
   public void doMessage(CPUAnimator theElement)
   {
   }
@@ -135,7 +135,7 @@ public class UniversalMessageAdapter extends MessageAdapter
   public void doMessage(MultimediaAnimator theElement)
   {
   }
-	
+
   public void doMessage(ProcessManagerAnimator theElement)
   {
   }
@@ -150,5 +150,5 @@ public class UniversalMessageAdapter extends MessageAdapter
 
   public void doMessage(TerminalManagerAnimator theElement)
   {
-  }	
+  }
 }

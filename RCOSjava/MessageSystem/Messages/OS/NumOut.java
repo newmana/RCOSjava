@@ -1,8 +1,8 @@
 //******************************************************/
 // FILE     : NumOutMessage.java
-// PURPOSE  : 
+// PURPOSE  :
 // AUTHOR   : Andrew Newman
-// MODIFIED : 
+// MODIFIED :
 // HISTORY  : 24/03/96   Created
 //******************************************************/
 
@@ -14,31 +14,31 @@ import Software.Kernel.Kernel;
 
 public class NumOut extends OSMessageAdapter
 {
-  private String sTerminalID;
-  private short sNum;
+  private String terminalId;
+  private short num;
 
-  public NumOut(OSMessageHandler theSource, 
-    String sNewTerminalID, short sNewNum)
+  public NumOut(OSMessageHandler theSource,
+    String newTerminalId, short newNum)
   {
     super(theSource);
-		sTerminalID = sNewTerminalID;
-    sNum = sNewNum;
-  }  
-  
-  public void setTerminalID(String sNewTerminalID)
-  {
-    sTerminalID = sNewTerminalID;
+    terminalId = newTerminalId;
+    num = newNum;
   }
 
-  public void setNewNum(short sNewNum)
+  public void setTerminalID(String newTerminalId)
   {
-    sNum = sNewNum;
+    terminalId = newTerminalId;
   }
-  
+
+  public void setNewNum(short newNum)
+  {
+    num = newNum;
+  }
+
   public void doMessage(SoftwareTerminal theElement)
   {
-    if (theElement.getID().compareTo(sTerminalID) == 0)    
-      theElement.numOut((byte) sNum);
+    if (theElement.getId().compareTo(terminalId) == 0)
+      theElement.numOut((byte) num);
   }
 }
 

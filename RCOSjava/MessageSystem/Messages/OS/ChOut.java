@@ -1,8 +1,8 @@
 //******************************************************/
 // FILE     : ChOutMessage.java
-// PURPOSE  : 
+// PURPOSE  :
 // AUTHOR   : Andrew Newman
-// MODIFIED : 
+// MODIFIED :
 // HISTORY  : 24/03/96   Created
 //******************************************************/
 
@@ -14,31 +14,31 @@ import Software.Kernel.Kernel;
 
 public class ChOut extends OSMessageAdapter
 {
-  private String sTerminalID;
-  private char cCh;
+  private String terminalId;
+  private char ch;
 
-  public ChOut(OSMessageHandler theSource, 
-    String sNewTerminalID, char cNewCh)
+  public ChOut(OSMessageHandler theSource,
+    String newTerminalId, char newCh)
   {
     super(theSource);
-    sTerminalID = sNewTerminalID;
-    cCh = cNewCh;
-  }
-  
-  public void setTerminalID(String sNewTerminalID)
-  {
-    sTerminalID = sNewTerminalID;
+    terminalId = newTerminalId;
+    ch = newCh;
   }
 
-  public void setCharacter(char cNewCh)
+  public void setTerminalID(String newTerminalId)
   {
-    cCh = cNewCh;
+    terminalId = newTerminalId;
+  }
+
+  public void setCharacter(char newCh)
+  {
+    ch = newCh;
   }
 
   public void doMessage(SoftwareTerminal theElement)
   {
-    if (theElement.getID().compareTo(sTerminalID) == 0)
-      theElement.chOut(cCh);
+    if (theElement.getId().compareTo(terminalId) == 0)
+      theElement.chOut(ch);
   }
 }
 

@@ -1,19 +1,3 @@
-//***************************************************************************
-// FILE     : SimpleMessageHandler.java
-// PACKAGE  : MessageSystem
-// PURPOSE  : Provide sending and receiving facilities for all classes.
-// AUTHOR   : Bruce Jamieson
-// MODIFIED : Andrew Newman
-// HISTORY  : 24/01/96 Created
-//            ??/??/96 Fixed bug nolonger registers to postoffice
-//                     automatically.
-//            20/05/97 Changed message system
-//            21/05/97 Added LocalSendMessage to all posting of a message
-//                     to the local Post Office instead of broadcasting
-//                     it everywhere.
-//
-//***************************************************************************/
-
 package MessageSystem.PostOffices;
 
 import MessageSystem.Messages.MessageAdapter;
@@ -22,7 +6,23 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.io.Serializable;
 
-public abstract class SimpleMessageHandler implements MessageHandler, Serializable
+/**
+ * Provide sending and receiving facilities for all classes.
+ * <P>
+ * ??/??/96 Fixed bug nolonger registers to postoffice
+ * automatically.<BR>
+ * 20/05/97 Changed message system.<BR>
+ * 21/05/97 Added LocalSendMessage to all posting of a message
+ * to the local Post Office instead of broadcasting
+ * it everywhere.<BR>
+ *
+ * @author Andrew Newman.
+ * @author Bruce Jamieson.
+ * @version 1.00 $Date$
+ * @created 24th January 1996
+ **/
+public abstract class SimpleMessageHandler
+  implements MessageHandler, Serializable
 {
   protected PostOffice registeredPostOffice;
   protected String id;
@@ -32,28 +32,28 @@ public abstract class SimpleMessageHandler implements MessageHandler, Serializab
   {
   }
 
-  public SimpleMessageHandler(String newID, PostOffice newPostOffice)
+  public SimpleMessageHandler(String newId, PostOffice newPostOffice)
   {
     // Save myId and a pointer the PostOffice
-    id = newID;
+    id = newId;
     registeredPostOffice = newPostOffice;
     // Tell the PostOffice that I'm alive
-    AddHandler newMessage = new AddHandler(this, newID,
+    AddHandler newMessage = new AddHandler(this, newId,
       newPostOffice);
     newPostOffice.processMessage(newMessage);
   }
 
-  public SimpleMessageHandler(String newID)
+  public SimpleMessageHandler(String newId)
   {
-    id = newID;
+    id = newId;
   }
 
-  public void setID(String newID)
+  public void setId(String newId)
   {
-    id = newID;
+    id = newId;
   }
 
-  public String getID()
+  public String getId()
   {
     return id;
   }
@@ -62,9 +62,9 @@ public abstract class SimpleMessageHandler implements MessageHandler, Serializab
   public abstract void localSendMessage(MessageAdapter maMessage);
   public abstract void processMessage(MessageAdapter maMessage);
 
-  public void addHandler(String newID, MessageHandler newHandler)
+  public void addHandler(String newId, MessageHandler newHandler)
   {
-    registeredHandlers.put(newID, newHandler);
+    registeredHandlers.put(newId, newHandler);
   }
 
   public MessageHandler getHandler(String handlerToGet)
@@ -83,9 +83,9 @@ public abstract class SimpleMessageHandler implements MessageHandler, Serializab
     return registeredHandlers.keys();
   }
 
-  public void removeHandler(String oldID)
+  public void removeHandler(String oldId)
   {
-    registeredHandlers.remove(oldID);
+    registeredHandlers.remove(oldId);
   }
 
   public void clearHandlers()

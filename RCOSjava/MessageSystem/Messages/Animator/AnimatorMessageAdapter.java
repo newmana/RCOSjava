@@ -1,13 +1,3 @@
-//******************************************************/
-// FILE     : AnimatorMessageAdapter.java
-// PURPOSE  : AnimatorMessageAdapter which implements
-//            AnimatorMessage.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 24/03/96   Created
-//          : 03/07/98   Used double dispatch
-//******************************************************/
-
 package MessageSystem.Messages.Animator;
 
 import java.lang.Object;
@@ -26,7 +16,16 @@ import MessageSystem.PostOffices.Animator.AnimatorMessageHandler;
 import RCOS;
 import java.io.Serializable;
 
-public class AnimatorMessageAdapter extends MessageAdapter 
+/**
+ * AnimatorMessageAdapter which implements AnimatorMessage.
+ * <P>
+ * HISTORY         : 03/07/98   Used double dispatch
+ *
+ * @author Andrew Newman
+ * @created 24th March 1996
+ * @version 1.00 $Date$
+ */
+public class AnimatorMessageAdapter extends MessageAdapter
   implements AnimatorMessage, Serializable
 {
   public AnimatorMessageAdapter()
@@ -44,9 +43,9 @@ public class AnimatorMessageAdapter extends MessageAdapter
     return ("OS");
   }
 
-  public boolean forPostOffice(PostOffice poMyPostOffice)
+  public boolean forPostOffice(PostOffice myPostOffice)
   {
-    return (poMyPostOffice.getID().compareTo(RCOS.sAnimatorPostOfficeID) == 0);
+    return (myPostOffice.getId().compareTo(RCOS.animatorPostOfficeId) == 0);
   }
 
   public void doMessage(CPUAnimator theElement)

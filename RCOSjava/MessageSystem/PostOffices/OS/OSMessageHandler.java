@@ -10,8 +10,9 @@ import MessageSystem.Messages.AddHandler;
 /**
  *  Provide sending and receiving facilities for all classes.
  *
- * @author     Bruce Jamieson, Andrew Newman
- * @created    21 October 2000
+ * @author Bruce Jamieson, Andrew Newman
+ * @created 21 October 2000
+ * @version 1.00 $Date$
  */
 public abstract class OSMessageHandler extends SimpleMessageHandler
 {

@@ -1,54 +1,83 @@
 package MessageSystem.PostOffices.OS;
 
-import MessageSystem.PostOffices.SimpleMessageHandler;
 import MessageSystem.Messages.OS.OSMessageAdapter;
 import MessageSystem.Messages.Universal.UniversalMessageAdapter;
-import MessageSystem.Messages.MessageAdapter;
-import MessageSystem.PostOffices.PostOffice;
-import MessageSystem.Messages.AddHandler;
-import pll2.*;
+import MessageSystem.PostOffices.Universal.UniversalMessageRecorder;
 
+/**
+ *  Recording facilities for all operating system messages.
+ *
+ * @author     Andrew Newman
+ * @created    25th February 2001
+ * @version 1.00 $Date$
+ */
 public class OSMessageRecorder extends OSMessageHandler
 {
-  public static int counter;
-  private FileClient myClient;
+  /**
+   *
+   */
+  private UniversalMessageRecorder recorder;
 
+  /**
+   * Null constructor.  Does nothing.
+   */
   public OSMessageRecorder()
   {
   }
 
-  public OSMessageRecorder(String newID, OSOffice mhNewPostOffice)
+  /**
+   * Constructs a message recorder to listen to all the message of a particular
+   * post office.
+   *
+   * @param newId the string identifier to register as.
+   * @param newPostOffice the post office to register to.
+   */
+  public OSMessageRecorder(String newId, OSOffice newPostOffice,
+    UniversalMessageRecorder newRecorder)
   {
-    super(newID, mhNewPostOffice);
+    super(newId, newPostOffice);
+    recorder = newRecorder;
   }
 
-  public void processMessage(OSMessageAdapter mMessage)
+  /**
+   * Processes any and all message of operating system message type (operating
+   * system component to operating system component in this case).
+   *
+   * @param newMessage the message to accept.
+   */
+  public void processMessage(OSMessageAdapter newMessage)
   {
-    System.out.println("OS Got OS Message: " + mMessage);
-    myClient = new FileClient("localhost", 4242);
+    System.out.println("OS Got OS Message: " + newMessage);
+/*    myClient = new FileClient("localhost", 4242);
     myClient.openConnection();
     try
     {
-      myClient.writeRecFile("/test.xml" + counter++, mMessage);
+      myClient.writeRecFile("/test.xml" + counter++, newMessage);
     }
     catch (Exception e)
     {
     }
-    myClient.closeConnection();
+    myClient.closeConnection();*/
   }
 
-  public void processMessage(UniversalMessageAdapter mMessage)
+  /**
+   * Accept the universal messages sent to the post office.  This message
+   * can come from either an animator or operating system component.
+   *
+   * @param newMessage the message to accept.
+   */
+  public void processMessage(UniversalMessageAdapter newMessage)
   {
-    System.out.println("OS Got Universal Message: " + mMessage);
-    myClient = new FileClient("localhost", 4242);
+    System.out.println("OS Got Universal Message: " + newMessage);
+/*    myClient = new FileClient("localhost", 4242);
     myClient.openConnection();
     try
     {
-      myClient.writeRecFile("/test.xml" + counter++, mMessage);
+      myClient.writeRecFile("/test" + (counter++) + ".xml", mMessage);
     }
     catch (Exception e)
     {
     }
-    myClient.closeConnection();
+    myClient.closeConnection();*/
   }
 }

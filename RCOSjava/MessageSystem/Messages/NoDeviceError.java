@@ -18,13 +18,13 @@ public class NoDeviceError extends MessageAdapter
 
   public void doMessage(PostOffice theElement)
   {
-    System.out.println("POST OFFICE " + ERROR_MESSAGE + this.getSource().getID() + 
+    System.err.println("POST OFFICE " + ERROR_MESSAGE + this.getSource().getId() +
       " from " + this.getSource());
   }
-  
+
   public void doMessage(Object theElement)
   {
-    System.out.println(ERROR_MESSAGE + theElement.getClass().getName());
+    System.err.println(ERROR_MESSAGE + theElement.getClass().getName());
   }
 }
 
