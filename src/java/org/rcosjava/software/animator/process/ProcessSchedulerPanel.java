@@ -935,8 +935,8 @@ public class ProcessSchedulerPanel extends RCOSPanel
     queue.goToHead();
     while (!queue.atTail())
     {
-      RCOSProcess process = (RCOSProcess) queue.peek();
-      MTGO tmpMTGO = engine.returnMTGO("P" + process.getPID());
+      Integer PID = (Integer) queue.peek();
+      MTGO tmpMTGO = engine.returnMTGO("P" + PID);
 
       tmpMTGO.setXPosition(xPosition);
       tmpMTGO.setYPosition(yPosition);
