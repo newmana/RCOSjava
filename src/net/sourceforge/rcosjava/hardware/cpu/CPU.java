@@ -74,7 +74,7 @@ public class CPU
   private boolean codeToExecute;
   private boolean processFinished;
   private int ticks = 0;
-  private Context myContext;
+  private Context myContext = new Context();
   private Memory processStack, processCode;
   private InterruptQueue interruptsQueue;
   private Kernel myKernel;
@@ -103,6 +103,11 @@ public class CPU
   public void setContext(Context newContext)
   {
     myContext = newContext;
+  }
+
+  public void setNewContext()
+  {
+    myContext = new Context();
   }
 
   /**
@@ -628,7 +633,7 @@ public class CPU
     }
     else
     {
-      System.out.println("Illegal Instruction");
+      System.err.println("Illegal Instruction");
     }
   }
 
