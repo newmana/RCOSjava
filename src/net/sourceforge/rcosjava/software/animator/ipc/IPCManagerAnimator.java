@@ -9,6 +9,7 @@ import net.sourceforge.rcosjava.software.animator.support.mtgos.MTGO;
 import net.sourceforge.rcosjava.software.animator.support.positions.Position;
 import net.sourceforge.rcosjava.software.memory.MemoryRequest;
 import net.sourceforge.rcosjava.software.memory.MemoryReturn;
+import net.sourceforge.rcosjava.software.ipc.SharedMemory;
 import net.sourceforge.rcosjava.messaging.messages.animator.AnimatorMessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.Message;
@@ -153,25 +154,31 @@ public class IPCManagerAnimator extends RCOSAnimator
   }
 
   public void sharedMemoryCreated(String sharedMemoryId, int processId,
-    int size)
+    SharedMemory memory)
   {
-//    myFrame.semaphoreCreated(semaphoreId, processId, value);
+    myFrame.sharedMemoryCreated(sharedMemoryId, processId, memory);
   }
 
-  public void sharedMemoryOpen()
+  public void sharedMemoryOpened(String sharedMemoryId, int processId)
   {
+    myFrame.sharedMemoryOpened(sharedMemoryId, processId);
   }
 
-  public void sharedMemoryClosed()
+  public void sharedMemoryClosed(String sharedMemoryId, int processId)
   {
+    myFrame.sharedMemoryClosed(sharedMemoryId, processId);
   }
 
-  public void sharedMemoryRead()
+  public void sharedMemoryRead(String sharedMemoryId, int processId,
+    SharedMemory memory)
   {
+    myFrame.sharedMemoryRead(sharedMemoryId, processId, memory);
   }
 
-  public void sharedMemoryWrite()
+  public void sharedMemoryWrote(String sharedMemoryId, int processId,
+    SharedMemory memory)
   {
+    myFrame.sharedMemoryWrote(sharedMemoryId, processId, memory);
   }
 }
 
