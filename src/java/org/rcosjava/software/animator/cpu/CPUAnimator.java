@@ -63,9 +63,9 @@ public class CPUAnimator extends RCOSAnimator
   }
 
   /**
-   * Sets the Context attribute of the CPUAnimator object
+   * Sets the context (Program Counter, Base Pointer, etc).
    *
-   * @param newContext The new Context value
+   * @param newContext the new context.
    */
   public void setContext(Context newContext)
   {
@@ -74,9 +74,9 @@ public class CPUAnimator extends RCOSAnimator
   }
 
   /**
-   * Gets the Context attribute of the CPUAnimator object
+   * Returns the current context (Program Counter, etc).
    *
-   * @return The Context value
+   * @return the current context (Program Counter, etc).
    */
   public Context getContext()
   {
@@ -94,9 +94,9 @@ public class CPUAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * Update the stack of the currently executing process.
    *
-   * @param newStack Description of Parameter
+   * @param newStack the new value of the stack.
    */
   public void updateStack(Memory newStack)
   {
@@ -105,9 +105,9 @@ public class CPUAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * Update the code of the current executing process.
    *
-   * @param newCode Description of Parameter
+   * @param newCode the new value of the code.
    */
   public void loadCode(Memory newCode)
   {
@@ -122,7 +122,7 @@ public class CPUAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * Resets the display of the stack, code and context.
    */
   public void screenReset()
   {
