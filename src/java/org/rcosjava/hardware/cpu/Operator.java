@@ -298,7 +298,6 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().decStackPointer();
-      cpu.getContext().decStackPointer();
       cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
           (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) ^
           cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
@@ -382,6 +381,25 @@ public class Operator extends WordParameter
     }
   };
 
+  /**
+   * Operation constant (for OPCODE_OPR) RaNDom.
+   */
+  public final static Operator RANDOM = new Operator((short) 23, "_RND")
+  {
+    void execute(CPU cpu)
+    {
+      // Read stack.
+      int maxRange = cpu.getProcessStack().read(cpu.getContext().getStackPointer());
+
+      // Get random value
+      Random random = new Random(System.currentTimeMillis());
+      int value = random.nextInt(maxRange);
+
+      // Set result
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(), value);
+    }
+  };
+
   public static final Operator OPERATIONS[] =
   {
     Operator.RETURN, Operator.NEGATIVE, Operator.ADD, Operator.SUBTRACT,
@@ -390,11 +408,12 @@ public class Operator extends WordParameter
     Operator.GREATER_THAN_OR_EQUAL, Operator.GREATER_THAN,
     Operator.LESS_THAN_OR_EQUAL, Operator.OR, Operator.AND, Operator.XOR,
     Operator.NOT, Operator.SHIFT_LEFT, Operator.SHIFT_RIGHT,
-    Operator.INCREMENT, Operator.DECREMENT, Operator.COPY
+    Operator.INCREMENT, Operator.DECREMENT, Operator.COPY,
+    Operator.RANDOM
   };
 
   /**
-   * The internal value of the operator. Current valid between 0 and 22.
+   * The internal value of the operator. Current valid between 0 and 23.
    */
   private short operatorValue;
 

@@ -550,6 +550,32 @@ public class StatementCompiler extends DepthFirstAdapter
         Operator.MULTIPLY.getValue());
   }
 
+  public void inARandRcosStatement(ARandRcosStatement node)
+  {
+    handlePValueLoad(node.getId());
+    writePCode(OpCode.OPERATION.getValue(), (byte) 0,
+      Operator.RANDOM.getValue());
+
+    String varName = node.getVarname().toString().trim();
+
+    try
+    {
+      if (isArray(varName))
+      {
+        currentSymbol = table.getArray(varName, Compiler.getLevel());
+      }
+      else
+      {
+        currentSymbol = table.getSymbol(varName, Compiler.getLevel());
+      }
+    }
+    catch (Exception e)
+    {
+    }
+
+    currentSymbol.handleStore(this);
+  }
+
   /**
    * Simple assignment statements
    * e.g. i = 0;
