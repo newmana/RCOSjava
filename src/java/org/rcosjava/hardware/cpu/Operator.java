@@ -189,6 +189,7 @@ public class Operator extends WordParameter
     void execute(CPU cpu)
     {
       cpu.getContext().decStackPointer();
+
       if (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) <
           cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1))
       {

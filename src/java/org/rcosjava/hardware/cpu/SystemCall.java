@@ -28,7 +28,6 @@ public class SystemCall extends WordParameter
    */
   private static HashMap allSystemCallsByValue = new HashMap();
 
-
   /**
    * Operation constant for system call (OPCODE_CSP) CHaracter IN
    */
