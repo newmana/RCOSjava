@@ -15,7 +15,6 @@ import java.net.*;
  * </DD></DT>
  * <P>
  * @author Andrew Newman.
- * @author Brett Carter.
  * @version 1.00 $Date$
  * @created 25th May 2001
  */
