@@ -1,6 +1,6 @@
 package net.sourceforge.rcosjava.compiler;
 
-import net.sourceforge.rcosjava.hardware.cpu.Instruction;
+import net.sourceforge.rcosjava.hardware.cpu.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -140,36 +140,36 @@ public class Compiler extends DepthFirstAdapter
   public void caseAGteqRelop(AGteqRelop node)
   {
     System.out.println("GTE Node: " + node);
-    writePCode(new Instruction(Instruction.OPCODE_OPR, (byte) 0,
-      Instruction.OPERATOR_GE));
+    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
+      Operator.GREATER_THAN_OR_EQUAL.getValue()));
   }
 
   public void caseAGtRelop(AGtRelop node)
   {
     System.out.println("GT Node: " + node);
-    writePCode(new Instruction(Instruction.OPCODE_OPR, (byte) 0,
-      Instruction.OPERATOR_GT));
+    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
+      Operator.GREATER_THAN.getValue()));
   }
 
   public void caseALteqRelop(ALteqRelop node)
   {
     System.out.println("LTE Node: " + node);
-    writePCode(new Instruction(Instruction.OPCODE_OPR, (byte) 0,
-      Instruction.OPERATOR_LE));
+    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
+      Operator.LESS_THAN_OR_EQUAL.getValue()));
   }
 
   public void caseALtRelop(ALtRelop node)
   {
     System.out.println("LT Node: " + node);
-    writePCode(new Instruction(Instruction.OPCODE_OPR, (byte) 0,
-      Instruction.OPERATOR_LT));
+    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
+      Operator.LESS_THAN.getValue()));
   }
 
   public void caseAEqRelop(AEqRelop node)
   {
     System.out.println("EQ Node: " + node);
-    writePCode(new Instruction(Instruction.OPCODE_OPR, (byte) 0,
-      Instruction.OPERATOR_EQ));
+    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
+      Operator.EQUAL.getValue()));
   }
 
   /**
@@ -191,7 +191,7 @@ public class Compiler extends DepthFirstAdapter
       //emit each element in the string
       for (int count = 0; count < varStrLength; count++)
       {
-        writePCode(new Instruction(Instruction.OPCODE_LIT, (byte) 0,
+        writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
           (short) varValue.charAt(count)));
       }
     }
@@ -200,12 +200,12 @@ public class Compiler extends DepthFirstAdapter
     {
       System.out.println("[" + varValue + "]");
       short varIntValue = Short.parseShort(varValue);
-      writePCode(new Instruction(Instruction.OPCODE_LIT, (byte) 0,
+      writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
         varIntValue));
     }
 
     //emit store a required pos
-    writePCode(new Instruction(Instruction.OPCODE_STO, (byte) 0,
+    writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
       (short) getVariableLocation(varName)));
   }
 
