@@ -342,6 +342,10 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     pmAnimator.setupLayout(this);
     mmAnimator.setupLayout(this);
     aboutAnimator.setupLayout(this);
+
+    // Ensure that it's repainted correctly
+    getContentPane().invalidate();
+    getContentPane().validate();
   }
 
   /**
@@ -576,8 +580,6 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     menuItem = new JMenuItem("Play");
     menu.add(menuItem);
     menuItem = new JMenuItem("Record New");
-    menu.add(menuItem);
-    menuItem = new JMenuItem("Save and Record New");
     menu.add(menuItem);
 
     menu = new JMenu("Help");
