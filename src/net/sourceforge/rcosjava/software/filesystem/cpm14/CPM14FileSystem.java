@@ -499,12 +499,12 @@ public class CPM14FileSystem implements FileSystem
   // necessary cary on functions.
   private void handleReturnMessages(OSMessageAdapter mvTheMessage)
   {
-    DiskRequest mvMessageData = (DiskRequest)mvTheMessage.getBody();
+    DiskRequest mvMessageData = (DiskRequest) mvTheMessage.getBody();
 
-    int mvRequestID = mvMessageData.FSRequestID;
+    int mvRequestID = mvMessageData.getRequestId();
 
     CPM14RequestTableEntry mvRequestData =
-      (CPM14RequestTableEntry)cvRequestTable.getItem( mvRequestID );
+      (CPM14RequestTableEntry) cvRequestTable.getItem( mvRequestID );
 
     int mvFID = mvRequestData.FSFileNum;
 
@@ -565,15 +565,15 @@ public class CPM14FileSystem implements FileSystem
     }
     else if ( mvRequestData.Type.equalsIgnoreCase("FS_READ::GETBLOCK"))
     {
-      if ( mvMessageData.DiskBlock >= 0)
+      if ( mvMessageData.getDiskBlock() >= 0)
       {
         int mvCounter;
         for ( mvCounter = 0; mvCounter < BLOCK_SIZE; mvCounter++)
         {
-          mvFIDEntry.Buffer[mvCounter] = mvMessageData.Data[mvCounter];
+          mvFIDEntry.Buffer[mvCounter] = mvMessageData.getData()[mvCounter];
         }
 
-        mvFIDEntry.CurrentDiskBlock = (byte)mvMessageData.DiskBlock;
+        mvFIDEntry.CurrentDiskBlock = (byte) mvMessageData.getDiskBlock();
         int mvReturnItem = SVB2I&mvFIDEntry.Buffer[
                     mvFIDEntry.CurrentPosition % BLOCK_SIZE];
         if (mvReturnItem == 0x1A)    // EOF
@@ -596,7 +596,7 @@ public class CPM14FileSystem implements FileSystem
     }
     else if ( mvRequestData.Type.equalsIgnoreCase("FS_WRITE::FLUSH"))
     {
-      if ( mvMessageData.DiskBlock >= 0)
+      if ( mvMessageData.getDiskBlock() >= 0)
       {
         System.out.println("Interupt reveived.bout to write"); // DEBUG
         int mvLastBlock = SVB2I&mvDevice.directoryTable
