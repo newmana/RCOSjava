@@ -72,7 +72,7 @@ public class TerminalManagerPanel extends RCOSPanel
       TerminalManagerAnimator thisTerminalManager)
   {
     super();
-
+    
     maxTerminals = noTerminals + 1;
     maxTerminalCols = noTerminalCols;
     maxTerminalRows = noTerminalRows;
@@ -164,6 +164,7 @@ public class TerminalManagerPanel extends RCOSPanel
         currentTerminal++;
         views[currentTerminal] = new JButton("Terminal #" + currentTerminal);
         views[currentTerminal].setFont(defaultFont);
+        views[currentTerminal].setBackground(defaultBgColour);
         gridBag.setConstraints(views[currentTerminal], constraints);
         main.add(views[currentTerminal]);
         views[currentTerminal].addActionListener(new TerminalButtonListener());
