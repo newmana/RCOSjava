@@ -27,7 +27,6 @@ import pll2.FileClient;
  *      To be done.
  * </CODE>
  * </DD></DT>
- *
  * @author Andrew Newman.
  * @version 1.00 $Date$
  * @created 2nd January 2001
@@ -38,7 +37,7 @@ public class UniversalMessageRecorder
 {
   private OSMessageRecorder osRecorder;
   private AnimatorMessageRecorder animatorRecorder;
-  private static int counter;
+  private static int counter =0;
   private FileClient myClient;
   private String host;
   private int port;
@@ -138,11 +137,11 @@ public class UniversalMessageRecorder
    *
    * @param newMessage the message to save permanently.
    */
-  public void processAnimatorUniversalMessage(
+  /*public void processAnimatorUniversalMessage(
     UniversalMessageAdapter newMessage)
   {
     saveMessage(newMessage);
-  }
+  }*/
 
   /**
    * Saves all the messages in a consistent.  Called by all 4 process methods.
@@ -154,7 +153,8 @@ public class UniversalMessageRecorder
     myClient.openConnection();
     try
     {
-      myClient.writeRecFile("/" + fileName + (counter++) + ".xml", newMessage);
+      myClient.writeRecFile("/" + fileName + counter + ".xml", newMessage);
+      counter++;
     }
     catch (Exception e)
     {

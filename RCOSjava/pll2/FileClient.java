@@ -136,7 +136,8 @@ public class FileClient
   public Object getRecFile(String filename)
   {
     String serializedObject = getFile(2, filename);
-    ByteArrayInputStream tmpBuffer = new ByteArrayInputStream(serializedObject.getBytes());
+    ByteArrayInputStream tmpBuffer = new
+      ByteArrayInputStream(serializedObject.getBytes());
     KOMLDeserializer deserializer = null;
     try
     {

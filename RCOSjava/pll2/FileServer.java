@@ -266,6 +266,7 @@ public class FileServer
     }
     catch (IOException theException)
     {
+      theException.printStackTrace();
       fileSize = 0;
       fileData = null;
     }
