@@ -66,11 +66,11 @@ import net.sourceforge.rcosjava.software.memory.MemoryRequest;
  * 02/04/2001 Added schedule message call.
  * </DD></DT>
  * <P>
+ * @see net.sourceforge.rcosjava.hardware.cpu.CPU
  * @author Andrew Newman.
  * @author David Jones.
  * @version 1.00 $Date$
  * @created 1st February 1996
- * @see Hardware.cpu.CPU
  */
 public class Kernel extends OSMessageHandler
 {

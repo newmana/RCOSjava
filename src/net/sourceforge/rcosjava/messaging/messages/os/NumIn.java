@@ -8,8 +8,8 @@ import net.sourceforge.rcosjava.software.kernel.Kernel;
  * Kernel receives a number in event tells the software terminal to display
  * the input on screen.
  * <P>
- * @see software.kernel.kernel
- * @see software.terminal.SoftwareTerminal
+ * @see net.sourceforge.rcosjava.software.kernel.kernel
+ * @see net.sourceforge.rcosjava.software.terminal.SoftwareTerminal
  * @author Andrew Newman.
  * @author David Jones
  * @version 1.00 $Date$

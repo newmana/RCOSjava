@@ -27,11 +27,12 @@ import net.sourceforge.rcosjava.pll2.FileClient;
  *      To be done.
  * </CODE>
  * </DD></DT>
+ * <P>
+ * @see net.sourceforge.rcosjava.messaging.postoffices.os.OSMessageRecorder
+ * @see net.sourceforge.rcosjava.messaging.postoffices.animator.AnimatorMessageRecorder
  * @author Andrew Newman.
  * @version 1.00 $Date$
  * @created 2nd January 2001
- * @see MessageSystem.postoffices.os.OSMessageRecorder
- * @see MessageSystem.postoffices.animator.AnimatorMessageRecorder
  */
 public class UniversalMessageRecorder
 {

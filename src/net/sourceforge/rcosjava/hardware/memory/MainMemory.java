@@ -11,7 +11,7 @@ package net.sourceforge.rcosjava.hardware.memory;
  * <P>
  * Creates 64 memory blocks using the default memory size (1024 bytes) or 64K.
  * <P>
- * @see Hardware.memory.Memory
+ * @see net.sourceforge.rcosjava.hardware.memory.Memory
  * @author Andrew Newman.
  * @version 1.00 $Date$
  * @created 1st July, 1997

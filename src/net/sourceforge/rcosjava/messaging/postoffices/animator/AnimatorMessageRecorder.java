@@ -7,10 +7,10 @@ import net.sourceforge.rcosjava.messaging.postoffices.universal.UniversalMessage
 /**
  * Recording facilities for all animator messages.
  * <P>
+ * @see net.sourceforge.rcosjava.messaging.postoffices.universal.UniversalMessageRecorder
  * @author Andrew Newman
  * @created 25th February 2001
  * @version 1.00 $Date$
- * @see MessageSystem.postoffices.universal.UniversalMessageRecorder
  */
 public class AnimatorMessageRecorder extends AnimatorMessageHandler
 {

@@ -185,8 +185,10 @@ import net.sourceforge.rcosjava.software.util.FIFOQueue;
   }
 
   /**
-   * Called to bring the terminal into focus.  Called by @see TerminalBack and
-   * @see TerminalFont messages.
+   * Called to bring the terminal into focus.  Called by
+   * @see net.sourceforge.rcosjava.messaging.message.universal.TerminalBack and
+   * @see net.sourceforge.rcosjava.messaging.messages.universal.TerminalFont
+   * messages.
    *
    * @param terminalNumber the terminal to display.
    * @param windowVisible set the window to display/not display.

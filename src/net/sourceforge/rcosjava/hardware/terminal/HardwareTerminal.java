@@ -38,12 +38,12 @@ import net.sourceforge.rcosjava.software.util.FIFOQueue;
  * 29/11/1998 Removed any message passing.
  * </DD></DT>
  * <P>
+ * @see net.sourceforge.rcosjava.software.animator.RCOSFrame
+ * @see net.sourceforge.rcosjava.hardware.terminal.HardwareTerminalScreen
+ * @see net.sourceforge.rcosjava.software.terminal.SoftwareTerminal
  * @author Andrew Newman.
  * @version 1.00 $Date$
  * @created 24th January 1996
- * @see Software.animator.RCOSFrame
- * @see Hardware.terminal.HardwareTerminalScreen
- * @see Software.terminal.SoftwareTerminal
  */
 
 public class HardwareTerminal extends RCOSFrame

@@ -4,10 +4,10 @@ package net.sourceforge.rcosjava.hardware.disk;
  * General simulation of a disk (floppy or hard drive).  Extend this to
  * implement specific implementations.
  * <P>
+ * @see net.sourceforge.rcosjava.hardware.disk.Disk
  * @author Andrew Newman.
  * @version 1.00 $Date$
  * @created 10th of August 1999
- * @see Hardware.disk.Disk
  */
 public class SimpleDisk implements Disk
 {

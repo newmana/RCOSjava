@@ -29,10 +29,10 @@ import net.sourceforge.rcosjava.software.util.FIFOQueue;
  * HardwareTerminalScreen
  * </DD></DT>
  * <P>
+ * @see net.sourceforge.rcosjava.hardware.terminal.HardwareTerminal
  * @author Andrew Newman.
  * @version 1.00 $Date$
  * @created 24th January 1996
- * @see Hardware.terminal.HardwareTerminal
  */
 public class HardwareTerminalScreen extends Canvas
 {
