@@ -51,7 +51,7 @@
 
   <target name="javadoc" depends="dist">
     <javadoc packagenames="net.sourceforge.rcosjava.*, pll2.*" sourcepath="${src.dir}"
-      classpath="${lib.dir}/junit.jar"
+      classpath="${lib.dir}/junit.jar;${lib.dir}/sablecc.jar;${lib.dir}/simplec.jar"
       destdir="${javadoc.dir}" author="true" version="true" use="true"/>
   </target>
 </project>
