@@ -1,4 +1,6 @@
 int global;
+int global2;
+int global3;
 
 /**
  * Tests if/else/elseif for >, ==, !=, <
