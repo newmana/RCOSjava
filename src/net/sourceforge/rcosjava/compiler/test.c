@@ -1,14 +1,17 @@
+/**
+ * For simple variable allocation and if statement.
+ **/
+
 char c3[100];
 int global;
 
-void main()
+int main()
 {
   int count;
 
   count = 2;
   global = 1;
-  c3 = '3';
-  c3 = "hello world";
+  c3[0] = '3';
 
   if ((global > 0))
   {

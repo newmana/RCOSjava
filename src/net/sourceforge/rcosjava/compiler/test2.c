@@ -5,7 +5,7 @@ int global3;
 /**
  * Tests if/else/elseif for >, ==, !=, <
  **/
-void main()
+int main()
 {
   int local;
   int local2;
