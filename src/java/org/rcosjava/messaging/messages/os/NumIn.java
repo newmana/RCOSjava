@@ -37,7 +37,7 @@ public class NumIn extends OSMessageAdapter
    *
    * @param newTerminalId the new value for the terminal id.
    */
-  public void setTerminalID(String newTerminalId)
+  public void setTerminalId(String newTerminalId)
   {
     terminalId = newTerminalId;
   }
@@ -50,6 +50,8 @@ public class NumIn extends OSMessageAdapter
    */
   public void doMessage(SoftwareTerminal theElement)
   {
+    System.out.println("Element id:" + theElement.getId());
+    System.out.println("My id:" + terminalId);
     if (theElement.getId().compareTo(terminalId) == 0)
     {
       theElement.numIn();
