@@ -41,7 +41,7 @@ import net.sourceforge.rcosjava.messaging.postoffices.universal.UniversalMessage
 import net.sourceforge.rcosjava.messaging.postoffices.universal.UniversalMessagePlayer;
 
 /**
- * Main startup file for RCOS.java Version 1.00
+ * Main startup file for RCOSjava Version 1.00
  * <P>
  * <DT><B>History:</B>
  * <DD>
@@ -102,7 +102,7 @@ public class RCOS extends java.applet.Applet implements Runnable
   public String defaultDomain = new String("localhost");
   public int port;
   public String docBase;
-  private static final String welcome = "Welcome to RCOS.java Version 1.00";
+  private static final String welcome = "Welcome to RCOSjava Version 1.00";
   private static final String info = "Copyright 1995-2001.\nVersion 1.00.\n" +
     "Authors: David Jones, Brett Carter, Bruce Jamieson, and Andrew Newman";
 
@@ -567,13 +567,11 @@ public class RCOS extends java.applet.Applet implements Runnable
       {
         synchronized (this)
         {
-          while (!running)
-          {
-            wait();
-          }
+          if (!running)
+            this.wait();
         }
         theKernel.performInstructionExecutionCycle();
-        kernelThread.sleep(10);
+        kernelThread.sleep(50);
       }
       catch (InterruptedException exc)
       {
