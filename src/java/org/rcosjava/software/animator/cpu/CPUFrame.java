@@ -1,5 +1,6 @@
 package org.rcosjava.software.animator.cpu;
 
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.FlowLayout;
@@ -38,14 +39,14 @@ public class CPUFrame extends RCOSFrame
   private CPUAnimator myCPUAnimator;
 
   /**
-   * Description of the Field
+   * Titles for the various sections of the CPU.
    */
-  private NewLabel CPUtitle, IRtitle, PCtitle, SPtitle, BPtitle;
+  private JLabel CPUtitle, IRtitle, PCtitle, SPtitle, BPtitle;
 
   /**
-   * Description of the Field
+   * Values for the various sections of the CPU.
    */
-  private NewLabel IRvalue, PCvalue, SPvalue, BPvalue;
+  private JLabel IRvalue, PCvalue, SPvalue, BPvalue;
 
   /**
    * The process stack.
@@ -89,7 +90,6 @@ public class CPUFrame extends RCOSFrame
       myImages = new Image[images.length];
       for (int index = 0; index < images.length; index++)
       {
-        System.err.println("Yo: " + index);
         myImages[index] = images[index].getImage();
       }
     }
@@ -162,28 +162,55 @@ public class CPUFrame extends RCOSFrame
     constraints.gridwidth = 1;
     stackList = new JList();
     stackListModel = new DefaultListModel();
-    stackList.setVisibleRowCount(10);
+    stackList.setVisibleRowCount(8);
     stackList.setModel(stackListModel);
-    stackList.setBackground(listColour);
+    stackList.setForeground(Color.white);
+    stackList.setBackground(Color.darkGray);
     gridBag.setConstraints(stackList, constraints);
-    main.add(stackList);
+    JScrollPane stackListPane = new JScrollPane(stackList);
+    stackListPane.setMinimumSize(new Dimension(100, 200));
+    main.add(stackListPane);
 
     // Middle/CPU section
     cpu.setLayout(new GridLayout(8, 2));
 
     titleFont = new Font("TimesRoman", Font.BOLD, 14);
 
-    IRtitle = new NewLabel("Instruction Register", titleFont);
-    IRvalue = new NewLabel("None", defaultFont);
+    IRtitle = new JLabel("Instruction Register", JLabel.CENTER);
+    IRtitle.setForeground(Color.white);
+    IRtitle.setBackground(Color.black);
+    IRtitle.setFont(titleFont);
+    IRvalue = new JLabel("None", JLabel.CENTER);
+    IRvalue.setForeground(Color.white);
+    IRvalue.setBackground(Color.black);
+    IRvalue.setFont(defaultFont);
 
-    PCtitle = new NewLabel("Program Counter", titleFont);
-    PCvalue = new NewLabel("0", defaultFont);
+    PCtitle = new JLabel("Program Counter", JLabel.CENTER);
+    PCtitle.setForeground(Color.white);
+    PCtitle.setBackground(Color.black);
+    PCtitle.setFont(titleFont);
+    PCvalue = new JLabel("0", JLabel.CENTER);
+    PCvalue.setForeground(Color.white);
+    PCvalue.setBackground(Color.black);
+    PCvalue.setFont(defaultFont);
 
-    SPtitle = new NewLabel("Stack Pointer", titleFont);
-    SPvalue = new NewLabel("0", defaultFont);
+    SPtitle = new JLabel("Stack Pointer", JLabel.CENTER);
+    SPtitle.setForeground(Color.white);
+    SPtitle.setBackground(Color.black);
+    SPtitle.setFont(titleFont);
+    SPvalue = new JLabel("0", JLabel.CENTER);
+    SPvalue.setForeground(Color.white);
+    SPvalue.setBackground(Color.black);
+    SPvalue.setFont(defaultFont);
 
-    BPtitle = new NewLabel("Base Pointer", titleFont);
-    BPvalue = new NewLabel("0", defaultFont);
+    BPtitle = new JLabel("Base Pointer", JLabel.CENTER);
+    BPtitle.setForeground(Color.white);
+    BPtitle.setBackground(Color.black);
+    BPtitle.setFont(titleFont);
+    BPvalue = new JLabel("0", JLabel.CENTER);
+    BPvalue.setForeground(Color.white);
+    BPvalue.setBackground(Color.black);
+    BPvalue.setFont(defaultFont);
 
     cpu.add(IRtitle);
     cpu.add(IRvalue);
@@ -206,10 +233,13 @@ public class CPUFrame extends RCOSFrame
     codeList = new JList();
     codeListModel = new DefaultListModel();
     codeList.setModel(codeListModel);
-    codeList.setVisibleRowCount(10);
-    codeList.setBackground(listColour);
+    codeList.setVisibleRowCount(8);
+    codeList.setForeground(Color.white);
+    codeList.setBackground(Color.darkGray);
     gridBag.setConstraints(codeList, constraints);
-    main.add(codeList);
+    JScrollPane codeListPane = new JScrollPane(codeList);
+    codeListPane.setMinimumSize(new Dimension(100, 200));
+    main.add(codeListPane);
 
     // Close section
     close.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -220,6 +250,8 @@ public class CPUFrame extends RCOSFrame
     // Add the two panels to the frame.
     add("Center", main);
     add("South", close);
+
+    screenReset();
   }
 
   /**
@@ -291,40 +323,34 @@ public class CPUFrame extends RCOSFrame
    */
   void updateCode()
   {
-    int count;
-    int listSize = codeList.getVisibleRowCount();
-    int visible = myCPUAnimator.getContext().getProgramCounter() + listSize / 2;
-
-    //int listSize = codeList.getRows();
-    //getRows doesn't seem to be reliable
-
-    if (codeListModel.size() > myCPUAnimator.getContext().getProgramCounter())
+    SwingUtilities.invokeLater(new Runnable()
     {
-//      codeList.makeVisible(myCPUAnimator.getContext().getProgramCounter());
-//      codeList.setSelectedIndex(myCPUAnimator.getContext().getProgramCounter());
-      SwingUtilities.invokeLater(new Runnable()
+      public void run()
       {
-        public void run()
+        int count;
+        int listSize = codeList.getVisibleRowCount();
+        int visible = myCPUAnimator.getContext().getProgramCounter() + listSize / 2;
+
+        //int listSize = codeList.getRows();
+        //getRows doesn't seem to be reliable
+
+        if (codeListModel.size() > myCPUAnimator.getContext().getProgramCounter())
         {
+//      codeList.makeVisible(myCPUAnimator.getContext().getProgramCounter());
+          codeList.setSelectedIndex(myCPUAnimator.getContext().getProgramCounter());
           codeList.ensureIndexIsVisible(myCPUAnimator.getContext().getProgramCounter());
         }
-      });
-    }
-    else
-    {
+        else
+        {
 //      codeList.makeVisible(programSize - 1);
 //      codeList.setSelectedIndex(programSize - 1);
-      SwingUtilities.invokeLater(new Runnable()
-      {
-        public void run()
-        {
           codeList.ensureIndexIsVisible(codeListModel.size() - 1);
         }
-      });
-    }
-    // make the selected instruction the ProgramCounter
+        // make the selected instruction the ProgramCounter
 //    codeList.select(myCPUAnimator.getContext().getProgramCounter());
-    codeList.setSelectedIndex(myCPUAnimator.getContext().getProgramCounter());
+        codeList.setSelectedIndex(myCPUAnimator.getContext().getProgramCounter());
+      }
+    });
   }
 
   /**
@@ -332,16 +358,23 @@ public class CPUFrame extends RCOSFrame
    */
   void screenReset()
   {
-    codeList.removeAll();
-    stackList.removeAll();
-    for (int count = 0; count < 5; count++)
+    SwingUtilities.invokeLater(new Runnable()
     {
-      stackListModel.addElement("Empty Stack");
-    }
-    IRvalue.setText("None");
-    PCvalue.setText("0");
-    SPvalue.setText("0");
-    BPvalue.setText("0");
+      public void run()
+      {
+        codeListModel.removeAllElements();
+        stackListModel.removeAllElements();
+
+        for (int count = 0; count < 5; count++)
+        {
+          stackListModel.addElement("Empty Stack");
+        }
+        IRvalue.setText("None");
+        PCvalue.setText("0");
+        SPvalue.setText("0");
+        BPvalue.setText("0");
+      }
+    });
   }
 
   /**
@@ -349,28 +382,34 @@ public class CPUFrame extends RCOSFrame
    *
    * @param theStack the new value of the stack to replace the current one with.
    */
-  void updateStack(Memory theStack)
+  void updateStack(final Memory theStack)
   {
-    int count;
-
-    stackList.removeAll();
-
-    if (theStack != null)
+    SwingUtilities.invokeLater(new Runnable()
     {
-      if (myCPUAnimator.getContext().getStackPointer() <= 0)
+      public void run()
       {
-        for (count = 0; count < 5; count++)
+        int count;
+
+        stackListModel.removeAllElements();
+
+        if (theStack != null)
         {
-          stackListModel.addElement("Empty Stack");
+          if (myCPUAnimator.getContext().getStackPointer() <= 0)
+          {
+            for (count = 0; count < 5; count++)
+            {
+              stackListModel.addElement("Empty Stack");
+            }
+          }
+          else
+          {
+            for (count = myCPUAnimator.getContext().getStackPointer(); count != 0; count--)
+            {
+              stackListModel.addElement((new String()).valueOf(theStack.read(count)));
+            }
+          }
         }
       }
-      else
-      {
-        for (count = myCPUAnimator.getContext().getStackPointer(); count != 0; count--)
-        {
-          stackListModel.addElement((new String()).valueOf(theStack.read(count)));
-        }
-      }
-    }
+    });
   }
 }
