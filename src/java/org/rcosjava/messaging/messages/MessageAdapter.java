@@ -6,7 +6,6 @@ import java.lang.Object;
 import org.rcosjava.messaging.postoffices.PostOffice;
 import org.rcosjava.messaging.postoffices.SimpleMessageHandler;
 
-
 /**
  * An adapter (default implementation) of the message interface. It prevents
  * messages from having to implement methods that have exactly the same
