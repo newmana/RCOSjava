@@ -1,3 +1,10 @@
+
+package net.sourceforge.rcosjava.software.interrupt;
+
+import net.sourceforge.rcosjava.messaging.messages.os.KeyPress;
+import net.sourceforge.rcosjava.messaging.postoffices.os.OSOffice;
+import java.io.Serializable;
+
 /**
  * Interrupt handler for terminal input
  * <P>
@@ -11,27 +18,20 @@
  * @version 1.00 $Date$
  * @created 29th of March 1996
  */
-package net.sourceforge.rcosjava.software.interrupt;
-
-import net.sourceforge.rcosjava.messaging.messages.os.KeyPress;
-import net.sourceforge.rcosjava.messaging.postoffices.os.OSOffice;
-import java.io.Serializable;
-
 public class TerminalInterruptHandler extends InterruptHandler
 {
-  public TerminalInterruptHandler(String sID, OSOffice postOffice,
+  public TerminalInterruptHandler(String id, OSOffice postOffice,
     String newType)
   {
-    super(sID, postOffice, newType);
+    super(id, postOffice, newType);
   }
 
+  /**
+   * Send a key press message when this event occurs.
+   */
   public void handleInterrupt()
   {
-    // perform any necesary clean up procedures so next
-    // Interrupt of this type can occur
-    // THERE IS NONE
-    // send a message to the appropriate DeviceDriver
-    KeyPress aMessage = new KeyPress(this, null);
-    sendMessage(aMessage);
+    KeyPress message = new KeyPress(this, null);
+    sendMessage(message);
   }
 }
