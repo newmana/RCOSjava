@@ -13,6 +13,7 @@ import org.rcosjava.messaging.messages.os.ChIn;
 import org.rcosjava.messaging.messages.os.ChOut;
 import org.rcosjava.messaging.messages.os.NumIn;
 import org.rcosjava.messaging.messages.os.NumOut;
+import org.rcosjava.messaging.messages.os.RegisterInterruptHandler;
 import org.rcosjava.messaging.messages.os.Schedule;
 import org.rcosjava.messaging.messages.os.SemaphoreClose;
 import org.rcosjava.messaging.messages.os.SemaphoreCreate;
@@ -36,6 +37,8 @@ import org.rcosjava.messaging.messages.universal.WriteBytes;
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.messaging.postoffices.os.OSOffice;
 import org.rcosjava.software.interrupt.InterruptHandler;
+import org.rcosjava.software.interrupt.ProcessFinishedInterruptHandler;
+import org.rcosjava.software.interrupt.TimerInterruptHandler;
 import org.rcosjava.software.memory.MemoryManager;
 import org.rcosjava.software.memory.MemoryRequest;
 import org.rcosjava.software.process.RCOSProcess;
@@ -147,6 +150,16 @@ public class Kernel extends OSMessageHandler
     super(MESSENGING_ID, postOffice);
     myCPU = new CPU(this);
     runningProcess = false;
+
+    // Register timer interrupt.
+    RegisterInterruptHandler msg = new RegisterInterruptHandler(this,
+      new TimerInterruptHandler(this, "TimerInterrupt"));
+    sendMessage(msg);
+
+    // Register process finished interrupt.
+    msg = new RegisterInterruptHandler(this,
+      new ProcessFinishedInterruptHandler(this, "CodeFinished"));
+    sendMessage(msg);
   }
 
   /**
@@ -190,7 +203,7 @@ public class Kernel extends OSMessageHandler
     {
       log.debug("Setting process code: " + newProcessCode);
     }
-    myCPU.setProcessCode(newProcessCode);
+    myCPU.setCode(newProcessCode);
   }
 
   /**
@@ -205,8 +218,8 @@ public class Kernel extends OSMessageHandler
       log.debug("Setting process stack: " + newProcessStack);
     }
 
-    myCPU.setProcessStack(newProcessStack);
-    if ((newProcessStack != null) && (myCPU.getProcessCode() != null) &&
+    myCPU.setStack(newProcessStack);
+    if ((newProcessStack != null) && (myCPU.getCode() != null) &&
         (myCPU.getContext() != null))
     {
       if (log.isDebugEnabled())
@@ -265,10 +278,10 @@ public class Kernel extends OSMessageHandler
     if (log.isDebugEnabled())
     {
       log.debug("Getting name");
-      log.debug("Name length: " + myCPU.getProcessStack().read(myCPU.getContext().
+      log.debug("Name length: " + myCPU.getStack().read(myCPU.getContext().
           getStackPointer()));
     }
-    int length = myCPU.getProcessStack().read(myCPU.getContext().
+    int length = myCPU.getStack().read(myCPU.getContext().
         getStackPointer());
 
     char[] name = new char[length];
@@ -282,7 +295,7 @@ public class Kernel extends OSMessageHandler
         count < myCPU.getContext().getStackPointer() + length;
         count++)
     {
-      name[index] = (char) myCPU.getProcessStack().read(count);
+      name[index] = (char) myCPU.getStack().read(count);
       index++;
     }
 
@@ -356,7 +369,7 @@ public class Kernel extends OSMessageHandler
    * Sets the current process and context as well as the code and stack segments
    * of the CPU to null. That there is no currently running process.
    */
-  public void nullProcess()
+  private void nullProcess()
   {
     if (log.isDebugEnabled())
     {
@@ -364,8 +377,8 @@ public class Kernel extends OSMessageHandler
     }
     processStopped();
     myCPU.setContext(new Context());
-    myCPU.setProcessCode(null);
-    myCPU.setProcessStack(null);
+    myCPU.setCode(null);
+    myCPU.setStack(null);
   }
 
   /**
@@ -378,8 +391,7 @@ public class Kernel extends OSMessageHandler
     {
       log.debug("Killing process");
     }
-    myCPU.setProcessFinished();
-    myCPU.handleInterrupts();
+    myCPU.setCodeFinished();
   }
 
   /**
@@ -388,10 +400,11 @@ public class Kernel extends OSMessageHandler
    */
   public void performInstructionExecutionCycle()
   {
+    // Schedule and then perform an instruction
     if ((!myCPU.isPaused()) || (stepExecution))
     {
-      sendMessage(scheduleMessage);
       myCPU.performInstructionExecutionCycle(stepExecution);
+      sendMessage(scheduleMessage);
     }
 
     postOffice.deliverMessages();
@@ -407,10 +420,12 @@ public class Kernel extends OSMessageHandler
 
       SetContext contextMsg = new SetContext(this, myCPU.getContext());
       sendMessage(contextMsg);
+      postOffice.deliverMessages();
 
       InstructionExecution executionMsg = new InstructionExecution(this,
-          myCPU.getProcessStack());
+          myCPU.getStack());
       sendMessage(executionMsg);
+      postOffice.deliverMessages();
     }
 
     if (stepExecution)
@@ -452,23 +467,6 @@ public class Kernel extends OSMessageHandler
   }
 
   /**
-   * Provides direct access to the CPU to generate an interrupts. It adds a new
-   * interrupt to be dealt with by the CPU (during a execution cycle probably).
-   * The interrupts are stored and generated by the CPU not the Kernel. The
-   * Kernel handles the interrupts.
-   *
-   * @param newInterrupt the new interrupt to add.
-   */
-  public void generateInterrupt(Interrupt newInterrupt)
-  {
-    if (log.isDebugEnabled())
-    {
-      log.debug("Generating Interrupt: " + newInterrupt);
-    }
-    myCPU.generateInterrupt(newInterrupt);
-  }
-
-  /**
    * Inserts a new interrupt handler into the list of interrupt handlers. This
    * must be done before handleInterrupt is called.
    *
@@ -496,32 +494,19 @@ public class Kernel extends OSMessageHandler
   {
     if (log.isDebugEnabled())
     {
-      log.debug("Handling interrupt: " + anInterrupt);
-      log.debug("Handling interrupt type: " + anInterrupt.getType());
+      log.debug("Handling interrupt: " + anInterrupt.getType());
       log.debug("Handling interrupt time: " + anInterrupt.getTime());
     }
 
-    if (anInterrupt.getType().compareTo("TimerInterrupt") == 0)
-    {
-      handleTimerInterrupt();
-    }
-    else if (anInterrupt.getType().compareTo("ProcessFinished") == 0)
-    {
-      handleProcessFinishedInterrupt();
-    }
-    else
-    {
-      InterruptHandler aIH = (InterruptHandler) interruptHandlers.get(
-          anInterrupt.getType());
+    InterruptHandler aIH = (InterruptHandler) interruptHandlers.get(
+      anInterrupt.getType());
 
-      //If aIH is equal to null then the Interrupt Handler doesn't
-      //exist.  Process otherwise.  May-be add an error message or
-      //something later.
-
-      if (aIH != null)
-      {
-        aIH.handleInterrupt();
-      }
+    //If aIH is equal to null then the Interrupt Handler doesn't
+    //exist.  Process otherwise.  May-be add an error message or
+    //something later.
+    if (aIH != null)
+    {
+      aIH.handleInterrupt();
     }
   }
 
@@ -535,11 +520,12 @@ public class Kernel extends OSMessageHandler
     if (log.isDebugEnabled())
     {
       log.debug("Return Value: " + value);
+      log.debug("Context: " + myCPU.getContext());
     }
 
     // place return value onto stack
     myCPU.getContext().incStackPointer();
-    myCPU.getProcessStack().write(myCPU.getContext().getStackPointer(), value);
+    myCPU.getStack().write(myCPU.getContext().getStackPointer(), value);
   }
 
   /**
@@ -548,7 +534,7 @@ public class Kernel extends OSMessageHandler
    *
    * @throws java.io.IOException
    */
-  public void handleSystemCall() throws java.io.IOException
+  public void systemCall() throws java.io.IOException
   {
     Instruction call = myCPU.getContext().getInstructionRegister();
 
@@ -565,7 +551,7 @@ public class Kernel extends OSMessageHandler
     else if (call.isChOut())
     {
       ChOut message = new ChOut(this, getCurrentProcess().getTerminalId(),
-          (char)  myCPU.getProcessStack().read(
+          (char)  myCPU.getStack().read(
             myCPU.getContext().getStackPointer()));
       sendMessage(message);
     }
@@ -582,7 +568,7 @@ public class Kernel extends OSMessageHandler
     else if (call.isNumOut())
     {
       NumOut message = new NumOut(this, getCurrentProcess().getTerminalId(),
-        (short) myCPU.getProcessStack().read(
+        (short) myCPU.getStack().read(
           myCPU.getContext().getStackPointer()));
 
       sendMessage(message);
@@ -590,7 +576,7 @@ public class Kernel extends OSMessageHandler
     }
     else if (call.isStrOut())
     {
-      int length = myCPU.getProcessStack().read(myCPU.getContext().
+      int length = myCPU.getStack().read(myCPU.getContext().
           getStackPointer());
 
       myCPU.getContext().decStackPointer();
@@ -604,13 +590,13 @@ public class Kernel extends OSMessageHandler
       {
         ChOut message = new
             ChOut(this, getCurrentProcess().getTerminalId(),
-            (char) myCPU.getProcessStack().read(count));
+            (char) myCPU.getStack().read(count));
         sendMessage(message);
       }
     }
     else if (call.isSemaphoreCreate())
     {
-      int initValue = myCPU.getProcessStack().read(
+      int initValue = myCPU.getStack().read(
           myCPU.getContext().getStackPointer());
       myCPU.getContext().decStackPointer();
 
@@ -631,7 +617,7 @@ public class Kernel extends OSMessageHandler
     }
     else if (call.isSemaphoreClose())
     {
-      int semaphoreId = myCPU.getProcessStack().read(myCPU.getContext().
+      int semaphoreId = myCPU.getStack().read(myCPU.getContext().
           getStackPointer());
       myCPU.getContext().decStackPointer();
 
@@ -646,16 +632,16 @@ public class Kernel extends OSMessageHandler
     }
     else if (call.isSemaphoreSignal())
     {
-      int semaphoreId = myCPU.getProcessStack().read(myCPU.getContext().
+      int semaphoreId = myCPU.getStack().read(myCPU.getContext().
           getStackPointer());
       myCPU.getContext().decStackPointer();
 
       if (log.isDebugEnabled())
       {
         log.debug("Kernel SemSig got: " + semaphoreId);
-        log.debug("Kernel SemSig got: " + myCPU.getProcessStack().read(myCPU.getContext().
+        log.debug("Kernel SemSig got: " + myCPU.getStack().read(myCPU.getContext().
             getStackPointer()+1));
-        log.debug("Kernel SemSig got: " + myCPU.getProcessStack().read(myCPU.getContext().
+        log.debug("Kernel SemSig got: " + myCPU.getStack().read(myCPU.getContext().
             getStackPointer()-1));
       }
 
@@ -665,16 +651,16 @@ public class Kernel extends OSMessageHandler
     }
     else if (call.isSemaphoreWait())
     {
-      int semaphoreId = myCPU.getProcessStack().read(myCPU.getContext().
+      int semaphoreId = myCPU.getStack().read(myCPU.getContext().
           getStackPointer());
       myCPU.getContext().decStackPointer();
 
       if (log.isDebugEnabled())
       {
         log.debug("Kernel SemWait got: " + semaphoreId);
-        log.debug("Kernel SemWait got: " + myCPU.getProcessStack().read(myCPU.getContext().
+        log.debug("Kernel SemWait got: " + myCPU.getStack().read(myCPU.getContext().
             getStackPointer()+1));
-        log.debug("Kernel SemWait got: " + myCPU.getProcessStack().read(myCPU.getContext().
+        log.debug("Kernel SemWait got: " + myCPU.getStack().read(myCPU.getContext().
             getStackPointer()-1));
       }
 
@@ -685,7 +671,7 @@ public class Kernel extends OSMessageHandler
     }
     else if (call.isSharedMemoryCreate())
     {
-      int length = myCPU.getProcessStack().read(
+      int length = myCPU.getStack().read(
           myCPU.getContext().getStackPointer());
 
       myCPU.getContext().decStackPointer();
@@ -708,7 +694,7 @@ public class Kernel extends OSMessageHandler
     }
     else if (call.isSharedMemoryClose())
     {
-      int sharedMemId = myCPU.getProcessStack().read(myCPU.getContext().
+      int sharedMemId = myCPU.getStack().read(myCPU.getContext().
           getStackPointer());
 
       myCPU.getContext().decStackPointer();
@@ -719,12 +705,12 @@ public class Kernel extends OSMessageHandler
     }
     else if (call.isSharedMemoryRead())
     {
-      int offset = myCPU.getProcessStack().read(myCPU.getContext().
+      int offset = myCPU.getStack().read(myCPU.getContext().
           getStackPointer());
 
       myCPU.getContext().decStackPointer();
 
-      int sharedMemId = myCPU.getProcessStack().read(myCPU.getContext().
+      int sharedMemId = myCPU.getStack().read(myCPU.getContext().
           getStackPointer());
 
       myCPU.getContext().decStackPointer();
@@ -736,17 +722,17 @@ public class Kernel extends OSMessageHandler
     }
     else if (call.isSharedMemoryWrite())
     {
-      int newValue = myCPU.getProcessStack().read(myCPU.getContext().
+      int newValue = myCPU.getStack().read(myCPU.getContext().
           getStackPointer());
 
       myCPU.getContext().decStackPointer();
 
-      int offset = myCPU.getProcessStack().read(myCPU.getContext().
+      int offset = myCPU.getStack().read(myCPU.getContext().
           getStackPointer());
 
       myCPU.getContext().decStackPointer();
 
-      int sharedMemId = myCPU.getProcessStack().read(myCPU.getContext().
+      int sharedMemId = myCPU.getStack().read(myCPU.getContext().
           getStackPointer());
 
       SharedMemoryWriteMessage message = new SharedMemoryWriteMessage(this,
@@ -756,7 +742,7 @@ public class Kernel extends OSMessageHandler
     }
     else if (call.isSharedMemorySize())
     {
-      int sharedMemId = myCPU.getProcessStack().read(myCPU.getContext().
+      int sharedMemId = myCPU.getStack().read(myCPU.getContext().
           getStackPointer());
 
       myCPU.getContext().decStackPointer();
@@ -831,7 +817,7 @@ public class Kernel extends OSMessageHandler
    * if it is ignore<BR>
    * else update CPU ticks and do ProcessSwitch
    */
-  public void handleTimerInterrupt()
+  public void handleTimer()
   {
     if (log.isDebugEnabled())
     {
@@ -860,19 +846,17 @@ public class Kernel extends OSMessageHandler
         //programs cannot modify their own memory?
         MemoryRequest memSave = new MemoryRequest(getCurrentProcess().getPID(),
             MemoryManager.STACK_SEGMENT,
-            myCPU.getProcessStack().getSegmentSize(), myCPU.getProcessStack());
+            myCPU.getStack().getSegmentSize(), myCPU.getStack());
         WriteBytes msg = new WriteBytes(this, memSave);
         sendMessage(msg);
+
+        nullProcess();
 
         // no need to get a copy of the code as it won't change
         // Send a message to the ProcessScheduler to update old current
         // processes data structures
         RunningToReady tmpMsg = new RunningToReady(this, oldProcess);
         sendMessage(tmpMsg);
-
-        //Set the current process to nothing
-        NullProcess nullMsg = new NullProcess(this);
-        sendMessage(nullMsg);
       }
     }
   }
@@ -882,7 +866,7 @@ public class Kernel extends OSMessageHandler
    * finished execute the old process is removed, the process time calculated,
    * and a ProcessFinished message is sent.
    */
-  public void handleProcessFinishedInterrupt()
+  public void processFinished()
   {
     if (log.isDebugEnabled())
     {
@@ -899,8 +883,7 @@ public class Kernel extends OSMessageHandler
     sendMessage(tmpMsg);
 
     //Set the current process to null
-    NullProcess tmpMessage = new NullProcess(this);
-    sendMessage(tmpMessage);
+    nullProcess();
   }
 
   /**
