@@ -51,27 +51,14 @@ public class CPUPanel extends RCOSPanel
   private DefaultListModel codeListModel;
 
   /**
-   * Images used by the frame.
-   */
-  private Image images[];
-
-  /**
    * Constructor for the CPUFrame object
    *
    * @param newImages Description of Parameter
    * @param newCPUAnimator Description of Parameter
    */
-  public CPUPanel(ImageIcon[] newImages, CPUAnimator newCPUAnimator)
+  public CPUPanel(CPUAnimator newCPUAnimator)
   {
     super();
-    if (images != null)
-    {
-      images = new Image[newImages.length];
-      for (int index = 0; index < images.length; index++)
-      {
-        images[index] = newImages[index].getImage();
-      }
-    }
     cpuAnimator = newCPUAnimator;
   }
 
@@ -84,8 +71,6 @@ public class CPUPanel extends RCOSPanel
    */
   public void setupLayout(Component c)
   {
-    super.setupLayout(c);
-
     setLayout(new BorderLayout());
 
     JPanel main = new JPanel();
