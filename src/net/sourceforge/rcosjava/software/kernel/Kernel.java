@@ -362,7 +362,9 @@ public class Kernel extends OSMessageHandler
       //something later.
 
       if (aIH != null)
+      {
         aIH.handleInterrupt();
+      }
     }
   }
 

@@ -18,6 +18,22 @@ import net.sourceforge.rcosjava.software.process.RCOSProcess;
 import net.sourceforge.rcosjava.software.kernel.Kernel;
 import net.sourceforge.rcosjava.messaging.postoffices.os.OSMessageHandler;
 
+/**
+ * Process is being moved from being executed (on the CPU) to blocked (usually
+ * waiting for I/O).
+ * <P>
+ * <DT><B>History:</B><DD>
+ * 24/03/96 Created
+ * </DD><DD>
+ * 01/07/96 Uses Memory
+ * </DD><DD>
+ * 03/08/97 Moved to message system
+ * </DD></DT>
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 24th of March 1996
+ */
 public class RunningToBlocked extends UniversalMessageAdapter
 {
   private RCOSProcess myProcess;
@@ -38,4 +54,3 @@ public class RunningToBlocked extends UniversalMessageAdapter
     theElement.cpuToBlocked(myProcess.getPID());
   }
 }
-
