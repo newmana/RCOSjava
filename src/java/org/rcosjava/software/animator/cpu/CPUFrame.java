@@ -106,20 +106,20 @@ public class CPUFrame extends RCOSFrame
   public void setupLayout(Component c)
   {
     super.setupLayout(c);
-    setBackground(Color.black);
-    setForeground(Color.white);
+    setBackground(defaultBgColour);
+    setForeground(defaultFgColour);
 
     setLayout(new BorderLayout());
 
     JPanel main = new JPanel();
-    main.setBackground(Color.black);
-    main.setForeground(Color.white);
+    main.setBackground(defaultBgColour);
+    main.setForeground(defaultFgColour);
     JPanel cpu = new JPanel();
-    cpu.setBackground(Color.black);
-    cpu.setForeground(Color.white);
+    cpu.setBackground(defaultBgColour);
+    cpu.setForeground(defaultFgColour);
     JPanel close = new JPanel();
-    close.setBackground(Color.black);
-    close.setForeground(Color.white);
+    close.setBackground(defaultBgColour);
+    close.setForeground(defaultFgColour);
 
     JLabel tmpLabel;
 
@@ -136,24 +136,24 @@ public class CPUFrame extends RCOSFrame
 
     // Headings
     tmpLabel = new JLabel("Stack");
-    tmpLabel.setForeground(Color.white);
-    tmpLabel.setBackground(Color.black);
+    tmpLabel.setForeground(defaultFgColour);
+    tmpLabel.setBackground(defaultBgColour);
     tmpLabel.setFont(titleFont);
     gridBag.setConstraints(tmpLabel, constraints);
     main.add(tmpLabel);
 
     constraints.gridwidth = 2;
     tmpLabel = new JLabel("CPU");
-    tmpLabel.setForeground(Color.white);
-    tmpLabel.setBackground(Color.black);
+    tmpLabel.setForeground(defaultFgColour);
+    tmpLabel.setBackground(defaultBgColour);
     tmpLabel.setFont(titleFont);
     gridBag.setConstraints(tmpLabel, constraints);
     main.add(tmpLabel);
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     tmpLabel = new JLabel("Code");
-    tmpLabel.setForeground(Color.white);
-    tmpLabel.setBackground(Color.black);
+    tmpLabel.setForeground(defaultFgColour);
+    tmpLabel.setBackground(defaultBgColour);
     tmpLabel.setFont(titleFont);
     gridBag.setConstraints(tmpLabel, constraints);
     main.add(tmpLabel);
@@ -164,8 +164,8 @@ public class CPUFrame extends RCOSFrame
     stackListModel = new DefaultListModel();
     stackList.setVisibleRowCount(8);
     stackList.setModel(stackListModel);
-    stackList.setForeground(Color.white);
-    stackList.setBackground(Color.darkGray);
+    stackList.setForeground(defaultFgColour);
+    stackList.setBackground(listColour);
     gridBag.setConstraints(stackList, constraints);
     JScrollPane stackListPane = new JScrollPane(stackList);
     stackListPane.setMinimumSize(new Dimension(100, 200));
@@ -177,39 +177,39 @@ public class CPUFrame extends RCOSFrame
     titleFont = new Font("TimesRoman", Font.BOLD, 14);
 
     IRtitle = new JLabel("Instruction Register", JLabel.CENTER);
-    IRtitle.setForeground(Color.white);
-    IRtitle.setBackground(Color.black);
+    IRtitle.setForeground(defaultFgColour);
+    IRtitle.setBackground(defaultBgColour);
     IRtitle.setFont(titleFont);
     IRvalue = new JLabel("None", JLabel.CENTER);
-    IRvalue.setForeground(Color.white);
-    IRvalue.setBackground(Color.black);
+    IRvalue.setForeground(defaultFgColour);
+    IRvalue.setBackground(defaultBgColour);
     IRvalue.setFont(defaultFont);
 
     PCtitle = new JLabel("Program Counter", JLabel.CENTER);
-    PCtitle.setForeground(Color.white);
-    PCtitle.setBackground(Color.black);
+    PCtitle.setForeground(defaultFgColour);
+    PCtitle.setBackground(defaultBgColour);
     PCtitle.setFont(titleFont);
     PCvalue = new JLabel("0", JLabel.CENTER);
-    PCvalue.setForeground(Color.white);
-    PCvalue.setBackground(Color.black);
+    PCvalue.setForeground(defaultFgColour);
+    PCvalue.setBackground(defaultBgColour);
     PCvalue.setFont(defaultFont);
 
     SPtitle = new JLabel("Stack Pointer", JLabel.CENTER);
-    SPtitle.setForeground(Color.white);
-    SPtitle.setBackground(Color.black);
+    SPtitle.setForeground(defaultFgColour);
+    SPtitle.setBackground(defaultBgColour);
     SPtitle.setFont(titleFont);
     SPvalue = new JLabel("0", JLabel.CENTER);
-    SPvalue.setForeground(Color.white);
-    SPvalue.setBackground(Color.black);
+    SPvalue.setForeground(defaultFgColour);
+    SPvalue.setBackground(defaultBgColour);
     SPvalue.setFont(defaultFont);
 
     BPtitle = new JLabel("Base Pointer", JLabel.CENTER);
-    BPtitle.setForeground(Color.white);
-    BPtitle.setBackground(Color.black);
+    BPtitle.setForeground(defaultFgColour);
+    BPtitle.setBackground(defaultBgColour);
     BPtitle.setFont(titleFont);
     BPvalue = new JLabel("0", JLabel.CENTER);
-    BPvalue.setForeground(Color.white);
-    BPvalue.setBackground(Color.black);
+    BPvalue.setForeground(defaultFgColour);
+    BPvalue.setBackground(defaultBgColour);
     BPvalue.setFont(defaultFont);
 
     cpu.add(IRtitle);
@@ -234,8 +234,8 @@ public class CPUFrame extends RCOSFrame
     codeListModel = new DefaultListModel();
     codeList.setModel(codeListModel);
     codeList.setVisibleRowCount(8);
-    codeList.setForeground(Color.white);
-    codeList.setBackground(Color.darkGray);
+    codeList.setForeground(defaultFgColour);
+    codeList.setBackground(listColour);
     gridBag.setConstraints(codeList, constraints);
     JScrollPane codeListPane = new JScrollPane(codeList);
     codeListPane.setMinimumSize(new Dimension(100, 200));
