@@ -52,5 +52,14 @@ public class NullProcess extends UniversalMessageAdapter
   {
     theElement.screenReset();
   }
+
+  /**
+   * A good way to fill up the hard drive is to leave messaging on with no
+   * process running with the set to true.  Set to false to prevent this.
+   */
+  public boolean undoableMessage()
+  {
+    return false;
+  }
 }
 
