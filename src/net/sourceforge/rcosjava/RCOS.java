@@ -199,33 +199,35 @@ public class RCOS extends java.applet.Applet implements Runnable
    */
   public void getImagesAndSound()
   {
-    clips[0] = getAudioClip(docBaseURL, "Software/animator/audio/start.au");
+    String rootDir = "net/sourceforge/rcosjava/software/animator";
+
+    clips[0] = getAudioClip(docBaseURL, rootDir + "/audio/start.au");
 
     MediaTracker tracker = new MediaTracker(this);
 
     for (int count = 0; count < numberPeople; count++)
     {
-      imgAbout[count] = getImage(docBaseURL, "Software/animator/images/p" +
+      imgAbout[count] = getImage(docBaseURL, rootDir + "/images/p" +
         count + ".jpg");
       tracker.addImage(imgAbout[count],0);
     }
 
     for (int count = 0; count < numberButtons; count++)
     {
-      imgUpButtons[count] = getImage(docBaseURL, "Software/animator/images/b"
+      imgUpButtons[count] = getImage(docBaseURL, rootDir + "/images/b"
         + count + "up.jpg");
-      imgDownButtons[count] = getImage(docBaseURL, "Software/animator/images/b"
+      imgDownButtons[count] = getImage(docBaseURL, rootDir + "/images/b"
         + count + "down.jpg");
       tracker.addImage(imgUpButtons[count],1);
       tracker.addImage(imgDownButtons[count],2);
     }
 
-    imgTerminal[0] = getImage(docBaseURL, "Software/animator/images/termon.jpg");
-    imgTerminal[1] = getImage(docBaseURL, "Software/animator/images/termoff.jpg");
-    imgProcess[0] = getImage(docBaseURL, "Software/animator/images/process1.gif");
-    imgProcess[1] = getImage(docBaseURL, "Software/animator/images/process2.gif");
-    imgProcess[2] = getImage(docBaseURL, "Software/animator/images/rcoscpu.jpg");
-    imgIPC[0] = getImage(docBaseURL, "Software/animator/images/memory.jpg");
+    imgTerminal[0] = getImage(docBaseURL, rootDir + "/images/termon.jpg");
+    imgTerminal[1] = getImage(docBaseURL, rootDir + "/images/termoff.jpg");
+    imgProcess[0] = getImage(docBaseURL, rootDir + "/images/process1.gif");
+    imgProcess[1] = getImage(docBaseURL, rootDir + "/images/process2.gif");
+    imgProcess[2] = getImage(docBaseURL, rootDir + "/images/rcoscpu.jpg");
+    imgIPC[0] = getImage(docBaseURL, rootDir + "/images/memory.jpg");
 
     tracker.addImage(imgTerminal[0],3);
     tracker.addImage(imgTerminal[1],3);
@@ -242,7 +244,7 @@ public class RCOS extends java.applet.Applet implements Runnable
     {
       System.out.println("Image Loading Failed!");
       updateStatusBar("Images failed to load from " + docBase +
-        "Software/animator/images/");
+        rootDir + "/images/");
     }
     imgTerminal[2] = imgUpButtons[1];
     imgTerminal[3] = imgDownButtons[1];
