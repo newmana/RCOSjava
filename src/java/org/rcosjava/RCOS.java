@@ -247,7 +247,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   /**
    * Images for terminal animator.
    */
-  private ImageIcon terminalImages[] = new ImageIcon[2];
+  private static ImageIcon terminalImages[] = new ImageIcon[2];
 
   /**
    * Images for process scheduler.
@@ -323,8 +323,11 @@ public class RCOS extends javax.swing.JApplet implements Runnable
       port = 4242;
     }
 
+    // Set up XML serializer
     fr.dyade.koala.xml.koml.KOMLConstants.KOML_DTD = getCodeBase().toString() +
         "pll2/koml12.dtd";
+    fr.dyade.koala.xml.koml.KOMLConstants.XML_PROPERTIES =
+        getCodeBase().toString() + "XML.properties";
   }
 
   /**
@@ -622,12 +625,12 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 //    list.add(mmAnimator);
 
     // Add operating system
-    list.add(theKernel);
-    list.add(theTerminalManager);
-    list.add(theProcessScheduler);
-    list.add(theIPC);
-    list.add(theMemoryManager);
-    list.add(theProgramManager);
+//    list.add(theKernel);
+//    list.add(theTerminalManager);
+//    list.add(theProcessScheduler);
+//    list.add(theIPC);
+//    list.add(theMemoryManager);
+//    list.add(theProgramManager);
 
     return list;
   }
@@ -657,6 +660,16 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 //    theIPC = (IPC) rcosComponents.get(11);
 //    theMemoryManager = (MemoryManager) rcosComponents.get(12);
 //    theProgramManager = (ProgramManager) rcosComponents.get(13);
+  }
+
+  /**
+   * Returns the terminal images.
+   *
+   * @return the terminal images.
+   */
+  public static ImageIcon[] getTerminalImages()
+  {
+    return terminalImages;
   }
 
   /**

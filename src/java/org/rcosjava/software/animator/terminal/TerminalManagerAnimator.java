@@ -3,6 +3,8 @@ package org.rcosjava.software.animator.terminal;
 import java.applet.*;
 import java.awt.*;
 import javax.swing.ImageIcon;
+import javax.swing.JPanel;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -12,6 +14,7 @@ import org.rcosjava.messaging.messages.universal.TerminalToggle;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.software.animator.RCOSAnimator;
 import org.rcosjava.software.animator.RCOSPanel;
+import org.rcosjava.RCOS;
 
 /**
  * Terminal Manager Animator receives responses back from the operating system
@@ -82,12 +85,15 @@ public class TerminalManagerAnimator extends RCOSAnimator
    * @param noTerminalRows number of rows of terminals to display
    * @param images the images to use for process and buttons.
    */
-  public TerminalManagerAnimator(AnimatorOffice postOffice, ImageIcon[] images,
-      int newNoTerminals, int newNoTerminalColumns, int newNoTerminalRows)
+  public TerminalManagerAnimator(AnimatorOffice postOffice,
+      ImageIcon[] newImages, int newNoTerminals, int newNoTerminalColumns,
+      int newNoTerminalRows)
   {
     super(MESSENGING_ID, postOffice);
 
-    noTerminals = newNoTerminals + 1;
+    images = newImages;
+
+    noTerminals = newNoTerminals;
     noTerminalColumns = newNoTerminalColumns;
     noTerminalRows = newNoTerminalRows;
 
@@ -234,41 +240,77 @@ public class TerminalManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Handle the creation of non-serializable components.
+   * Handle the serialization of the contents.
+   */
+  private void writeObject(ObjectOutputStream os) throws IOException
+  {
+    // Columns
+    os.writeInt(noTerminalColumns);
+    os.writeInt(noTerminalRows);
+    os.writeInt(noTerminals);
+
+    // Terminal On
+    for (int index = 0; index < noTerminals; index++)
+    {
+      os.writeBoolean(terminalsOn[index]);
+    }
+
+    // Terminal Front
+    for (int index = 0; index < noTerminals; index++)
+    {
+      os.writeBoolean(terminalsFront[index]);
+    }
+  }
+
+  /**
+   * Handle deserialization of the contents.  Ensures non-serializable
+   * components correctly created.
    *
    * @param is stream that is being read.
    */
   private void readObject(ObjectInputStream is) throws IOException,
       ClassNotFoundException
   {
-    // Deserialize the document
-    is.defaultReadObject();
+    // Columns
+    noTerminalColumns = is.readInt();
+    noTerminalRows = is.readInt();
+    noTerminals = is.readInt();
 
-    // Create new connection
+    terminalsFront = new boolean[noTerminals];
+    terminalsOn = new boolean[noTerminals];
+
+    images = RCOS.getTerminalImages();
     panel = new TerminalManagerPanel(images, noTerminals, noTerminalColumns,
         noTerminalRows, this);
+    panel.setupLayout(new JPanel());
 
-    // Restore the state of the terminals
-    for (int terminals = 0; terminals < noTerminals; terminals++)
+    // Terminal On
+    for (int index = 1; index < noTerminals; index++)
     {
-      // Restore terminals on state
-      if (terminalsFront[terminals])
-      {
-        panel.terminalOn(terminals);
-      }
-      else
-      {
-        panel.terminalOff(terminals);
-      }
+      terminalsOn[index] = is.readBoolean();
 
-      // Restore terminal front state.
-      if (terminalsFront[terminals])
+      if (terminalsOn[index])
       {
-        panel.terminalFront(terminals);
+        terminalOn(index);
       }
       else
       {
-        panel.terminalBack(terminals);
+        terminalOff(index);
+      }
+    }
+
+    // Terminal Front
+    for (int index = 1; index < noTerminals; index++)
+    {
+      terminalsFront[index] = is.readBoolean();
+
+      if (terminalsFront[index])
+      {
+        terminalFront(index);
+      }
+      else
+      {
+        terminalBack(index);
       }
     }
   }
