@@ -270,7 +270,15 @@ public class StatementCompiler extends DepthFirstAdapter
     try
     {
       String varName = node.getVarname().toString().trim();
-      currentSymbol = table.getSymbol(varName, Compiler.getLevel());
+
+      if (isArray(varName))
+      {
+        currentSymbol = table.getArray(varName, Compiler.getLevel());
+      }
+      else
+      {
+        currentSymbol = table.getSymbol(varName, Compiler.getLevel());
+      }
 
       PRhs rhs = node.getRhs();
       rhs.apply(this);
