@@ -161,7 +161,7 @@ public class IPC extends OSMessageHandler
   {
     if (log.isInfoEnabled())
     {
-      log.info("Opening semaphore: " + semaphoreName + " pid " + pid);
+      log.info("Opening semaphore: " + semaphoreName + " pid: " + pid);
     }
 
     // Check that the semaphore exists - if it does then open it
@@ -177,7 +177,7 @@ public class IPC extends OSMessageHandler
 
       if (log.isInfoEnabled())
       {
-        log.info("Opened semaphore: " + semaphoreName + " id " + semId);
+        log.info("Opened semaphore: " + semaphoreName + " sem id: " + semId);
       }
 
       // Done.  Now we return a message with the id?
@@ -255,6 +255,11 @@ public class IPC extends OSMessageHandler
    */
   public void sempahoreSignal(int semaphoreId, int pid)
   {
+    if (log.isInfoEnabled())
+    {
+      log.info("Waiting semaphore: " + semaphoreId + " pid " + pid);
+    }
+
     if (getSemaphoreTable().isMember(semaphoreId))
     {
       // Get the semaphore and find the next process that is attached to
@@ -311,6 +316,10 @@ public class IPC extends OSMessageHandler
       Semaphore existingSemaphore = (Semaphore)
           getSemaphoreTable().peek(semaphoreId);
       int noConnectedProcesses = existingSemaphore.close(pid);
+      if (log.isDebugEnabled())
+      {
+        log.debug("Closing semaphore: " + noConnectedProcesses);
+      }
 
       if (noConnectedProcesses == 0)
       {
@@ -638,7 +647,7 @@ public class IPC extends OSMessageHandler
    *
    * @return The SemaphoreTable value
    */
-  private synchronized SemaphoreQueue getSemaphoreTable()
+  private SemaphoreQueue getSemaphoreTable()
   {
     return semaphoreTable;
   }

@@ -571,7 +571,11 @@ public class Kernel extends OSMessageHandler
     }
     else if (call.isNumIn())
     {
-      System.err.println("NUM IN: " + getCurrentProcess().getTerminalId());
+      if (log.isDebugEnabled())
+      {
+        log.debug("Handle System Call NUM IN: " +
+            getCurrentProcess().getTerminalId());
+      }
       NumIn message = new NumIn(this, getCurrentProcess().getTerminalId());
       sendMessage(message);
     }
@@ -630,7 +634,12 @@ public class Kernel extends OSMessageHandler
     {
       int semaphoreId = myCPU.getProcessStack().read(myCPU.getContext().
           getStackPointer());
-      System.out.println("Kernel SemClose got: " + semaphoreId);
+
+      if (log.isDebugEnabled())
+      {
+        log.debug("Kernel SemClose got: " + semaphoreId + "," + getCurrentProcess().getPID());
+      }
+
       myCPU.getContext().decStackPointer();
 
       SemaphoreClose message = new SemaphoreClose(
@@ -643,11 +652,15 @@ public class Kernel extends OSMessageHandler
       int semaphoreId = myCPU.getProcessStack().read(myCPU.getContext().
           getStackPointer());
       myCPU.getContext().decStackPointer();
-      System.err.println("Kernel SemSig got: " + semaphoreId);
-      System.err.println("Kernel SemSig got: " + myCPU.getProcessStack().read(myCPU.getContext().
-          getStackPointer()+1));
-      System.err.println("Kernel SemSig got: " + myCPU.getProcessStack().read(myCPU.getContext().
-          getStackPointer()-1));
+
+      if (log.isDebugEnabled())
+      {
+        log.debug("Kernel SemSig got: " + semaphoreId);
+        log.debug("Kernel SemSig got: " + myCPU.getProcessStack().read(myCPU.getContext().
+            getStackPointer()+1));
+        log.debug("Kernel SemSig got: " + myCPU.getProcessStack().read(myCPU.getContext().
+            getStackPointer()-1));
+      }
 
       SemaphoreSignal message = new SemaphoreSignal(
           this, semaphoreId, getCurrentProcess().getPID());
@@ -659,11 +672,15 @@ public class Kernel extends OSMessageHandler
       int semaphoreId = myCPU.getProcessStack().read(myCPU.getContext().
           getStackPointer());
       myCPU.getContext().decStackPointer();
-      System.err.println("Kernel SemWait got: " + semaphoreId);
-      System.err.println("Kernel SemWait got: " + myCPU.getProcessStack().read(myCPU.getContext().
-          getStackPointer()+1));
-      System.err.println("Kernel SemWait got: " + myCPU.getProcessStack().read(myCPU.getContext().
-          getStackPointer()-1));
+
+      if (log.isDebugEnabled())
+      {
+        log.debug("Kernel SemWait got: " + semaphoreId);
+        log.debug("Kernel SemWait got: " + myCPU.getProcessStack().read(myCPU.getContext().
+            getStackPointer()+1));
+        log.debug("Kernel SemWait got: " + myCPU.getProcessStack().read(myCPU.getContext().
+            getStackPointer()-1));
+      }
 
       SemaphoreWait message = new SemaphoreWait(
           this, semaphoreId, getCurrentProcess().getPID());
@@ -868,7 +885,7 @@ public class Kernel extends OSMessageHandler
     if (log.isDebugEnabled())
     {
       log.debug("Handling Process Finished Interrupt");
-      log.debug("Current Process" + getCurrentProcess().getPID());
+      log.debug("Current Process PID: " + getCurrentProcess().getPID());
     }
 
     //Get the current process and add CPU ticks spent.
