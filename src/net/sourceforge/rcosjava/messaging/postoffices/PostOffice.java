@@ -1,8 +1,7 @@
 package net.sourceforge.rcosjava.messaging.postoffices;
 
-import java.util.Enumeration;
-import java.util.Vector;
 import net.sourceforge.rcosjava.messaging.messages.MessageAdapter;
+import java.util.*;
 
 /**
  * Provide message handling centre of operations.
@@ -16,7 +15,7 @@ public abstract class PostOffice extends SimpleMessageHandler
   /**
    * The registered post offices.
    */
-  protected Vector postOffices = new Vector(1, 1);
+  protected ArrayList postOffices = new ArrayList(1);
 
   /**
    * The type of post office (name of the class).
@@ -51,7 +50,7 @@ public abstract class PostOffice extends SimpleMessageHandler
    */
   public PostOffice getPostOffice(int index)
   {
-    return ((PostOffice) postOffices.elementAt(index));
+    return ((PostOffice) postOffices.get(index));
   }
 
   /**
@@ -61,7 +60,7 @@ public abstract class PostOffice extends SimpleMessageHandler
    */
   public void addPostOffice(PostOffice newPostOffice)
   {
-    postOffices.addElement(newPostOffice);
+    postOffices.add(newPostOffice);
   }
 
   /**

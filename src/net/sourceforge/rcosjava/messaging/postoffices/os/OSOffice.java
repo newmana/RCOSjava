@@ -35,7 +35,7 @@ public class OSOffice extends PostOffice
    */
   private FIFOQueue postOfficeMessages = new FIFOQueue(5,1);
 
-  private Vector myPostOffices = postOffices;
+  private ArrayList myPostOffices = postOffices;
 
   /**
    * To be done

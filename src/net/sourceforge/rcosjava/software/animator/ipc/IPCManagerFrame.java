@@ -43,7 +43,7 @@ public class IPCManagerFrame extends RCOSFrame
   private Component myComponent;
   private int windowWidth, windowHeight;
   private MemoryGraphic[] memoryGraphics = new MemoryGraphic[20];
-  private Hashtable semaphoreList;
+  private HashMap semaphoreList;
   private Choice shmOption;
   private RCOSList shmList;
   private TextField semValue;
@@ -59,7 +59,7 @@ public class IPCManagerFrame extends RCOSFrame
     windowWidth = x;
     windowHeight = y;
     myIPCManagerAnimator = thisIPCManager;
-    semaphoreList = new Hashtable(5);
+    semaphoreList = new HashMap(5);
   }
 
   public void addNotify()

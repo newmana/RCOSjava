@@ -34,6 +34,9 @@ import java.util.*;
  */
 public class AnimatorOffice extends PostOffice
 {
+  /**
+   * The operating system post office to send all of the message.
+   */
   private OSOffice theOSPostOffice;
 
   /**
@@ -46,7 +49,10 @@ public class AnimatorOffice extends PostOffice
    */
   private FIFOQueue postOfficeMessages = new FIFOQueue(5,1);
 
-  private Vector myPostOffices = postOffices;
+  /**
+   * List of other post offices to send it to.
+   */
+  private ArrayList myPostOffices = postOffices;
 
   /**
    * Attach animator to another post office.

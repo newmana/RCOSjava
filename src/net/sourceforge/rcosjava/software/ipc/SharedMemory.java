@@ -1,27 +1,25 @@
-// ************************************************************
-// FILE:    SharedMemory.java
-// PURPOSE: Base Shared Memory class - uses Memory class
-//          as the storage type.
-// AUTHOR:  Bruce Jamieson
-// MODIFIED: Andrew Newman
-// HISTORY: 30/03/96  Completed.
-//          11/08/98  Improved implementation. AN
-//          13/08/98  Write return old value on success. AN
-// ************************************************************
-
-
 package net.sourceforge.rcosjava.software.ipc;
 
-import java.util.Hashtable;
-import java.util.Vector;
-import java.lang.String;
+import java.util.*;
 import net.sourceforge.rcosjava.hardware.memory.Memory;
 
 import net.sourceforge.rcosjava.software.memory.*;
 
-// Basic Shared Memory class - Belongs to the Q&N school..
-// BJJ
-
+/**
+ * Uses Memory class as the storage type.
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 11/08/98  Improved implementation. AN
+ * </DD><DD>
+ * 13/08/98  Write return old value on success. AN
+ * </DD></DT>
+ * <P>
+ * @author Bruce Jamieson.
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 30th March 1996
+ */
 public class SharedMemory
 {
   private int theSize = -1;

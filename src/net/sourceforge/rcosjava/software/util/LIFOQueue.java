@@ -56,6 +56,6 @@ public class LIFOQueue extends BaseQueue
    */
   public void insert(Object theObject)
   {
-    insertElementAt(theObject, itemCount());
+    add(itemCount(), theObject);
   }
 }

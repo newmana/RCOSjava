@@ -45,8 +45,8 @@ public class IPC extends OSMessageHandler
   private int semaphoreCount = 0;
   // Two hashtables with different indexes - no restrictions
   // on number of segments etc.
-  private Hashtable sharedMemoryTable = new Hashtable();
-  private Hashtable sharedMemoryIdTable = new Hashtable();
+  private HashMap sharedMemoryTable = new HashMap();
+  private HashMap sharedMemoryIdTable = new HashMap();
   private int shmCount = 0;
   private static final String MESSENGING_ID = "IPC";
 
@@ -229,7 +229,7 @@ public class IPC extends OSMessageHandler
       {
         // Ok - That was the last connected PID
         // Remove sempahore
-        getSemaphoreTable().removeElement(existingSemaphore);
+        getSemaphoreTable().remove(existingSemaphore);
       }
 
       // Default Message Back
@@ -425,10 +425,10 @@ public class IPC extends OSMessageHandler
    */
   public void deallocateMemory(int pid)
   {
-    Enumeration tmpEnum = getSemaphoreTable().elements();
-    while (tmpEnum.hasMoreElements())
+    Iterator tmpIter = getSemaphoreTable().iterator();
+    while (tmpIter.hasNext())
     {
-      Semaphore existingSemaphore = (Semaphore) tmpEnum.nextElement();
+      Semaphore existingSemaphore = (Semaphore) tmpIter.next();
       if (existingSemaphore.close(pid) == 0)
       {
         getSemaphoreTable().remove(existingSemaphore);

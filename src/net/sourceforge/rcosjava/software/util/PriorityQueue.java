@@ -68,24 +68,24 @@ public class PriorityQueue extends BaseQueue
     //priority.
     if (queueEmpty())
     {
-      insertElementAt(theObject, 0);
+      add(0,theObject);
     }
     else
     {
       if (theObject instanceof java.lang.Comparable)
       {
         Comparable compObject = (Comparable) theObject;
-        if (compObject.compareTo(elementAt(position)) == 0)
-          insertElementAt(theObject, 0);
+        if (compObject.compareTo(get(position)) == 0)
+          add(0, theObject);
         else
         {
-          while (compObject.compareTo(elementAt(position)) > 0)
+          while (compObject.compareTo(get(position)) > 0)
           {
             position++;
             if (position == size())
               break;
           }
-          insertElementAt(theObject, position);
+          add(position, theObject);
         }
       }
     }

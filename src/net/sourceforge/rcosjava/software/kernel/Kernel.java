@@ -81,7 +81,7 @@ public class Kernel extends OSMessageHandler
   private int timerInterrupts = 0;
   private int timeProcessOn;
   private CPU myCPU;
-  private Hashtable interruptHandlers = new Hashtable();
+  private HashMap interruptHandlers = new HashMap();
   private Schedule scheduleMessage = new Schedule(this);
   private RCOSProcess currentProcess;
   private boolean runningProcess;

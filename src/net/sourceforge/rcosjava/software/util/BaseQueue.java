@@ -12,7 +12,7 @@ import java.util.*;
  * @version 1.00 $Date$
  * @created 2nd February 1996
  */
-public class BaseQueue extends Vector implements Queue
+public class BaseQueue extends ArrayList implements Queue
 {
   /**
    * This is an integer that points to an element in the queue.
@@ -39,7 +39,7 @@ public class BaseQueue extends Vector implements Queue
    */
   protected BaseQueue(int initialCapacity, int capacityIncrement)
   {
-    super(initialCapacity, capacityIncrement);
+    super(initialCapacity);
     pointer = 0;
   }
 
@@ -69,7 +69,7 @@ public class BaseQueue extends Vector implements Queue
    */
   public void insert(Object theObject)
   {
-    insertElementAt(theObject, 0);
+    add(0, theObject);
   }
 
   /**
@@ -82,9 +82,9 @@ public class BaseQueue extends Vector implements Queue
   {
     if (queueEmpty()) return null;
 
-    Object theObject = elementAt(itemCount()-1);
+    Object theObject = get(itemCount()-1);
 
-    removeElementAt(itemCount()-1);
+    remove(itemCount()-1);
     return theObject;
   }
 
@@ -99,9 +99,9 @@ public class BaseQueue extends Vector implements Queue
   {
     if (queueEmpty()) return null;
 
-    Object theObject = elementAt(pointer);
+    Object theObject = get(pointer);
 
-    removeElementAt(pointer);
+    remove(pointer);
     return theObject;
   }
 
@@ -155,7 +155,7 @@ public class BaseQueue extends Vector implements Queue
   {
     if (queueEmpty())
       return null;
-    return elementAt(index);
+    return get(index);
   }
 
   /**
@@ -169,7 +169,7 @@ public class BaseQueue extends Vector implements Queue
   {
     if (queueEmpty())
       return null;
-    return elementAt(pointer);
+    return get(pointer);
   }
 
   /**

@@ -21,14 +21,14 @@ import net.sourceforge.rcosjava.messaging.messages.os.OSMessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.os.FileSystemRequest;
 import net.sourceforge.rcosjava.software.util.*;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 public class FileSystemManager extends OSMessageHandler
 {
   private IndexedList cvFIDTable;
   private IndexedList cvRequestTable;
-  private Hashtable cvFileSystems;  // Indexed on FStype
-  private Hashtable cvMountTable;   // indexed on Mount Point
+  private HashMap cvFileSystems;  // Indexed on FStype
+  private HashMap cvMountTable;   // indexed on Mount Point
 
   //public final static String F_REGISTER = "F_REGISTER";
   //public final static String F_MOUNT = "F_MOUNT";
@@ -47,8 +47,8 @@ public class FileSystemManager extends OSMessageHandler
     super(MESSENGING_ID, myPO);
     cvFIDTable = new IndexedList(100, 10);
     cvRequestTable = new IndexedList(100, 10);
-    cvFileSystems = new Hashtable(20);
-    cvMountTable = new Hashtable(20);
+    cvFileSystems = new HashMap(20);
+    cvMountTable = new HashMap(20);
   }
 
   // Registers and dynamically creates a file system with the specified FS type.

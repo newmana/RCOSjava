@@ -1,8 +1,6 @@
 package net.sourceforge.rcosjava.software.ipc;
 
-import java.util.Hashtable;
-import java.util.Vector;
-import java.lang.String;
+import java.util.*;
 import net.sourceforge.rcosjava.software.memory.*;
 import net.sourceforge.rcosjava.software.util.FIFOQueue;
 
@@ -47,7 +45,7 @@ public class Semaphore
   /**
    * List of processes using the semaphore
    */
-  private Vector connectedProcesses = new Vector();
+  private ArrayList connectedProcesses = new ArrayList();
 
   /**
    * List of process blocked/waiting.
@@ -104,8 +102,7 @@ public class Semaphore
    */
   public void open(int pid)
   {
-    Integer newPID = new Integer(pid);
-    connectedProcesses.addElement(newPID);
+    connectedProcesses.get(pid);
   }
 
   /**
@@ -174,7 +171,7 @@ public class Semaphore
   public int close(int pid)
   {
     Integer oldPID = new Integer(pid);
-    connectedProcesses.removeElement(oldPID);
+    connectedProcesses.remove(oldPID);
     // IF there are no connections open to the sem, then the
     // sem should die..
     // Do this by returning the number connected

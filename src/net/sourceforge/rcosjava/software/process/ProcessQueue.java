@@ -99,7 +99,7 @@ public class ProcessQueue
    */
   public void removeAllProcesses()
   {
-    processes.removeAllElements();
+    processes.clear();
   }
 
   /**
