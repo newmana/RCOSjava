@@ -65,4 +65,3 @@ public class ProcessSwitch extends UniversalMessageAdapter
     theElement.readyToCPU(process);
   }
 }
-
