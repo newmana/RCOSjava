@@ -34,8 +34,7 @@ public class TerminalInterruptHandler extends InterruptHandler
    */
   public void handleInterrupt()
   {
-    KeyPress message = new KeyPress(this, null);
-
+    KeyPress message = new KeyPress(this);
     sendMessage(message);
   }
 }
