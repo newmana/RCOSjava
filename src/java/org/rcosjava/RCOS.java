@@ -2,14 +2,14 @@ package org.rcosjava;
 
 import java.applet.*;
 import java.awt.*;
-import javax.swing.*;
 import java.applet.AppletContext;
 import java.awt.event.*;
 import java.io.*;
-
 import java.lang.reflect.Method;
 import java.net.*;
 import java.util.*;
+import javax.swing.*;
+
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.messaging.postoffices.os.OSOffice;
 import org.rcosjava.messaging.postoffices.universal.UniversalMessagePlayer;
