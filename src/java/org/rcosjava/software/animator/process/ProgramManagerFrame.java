@@ -101,9 +101,10 @@ public class ProgramManagerFrame extends RCOSFrame
   }
 
   /**
-   * Sets the Visible attribute of the ProgramManagerFrame object
+   * Makes the frame visible and resets the file name and updates the directory
+   * and file lists.
    *
-   * @param visibility The new Visible value
+   * @param visibility whether to make it visible or not.
    */
   public void setVisible(boolean visibility)
   {
@@ -116,7 +117,11 @@ public class ProgramManagerFrame extends RCOSFrame
   }
 
   /**
-   * Description of the Method
+   * Sets up the layout for the whole program manager window. It creates three
+   * panels.  It puts adds the labels and windows for the directories and
+   * filenames available.  It also has a filename and terminal option panel
+   * which it also adds to the main panel. This is then added to the content
+   * panel to the center area and the bottom (south) contains the Close button.
    *
    * @param c Description of Parameter
    */
