@@ -169,6 +169,9 @@ public class UniversalMessageRecorder extends OSMessageHandler
     myClient.createRecDir(java.io.File.separatorChar + recordingName);
     messagesRecorded = 0;
     myClient.closeConnection();
+
+    // Save the current state to disk
+    saveMessage(org.rcosjava.RCOS.getRCOSComponents());
   }
 
   /**

@@ -1,7 +1,10 @@
 package org.rcosjava;
 
 import java.applet.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.applet.AppletContext;
 import java.awt.event.*;
 import java.io.*;
@@ -104,11 +107,6 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   private static volatile boolean running = false;
 
   /**
-   * URL to access the help system
-   */
-  private static URL helpURL;
-
-  /**
    * Process scheduler animator object.
    */
   private static ProcessSchedulerAnimator psAnimator;
@@ -149,11 +147,6 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   private static MultimediaAnimator mmAnimator;
 
   /**
-   * Overview animator object.
-   */
-  private static Overview overviewAnimator;
-
-  /**
    * About animator object.
    */
   private static AboutAnimator aboutAnimator;
@@ -167,11 +160,6 @@ public class RCOS extends javax.swing.JApplet implements Runnable
    * Process scheduler animator object.
    */
   private static ProcessManagerAnimator pcmAnimator;
-
-  /**
-   * Status bar for messages.
-   */
-  private static JTextArea statusBar;
 
   /**
    * Base domain of location of applet.
@@ -219,32 +207,32 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   /**
    * Terminal manager operating system object.
    */
-  private TerminalManager theTerminalManager;
+  private static TerminalManager theTerminalManager;
 
   /**
    * Kernel operating system object.
    */
-  private Kernel theKernel;
+  private static Kernel theKernel;
 
   /**
    * Memory manager operating system object.
    */
-  private MemoryManager theMemoryManager;
+  private static MemoryManager theMemoryManager;
 
   /**
    * Program manager operating system object.
    */
-  private ProgramManager theProgramManager;
+  private static ProgramManager theProgramManager;
 
   /**
    * Process scheduler operating system object.
    */
-  private ProcessScheduler theProcessScheduler;
+  private static ProcessScheduler theProcessScheduler;
 
   /**
    * IPC manager operating system object.
    */
-  private IPC theIPC;
+  private static IPC theIPC;
 
   /**
    * Main kernel thread.
@@ -284,17 +272,6 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   public static boolean isRunning()
   {
     return running;
-  }
-
-  /**
-   * The GUI contains a status bar that shows any system messages. This adds a
-   * new message to it.
-   *
-   * @param newMessage new message to add to the status bar.
-   */
-  public static void updateStatusBar(String newMessage)
-  {
-    statusBar.insert(newMessage + "\n", 0);
   }
 
   /**
@@ -348,7 +325,6 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 
     fr.dyade.koala.xml.koml.KOMLConstants.KOML_DTD = getCodeBase().toString() +
         "pll2/koml12.dtd";
-    //helpURLStr = getClass().getResource("/Help/index.html").toString();
   }
 
   /**
@@ -468,9 +444,9 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 
     ipcAnimator = new IPCManagerAnimator(animatorPostOffice, ipcImages);
 
-    cpuAnimator = new CPUAnimator(animatorPostOffice, null);
+    cpuAnimator = new CPUAnimator(animatorPostOffice);
 
-    pmAnimator = new ProgramManagerAnimator(animatorPostOffice, null);
+    pmAnimator = new ProgramManagerAnimator(animatorPostOffice);
 
     pcmAnimator = new ProcessManagerAnimator(animatorPostOffice, this);
 
@@ -622,6 +598,65 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     {
       kernelThread = null;
     }
+  }
+
+  /**
+   * Returns a list of all the current animators and operating system
+   * components.
+   *
+   * @return a list of all the current animators and operation system
+   *   components.
+   */
+  public static List getRCOSComponents()
+  {
+    ArrayList list = new ArrayList();
+
+    // Add animators
+    list.add(tmAnimator);
+    list.add(psAnimator);
+    list.add(memoryAnimator);
+    list.add(ipcAnimator);
+    list.add(cpuAnimator);
+    list.add(pmAnimator);
+    list.add(pcmAnimator);
+    list.add(mmAnimator);
+
+    // Add operating system
+    list.add(theKernel);
+    list.add(theTerminalManager);
+    list.add(theProcessScheduler);
+    list.add(theIPC);
+    list.add(theMemoryManager);
+    list.add(theProgramManager);
+
+    return list;
+  }
+
+  /**
+   * Sets all of the RCOS components.  Order is presumed to be the same as
+   * defined in getRCOSComponents.
+   *
+   * @param rcosComponents the list of RCOS components.
+   */
+  public static void setRCOSComponents(List rcosComponents)
+  {
+    // Load animators.
+    tmAnimator = (TerminalManagerAnimator) rcosComponents.get(0);
+    psAnimator = (ProcessSchedulerAnimator) rcosComponents.get(1);
+    memoryAnimator = (MemoryManagerAnimator) rcosComponents.get(2);
+    ipcAnimator = (IPCManagerAnimator) rcosComponents.get(3);
+    cpuAnimator = (CPUAnimator) rcosComponents.get(4);
+    pmAnimator = (ProgramManagerAnimator) rcosComponents.get(5);
+    pcmAnimator = (ProcessManagerAnimator) rcosComponents.get(6);
+    mmAnimator = (MultimediaAnimator) rcosComponents.get(7);
+
+    // Load OS.
+    theKernel = (Kernel) rcosComponents.get(8);
+    theTerminalManager = (TerminalManager) rcosComponents.get(9);
+    theProcessScheduler = (ProcessScheduler) rcosComponents.get(10);
+    theIPC = (IPC) rcosComponents.get(11);
+    theMemoryManager = (MemoryManager) rcosComponents.get(12);
+    theProgramManager = (ProgramManager) rcosComponents.get(13);
   }
 
   /**
