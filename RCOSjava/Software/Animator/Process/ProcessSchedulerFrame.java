@@ -698,11 +698,8 @@ public class ProcessSchedulerFrame extends RCOSFrame
         String sTemp = new String(engine.isInside(e.getX(),e.getY()));
         if (sTemp != " ")
         {
-          System.out.println("");
-          System.out.println("You hit [" + sTemp + "]");
           if (sTemp.compareTo("RCOS CPU") == 0)
           {
-            System.out.println("Spin that RCOS CPU");
             myProcessScheduler.showCPU();
           }
           System.out.println("");

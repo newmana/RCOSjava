@@ -34,7 +34,7 @@ public class CPM14DiskScheduler implements DiskScheduler
   private static int cvBlockSize = 0;
   private static int cvSize = 0;
   // Storage objects.
-  private CPM14Harddrive cvDiskDrive = new CPM14Harddrive(TRACKS, 
+  private CPM14Harddrive cvDiskDrive = new CPM14Harddrive(TRACKS,
 		SECTORS_PER_TRACK, SECTOR_SIZE);
 
   // Constructor. Sets up variables and registers with the post office.
@@ -44,7 +44,7 @@ public class CPM14DiskScheduler implements DiskScheduler
     cvRequestQueue = new FIFOQueue (10, 5);
     // Create and Register the InterruptHandler.
     //cvIntHandler = new CPM14DiskInterruptHandler( id, mvPostOffice,
-    //                                     id+":INT", id);   
+    //                                     id+":INT", id);
     //Message mvIHReg = new Message ( id, "KERNEL", "RegisterInterruptHandler",
     //                                  cvIntHandler);
   }
@@ -68,15 +68,15 @@ public class CPM14DiskScheduler implements DiskScheduler
 //    System.out.println("CPM14Disk: ProcessMessage - Finish"); // DEBUG
 
     try
-    {          
+    {
       osmMessage = (OSMessageAdapter) Class.forName(aMsg.getType()).newInstance();
-      osmMessage.doMessage(this);        
+      osmMessage.doMessage(this);
     }
     catch (Exception e)
     {
-      System.out.println("Error processing message: "+e);
+      System.err.println("Error processing message: "+e);
       e.printStackTrace();
-    }  
+    }
   }
 
   public synchronized void queueRequest(String mvSource, DiskRequest mvTheRequest)
@@ -90,7 +90,7 @@ public class CPM14DiskScheduler implements DiskScheduler
     if (!cvBusy)
     {
       cvBusy = true;
-      if (!cvRequestQueue.queueEmpty()) 
+      if (!cvRequestQueue.queueEmpty())
       {
         cvCurrentRequest = (DiskQueueItem) cvRequestQueue.retrieve();
         // Calc time.
@@ -115,13 +115,13 @@ public class CPM14DiskScheduler implements DiskScheduler
     {
       mvReturnData = readBlock(cvCurrentRequest.getDiskRequest().DiskBlock);
     }
-    else 
+    else
     {
       mvReturnData = null;
       writeBlock (cvCurrentRequest.getDiskRequest().DiskBlock,
                          cvCurrentRequest.getDiskRequest().Data);
     }
-    DiskRequest mvTheReturnData = new DiskRequest ( 
+    DiskRequest mvTheReturnData = new DiskRequest (
                                      cvCurrentRequest.getDiskRequest().FSRequestID,
                                      cvCurrentRequest.getDiskRequest().DiskBlock,
 			             mvReturnData);
@@ -134,7 +134,7 @@ public class CPM14DiskScheduler implements DiskScheduler
     cvBusy = false;
   }
 
-  // This proceedure is part of the Simulation. In a real system, this 
+  // This proceedure is part of the Simulation. In a real system, this
   // is where the device driver talks to the disk.
   public byte[] readBlock(int mvBlockNumber)
   {
@@ -150,7 +150,7 @@ public class CPM14DiskScheduler implements DiskScheduler
     return mvReadData;
   }
 
-  // Note: This proceedure is part of the Simulation. In a real system, this 
+  // Note: This proceedure is part of the Simulation. In a real system, this
   // is where the device driver talks to the disk.
   public void writeBlock(int mvBlockNumber, byte[] mvWriteData)
   {
@@ -177,6 +177,5 @@ public class CPM14DiskScheduler implements DiskScheduler
       }
       System.out.print((char)cvDiskData[(Block*cvBlockSize)+X]);*/
     }
-    System.out.println("");
   }
 }

@@ -27,10 +27,10 @@ import MessageSystem.PostOffices.Animator.AnimatorOffice;
 public class MultimediaAnimator extends RCOSAnimator
 {
   private MultimediaFrame mmFrame;
-	private static final String MESSENGING_ID = "MultimediaAnimator";
+  private static final String MESSENGING_ID = "MultimediaAnimator";
 
   public MultimediaAnimator (AnimatorOffice aPostOffice,
-                             int x, int y, Image[] pmImages)
+    int x, int y, Image[] pmImages)
   {
     super(MESSENGING_ID, aPostOffice);
     mmFrame = new MultimediaFrame(x, y, pmImages, this);
@@ -66,12 +66,12 @@ public class MultimediaAnimator extends RCOSAnimator
     }
     catch (Exception e)
     {
-      System.out.println("Error processing: "+e);
+      System.err.println("Error processing: "+e);
       e.printStackTrace();
     }
   }
 
-	public void processMessage(UniversalMessageAdapter aMsg)
+  public void processMessage(UniversalMessageAdapter aMsg)
   {
     try
     {
@@ -79,7 +79,7 @@ public class MultimediaAnimator extends RCOSAnimator
     }
     catch (Exception e)
     {
-      System.out.println("Error processing: "+e);
+      System.err.println("Error processing: "+e);
       e.printStackTrace();
     }
   }

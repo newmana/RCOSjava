@@ -82,7 +82,7 @@ public class ProcessManagerAnimator extends RCOSAnimator
     }
     catch (Exception e)
     {
-      System.out.println("Error processing: "+e);
+      System.err.println("Error processing: "+e);
       e.printStackTrace();
     }
   }
