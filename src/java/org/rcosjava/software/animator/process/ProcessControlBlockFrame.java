@@ -131,16 +131,16 @@ public class ProcessControlBlockFrame extends RCOSFrame
     //Listen for when the selection changes.
     tree.addTreeSelectionListener(new TreeSelectionListener() {
       public void valueChanged(TreeSelectionEvent e) {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-                                      tree.getLastSelectedPathComponent();
-
-        if (node == null) return;
-
-        Object nodeInfo = node.getUserObject();
-        if (node.isLeaf()) {
-        }
-        else {
-        }
+//        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+//                                      tree.getLastSelectedPathComponent();
+//
+//        if (node == null) return;
+//
+//        Object nodeInfo = node.getUserObject();
+//        if (node.isLeaf()) {
+//        }
+//        else {
+//        }
       }
     });
 
