@@ -98,7 +98,6 @@ public class IPC extends OSMessageHandler
       // semaphore - we have got to nicely reply "no"
       // Use -1 SemID
       ReturnValue returnMessage = new ReturnValue(this, (short) -1);
-
       sendMessage(returnMessage);
     }
     else
@@ -353,7 +352,7 @@ public class IPC extends OSMessageHandler
     Integer shrmId = new Integer(shmCount);
     sharedMemoryIdTable.put(shrmId, shShrm);
 
-    // Two Tables - 1 indexed by the String shrm, one by
+    // Two Tables - one indexed by the String shrm, one by
     // the simpleint shrm number.
 
     //Return the integer value (SemID) of the semaphore created.
@@ -420,7 +419,8 @@ public class IPC extends OSMessageHandler
       }
       else
       {
-        MemoryRequest request = new MemoryRequest(pid,
+        // Send a memory request of the owner of the shared memory
+        MemoryRequest request = new MemoryRequest(shShrm.getProcessId(),
             MemoryManager.SHARED_SEGMENT, 1, offset);
         ReadBytes message = new ReadBytes(this, request);
         sendMessage(message);
@@ -465,10 +465,6 @@ public class IPC extends OSMessageHandler
   public void sharedMemoryWrite(int currentShmId, int offset, short newValue,
       int pid)
   {
-    System.out.println("Write Offset: " + offset);
-    System.out.println("New Value: " + newValue);
-    System.out.println("PID: " + pid);
-
     Integer shrmId = new Integer(currentShmId);
 
     if (sharedMemoryIdTable.containsKey(shrmId))
@@ -477,16 +473,15 @@ public class IPC extends OSMessageHandler
 
       if (offset > shShrm.size())
       {
-        System.out.println("Shrm outside offset");
         ReturnValue message = new ReturnValue(this, (short) -1);
         sendMessage(message);
       }
       else
       {
-        System.out.println("Writing shm");
+        Memory tmpMemory = new Memory(1);
+        tmpMemory.write(0, newValue);
         MemoryRequest request = new MemoryRequest(pid,
-            MemoryManager.SHARED_SEGMENT, 1, offset,
-            new Memory(String.valueOf(newValue)));
+            MemoryManager.SHARED_SEGMENT, 1, offset, tmpMemory);
         SharedMemoryWrite write = new SharedMemoryWrite(this, shShrm.getName(),
             request);
         sendMessage(write);
@@ -494,7 +489,6 @@ public class IPC extends OSMessageHandler
     }
     else
     {
-      System.out.println("No shmr");
       // No such Shrm?
       ReturnValue message = new ReturnValue(this, (short) -1);
       sendMessage(message);
@@ -524,7 +518,8 @@ public class IPC extends OSMessageHandler
         String semaphoreName = shShrm.getName();
         sharedMemoryTable.remove(semaphoreName);
         sharedMemoryIdTable.remove(shrmId);
-        // Assume other handle this when the receive the MemoryClosed
+
+        // Assume others handle this when the receive the MemoryClosed
         // successful message.
       }
 

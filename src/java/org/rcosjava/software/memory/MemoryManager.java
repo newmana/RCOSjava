@@ -122,6 +122,13 @@ public class MemoryManager extends OSMessageHandler
     }
   }
 
+  /**
+   * Called by SharedMemoryWrite message to write the values given in the
+   * request object of the given shared memory name.
+   *
+   * @param request the memory type to read, process id and memory to write.
+   * @param shmName the unique id of the shared memory segment.
+   */
   public void sharedMemoryWrite(MemoryRequest request, String shmName)
   {
     try
@@ -131,8 +138,6 @@ public class MemoryManager extends OSMessageHandler
 
       Memory memory = thePageHandler.getAllMemory(request.getPID(),
           request.getMemoryType());
-
-      System.out.println("Got memory: " + memory.toString());
 
       // Then let others know
       SharedMemoryWrote wroteMessage = new SharedMemoryWrote(this, shmName,
