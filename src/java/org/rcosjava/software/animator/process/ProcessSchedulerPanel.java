@@ -4,10 +4,10 @@ import java.applet.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.net.*;
 import java.util.*;
 import org.rcosjava.software.animator.RCOSPanel;
-import org.rcosjava.software.animator.support.NewLabel;
 import org.rcosjava.software.animator.support.RCOSBox;
 import org.rcosjava.software.animator.support.mtgos.GraphicsEngine;
 import org.rcosjava.software.animator.support.mtgos.MTGO;
@@ -31,81 +31,78 @@ import org.rcosjava.software.util.LIFOQueue;
  */
 public class ProcessSchedulerPanel extends RCOSPanel
 {
+  private JPanel optionsPanel;
+
   /**
-   * Description of the Field
+   * The process scheduler display area.
    */
   private GraphicsEngine engine;
 
   /**
-   * Description of the Field
+   * The positioning of the CPU.
    */
   private Position cpuPosition;
 
   /**
-   * Description of the Field
+   * The positions to move the process around the ready queue.
    */
   private Position[] readyPositions = new Position[11];
 
   /**
-   * Description of the Field
+   * The positions to move the process around the blocked queue.
    */
   private Position[] blockedPositions = new Position[11];
 
   /**
-   * Description of the Field
+   * The positions to move the process around the zombie queue.
    */
   private Position[] zombiePositions = new Position[11];
 
   /**
-   * Description of the Field
+   * Positions to move process to the from the zombie to the ready queue.
    */
   private Position[] zombieToReadyPositions = new Position[6];
 
   /**
-   * Description of the Field
+   * Positions to move process to the from the blocked to the ready queue.
    */
   private Position[] blockedToReadyPositions = new Position[6];
 
   /**
-   * Description of the Field
+   * Positions to move process to the from the ready queue to the CPU.
    */
   private Position[] readyToCPUPositions = new Position[4];
 
   /**
-   * Description of the Field
+   * Positions to move process to the from the CPU to the ready queue.
    */
   private Position[] cpuToReadyPositions = new Position[4];
 
   /**
-   * Description of the Field
+   * Positions to move process to the from the CPU to the blocked queue.
    */
   private Position[] cpuToBlockedPositions = new Position[4];
 
   /**
-   * Description of the Field
+   * Pictures to display.
    */
   private MTGO tmpPic, cpuPic;
 
   /**
-   * Description of the Field
+   * Holds which processes are the the queue.
    */
   private LIFOQueue ZombieQ, ReadyQ, BlockedQ;
 
   /**
-   * Description of the Field
+   * Holds the movement of the queue.
    */
   private Movement zombieMovement, blockedMovement, readyMovement;
 
   /**
-   * Description of the Field
+   * Holds the movement of processes.
    */
   private Movement zombieToReadyMovement, blockedToReadyMovement,
     readyToCPUMovement, cpuToReadyMovement, cpuToBlockedMovement;
-
-  /**
-   * Description of the Field
-   */
-  private Panel mainPanel, westPanel;
 
   /**
    * Description of the Field
@@ -153,11 +150,6 @@ public class ProcessSchedulerPanel extends RCOSPanel
   private ProcessSchedulerAnimator myProcessScheduler;
 
   /**
-   * Description of the Field
-   */
-  private RCOSBox box;
-
-  /**
    * Constructor for the ProcessSchedulerFrame object
    *
    * @param x Description of Parameter
@@ -176,7 +168,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     ZombieQ = new LIFOQueue(10, 0);
     BlockedQ = new LIFOQueue(10, 0);
     ReadyQ = new LIFOQueue(10, 0);
-    windowWidth = x;
+    windowWidth = x - 100;
     windowHeight = y - 175;
     delay = 1;
     myProcessScheduler = thisProcessScheduler;
@@ -193,8 +185,16 @@ public class ProcessSchedulerPanel extends RCOSPanel
   {
     super.setupLayout(c);
 
+    optionsPanel = new JPanel();
+    JPanel processPanel = new JPanel();
+    JPanel main = new JPanel();
+
+    main.setBackground(defaultBgColour);
+    main.setForeground(defaultFgColour);
+    main.setLayout(new BorderLayout());
+
     engine = new GraphicsEngine(this, windowWidth, windowHeight);
-    engine.backgroundColour = defaultBgColour;
+    engine.setBackgroundColour(defaultBgColour);
 
     width = engine.getWidth();
     height = engine.getHeight() / 5;
@@ -203,29 +203,43 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
     setupMovement();
 
-    mainPanel = new Panel();
-    closePanel = new Panel();
-    westPanel = new Panel();
-
-    Panel pTemp = new Panel();
     Choice speedOption = new Choice();
     Choice quantumOption = new Choice();
     Choice schedulerOption = new Choice();
-    NewLabel lTmpLabel;
 
-// Set-up options for choosing the speed of refresh.
+    optionsPanel.setBackground(defaultBgColour);
+    optionsPanel.setForeground(defaultFgColour);
+    TitledBorder optionsTitle = BorderFactory.createTitledBorder("Options");
+    optionsTitle.setTitleColor(defaultFgColour);
+    optionsPanel.setBorder(BorderFactory.createCompoundBorder(
+        optionsTitle, BorderFactory.createEmptyBorder(3,3,3,3)));
+
+    // Set-up options for choosing the speed of refresh.
+
+    // Create a temporary gridbaglayout for the options portion
+    // of the screen.
+
+    GridBagConstraints constraints = new GridBagConstraints();
+    GridBagLayout gridBag = new GridBagLayout();
+
+    optionsPanel.setLayout(gridBag);
+
+    constraints.gridwidth = 1;
+    constraints.gridheight = 1;
+    constraints.weighty = 1;
+    constraints.weightx = 1;
 
     speedOption.addItem("Fastest");
     speedOption.addItem("Fast");
     speedOption.addItem("Normal");
     speedOption.addItem("Slow");
     speedOption.addItem("Slowest");
-    speedOption.setBackground(choiceColour);
-    speedOption.setForeground(defaultFgColour);
+    speedOption.setForeground(choiceColour);
+    speedOption.setBackground(defaultBgColour);
     speedOption.select("Fastest");
 
-// Set-up the options for the choice of quantum ie.
-// time spent on the CPU.
+    // Set-up the options for the choice of quantum ie.
+    // time spent on the CPU.
 
     quantumOption.addItem("20");
     quantumOption.addItem("10");
@@ -233,103 +247,77 @@ public class ProcessSchedulerPanel extends RCOSPanel
     quantumOption.addItem("3");
     quantumOption.addItem("2");
     quantumOption.addItem("1");
-    quantumOption.setBackground(choiceColour);
-    quantumOption.setForeground(defaultFgColour);
+    quantumOption.setForeground(choiceColour);
+    quantumOption.setBackground(defaultBgColour);
     quantumOption.select("2");
 
-// Set-up the options for the choice of queue
+    // Set-up the options for the choice of queue
 
     schedulerOption.addItem("FIFO");
     schedulerOption.addItem("LIFO");
     schedulerOption.addItem("Priority");
-    schedulerOption.setBackground(choiceColour);
-    schedulerOption.setForeground(defaultFgColour);
+    schedulerOption.setForeground(choiceColour);
+    schedulerOption.setBackground(defaultBgColour);
     schedulerOption.select("FIFO");
 
-// Create a temporary gridbaglayout for the options portion
-// of the screen.
-
-    GridBagConstraints constraints = new GridBagConstraints();
-    GridBagLayout gridBag = new GridBagLayout();
-
-    pTemp.setLayout(gridBag);
-
-    constraints.gridwidth = 1;
-    constraints.gridheight = 1;
-    constraints.weighty = 1;
-    constraints.weightx = 1;
+    JLabel tmpLabel = new JLabel();
 
     constraints.insets = new Insets(1, 3, 1, 1);
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
-    lTmpLabel = new NewLabel("Speed:", defaultFont);
-    gridBag.setConstraints(lTmpLabel, constraints);
-    pTemp.add(lTmpLabel);
+    tmpLabel = new JLabel("Speed:", JLabel.CENTER);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
+    gridBag.setConstraints(tmpLabel, constraints);
+    optionsPanel.add(tmpLabel);
 
     constraints.insets = new Insets(1, 6, 1, 1);
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
     gridBag.setConstraints(speedOption, constraints);
-    pTemp.add(speedOption);
+    optionsPanel.add(speedOption);
     speedOption.addItemListener(new SpeedSelection());
 
     constraints.insets = new Insets(1, 3, 1, 1);
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
-    lTmpLabel = new NewLabel("Quantum:", defaultFont);
-    gridBag.setConstraints(lTmpLabel, constraints);
-    pTemp.add(lTmpLabel);
+    tmpLabel = new JLabel("Quantum:", JLabel.CENTER);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
+    gridBag.setConstraints(tmpLabel, constraints);
+    optionsPanel.add(tmpLabel);
 
     constraints.insets = new Insets(1, 6, 1, 1);
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
     gridBag.setConstraints(quantumOption, constraints);
-    pTemp.add(quantumOption);
+    optionsPanel.add(quantumOption);
     quantumOption.addItemListener(new QuantumSelection());
 
     constraints.insets = new Insets(1, 3, 1, 1);
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
-    lTmpLabel = new NewLabel("Type:", defaultFont);
-    gridBag.setConstraints(lTmpLabel, constraints);
-    pTemp.add(lTmpLabel);
+    tmpLabel = new JLabel("Type:");
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
+    gridBag.setConstraints(tmpLabel, constraints);
+    optionsPanel.add(tmpLabel);
 
     constraints.insets = new Insets(1, 6, 1, 1);
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.gridheight = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
     gridBag.setConstraints(schedulerOption, constraints);
-    pTemp.add(schedulerOption);
+    optionsPanel.add(schedulerOption);
     schedulerOption.addItemListener(new SchedulerSelection());
 
-    box = new RCOSBox(pTemp, new NewLabel("Options", titleFont), 3, 3, 3, 3);
-
-    westPanel.setLayout(gridBag);
-    constraints.gridwidth = 1;
-    constraints.gridheight = 1;
-    constraints.weighty = 1;
-    constraints.weightx = 1;
-
-    constraints.insets = new Insets(21, 2, 1, 2);
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
-    constraints.anchor = GridBagConstraints.NORTH;
-    gridBag.setConstraints(box, constraints);
-    westPanel.add(box);
-
-    mainPanel.add(engine);
+    processPanel.add(engine);
     engine.addMouseListener(new MTGOSelection());
 
-    add("Center", mainPanel);
-    add("West", westPanel);
-  }
+    main.add("Center", processPanel);
+    main.add("West", optionsPanel);
 
-  /**
-   * Adds a feature to the Notify attribute of the ProcessSchedulerFrame object
-   */
-  public void addNotify()
-  {
-    this.repaint();
-    super.addNotify();
+    add("Center", main);
   }
 
   /**
@@ -351,7 +339,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
   {
     drawBackground();
     engine.repaint();
-    box.repaint();
+    optionsPanel.repaint();
   }
 
   /**

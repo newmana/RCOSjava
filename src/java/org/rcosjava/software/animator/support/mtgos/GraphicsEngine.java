@@ -16,43 +16,52 @@ import java.awt.image.*;
 public class GraphicsEngine extends Canvas
 {
   /**
-   * Description of the Field
+   * Background image (layer 0).
    */
-  public Image background;
+  private Image background;
+
   /**
-   * Description of the Field
+   * Offscreen buffer.
    */
-  public Image buffer;
+  private Image buffer;
+
   /**
-   * Description of the Field
+   * Background colour.
    */
-  public Color backgroundColour = Color.white;
+  private Color backgroundColour = Color.white;
+
   /**
-   * Description of the Field
+   * Middle of screen X position.
    */
   public int centerX = 0;
+
   /**
-   * Description of the Field
+   * Middle of screen Y position.
    */
   public int centerY = 0;
+
   /**
-   * Description of the Field
+   * Width of screen.
    */
   public int width = 0;
+
   /**
-   * Description of the Field
+   * Height of screen.
    */
   public int height = 0;
+
   /**
-   * Description of the Field
+   * Graphics to write to.
    */
   public Graphics pad;
+
   /**
-   * Description of the Field
+   * Objects to display.
    */
   Chain objectChain = null;
+
   /**
-   * Description of the Field
+   * Peer component.
    */
   private Component myComponent;
 
@@ -64,8 +73,7 @@ public class GraphicsEngine extends Canvas
    * @exception java.lang.IllegalArgumentException Description of Exception
    * @throws java.lang.IllegalArgumentException when c is null.
    */
-  public GraphicsEngine(Component c)
-    throws java.lang.IllegalArgumentException
+  public GraphicsEngine(Component c) throws java.lang.IllegalArgumentException
   {
     super();
     if (c == null)
@@ -420,5 +428,15 @@ public class GraphicsEngine extends Canvas
     repaint();
     centerX = (int) (width / 2);
     centerY = (int) (height / 2);
+  }
+
+  /**
+   * Sets the new background colour of the entire area.
+   *
+   * @param newBackgroundColour the new colour to set the background to.
+   */
+  public void setBackgroundColour(Color newBackgroundColour)
+  {
+    backgroundColour = newBackgroundColour;
   }
 }

@@ -2,6 +2,7 @@ package org.rcosjava.software.animator.ipc;
 
 import java.awt.*;
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import java.awt.event.*;
 import java.util.*;
 import org.rcosjava.software.animator.RCOSPanel;
@@ -242,7 +243,9 @@ public class IPCManagerPanel extends RCOSPanel
     gridBag.setConstraints(lTmpLabel, constraints);
     pTemp.add(lTmpLabel);
 
-    iBox = new RCOSBox(pTemp, new NewLabel("Key", labelFont), 0, 2, 2, 2);
+    JLabel keyLabel = new JLabel("Key", JLabel.CENTER);
+    keyLabel.setFont(labelFont);
+    iBox = new RCOSBox(pTemp, keyLabel, 0, 2, 2, 2);
 
     Panel pSMem;
 
@@ -365,12 +368,16 @@ public class IPCManagerPanel extends RCOSPanel
     mainPanel.add(iBox);
 
     constraints.gridheight = 1;
-    rBox = new RCOSBox(pSem, new NewLabel("Semaphores", titleFont), 1, 1, 1, 1);
+    JLabel semaphoreLabel = new JLabel("Semaphores", JLabel.CENTER);
+    semaphoreLabel.setFont(titleFont);
+    rBox = new RCOSBox(pSem, semaphoreLabel, 1, 1, 1, 1);
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBag.setConstraints(rBox, constraints);
     mainPanel.add(rBox);
 
-    rBox = new RCOSBox(pSMem, new NewLabel("Shared Memory", titleFont), 1, 1, 1, 1);
+    JLabel shmMemLabel = new JLabel("Shared Memory", JLabel.CENTER);
+    shmMemLabel.setFont(titleFont);
+    rBox = new RCOSBox(pSMem, shmMemLabel, 1, 1, 1, 1);
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBag.setConstraints(rBox, constraints);
     mainPanel.add(rBox);

@@ -5,6 +5,7 @@ import java.awt.*;
 import java.net.*;
 import javax.swing.ImageIcon;
 import java.util.*;
+import org.rcosjava.software.animator.RCOSPanel;
 import org.rcosjava.messaging.messages.animator.ShowCPU;
 import org.rcosjava.messaging.messages.universal.Quantum;
 import org.rcosjava.messaging.messages.universal.Run;
@@ -14,7 +15,6 @@ import org.rcosjava.messaging.messages.universal.SwitchToLIFO;
 import org.rcosjava.messaging.messages.universal.SwitchToPriority;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.software.animator.RCOSAnimator;
-import org.rcosjava.software.animator.RCOSPanel;
 import org.rcosjava.software.process.ProcessScheduler;
 
 /**

@@ -88,8 +88,6 @@ public class CPUPanel extends RCOSPanel
   public void setupLayout(Component c)
   {
     super.setupLayout(c);
-    setBackground(defaultBgColour);
-    setForeground(defaultFgColour);
 
     setLayout(new BorderLayout());
 
@@ -99,9 +97,6 @@ public class CPUPanel extends RCOSPanel
     JPanel cpu = new JPanel();
     cpu.setBackground(defaultBgColour);
     cpu.setForeground(defaultFgColour);
-    JPanel close = new JPanel();
-    close.setBackground(defaultBgColour);
-    close.setForeground(defaultFgColour);
 
     JLabel tmpLabel;
 

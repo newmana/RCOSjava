@@ -45,12 +45,12 @@ public class TerminalManagerPanel extends RCOSPanel
   /**
    * Images to display in button.
    */
-  private Image myImages[];
+  private Image images[];
 
   /**
    * The calling animator.
    */
-  private TerminalManagerAnimator myTerminalManager;
+  private TerminalManagerAnimator terminalManager;
 
   /**
    * Create an animator frame, set the size of it and the images to use to
@@ -64,7 +64,7 @@ public class TerminalManagerPanel extends RCOSPanel
    * @param images Description of Parameter
    * @param noTerminalCols Description of Parameter
    */
-  public TerminalManagerPanel(int x, int y, ImageIcon[] images,
+  public TerminalManagerPanel(int x, int y, ImageIcon[] newImages,
       int noTerminals, int noTerminalCols, int noTerminalRows,
       TerminalManagerAnimator thisTerminalManager)
   {
@@ -74,12 +74,12 @@ public class TerminalManagerPanel extends RCOSPanel
     maxTerminalCols = noTerminalCols;
     maxTerminalRows = noTerminalRows;
 
-    myImages = new Image[images.length];
+    images = new Image[newImages.length];
     for (int index = 0; index < images.length; index++)
     {
-      myImages[index] = images[index].getImage();
+      images[index] = newImages[index].getImage();
     }
-    myTerminalManager = thisTerminalManager;
+    terminalManager = thisTerminalManager;
 
     terminals = new GraphicButton[maxTerminals];
     views = new GraphicButton[maxTerminals];
@@ -96,19 +96,18 @@ public class TerminalManagerPanel extends RCOSPanel
   {
     super.setupLayout(c);
 
-    Panel pMain = new Panel();
-    Panel pClose = new Panel();
+    Panel main = new Panel();
+    main.setBackground(defaultBgColour);
+    main.setForeground(defaultFgColour);
 
     GridBagConstraints constraints = new GridBagConstraints();
     GridBagLayout gridBag = new GridBagLayout();
 
-    pMain.setLayout(gridBag);
+    main.setLayout(gridBag);
 
     constraints.gridheight = 1;
     constraints.weighty = 1;
     constraints.weightx = 1;
-
-    pClose.setLayout(new FlowLayout(FlowLayout.CENTER));
 
     int currentTerminal = 0;
 
@@ -130,11 +129,13 @@ public class TerminalManagerPanel extends RCOSPanel
         }
 
         currentTerminal++;
-        terminals[currentTerminal] = new GraphicButton(myImages[1],
-            myImages[1], "Terminal #" + currentTerminal, defaultFont,
+        Icon upIcon = new ImageIcon(images[1]);
+        Icon downIcon = new ImageIcon(images[2]);
+        terminals[currentTerminal] = new GraphicButton(images[1],
+            images[1], "Terminal #" + currentTerminal, defaultFont,
             defaultFgColour, true, false);
         gridBag.setConstraints(terminals[currentTerminal], constraints);
-        pMain.add(terminals[currentTerminal]);
+        main.add(terminals[currentTerminal]);
         terminals[currentTerminal].addMouseListener(new TerminalHandler());
       }
       currentTerminal -= maxTerminalCols;
@@ -154,16 +155,17 @@ public class TerminalManagerPanel extends RCOSPanel
         }
 
         currentTerminal++;
-        views[currentTerminal] = new GraphicButton(myImages[2],
-            myImages[3], "#" + currentTerminal + " off", defaultFont,
+        views[currentTerminal] = new GraphicButton(images[2],
+            images[3], "#" + currentTerminal + " off", defaultFont,
             buttonColour, true, true);
         gridBag.setConstraints(views[currentTerminal], constraints);
-        pMain.add(views[currentTerminal]);
+        main.add(views[currentTerminal]);
         views[currentTerminal].addMouseListener(new TerminalHandler());
       }
     }
 
-    add("Center", pMain);
+    setLayout(new BorderLayout());
+    add("Center", main);
   }
 
   /**
@@ -176,9 +178,9 @@ public class TerminalManagerPanel extends RCOSPanel
    */
   void terminalOn(int terminalNo)
   {
-    terminals[terminalNo].imgButtonUpPic = myImages[0];
-    terminals[terminalNo].imgButtonDownPic = myImages[0];
-    views[terminalNo].sTheButton = "Hide #" + terminalNo;
+    terminals[terminalNo].setButtonUpPic(images[0]);
+    terminals[terminalNo].setButtonDownPic(images[0]);
+    views[terminalNo].setButtonText("Hide #" + terminalNo);
     terminals[terminalNo].repaint();
     views[terminalNo].repaint();
   }
@@ -192,9 +194,9 @@ public class TerminalManagerPanel extends RCOSPanel
    */
   void terminalOff(int terminalNo)
   {
-    terminals[terminalNo].imgButtonUpPic = myImages[1];
-    terminals[terminalNo].imgButtonDownPic = myImages[1];
-    views[terminalNo].sTheButton = "#" + terminalNo + " off";
+    terminals[terminalNo].setButtonUpPic(images[1]);
+    terminals[terminalNo].setButtonDownPic(images[1]);
+    views[terminalNo].setButtonText("#" + terminalNo + " off");
     terminals[terminalNo].repaint();
     views[terminalNo].repaint();
   }
@@ -208,7 +210,7 @@ public class TerminalManagerPanel extends RCOSPanel
    */
   void terminalFront(int terminalNo)
   {
-    views[terminalNo].sTheButton = "Hide #" + terminalNo;
+    views[terminalNo].setButtonText("Hide #" + terminalNo);
     views[terminalNo].repaint();
   }
 
@@ -221,7 +223,7 @@ public class TerminalManagerPanel extends RCOSPanel
    */
   void terminalBack(int terminalNo)
   {
-    views[terminalNo].sTheButton = "View #" + terminalNo;
+    views[terminalNo].setButtonText("View #" + terminalNo);
     views[terminalNo].repaint();
   }
 
@@ -248,18 +250,18 @@ public class TerminalManagerPanel extends RCOSPanel
       if (whichObject.startsWith("Terminal #"))
       {
         iTerminalNumber = (Integer.parseInt(whichObject.substring(10)));
-        myTerminalManager.sendToggleTerminal(iTerminalNumber);
+        terminalManager.sendToggleTerminal(iTerminalNumber);
       }
       if (whichObject.startsWith("View #"))
       {
         iTerminalNumber = (Integer.parseInt(whichObject.substring(6)));
-        myTerminalManager.sendTerminalFront(iTerminalNumber);
+        terminalManager.sendTerminalFront(iTerminalNumber);
         terminalFront(iTerminalNumber);
       }
       if (whichObject.startsWith("Hide #"))
       {
         iTerminalNumber = (Integer.parseInt(whichObject.substring(6)));
-        myTerminalManager.sendTerminalBack(iTerminalNumber);
+        terminalManager.sendTerminalBack(iTerminalNumber);
         terminalBack(iTerminalNumber);
       }
     }

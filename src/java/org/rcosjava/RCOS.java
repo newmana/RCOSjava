@@ -624,15 +624,15 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     menu.add(menuItem);
 
     Container contentPane = getContentPane();
-    contentPane.setBackground(RCOSFrame.defaultBgColour);
-    contentPane.setForeground(RCOSFrame.defaultFgColour);
+//    contentPane.setBackground(RCOSFrame.defaultBgColour);
+//    contentPane.setForeground(RCOSFrame.defaultFgColour);
 
     JTabbedPane tabbedPane = new JTabbedPane();
 
     tabbedPane.add(tmAnimator.getPanel(), "Terminals");
     tabbedPane.add(psAnimator.getPanel(), "Process Scheduler");
     tabbedPane.add(cpuAnimator.getPanel(), "CPU");
-    tabbedPane.add(ipcAnimator.getPanel(), "IPC Manager");
+//    tabbedPane.add(ipcAnimator.getPanel(), "IPC Manager");
     tabbedPane.add(new JPanel(), "Disk Scheduler");
     tabbedPane.add(new JPanel(), "File System");
 

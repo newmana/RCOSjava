@@ -114,12 +114,6 @@ public class RCOSPanel extends JPanel implements Serializable
   public void setupLayout(Component c)
   {
     myComponent = c;
-
-    // Set default colours, fonts and layout manager.
-    setBackground(defaultBgColour);
-    setForeground(defaultFgColour);
-    setFont(defaultFont);
-    setLayout(new BorderLayout());
   }
 
   /**
