@@ -311,7 +311,6 @@ public class Memory implements Serializable, Cloneable
       {
         for(int count = 0; count < getSegmentSize(); count++)
         {
-         //System.out.println("Count: " + count + ", Mine: " + memorySegment[count] + ", Yours: " + mem.memorySegment[count]);
           if (memorySegment[count] != mem.memorySegment[count])
             return false;
         }
