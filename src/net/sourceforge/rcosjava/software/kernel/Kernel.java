@@ -23,6 +23,7 @@ import net.sourceforge.rcosjava.messaging.messages.os.SemaphoreCreate;
 import net.sourceforge.rcosjava.messaging.messages.os.SemaphoreOpen;
 import net.sourceforge.rcosjava.messaging.messages.os.SemaphoreSignal;
 import net.sourceforge.rcosjava.messaging.messages.os.SemaphoreWait;
+import net.sourceforge.rcosjava.messaging.messages.universal.NullProcess;
 import net.sourceforge.rcosjava.messaging.messages.universal.RunningToBlocked;
 import net.sourceforge.rcosjava.messaging.messages.universal.RunningToReady;
 import net.sourceforge.rcosjava.messaging.messages.universal.ProcessFinished;
@@ -124,7 +125,7 @@ public class Kernel extends OSMessageHandler
    */
   public int getCurrentProcessTicks()
   {
-    return(myCPU.getTicks()-timeProcessOn);
+    return(myCPU.getTicks() - timeProcessOn);
   }
 
   /**
@@ -146,6 +147,14 @@ public class Kernel extends OSMessageHandler
   }
 
   /**
+   * @return the current PID that is executing in the Kernel
+   */
+  public int getCurrentProcessPID()
+  {
+    return currentProcess.getPID();
+  }
+
+  /**
    * Private method to give access to the current running process.
    */
   private RCOSProcess getCurrentProcess()
@@ -158,12 +167,18 @@ public class Kernel extends OSMessageHandler
    * Sets the current process and context as well as the code and stack segments
    * of the CPU to null.  That there is no currently running process.
    */
-  public void processNull()
+  public void nullProcess()
   {
     runningProcess = false;
     myCPU.setNewContext();
     myCPU.setProcessCode(null);
     myCPU.setProcessStack(null);
+  }
+
+  public void killProcess()
+  {
+    myCPU.setProcessFinished();
+    myCPU.handleInterrupts();
   }
 
   /**
@@ -198,36 +213,6 @@ public class Kernel extends OSMessageHandler
   }
 
   /**
-   * When an I/O event or other block event occurs the current process is
-   * removed from the CPU and a RunningToBlocked message is sent with the
-   * oldCurrent process.
-   */
-  public void blockCurrentProcess()
-  {
-    getCurrentProcess().addToCPUTicks(getCurrentProcessTicks());
-    if (myCPU.hasCodeToExecute())
-    {
-      //Save current process and process context
-      RCOSProcess oldCurrent = getCurrentProcess();
-
-      //Remove process from CPU and Kernel
-      this.processNull();
-
-      // decrement program counter to force the blocking
-      // instruction to be re-executed when the process is woken up
-      // BUT only do it if the body of the message is null
-
-      oldCurrent.getContext().decProgramCounter();
-
-      // no need to get a copy of the code as it won't change
-      // Send a message to the ProcessScheduler to update old current
-      // processes data structures
-      RunningToBlocked msg = new RunningToBlocked(this, oldCurrent);
-      sendMessage(msg);
-    }
-  }
-
-  /**
    * This occurs when a new process is to be executed on the CPU.  If there
    * was an existing process it's existing stack is saved and the new process
    * is put in its place.  This include overwriting the exsting code pages and
@@ -235,28 +220,19 @@ public class Kernel extends OSMessageHandler
    */
   public void switchProcess(RCOSProcess newProcess)
   {
-    //Save memory if program hasn't terminated.
-    if (myCPU.hasCodeToExecute())
-    {
-      //Assume that the stack is the only thing worth writing back that the
-      //programs cannot modify their own memory?
-      MemoryRequest memSave = new MemoryRequest(getCurrentProcess().getPID(),
-        MemoryManager.STACK_SEGMENT, myCPU.getProcessStack().getSegmentSize(),
-        myCPU.getProcessStack());
-      WriteBytes msg = new WriteBytes(this, memSave);
-      sendMessage(msg);
-    }
     currentProcess = newProcess;
     myCPU.setContext(currentProcess.getContext());
     runningProcess = true;
 
     //Get new memory
     MemoryRequest memRead = new MemoryRequest(newProcess.getPID(),
-      MemoryManager.CODE_SEGMENT, newProcess.getCodePages()*MemoryManager.PAGE_SIZE);
+      MemoryManager.CODE_SEGMENT, newProcess.getCodePages() *
+      MemoryManager.PAGE_SIZE);
     ReadBytes msg = new ReadBytes(this, memRead);
     sendMessage(msg);
 
-    memRead = new MemoryRequest(newProcess.getPID(), MemoryManager.STACK_SEGMENT,
+    memRead = new MemoryRequest(newProcess.getPID(),
+      MemoryManager.STACK_SEGMENT,
       newProcess.getStackPages()*MemoryManager.PAGE_SIZE);
     msg = new ReadBytes(this, memRead);
     sendMessage(msg);
@@ -541,8 +517,7 @@ public class Kernel extends OSMessageHandler
     char[] name = new char[length];
 
     myCPU.getContext().setStackPointer(
-     (short) (myCPU.getContext().getStackPointer()
-     - length));
+     (short) (myCPU.getContext().getStackPointer() - length));
 
     int index = 0;
 
@@ -554,6 +529,36 @@ public class Kernel extends OSMessageHandler
         index++;
       }
     return (new String(name));
+  }
+
+  /**
+   * When an I/O event or other block event occurs the current process is
+   * removed from the CPU and a RunningToBlocked message is sent with the
+   * oldCurrent process.
+   */
+  public void blockCurrentProcess()
+  {
+    getCurrentProcess().addToCPUTicks(getCurrentProcessTicks());
+    if (myCPU.hasCodeToExecute())
+    {
+      //Save current process and process context
+      RCOSProcess oldCurrent = getCurrentProcess();
+
+      //Set the current process to nothing
+      NullProcess nullMsg = new NullProcess(this);
+      sendMessage(nullMsg);
+
+      // decrement program counter to force the blocking
+      // instruction to be re-executed when the process is woken up
+      // BUT only do it if the body of the message is null
+      oldCurrent.getContext().decProgramCounter();
+
+      // no need to get a copy of the code as it won't change
+      // Send a message to the ProcessScheduler to update old current
+      // processes data structures
+      RunningToBlocked msg = new RunningToBlocked(this, oldCurrent);
+      sendMessage(msg);
+    }
   }
 
   /**
@@ -571,8 +576,26 @@ public class Kernel extends OSMessageHandler
 
       if (myCPU.hasCodeToExecute())
       {
+        //Save currently executing process
         RCOSProcess oldProcess = getCurrentProcess();
         oldProcess.addToCPUTicks(getCurrentProcessTicks());
+
+        //Save memory if program hasn't terminated.
+        if (myCPU.hasCodeToExecute())
+        {
+          //Assume that the stack is the only thing worth writing back that the
+          //programs cannot modify their own memory?
+          MemoryRequest memSave = new MemoryRequest(getCurrentProcess().getPID(),
+            MemoryManager.STACK_SEGMENT, myCPU.getProcessStack().getSegmentSize(),
+            myCPU.getProcessStack());
+          WriteBytes msg = new WriteBytes(this, memSave);
+          sendMessage(msg);
+        }
+
+        //Set the current process to nothing
+        NullProcess nullMsg = new NullProcess(this);
+        sendMessage(nullMsg);
+
         // no need to get a copy of the code as it won't change
         // Send a message to the ProcessScheduler to update old current
         // processes data structures
@@ -590,10 +613,17 @@ public class Kernel extends OSMessageHandler
    */
   public void handleProcessFinishedInterrupt()
   {
+    //Get the current process and add CPU ticks spent.
     RCOSProcess oldCurrent = getCurrentProcess();
     oldCurrent.addToCPUTicks(getCurrentProcessTicks());
+
+    //Let process scheduler and others know that the process has finished
     ProcessFinished tmpMsg = new ProcessFinished(this, oldCurrent);
     sendMessage(tmpMsg);
+
+    //Set the current process to null
+    NullProcess tmpMessage = new NullProcess(this);
+    sendMessage(tmpMessage);
   }
 
   public void processMessage(OSMessageAdapter message)
