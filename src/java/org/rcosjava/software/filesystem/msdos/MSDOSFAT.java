@@ -8,10 +8,11 @@ import java.util.Vector;
 import java.util.StringTokenizer;
 
 /**
- * Description of the Class
+ * Title: RCOS Description: Copyright: Copyright (c) 2002 Company: UFPE
  *
- * @author andrew
+ * @author Danielly Cruz
  * @created July 27, 2003
+ * @version 1.0
  */
 public class MSDOSFAT implements Serializable
 {

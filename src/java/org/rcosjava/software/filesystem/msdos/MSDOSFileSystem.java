@@ -1479,6 +1479,16 @@ public class MSDOSFileSystem implements FileSystem
 
   }
 
+  /**
+   * Writes the buffer to the device.
+   *
+   * @param request the request details the request id and file and the data
+   *   to write to the device.
+   */
+  public void writeBuffer(DiskRequest request)
+  {
+
+  }
 
   // Will display the specified data to the screen.
   // Operation can be "DIR" or "BUFFER". For DIR, item1 will indicate
