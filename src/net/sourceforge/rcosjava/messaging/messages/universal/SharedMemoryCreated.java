@@ -2,6 +2,7 @@ package net.sourceforge.rcosjava.messaging.messages.universal;
 
 import net.sourceforge.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import net.sourceforge.rcosjava.software.animator.ipc.IPCManagerAnimator;
+import net.sourceforge.rcosjava.software.ipc.SharedMemory;
 
 /**
  * Message sent to IPC manager animator for verification of created shared
@@ -24,21 +25,21 @@ public class SharedMemoryCreated extends UniversalMessageAdapter
   private int PID;
 
   /**
-   * The size of the shared memory structured to create.
+   * The memory created.
    */
-  private int size;
+  private SharedMemory memory;
 
   public SharedMemoryCreated(OSMessageHandler theSource,
-    String newSharedMemoryId, int newPID, int newSize)
+    String newSharedMemoryId, int newPID, SharedMemory newMemory)
   {
     super(theSource);
     sharedMemoryId = newSharedMemoryId;
     PID = newPID;
-    size = newSize;
+    memory = newMemory;
   }
 
   public void doMessage(IPCManagerAnimator theElement)
   {
-    theElement.semaphoreCreated(sharedMemoryId, PID, size);
+    theElement.sharedMemoryCreated(sharedMemoryId, PID, memory);
   }
 }
