@@ -3,7 +3,7 @@ package net.sourceforge.rcosjava.software.memory.paged;
 /**
  * Table which contains type and PID of all memory.  For fast look-up.
  * <P>
- * @see net.sourceforge.rcosjava.software.memory.PagedMemoryManagement
+ * @see net.sourceforge.rcosjava.software.memory.paged.PagedMemoryManagement
  * @author Andrew Newman.
  * @version 1.00 $Date$
  * @created 27th March 1996
