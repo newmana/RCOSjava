@@ -47,6 +47,7 @@ public class Movement
     iCurrentY = 0;
     bForward = true;
     bRepeat = false;
+    bFinished = true;
   }
 
 //Able to set whether the item repeats or not.
@@ -61,6 +62,7 @@ public class Movement
     iCurrentY = 0;
     bForward = true;
     bRepeat = bInitRepeat;
+    bFinished = true;
   }
 
   // Current position in queue of Positions
@@ -79,7 +81,7 @@ public class Movement
 
 // Sets the variables to be set to the start of the PositionChain.
 
-  public void start()
+  public synchronized void start()
   {
     if (positions.itemCount() > 1)
     {
@@ -94,12 +96,12 @@ public class Movement
     }
   }
 
-  public boolean finished()
+  public synchronized boolean finished()
   {
     return (bFinished);
   }
 
-  public boolean finished(int iTo)
+  public synchronized boolean finished(int iTo)
   {
     return (positions.thePointer == iTo);
   }
@@ -107,7 +109,7 @@ public class Movement
 // Steps forward or backward one motion depending on whether bForward
 // is true or not.
 
-  public void step ()
+  public synchronized void step ()
   {
     if (bForward)
     {
