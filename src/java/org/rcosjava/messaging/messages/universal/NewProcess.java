@@ -18,30 +18,30 @@ import org.rcosjava.software.process.ProcessScheduler;
 public class NewProcess extends UniversalMessageAdapter
 {
   /**
-   * Description of the Field
+   * The name of the file to create the process from.
    */
   private String fileName;
 
   /**
-   * Description of the Field
+   * The memory of the new process.
    */
   private Memory processMemory;
 
   /**
-   * Description of the Field
+   * The size of the file of the program data.
    */
-  private int fileSize;
+  private long fileSize;
 
   /**
-   * Constructor for the NewProcess object
+   * Creates a new NewProcess message object.
    *
-   * @param theSource Description of Parameter
-   * @param newFileName Description of Parameter
-   * @param newProcessMemory Description of Parameter
-   * @param newFileSize Description of Parameter
+   * @param theSource the sender of the message.
+   * @param newFileName the filename of the new process.
+   * @param newProcessMemory the contents of the file.
+   * @param newFileSize the size of the file.
    */
   public NewProcess(OSMessageHandler theSource, String newFileName,
-      Memory newProcessMemory, int newFileSize)
+      Memory newProcessMemory, long newFileSize)
   {
     super(theSource);
     fileName = newFileName;
@@ -50,9 +50,9 @@ public class NewProcess extends UniversalMessageAdapter
   }
 
   /**
-   * Sets the Filename attribute of the NewProcess object
+   * Sets the value of the file name attribute.
    *
-   * @param newFileName The new Filename value
+   * @param newFileName The new value for file name.
    */
   public void setFileName(String newFileName)
   {
@@ -60,9 +60,9 @@ public class NewProcess extends UniversalMessageAdapter
   }
 
   /**
-   * Sets the Memory attribute of the NewProcess object
+   * Sets the value of the memory attribute.
    *
-   * @param newMemory The new Memory value
+   * @param newMemory The new value for memory.
    */
   public void setMemory(Memory newMemory)
   {
@@ -70,9 +70,9 @@ public class NewProcess extends UniversalMessageAdapter
   }
 
   /**
-   * Sets the FileSize attribute of the NewProcess object
+   * Sets the value of the file size attribute.
    *
-   * @param newFileSize The new FileSize value
+   * @param newFileSize The new value for the file size.
    */
   public void setFileSize(int newFileSize)
   {
@@ -80,9 +80,9 @@ public class NewProcess extends UniversalMessageAdapter
   }
 
   /**
-   * Gets the Filename attribute of the NewProcess object
+   * Returns the file name attribute.
    *
-   * @return The Filename value
+   * @return the file name attribute.
    */
   public String getFileName()
   {
@@ -90,9 +90,9 @@ public class NewProcess extends UniversalMessageAdapter
   }
 
   /**
-   * Gets the Memory attribute of the NewProcess object
+   * Returns the memory attribute.
    *
-   * @return The Memory value
+   * @return the memory attribute.
    */
   public Memory getMemory()
   {
@@ -100,19 +100,19 @@ public class NewProcess extends UniversalMessageAdapter
   }
 
   /**
-   * Gets the FileSize attribute of the NewProcess object
+   * Returns the size of the file.
    *
-   * @return The FileSize value
+   * @return the size of the file.
    */
-  public int getFileSize()
+  public long getFileSize()
   {
     return fileSize;
   }
 
   /**
-   * Gets the StackPages attribute of the NewProcess object
+   * Returns the number of stack pages to allocate the program.
    *
-   * @return The StackPages value
+   * @return the number of stack pages to allocate the program.
    */
   public int getStackPages()
   {
