@@ -140,7 +140,7 @@ public class IPCManagerAnimator extends RCOSAnimator
     {
       Semaphore tmpSemaphore = (Semaphore) semaphoreMap.get(semaphoreId);
       tmpSemaphore.addWaitingProcess(processId);
-      panel.semaphoreWaiting(tmpSemaphore, processId);
+      panel.semaphoreWaiting(tmpSemaphore, value);
     }
   }
 
