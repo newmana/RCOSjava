@@ -321,7 +321,10 @@ public class Memory implements Serializable, Cloneable
   }
 
   /**
-   * @return the string representation of the memory block which is simple
+   * Returns the string representation of the memory block which is simply
+   * appending the short values to a string.
+   *
+   * @return the string representation of the memory block which is simply
    * appending the short values to a string.
    */
   public String toString()
