@@ -27,11 +27,6 @@ import java.io.Serializable;
 public class AnimatorMessageAdapter extends MessageAdapter
   implements AnimatorMessage, Serializable
 {
-  public AnimatorMessageAdapter()
-  {
-    super();
-  }
-
   public AnimatorMessageAdapter(AnimatorMessageHandler theSource)
   {
     super(theSource);
