@@ -418,6 +418,16 @@ public class StatementCompiler extends DepthFirstAdapter
   }
 
   /**
+   * Process print out an element in an array.
+   */
+  public void caseAPrintf3RcosStatement(APrintf3RcosStatement node)
+  {
+    PPrintfControlStrings control = node.getControl();
+    PArrayref array = node.getArrayref();
+    printOut(control, array);
+  }
+
+  /**
    * Right hand side of a variable assignment with one statement.
    */
   public void caseAUnaryRhs(AUnaryRhs node)
@@ -444,8 +454,17 @@ public class StatementCompiler extends DepthFirstAdapter
     }
     else if (node.getSimpleExpression() instanceof AVarnameSimpleExpression)
     {
-      handleIdentifierLoad(
-        ((AVarnameSimpleExpression) node.getSimpleExpression()).getVarname());
+      PVarname varName =
+        ((AVarnameSimpleExpression) node.getSimpleExpression()).getVarname();
+
+      if (!isArray(varName.toString()))
+      {
+        handleIdentifierLoad(varName);
+      }
+      else
+      {
+        handleIdentifierArrayLoad(varName.toString());
+      }
     }
   }
 
@@ -492,6 +511,7 @@ public class StatementCompiler extends DepthFirstAdapter
     try
     {
       String varName = node.getVarname().toString().trim();
+      short index;
 
 //      PRhs rhs = node.getRhs();
 //      rhs.apply(this);
@@ -501,7 +521,28 @@ public class StatementCompiler extends DepthFirstAdapter
 //      System.err.println("Current symbole: " + currentSymbol);
       if (isArray(varName))
       {
-        currentSymbol = table.getArray(varName, Compiler.getLevel());
+        String identifierName = varName.substring(0, varName.indexOf("[")).
+          trim();
+
+        //Dodgy try and get the index as a integer else try and get it as a
+        //variable.
+        try
+        {
+          index = getArraySize(varName);
+          System.out.println("Array index: " + index);
+          System.out.println("Id name: [" + identifierName + "]");
+
+          writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
+            (short) index));
+        }
+        catch (NumberFormatException nfe)
+        {
+          // If it's not a number then try and load it.
+          Symbol tmpSymbol = getArraySymbol(varName);
+          tmpSymbol.handleLoad(this);
+        }
+
+        currentSymbol = table.getSymbol(identifierName, Compiler.getLevel());
       }
       else
       {
@@ -511,7 +552,15 @@ public class StatementCompiler extends DepthFirstAdapter
       PRhs rhs = node.getRhs();
       rhs.apply(this);
 
-      currentSymbol.handleStore(this);
+      if (isArray(varName))
+      {
+        writePCode(new Instruction(OpCode.STORE_INDEXED.getValue(),
+          (byte) 0, currentSymbol.getOffset()));
+      }
+      else
+      {
+        currentSymbol.handleStore(this);
+      }
     }
     catch (Exception e)
     {
@@ -676,7 +725,7 @@ public class StatementCompiler extends DepthFirstAdapter
    *
    * @param declarator the declaration of the variable.
    */
-  private short getArraySize(String declarator)
+  private short getArraySize(String declarator) throws NumberFormatException
   {
     int arrayStartIndex = declarator.indexOf("[");
     int arrayFinishedIndex = 0;
@@ -687,13 +736,38 @@ public class StatementCompiler extends DepthFirstAdapter
       arrayFinishedIndex = declarator.indexOf("]");
 //      System.out.println("Dec: " + (arrayFinishedIndex - arrayStartIndex));
 //      System.out.println("Dec: " + declarator);
-      if ((arrayFinishedIndex - arrayStartIndex) > 2)
-      {
-        arraySize = Short.parseShort(declarator.substring(arrayStartIndex+1,
-          arrayFinishedIndex).trim());
-      }
+      String declaratorStr = declarator.substring(arrayStartIndex+1,
+          arrayFinishedIndex).trim();
+      arraySize = Short.parseShort(declaratorStr);
     }
     return arraySize;
+  }
+
+  private Symbol getArraySymbol(String declarator)
+  {
+//    System.err.println("Get array symbol got: " + declarator);
+
+    int arrayStartIndex = declarator.indexOf("[");
+    int arrayFinishedIndex = 0;
+    Symbol tmpSymbol = null;
+
+    try
+    {
+      declarator = declarator.trim();
+      if (arrayStartIndex > 0)
+      {
+        arrayFinishedIndex = declarator.indexOf("]");
+        String declaratorStr = declarator.substring(arrayStartIndex+1,
+            arrayFinishedIndex).trim();
+//        System.err.println("Trying to get symbol: " + declaratorStr);
+        tmpSymbol = table.getSymbol(declaratorStr, Compiler.getLevel());
+      }
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+    return tmpSymbol;
   }
 
   public void writePCode(Instruction newInstruction)
@@ -738,10 +812,48 @@ public class StatementCompiler extends DepthFirstAdapter
     handleIdentifierLoading(identifier.toString().trim());
   }
 
+  private void handleIdentifierLoad(PArrayref identifier)
+  {
+    handleIdentifierArrayLoad(identifier.toString());
+  }
+
+  private void handleIdentifierArrayLoad(String fullName)
+  {
+    try
+    {
+      if (isArray(fullName))
+      {
+        String identifierName = fullName.substring(0, fullName.indexOf("[")).
+          trim();
+
+        currentSymbol = table.getSymbol(identifierName, Compiler.getLevel());
+        Array array = (Array) currentSymbol;
+        try
+        {
+          short index = getArraySize(fullName);
+          System.out.println("Array index: " + index);
+          System.out.println("Id name: [" + identifierName + "]");
+          array.handleLoad(this, index);
+        }
+        catch (NumberFormatException nfe)
+        {
+          // Dodgy if it's not a number then try and load it as a symbol.
+          Symbol tmpSymbol = getArraySymbol(fullName);
+          array.handleLoad(this, tmpSymbol);
+        }
+      }
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+  }
+
   private void handleIdentifierLoading(String identifierName)
   {
     try
     {
+      System.out.println("Id name: " + identifierName);
       currentSymbol = table.getSymbol(identifierName, Compiler.getLevel());
       currentSymbol.handleLoad(this);
     }
@@ -800,7 +912,17 @@ public class StatementCompiler extends DepthFirstAdapter
   private void printOut(PPrintfControlStrings control, PValue value)
   {
     handlePValueLoad(value);
+    printOutSysCall(control);
+  }
 
+  private void printOut(PPrintfControlStrings control, PArrayref value)
+  {
+    handleIdentifierLoad(value);
+    printOutSysCall(control);
+  }
+
+  private void printOutSysCall(PPrintfControlStrings control)
+  {
     if (control instanceof AIntControlPrintfControlStrings)
     {
       writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),

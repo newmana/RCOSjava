@@ -53,7 +53,7 @@ public class Array extends Symbol
     int count = 0;
     while(count < varStrLength)
     {
-      writeLoad(compiler, count);
+      handleLoad(compiler, count);
       count++;
     }
     compiler.writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
@@ -74,23 +74,23 @@ public class Array extends Symbol
       {
         tmpInst = new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
           (short) 13);
-        writeStore(compiler, count, tmpInst);
+        handleStore(compiler, count, tmpInst);
         tmpInst = new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
           (short) 10);
-        writeStore(compiler, count, tmpInst);
+        handleStore(compiler, count, tmpInst);
         count = count + 2;
       }
       else
       {
         tmpInst = new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
           (short) varValue.charAt(count));
-        writeStore(compiler, count, tmpInst);
+        handleStore(compiler, count, tmpInst);
         count++;
       }
     }
   }
 
-  private void writeLoad(StatementCompiler compiler, int index)
+  public void handleLoad(StatementCompiler compiler, int index)
   {
     compiler.writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
       (short) index));
@@ -98,7 +98,23 @@ public class Array extends Symbol
       (byte) 0, getOffset()));
   }
 
-  private void writeStore(StatementCompiler compiler, int index,
+  public void handleLoad(StatementCompiler compiler, Symbol index)
+  {
+    index.handleLoad(compiler);
+    compiler.writePCode(new Instruction(OpCode.LOAD_INDEXED.getValue(),
+      (byte) 0, getOffset()));
+  }
+
+  public void handleStore(StatementCompiler compiler, Symbol index,
+    Instruction newInstruction)
+  {
+    index.handleLoad(compiler);
+    compiler.writePCode(newInstruction);
+    compiler.writePCode(new Instruction(OpCode.STORE_INDEXED.getValue(),
+      (byte) 0, getOffset()));
+  }
+
+  public void handleStore(StatementCompiler compiler, int index,
     Instruction newInstruction)
   {
     compiler.writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
