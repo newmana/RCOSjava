@@ -3,7 +3,7 @@ RCOS.java Version 1.0
 
 ** Where is it? **
 ==================
-URL:   http://rcosjava.sourceforge.net/
+URL: http://www.rcosjava.org/
 
 ** What is it? **
 =================
@@ -17,9 +17,10 @@ semaphores.
 ** Compiling and Installing **
 ==============================
 The default process of installing RCOS.java is to use the Jakarta Ant build
-program.  It is assumed that you have installed ANT correctly.
+program.  It is assumed that you have installed Ant correctly.  The current
+build.xml assumes version 1.3 of Ant.
 
-Just go to the root directory, and execute "ant".
+Just go to the root directory of the source code, and execute "ant".
 
 After compilation the directories "deploy" and "javadoc" will have 
 been generated.
@@ -34,12 +35,12 @@ and the HTML file located in the "deploy" root directory.
 =======================
 The requirements for 'RCOS.java' are:
 * Java Runtime Environment (MS, Sun, Symantec, etc) verion 1.3.
-* 16MB RAM.
+* 32MB RAM.
 * For older Windows/Mac systems - TCP/IP networking installed.
 * Web server (for Netscape and IE 4.x users and above) if running in
 Appletviewer or the browser.  It will run okay in an IDE like 
 JBuilder.
-* 486DX266 (or equivalent) or above.  Pentium recommended!
+* Pentium 166 (or equivalent) or above.  Pentium II recommended.
 
 The programs that RCOS.java executes are retrieved from a network server.
 This server, a Java application, must be started before running RCOS.java.
@@ -54,8 +55,8 @@ in a different directory copy the required batch/script file and the pll2
 directory.
 
 The executables guaranteed to work are "sem.pcd", "sem2.pcd", "third.pcd"
-and "numbers.pcd".  The others will work soon but this one is the only 
-tested one so far.
+and "numbers.pcd".  Some of the others will work but they haven't been 
+tested fully.
 
 For 95/98 and NT users please ensure that 'hosts' file is set-up correctly.
 The program can appear to hang if it can't resolve your computers name.
@@ -99,7 +100,7 @@ configurable using the 'port' parameter.
 ** Appletviewer ** 
 ===================
 Go to the RCOS directory and type:
-	appletviewer RCOS.html [Return]
+appletviewer RCOS.html [Return]
 
 This works okay.  The Help system won't work because it requires a browser 
 to bring up the hypertext.
@@ -107,10 +108,10 @@ to bring up the hypertext.
 ** Known bugs **
 ===================
 The currently known bugs are:
-* You must be able to connect to the Internet to access the DTD for the
-XML based recording.  If you are not connected then playback will fail.
-* The server side client sometimes crashes.  Although this is getting
-better.
+* File server sometimes crashes,
+* Killing a process when it is moving between the a queues will cause a 
+crash, and
+* Some odd semaphore based bugs.
 
 Please submit any bugs (with OS, Java VM, Browser and any other details)
 to the email addresses below.
@@ -127,4 +128,4 @@ newmana@netscape.net
 David Jones
 d.jones@cqu.edu.au
 
-Last Update: 25th April 2001
+Last Update: 13th June 2001
