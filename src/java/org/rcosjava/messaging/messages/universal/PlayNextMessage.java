@@ -1,7 +1,11 @@
 package org.rcosjava.messaging.messages.universal;
 
+import org.rcosjava.software.animator.support.ErrorDialog;
 import org.rcosjava.messaging.postoffices.animator.AnimatorMessageHandler;
 import org.rcosjava.messaging.postoffices.universal.UniversalMessagePlayer;
+import org.rcosjava.messaging.postoffices.universal.EndOfMessagesException;
+
+import org.apache.log4j.*;
 
 /**
  * Tells the universal message player to play another message.
@@ -12,6 +16,11 @@ import org.rcosjava.messaging.postoffices.universal.UniversalMessagePlayer;
  */
 public class PlayNextMessage extends UniversalMessageAdapter
 {
+  /**
+   * Logging class.
+   */
+  private final static Logger log = Logger.getLogger(PlayNextMessage.class);
+
   /**
    * Constructs a new play next message.
    *
@@ -29,7 +38,16 @@ public class PlayNextMessage extends UniversalMessageAdapter
    */
   public void doMessage(UniversalMessagePlayer theElement)
   {
-    theElement.playNextMessage();
+    try
+    {
+      theElement.playNextMessage();
+    }
+    catch (EndOfMessagesException nome)
+    {
+      new ErrorDialog("Warning - No Messages Left", "You made a request to " +
+          "play a message that does not exist.").show();
+      log.error("No more messages", nome);
+    }
   }
 
   /**
