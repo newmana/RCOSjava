@@ -32,7 +32,12 @@ public class MultimediaAnimator extends RCOSAnimator
   /**
    * Description of the Field
    */
-  private MultimediaFrame mmFrame;
+  private MultimediaPlayFrame mmPlayFrame;
+
+  /**
+   *
+   */
+  private MultimediaRecordFrame mmRecordFrame;
 
   /**
    * Description of the Field
@@ -74,7 +79,8 @@ public class MultimediaAnimator extends RCOSAnimator
       UniversalMessagePlayer newPlayer)
   {
     super(MESSENGING_ID, aPostOffice);
-    mmFrame = new MultimediaFrame(x, y, pmImages, this);
+    mmPlayFrame = new MultimediaPlayFrame(x, y, pmImages, this);
+    mmRecordFrame = new MultimediaRecordFrame(x, y, pmImages, this);
     recorder = newRecorder;
     player = newPlayer;
     recording = false;
@@ -88,7 +94,8 @@ public class MultimediaAnimator extends RCOSAnimator
    */
   public void setupLayout(Component c)
   {
-    mmFrame.setupLayout(c);
+    mmPlayFrame.setupLayout(c);
+    mmRecordFrame.setupLayout(c);
   }
 
   /**
@@ -127,17 +134,33 @@ public class MultimediaAnimator extends RCOSAnimator
   /**
    * Description of the Method
    */
-  public void showFrame()
+  public void showPlayFrame()
   {
-    mmFrame.setVisible(true);
+    mmPlayFrame.setVisible(true);
   }
 
   /**
    * Description of the Method
    */
-  public void hideFrame()
+  public void hidePlayFrame()
   {
-    mmFrame.setVisible(false);
+    mmPlayFrame.setVisible(false);
+  }
+
+  /**
+   * Description of the Method
+   */
+  public void showRecordFrame()
+  {
+    mmRecordFrame.setVisible(true);
+  }
+
+  /**
+   * Description of the Method
+   */
+  public void hideRecordFrame()
+  {
+    mmRecordFrame.setVisible(false);
   }
 
   /**
