@@ -2,6 +2,7 @@ package org.rcosjava.software.terminal;
 
 import java.awt.*;
 import java.awt.event.*;
+
 import org.rcosjava.hardware.cpu.Interrupt;
 import org.rcosjava.hardware.terminal.HardwareTerminal;
 import org.rcosjava.messaging.messages.os.AddInterrupt;
@@ -90,7 +91,7 @@ public class SoftwareTerminal extends OSMessageHandler
 
     // create and register a terminal Interrupt handler
     RegisterInterruptHandler msg = new RegisterInterruptHandler(this,
-      new TerminalInterruptHandler(this));
+      new TerminalInterruptHandler(this, myId));
     sendMessage(msg);
   }
 
