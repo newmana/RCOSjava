@@ -7,8 +7,9 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.net.*;
 import java.util.*;
+
 import org.rcosjava.software.animator.RCOSPanel;
-import org.rcosjava.software.animator.support.RCOSBox;
+import org.rcosjava.software.animator.support.RCOSRectangle;
 import org.rcosjava.software.animator.support.mtgos.GraphicsEngine;
 import org.rcosjava.software.animator.support.mtgos.MTGO;
 import org.rcosjava.software.animator.support.positions.Movement;
@@ -103,40 +104,43 @@ public class ProcessSchedulerPanel extends RCOSPanel
     readyToCPUMovement, cpuToReadyMovement, cpuToBlockedMovement;
 
   /**
-   * Description of the Field
+   * Images to use to display.
    */
   private Image myImages[] = new Image[5];
 
   /**
-   * Description of the Field
+   * Center of the window.
    */
   private int windowCenter;
 
   /**
-   * Description of the Field
+   * Indentation into the graphics engine.
    */
   private int leftIndent, rightIndent;
 
   /**
-   * Description of the Field
+   * Dimensions of the graphics engine.
    */
   private int width, height;
 
   /**
-   * Description of the Field
+   * The dimensions of the box.
    */
   private int boxHeight, boxWidth;
 
   /**
-   * Description of the Field
+   * How long to delay between refreshes.
    */
   private long delay;
 
   /**
-   * Description of the Field
+   * The process scheduler that we are representing.
    */
   private ProcessSchedulerAnimator myProcessScheduler;
 
+  /**
+   * True if we've successfully set-up the movement of the processes.
+   */
   private boolean movementSetup = false;
 
   /**
@@ -146,7 +150,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    * @param thisProcessScheduler Description of Parameter
    */
   public ProcessSchedulerPanel(ImageIcon[] images,
-      ProcessSchedulerAnimator thisProcessScheduler)
+      ProcessSchedulerAnimator newProcessScheduler)
   {
     myImages = new Image[images.length];
     for (int index = 0; index < images.length-1; index++)
@@ -158,7 +162,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     ReadyQ = new LIFOQueue(10, 0);
 
     delay = 1;
-    myProcessScheduler = thisProcessScheduler;
+    myProcessScheduler = newProcessScheduler;
   }
 
   /**
@@ -296,9 +300,10 @@ public class ProcessSchedulerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Paint the compontents call super, then repaints background if engine
+   * is initialized.
    *
-   * @param g Description of Parameter
+   * @param g graphics object.
    */
   public synchronized void paintComponent(Graphics g)
   {
@@ -315,9 +320,10 @@ public class ProcessSchedulerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Waits for a given set of time and then calls repaint.  This is to slow
+   * down repaints.
    *
-   * @param time Description of Parameter
+   * @param time number of milliseconds to wait before running.
    */
   public synchronized void syncPaint(long time)
   {
@@ -338,7 +344,6 @@ public class ProcessSchedulerPanel extends RCOSPanel
    */
   void setupMovement()
   {
-
     // Create the animation area for the panel.
     cpuPic = new MTGO(myImages[2], "RCOS CPU", false);
     cpuPic.priority = 1;
@@ -358,7 +363,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     int count;
     int count2;
     int increment;
-    int iArr;
+    int arrayIndex;
 
     // Movement inside queues
 
@@ -374,27 +379,26 @@ public class ProcessSchedulerPanel extends RCOSPanel
         {
           increment = 0;
         }
-        iArr = (count2 - 5) * -1;
+        arrayIndex = (count2 - 5) * -1;
         if (count == 1)
         {
-          readyPositions[iArr] = new Position(((count2 * boxHeight) + engine.getCenterX()),
+          readyPositions[arrayIndex] = new Position(((count2 * boxHeight) + engine.getCenterX()),
               ((count * height) + boxHeight), increment, 0);
         }
         if (count == 2)
         {
-          blockedPositions[iArr] = new Position(((count2 * boxHeight) + engine.getCenterX()),
+          blockedPositions[arrayIndex] = new Position(((count2 * boxHeight) + engine.getCenterX()),
               ((count * height) + boxHeight), increment, 0);
         }
         if (count == 3)
         {
-          zombiePositions[iArr] = new Position(((count2 * boxHeight) + engine.getCenterX()),
+          zombiePositions[arrayIndex] = new Position(((count2 * boxHeight) + engine.getCenterX()),
               ((count * height) + boxHeight), increment, 0);
         }
       }
     }
 
     // Movement of process from Zombie to Ready
-
     zombieToReadyPositions[0] = new Position(engine.getCenterX() - 180, (3 * height) + boxHeight, -2, 0);
     zombieToReadyPositions[1] = new Position(leftIndent - (boxWidth / 2), (3 * height) + boxHeight, 0, -2);
     zombieToReadyPositions[2] = new Position(leftIndent - (boxWidth / 2), (2 * height) + 45 + (boxHeight / 2), 2, 0);
@@ -647,7 +651,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Move
    *
    * @param pid Description of Parameter
    */
@@ -669,9 +673,9 @@ public class ProcessSchedulerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Move across the zombie queue.
    *
-   * @param pid Description of Parameter
+   * @param pid process id to move.
    */
   synchronized void moveZombieQ(int pid)
   {
@@ -679,9 +683,9 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
     zombieMovement.start();
 
-    int iPos = 10 - ReadyQ.itemCount();
+    int pos = 10 - ReadyQ.itemCount();
 
-    while (!zombieMovement.finished(iPos))
+    while (!zombieMovement.finished(pos))
     {
       zombieMovement.step();
       tmpMTGO.xPosition = zombieMovement.getCurrentX();
@@ -698,76 +702,75 @@ public class ProcessSchedulerPanel extends RCOSPanel
    */
   synchronized void addQueue(int queueType, int pid)
   {
-    String sProcessID = "P" + pid;
+    String processId = "P" + pid;
 
     switch (queueType)
     {
-        case ProcessScheduler.READYQ:
-          ReadyQ.insert(sProcessID);
-          moveReadyQ(pid);
-          break;
-        case ProcessScheduler.BLOCKEDQ:
-          BlockedQ.insert(sProcessID);
-          moveBlockedQ(pid);
-          break;
-        case ProcessScheduler.ZOMBIEQ:
-          ZombieQ.insert(sProcessID);
-          moveZombieQ(pid);
-          break;
+      case ProcessScheduler.READYQ:
+        ReadyQ.insert(processId);
+        moveReadyQ(pid);
+        break;
+      case ProcessScheduler.BLOCKEDQ:
+        BlockedQ.insert(processId);
+        moveBlockedQ(pid);
+        break;
+      case ProcessScheduler.ZOMBIEQ:
+        ZombieQ.insert(processId);
+        moveZombieQ(pid);
+        break;
     }
     refreshQueue(queueType);
   }
 
   /**
-   * Description of the Method
+   * Remove a process from the given queue type.
    *
-   * @param queueType Description of Parameter
-   * @param pid Description of Parameter
+   * @param queueType the specific queue to remove ready, blocked or zombie.
+   * @param pid the process id to remove from the queue.
    */
   synchronized void removeQueue(int queueType, int pid)
   {
     switch (queueType)
     {
-        case ProcessScheduler.READYQ:
-          ReadyQ = removeProcID(pid, ReadyQ);
-          break;
-        case ProcessScheduler.BLOCKEDQ:
-          BlockedQ = removeProcID(pid, BlockedQ);
-          break;
-        case ProcessScheduler.ZOMBIEQ:
-          ZombieQ = removeProcID(pid, ZombieQ);
-          break;
+      case ProcessScheduler.READYQ:
+        removeProcId(pid, ReadyQ);
+        break;
+      case ProcessScheduler.BLOCKEDQ:
+        removeProcId(pid, BlockedQ);
+        break;
+      case ProcessScheduler.ZOMBIEQ:
+        removeProcId(pid, ZombieQ);
+        break;
     }
     refreshQueue(queueType);
   }
 
   /**
-   * Description of the Method
+   * Remove a process from a given queue.
    *
-   * @param pid Description of Parameter
-   * @param tmpQueue Description of Parameter
-   * @return Description of the Returned Value
+   * @param pid the process id to remove from the queue.
+   * @param tmpQueue the queue to remove the pid from.
    */
-  synchronized LIFOQueue removeProcID(int pid, LIFOQueue tmpQueue)
+  synchronized void removeProcId(int pid, LIFOQueue tmpQueue)
   {
-    String tmpID;
-    String sProcessID = "P" + pid;
+    String tmpId;
+    String processId = "P" + pid;
 
     tmpQueue.goToHead();
     while (!tmpQueue.atTail())
     {
-      tmpID = (String) tmpQueue.peek();
-      if (tmpID.compareTo(sProcessID) == 0)
+      tmpId = (String) tmpQueue.peek();
+      if (tmpId.compareTo(processId) == 0)
       {
         tmpQueue.retrieveCurrent();
+        break;
       }
       tmpQueue.goToNext();
     }
-    return tmpQueue;
   }
 
   /**
-   * Description of the Method
+   * Draw the background images the queue names, the boxes, etc.
    */
   private void drawBackground()
   {
@@ -841,7 +844,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    * If a process has left or joined a queue then given the queue type (1-3)
    * redisplay all the processes that are in that queue.
    *
-   * @param queueType Description of Parameter
+   * @param queueType the type of the queue ready, blocked or zombie.
    */
   private synchronized void refreshQueue(int queueType)
   {
@@ -851,15 +854,15 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
     switch (queueType)
     {
-        case ProcessScheduler.READYQ:
-          tmpQ = ReadyQ;
-          break;
-        case ProcessScheduler.BLOCKEDQ:
-          tmpQ = BlockedQ;
-          break;
-        case ProcessScheduler.ZOMBIEQ:
-          tmpQ = ZombieQ;
-          break;
+      case ProcessScheduler.READYQ:
+        tmpQ = ReadyQ;
+        break;
+      case ProcessScheduler.BLOCKEDQ:
+        tmpQ = BlockedQ;
+        break;
+      case ProcessScheduler.ZOMBIEQ:
+        tmpQ = ZombieQ;
+        break;
     }
     tmpQ.goToHead();
     while (!tmpQ.atTail())
@@ -879,27 +882,23 @@ public class ProcessSchedulerPanel extends RCOSPanel
    * If you click on an object in the animation area then do something based on
    * the object selected. For example, display the CPU frame if you click on the
    * CPU object.
-   *
-   * @author administrator
-   * @created 28 April 2002
    */
   class MTGOSelection extends MouseAdapter
   {
     /**
-     * Description of the Method
+     * Send a message when we get a mouse pressed event.
      *
-     * @param e Description of Parameter
+     * @param e the mouse event generated.
      */
     public void mousePressed(MouseEvent e)
     {
       try
       {
-//        this.repaint();
-        String sTemp = new String(engine.isInside(e.getX(), e.getY()));
+        String temp = new String(engine.isInside(e.getX(), e.getY()));
 
-        if (sTemp != " ")
+        if (temp != " ")
         {
-          if (sTemp.compareTo("RCOS CPU") == 0)
+          if (temp.compareTo("RCOS CPU") == 0)
           {
             myProcessScheduler.showCPU();
           }
@@ -913,16 +912,13 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
   /**
    * Change the refresh rate based on the item selected.
-   *
-   * @author administrator
-   * @created 28 April 2002
    */
   class SpeedSelection implements ItemListener
   {
     /**
-     * Description of the Method
+     * Change the refresh rate.
      *
-     * @param e Description of Parameter
+     * @param e the item event generated.
      */
     public void itemStateChanged(ItemEvent e)
     {
@@ -953,16 +949,14 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
   /**
    * Change the type of process queueing.
-   *
-   * @author administrator
-   * @created 28 April 2002
    */
   class SchedulerSelection implements ItemListener
   {
     /**
-     * Description of the Method
+     * When a new queue type has been selected initiate a switch with the
+     * process scheduler.
      *
-     * @param e Description of Parameter
+     * @param e item event generated.
      */
     public void itemStateChanged(ItemEvent e)
     {
@@ -985,16 +979,13 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
   /**
    * Change the quatum based on the option selected.
-   *
-   * @author administrator
-   * @created 28 April 2002
    */
   class QuantumSelection implements ItemListener
   {
     /**
-     * Description of the Method
+     * When a different quantum level has change send a new quantum message.
      *
-     * @param e Description of Parameter
+     * @param e item event generated.
      */
     public void itemStateChanged(ItemEvent e)
     {

@@ -30,6 +30,11 @@ import org.rcosjava.software.process.ProcessScheduler;
 public class ProcessSchedulerAnimator extends RCOSAnimator
 {
   /**
+   * Uniquely identifies the process scheduler to the post office.
+   */
+  private final static String MESSENGING_ID = "ProcessSchedulerAnimator";
+
+  /**
    * The panel in which to display all the details to.
    */
   private static ProcessSchedulerPanel panel;
@@ -38,11 +43,6 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    * The string (e.g. "PID 1") of the current process running.
    */
   private static String currentProcess = new String();
-
-  /**
-   * Uniquely identifies the process scheduler to the post office.
-   */
-  private final static String MESSENGING_ID = "ProcessSchedulerAnimator";
 
   /**
    * Create an animator office, register with the animator office, set the size
