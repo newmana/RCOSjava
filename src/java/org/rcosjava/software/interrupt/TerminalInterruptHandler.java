@@ -29,10 +29,11 @@ public class TerminalInterruptHandler extends InterruptHandler
    * Create a new interrupt handler.
    *
    * @param newHandler the handler.
+   * @param newId the id of the terminal.
    */
-  public TerminalInterruptHandler(SoftwareTerminal newHandler)
+  public TerminalInterruptHandler(SoftwareTerminal newHandler, String newId)
   {
-    super(myType);
+    super(myType + "_" + newId);
     handler = newHandler;
   }
 
