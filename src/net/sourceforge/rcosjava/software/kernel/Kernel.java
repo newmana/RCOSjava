@@ -486,17 +486,17 @@ public class Kernel extends OSMessageHandler
       myCPU.getContext().decStackPointer();
       //get the shared mem name using getName()
       //send the message
-      //SharedMemoryCreateMessage message = new SharedMemoryCreateMessage(this,
-      //  getName(), myCPU.getCurrentProcess().getPID(), iLength);
-      //sendMessage(message);
+      SharedMemoryCreateMessage message = new SharedMemoryCreateMessage(this,
+        getName(), getCurrentProcess().getPID(), length);
+      sendMessage(message);
     }
     else if (call.isSharedMemoryOpen())
     {
       //get the shared mem name using getName()
       //send the message
-      //SharedMemoryOpenMessage message = new SharedMemoryOpenMessage(this,
-      //  getName(), myCPU.getCurrentProcess().getPID());
-      //sendMessage(message);
+      SharedMemoryOpenMessage message = new SharedMemoryOpenMessage(this,
+        getName(), getCurrentProcess().getPID());
+      sendMessage(message);
     }
     else if (call.isSharedMemoryClose())
     {
@@ -526,9 +526,12 @@ public class Kernel extends OSMessageHandler
     }
     else if (call.isSharedMemorySize())
     {
-      int sharedMemId = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
-      //SharedMemorySizeMessae message = SharedMemorySizeMessage(this,
-      //  iSharedMemID);
+      int sharedMemId = myCPU.getProcessStack().read(myCPU.getContext().
+        getStackPointer());
+      myCPU.getContext().decStackPointer();
+      SharedMemorySizeMessage message = new SharedMemorySizeMessage(this,
+        sharedMemId);
+      sendMessage(message);
     }
     else if (call.isFork())
     {
@@ -562,8 +565,8 @@ public class Kernel extends OSMessageHandler
    */
   public String getName()
   {
-    int length = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
-    //myCPU.getContext().decStackPointer();
+    int length = myCPU.getProcessStack().read(myCPU.getContext().
+      getStackPointer());
 
     char[] name = new char[length];
 

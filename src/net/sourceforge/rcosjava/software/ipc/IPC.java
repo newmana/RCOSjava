@@ -7,9 +7,9 @@ import net.sourceforge.rcosjava.messaging.postoffices.MessageHandler;
 import net.sourceforge.rcosjava.messaging.messages.MessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.os.BlockCurrentProcess;
 import net.sourceforge.rcosjava.messaging.messages.os.OSMessageAdapter;
-import net.sourceforge.rcosjava.messaging.messages.os.ShrmInit;
+import net.sourceforge.rcosjava.messaging.messages.os.SharedMemoryCreateMessage;
 import net.sourceforge.rcosjava.messaging.messages.os.ShrmRet;
-import net.sourceforge.rcosjava.messaging.messages.os.ShrmSize;
+import net.sourceforge.rcosjava.messaging.messages.os.SharedMemorySizeMessage;
 import net.sourceforge.rcosjava.messaging.messages.os.ShrmRead;
 import net.sourceforge.rcosjava.messaging.messages.os.ShrmWrite;
 import net.sourceforge.rcosjava.messaging.messages.os.ReturnValue;
@@ -19,6 +19,7 @@ import net.sourceforge.rcosjava.messaging.messages.universal.SemaphoreCreated;
 import net.sourceforge.rcosjava.messaging.messages.universal.SemaphoreOpened;
 import net.sourceforge.rcosjava.messaging.messages.universal.SemaphoreWaiting;
 import net.sourceforge.rcosjava.messaging.messages.universal.SemaphoreSignalled;
+import net.sourceforge.rcosjava.messaging.messages.universal.SharedMemoryCreated;
 import net.sourceforge.rcosjava.messaging.messages.universal.BlockedToReady;
 import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import net.sourceforge.rcosjava.hardware.memory.Memory;
@@ -254,25 +255,29 @@ public class IPC extends OSMessageHandler
     {
       // This means that someone has already created this
       // shrm block (on that id) - nicely say no.
-      //ReturnValue message = new ReturnValue(this, -1);
-      //sendMessage(message);
+      ReturnValue message = new ReturnValue(this, (short) -1);
+      sendMessage(message);
     }
     else
     {
       shmCount++;
       // We give this nice process some shared memory ;-)
-      SharedMemory shShrm = new SharedMemory(shmName,
-        shmCount, pid, size);
+      SharedMemory shShrm = new SharedMemory(shmName, shmCount, pid, size);
       sharedMemoryTable.put(shmName, shShrm);
-      Integer iShrmID = new Integer(shmCount);
-      sharedMemoryIdTable.put(iShrmID, shShrm);
+      Integer shrmId = new Integer(shmCount);
+      sharedMemoryIdTable.put(shrmId, shShrm);
+
       // Two Tables - 1 indexed by the String shrm, one by
       // the simpleint shrm number.
-      //message = new ReturnValue(this, (short) shmCount);
-      //sendMessage(message);
-      //message = new SharedMemoryCreatedMessage(this, shmCount,
-      //  pid, size);
-      //sendMessage(message);
+
+      //Return the integer value (SemID) of the semaphore created.
+      ReturnValue returnMessage = new ReturnValue(this, (short) shmCount);
+      sendMessage(returnMessage);
+
+      //Inform other components that the shared memory was created.
+      SharedMemoryCreated createdMessage = new SharedMemoryCreated(this,
+        shmName, pid, size);
+      sendMessage(createdMessage);
     }
   }
 
@@ -282,13 +287,14 @@ public class IPC extends OSMessageHandler
     {
       // Check that the shrm exists - it does
       // Open shrm
-      SharedMemory shShrm = (SharedMemory)
-        sharedMemoryTable.get(shmName);
+      SharedMemory shShrm = (SharedMemory) sharedMemoryTable.get(shmName);
       shShrm.open(pid);
-      int iSharedMemID = shShrm.getShrmID();
+
       // Done.  Now we return a message
-      //message = new ReturnValue(this, (short) iSharedMemID);
-      //sendMessage(message);
+      int sharedMemId = shShrm.getShrmID();
+      ReturnValue returnMessage = new ReturnValue(this, (short) sharedMemId);
+      sendMessage(returnMessage);
+
       //message = new SharedMemoryOpenedMessage(this, iSharedMemID, pid);
       //sendMessage(message);
     }
@@ -296,8 +302,8 @@ public class IPC extends OSMessageHandler
     {
       // The shrm does not exist (someone trying to open
       // a "non created" shrm segment)
-      //message = new ReturnValue(this, -1);
-      //sendMessage(message);
+      ReturnValue returnMessage = new ReturnValue(this, (short) -1);
+      sendMessage(returnMessage);
     }
   }
 
@@ -390,18 +396,20 @@ public class IPC extends OSMessageHandler
       }
   }
 
-  public void sharedMemorySize(int shmId)
+  public void sharedMemorySize(int currentShmId)
   {
-    Integer iShrmID = new Integer(shmId);
-    if (sharedMemoryIdTable.containsKey(iShrmID))
+    Integer shrmId = new Integer(currentShmId);
+
+    if (sharedMemoryIdTable.containsKey(shrmId))
     {
       // Check that the shrm exists - it does
-      //SharedMemory shShrm = (SharedMemory)
-      //  sharedMemoryIdTable.get(shmId);
-      //int size = shShrm.size();
+      SharedMemory shShrm = (SharedMemory) sharedMemoryIdTable.get(shrmId);
+      int size = shShrm.size();
+
       // Let kernel know the result
-      //message = new ReturnValue(this, (short) size);
-      //sendMessage(message);
+      ReturnValue returnMessage = new ReturnValue(this, (short) size);
+      sendMessage(returnMessage);
+
       //if (size != -1)
       //{
         //message = new SharedMemorySizeMessage(this,
@@ -412,8 +420,8 @@ public class IPC extends OSMessageHandler
     else
     {
       // Don't know about this segment?
-      //message = new ReturnValue(this, -1);
-      //sendMessage(message);
+      ReturnValue message = new ReturnValue(this, (short) -1);
+      sendMessage(message);
     }
   }
 
