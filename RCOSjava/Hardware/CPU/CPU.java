@@ -149,17 +149,17 @@ public class CPU
       }
       catch (java.io.IOException e)
       {
-        System.out.println("IO Exception while executing code: " +
+        System.err.println("IO Exception while executing code: " +
           e.getMessage());
       }
       catch (java.lang.NullPointerException e2)
       {
-        System.out.println("Null Pointer while executing code: " +
+        System.err.println("Null Pointer while executing code: " +
           e2.getMessage());
       }
       catch (java.lang.Exception e3)
       {
-        System.out.println("Exception while executing code: " +
+        System.err.println("Exception while executing code: " +
           e3.getMessage());
       }
     }
