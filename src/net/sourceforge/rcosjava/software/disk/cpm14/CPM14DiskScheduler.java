@@ -1,13 +1,3 @@
-//*************************************************************************//
-// FILENAME : CPM14DiskScheduler.java
-// PACKAGE  : Disk.CPM14
-// PURPOSE  : A simulated CPM14 disk with simple processing of requests.
-// AUTHOR   : Brett Carter
-// MODIFIED : Andrew Newman
-// HISTORY  : 25/03/96 Created.
-//            10/08/99 Moved to package and removed message handling.
-//*************************************************************************//
-
 package net.sourceforge.rcosjava.software.disk.cpm14;
 
 import net.sourceforge.rcosjava.messaging.messages.MessageAdapter;
@@ -18,8 +8,16 @@ import net.sourceforge.rcosjava.software.disk.DiskRequest;
 import net.sourceforge.rcosjava.software.disk.DiskQueueItem;
 import net.sourceforge.rcosjava.software.util.FIFOQueue;
 import net.sourceforge.rcosjava.software.interrupt.CPM14DiskInterruptHandler;
-import net.sourceforge.rcosjava.hardware.disk.cpm14.CPM14HardDrive;
+import net.sourceforge.rcosjava.hardware.disk.Disk;
 
+/**
+ * A simulated CPM14 disk with simple processing of requests.
+ * <P>
+ * @author Andrew Newman.
+ * @author Brett Carter.
+ * @version 1.00 $Date$
+ * @created 10th September, 1999
+ */
 public class CPM14DiskScheduler implements DiskScheduler
 {
   //Defaults based on size of 247808 bytes and 1024 bytes per sector
@@ -27,26 +25,22 @@ public class CPM14DiskScheduler implements DiskScheduler
   private final int SECTORS_PER_TRACK = 11;
   private final int TRACKS = 22;
   // Variables
-  private CPM14DiskInterruptHandler cvIntHandler;
-  private FIFOQueue cvRequestQueue;
-  private DiskQueueItem cvCurrentRequest;
-  private boolean cvBusy;
-  private static int cvBlockSize = 0;
-  private static int cvSize = 0;
-  // Storage objects.
-  private CPM14HardDrive cvDiskDrive = new CPM14HardDrive(TRACKS,
-    SECTORS_PER_TRACK, SECTOR_SIZE);
+  private CPM14DiskInterruptHandler interruptHandler;
+  private FIFOQueue requestQueue;
+  private DiskQueueItem currentRequest;
+  private boolean busy;
+  private Disk disk;
 
   // Constructor. Sets up variables and registers with the post office.
   public CPM14DiskScheduler(String myID, MessageHandler mhPostOffice)
   {
     //super(myID, mhPostOffice);
-    cvRequestQueue = new FIFOQueue (10, 5);
+    requestQueue = new FIFOQueue (10, 5);
     // Create and Register the InterruptHandler.
-    //cvIntHandler = new CPM14DiskInterruptHandler( id, mvPostOffice,
+    //interruptHandler = new CPM14DiskInterruptHandler( id, mvPostOffice,
     //                                     id+":INT", id);
     //Message mvIHReg = new Message ( id, "KERNEL", "RegisterInterruptHandler",
-    //                                  cvIntHandler);
+    //                                  interruptHandler);
   }
 
   public void processMessage(MessageAdapter aMsg)
@@ -82,17 +76,17 @@ public class CPM14DiskScheduler implements DiskScheduler
   public void queueRequest(String mvSource, DiskRequest mvTheRequest)
   {
     DiskQueueItem mvTheQueueItem = new DiskQueueItem(mvSource, mvTheRequest);
-    cvRequestQueue.insert(mvTheQueueItem);
+    requestQueue.insert(mvTheQueueItem);
   }
 
   public void processQueue()
   {
-    if (!cvBusy)
+    if (!busy)
     {
-      cvBusy = true;
-      if (!cvRequestQueue.queueEmpty())
+      busy = true;
+      if (!requestQueue.queueEmpty())
       {
-        cvCurrentRequest = (DiskQueueItem) cvRequestQueue.retrieve();
+        currentRequest = (DiskQueueItem) requestQueue.retrieve();
         // Calc time.
         int mvTime = 10;
         // Register Interrupt.
@@ -101,7 +95,7 @@ public class CPM14DiskScheduler implements DiskScheduler
       }
       else
       {
-        cvBusy = false;
+        busy = false;
       }
     }
   }
@@ -111,27 +105,27 @@ public class CPM14DiskScheduler implements DiskScheduler
   {
     byte[] mvReturnData;
 
-    if (cvCurrentRequest.getDiskRequest().Data == null)
+    if (currentRequest.getDiskRequest().Data == null)
     {
-      mvReturnData = readBlock(cvCurrentRequest.getDiskRequest().DiskBlock);
+      mvReturnData = readBlock(currentRequest.getDiskRequest().DiskBlock);
     }
     else
     {
       mvReturnData = null;
-      writeBlock (cvCurrentRequest.getDiskRequest().DiskBlock,
-                         cvCurrentRequest.getDiskRequest().Data);
+      writeBlock (currentRequest.getDiskRequest().DiskBlock,
+                         currentRequest.getDiskRequest().Data);
     }
     DiskRequest mvTheReturnData = new DiskRequest (
-                                     cvCurrentRequest.getDiskRequest().FSRequestID,
-                                     cvCurrentRequest.getDiskRequest().DiskBlock,
+                                     currentRequest.getDiskRequest().FSRequestID,
+                                     currentRequest.getDiskRequest().DiskBlock,
 			             mvReturnData);
 //    Message mvTheMessage = new Message( id,
-//					cvCurrentRequest.cvSource,
+//					currentRequest.cvSource,
 //					"DiskRequestComplete",
 //					mvTheReturnData );
  //   SendMessage ( mvTheMessage );
-    cvCurrentRequest = null;
-    cvBusy = false;
+    currentRequest = null;
+    busy = false;
   }
 
   // This proceedure is part of the Simulation. In a real system, this
@@ -140,10 +134,10 @@ public class CPM14DiskScheduler implements DiskScheduler
   {
     int mvCounter;
 
-    int mvBlockOffset = (mvBlockNumber * cvBlockSize);
-    byte[] mvReadData = new byte[cvBlockSize];
+    int mvBlockOffset = (mvBlockNumber * blockSize);
+    byte[] mvReadData = new byte[blockSize];
 
-    for (mvCounter = 0; mvCounter < cvBlockSize; mvCounter++)
+    for (mvCounter = 0; mvCounter < blockSize; mvCounter++)
     {
       //mvReadData[mvCounter] = cvDiskData[mvCounter + mvBlockOffset];
     }
@@ -156,9 +150,9 @@ public class CPM14DiskScheduler implements DiskScheduler
   {
     int mvCounter;
 
-    int mvBlockOffset = (mvBlockNumber * cvBlockSize);
+    int mvBlockOffset = (mvBlockNumber * blockSize);
 
-    for (mvCounter = 0; mvCounter < cvBlockSize; mvCounter++)
+    for (mvCounter = 0; mvCounter < blockSize; mvCounter++)
     {
       //cvDiskData[mvCounter + mvBlockOffset] = mvWriteData[mvCounter];
     }
@@ -171,11 +165,11 @@ public class CPM14DiskScheduler implements DiskScheduler
     int X;
     for (X = 0; X<1024; X++)
     {
-      /*if ( cvDiskData[(Block*cvBlockSize)+X] == (byte)0x1A)
+      /*if ( cvDiskData[(Block*blockSize)+X] == (byte)0x1A)
       {
         System.out.print("<EOF>");
       }
-      System.out.print((char)cvDiskData[(Block*cvBlockSize)+X]);*/
+      System.out.print((char)cvDiskData[(Block*blockSize)+X]);*/
     }
   }
 }

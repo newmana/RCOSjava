@@ -1,13 +1,3 @@
-//*************************************************************************//
-// FILENAME : DiskManager.java
-// PACKAGE  : Hardware.Disk
-// PURPOSE  : Handles the creation/deletion of physical disks, their
-//            scheduler and other attributes.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 10/08/99 Created.
-//*************************************************************************//
-
 package net.sourceforge.rcosjava.software.disk;
 
 import net.sourceforge.rcosjava.messaging.messages.os.OSMessageAdapter;
@@ -17,6 +7,15 @@ import net.sourceforge.rcosjava.messaging.postoffices.os.OSOffice;
 import net.sourceforge.rcosjava.software.util.FIFOQueue;
 import net.sourceforge.rcosjava.software.interrupt.CPM14DiskInterruptHandler;
 
+/**
+ * Handles the creation and deletion of physical disks, their scheduler and
+ * other attributes.
+ * <P>
+ * @author Andrew Newman.
+ * @author Brett Carter.
+ * @version 1.00 $Date$
+ * @created 10th September, 1999
+ */
 public class DiskManager extends OSMessageHandler
 {
   private static final String MESSENGING_ID = "DiskManager";

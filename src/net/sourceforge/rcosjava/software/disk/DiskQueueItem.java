@@ -1,15 +1,13 @@
-//*************************************************************************//
-// FILENAME : DiskQueueItem.java
-// PACKAGE  : Disk
-// PURPOSE  :
-// AUTHOR   : Brett Carter
-// MODIFIED : Andrew Newman
-// HISTORY  : 25/3/96 Created.
-//            08/08/98 Moved package added get etc. AN
-//*************************************************************************//
-
 package net.sourceforge.rcosjava.software.disk;
 
+/**
+ * Holds the disk request and the object that sent it.  TODO refactor.
+ * <P>
+ * @author Andrew Newman.
+ * @author Brett Carter.
+ * @version 1.00 $Date$
+ * @created 10th September, 1999
+ */
 public class DiskQueueItem
 {
   private String cvSource;
