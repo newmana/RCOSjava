@@ -1,18 +1,3 @@
-//*************************************************************************/
-// FILE     : PagedMemoryManagement.java
-// PURPOSE  : Provides basic Memory/Page allocation.
-//            It is very inefficent at the moment.
-//            Probably should have two lists which
-//            contains used and free memory blocks.
-//            Combining and splitting memory blocks means it is
-//            very slow and unrealistic.
-// AUTHOR   : Bruce Jamieson
-// MODIFIED : Andrew Newman
-// HISTORY  : 27/03/96   Last Modified.
-//            02/12/97   Fixed bug with deallocating memory.
-//
-// *************************************************************************/
-
 package net.sourceforge.rcosjava.software.memory.paged;
 
 import java.lang.Integer;
@@ -24,22 +9,52 @@ import net.sourceforge.rcosjava.software.memory.MemoryReturn;
 import net.sourceforge.rcosjava.software.memory.MemoryManagement;
 import net.sourceforge.rcosjava.software.util.FIFOQueue;
 
+/**
+ * Provides basic Memory/Page allocation. It is very inefficent at the moment.
+ * Probably should have two lists which contains used and free memory blocks.
+ * Combining and splitting memory blocks means it is very slow and unrealistic.
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 02/12/97   Fixed bug with deallocating memory.
+ * </DD></DT>
+ * <P>
+ * @see net.sourceforge.rcosjava.hardware.memory.MainMemory
+ * @see net.sourceforge.rcosjava.software.memory.MemoryManager
+ * @author Andrew Newman.
+ * @author Bruce Jamieson
+ * @version 1.00 $Date$
+ * @created 27th March 1996
+ */
 public class PagedMemoryManagement implements MemoryManagement
 {
-  // Base page handler for the MMU
+  /**
+   * Base page handler for the MMU
+   */
   private static MainMemory myMainMemory;
   private FIFOQueue thePageTable;
 
-  public PagedMemoryManagement(int MaxPages)
+  /**
+   * Create a new set of paged memory.
+   *
+   * @param maxPages maximum number of pages to handle.
+   */
+  public PagedMemoryManagement(int maxPages)
   {
     thePageTable = new FIFOQueue(10,1);
-    myMainMemory = new MainMemory(MaxPages);
+    myMainMemory = new MainMemory(maxPages);
   }
 
-  //Goes through the entire section of memory allocating
-  //a specific set of memory with the same PID and
-  //Type.  Size, in this case is the number of pages.
-  public MemoryReturn open(int PID, byte type, int size)
+  /**
+   * Goes through the entire section of memory allocating a specific set of
+   * memory with the same PID and Type.  Size, in this case is the number of
+   * pages.
+   *
+   * @param pid the owner (in process id) of the memory to create for.
+   * @param type memory type (either code or stack).
+   * @param size the number of pages to create.
+   */
+  public MemoryReturn open(int pid, byte type, int size)
     throws MemoryOpenFailedException
   {
     // Allocate pages
@@ -68,7 +83,7 @@ public class PagedMemoryManagement implements MemoryManagement
       }
     }
     //Write allocation information to page table.
-    PageTableEntry newPageTableEntry = new PageTableEntry((byte) PID,
+    PageTableEntry newPageTableEntry = new PageTableEntry((byte) pid,
       type, pages,(short) noPages);
     thePageTable.insert(newPageTableEntry);
     /*PageTableEntry tmpPageTable;
@@ -79,11 +94,15 @@ public class PagedMemoryManagement implements MemoryManagement
       thePageTable.goToNext();
     }*/
 
-    return (new MemoryReturn(PID, type, noPages, pages));
+    return (new MemoryReturn(pid, type, noPages, pages));
   }
 
-  // Deallocate based on Process ID.
-  public MemoryReturn close(int PID)
+  /**
+   * Deallocate all memory belonging to a certain Process ID.
+   *
+   * @param pid the process id to deallocate the memory from.
+   */
+  public MemoryReturn close(int pid)
   {
     PageTableEntry tmpPage;
 
@@ -94,14 +113,12 @@ public class PagedMemoryManagement implements MemoryManagement
     while (!thePageTable.atTail())
     {
       tmpPage = (PageTableEntry) thePageTable.peek();
-      if (tmpPage.getPID() == ((byte) PID))
+      if (tmpPage.getPID() == ((byte) pid))
       {
         tmpPage = (PageTableEntry) thePageTable.retrieveCurrent();
         for(int count = 0; count < tmpPage.getTotalNumberOfPages(); count++)
         {
           myMainMemory.freeMemory(tmpPage.getPages()[count]);
-          for (int count2 = 1; count2 < Memory.DEFAULT_SEGMENT-1; count2++)
-            myMainMemory.allocateMemory(tmpPage.getPages()[count]);
           indexTotalPages[totalPages] = tmpPage.getPages()[count];
           totalPages++;
         }
@@ -111,11 +128,14 @@ public class PagedMemoryManagement implements MemoryManagement
         thePageTable.goToNext();
       }
     }
-    return (new MemoryReturn(PID, (byte) 0, totalPages, indexTotalPages));
+    return (new MemoryReturn(pid, (byte) 0, totalPages, indexTotalPages));
   }
 
   /**
-   * Get all memory from numerous pages belonging to PID of type Type.
+   * Get all memory from numerous pages belonging to pid of type Type.
+   *
+   * @param pid the process id to find all the memory for.
+   * @param type the type of memory to find (code or stack).
    */
   public Memory getAllMemory(int pid, byte type)
   {
@@ -155,16 +175,18 @@ public class PagedMemoryManagement implements MemoryManagement
     return tmpMemory;
   }
 
-  // Read page number Offset belonging to PID of type Type.
-  public Memory readPage(int PID, byte type, int offset)
+  /**
+   * Read page number Offset belonging to pid of type Type.
+   */
+  public Memory readPage(int pid, byte type, int offset)
   {
-    return (readBytes(PID, type, Memory.DEFAULT_SEGMENT, offset*Memory.DEFAULT_SEGMENT));
+    return (readBytes(pid, type, Memory.DEFAULT_SEGMENT, offset*Memory.DEFAULT_SEGMENT));
   }
 
-  //Read a number of bytes with given PID, Type, Size and Offset.
-  public Memory readBytes(int PID, byte type, int size, int offset)
+  //Read a number of bytes with given pid, Type, Size and Offset.
+  public Memory readBytes(int pid, byte type, int size, int offset)
   {
-    Memory tmpMemory = getAllMemory(PID, type);
+    Memory tmpMemory = getAllMemory(pid, type);
     if (tmpMemory != null)
     {
       return (tmpMemory.read(offset, size));
@@ -172,19 +194,21 @@ public class PagedMemoryManagement implements MemoryManagement
     return null;
   }
 
-  // Write page number Offset belonging to PID of type Type with Memory.
-  public void writePage(int PID, byte type, int offset, Memory newMemory)
+  /**
+   * Write page number Offset belonging to pid of type Type with Memory.
+   */
+  public void writePage(int pid, byte type, int offset, Memory newMemory)
   {
-    writeBytes(PID, type, Memory.DEFAULT_SEGMENT, offset*Memory.DEFAULT_SEGMENT,
+    writeBytes(pid, type, Memory.DEFAULT_SEGMENT, offset*Memory.DEFAULT_SEGMENT,
       newMemory);
   }
 
-  // Write bytes given PID, Type, Size, Offset with Memory.
-  public void writeBytes(int PID, byte type, int size, int offset,
+  // Write bytes given pid, Type, Size, Offset with Memory.
+  public void writeBytes(int pid, byte type, int size, int offset,
     Memory newMemory)
   {
     // Get all Memory from segments
-    Memory tmpMemory = getAllMemory(PID, type);
+    Memory tmpMemory = getAllMemory(pid, type);
     tmpMemory.setAllocated();
     if (tmpMemory != null)
     {
@@ -196,7 +220,7 @@ public class PagedMemoryManagement implements MemoryManagement
       while (!thePageTable.atTail())
       {
         tmpPageTable = (PageTableEntry) thePageTable.peek();
-        if ((tmpPageTable.getPID() == ((byte) PID)) &&
+        if ((tmpPageTable.getPID() == ((byte) pid)) &&
             (tmpPageTable.getType() == ((byte) type)))
         {
           int count;

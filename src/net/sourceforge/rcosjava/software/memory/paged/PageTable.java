@@ -1,54 +1,52 @@
-// ****************************************************
-// FILE:        PageTable.java
-// PURPOSE:     Table which contains type and PID of
-//              all memory.  For fast look-up.
-// AUTHOR:      Andrew Newman
-// MODIFIED:
-// HISTORY:     ?/?/97          Completed
-//
-// ****************************************************
-
 package net.sourceforge.rcosjava.software.memory.paged;
 
+/**
+ * Table which contains type and PID of all memory.  For fast look-up.
+ * <P>
+ * @see net.sourceforge.rcosjava.software.memory.PagedMemoryManagement
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 27th March 1996
+ */
 public class PageTable
 {
-  private byte bType;
-  private byte bPID;
-  private short[] sPages;
-  private short sNoPages;
+  private byte type;
+  private byte pid;
+  private short[] pages;
+  private short noPages;
 
   public PageTable()
   {
-    bType = -1;
-    bPID = -1;
+    type = -1;
+    pid = -1;
   }
 
-  public PageTable(byte aPID, byte aType, short[] aPages, short aNoPages)
+  public PageTable(byte newPID, byte newType, short[] newPages, short newNoPages)
   {
-    bPID = aPID;
-    bType = aType;
-    sPages = aPages;
-    sNoPages = aNoPages;
+    pid = newPID;
+    type = newType;
+    pages = newPages;
+    noPages = newNoPages;
   }
 
   public byte getType()
   {
-    return bType;
+    return type;
   }
 
   public byte getPID()
   {
-    return bPID;
+    return pid;
   }
 
   public short[] getPages()
   {
-    return sPages;
+    return pages;
   }
 
   public short getTotalNumberOfPages()
   {
-    return sNoPages;
+    return noPages;
   }
 }
 

@@ -77,35 +77,40 @@ public class MemoryManager extends OSMessageHandler
     }
   }
 
-  public void deallocatePages(int iPID)
+  /**
+   * Called by the DeallocatePages message from the process scheduler.  The
+   * process has ceased functioning and the memory pages allocated to it must be
+   * removed.
+   */
+  public void deallocatePages(int pid)
   {
-    MemoryReturn mrReturn = thePageHandler.close(iPID);
+    MemoryReturn returnedMemory = thePageHandler.close(pid);
     // Return message.
-    if (mrReturn.getSize() > 0)
+    if (returnedMemory.getSize() > 0)
     {
-      DeallocatedPages msg = new DeallocatedPages(this, mrReturn);
+      DeallocatedPages msg = new DeallocatedPages(this, returnedMemory);
       sendMessage(msg);
     }
   }
 
-  public Memory readPage(int iPID, byte iType, int iOffset)
+  public Memory readPage(int pid, byte iType, int iOffset)
   {
-    return(thePageHandler.readPage(iPID, iType, iOffset));
+    return(thePageHandler.readPage(pid, iType, iOffset));
   }
 
-  public Memory readBytes(int iPID, byte iType, int iSize, int iOffset)
+  public Memory readBytes(int pid, byte iType, int iSize, int iOffset)
   {
-    return(thePageHandler.readBytes(iPID, iType, iSize, iOffset));
+    return(thePageHandler.readBytes(pid, iType, iSize, iOffset));
   }
 
-  public void writePage(int iPID, byte iType, int iOffset, Memory newMemory)
+  public void writePage(int pid, byte iType, int iOffset, Memory newMemory)
   {
-    thePageHandler.writePage(iPID, iType, iOffset, newMemory);
+    thePageHandler.writePage(pid, iType, iOffset, newMemory);
   }
 
-  public void writeBytes(int iPID, byte iType, int iSize, int iOffset, Memory newMemory)
+  public void writeBytes(int pid, byte iType, int iSize, int iOffset, Memory newMemory)
   {
-    thePageHandler.writeBytes(iPID, iType, iSize, iOffset, newMemory);
+    thePageHandler.writeBytes(pid, iType, iSize, iOffset, newMemory);
   }
 
   public void writeBytes(MemoryRequest request)
@@ -142,12 +147,12 @@ public class MemoryManager extends OSMessageHandler
     }
   }
 
-  public synchronized int pageSize()
+  public int pageSize()
   {
     return PAGE_SIZE;
   }
 
-  public synchronized int maxPages()
+  public int maxPages()
   {
     return MAX_PAGES;
   }
