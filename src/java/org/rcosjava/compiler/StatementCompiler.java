@@ -25,9 +25,8 @@ public class StatementCompiler extends DepthFirstAdapter
   private HashMap functionPosition = new HashMap();
   private Stack statementPosition;
   private boolean inAFunction = false;
-  private boolean mainBlock = false;
-  private short globalVariables = 0;
-  private short localVariables = 0;
+  private Stack variablesOffsets = new Stack();
+  private short currentVariableOffset = 3;
   private Symbol currentSymbol = new Variable("", (short) 0, (short) 0);
   private int noLoops = 0;
 
@@ -42,12 +41,11 @@ public class StatementCompiler extends DepthFirstAdapter
     Compiler.incLevel();
     if (node.getFunctionDeclarator().toString().startsWith("main"))
     {
-      mainBlock = true;
+      // If we're in the main body get the initialise the global variables
+      writePCode(OpCode.INCREMENT_T_REGISTER.getValue(), (byte) 0,
+        ((short) (currentVariableOffset)));
     }
-    else
-    {
-      mainBlock = false;
-    }
+
     String func = node.getFunctionDeclarator().toString();
     Short pos = new Short((short) (Compiler.getInstructionIndex() + 1));
     functionPosition.put(func.substring(0, func.indexOf(" (")),  pos);
@@ -61,14 +59,21 @@ public class StatementCompiler extends DepthFirstAdapter
   public void inAFunctionBody(AFunctionBody node)
   {
     inAFunction = true;
+
+    // Save the current variables and reset the number of variables
+    variablesOffsets.push(new Integer(currentVariableOffset));
+    currentVariableOffset = 3;
+
     super.inAFunctionBody(node);
   }
 
   public void outAFunctionBody(AFunctionBody node)
   {
     inAFunction = false;
+
     // Reset the number of local variables
-    localVariables = 0;
+    currentVariableOffset = ((Integer) variablesOffsets.pop()).shortValue();
+
     super.outAFunctionBody(node);
   }
 
@@ -190,11 +195,6 @@ public class StatementCompiler extends DepthFirstAdapter
     return ((Short) functionPosition.get(methodName)).shortValue();
   }
 
-  public short numberOfGlobalVariables()
-  {
-    return globalVariables;
-  }
-
   /**
    * If statement
    */
@@ -254,7 +254,7 @@ public class StatementCompiler extends DepthFirstAdapter
     startPosition = Compiler.getInstructionIndex();
     node.getElseCompStmt().apply(this);
     finishPosition = Compiler.getInstructionIndex();
-    writePCode(startPosition, OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
+    writePCode(startPosition, OpCode.JUMP.getValue(), (byte) 0,
         (short) (finishPosition+1+(noLoops*2)));
 
     noLoops--;
@@ -593,15 +593,7 @@ public class StatementCompiler extends DepthFirstAdapter
       PRhs rhs = node.getRhs();
       rhs.apply(this);
 
-      if (isArray(varName))
-      {
-        writePCode(OpCode.STORE_INDEXED.getValue(), (byte) 0,
-            tmpSymbol.getOffset());
-      }
-      else
-      {
-        tmpSymbol.handleStore(this);
-      }
+      tmpSymbol.handleStore(this);
     }
     catch (Exception e)
     {
@@ -657,18 +649,10 @@ public class StatementCompiler extends DepthFirstAdapter
       ((PVariableDeclaration) temp[i]).apply(this);
     }
 
-    // Set the number of declared variables plus 3.
+    // Current variable offset should be the size of the variables plus 3.
     // For return address, dynamic link and static link values.
-    if (mainBlock)
-    {
-      writePCode(OpCode.INCREMENT_T_REGISTER.getValue(), (byte) 0,
-        ((short) (this.globalVariables+3)));
-    }
-    else
-    {
-      writePCode(OpCode.INCREMENT_T_REGISTER.getValue(), (byte) 0,
-        ((short) (this.localVariables+3)));
-    }
+    writePCode(OpCode.INCREMENT_T_REGISTER.getValue(), (byte) 0,
+      ((short) (currentVariableOffset)));
 
     Object temp2[] = node.getStatement().toArray();
     for (int i = 0; i < temp2.length; i++)
@@ -743,31 +727,22 @@ public class StatementCompiler extends DepthFirstAdapter
         size = getArraySize(name);
         name = name.substring(0, name.indexOf("[")).trim();
         Array newArray = new Array(name, Compiler.getLevel(),
-            Compiler.getInstructionIndex(), size);
+            (short) (currentVariableOffset), size);
         table.addSymbol(newArray);
       }
       else
       {
 //        System.out.println("Type: " + node.getTypeSpecifier().toString());
         System.out.println("Name: " + name);
-        System.out.println("VAR DEC Compiler Level: " + Compiler.getLevel());
+        System.out.println("Compiler Level: " + Compiler.getLevel());
         size = 1;
-        Variable newVar = new Variable(name,
-            Compiler.getLevel(), Compiler.getInstructionIndex());
+        Variable newVar = new Variable(name, Compiler.getLevel(),
+          (short) (currentVariableOffset));
         table.addSymbol(newVar);
       }
 
-      // Ensure we could the number of global variables.
-      if (!inAFunction)
-      {
-        globalVariables += size;
-        System.out.println("No global: " + globalVariables);
-      }
-      else
-      {
-        localVariables += size;
-        System.out.println("No local: " + localVariables);
-      }
+      currentVariableOffset += size;
+      System.out.println("Current variable offset: " + currentVariableOffset);
     }
     catch (ParserException pe)
     {
