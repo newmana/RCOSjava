@@ -97,8 +97,6 @@ public class MultimediaFrame extends RCOSFrame
    */
   public void setupLayout(Component c)
   {
-    super.setupLayout(c);
-
     //Set up modal file name dialog
 
     Panel dialogPanel = new Panel();
@@ -183,8 +181,8 @@ public class MultimediaFrame extends RCOSFrame
     closePanel.add(tmpButton);
     tmpButton.addMouseListener(new CloseAnimator());
 
-    add("Center", mainPanel);
-    add("South", closePanel);
+    getContentPane().add("Center", mainPanel);
+    getContentPane().add("South", closePanel);
   }
 
   /**

@@ -3,7 +3,7 @@ import java.applet.*;
 
 import java.awt.*;
 import java.net.*;
-import javax.swing.ImageIcon;
+import javax.swing.*;
 import java.util.*;
 import org.rcosjava.software.animator.RCOSPanel;
 import org.rcosjava.messaging.messages.animator.ShowCPU;

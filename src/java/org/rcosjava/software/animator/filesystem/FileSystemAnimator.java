@@ -44,7 +44,6 @@ public class FileSystemAnimator extends RCOSAnimator
    */
   public void setupLayout(Component c)
   {
-    fsFrame.setupLayout(c);
   }
 
   public RCOSPanel getPanel()

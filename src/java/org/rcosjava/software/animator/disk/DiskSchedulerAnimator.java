@@ -49,7 +49,6 @@ public class DiskSchedulerAnimator extends RCOSAnimator
    */
   public void setupLayout(Component c)
   {
-    dsFrame.setupLayout(c);
   }
 
   /**
