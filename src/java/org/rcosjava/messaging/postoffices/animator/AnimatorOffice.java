@@ -9,10 +9,12 @@ import org.rcosjava.messaging.postoffices.PostOffice;
 import org.rcosjava.messaging.postoffices.os.OSOffice;
 import org.rcosjava.software.util.FIFOQueue;
 
+import org.apache.log4j.*;
+
 /**
- * Provide message handling centre of operations. Variation on PostOffice -
- * Messages are CC'ed to the AnimatorOffice where they are distributed to
- * various Animators (which are actually MessageHandlers).
+ * Provide a message handling service for all animators.  This one differs to
+ * the OSOffice in that it has two internal threads that handle delivery to
+ * any other registered Post Offices and to locally registered handlers.
  * <P>
  * <DT> <B>History:</B>
  * <DD> 17/03/96 MOD for Animator to send to all </DD>
@@ -28,9 +30,14 @@ import org.rcosjava.software.util.FIFOQueue;
 public class AnimatorOffice extends PostOffice
 {
   /**
-   * Description of the Field
+   * Logging class.
    */
-  private OSOffice theOSPostOffice;
+  private final static Logger log = Logger.getLogger(AnimatorOffice.class);
+
+  /**
+   * My peer post office, os post office.
+   */
+  private OSOffice osPostOffice;
 
   /**
    * The local messages to be sent.
@@ -48,7 +55,17 @@ public class AnimatorOffice extends PostOffice
   private ArrayList myPostOffices = postOffices;
 
   /**
-   * Attach animator to another post office.
+   * The thread that handles sending messages to locally subscribed handlers.
+   */
+  private LocalMessageSender internalSender;
+
+  /**
+   * The thread that handles sending message to other post offices.
+   */
+  private PostOfficeMessageSender poSender;
+
+  /**
+   * Initialize the animator and attach it to the OS post office.
    *
    * @param newId the string identifier to register the post office to the OS
    *      post office.
@@ -58,44 +75,52 @@ public class AnimatorOffice extends PostOffice
   {
     super(newId, null);
 
-    theOSPostOffice = newOSPostOffice;
+    osPostOffice = newOSPostOffice;
 
     // Register OSPostOffice with Animator Office
-    this.addPostOffice(theOSPostOffice);
+    this.addPostOffice(osPostOffice);
     // Register the Animator with the OSPostOffice
-    theOSPostOffice.addPostOffice(this);
+    osPostOffice.addPostOffice(this);
 
-    LocalMessageSender internalSender = new LocalMessageSender();
-
+    internalSender = new LocalMessageSender();
     internalSender.setName("AnimatorLocalOfficeThread");
-    internalSender.start();
 
-    PostOfficeMessageSender poSender = new PostOfficeMessageSender();
-
+    poSender = new PostOfficeMessageSender();
     poSender.setName("AnimatorPOOfficeThread");
+  }
+
+  /**
+   * Indicate that the post office should start sending messages.  Starts the
+   * internal thread for sending messages to locally subscribed handlers as well
+   * as the internal thread for sending messages to other post offices.
+   */
+  public void startSending()
+  {
+    internalSender.start();
     poSender.start();
   }
 
   /**
-   * Description of the Method
+   * Send a message to all registered post offices and to all locally registered
+   * components.
    *
-   * @param message Description of Parameter
+   * @param message message to send.
    */
   public void sendMessage(MessageAdapter message)
   {
     //Send to all other registered post offices by adding it to the list.
     //The send thread should move it along.
-    postOfficeMessages.add(message);
+    sendToPostOffices(message);
 
     //Send to locally registered components by adding it to the list
-    localMessages.add(message);
+    localSendMessage(message);
   }
 
   /**
-   * Send a message to all registered post office and to all locally registered
+   * Send a message to all registered post offices and to all locally registered
    * components.
    *
-   * @param message the message to send.
+   * @param message message to send.
    */
   public void sendMessage(UniversalMessageAdapter message)
   {
@@ -103,23 +128,26 @@ public class AnimatorOffice extends PostOffice
   }
 
   /**
-   * Sends messages to all conpontents registered to this post office.
+   * Sends a message to only the locally registered components.
    *
-   * @param message the message to send.
+   * @param message message to send.
    */
   public void sendMessage(AnimatorMessageAdapter message)
   {
-    sendMessage((MessageAdapter) message);
+    localSendMessage((MessageAdapter) message);
   }
 
   /**
-   * Description of the Method
+   * Send a message to only registered objects of local post office.
    *
-   * @param message Description of Parameter
+   * @param message Message to send.
    */
   public void localSendMessage(MessageAdapter message)
   {
-    localMessages.add(message);
+    synchronized (localMessages)
+    {
+      localMessages.add(message);
+    }
   }
 
   /**
@@ -133,19 +161,22 @@ public class AnimatorOffice extends PostOffice
   }
 
   /**
-   * Description of the Method
+   * Send message only to other post offices.
    *
-   * @param message Description of Parameter
+   * @param message Message to send to all post offices.
    */
   public void sendToPostOffices(MessageAdapter message)
   {
-    postOfficeMessages.add(message);
+    synchronized (postOfficeMessages)
+    {
+      postOfficeMessages.add(message);
+    }
   }
 
   /**
-   * Description of the Method
+   * Process a sent message.
    *
-   * @param message Description of Parameter
+   * @param message Message received.
    */
   public void processMessage(MessageAdapter message)
   {
@@ -161,10 +192,8 @@ public class AnimatorOffice extends PostOffice
   }
 
   /**
-   * Description of the Class
-   *
-   * @author administrator
-   * @created 28 April 2002
+   * A simple class responsible for merely adding a message to each of the
+   * OS Offices registered.
    */
   private class PostOfficeMessageSender extends Thread
   {
@@ -181,6 +210,7 @@ public class AnimatorOffice extends PostOffice
         }
         catch (java.lang.InterruptedException ie)
         {
+          log.error("Interrupted while sleeping", ie);
         }
         synchronized (postOfficeMessages)
         {
@@ -211,10 +241,8 @@ public class AnimatorOffice extends PostOffice
   }
 
   /**
-   * Description of the Class
-   *
-   * @author administrator
-   * @created 28 April 2002
+   * The class responsible for processing the message for each of the registered
+   * handlers.
    */
   private class LocalMessageSender extends Thread
   {
@@ -231,6 +259,7 @@ public class AnimatorOffice extends PostOffice
         }
         catch (java.lang.InterruptedException ie)
         {
+          log.error("Interrupted while sleeping", ie);
         }
         synchronized (localMessages)
         {
@@ -262,12 +291,11 @@ public class AnimatorOffice extends PostOffice
                         "processMessage", classes);
 
                     Object[] args = {message};
-
                     method.invoke(theDestination, args);
                   }
                   catch (Exception e)
                   {
-                    e.printStackTrace();
+                    log.error("An error occurred: " + e);
                   }
                 }
               }
