@@ -57,7 +57,7 @@ public class IPCManagerFrame extends RCOSFrame
     semaphoreList = new Hashtable(5);
   }
 
-  public synchronized void addNotify()
+  public void addNotify()
   {
     this.repaint();
     super.addNotify();
@@ -98,11 +98,11 @@ public class IPCManagerFrame extends RCOSFrame
     }
   }
 
-  void deallocatedPages(MemoryReturn aMemret)
+  void deallocatedPages(MemoryReturn returnedMemory)
   {
-    for (int count=0; count < aMemret.getSize(); count++)
+    for (int count=0; count < returnedMemory.getSize(); count++)
     {
-      memoryGraphics[aMemret.getPage(count)].setDeallocated();
+      memoryGraphics[returnedMemory.getPage(count)].setDeallocated();
     }
   }
 
