@@ -1,5 +1,6 @@
 package org.rcosjava.software.ipc;
 
+import java.io.Serializable;
 import java.util.*;
 
 import org.rcosjava.hardware.memory.Memory;
@@ -17,7 +18,7 @@ import org.rcosjava.hardware.memory.Memory;
  * @created 30th March 1996
  * @version 1.00 $Date$
  */
-public class SharedMemory
+public class SharedMemory implements Serializable
 {
   /**
    * A list of all the processes with open connections to this memory block.

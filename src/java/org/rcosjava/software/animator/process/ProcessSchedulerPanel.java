@@ -16,6 +16,7 @@ import org.rcosjava.software.animator.support.mtgos.MTGO;
 import org.rcosjava.software.animator.support.positions.Movement;
 import org.rcosjava.software.animator.support.positions.Position;
 import org.rcosjava.software.process.ProcessScheduler;
+import org.rcosjava.software.process.RCOSProcess;
 import org.rcosjava.software.util.LIFOQueue;
 
 /**
@@ -137,12 +138,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
   /**
    * Metrics for the default font.
    */
-  FontMetrics fm = getFontMetrics(defaultFont);
-
-  /**
-   * How long to delay between refreshes.
-   */
-  private long delay;
+  private FontMetrics fm = getFontMetrics(defaultFont);
 
   /**
    * The process scheduler that we are representing.
@@ -155,21 +151,46 @@ public class ProcessSchedulerPanel extends RCOSPanel
   private boolean movementSetup = false;
 
   /**
+   * Combo box for selecting the speed of animation.
+   */
+  private JComboBox speedOption = new JComboBox();
+
+  /**
+   * Combo box for selecting the quantum of the processes.
+   */
+  private JComboBox quantumOption = new JComboBox();
+
+  /**
+   * Combo box for selecting the scheduler option.
+   */
+  private JComboBox schedulerOption = new JComboBox();
+
+  /**
    * Constructor for the ProcessSchedulerFrame object
    *
    * @param images Description of Parameter
-   * @param thisProcessScheduler Description of Parameter
+   * @param newProcessSchedulerAnimator Description of Parameter
    */
   public ProcessSchedulerPanel(ImageIcon[] images,
-      ProcessSchedulerAnimator newProcessScheduler)
+      ProcessSchedulerAnimator newProcessSchedulerAnimator)
   {
     myImages = new Image[images.length];
     for (int index = 0; index < images.length; index++)
     {
       myImages[index] = images[index].getImage();
     }
-    delay = 1;
-    myProcessScheduler = newProcessScheduler;
+
+    setManager(newProcessSchedulerAnimator);
+  }
+
+  /**
+   * Sets a new process scheduler animator.
+   *
+   * @param newProcessSchedulerAnimator the new process scheduler animator.
+   */
+  void setManager(ProcessSchedulerAnimator newProcessSchedulerAnimator)
+  {
+    myProcessScheduler = newProcessSchedulerAnimator;
   }
 
   /**
@@ -213,10 +234,6 @@ public class ProcessSchedulerPanel extends RCOSPanel
     setBackground(defaultBgColour);
     setForeground(defaultFgColour);
     setLayout(new BorderLayout());
-
-    JComboBox speedOption = new JComboBox();
-    JComboBox quantumOption = new JComboBox();
-    JComboBox schedulerOption = new JComboBox();
 
     // Setup the panel with a border around it.
     optionsPanel.setBackground(defaultBgColour);
@@ -327,6 +344,69 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
     add(engine, BorderLayout.CENTER);
     add(optionsPanel, BorderLayout.WEST);
+  }
+
+  /**
+   * Sets the currently selected item of the repaint speed selection.
+   *
+   * @param delay the delay value that was set.
+   */
+  void setDelay(long newDelay)
+  {
+    if (newDelay == 1)
+    {
+      speedOption.setSelectedItem("Fastest");
+    }
+    else if (newDelay == 3)
+    {
+      speedOption.setSelectedItem("Fast");
+    }
+    else if (newDelay == 6)
+    {
+      speedOption.setSelectedItem("Normal");
+    }
+    else if (newDelay == 12)
+    {
+      speedOption.setSelectedItem("Slow");
+    }
+    else if (newDelay == 24)
+    {
+      speedOption.setSelectedItem("Slowest");
+    }
+  }
+
+  /**
+   * Sets the currently selected item for the process' quantum.
+   *
+   * @param newQuantum the quantum value to select.
+   */
+  void setQuantum(int newQuantum)
+  {
+    Integer newValue = new Integer(newQuantum);
+    quantumOption.setSelectedItem(newValue.toString());
+    myProcessScheduler.sendQuantum(newValue);
+  }
+
+  /**
+   * Sets the currently selected item for the queue type.
+   */
+  void setQueueType(int newQueueType)
+  {
+    if (newQueueType == 1)
+    {
+      schedulerOption.setSelectedItem("FIFO");
+      myProcessScheduler.sendSwitchFIFO();
+    }
+    else if (newQueueType == 2)
+    {
+      schedulerOption.setSelectedItem("LIFO");
+      myProcessScheduler.sendSwitchLIFO();
+    }
+    else if (newQueueType == 3)
+    {
+      schedulerOption.setSelectedItem("Priority");
+      myProcessScheduler.sendSwitchPriority();
+    }
   }
 
   /**
@@ -542,7 +622,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
       tmpMTGO.setInvisible();
       engine.removeMTGO("P" + pid);
     }
-    syncPaint(delay);
+    syncPaint(myProcessScheduler.getDelay());
   }
 
   /**
@@ -555,7 +635,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
   {
     // Remove it from any queues.
     processFinished(pid);
-    syncPaint(delay);
+    syncPaint(myProcessScheduler.getDelay());
   }
 
   /**
@@ -575,7 +655,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
         cpuToBlockedMovement.step();
         tmpMTGO.setXPosition(cpuToBlockedMovement.getCurrentX());
         tmpMTGO.setYPosition(cpuToBlockedMovement.getCurrentY());
-        syncPaint(delay);
+        syncPaint(myProcessScheduler.getDelay());
       }
     }
   }
@@ -597,7 +677,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
         blockedToReadyMovement.step();
         tmpMTGO.setXPosition(blockedToReadyMovement.getCurrentX());
         tmpMTGO.setYPosition(blockedToReadyMovement.getCurrentY());
-        syncPaint(delay);
+        syncPaint(myProcessScheduler.getDelay());
       }
     }
   }
@@ -619,7 +699,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
         cpuToReadyMovement.step();
         tmpMTGO.setXPosition(cpuToReadyMovement.getCurrentX());
         tmpMTGO.setYPosition(cpuToReadyMovement.getCurrentY());
-        syncPaint(delay);
+        syncPaint(myProcessScheduler.getDelay());
       }
     }
   }
@@ -641,7 +721,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
         readyToCPUMovement.step();
         tmpMTGO.setXPosition(readyToCPUMovement.getCurrentX());
         tmpMTGO.setYPosition(readyToCPUMovement.getCurrentY());
-        syncPaint(delay);
+        syncPaint(myProcessScheduler.getDelay());
       }
     }
   }
@@ -691,7 +771,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
         zombieToReadyMovement.step();
         tmpMTGO.setXPosition(zombieToReadyMovement.getCurrentX());
         tmpMTGO.setYPosition(zombieToReadyMovement.getCurrentY());
-        syncPaint(delay);
+        syncPaint(myProcessScheduler.getDelay());
       }
     }
   }
@@ -714,7 +794,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
         readyMovement.step();
         tmpMTGO.setXPosition(readyMovement.getCurrentX());
         tmpMTGO.setYPosition(readyMovement.getCurrentY());
-        syncPaint(delay);
+        syncPaint(myProcessScheduler.getDelay());
       }
     }
   }
@@ -737,7 +817,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
         blockedMovement.step();
         tmpMTGO.setXPosition(blockedMovement.getCurrentX());
         tmpMTGO.setYPosition(blockedMovement.getCurrentY());
-        syncPaint(delay);
+        syncPaint(myProcessScheduler.getDelay());
       }
     }
   }
@@ -760,7 +840,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
         zombieMovement.step();
         tmpMTGO.setXPosition(zombieMovement.getCurrentX());
         tmpMTGO.setYPosition(zombieMovement.getCurrentY());
-        syncPaint(delay);
+        syncPaint(myProcessScheduler.getDelay());
       }
     }
   }
@@ -855,15 +935,15 @@ public class ProcessSchedulerPanel extends RCOSPanel
     queue.goToHead();
     while (!queue.atTail())
     {
-      String procID = (String) queue.peek();
-      MTGO tmpMTGO = engine.returnMTGO(procID);
+      RCOSProcess process = (RCOSProcess) queue.peek();
+      MTGO tmpMTGO = engine.returnMTGO("P" + process.getPID());
 
       tmpMTGO.setXPosition(xPosition);
       tmpMTGO.setYPosition(yPosition);
       xPosition = xPosition + boxWidth;
       queue.goToNext();
     }
-    syncPaint(delay);
+    syncPaint(myProcessScheduler.getDelay());
   }
 
   /**
@@ -933,23 +1013,23 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
         if (whichObject.compareTo("Fastest") == 0)
         {
-          delay = 1;
+          myProcessScheduler.setDelay(1);
         }
         else if (whichObject.compareTo("Fast") == 0)
         {
-          delay = 3;
+          myProcessScheduler.setDelay(3);
         }
         else if (whichObject.compareTo("Normal") == 0)
         {
-          delay = 6;
+          myProcessScheduler.setDelay(6);
         }
         else if (whichObject.compareTo("Slow") == 0)
         {
-          delay = 12;
+          myProcessScheduler.setDelay(12);
         }
         else if (whichObject.compareTo("Slowest") == 0)
         {
-          delay = 24;
+          myProcessScheduler.setDelay(24);
         }
       }
     }

@@ -3,6 +3,7 @@ package org.rcosjava.software.kernel;
 import java.io.*;
 import java.util.*;
 
+import org.rcosjava.RCOS;
 import org.rcosjava.hardware.cpu.CPU;
 import org.rcosjava.hardware.cpu.Context;
 import org.rcosjava.hardware.cpu.Instruction;
@@ -107,7 +108,7 @@ public class Kernel extends OSMessageHandler
    * This is the schedule message to send to the process scheduler. A global so
    * that it's not reinitialized.
    */
-  private Schedule scheduleMessage = new Schedule(this);
+  private transient Schedule scheduleMessage = new Schedule(this);
 
   /**
    * Currently executing RCOS process.
@@ -777,5 +778,46 @@ public class Kernel extends OSMessageHandler
   {
     currentProcess.setContext(myCPU.getContext());
     return currentProcess;
+  }
+
+  /**
+   * Handle the serialization of the contents.
+   */
+  private void writeObject(ObjectOutputStream os) throws IOException
+  {
+    os.writeInt(quantum);
+    os.writeInt(timerInterrupts);
+    os.writeInt(timeProcessOn);
+    os.writeObject(myCPU);
+    os.writeObject(interruptHandlers);
+    os.writeObject(currentProcess);
+    os.writeBoolean(runningProcess);
+    os.writeBoolean(stepExecution);
+  }
+
+  /**
+   * Handle deserialization of the contents.  Ensures non-serializable
+   * components correctly created.
+   *
+   * @param is stream that is being read.
+   */
+  private void readObject(ObjectInputStream is) throws IOException,
+      ClassNotFoundException
+  {
+    register(MESSENGING_ID, RCOS.getOSPostOffice());
+
+    quantum = is.readInt();
+    timerInterrupts = is.readInt();
+    timeProcessOn = is.readInt();
+
+    myCPU = (CPU) is.readObject();
+    myCPU.setKernel(this);
+
+    interruptHandlers = (HashMap) is.readObject();
+    currentProcess = (RCOSProcess) is.readObject();
+    runningProcess = is.readBoolean();
+    stepExecution = is.readBoolean();
+
+    scheduleMessage = new Schedule(this);
   }
 }

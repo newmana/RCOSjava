@@ -1,6 +1,8 @@
 package org.rcosjava.software.memory;
 
-import java.lang.Integer;
+import java.io.*;
+
+import org.rcosjava.RCOS;
 import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.messaging.messages.universal.AllocatedSharedMemoryPages;
 import org.rcosjava.messaging.messages.universal.AllocatedPages;
@@ -22,7 +24,6 @@ import org.rcosjava.software.memory.paged.PagedMemoryManagement;
  */
 public class MemoryManager extends OSMessageHandler
 {
-
   /**
    * Defines the number and size (in bytes) of pages
    */
@@ -262,5 +263,25 @@ public class MemoryManager extends OSMessageHandler
   {
     return MAX_PAGES;
   }
-}
 
+  /**
+   * Handle the serialization of the contents.
+   */
+  private void writeObject(ObjectOutputStream os) throws IOException
+  {
+    os.writeObject(thePageHandler);
+  }
+
+  /**
+   * Handle deserialization of the contents.  Ensures non-serializable
+   * components correctly created.
+   *
+   * @param is stream that is being read.
+   */
+  private void readObject(ObjectInputStream is) throws IOException,
+      ClassNotFoundException
+  {
+    register(MESSENGING_ID, RCOS.getOSPostOffice());
+    thePageHandler = (PagedMemoryManagement) is.readObject();
+  }
+}

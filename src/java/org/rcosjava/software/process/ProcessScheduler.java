@@ -1,5 +1,8 @@
 package org.rcosjava.software.process;
 
+import java.io.*;
+
+import org.rcosjava.RCOS;
 import org.rcosjava.messaging.messages.os.AllocatePages;
 import org.rcosjava.messaging.messages.os.DeallocateMemory;
 import org.rcosjava.messaging.messages.os.TerminalRelease;
@@ -61,7 +64,7 @@ public class ProcessScheduler extends OSMessageHandler
   /**
    * Represents a queue for each of the different type of processes.
    */
-  private static ProcessQueue zombieCreatedQ, zombieDeadQ, readyQ, blockedQ;
+  private static ProcessQueue zombieCreatedQ, readyQ, blockedQ;
 
   /**
    * The queue of executing programs. Should only be one in a single CPU
@@ -91,7 +94,6 @@ public class ProcessScheduler extends OSMessageHandler
     super(MESSENGING_ID, postOffice);
 
     zombieCreatedQ = new ProcessQueue(new FIFOQueue(10, 1));
-    zombieDeadQ = new ProcessQueue(new FIFOQueue(10, 1));
     blockedQ = new ProcessQueue(new FIFOQueue(10, 1));
     readyQ = new ProcessQueue(new FIFOQueue(10, 1));
     executingQ = new ProcessQueue(new FIFOQueue(10, 1));
@@ -428,8 +430,6 @@ public class ProcessScheduler extends OSMessageHandler
   {
     zombieCreatedQ.setProcessQueue(new
         LIFOQueue(10, 1, zombieCreatedQ.getProcessQueue()));
-    zombieDeadQ.setProcessQueue(new
-        LIFOQueue(10, 1, zombieDeadQ.getProcessQueue()));
     blockedQ.setProcessQueue(new LIFOQueue(10, 1, blockedQ.getProcessQueue()));
     readyQ.setProcessQueue(new LIFOQueue(10, 1, readyQ.getProcessQueue()));
     executingQ.setProcessQueue(new
@@ -444,8 +444,6 @@ public class ProcessScheduler extends OSMessageHandler
   {
     zombieCreatedQ.setProcessQueue(new
         FIFOQueue(10, 1, zombieCreatedQ.getProcessQueue()));
-    zombieDeadQ.setProcessQueue(new
-        FIFOQueue(10, 1, zombieDeadQ.getProcessQueue()));
     blockedQ.setProcessQueue(new FIFOQueue(10, 1, blockedQ.getProcessQueue()));
     readyQ.setProcessQueue(new FIFOQueue(10, 1, readyQ.getProcessQueue()));
     executingQ.setProcessQueue(new
@@ -460,8 +458,6 @@ public class ProcessScheduler extends OSMessageHandler
   {
     zombieCreatedQ.setProcessQueue(new
         PriorityQueue(10, 1, zombieCreatedQ.getProcessQueue()));
-    zombieDeadQ.setProcessQueue(new
-        PriorityQueue(10, 1, zombieDeadQ.getProcessQueue()));
     blockedQ.setProcessQueue(new
         PriorityQueue(10, 1, blockedQ.getProcessQueue()));
     readyQ.setProcessQueue(new PriorityQueue(10, 1, readyQ.getProcessQueue()));
@@ -665,5 +661,26 @@ public class ProcessScheduler extends OSMessageHandler
       }
     }
     return tmpProcess;
+  }
+
+  /**
+   * Handle the serialization of the contents.
+   */
+  private void writeObject(ObjectOutputStream os) throws IOException
+  {
+    os.defaultWriteObject();
+  }
+
+  /**
+   * Handle deserialization of the contents.  Ensures non-serializable
+   * components correctly created.
+   *
+   * @param is stream that is being read.
+   */
+  private void readObject(ObjectInputStream is) throws IOException,
+      ClassNotFoundException
+  {
+    register(MESSENGING_ID, RCOS.getOSPostOffice());
+    is.defaultReadObject();
   }
 }

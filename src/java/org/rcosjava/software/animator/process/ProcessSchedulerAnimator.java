@@ -54,14 +54,29 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   private ProcessControlBlockFrame pcbFrame;
 
   /**
+   * The seletected by the user to display.
+   */
+  private int pcbSelectedProcess;
+
+  /**
    * The current processes running.
    */
   private HashMap currentProcesses;
 
   /**
-   * The seletected by the user to display.
+   * How long to delay between refreshes.
    */
-  private int pcbSelectedProcess;
+  private long delay = 1;
+
+  /**
+   * The selected quantum.
+   */
+  private int quantum = 2;
+
+  /**
+   * The queue type.  1 is FIFO, 2 is LIFO, 3 is Priority.
+   */
+  private int queueType = 1;
 
   /**
    * Create an animator office, register with the animator office, set the size
@@ -89,6 +104,26 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   }
 
   /**
+   * Get the sync delay.
+   *
+   * @return the number of milliseconds to deplay painting.
+   */
+  long getDelay()
+  {
+    return delay;
+  }
+
+  /**
+   * Set the sync delay.
+   *
+   * @param newDelayValue new delay value.
+   */
+  void setDelay(int newDelayValue)
+  {
+    delay = newDelayValue;
+  }
+
+  /**
    * Setup the layout of the frame (menus, etc).
    *
    * @param c the parent component.
@@ -109,6 +144,16 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   }
 
   /**
+   * Returns the Process Control Block frame.
+   *
+   * @return the Process Control Block frame.
+   */
+  public ProcessControlBlockFrame getPCBFrame()
+  {
+    return pcbFrame;
+  }
+
+  /**
    * Called by the frame to set the quantum in the kernel. Sends a new quantum
    * message.
    *
@@ -117,6 +162,9 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   public void sendQuantum(Integer quantumValue)
   {
     sendMessage(new Stop(this));
+
+    // Set internal version of quantum.
+    quantum = quantumValue.intValue();
 
     //Create and send Quantum message
     Quantum msg = new Quantum(this, quantumValue.intValue());
@@ -129,10 +177,10 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void sendSwitchFIFO()
   {
+    queueType = 1;
+
     sendMessage(new Stop(this));
-
     SwitchToFIFO msg = new SwitchToFIFO(this);
-
     sendMessage(msg);
     sendMessage(new Run(this));
   }
@@ -142,10 +190,10 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void sendSwitchLIFO()
   {
+    queueType = 2;
+
     sendMessage(new Stop(this));
-
     SwitchToLIFO msg = new SwitchToLIFO(this);
-
     sendMessage(msg);
     sendMessage(new Run(this));
   }
@@ -155,10 +203,10 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void sendSwitchPriority()
   {
+    queueType = 3;
+
     sendMessage(new Stop(this));
-
     SwitchToPriority msg = new SwitchToPriority(this);
-
     sendMessage(msg);
     sendMessage(new Run(this));
   }
@@ -190,9 +238,9 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void killProcess(RCOSProcess process)
   {
-    removeQueue(ProcessScheduler.READYQ, process.getPID());
-    removeQueue(ProcessScheduler.BLOCKEDQ, process.getPID());
-    removeQueue(ProcessScheduler.ZOMBIEQ, process.getPID());
+    removeQueue(ProcessScheduler.READYQ, process);
+    removeQueue(ProcessScheduler.BLOCKEDQ, process);
+    removeQueue(ProcessScheduler.ZOMBIEQ, process);
 
     panel.killProcess(process.getPID());
 
@@ -220,9 +268,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
     currentProcesses.put(new Integer(process.getPID()), process);
 
     panel.cpuToBlocked(process.getPID());
-    String pid = "P" + process.getPID();
-    blockedQueue.insert(pid);
-    addQueue(ProcessScheduler.BLOCKEDQ, blockedQueue.itemCount());
+    addQueue(ProcessScheduler.BLOCKEDQ, process);
 
     if (process.getPID() == pcbSelectedProcess)
     {
@@ -246,9 +292,9 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
 
     // Update the values of the current processes and animate
     currentProcesses.put(new Integer(process.getPID()), process);
-    removeQueue(ProcessScheduler.BLOCKEDQ, process.getPID());
+    removeQueue(ProcessScheduler.BLOCKEDQ, process);
     panel.blockedToReady(process.getPID());
-    addQueue(ProcessScheduler.READYQ, process.getPID());
+    addQueue(ProcessScheduler.READYQ, process);
 
     if (process.getPID() == pcbSelectedProcess)
     {
@@ -274,7 +320,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
     currentProcesses.put(new Integer(process.getPID()), process);
 
     panel.cpuToReady(process.getPID());
-    addQueue(ProcessScheduler.READYQ, process.getPID());
+    addQueue(ProcessScheduler.READYQ, process);
 
     if (process.getPID() == pcbSelectedProcess)
     {
@@ -297,7 +343,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
 
     // Update the values of the current processes and animate
     currentProcesses.put(new Integer(process.getPID()), process);
-    removeQueue(ProcessScheduler.READYQ, process.getPID());
+    removeQueue(ProcessScheduler.READYQ, process);
     panel.readyToCPU(process.getPID());
 
     if (process.getPID() == pcbSelectedProcess)
@@ -323,9 +369,9 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
     // Update the values of the current processes and animate
     currentProcesses.put(new Integer(process.getPID()), process);
     pcbFrame.updateDisplay(process);
-    removeQueue(ProcessScheduler.ZOMBIEQ, process.getPID());
+    removeQueue(ProcessScheduler.ZOMBIEQ, process);
     panel.zombieToReady(process.getPID());
-    addQueue(ProcessScheduler.READYQ, process.getPID());
+    addQueue(ProcessScheduler.READYQ, process);
 
     if (process.getPID() == pcbSelectedProcess)
     {
@@ -350,7 +396,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
     // Update the values of the current processes and animate
     currentProcesses.put(new Integer(process.getPID()), process);
     panel.newProcess(process.getPID());
-    addQueue(ProcessScheduler.ZOMBIEQ, process.getPID());
+    addQueue(ProcessScheduler.ZOMBIEQ, process);
 
     if (process.getPID() == pcbSelectedProcess)
     {
@@ -376,25 +422,25 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    * addQueue on the Frame. Exposed for Animator Messages.
    *
    * @param queueType the numeric representation of the queue.
-   * @param pid the process id to add to the queue.
+   * @param process the process to add to the queue.
    */
-  private void addQueue(int queueType, int pid)
+  private void addQueue(int queueType, RCOSProcess process)
   {
     switch (queueType)
     {
       case ProcessScheduler.READYQ:
-        readyQueue.insert(("P" + pid));
-        panel.moveReadyQueue(pid, readyQueue.itemCount());
+        readyQueue.insert(process);
+        panel.moveReadyQueue(process.getPID(), readyQueue.itemCount());
         panel.refreshQueue(ProcessScheduler.READYQ, readyQueue);
       break;
       case ProcessScheduler.BLOCKEDQ:
-        blockedQueue.insert(("P" + pid));
-        panel.moveBlockedQueue(pid, blockedQueue.itemCount());
+        blockedQueue.insert(process);
+        panel.moveBlockedQueue(process.getPID(), blockedQueue.itemCount());
         panel.refreshQueue(ProcessScheduler.BLOCKEDQ, blockedQueue);
       break;
       case ProcessScheduler.ZOMBIEQ:
-        zombieQueue.insert(("P" + pid));
-        panel.moveZombieQueue(pid, zombieQueue.itemCount());
+        zombieQueue.insert(process);
+        panel.moveZombieQueue(process.getPID(), zombieQueue.itemCount());
         panel.refreshQueue(ProcessScheduler.ZOMBIEQ, zombieQueue);
       break;
     }
@@ -423,22 +469,22 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    * removeQueue on the Frame. Exposed for Animator Messages.
    *
    * @param queueType the numeric representation of the queue.
-   * @param pid the process id to add to the queue.
+   * @param process the process remove from the queue.
    */
-  public void removeQueue(int queueType, int pid)
+  public void removeQueue(int queueType, RCOSProcess process)
   {
     switch (queueType)
     {
       case ProcessScheduler.READYQ:
-        removeProcId(pid, readyQueue);
+        removeProcess(process, readyQueue);
         panel.refreshQueue(queueType, readyQueue);
       break;
       case ProcessScheduler.BLOCKEDQ:
-        removeProcId(pid, blockedQueue);
+        removeProcess(process, blockedQueue);
         panel.refreshQueue(queueType, blockedQueue);
       break;
       case ProcessScheduler.ZOMBIEQ:
-        removeProcId(pid, zombieQueue);
+        removeProcess(process, zombieQueue);
         panel.refreshQueue(queueType, zombieQueue);
       break;
     }
@@ -447,25 +493,13 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   /**
    * Remove a process from a given queue.
    *
-   * @param pid the process id to remove from the queue.
+   * @param process the process to remove from the queue.
    * @param tmpQueue the queue to remove the pid from.
    */
-  private synchronized void removeProcId(int pid, LIFOQueue tmpQueue)
+  private synchronized void removeProcess(RCOSProcess process,
+      LIFOQueue tmpQueue)
   {
-    String tmpId;
-    String processId = "P" + pid;
-
-    tmpQueue.goToHead();
-    while (!tmpQueue.atTail())
-    {
-      tmpId = (String) tmpQueue.peek();
-      if (tmpId.compareTo(processId) == 0)
-      {
-        tmpQueue.retrieveCurrent();
-        break;
-      }
-      tmpQueue.goToNext();
-    }
+    tmpQueue.remove(process);
   }
 
   /**
@@ -473,7 +507,20 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   private void writeObject(ObjectOutputStream os) throws IOException
   {
+    // Process state
+    os.writeObject(currentProcesses);
+    os.writeObject(readyQueue);
+    os.writeObject(blockedQueue);
+    os.writeObject(zombieQueue);
 
+    // Panel state
+    os.writeLong(delay);
+    os.writeInt(quantum);
+    os.writeInt(queueType);
+
+    // PCB state
+    os.writeInt(pcbSelectedProcess);
+    os.writeBoolean(pcbFrame.isVisible());
   }
 
   /**
@@ -486,5 +533,64 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
       ClassNotFoundException
   {
     register(MESSENGING_ID, RCOS.getAnimatorPostOffice());
+
+    // Process state
+    currentProcesses = (HashMap) is.readObject();
+    readyQueue = (LIFOQueue) is.readObject();
+    blockedQueue = (LIFOQueue) is.readObject();
+    zombieQueue = (LIFOQueue) is.readObject();
+
+    // Panel state
+    delay = is.readLong();
+    quantum = is.readInt();
+    queueType = is.readInt();
+
+    // Get the panel and PCB Frame.
+    panel = (ProcessSchedulerPanel) RCOS.getProcessSchedulerAnimator().getPanel();
+    pcbFrame = RCOS.getProcessSchedulerAnimator().getPCBFrame();
+    panel.setManager(this);
+
+    // Get the PCB State.
+    pcbSelectedProcess = is.readInt();
+    boolean pcbVisible = is.readBoolean();
+
+    // Refresh queues
+    RCOSProcess tmpProcess;
+
+    for (int index = 0; index < readyQueue.size(); index++)
+    {
+      tmpProcess = (RCOSProcess) readyQueue.peek(index);
+      panel.newProcess(tmpProcess.getPID());
+      panel.moveZombieQueue(tmpProcess.getPID(), readyQueue.itemCount());
+      panel.refreshQueue(ProcessScheduler.READYQ, readyQueue);
+    }
+    panel.refreshQueue(ProcessScheduler.READYQ, readyQueue);
+
+    for (int index = 0; index < blockedQueue.size(); index++)
+    {
+      tmpProcess = (RCOSProcess) blockedQueue.peek(index);
+      panel.newProcess(tmpProcess.getPID());
+      panel.moveZombieQueue(tmpProcess.getPID(), blockedQueue.itemCount());
+      panel.refreshQueue(ProcessScheduler.BLOCKEDQ, blockedQueue);
+    }
+    panel.refreshQueue(ProcessScheduler.BLOCKEDQ, blockedQueue);
+
+    for (int index = 0; index < zombieQueue.itemCount(); index++)
+    {
+      tmpProcess = (RCOSProcess) zombieQueue.peek(index);
+      panel.newProcess(tmpProcess.getPID());
+      panel.moveZombieQueue(tmpProcess.getPID(), zombieQueue.itemCount());
+      panel.refreshQueue(ProcessScheduler.ZOMBIEQ, zombieQueue);
+    }
+    panel.refreshQueue(ProcessScheduler.ZOMBIEQ, zombieQueue);
+
+    // Set delay
+    panel.setDelay(delay);
+
+    // Set quantum
+    panel.setQuantum(quantum);
+
+    // Set queue type
+    panel.setQueueType(queueType);
   }
 }

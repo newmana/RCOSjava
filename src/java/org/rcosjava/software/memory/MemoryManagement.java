@@ -1,8 +1,7 @@
 package org.rcosjava.software.memory;
 
-import org.rcosjava.hardware.memory.Memory;
-
 import java.io.Serializable;
+import org.rcosjava.hardware.memory.Memory;
 
 /**
  * Base interface class for ALL memory managers.

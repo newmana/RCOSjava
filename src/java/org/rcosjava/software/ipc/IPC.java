@@ -1,7 +1,9 @@
 package org.rcosjava.software.ipc;
 
+import java.io.*;
 import java.util.*;
 
+import org.rcosjava.RCOS;
 import org.rcosjava.hardware.memory.*;
 import org.rcosjava.software.memory.*;
 import org.rcosjava.software.process.RCOSProcess;
@@ -599,5 +601,34 @@ public class IPC extends OSMessageHandler
   private synchronized SemaphoreQueue getSemaphoreTable()
   {
     return semaphoreTable;
+  }
+
+  /**
+   * Handle the serialization of the contents.
+   */
+  private void writeObject(ObjectOutputStream os) throws IOException
+  {
+    os.writeObject(semaphoreTable);
+    os.writeInt(semaphoreCount);
+    os.writeObject(sharedMemoryTable);
+    os.writeObject(sharedMemoryIdTable);
+    os.writeInt(shmCount);
+ }
+
+  /**
+   * Handle deserialization of the contents.  Ensures non-serializable
+   * components correctly created.
+   *
+   * @param is stream that is being read.
+   */
+  private void readObject(ObjectInputStream is) throws IOException,
+      ClassNotFoundException
+  {
+    register(MESSENGING_ID, RCOS.getOSPostOffice());
+    semaphoreTable = (SemaphoreQueue) is.readObject();
+    semaphoreCount = is.readInt();
+    sharedMemoryTable = (HashMap) is.readObject();
+    sharedMemoryIdTable = (HashMap) is.readObject();
+    shmCount = is.readInt();
   }
 }

@@ -1,5 +1,7 @@
 package org.rcosjava.software.memory.paged;
 
+import java.io.Serializable;
+
 /**
  * Table which contains type and PID of all memory. For fast look-up.
  * <P>
@@ -8,7 +10,7 @@ package org.rcosjava.software.memory.paged;
  * @see org.rcosjava.software.memory.paged.PagedMemoryManagement
  * @version 1.00 $Date$
  */
-public class PageTableEntry
+public class PageTableEntry implements Serializable
 {
   /**
    * The type of memory (current 1 and 2 for stack and program).
@@ -88,4 +90,3 @@ public class PageTableEntry
     return noPages;
   }
 }
-
