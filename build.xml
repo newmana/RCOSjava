@@ -33,11 +33,11 @@
       debug="off" optimize="on" deprecation="on"/>
 
     <!-- Move all the images and sounds too -->
-    <copy todir="${deploy.dir}/net/sourceforge/rcosjava.software/animator/images">
-      <fileset dir="${src.dir}/net/sourceforge/rcosjava.software/animator/images"/>
+    <copy todir="${deploy.dir}/net/sourceforge/rcosjava/software/animator/images">
+      <fileset dir="${src.dir}/net/sourceforge/rcosjava/software/animator/images"/>
     </copy>
-    <copy todir="${deploy.dir}/net/sourceforge/rcosjava.software/animator//audio">
-      <fileset dir="${src.dir}/net/sourceforge/rcosjava.software/animator/audio"/>
+    <copy todir="${deploy.dir}/net/sourceforge/rcosjava/software/animator//audio">
+      <fileset dir="${src.dir}/net/sourceforge/rcosjava/software/animator/audio"/>
     </copy>
   </target>
 
