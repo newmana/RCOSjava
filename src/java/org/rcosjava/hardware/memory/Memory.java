@@ -319,6 +319,16 @@ public class Memory implements Serializable, Cloneable
   }
 
   /**
+   * Returns the hashcode of this object.
+   *
+   * @return the hashcode of this object.
+   */
+  public int hashCode()
+  {
+    return memorySegment.hashCode();
+  }
+
+  /**
    * Tests equality of the memory segment based on if it is allocated, the
    * segment size and the values stored in the segment.
    *

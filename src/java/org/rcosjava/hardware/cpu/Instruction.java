@@ -957,6 +957,17 @@ public class Instruction implements Cloneable, Serializable
   }
 
   /**
+   * Returns the hash code of the object based on opCode, byteParam and
+   *   wordParam.
+   *
+   * @return the hash code of the object.
+   */
+  public int hashCode()
+  {
+    return opCode.getValue() ^ byteParam ^ wordParam.getValue();
+  }
+
+  /**
    * Returns the binary value of the instruction dependant upon what the opCode
    * that is currently stored. 8 bytes.
    *

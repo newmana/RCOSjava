@@ -215,10 +215,22 @@ public class Context implements Cloneable, Serializable
   }
 
   /**
-   * Description of the Method
+   * Returns the hash code of the object.
    *
-   * @param obj Description of Parameter
-   * @return Description of the Returned Value
+   * @return the hash code of the object.
+   */
+  public int hashCode()
+  {
+    return instructionRegister.hashCode() ^ basePointer ^ programCounter ^
+        stackPointer;
+  }
+
+  /**
+   * Returns equal if the passed object is the same type, and the instruction
+   * register, program counter, stack point and base pointer are equal.
+   *
+   * @param obj object to test for equality.
+   * @return true if the objects are equal.
    */
   public boolean equals(Object obj)
   {
