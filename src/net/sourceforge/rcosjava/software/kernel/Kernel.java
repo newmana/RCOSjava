@@ -528,7 +528,7 @@ public class Kernel extends OSMessageHandler
       myCPU.getContext().decStackPointer();
 
       SharedMemoryReadMessage message = new SharedMemoryReadMessage(this,
-        sharedMemId, offset);
+        sharedMemId, offset, getCurrentProcess().getPID());
       sendMessage(message);
     }
     else if (call.isSharedMemoryWrite())
@@ -546,7 +546,7 @@ public class Kernel extends OSMessageHandler
       myCPU.getContext().decStackPointer();
 
       SharedMemoryWriteMessage message = new SharedMemoryWriteMessage(this,
-        sharedMemId, offset, (short) newValue);
+        sharedMemId, offset, (short) newValue, getCurrentProcess().getPID());
       sendMessage(message);
     }
     else if (call.isSharedMemorySize())
