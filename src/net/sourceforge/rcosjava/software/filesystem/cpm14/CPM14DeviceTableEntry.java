@@ -9,30 +9,30 @@
 
 package net.sourceforge.rcosjava.software.filesystem.cpm14;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 
 class CPM14DeviceTableEntry
 {
   // public int DeviceNumber // Device number is the key of the table.
-  public String DeviceName;
-  public byte[] DirectoryTable;
-  public Hashtable OpenFileNames;
-  public int Status;
-  public boolean[] BlockList;
-  public int NumberOfFreeBlocks;
-  public boolean[] DirEntList;
-  public int NumberOfFreeEntries;
+  public String deviceName;
+  public byte[] directoryTable;
+  public HashMap openFileNames;
+  public int status;
+  public boolean[] blockList;
+  public int numberOfFreeBlocks;
+  public boolean[] dirEntList;
+  public int numberOfFreeEntries;
 
   public CPM14DeviceTableEntry()
   {
-    DeviceName = null;
-    DirectoryTable = null;
-    OpenFileNames = null;
-    Status = -1;
-    BlockList = null;
-    NumberOfFreeBlocks = -1;
-    DirEntList = null;
-    NumberOfFreeEntries = -1;
+    deviceName = null;
+    directoryTable = null;
+    openFileNames = null;
+    status = -1;
+    blockList = null;
+    numberOfFreeBlocks = -1;
+    dirEntList = null;
+    numberOfFreeEntries = -1;
   }
 }
 
