@@ -180,7 +180,9 @@ public class ProcessManagerAnimator extends AnimatorMessageHandler
     else
     {
       killMenuItem = new JMenuItem(killMenuItem.getText());
+      killMenuItem.setEnabled(false);
       changeMenuItem = new JMenuItem(changeMenuItem.getText());
+      changeMenuItem.setEnabled(false);
     }
 
     menu.add(killMenuItem);
