@@ -163,6 +163,11 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
 
     // Remove the process from the list of current processes
     currentProcesses.remove(new Integer(process.getPID()));
+
+    if (process.getPID() == pcbSelectedProcess)
+    {
+      pcbFrame.setVisible(false);
+    }
   }
 
   /**
@@ -177,6 +182,11 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
 
     // Remove the process from the list of current processes
     currentProcesses.remove(new Integer(process.getPID()));
+
+    if (process.getPID() == pcbSelectedProcess)
+    {
+      pcbFrame.setVisible(false);
+    }
   }
 
   /**
@@ -192,6 +202,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
 
     // Update the values of the current processes and animate
     currentProcesses.put(new Integer(process.getPID()), process);
+    pcbFrame.updateDisplay(process);
     panel.cpuToBlocked(process.getPID());
     addQueue(ProcessScheduler.BLOCKEDQ, process.getPID());
 
@@ -212,6 +223,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
 
     // Update the values of the current processes and animate
     currentProcesses.put(new Integer(process.getPID()), process);
+    pcbFrame.updateDisplay(process);
     removeQueue(ProcessScheduler.BLOCKEDQ, process.getPID());
     panel.blockedToReady(process.getPID());
     addQueue(ProcessScheduler.READYQ, process.getPID());
@@ -233,6 +245,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
 
     // Update the values of the current processes and animate
     currentProcesses.put(new Integer(process.getPID()), process);
+    pcbFrame.updateDisplay(process);
     panel.cpuToReady(process.getPID());
     addQueue(ProcessScheduler.READYQ, process.getPID());
 
@@ -253,6 +266,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
 
     // Update the values of the current processes and animate
     currentProcesses.put(new Integer(process.getPID()), process);
+    pcbFrame.updateDisplay(process);
     removeQueue(ProcessScheduler.READYQ, process.getPID());
     panel.readyToCPU(process.getPID());
 
@@ -273,6 +287,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
 
     // Update the values of the current processes and animate
     currentProcesses.put(new Integer(process.getPID()), process);
+    pcbFrame.updateDisplay(process);
     removeQueue(ProcessScheduler.ZOMBIEQ, process.getPID());
     panel.zombieToReady(process.getPID());
     addQueue(ProcessScheduler.READYQ, process.getPID());
@@ -294,6 +309,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
 
     // Update the values of the current processes and animate
     currentProcesses.put(new Integer(process.getPID()), process);
+    pcbFrame.updateDisplay(process);
     panel.newProcess(process.getPID());
     addQueue(ProcessScheduler.ZOMBIEQ, process.getPID());
 
