@@ -448,7 +448,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     {
       v.printStackTrace();
     }
-    repaint();
+    repaint(100);
   }
 
   /**
