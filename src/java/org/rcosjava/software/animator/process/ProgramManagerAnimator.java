@@ -66,7 +66,7 @@ public class ProgramManagerAnimator extends RCOSAnimator
       ImageIcon[] pmImages)
   {
     super(MESSENGING_ID, postOffice);
-    pmFrame = new ProgramManagerFrame(250, 250, pmImages, this);
+    pmFrame = new ProgramManagerFrame(325, 300, pmImages, this);
   }
 
   /**

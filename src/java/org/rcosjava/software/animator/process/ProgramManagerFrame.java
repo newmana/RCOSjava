@@ -122,14 +122,20 @@ public class ProgramManagerFrame extends RCOSFrame
    */
   public void setupLayout(Component c)
   {
-    setBackground(defaultBgColour);
-    setForeground(defaultFgColour);
-    this.getContentPane().setLayout(new BorderLayout());
+    getContentPane().setLayout(new BorderLayout());
 
     JPanel mainPanel = new JPanel();
+    mainPanel.setBackground(defaultBgColour);
+    mainPanel.setForeground(defaultFgColour);
     JPanel fileNamePanel = new JPanel();
+    fileNamePanel.setBackground(defaultBgColour);
+    fileNamePanel.setForeground(defaultFgColour);
     JPanel terminOptionPanel = new JPanel();
+    terminOptionPanel.setBackground(defaultBgColour);
+    terminOptionPanel.setForeground(defaultFgColour);
     JPanel buttonPanel = new JPanel();
+    buttonPanel.setBackground(defaultBgColour);
+    buttonPanel.setForeground(defaultFgColour);
 
     GridBagConstraints constraints = new GridBagConstraints();
     GridBagLayout gridBag = new GridBagLayout();
@@ -166,27 +172,37 @@ public class ProgramManagerFrame extends RCOSFrame
     directoryListBox = new JList();
     directoryListModel = new DefaultListModel();
     directoryListBox.setVisibleRowCount(8);
+    directoryListBox.setFixedCellWidth(100);
     directoryListBox.setModel(directoryListModel);
     directoryListBox.setBackground(listColour);
     directoryListBox.setForeground(defaultFgColour);
-
-    gridBag.setConstraints(directoryListBox, constraints);
-    mainPanel.add(directoryListBox);
+    JScrollPane directoryListPane = new JScrollPane(directoryListBox);
+    directoryListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    directoryListPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    gridBag.setConstraints(directoryListPane, constraints);
+    mainPanel.add(directoryListPane);
     directoryListBox.addMouseListener(new DirectoryListBoxListener());
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
     fileListBox = new JList();
     fileListModel = new DefaultListModel();
-    fileListBox.setVisibleRowCount(8);
     fileListBox.setModel(fileListModel);
+    fileListBox.setVisibleRowCount(8);
+    fileListBox.setFixedCellWidth(100);
     fileListBox.setBackground(listColour);
     fileListBox.setForeground(defaultFgColour);
-    gridBag.setConstraints(fileListBox, constraints);
-    mainPanel.add(fileListBox);
+    JScrollPane fileListPane = new JScrollPane(fileListBox);
+    fileListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    fileListPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    gridBag.setConstraints(fileListPane, constraints);
+    mainPanel.add(fileListPane);
     fileListBox.addMouseListener(new FileListBoxListener());
 
-    fileNamePanel.add(new JLabel("Filename: "));
+    tmpLabel = new JLabel("Filename: ");
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
+    fileNamePanel.add(tmpLabel);
     fileNameTextField.setFont(defaultFont);
     fileNameTextField.setBackground(textBoxColour);
     fileNameTextField.setForeground(defaultFgColour);
@@ -200,7 +216,12 @@ public class ProgramManagerFrame extends RCOSFrame
     startTerminalCheckbox.setSelected(startTerminal);
     terminOptionPanel.add(startTerminalCheckbox);
     startTerminalCheckbox.addItemListener(new StartTerminalListener());
-    terminOptionPanel.add(new JLabel("Automatically start terminal."));
+    startTerminalCheckbox.setBackground(defaultBgColour);
+    startTerminalCheckbox.setForeground(defaultFgColour);
+    tmpLabel = new JLabel("Automatically start terminal.");
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
+    terminOptionPanel.add(tmpLabel);
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
