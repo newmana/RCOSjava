@@ -160,7 +160,7 @@ Tokens
     identifier = nondigit (digit | nondigit)*;
     floating_constant = fractional_constant exponent_part? floating_suffix? |
         digit_sequence exponent_part floating_suffix?;
-    string_literal = 'L'? '"' s_char_sequence? '"';
+    string_litteral = 'L'? '"' s_char_sequence? '"';
     integer_constant = decimal_constant integer_suffix? | octal_constant integer_suffix? | 
         hexadecimal_constant integer_suffix?;
     character_constant = 'L'? ''' c_char_sequence ''';
@@ -395,10 +395,11 @@ Productions
         {while}        while l_par conditional_expression r_par compound_statement |
         {do}           do compound_statement while l_par conditional_expression r_par semicolon |
         {for}          for l_par [start]:basic_statement? [sc_one]:semicolon conditional_expression? [sc_two]:semicolon [iter]:basic_statement? r_par compound_statement |
-        {switch}       switch l_par value r_par case_statements;
+        {switch}       switch l_par value r_par case_statements |
+        {rcos_stmt}    rcos_statement;
 
-    rcos_statment = 
-        {printf1}      printf l_par string_literal r_par semicolon |
+    rcos_statement = 
+        {printf1}      printf l_par string_litteral r_par semicolon |
         {printf2}      printf l_par [control]:printf_control_strings comma value r_par semicolon |
         {scanf}        scanf l_par [control]:scanf_control_strings comma value r_par semicolon |
         {getc}         getc l_par [file_stream]:value r_par semicolon |
@@ -465,7 +466,7 @@ Productions
 
     constant =
         {floating}  unop? floating_constant |
-        {string}    unop? string_literal |
+        {string}    unop? string_litteral |
         {integer}   unop? integer_constant |
         {character} unop? character_constant;
 
