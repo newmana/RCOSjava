@@ -793,6 +793,12 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
     }
   }
 
+  /**
+   * Writes the buffer to the device.
+   *
+   * @param request the request details the request id and file and the data
+   *   to write to the device.
+   */
   public void writeBuffer(DiskRequest request)
   {
     // Get the requested data from the request table.
