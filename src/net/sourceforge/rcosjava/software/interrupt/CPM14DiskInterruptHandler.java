@@ -1,17 +1,17 @@
-//*************************************************************************//
-// FILENAME : CPM14DiskInterruptHandler.java
-// PACKAGE  : Interrupt
-// PURPOSE  :
-// AUTHOR   : Brett Carter
-// HISTORY  : 25/3/96 Created.
-//*************************************************************************//
-
 package net.sourceforge.rcosjava.software.interrupt;
 
 import net.sourceforge.rcosjava.messaging.postoffices.os.OSOffice;
 import net.sourceforge.rcosjava.messaging.messages.MessageAdapter;
 import java.io.Serializable;
 
+/**
+ * Interrupt for CPM14 Disk.
+ * <P>
+ * @author Andrew Newman
+ * @author Brett Carter
+ * @created 25 March 1996
+ * @version 1.00 $Date$
+ */
 public class CPM14DiskInterruptHandler extends InterruptHandler
   implements Serializable
 {

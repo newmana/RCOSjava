@@ -1,26 +1,25 @@
-//**************************************************************************/
-// FILE     : InterruptQueue.java
-// PACKAGE  : Interrupt
-// PURPOSE  : Implement a queue for Interrupts used
-//            by the CPU of RCOS.java
-//            Extension of priorityQueue class by Andrew Newman
-//            Additional features include
-//            - a compare function that knows about the Interrupt class
-//            - a GetInterrupt function that accepts a time and
-//              returns the Interrupt type of an Interrupt that
-//              occurs at that time
-// AUTHOR   :	David Jones
-// MODIFIED : Andrew Newman
-// HISTORY  :	23/03/95 Created
-//            05/09/98 Change getInterrupt to return Interrupt instead of String AN
-//
-//**************************************************************************/
-
 package net.sourceforge.rcosjava.software.interrupt;
 
 import net.sourceforge.rcosjava.software.util.PriorityQueue;
 import net.sourceforge.rcosjava.hardware.cpu.Interrupt;
 
+/**
+ * Implement a queue for Interrupts used by the CPU of RCOS.java.  Extension of
+ * priorityQueue class by Andrew Newman.  Additional features include: a
+ * compare function that knows about the Interrupt class, a GetInterrupt
+ * function that accepts a time and returns the Interrupt type of an Interrupt
+ * that occurs at that time
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 05/09/98 Change getInterrupt to return Interrupt instead of String AN
+ * </DD></DT>
+ * <P>
+ * @author Andrew Newman
+ * @author David Jones
+ * @created 23 March 1996
+ * @version 1.00 $Date$
+ */
 public class InterruptQueue extends PriorityQueue
 {
   public InterruptQueue(int initialCapacity, int capacityIncrement)
@@ -28,12 +27,11 @@ public class InterruptQueue extends PriorityQueue
     super(initialCapacity, capacityIncrement);
   }
 
-  //********************************
-  // return -1, 0, 1 if first object is less than, equal to or greater than
-  // second object
-  // In Interrupt Queue order is based on the time the Interrupt is scheduled
-  // to occur
-
+  /**
+   * @return -1, 0, 1 if first object is less than, equal to or greater than
+   *  second object In Interrupt Queue order is based on the time the Interrupt
+   *  is scheduled to occur
+   */
   public int compare(Object first, Object second)
   {
     Interrupt intOne = (Interrupt) first;
@@ -50,10 +48,10 @@ public class InterruptQueue extends PriorityQueue
       return 1;
   }
 
-  //****************************************************
-  // return String type of Interrupt to occur at the specified time
-  // return null if no interrupt
-
+  /**
+   * @return String type of Interrupt to occur at the specified time return
+   * null if no interrupt
+   */
   public Interrupt getInterrupt(int iTime)
   {
     Interrupt intTmp;

@@ -1,16 +1,3 @@
-//**************************************************************************/
-// FILE     : InterruptHandler.java
-// PACKAGE  :
-// PURPOSE  : Abstract class for InterruptHandlers
-//            Each DeviceDriver that must declare and register
-//            appropriate InterruptHandlers with the Kernel
-// AUTHOR   : David Jones
-// MODIFIED : Andrew Newman
-// HISTORY  : 23/03/96	Created
-//            24/03/96   modified to extend SimpleMessageHandler
-//
-//**************************************************************************/
-
 package net.sourceforge.rcosjava.software.interrupt;
 
 import net.sourceforge.rcosjava.messaging.postoffices.os.OSOffice;
@@ -19,6 +6,21 @@ import net.sourceforge.rcosjava.messaging.messages.os.OSMessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import java.io.Serializable;
 
+/**
+ * Abstract class for InterruptHandlers.  Each DeviceDriver that must declare
+ * and register appropriate InterruptHandlers with the Kernel
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 24/03/96 Modified to extend SimpleMessageHandler
+ * </DD></DT>
+ * <P>
+ * @see net.sourceforge.rcosjava.messaging.postoffices.SimpleMessageHandler
+ * @author Andrew Newman
+ * @author Bruce Jamieson
+ * @created 23 March 1996
+ * @version 1.00 $Date$
+ */
 public class InterruptHandler extends OSMessageHandler implements Serializable
 {
 //  public static final String IH_IDENTIFIER = "IH";
@@ -36,7 +38,9 @@ public class InterruptHandler extends OSMessageHandler implements Serializable
     return type;
   }
 
-  // Had to change this from an abstract method because of crashing.
+  /**
+   * Had to change this from an abstract method because of crashing.
+   */
   public void handleInterrupt()
   {
   }
