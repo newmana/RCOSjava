@@ -1,1 +1,42 @@
-package org.rcosjava.messaging.messages.os;import java.io.Serializable;import org.rcosjava.software.interrupt.InterruptHandler;import org.rcosjava.software.kernel.Kernel;/** * Description of the Class * * @author administrator * @created 28 April 2002 */public class RegisterInterruptHandler extends OSMessageAdapter{  /**   * Description of the Field   */  private InterruptHandler ihHandler;  /**   * Constructor for the RegisterInterruptHandler object   *   * @param theSource Description of Parameter   */  public RegisterInterruptHandler(InterruptHandler theSource)  {    super(theSource);    ihHandler = theSource;  }  /**   * Sets the InterruptHandler attribute of the RegisterInterruptHandler object   *   * @param ihNewHandler The new InterruptHandler value   */  public void setInterruptHandler(InterruptHandler ihNewHandler)  {    ihHandler = ihNewHandler;  }  /**   * Description of the Method   *   * @param theElement Description of Parameter   */  public void doMessage(Kernel theElement)  {    theElement.insertInterruptHandler(ihHandler);  }}
+package org.rcosjava.messaging.messages.os;
+
+import java.io.Serializable;
+import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
+import org.rcosjava.software.interrupt.InterruptHandler;
+import org.rcosjava.software.kernel.Kernel;
+
+/**
+ * Registers an interrupt handler with the kernel.
+ *
+ * @author Andrew Newman
+ * @created 28 April 2002
+ */
+public class RegisterInterruptHandler extends OSMessageAdapter
+{
+  /**
+   * The interrupt handler to register.
+   */
+  private InterruptHandler handler;
+
+  /**
+   * Create a new message from the given source.
+   *
+   * @param theSource the sender of the message.
+   */
+  public RegisterInterruptHandler(OSMessageHandler theSource,
+      InterruptHandler newHandler)
+  {
+    super(theSource);
+    handler = newHandler;
+  }
+
+  /**
+   * Call insertInterruptHandler on the kernel.
+   *
+   * @param theElement the kernel to call.
+   */
+  public void doMessage(Kernel theElement)
+  {
+    theElement.insertInterruptHandler(handler);
+  }
+}

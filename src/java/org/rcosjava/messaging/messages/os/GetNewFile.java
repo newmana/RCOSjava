@@ -1,4 +1,5 @@
 package org.rcosjava.messaging.messages.os;
+
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.software.process.ProgramManager;
 
