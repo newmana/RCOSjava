@@ -77,7 +77,7 @@ public class FileMessages
         end = strTmpMessage.endsWith(EOF);
         tmpMessage.append(strTmpMessage);
       }
-      System.out.println("Raw message: " + tmpMessage);
+//      System.out.println("Raw message: " + tmpMessage);
       tmpMessage.setLength(tmpMessage.length() - EOF.length());
       message = tmpMessage.toString();
 
@@ -112,12 +112,12 @@ public class FileMessages
     }
     catch (IOException ioe)
     {
-      System.out.println("Error reading data from server: " + ioe);
+      System.err.println("Error reading data from server: " + ioe);
       ioe.printStackTrace();
     }
     catch (Exception e)
     {
-      System.out.println("Error: " + e);
+      System.err.println("Error: " + e);
       e.printStackTrace();
     }
     return false;
@@ -340,7 +340,7 @@ public class FileMessages
     }
     catch (IOException ioe)
     {
-      System.out.println(ioe + " Error when trying to write: " + message);
+      System.err.println(ioe + " Error when trying to write: " + message);
       return false;
     }
     return true;
@@ -355,7 +355,7 @@ public class FileMessages
     }
     catch (IOException ioe)
     {
-      System.out.println("Error when trying to flush");
+      System.err.println("Error when trying to flush");
     }
   }
 }

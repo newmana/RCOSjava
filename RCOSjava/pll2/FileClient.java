@@ -113,12 +113,12 @@ public class FileClient
       }
       else
       {
-        System.out.println(this + " getDir() Couldn't read reply.");
+        System.err.println(this + " getDir() Couldn't read reply.");
       }
     }
     else
     {
-      System.out.println(this + " getDir() Couldn't send command.");
+      System.err.println(this + " getDir() Couldn't send command.");
     }
     // Return the lines read in.
     return sTheList;

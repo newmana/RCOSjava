@@ -95,7 +95,7 @@ public class FileServer
     }
     catch (IOException theException)
     {
-      System.out.println("IO Error encountered: " + theException);
+      System.err.println("IO Error encountered: " + theException);
     }
   }
 
