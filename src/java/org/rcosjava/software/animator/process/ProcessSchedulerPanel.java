@@ -188,7 +188,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param newProcessSchedulerAnimator the new process scheduler animator.
    */
-  void setManager(ProcessSchedulerAnimator newProcessSchedulerAnimator)
+  synchronized void setManager(ProcessSchedulerAnimator newProcessSchedulerAnimator)
   {
     myProcessScheduler = newProcessSchedulerAnimator;
   }
@@ -351,7 +351,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param delay the delay value that was set.
    */
-  void setDelay(long newDelay)
+  synchronized void setDelay(long newDelay)
   {
     if (newDelay == 1)
     {
@@ -380,7 +380,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param newQuantum the quantum value to select.
    */
-  void setQuantum(int newQuantum)
+  synchronized void setQuantum(int newQuantum)
   {
     Integer newValue = new Integer(newQuantum);
     quantumOption.setSelectedItem(newValue.toString());
@@ -390,7 +390,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
   /**
    * Sets the currently selected item for the queue type.
    */
-  void setQueueType(int newQueueType)
+  synchronized void setQueueType(int newQueueType)
   {
     if (newQueueType == 1)
     {
@@ -452,7 +452,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    * Perhaps a rather dumb way of creating the movement arrays between the CPU
    * and queues. There must be a better way?
    */
-  void setupMovement()
+  synchronized void setupMovement()
   {
     cpuPic = new MTGO(myImages[0], "RCOS CPU", false);
     cpuPic.setPriority(1);
@@ -848,7 +848,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
   /**
    * Draw the background images the queue names, the boxes, etc.
    */
-  private void drawBackground()
+  private synchronized void drawBackground()
   {
     //Draw the black background or image (if it's set)
     int increment;
