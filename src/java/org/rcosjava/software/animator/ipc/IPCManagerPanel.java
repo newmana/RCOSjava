@@ -1,24 +1,21 @@
 package org.rcosjava.software.animator.ipc;
 
 import java.awt.*;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
+import javax.swing.*;
 import java.awt.event.*;
 import java.util.*;
-import org.rcosjava.software.animator.memory.MemoryGraphic;
+
 import org.rcosjava.software.animator.RCOSPanel;
-import org.rcosjava.software.animator.support.NewLabel;
-import org.rcosjava.software.animator.support.RCOSBox;
 import org.rcosjava.software.animator.support.RCOSQueue;
-import org.rcosjava.software.animator.support.RCOSRectangle;
+import org.rcosjava.software.animator.support.RCOSBox;
 import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.software.ipc.SharedMemory;
 import org.rcosjava.software.memory.MemoryManager;
 import org.rcosjava.software.memory.MemoryReturn;
 
 /**
- * Based on the commands sent and received to the MMU and IPC displays
- * graphically what is happening.
+ * Based on the commands sent and received to the IPC and displays graphically
+ * what is happening to shared memory and semaphores.
  * <P>
  * @author Andrew Newman
  * @created 22nd July 2002
@@ -39,11 +36,6 @@ public class IPCManagerPanel extends RCOSPanel
   private static String SOME = " Select";
 
   /**
-   * Panels for layout.
-   */
-  private Panel mainPanel;
-
-  /**
    * Images used to display UI.
    */
   private Image myImages[];
@@ -62,7 +54,7 @@ public class IPCManagerPanel extends RCOSPanel
    * Animator that I receive calls from and makes calls back when a user event
    * occurs.
    */
-  private IPCManagerAnimator myIPCManagerAnimator;
+  private IPCManagerAnimator myAnimator;
 
   /**
    * Component used for UI display.
@@ -73,11 +65,6 @@ public class IPCManagerPanel extends RCOSPanel
    * Window dimensions.
    */
   private int windowWidth, windowHeight;
-
-  /**
-   * Memory images to display.
-   */
-  private MemoryGraphic[] memoryGraphics = new MemoryGraphic[20];
 
   /**
    * Map of current semaphores.
@@ -92,17 +79,22 @@ public class IPCManagerPanel extends RCOSPanel
   /**
    * Description of the Field
    */
-  private Choice shmOption, semOption;
+  private JComboBox shmOption, semOption;
+
+  /**
+   * List models for options.
+   */
+  private DefaultListModel shmListModel, semListModel;
 
   /**
    * Description of the Field
    */
-  private java.awt.List shmList;
+  private JList shmList;
 
   /**
    * Description of the Field
    */
-  private TextField semValue;
+  private JTextField semValue;
 
   /**
    * Description of the Field
@@ -117,10 +109,10 @@ public class IPCManagerPanel extends RCOSPanel
   /**
    * Constructor for the IPCManagerFrame object
    *
-   * @param ipcImages images used in display of ui.
-   * @param thisIPCManager animator used to receive and make messages.
+   * @param images images used in display of ui.
+   * @param newIPCManager animator used to receive and make messages.
    */
-  public IPCManagerPanel(ImageIcon[] images, IPCManagerAnimator thisIPCManager)
+  public IPCManagerPanel(ImageIcon[] images, IPCManagerAnimator newIPCManager)
   {
     super();
     myImages = new Image[images.length];
@@ -130,7 +122,7 @@ public class IPCManagerPanel extends RCOSPanel
     }
     windowWidth = this.getWidth();
     windowHeight = this.getHeight();
-    myIPCManagerAnimator = thisIPCManager;
+    myAnimator = newIPCManager;
     semaphoreMap = new HashMap();
     sharedMemoryMap = new HashMap();
   }
@@ -144,136 +136,47 @@ public class IPCManagerPanel extends RCOSPanel
   {
     super.setupLayout(c);
 
-    NewLabel lTmpLabel;
-    RCOSBox rBox;
-
+    setBackground(defaultBgColour);
+    setForeground(defaultFgColour);
     setLayout(new BorderLayout());
 
-    mainPanel = new Panel();
-    Panel pTemp = new Panel();
+    JPanel mainPanel = new JPanel();
+    mainPanel.setBackground(defaultBgColour);
+    mainPanel.setForeground(defaultFgColour);
 
-    for (int count = 0; count < MemoryManager.MAX_PAGES; count++)
-    {
-      memoryGraphics[count] = new MemoryGraphic(myImages[0]);
-    }
+    JLabel tmpLabel;
 
-    GridBagConstraints constraints = new GridBagConstraints();
-    GridBagLayout gridBag = new GridBagLayout();
+    shmOption = new JComboBox();
 
-    mainPanel.setLayout(gridBag);
-    constraints.fill = GridBagConstraints.BOTH;
-    constraints.gridwidth = 1;
-    constraints.gridheight = 1;
-    constraints.weightx = 1;
-    constraints.insets = new Insets(1, 1, 0, 0);
-    constraints.anchor = GridBagConstraints.CENTER;
-
-    int iMemRows;
-
-    int iMemCols;
-
-    for (iMemRows = 0; iMemRows < 2; iMemRows++)
-    {
-      for (iMemCols = 0; iMemCols < 9; iMemCols++)
-      {
-        constraints.gridwidth = 1;
-        gridBag.setConstraints(memoryGraphics[(iMemRows * 10) + iMemCols], constraints);
-        mainPanel.add(memoryGraphics[(iMemRows * 10) + iMemCols]);
-      }
-      constraints.gridwidth = GridBagConstraints.REMAINDER;
-      gridBag.setConstraints(memoryGraphics[(iMemRows * 10) + 9], constraints);
-      mainPanel.add(memoryGraphics[(iMemRows * 10) + 9]);
-    }
-
-    RCOSBox iBox;
-    RCOSRectangle allocBox;
-    RCOSRectangle readBox;
-    RCOSRectangle writeBox;
-    RCOSRectangle unallocBox;
-
-    pTemp = new Panel();
-    pTemp.setLayout(gridBag);
-
-    allocBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.allocatedColour, Color.white);
-    unallocBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.deallocatedColour, Color.white);
-    readBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.readingColour, Color.white);
-    writeBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.writingColour, Color.white);
-
-    constraints.fill = GridBagConstraints.BOTH;
-    constraints.anchor = GridBagConstraints.NORTH;
-    constraints.gridwidth = 1;
-    constraints.gridheight = 1;
-    constraints.weighty = 1;
-    constraints.weightx = 1;
-
-    gridBag.setConstraints(allocBox, constraints);
-    pTemp.add(allocBox);
-
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
-    lTmpLabel = new NewLabel(" Allocated ", defaultFont);
-    gridBag.setConstraints(lTmpLabel, constraints);
-    pTemp.add(lTmpLabel);
-
-    constraints.gridwidth = 1;
-    gridBag.setConstraints(unallocBox, constraints);
-    pTemp.add(unallocBox);
-
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
-    lTmpLabel = new NewLabel(" Unallocated ", defaultFont);
-    gridBag.setConstraints(lTmpLabel, constraints);
-    pTemp.add(lTmpLabel);
-
-    constraints.gridwidth = 1;
-    gridBag.setConstraints(readBox, constraints);
-    pTemp.add(readBox);
-
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
-    lTmpLabel = new NewLabel(" Being Read ", defaultFont);
-    gridBag.setConstraints(lTmpLabel, constraints);
-    pTemp.add(lTmpLabel);
-
-    constraints.gridwidth = 1;
-    gridBag.setConstraints(writeBox, constraints);
-    pTemp.add(writeBox);
-
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
-    lTmpLabel = new NewLabel(" Being Written ", defaultFont);
-    gridBag.setConstraints(lTmpLabel, constraints);
-    pTemp.add(lTmpLabel);
-
-    JLabel keyLabel = new JLabel("Key", JLabel.CENTER);
-    keyLabel.setFont(labelFont);
-    iBox = new RCOSBox(pTemp, keyLabel, 0, 2, 2, 2);
-
-    Panel pSMem;
-
-    Panel pSem;
-
-    shmOption = new Choice();
-    shmList = new java.awt.List(2, false);
-    shmList.setBackground(Color.black);
+    shmListModel = new DefaultListModel();
+    shmList = new JList(shmListModel);
+    shmList.setBackground(defaultBgColour);
     shmList.setForeground(textBoxColour);
+    shmList.setVisibleRowCount(3);
+    shmList.setModel(shmListModel);
 
-    semOption = new Choice();
-    semValue = new TextField(2);
+    semOption = new JComboBox();
+    semValue = new JTextField(2);
 
     shmOption.addItem("None      ");
     shmOption.setBackground(Color.black);
     shmOption.setForeground(Color.white);
-    shmOption.select("None      ");
+    shmOption.setSelectedIndex(0);
 
     semOption.addItem(NONE);
     semOption.setBackground(Color.black);
     semOption.setForeground(Color.white);
-    semOption.select(NONE);
+    semOption.setSelectedIndex(0);
     selectedSemaphoreName = NONE;
 
-    pSMem = new Panel();
+    JPanel sharedMemPanel = new JPanel();
+    sharedMemPanel.setBackground(defaultBgColour);
+    sharedMemPanel.setForeground(textBoxColour);
 
     GridBagConstraints tmpConstraints = new GridBagConstraints();
     GridBagLayout tmpGridBag = new GridBagLayout();
 
-    pSMem.setLayout(tmpGridBag);
+    sharedMemPanel.setLayout(tmpGridBag);
 
     tmpConstraints.weightx = 1;
     tmpConstraints.gridwidth = 1;
@@ -281,37 +184,48 @@ public class IPCManagerPanel extends RCOSPanel
     tmpConstraints.anchor = GridBagConstraints.CENTER;
 
     tmpConstraints.anchor = GridBagConstraints.CENTER;
-    lTmpLabel = new NewLabel("ID:", defaultFont);
-    tmpGridBag.setConstraints(lTmpLabel, tmpConstraints);
-    pSMem.add(lTmpLabel);
+    tmpLabel = new JLabel("ID:");
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(textBoxColour);
+    tmpLabel.setFont(defaultFont);
+    tmpGridBag.setConstraints(tmpLabel, tmpConstraints);
+    sharedMemPanel.add(tmpLabel);
 
-    lTmpLabel = new NewLabel("Process Queue:", defaultFont);
-    tmpGridBag.setConstraints(lTmpLabel, tmpConstraints);
-    pSMem.add(lTmpLabel);
+    tmpLabel = new JLabel("Process Queue:");
+    tmpLabel.setFont(defaultFont);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(textBoxColour);
+    tmpGridBag.setConstraints(tmpLabel, tmpConstraints);
+    sharedMemPanel.add(tmpLabel);
 
     tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
-    lTmpLabel = new NewLabel("Value:", defaultFont);
-    tmpGridBag.setConstraints(lTmpLabel, tmpConstraints);
-    pSMem.add(lTmpLabel);
+    tmpLabel = new JLabel("Value:");
+    tmpLabel.setFont(defaultFont);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(textBoxColour);
+    tmpGridBag.setConstraints(tmpLabel, tmpConstraints);
+    sharedMemPanel.add(tmpLabel);
 
     tmpConstraints.gridwidth = 1;
     tmpGridBag.setConstraints(shmOption, tmpConstraints);
     shmOption.addItemListener(new SharedMemorySelection());
-    pSMem.add(shmOption);
+    sharedMemPanel.add(shmOption);
 
     shmQueue = new RCOSQueue(5, defaultFont);
     tmpGridBag.setConstraints(shmQueue, tmpConstraints);
-    pSMem.add(shmQueue);
+    sharedMemPanel.add(shmQueue);
 
     tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
     tmpGridBag.setConstraints(shmList, tmpConstraints);
-    pSMem.add(shmList);
+    sharedMemPanel.add(shmList);
 
-    pSem = new Panel();
+    JPanel semPanel = new JPanel();
+    semPanel.setBackground(defaultBgColour);
+    semPanel.setForeground(textBoxColour);
 
     tmpConstraints = new GridBagConstraints();
     tmpGridBag = new GridBagLayout();
-    pSem.setLayout(tmpGridBag);
+    semPanel.setLayout(tmpGridBag);
 
     tmpConstraints.gridwidth = 1;
     tmpConstraints.gridheight = 1;
@@ -321,34 +235,43 @@ public class IPCManagerPanel extends RCOSPanel
 
     tmpConstraints.insets = new Insets(1, 1, 1, 1);
     tmpConstraints.gridwidth = 1;
-    lTmpLabel = new NewLabel("ID:", defaultFont);
-    tmpGridBag.setConstraints(lTmpLabel, tmpConstraints);
-    pSem.add(lTmpLabel);
+    tmpLabel = new JLabel("ID:");
+    tmpLabel.setFont(defaultFont);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(textBoxColour);
+    tmpGridBag.setConstraints(tmpLabel, tmpConstraints);
+    semPanel.add(tmpLabel);
 
     tmpConstraints.insets = new Insets(1, 1, 1, 1);
-    lTmpLabel = new NewLabel("Process Queue:", defaultFont);
-    tmpGridBag.setConstraints(lTmpLabel, tmpConstraints);
-    pSem.add(lTmpLabel);
+    tmpLabel = new JLabel("Process Queue:");
+    tmpLabel.setFont(defaultFont);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(textBoxColour);
+    tmpGridBag.setConstraints(tmpLabel, tmpConstraints);
+    semPanel.add(tmpLabel);
 
     tmpConstraints.insets = new Insets(1, 1, 1, 1);
     tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
     tmpConstraints.anchor = GridBagConstraints.CENTER;
-    lTmpLabel = new NewLabel("Value:", defaultFont);
-    tmpGridBag.setConstraints(lTmpLabel, tmpConstraints);
-    pSem.add(lTmpLabel);
+    tmpLabel = new JLabel("Value:");
+    tmpLabel.setFont(defaultFont);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(textBoxColour);
+    tmpGridBag.setConstraints(tmpLabel, tmpConstraints);
+    semPanel.add(tmpLabel);
 
     tmpConstraints.insets = new Insets(1, 1, 1, 1);
     tmpConstraints.gridwidth = 1;
     tmpConstraints.anchor = GridBagConstraints.CENTER;
     tmpGridBag.setConstraints(semOption, tmpConstraints);
     semOption.addItemListener(new SemaphoreSelection());
-    pSem.add(semOption);
+    semPanel.add(semOption);
 
     tmpConstraints.insets = new Insets(1, 1, 1, 1);
     tmpConstraints.anchor = GridBagConstraints.CENTER;
     semQueue = new RCOSQueue(5, defaultFont);
     tmpGridBag.setConstraints(semQueue, tmpConstraints);
-    pSem.add(semQueue);
+    semPanel.add(semQueue);
 
     tmpConstraints.insets = new Insets(1, 1, 1, 1);
     tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
@@ -358,71 +281,10 @@ public class IPCManagerPanel extends RCOSPanel
     semValue.setForeground(defaultFgColour);
     semValue.setBackground(defaultBgColour);
     tmpGridBag.setConstraints(semValue, tmpConstraints);
-    pSem.add(semValue);
+    semPanel.add(semValue);
 
-    constraints.gridheight = 3;
-    constraints.gridwidth = 2;
-    gridBag.setConstraints(iBox, constraints);
-    mainPanel.add(iBox);
-
-    constraints.gridheight = 1;
-    JLabel semaphoreLabel = new JLabel("Semaphores", JLabel.CENTER);
-    semaphoreLabel.setFont(titleFont);
-    rBox = new RCOSBox(pSem, semaphoreLabel, 1, 1, 1, 1);
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
-    gridBag.setConstraints(rBox, constraints);
-    mainPanel.add(rBox);
-
-    JLabel shmMemLabel = new JLabel("Shared Memory", JLabel.CENTER);
-    shmMemLabel.setFont(titleFont);
-    rBox = new RCOSBox(pSMem, shmMemLabel, 1, 1, 1, 1);
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
-    gridBag.setConstraints(rBox, constraints);
-    mainPanel.add(rBox);
-
-    add("Center", mainPanel);
-  }
-
-  /**
-   * Description of the Method
-   *
-   * @param g Description of Parameter
-   */
-  public void paint(Graphics g)
-  {
-    update(g);
-  }
-
-  /**
-   * Description of the Method
-   *
-   * @param g Description of Parameter
-   */
-  public synchronized void update(Graphics g)
-  {
-    for (int count = 0; count < MemoryManager.MAX_PAGES; count++)
-    {
-      memoryGraphics[count].repaint();
-    }
-    notify();
-  }
-
-  /**
-   * Description of the Method
-   *
-   * @param time Description of Parameter
-   */
-  public synchronized void syncPaint(long time)
-  {
-    this.repaint();
-    // do nothing
-    try
-    {
-      wait(time);
-    }
-    catch (Exception v)
-    {
-    }
+    add(sharedMemPanel, BorderLayout.NORTH);
+    add(semPanel, BorderLayout.SOUTH);
   }
 
   /**
@@ -437,10 +299,10 @@ public class IPCManagerPanel extends RCOSPanel
     if (semOption.getItemCount() == 1)
     {
       semOption.removeAll();
-      semOption.add(SOME);
+      semOption.addItem(SOME);
       selectedSemaphoreName = SOME;
     }
-    semOption.add(semaphoreId);
+    semOption.addItem(semaphoreId);
     semaphoreMap.put(semaphoreId, new SemaphoreSharedMemoryGraphic(pid,
         new Integer(value)));
     updateSemaphoreQueue();
@@ -519,11 +381,11 @@ public class IPCManagerPanel extends RCOSPanel
     }
     if (tmpGraphic.attachedProcesses() == 0)
     {
-      semOption.remove(semaphoreId);
+      semOption.removeItem(semaphoreId);
       if (semOption.getItemCount() == 1)
       {
         semOption.removeAll();
-        semOption.add(NONE);
+        semOption.addItem(NONE);
         selectedSemaphoreName = NONE;
       }
       else
@@ -547,10 +409,10 @@ public class IPCManagerPanel extends RCOSPanel
     if (shmOption.getItemCount() == 1)
     {
       shmOption.removeAll();
-      shmOption.add(SOME);
+      shmOption.addItem(SOME);
       selectedSharedMemoryName = SOME;
     }
-    shmOption.add(sharedMemoryId);
+    shmOption.addItem(sharedMemoryId);
     sharedMemoryMap.put(sharedMemoryId, new SemaphoreSharedMemoryGraphic(
       memoryReturn.getPID(), memory.toString()));
     updateSharedMemoryQueue();
@@ -592,11 +454,11 @@ public class IPCManagerPanel extends RCOSPanel
       // Remove the last graphic.
       if (tmpGraphic.attachedProcesses() == 0)
       {
-        shmOption.remove(sharedMemoryId);
+        shmOption.removeItem(sharedMemoryId);
         if (shmOption.getItemCount() == 1)
         {
           shmOption.removeAll();
-          shmOption.add(NONE);
+          shmOption.addItem(NONE);
           selectedSharedMemoryName = NONE;
         }
         else
@@ -654,94 +516,6 @@ public class IPCManagerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
-   *
-   * @param aMemret Description of Parameter
-   */
-  void allocatedPages(MemoryReturn aMemret)
-  {
-    for (int count = 0; count < aMemret.getSize(); count++)
-    {
-      memoryGraphics[aMemret.getPage(count)].setAllocated(aMemret);
-    }
-  }
-
-  /**
-   * Description of the Method
-   *
-   * @param returnedMemory Description of Parameter
-   */
-  void deallocatedPages(MemoryReturn returnedMemory)
-  {
-    for (int count = 0; count < returnedMemory.getSize(); count++)
-    {
-      memoryGraphics[returnedMemory.getPage(count)].setDeallocated();
-    }
-  }
-
-  /**
-   * Description of the Method
-   *
-   * @param pid Description of Parameter
-   * @param memoryType Description of Parameter
-   */
-  void readingMemory(int pid, byte memoryType)
-  {
-    colourMemory(MemoryGraphic.readingColour, pid, memoryType);
-  }
-
-  /**
-   * Description of the Method
-   *
-   * @param pid Description of Parameter
-   * @param memoryType Description of Parameter
-   */
-  void writingMemory(int pid, byte memoryType)
-  {
-    colourMemory(MemoryGraphic.writingColour, pid, memoryType);
-  }
-
-  /**
-   * Description of the Method
-   *
-   * @param pid Description of Parameter
-   * @param memoryType Description of Parameter
-   */
-  void finishedReadingMemory(int pid, byte memoryType)
-  {
-    colourMemory(MemoryGraphic.allocatedColour, pid, memoryType);
-  }
-
-  /**
-   * Description of the Method
-   *
-   * @param pid Description of Parameter
-   * @param memoryType Description of Parameter
-   */
-  void finishedWritingMemory(int pid, byte memoryType)
-  {
-    colourMemory(MemoryGraphic.allocatedColour, pid, memoryType);
-  }
-
-  /**
-   * Description of the Method
-   *
-   * @param cColor Description of Parameter
-   * @param pid Description of Parameter
-   * @param bMemoryType Description of Parameter
-   */
-  private void colourMemory(Color color, int pid, byte memoryType)
-  {
-    for (int count = 0; count < MemoryManager.MAX_PAGES; count++)
-    {
-      if (memoryGraphics[count].isMemory(pid, memoryType))
-      {
-        memoryGraphics[count].setCurrentColour(color);
-      }
-    }
-  }
-
-  /**
    * Update the semaphore queue with the currently selected item.
    */
   private void updateSemaphoreQueue()
@@ -784,7 +558,7 @@ public class IPCManagerPanel extends RCOSPanel
       SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
           sharedMemoryMap.get(selectedSharedMemoryName);
 
-      shmList.add((String) tmpGraphic.getValue());
+      shmListModel.addElement((String) tmpGraphic.getValue());
 
       Iterator tmpIter = tmpGraphic.getAttachedProcesses();
 
