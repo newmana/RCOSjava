@@ -82,14 +82,9 @@ public class IPCManagerPanel extends RCOSPanel
   private JComboBox shmOption, semOption;
 
   /**
-   * List models for options.
-   */
-  private DefaultListModel shmListModel, semListModel;
-
-  /**
    * The list of shared memory.
    */
-  private JList shmList;
+  private JTextArea shmList;
 
   /**
    * The current value of the currently selected semaphore.
@@ -120,8 +115,8 @@ public class IPCManagerPanel extends RCOSPanel
     {
       myImages[index] = images[index].getImage();
     }
-    windowWidth = this.getWidth();
-    windowHeight = this.getHeight();
+    windowWidth = getWidth();
+    windowHeight = getHeight();
     myAnimator = newIPCManager;
     semaphoreMap = new HashMap();
     sharedMemoryMap = new HashMap();
@@ -148,17 +143,19 @@ public class IPCManagerPanel extends RCOSPanel
 
     shmOption = new JComboBox();
 
-    shmListModel = new DefaultListModel();
-    shmList = new JList(shmListModel);
+    shmList = new JTextArea();
     shmList.setBackground(defaultBgColour);
     shmList.setForeground(textBoxColour);
-    shmList.setVisibleRowCount(3);
-    shmList.setModel(shmListModel);
+    shmList.setLineWrap(true);
+    JScrollPane shmListPane = new JScrollPane(shmList);
+    shmListPane.setVerticalScrollBarPolicy(
+      JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    shmListPane.setPreferredSize(new Dimension(450,100));
 
     semOption = new JComboBox();
     semValue = new JTextField(2);
 
-    shmOption.addItem("None      ");
+    shmOption.addItem(NONE);
     shmOption.setForeground(choiceColour);
     shmOption.setBackground(defaultBgColour);
     shmOption.setSelectedIndex(0);
@@ -191,15 +188,8 @@ public class IPCManagerPanel extends RCOSPanel
     tmpGridBag.setConstraints(tmpLabel, tmpConstraints);
     sharedMemPanel.add(tmpLabel);
 
-    tmpLabel = new JLabel("Process Queue:");
-    tmpLabel.setFont(defaultFont);
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(textBoxColour);
-    tmpGridBag.setConstraints(tmpLabel, tmpConstraints);
-    sharedMemPanel.add(tmpLabel);
-
     tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
-    tmpLabel = new JLabel("Value:");
+    tmpLabel = new JLabel("Process Queue:");
     tmpLabel.setFont(defaultFont);
     tmpLabel.setBackground(defaultBgColour);
     tmpLabel.setForeground(textBoxColour);
@@ -211,13 +201,22 @@ public class IPCManagerPanel extends RCOSPanel
     shmOption.addItemListener(new SharedMemorySelection());
     sharedMemPanel.add(shmOption);
 
+    tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
     shmQueue = new RCOSQueue(5, defaultFont);
     tmpGridBag.setConstraints(shmQueue, tmpConstraints);
     sharedMemPanel.add(shmQueue);
 
     tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
-    tmpGridBag.setConstraints(shmList, tmpConstraints);
-    sharedMemPanel.add(shmList);
+    tmpLabel = new JLabel("Value:");
+    tmpLabel.setFont(defaultFont);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(textBoxColour);
+    tmpGridBag.setConstraints(tmpLabel, tmpConstraints);
+    sharedMemPanel.add(tmpLabel);
+
+    tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
+    tmpGridBag.setConstraints(shmListPane, tmpConstraints);
+    sharedMemPanel.add(shmListPane);
 
     JPanel semPanel = new JPanel();
     semPanel.setBackground(defaultBgColour);
@@ -415,9 +414,9 @@ public class IPCManagerPanel extends RCOSPanel
       shmOption.addItem(SOME);
       selectedSharedMemoryName = SOME;
     }
-    shmOption.addItem(sharedMemoryId);
     sharedMemoryMap.put(sharedMemoryId, new SemaphoreSharedMemoryGraphic(
       memoryReturn.getPID(), memory.toString()));
+    shmOption.addItem(sharedMemoryId);
     updateSharedMemoryQueue();
   }
 
@@ -531,6 +530,7 @@ public class IPCManagerPanel extends RCOSPanel
     //Reset values
     semQueue.removeAllFromQueue();
     semValue.setText("");
+
     //Check that it's a real semaphore
     if (!selectedSemaphoreName.startsWith(NONE) &&
         !selectedSemaphoreName.startsWith(SOME))
@@ -559,14 +559,15 @@ public class IPCManagerPanel extends RCOSPanel
     shmQueue.removeAllFromQueue();
     shmList.removeAll();
 
-    //Check that it's a real semaphore
+    //Check that it's a real shared memory queue.
     if (!selectedSharedMemoryName.startsWith(NONE) &&
         !selectedSharedMemoryName.startsWith(SOME))
     {
       SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
           sharedMemoryMap.get(selectedSharedMemoryName);
 
-      shmListModel.addElement((String) tmpGraphic.getValue());
+      String tmpValue = (String) tmpGraphic.getValue();
+      shmList.setText(tmpValue);
       Iterator tmpIter = tmpGraphic.getAttachedProcesses();
 
       while (tmpIter.hasNext())
