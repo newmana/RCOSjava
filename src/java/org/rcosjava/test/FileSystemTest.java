@@ -93,7 +93,7 @@ public class FileSystemTest extends TestCase
       // Ensure allocated correctly.
       dump = fs.dumpFIDEntry(fileId);
       assertEquals("The current file id entry should have the correct " +
-        "filename and mode", "C:test.pas,0", dump);
+        "filename and mode", "C:test.pas," + CPM14Mode.ALLOCATED, dump);
 
       // Assume allocation is predictable
       assertEquals("Request Id should be equal", 0, requestId);
@@ -109,7 +109,7 @@ public class FileSystemTest extends TestCase
       // Ensure created correctly.
       dump = fs.dumpFIDEntry(fileId);
       assertEquals("The current file id entry should have the correct " +
-        "filename and mode", "C:test.pas,2", dump);
+        "filename and mode", "C:test.pas," + CPM14Mode.WRITING, dump);
 
       // Ensure that the file was created without error.
       assertEquals("Request Id should be equal", 1, requestId);
@@ -120,10 +120,6 @@ public class FileSystemTest extends TestCase
       assertEquals("Directory request should have one file",
           "0 t e s t         p a s 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 " +
           "\n", dump);
-
-      dump = fs.dumpFIDEntry(fileId);
-      assertEquals("The current file id entry should have the correct " +
-        "filename and mode", "C:test.pas,2", dump);
 
       int index = 1;
 
@@ -146,7 +142,20 @@ public class FileSystemTest extends TestCase
 
       dump = fs.dumpFIDEntry(fileId);
       assertEquals("The current file id entry should have the correct " +
-        "filename and mode", "C:test.pas,2", dump);
+        "filename and mode", "C:test.pas," + CPM14Mode.WRITING, dump);
+
+      // Close file
+      requestId++;
+      fs.close(requestId, fileId);
+      dump = fs.dumpDirectoryEntry(0, 0);
+      assertEquals("Directory request should have one file, with 4 allocated " +
+        "sectors", "0 t e s t         p a s 0 0 0 31 \n2 3 4 5 0 0 0 0 0 0 0 " +
+        "0 0 0 0 0 \n", dump);
+      System.err.println("Got: " + dump);
+
+      dump = fs.dumpFIDEntry(fileId);
+      assertEquals("The current file id entry should have the correct " +
+        "filename and mode", "C:test.pas," + CPM14Mode.CLOSING, dump);
     }
     catch (Exception e)
     {
@@ -166,7 +175,15 @@ public class FileSystemTest extends TestCase
       if (newMessage.getType() == "org.rcosjava.messaging.messages.os.AddDiskRequest")
       {
         AddDiskRequest msg = (AddDiskRequest) newMessage;
-        fs.flush(msg.getDiskRequest());
+        if (msg.getDiskRequest().getRequestId() == CPM14RequestTableEntry.FLUSH)
+        {
+          fs.flush(msg.getDiskRequest());
+        }
+        else if (msg.getDiskRequest().getRequestId() ==
+            CPM14RequestTableEntry.WRITE_BUFFER)
+        {
+          fs.writeBuffer(msg.getDiskRequest());
+        }
       }
     }
   }
