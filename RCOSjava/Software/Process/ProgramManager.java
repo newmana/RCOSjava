@@ -181,9 +181,9 @@ import RCOS;
     theFileClient.closeConnection();
   }
 
-  public synchronized void updateList(String sDirectoryName)
+  public synchronized void updateList(String directoryName, int directoryType)
   {
-    String[] sDataArray;
+    String[] dataArray;
     directoryList = new FIFOQueue(10,1);
     fileList = new FIFOQueue(10,1);
 
@@ -191,31 +191,35 @@ import RCOS;
     // Current directory is the messages body.
     if (open())
     {
-      sDataArray = theFileClient.getExeDir(sDirectoryName);
-      if (sDataArray != null)
+      if (directoryType == 1)
+        dataArray = theFileClient.getExeDir(directoryName);
+      else
+        dataArray = theFileClient.getRecDir();
+      if (dataArray != null)
       {
-        if (sDirectoryName.compareTo("/") != 0)
+        if ((directoryName.compareTo(java.io.File.separator) != 0) &&
+          (directoryType ==1))
         {
           directoryList.insert(new String("."));
           directoryList.insert(new String(".."));
         }
 
-        for (int counter = 0; counter < sDataArray.length; counter++)
+        for (int counter = 0; counter < dataArray.length; counter++)
         {
-          if (sDataArray[counter].endsWith("/"))
+          if (dataArray[counter].endsWith(java.io.File.separator))
           {
-            directoryList.insert(sDataArray[counter]);
+            directoryList.insert(dataArray[counter]);
           }
           else
           {
-            fileList.insert(sDataArray[counter]);
+            fileList.insert(dataArray[counter]);
           }
         }
       }
       close();
       // Sends updated list to animator.
       UpdateFileList newMsg = new UpdateFileList(this,
-        fileList, directoryList);
+        fileList, directoryList, directoryType);
       sendMessage(newMsg);
     }
     else
