@@ -194,11 +194,6 @@ public class SystemCall extends WordParameter
     "F_WRITE");
 
   /**
-   * Operation constant for system call (OPCODE_CSP) Sleep.
-   */
-  public final static SystemCall SLEEP = new SystemCall((short) 28, "SLEEP");
-
-  /**
    * The internal value of the system call. Currently valid between 0 and 27.
    */
   private short systemCallValue;
