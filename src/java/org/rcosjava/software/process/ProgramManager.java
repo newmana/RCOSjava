@@ -15,6 +15,7 @@ import org.rcosjava.messaging.messages.universal.UpdateFileList;
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.messaging.postoffices.os.OSOffice;
 import org.rcosjava.pll2.FileClient;
+import org.rcosjava.software.animator.support.ErrorDialog;
 import org.rcosjava.software.interrupt.InterruptHandler;
 import org.rcosjava.software.interrupt.ProgManInterruptHandler;
 import org.rcosjava.software.kernel.Kernel;
@@ -152,10 +153,10 @@ public class ProgramManager extends OSMessageHandler
   }
 
   /**
-   * Start loading and creating a new process based on a file name of an
+   * Start loading and creating a new process based on a filename of an
    * executable.
    *
-   * @param filename Description of Parameter
+   * @param filename the new filename to create.
    */
   public void newFile(String fileName)
   {
@@ -210,7 +211,7 @@ public class ProgramManager extends OSMessageHandler
   /**
    * Open a connection using the file client.
    *
-   * @return Description of the Returned Value
+   * @return true if the connection to the server was successful.
    */
   public boolean open()
   {
@@ -243,8 +244,8 @@ public class ProgramManager extends OSMessageHandler
   /**
    * Update the directory list.
    *
-   * @param directoryName Description of Parameter
-   * @param directoryType Description of Parameter
+   * @param directoryName the name of the directory relative to the host.
+   * @param directoryType executable or recordable.
    */
   public void updateList(String directoryName, int directoryType)
   {
@@ -295,7 +296,12 @@ public class ProgramManager extends OSMessageHandler
     }
     else
     {
-//      RCOS.updateStatusBar("Error! Unable to connect to server.");
+      new ErrorDialog("Error - Unable to connect to server.", "Ensure the " +
+          "server is running (execute either runme.sh or runme.bat) on " +
+          "host: '" + host + "' port: '" + port + "'").show();
+      UpdateFileList newMsg = new UpdateFileList(this,
+          fileList, directoryList, directoryType);
+      sendMessage(newMsg);
     }
   }
 }
