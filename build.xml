@@ -109,9 +109,9 @@
     <mkdir dir="${dist.dir}/pll2/recorded"/>
 
     <!-- Clean up dist directory -->
-    <!--delete dir="${dist.dir}/com"/>
+    <delete dir="${dist.dir}/com"/>
     <delete dir="${dist.dir}/fr"/>
-    <delete dir="${dist.dir}/org"/-->
+    <delete dir="${dist.dir}/org"/>
   </target>
 
   <target name="javadoc" depends="dist"
