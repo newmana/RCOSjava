@@ -58,6 +58,6 @@ public class AnimatorMessageRecorder extends AnimatorMessageHandler
    */
   public void processMessage(UniversalMessageAdapter newMessage)
   {
-    recorder.processAnimatorUniversalMessage(newMessage);
+    //recorder.processAnimatorUniversalMessage(newMessage);
   }
 }
