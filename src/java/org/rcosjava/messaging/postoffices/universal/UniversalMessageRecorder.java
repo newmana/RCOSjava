@@ -247,6 +247,7 @@ public class UniversalMessageRecorder extends OSMessageHandler
     }
     catch (Exception e)
     {
+      e.printStackTrace();
     }
     myClient.closeConnection();
   }
