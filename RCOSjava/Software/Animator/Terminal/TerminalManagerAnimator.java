@@ -30,9 +30,8 @@ public class TerminalManagerAnimator extends RCOSAnimator
   private TerminalManagerFrame tmFrame;
 	private static final String MESSENGING_ID = "TerminalManagerAnimator";
 
-  public TerminalManagerAnimator (AnimatorOffice aPostOffice,
-                                  int x, int y, Image[] tmImages, int mTerm,
-                                  int mCol, int mRow)
+  public TerminalManagerAnimator(AnimatorOffice aPostOffice, int x, int y,
+    Image[] tmImages, int mTerm, int mCol, int mRow)
   {
     super(MESSENGING_ID, aPostOffice);
     tmFrame = new TerminalManagerFrame(x, y, tmImages, mTerm, mCol, mRow, this);
@@ -60,9 +59,9 @@ public class TerminalManagerAnimator extends RCOSAnimator
     tmFrame.setVisible(false);
   }
 
-	public void processMessage(AnimatorMessageAdapter aMsg)
-	{
-	}
+  public void processMessage(AnimatorMessageAdapter aMsg)
+  {
+  }
 
   public void processMessage(UniversalMessageAdapter aMsg)
   {
@@ -87,19 +86,18 @@ public class TerminalManagerAnimator extends RCOSAnimator
     tmFrame.terminalOn(iTemp);
   }
 
-  public void sendToggleTerminal (int iTemp)
+  public void sendToggleTerminal(int iTemp)
   {
-    TerminalToggle ttMessage = new TerminalToggle(this,
-      iTemp);
+    TerminalToggle ttMessage = new TerminalToggle(this, iTemp);
     sendMessage(ttMessage);
   }
 
-  public void terminalFront (int iTemp)
+  public void terminalFront(int iTemp)
   {
     tmFrame.terminalFront(iTemp);
   }
 
-  public void sendTerminalFront (int iTemp)
+  public void sendTerminalFront(int iTemp)
   {
     TerminalFront tfMessage = new TerminalFront(this, iTemp);
     sendMessage(tfMessage);
@@ -110,7 +108,7 @@ public class TerminalManagerAnimator extends RCOSAnimator
     tmFrame.terminalBack(iTemp);
   }
 
-  public void sendTerminalBack (int iTemp)
+  public void sendTerminalBack(int iTemp)
   {
     TerminalBack tbMessage = new TerminalBack(this, iTemp);
     sendMessage(tbMessage);

@@ -1,18 +1,3 @@
-//***************************************************************************
-// FILE    : SoftwareTerminal.java
-// PACKAGE : Terminal
-// PURPOSE : OS software that manages a hardware terminal
-// AUTHOR  : David Jones
-// MODIFIED: Andrew Newman
-// HISTORY : 24/01/96  Created -DJ.
-//           23/03/96  Moved into package Terminal -DJ.
-//           24/03/96  Modified to reverse membership
-//                     Terminal now extends Frame and
-//                     has a MessageHandler as a member -DJ.
-//           29/03/96  Separated into SoftwareTerminal -DJ.
-//
-//***************************************************************************/
-
 package Software.Terminal;
 
 import java.awt.*;
@@ -36,6 +21,22 @@ import MessageSystem.Messages.Universal.UniversalMessageAdapter;
 import Software.Interrupt.InterruptHandler;
 import Software.Util.LIFOQueue;
 
+/**
+ * OS software that manages a hardware terminal.  The basic idea is that there
+ * is a hardware terminal representing the physical properties of the screen
+ * and the software terminal representing any logic processing involved.
+ * <P>
+ * HISTORY: 23/03/96  Moved into package Terminal -DJ.<BR>
+ *          24/03/96  Modified to reverse membership<BR>
+ *                    Terminal now extends Frame and
+ *                    has a MessageHandler as a member -DJ.<BR>
+ *          29/03/96  Separated into SoftwareTerminal -DJ.<BR>
+ * <P>
+ * @author Andrew Newman.
+ * @author David Jones.
+ * @version 1.00 $Date$
+ * @created 24th of January 1996
+ */
 public class SoftwareTerminal extends OSMessageHandler
 {
   HardwareTerminal hardwareTerminal;
@@ -59,9 +60,8 @@ public class SoftwareTerminal extends OSMessageHandler
     softwareBuffer = new LIFOQueue(10, 10);
 
     // create and register a terminal Interrupt handler
-
     terminalIH = new TerminalInterruptHandler(getId() , aPostOffice,
-                                getId() + "KeyPress", getId());
+      getId() + "KeyPress", getId());
     RegisterInterruptHandler msg = new
       RegisterInterruptHandler(this, (InterruptHandler) terminalIH);
     sendMessage(msg);
@@ -200,7 +200,7 @@ public class SoftwareTerminal extends OSMessageHandler
     }
   }
 
-	public void processMessage(UniversalMessageAdapter aMsg)
+  public void processMessage(UniversalMessageAdapter aMsg)
   {
     try
     {
@@ -213,16 +213,19 @@ public class SoftwareTerminal extends OSMessageHandler
     }
   }
 
-  // isNumber
-  // - check to see if the key that was pressed was a numeric key
-  // - TRUE if ASCII value is between 48 & 57 inclusive
+  /**
+   * Check to see if the key that was pressed was a numeric key
+   *
+   * @return TRUE if ASCII value is between 48 & 57 inclusive
+   */
   boolean isNumber(KeyEvent evt)
   {
     return ((evt.getKeyChar() > 47) && (evt.getKeyChar() < 58));
   }
 
-  // toNumber
-  // - take KeyEvent (keypress) and return Integer value
+  /**
+   * take KeyEvent (keypress) and return Integer value
+   */
   int toNumber(KeyEvent evt)
   {
     return (evt.getKeyChar() - 48);

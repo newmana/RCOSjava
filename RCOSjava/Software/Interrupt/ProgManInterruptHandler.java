@@ -5,8 +5,8 @@
 // AUTHOR   :	David Jones
 // MODIFIED : Andrew Newman
 // HISTORY  :	23/03/95	Created
-//            1/7/98    Should've been calling new message not NewProcess. 
-//                      
+//            1/7/98    Should've been calling new message not NewProcess.
+//
 //
 //**************************************************************************/
 
@@ -14,10 +14,12 @@ package Software.Interrupt;
 
 import MessageSystem.PostOffices.OS.OSOffice;
 import MessageSystem.Messages.OS.GetNewFile;
+import java.io.Serializable;
 
 public class ProgManInterruptHandler extends InterruptHandler
+  implements Serializable
 {
-  public ProgManInterruptHandler(String myId, OSOffice PostOffice, 
+  public ProgManInterruptHandler(String myId, OSOffice PostOffice,
                                  String type, String destination)
   {
     super(myId, PostOffice, type, destination);
@@ -33,4 +35,3 @@ public class ProgManInterruptHandler extends InterruptHandler
     sendMessage(aMessage);
   }
 }
- 

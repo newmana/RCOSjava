@@ -1,59 +1,82 @@
-//******************************************************/
-// FILE     : TerminalOnMessage.java
-// PURPOSE  : Message to show the CPU.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 24/03/96   Created
-//******************************************************/
-
 package MessageSystem.Messages.Universal;
 
+import MessageSystem.PostOffices.OS.OSMessageHandler;
+import MessageSystem.PostOffices.Animator.AnimatorMessageHandler;
 import Software.Animator.Terminal.TerminalManagerAnimator;
 import Software.Terminal.TerminalManager;
-import Software.Animator.Process.StartProgram;
-import MessageSystem.PostOffices.OS.OSMessageHandler;
-import MessageSystem.PostOffices.SimpleMessageHandler;
 
+/**
+ * Request that a specific terminal be set to on.
+ * <P>
+ * Usage example:
+ * <CODE>
+ *      TerminalOn tmpOn = new UpdateList(this, terminalNo);
+ * </CODE>
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 28th March 1997
+ */
 public class TerminalOn extends UniversalMessageAdapter
 {
-  private int iTerminalNo = 0;
+  private int terminalNo = 0;
+  boolean forAnimator = false;
 
-  public TerminalOn(OSMessageHandler theSource, int iNewTerminalNo)
+  /**
+   * Create the terminal on message given the source and terminal number to set.
+   */
+  public TerminalOn(OSMessageHandler theSource, int newTerminalNo,
+    boolean newForAnimator)
   {
     super(theSource);
-    iTerminalNo = iNewTerminalNo;
+    terminalNo = newTerminalNo;
+    forAnimator = newForAnimator;
   }
 
-  public TerminalOn(SimpleMessageHandler theSource)
+  public TerminalOn(AnimatorMessageHandler theSource, int newTerminalNo,
+    boolean newForAnimator)
+  {
+    super(theSource);
+    terminalNo = newTerminalNo;
+    forAnimator = newForAnimator;
+  }
+
+  /**
+   * Create a terminal message but don't allocate a terminal number.  The
+   * default is 0 indicating allocate the next free terminal.
+   */
+  public TerminalOn(AnimatorMessageHandler theSource)
   {
     super(theSource);
   }
 
-  public void setTerminalNo(int iNewTerminalNo)
+  /**
+   * @param newTerminalNo Set the terminal to the new value given.
+   */
+  public void setTerminalNo(int newTerminalNo)
   {
-    iTerminalNo = iNewTerminalNo;
+    terminalNo = newTerminalNo;
   }
 
+  /**
+   * If the terminal number terminal number is zero the call setNextTerminal
+   * on Terminal Manager.  Otherwise, tried to allocate the given terminal
+   * number.
+   */
   public void doMessage(TerminalManager theElement)
   {
-    if (iTerminalNo == 0)
-    {
-      iTerminalNo = theElement.setNextTerminal(getSource().getId());
-    }
-    else
-    {
-      if (theElement.addTerminal(iTerminalNo))
-			{
-		    //Send to animator once finished
-				theElement.sendMessage(this);
-			}
-    }
+    if (!forAnimator)
+      theElement.terminalOn(terminalNo);
   }
 
+  /**
+   * Will call the terminalOn call of the animator if the terminal number is
+   * not zero.
+   */
   public void doMessage(TerminalManagerAnimator theElement)
   {
-    if (iTerminalNo != 0)
-      theElement.terminalOn(iTerminalNo);
+    if (forAnimator)
+      theElement.terminalOn(terminalNo);
   }
 }
 

@@ -11,9 +11,11 @@ import MessageSystem.Messages.Universal.UpdateFileList;
 import MessageSystem.Messages.Universal.KillProcess;
 import MessageSystem.PostOffices.OS.OSMessageHandler;
 import MessageSystem.PostOffices.OS.OSOffice;
+import MessageSystem.Messages.OS.HandleInterrupt;
 import MessageSystem.PostOffices.MessageHandler;
 import MessageSystem.Messages.MessageAdapter;
 import MessageSystem.Messages.Universal.UniversalMessageAdapter;
+import MessageSystem.Messages.Universal.NewProcess;
 import Hardware.CPU.Interrupt;
 import pll2.FileClient;
 import Software.Interrupt.InterruptHandler;
@@ -79,6 +81,27 @@ import RCOS;
     sendMessage(newMsg);
   }
 
+  /**
+   * Start loading and creating a new process based on a file name of an
+   * executable.
+   */
+  public void newFile(String filename)
+  {
+    setNewFilename(filename);
+    // Create a new message body to send to Process Scheduler.
+    // Contains file information and code
+    open();
+    NewProcess newMsg = new NewProcess(this, filename,
+      getFileContents(filename), getFileSize(filename));
+    close();
+    sendMessage(newMsg);
+
+    Interrupt intInterrupt = new Interrupt(-1, "NewProcess");
+    HandleInterrupt newMsg2 = new HandleInterrupt(
+      this, intInterrupt);
+    sendMessage(newMsg2);
+  }
+
   public String getNewFilename()
   {
     return this.sNewFilename;
@@ -102,7 +125,7 @@ import RCOS;
     }
   }
 
-	public synchronized void processMessage(UniversalMessageAdapter aMsg )
+  public synchronized void processMessage(UniversalMessageAdapter aMsg )
   {
     try
     {
@@ -137,14 +160,17 @@ import RCOS;
     return theFileClient.openConnection();
   }
 
-  // Returns the file size. This method will return -1 if no
-  // file was selected.
+  /**
+   * Returns the file size. This method will return -1 if no file was selected.
+   */
   public synchronized int getFileSize(String theFileName)
   {
     return theFileClient.statExeFile(theFileName);
   }
 
-  // This function returns a Memory object containing the file data.
+  /**
+   * This function returns a Memory object containing the file data.
+   */
   public synchronized Memory getFileContents(String theFileName)
   {
     return theFileClient.getExeFile(theFileName);

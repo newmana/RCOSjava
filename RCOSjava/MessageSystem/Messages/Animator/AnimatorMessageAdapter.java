@@ -19,7 +19,7 @@ import java.io.Serializable;
 /**
  * AnimatorMessageAdapter which implements AnimatorMessage.
  * <P>
- * HISTORY         : 03/07/98   Used double dispatch
+ * HISTORY: 03/07/98 Used double dispatch
  *
  * @author Andrew Newman
  * @created 24th March 1996

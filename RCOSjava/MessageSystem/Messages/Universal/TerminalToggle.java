@@ -1,30 +1,35 @@
-//******************************************************/
-// FILE     : TerminalToggleMessage
-// PURPOSE  : Toggle terminal from on/off or vice versa.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 24/03/96   Created
-//******************************************************/
-
 package MessageSystem.Messages.Universal;
 
 import Software.Animator.Terminal.TerminalManagerAnimator;
 import Software.Terminal.TerminalManager;
 import MessageSystem.Messages.Universal.TerminalOff;
 import MessageSystem.Messages.Universal.TerminalOn;
-import MessageSystem.PostOffices.SimpleMessageHandler;
+import MessageSystem.PostOffices.OS.OSMessageHandler;
+import MessageSystem.PostOffices.Animator.AnimatorMessageHandler;
 
+/**
+ * Toggle the terminal off or on.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 28th March 1996
+ */
 public class TerminalToggle extends UniversalMessageAdapter
 {
   private int iTerminalNo = 0;
 
-  public TerminalToggle(SimpleMessageHandler theSource,
-    int iNewTerminalNo)
+  public TerminalToggle(OSMessageHandler theSource, int iNewTerminalNo)
   {
     super(theSource);
     iTerminalNo = iNewTerminalNo;
   }
-  
+
+  public TerminalToggle(AnimatorMessageHandler theSource, int iNewTerminalNo)
+  {
+    super(theSource);
+    iTerminalNo = iNewTerminalNo;
+  }
+
   public void setTerminalNumber(int iNewTerminalNo)
   {
     iTerminalNo = iNewTerminalNo;
@@ -32,26 +37,6 @@ public class TerminalToggle extends UniversalMessageAdapter
 
   public void doMessage(TerminalManager theElement)
   {
-    if (theElement.terminalOn(iTerminalNo))
-    {
-      if (theElement.removeTerminal(iTerminalNo))
-      {
-        //Terminal Off
-        TerminalOff toMessage = new TerminalOff(
-          theElement, iTerminalNo, false);
-        theElement.sendMessage(toMessage);
-      }
-    }
-    else
-    {
-      if (theElement.addTerminal(iTerminalNo))
-      {
-        //Terminal On
-        TerminalOn toMessage = new TerminalOn(
-          theElement, iTerminalNo);
-        theElement.sendMessage(toMessage);
-      }
-    }
+    theElement.terminalToggle(iTerminalNo);
   }
 }
-

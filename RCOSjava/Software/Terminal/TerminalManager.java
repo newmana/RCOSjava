@@ -1,17 +1,3 @@
-//**************************************************************************
-// FILE    : TerminalManager.java
-// PURPOSE : Manages the allocation and deallocation of terminals
-//           for rcos.java
-// AUTHOR  : David Jones
-// MODIFIED: Andrew Newman
-// HISTORY : 28/03/96  Created - DJ.
-//           01/12/96  Added the ability to add and remove
-//                     a terminal - AN.
-//           07/12/96  Added the ability to show terminals
-//                     or hide them - AN.
-//
-//**************************************************************************
-
 package Software.Terminal;
 
 import Hardware.Terminal.HardwareTerminal;
@@ -22,95 +8,350 @@ import MessageSystem.PostOffices.OS.OSMessageHandler;
 import MessageSystem.PostOffices.OS.OSOffice;
 import MessageSystem.Messages.Universal.ProcessAllocatedTerminalMessage;
 import MessageSystem.Messages.Universal.UniversalMessageAdapter;
+import MessageSystem.Messages.Universal.TerminalOn;
+import MessageSystem.Messages.Universal.TerminalOff;
+import MessageSystem.Messages.Universal.TerminalFront;
+import MessageSystem.Messages.Universal.TerminalBack;
 import Software.Util.TerminalQueue;
 import Software.Util.FIFOQueue;
 
-public class TerminalManager extends OSMessageHandler
+/**
+ * Manages the allocation and deallocation of terminals for the system.
+ * Processes waiting for an allocated terminal wait in a FIFO queue maintained
+ * by this manager.  Two TerminalQueue objects hold a list of all the allocated
+ * and deallocated terminals.  It possible that one or the other can be empty
+ * at any time.  The system holds the allocation of terminals in a separate
+ * array.
+ * <P>
+ * HISTORY: 01/12/96  Added the ability to add and remove a terminal - AN.<BR>
+ *          07/12/96  Added the ability to show terminals or hide them - AN.<BR>
+ * <P>
+ * @author Andrew Newman.
+ * @author David Jones.
+ * @version 1.00 $Date$
+ * @created 28th March 1997
+ */
+ public class TerminalManager extends OSMessageHandler
 {
-  private TerminalQueue tqAllocatedTerminals, tqUnallocatedTerminals;
-  private FIFOQueue fqWaitingProcesses;
-  private int iMaxTerminals;
-  private boolean[] bTerminalOn;
-  private final String sTerminalPrefix = "Terminal#";
-	private static final String MESSENGING_ID = "TerminalManager";
+  private TerminalQueue allocatedTerminals, unallocatedTerminals;
+  private FIFOQueue waitingProcesses;
+  private int maxTerminals;
+  private boolean[] terminalOn;
+  private final String terminalPrefix = "Terminal#";
+  private static final String MESSENGING_ID = "TerminalManager";
 
-  // - accept maximum number of terminals able to be created,
-  //   TerminalManagers Id and a point to the PostOffice.
-
-  public TerminalManager (OSOffice aPostOffice,
-                          int iNumberOfTerminals)
+  /**
+   * Accept maximum number of terminals able to be created, TerminalManagers
+   * Id and a point to the PostOffice.
+   *
+   * @param newPostOffice the post office to register to.
+   * @param newNumberOfTerminals the number of terminals to create and keep
+   * track of.
+   */
+  public TerminalManager (OSOffice newPostOffice, int newNumberOfTerminals)
   {
-    super(MESSENGING_ID, aPostOffice);
+    super(MESSENGING_ID, newPostOffice);
 
-    tqAllocatedTerminals = new TerminalQueue(iNumberOfTerminals,1);
-    tqUnallocatedTerminals = new TerminalQueue(iNumberOfTerminals,1);
-    fqWaitingProcesses = new FIFOQueue(5,1);
+    allocatedTerminals = new TerminalQueue(newNumberOfTerminals, 1);
+    unallocatedTerminals = new TerminalQueue(newNumberOfTerminals, 1);
+    waitingProcesses = new FIFOQueue(5,1);
 
-    iMaxTerminals = iNumberOfTerminals+1;
-    bTerminalOn = new boolean[iMaxTerminals];
+    maxTerminals = newNumberOfTerminals+1;
+    terminalOn = new boolean[maxTerminals];
 
-    for (int iCount = 1; iCount < iMaxTerminals; iCount++)
+    for (int iCount = 1; iCount < maxTerminals; iCount++)
     {
-      bTerminalOn[iCount] = false;
+      terminalOn[iCount] = false;
     }
   }
 
+  /**
+   * Turns the given terminal on.  Called by TerminalOn message.  If 0 will
+   * turn the next available terminal on.
+   */
+  public void terminalOn(int terminalNo)
+  {
+    if (terminalNo == 0)
+    {
+      //Will call terminal on with a number if found.
+      addNextTerminal();
+    }
+    else
+    {
+      if (addTerminal(terminalNo))
+      {
+        //Terminal On
+        TerminalOn toMessage = new TerminalOn(this, terminalNo, true);
+        sendMessage(toMessage);
+      }
+    }
+  }
+
+  /**
+   * Turns the given terminal off.  Called by TerminalOff message.
+   */
+  public void terminalOff(int terminalNo)
+  {
+    if (removeTerminal(terminalNo))
+    {
+      //Terminal Off
+      TerminalOff toMessage = new TerminalOff(this, terminalNo, true);
+      sendMessage(toMessage);
+    }
+  }
+
+  /**
+   * Set the given terminal to the front.  Called by the terminal front message.
+   */
+  public void terminalFront(int terminalNo)
+  {
+    if (viewTerminal(terminalNo, true))
+    {
+      TerminalFront tmpMsg = new TerminalFront(this, terminalNo, true);
+      this.sendMessage(tmpMsg);
+    }
+  }
+
+  /**
+   * Called by terminal back message.  Terminal no is the terminal to hide.
+   */
+  public void terminalBack(int terminalNo)
+  {
+    if (viewTerminal(terminalNo, false))
+    {
+      TerminalBack tmpMsg = new TerminalBack(this, terminalNo, true);
+      this.sendMessage(tmpMsg);
+    }
+  }
+
+  /**
+   * Toggles the given terminal number either on or off.
+   */
+  public void terminalToggle(int terminalNo)
+  {
+    if (isTerminalOn(terminalNo))
+    {
+      terminalOff(terminalNo);
+    }
+    else
+    {
+      terminalOn(terminalNo);
+    }
+  }
+
+  /**
+   * Returns the maximum number of terminal allocatable.
+   */
   public int getMaxTerminals()
   {
-    return iMaxTerminals;
+    return maxTerminals;
   }
 
-  public boolean terminalOn(int iTerminalNo)
+  /**
+   * Returns whether the given terminal number is on.  Terminal numbers begin
+   * at 1.
+   */
+  public boolean isTerminalOn(int terminalNo)
   {
-    return (bTerminalOn[iTerminalNo]);
+    return (terminalOn[terminalNo]);
   }
 
-  //*************************
-  // AllocateWaitingProcesses
-  // - checks to see if there are any processes waiting for
-  //   a terminal and if so gives them a terminal.
-
-  public void allocateWaitingProcesses()
+  /**
+   * Called to remove one terminal by terminal number only removes terminals
+   * that are allocated.  Calls the string version with a defined prefix.
+   *
+   * @param terminalId the terminal to remove.
+   * @return true if the operating succeeded.
+   */
+  public boolean removeTerminal(int terminalId)
   {
-    if (!fqWaitingProcesses.queueEmpty())
+    String terminalIdStr = terminalPrefix + terminalId;
+    return(removeTerminal(terminalIdStr, terminalId));
+  }
+
+  /**
+   * Called to remove one terminal by terminal string identifier.  Only removes
+   * terminals that are allocated.
+   *
+   * @param terminalIdStr the string name of the terminal.
+   * @return whether the operation was successful.
+   */
+  public boolean removeTerminal(String terminalIdStr)
+  {
+    int terminalId = Integer.parseInt(
+      terminalIdStr.substring(terminalPrefix.length()));
+    return(removeTerminal(terminalIdStr, terminalId));
+  }
+
+  /**
+   *  Set the given terminal to on.  If the terminal number is 0 then it will
+   *  attempt to retrieve the next available terminal
+   *
+   * @param terminalNo the terminal to add.
+   */
+  public void setTerminalOn(int terminalNo)
+  {
+    if (terminalNo == 0)
+    {
+      //terminalNo = theElement.setNextTerminal(getSource().getId());
+    }
+    else
+    {
+      //theElement.addTerminal(terminalNo);
+    }
+    // Send message using the new value of terminal
+    //TerminalOn tmpMsg = new TerminalOn(this, terminalNo);
+    //this.sendMessage(tmpMsg);
+  }
+
+  /**
+   * Called to bring the terminal into focus.  Called by @see TerminalBack and
+   * @see TerminalFont messages.
+   *
+   * @param terminalNumber the terminal to display.
+   * @param windowVisible set the window to display/not display.
+   * @return whether the operation was successful.
+   */
+  private boolean viewTerminal(int terminalNumber, boolean windowVisible)
+  {
+    if ((terminalNumber <= maxTerminals)  && (terminalNumber >= 0))
+    {
+      if (terminalOn[terminalNumber])
+      {
+        String terminalIdStr = new String (terminalPrefix +
+          String.valueOf(terminalNumber));
+        HardwareTerminal tmp = (HardwareTerminal)
+          unallocatedTerminals.retrieve(terminalIdStr, false);
+        if (tmp == null)
+        {
+          tmp = (HardwareTerminal)
+            allocatedTerminals.retrieve(terminalIdStr, false);
+        }
+        if (tmp != null)
+        {
+          tmp.setVisible(windowVisible);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Called to tidy up, in particular get rid of windows
+   */
+  public void disposeFrame()
+  {
+    HardwareTerminal tmp = (HardwareTerminal) allocatedTerminals.retrieve();
+
+    while (tmp != null)
+    {
+      tmp.dispose();
+      tmp = (HardwareTerminal) allocatedTerminals.retrieve();
+    }
+
+    tmp = (HardwareTerminal) unallocatedTerminals.retrieve();
+
+    while (tmp != null)
+    {
+      tmp.dispose();
+      tmp = (HardwareTerminal) unallocatedTerminals.retrieve();
+    }
+  }
+
+  /**
+   * Attemps to get a terminal for a process.  If there are none left then the
+   * process is put in a queue.  Currently there is no way to ask for the
+   * terminal to be removed from the queue.
+   *
+   * @param processId the process requiring a terminal
+   */
+  public void getTerminal(int processId)
+  {
+    if (unallocatedTerminals.queueEmpty())
+    {
+      // Oops, no terminals are avaialable
+      // place PID in waitingProcess Queue
+      waitingProcesses.insert(new Integer(processId));
+    }
+    else
+    {
+      allocateTerminal(processId);
+    }
+  }
+
+  /**
+   * Attempts to allocate a given terminal.
+   *
+   * @param processId the process to allocate the a terminal to.
+   */
+  private boolean allocateTerminal(int processId)
+  {
+    HardwareTerminal newTerminal = (HardwareTerminal)
+      unallocatedTerminals.retrieve();
+    newTerminal.setCurrentProcessId(processId);
+    allocatedTerminals.insert(newTerminal);
+    ProcessAllocatedTerminalMessage msg = new ProcessAllocatedTerminalMessage
+      (this, newTerminal.getTitle(), processId);
+    sendMessage(msg);
+    return true;
+  }
+
+  /**
+   * Checks to see if there are any processes waiting for a terminal and if so
+   * gives them a terminal.
+   */
+  private void allocateWaitingProcesses()
+  {
+    if (!waitingProcesses.queueEmpty())
     {
       // there's a process waiting on a free terminal so allocate it
-
       Integer tmp = (Integer)
-        fqWaitingProcesses.retrieve();
+        waitingProcesses.retrieve();
       allocateTerminal(tmp.intValue());
     }
   }
 
-  public void allocateTerminal(int iProcessID)
+  /**
+   * Sets the next terminal available to on.
+   */
+  private boolean addNextTerminal()
   {
-    HardwareTerminal htNewTerminal = (HardwareTerminal)
-      tqUnallocatedTerminals.retrieve();
-    htNewTerminal.setCurrentProcessID(iProcessID);
-    tqAllocatedTerminals.insert(htNewTerminal);
-    ProcessAllocatedTerminalMessage mMsg = new ProcessAllocatedTerminalMessage
-      (this, htNewTerminal.getTitle(), iProcessID);
-    sendMessage(mMsg);
+    int count = 1;
+    if (unallocatedTerminals.size() > 0)
+    {
+      while (count < getMaxTerminals())
+      {
+        if (!terminalOn[count])
+        {
+          if(addTerminal(count))
+          {
+            return true;
+          }
+        }
+        count++;
+      }
+    }
+    return false;
   }
 
-  //**********************************************
-  // addTerminal
-  // - called to add one more terminal with a
-  //   specific terminal number.
-  // - returns true if the action succeeded.
-
-  public boolean addTerminal (int terminalNumber)
+  /**
+   * Called to add one more terminal with a specific terminal number.
+   *
+   * @return true if the action succeeded.
+   */
+  private boolean addTerminal(int terminalNumber)
   {
-    if ((terminalNumber <= iMaxTerminals)  && (terminalNumber >= 0))
+    if ((terminalNumber <= maxTerminals)  && (terminalNumber >= 0))
     {
-      if (!bTerminalOn[terminalNumber])
+      if (!terminalOn[terminalNumber])
       {
-        bTerminalOn[terminalNumber] = true;
-        String terminalID = new String(sTerminalPrefix +
+        terminalOn[terminalNumber] = true;
+        String terminalId = new String(terminalPrefix +
           String.valueOf(terminalNumber));
         HardwareTerminal newTerminal = new
-          HardwareTerminal(terminalID, mhThePostOffice);
-        tqUnallocatedTerminals.insert(newTerminal);
+          HardwareTerminal(terminalId, mhThePostOffice);
+        unallocatedTerminals.insert(newTerminal);
         allocateWaitingProcesses();
         return true;
       }
@@ -118,126 +359,30 @@ public class TerminalManager extends OSMessageHandler
     return false;
   }
 
-  //**********************************************
-  // removeTerminal
-  // - called to remove one terminal by terminal number.
-  // - only removes terminals that aren't allocated.
-  // - returns true if operation succeeded.
-
-  public boolean removeTerminal(int iTerminalID)
+  /**
+   * Attempt to remove a given terminal.
+   *
+   * @param terminalIdStr the terminal string identifier of the terminal.
+   * @param terminalId the number identifier of the terminal.
+   * @return boolean if the operation was successful.
+   */
+  private boolean removeTerminal(String terminalIdStr, int terminalId)
   {
-    String sTerminalID = sTerminalPrefix + iTerminalID;
-    return(removeTerminal(sTerminalID, iTerminalID));
-  }
-
-  public boolean removeTerminal(String sTerminalID)
-  {
-    int iTerminalID = Integer.parseInt(sTerminalID.substring(sTerminalPrefix.length()));
-    return(removeTerminal(sTerminalID, iTerminalID));
-  }
-
-  private boolean removeTerminal(String sTerminalID, int iTerminalID)
-  {
-    if ((iTerminalID <= iMaxTerminals)  && (iTerminalID >= 0))
+    if ((terminalId <= maxTerminals)  && (terminalId >= 0))
     {
-      if (bTerminalOn[iTerminalID])
+      if (terminalOn[terminalId])
       {
-        HardwareTerminal htTmp = (HardwareTerminal)
-          tqUnallocatedTerminals.retrieve(sTerminalID,true);
-        if (htTmp != null)
+        HardwareTerminal tmpTerminal = (HardwareTerminal)
+          unallocatedTerminals.retrieve(terminalIdStr, true);
+        if (tmpTerminal != null)
         {
-          htTmp.dispose();
-          bTerminalOn[iTerminalID] = false;
+          tmpTerminal.dispose();
+          terminalOn[terminalId] = false;
           return true;
         }
       }
     }
     return false;
-  }
-
-  public int setNextTerminal(String sTheSource)
-  {
-    int count = 1;
-    boolean bOkay = false;
-    while ((count < getMaxTerminals()) && (!bOkay))
-    {
-      if (!bTerminalOn[count])
-      {
-        bOkay = addTerminal(count);
-      }
-      count++;
-    }
-    return (count-1);
-  }
-
-  //**********************************************
-  // viewTerminal
-  // - called to view an active terminal.
-  // - returns true if okay
-
-  public boolean viewTerminal(int terminalNumber, boolean bMaximise)
-  {
-    if ((terminalNumber <= iMaxTerminals)  && (terminalNumber >= 0))
-    {
-      if (bTerminalOn[terminalNumber])
-      {
-        String terminalID = new String (sTerminalPrefix +
-          String.valueOf(terminalNumber));
-        HardwareTerminal tmp = (HardwareTerminal)
-          tqUnallocatedTerminals.retrieve(terminalID, false);
-        if (tmp == null)
-        {
-          tmp = (HardwareTerminal)
-            tqAllocatedTerminals.retrieve(terminalID, false);
-        }
-        if (tmp != null)
-        {
-          if (bMaximise)
-            tmp.setVisible(true);
-          else
-            tmp.setVisible(false);
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  //**********************************************
-  // dispose
-  // - called to tidy up, in particular get rid of windows
-
-  public void disposeFrame()
-  {
-    HardwareTerminal tmp = (HardwareTerminal) tqAllocatedTerminals.retrieve();
-
-    while (tmp != null)
-    {
-      tmp.dispose();
-      tmp = (HardwareTerminal) tqAllocatedTerminals.retrieve();
-    }
-
-    tmp = (HardwareTerminal) tqUnallocatedTerminals.retrieve();
-
-    while (tmp != null)
-    {
-      tmp.dispose();
-      tmp = (HardwareTerminal) tqUnallocatedTerminals.retrieve();
-    }
-  }
-
-  public void getTerminal(int iProcessID)
-  {
-    if (tqUnallocatedTerminals.queueEmpty())
-    {
-      // Oops, no terminals are avaialable
-      // place PID in waitingProcess Queue
-      fqWaitingProcesses.insert(new Integer(iProcessID));
-    }
-    else
-    {
-      allocateTerminal(iProcessID);
-    }
   }
 
   public void processMessage(UniversalMessageAdapter aMsg)
@@ -249,7 +394,7 @@ public class TerminalManager extends OSMessageHandler
    catch (Exception e)
    {
       System.out.println("Error processing message: "+e);
-			e.printStackTrace();
+      e.printStackTrace();
     }
   }
 

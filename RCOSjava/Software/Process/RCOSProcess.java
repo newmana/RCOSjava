@@ -1,15 +1,3 @@
-//***********************************************************/
-// FILE     : RCOSProcess.java
-// PURPOSE  : Defines the Process class for rcos.java
-// AUTHOR   : David Jones
-// MODIFIED : Andrew Newman
-// HISTORY  : 24/03/96  Created. DJ
-//            01/07/97  Modified to use Memory. AN
-//            02/07/97  Uses MMU to get code and stack. AN
-//            10/11/97  Added getters and setters and
-//                      constants. AN
-//***********************************************************/
-
 package Software.Process;
 
 import Hardware.CPU.Context;
@@ -17,6 +5,20 @@ import Hardware.Memory.Memory;
 import MessageSystem.Messages.Universal.NewProcess;
 import java.io.Serializable;
 
+/**
+ * Defines the default process used to represent a user process in the system.
+ * A process has a state (or status), an id, a priority, file name, memory,
+ * terminal id, and a CPU context.
+ * <P>
+ * HISTORY: 01/07/97  Modified to use Memory. AN<BR>
+ *          02/07/97  Uses MMU to get code and stack. AN<BR>
+ *          10/11/97  Added getters and setters and constants. AN<BR>
+ * <P>
+ * @author Andrew Newman.
+ * @author David Jones.
+ * @version 1.00 $Date$
+ * @created 24th March 1996
+ */
 public class RCOSProcess implements Serializable
 {
   public static final byte MINIMUM_PRIORITY = 1;

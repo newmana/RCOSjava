@@ -1,47 +1,57 @@
-//******************************************************/
-// FILE     : TerminalBackMessage
-// PURPOSE  : Move terminal to back.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 24/03/96   Created
-//******************************************************/
-
 package MessageSystem.Messages.Universal;
 
 import Software.Animator.Terminal.TerminalManagerAnimator;
 import Software.Terminal.TerminalManager;
 import Software.Animator.Terminal.TerminalManagerAnimator;
-import MessageSystem.PostOffices.SimpleMessageHandler;
+import MessageSystem.PostOffices.OS.OSMessageHandler;
+import MessageSystem.PostOffices.Animator.AnimatorMessageHandler;
 
-public class TerminalBack extends UniversalMessageAdapter
+/**
+ * Move terminal to back.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 24th March 1996
+ */
+ public class TerminalBack extends UniversalMessageAdapter
 {
-  private int iTerminalNo = 0;
-  private boolean bOkay = false;
+  private int terminalNo = 0;
+  private boolean forAnimator = false;
 
-  public TerminalBack(SimpleMessageHandler theSource, int iNewTerminalNo)
+  public TerminalBack(OSMessageHandler theSource, int newTerminalNo,
+    boolean newForAnimator)
   {
     super(theSource);
-    iTerminalNo = iNewTerminalNo;
+    terminalNo = newTerminalNo;
+    forAnimator = newForAnimator;
   }
-  
-  public void setTerminalNumber(int iNewTerminalNo)
+
+  public TerminalBack(OSMessageHandler theSource, int newTerminalNo)
   {
-    iTerminalNo = iNewTerminalNo;
+    super(theSource);
+    terminalNo = newTerminalNo;
+  }
+
+  public TerminalBack(AnimatorMessageHandler theSource, int newTerminalNo)
+  {
+    super(theSource);
+    terminalNo = newTerminalNo;
+  }
+
+  public void setTerminalNumber(int newTerminalNo)
+  {
+    terminalNo = newTerminalNo;
   }
 
   public void doMessage(TerminalManager theElement)
   {
-    bOkay = theElement.viewTerminal(iTerminalNo, false);
-    //Send to animator once finished
-    if (bOkay)
-    {      
-      theElement.sendMessage(this);
-    }
+    if (!forAnimator)
+      theElement.terminalBack(terminalNo);
   }
 
   public void doMessage(TerminalManagerAnimator theElement)
   {
-    if (bOkay)
-      theElement.terminalBack(iTerminalNo);
+    if (forAnimator)
+      theElement.terminalBack(terminalNo);
   }
 }

@@ -10,8 +10,10 @@ package Software.Interrupt;
 
 import MessageSystem.PostOffices.OS.OSOffice;
 import MessageSystem.Messages.MessageAdapter;
+import java.io.Serializable;
 
 public class CPM14DiskInterruptHandler extends InterruptHandler
+  implements Serializable
 {
   public CPM14DiskInterruptHandler( String id, OSOffice PO, String type,
                            String destination)

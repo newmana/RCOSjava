@@ -17,7 +17,7 @@ import java.io.Serializable;
  * @author Andrew Newman.
  * @version 1.00 $Date$
  * @created 28th March 1997
- **/
+ */
 public class UpdateList extends UniversalMessageAdapter
 //  implements Serializable
 {

@@ -1,57 +1,38 @@
-//***************************************************************************
-// FILE    : NewFileMessage.java
-// PACKAGE :
-// PURPOSE :
-// AUTHOR  : Andrew Newman
-// MODIFIED:
-// HISTORY : 28/03/96  Created
-//
-//
-//***************************************************************************
-
 package MessageSystem.Messages.Universal;
 
 import Software.Process.ProgramManager;
-import MessageSystem.Messages.Universal.NewProcess;
-import MessageSystem.Messages.OS.HandleInterrupt;
-import MessageSystem.PostOffices.SimpleMessageHandler;
+import MessageSystem.PostOffices.Animator.AnimatorMessageHandler;
 import Software.Kernel.Kernel;
 import Hardware.CPU.Interrupt;
 import Software.Animator.Process.StartProgram;
 
+/**
+ * Creates a new file based on the given filename.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 28th March 1996
+ */
 public class NewFile extends UniversalMessageAdapter
 {
-  private String sFilename;
+  private String filename;
 
-  public NewFile(SimpleMessageHandler theSource, String sNewFilename)
+  public NewFile(AnimatorMessageHandler theSource, String newFilename)
   {
     super(theSource);
-    sFilename = sNewFilename;
+    filename = newFilename;
   }
 
-  private void setFilename(String sNewFilename)
+  private void setFilename(String newFilename)
   {
-    sFilename = sNewFilename;
+    filename = newFilename;
   }
 
+  /**
+   * Send a new process interrupt to the Kernel
+   */
   public void doMessage(ProgramManager theElement)
-
-    //Send a new process interrupt to the Kernel
   {
-    theElement.setNewFilename(sFilename);
-    // Create a new message body to send to Process Scheduler.
-    // Contains file information and code
-    theElement.open();
-    NewProcess newMsg = new NewProcess(theElement,
-      sFilename, theElement.getFileContents(sFilename),
-      theElement.getFileSize(sFilename));
-    theElement.close();
-    theElement.sendMessage(newMsg);
-
-    Interrupt intInterrupt = new Interrupt(-1, "NewProcess");
-    HandleInterrupt newMsg2 = new HandleInterrupt(
-      theElement, intInterrupt);
-    theElement.sendMessage(newMsg2);
+    theElement.newFile(filename);
   }
 }
-

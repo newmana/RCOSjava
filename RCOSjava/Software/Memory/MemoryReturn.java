@@ -1,18 +1,15 @@
-// ****************************************************
-// FILE     : MemoryReturn.java
-// PACKAGE  : Software.Memory.MemoryReturn
-// PURPOSE  : Structure sent to everyone after memory
-//            request.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 30/03/96  Created. AN
-//
-// ****************************************************
-
 package Software.Memory;
 
 import java.io.Serializable;
 
+/**
+ * Structure sent to everyone after memory request.
+ * <P>
+ *
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 30th March 1996
+ */
 public class MemoryReturn implements Serializable
 {
   //Used by MMU

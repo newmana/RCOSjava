@@ -1,14 +1,3 @@
-//***************************************************************************
-// FILE    : GetTerminalMessage.java
-// PACKAGE : Terminal
-// PURPOSE : 
-// AUTHOR  : Andrew Newman
-// MODIFIED: 
-// HISTORY : 28/03/96  Created
-//           
-//
-//***************************************************************************
-
 package MessageSystem.Messages.Universal;
 
 import Software.Terminal.TerminalManager;
@@ -18,6 +7,13 @@ import Software.Process.RCOSProcess;
 import Software.Process.ProcessScheduler;
 import MessageSystem.PostOffices.OS.OSMessageHandler;
 
+/**
+ * Sent when the a process requires a terminal.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 28th March 1996
+ */
 public class GetTerminal extends UniversalMessageAdapter
 {
   private int iPID;
@@ -27,17 +23,17 @@ public class GetTerminal extends UniversalMessageAdapter
     super(theSource);
     iPID = iProcessID;
   }
-  
+
   public void doMessage(TerminalManager theElement)
   {
     theElement.getTerminal(iPID);
   }
-  
+
   public void doMessage(ProcessSchedulerAnimator theElement)
   {
     theElement.newProcess(iPID);
   }
-  
+
   public void doMessage(ProcessManagerAnimator theElement)
   {
     theElement.newProcess(new Integer(iPID));

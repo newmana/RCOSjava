@@ -11,8 +11,10 @@ package Software.Interrupt;
 
 import MessageSystem.Messages.OS.KeyPress;
 import MessageSystem.PostOffices.OS.OSOffice;
+import java.io.Serializable;
 
 public class TerminalInterruptHandler extends InterruptHandler
+  implements Serializable
 {
   public TerminalInterruptHandler(String sID, OSOffice mhPostOffice,
     String sType, String sDestination )
@@ -24,10 +26,9 @@ public class TerminalInterruptHandler extends InterruptHandler
   {
     // perform any necesary clean up procedures so next
     // Interrupt of this type can occur
-    // THERE IS NONE 
+    // THERE IS NONE
     // send a message to the appropriate DeviceDriver
     KeyPress aMessage = new KeyPress(this, null);
     sendMessage(aMessage);
   }
 }
- 

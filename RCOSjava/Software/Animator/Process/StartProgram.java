@@ -28,8 +28,7 @@ import Software.Process.*;
 import Software.Util.*;
 import Software.Terminal.*;
 
-public class StartProgram
-  implements Runnable
+public class StartProgram implements Runnable
 {
   private ProgramManagerAnimator myAnimator;
   private Thread tThread;
