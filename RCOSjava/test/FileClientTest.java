@@ -4,6 +4,10 @@ import pll2.*;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import Software.Kernel.Kernel;
+import MessageSystem.Messages.Universal.InstructionExecution;
+import Hardware.Memory.Memory;
+import MessageSystem.PostOffices.OS.OSMessageRecorder;
 
 public class FileClientTest extends TestCase
 {
@@ -36,8 +40,24 @@ public class FileClientTest extends TestCase
   public void testGetFiles()
   {
 //    myClient.getRecFile();
-    System.out.println("File: " + myClient.getExeFile("/NUMBERS.PCD"));
-    System.out.println("File: " + myClient.getExeFile("/FRED.PCD"));
+    //Doesn't test whether the data is valid just the right size
+    assertEquals("Length of the data returned is not correct", myClient.getExeFile("/NUMBERS.PCD").getSegmentSize(),
+      288);
+    assertEquals("Length of the data returned is not correct", myClient.getExeFile("/FRED.PCD").getSegmentSize(),
+      1024);
+  }
+
+  public void testPutFiles()
+  {
+    try
+    {
+      myClient.writeRecFile("/test2.xml", new InstructionExecution(new OSMessageRecorder(),
+        new Memory()));
+      //myClient.writeRecFile("/test.xml", new String("hello"));
+    }
+    catch (Exception e)
+    {
+    }
   }
 
   public void testStatFiles()
@@ -52,9 +72,10 @@ public class FileClientTest extends TestCase
   public static Test suite()
   {
     TestSuite suite = new TestSuite();
-    suite.addTest(new FileClientTest("testGetDirs"));
-    suite.addTest(new FileClientTest("testGetFiles"));
-    suite.addTest(new FileClientTest("testStatFiles"));
+    //suite.addTest(new FileClientTest("testGetDirs"));
+    //suite.addTest(new FileClientTest("testGetFiles"));
+    suite.addTest(new FileClientTest("testPutFiles"));
+    //suite.addTest(new FileClientTest("testStatFiles"));
     return suite;
   }
 

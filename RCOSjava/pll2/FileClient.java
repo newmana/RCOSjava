@@ -19,6 +19,7 @@ import java.net.*;
 import java.util.StringTokenizer;
 import Software.Animator.Support.GraphicButton;
 import Hardware.Memory.Memory;
+import fr.dyade.koala.xml.koml.*;
 
 public class FileClient
 {
@@ -124,19 +125,19 @@ public class FileClient
 
   public Memory getExeFile(String sFileName)
   {
-    return getFile(1, sFileName);
+    return new Memory(getFile(1, sFileName));
   }
 
-  public Memory getRecFile(String sFileName)
+  public String getRecFile(String sFileName)
   {
     return getFile(2, sFileName);
   }
 
   // Purpose:  Retrieve the specified file from the server.
   // Returns:  An array of bytes containing the file contents.
-  private Memory getFile(int iDirectory, String sFileName)
+  private String getFile(int iDirectory, String sFileName)
   {
-    Memory mFileData = new Memory();
+    String mFileData = new String();
     if(fmMessenger.askReadFileData(iDirectory, sFileName))
     {
       //Read result
@@ -144,7 +145,7 @@ public class FileClient
       {
         if (fmMessenger.getLastMessageType().equals(fmMessenger.A_READ_FILE_DATA))
         {
-          mFileData = new Memory(fmMessenger.getLastMessageData());
+          mFileData = fmMessenger.getLastMessageData();
         }
       }
     }
@@ -152,8 +153,46 @@ public class FileClient
     return mFileData;
   }
 
-  public void writeRecFile()
+  public void writeRecFile(String sFileName, Object object)
+    throws Exception
   {
+    KOMLSerializer serializer = null;
+    System.out.println("Object: " + object);
+    ByteArrayOutputStream tmpBuffer = new ByteArrayOutputStream();
+    try
+    {
+      serializer = new KOMLSerializer(tmpBuffer, false);
+      serializer.addObject(object);
+      serializer.addObject(new String("fred"));
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+    finally
+    {
+      try
+      {
+        serializer.close();
+      }
+      catch (Exception e)
+      {
+        // ignore
+      }
+    }
+    //2 for recorded area
+    if(fmMessenger.askWriteFileData(2, sFileName, tmpBuffer.toString()))
+    {
+      //Read result
+      if (fmMessenger.readMessage())
+      {
+        if (fmMessenger.getLastMessageType().equals(fmMessenger.A_WRITE_FILE_DATA))
+        {
+          return;
+        }
+      }
+    }
+    throw new Exception();
   }
 
   public int statExeFile(String sFileName)

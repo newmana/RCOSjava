@@ -86,9 +86,10 @@ public class FileServer
         // Set Output Stream
         outputStream = new DataOutputStream(fileServerConnection.getOutputStream());
         fileMessage = new FileMessages(inputStream, outputStream);
-        while (fileMessage.readMessage())
+        boolean anotherMessage = true;
+        while (anotherMessage)
         {
-          handleMessage();
+          anotherMessage = handleMessage();
         }
       }
     }
@@ -98,9 +99,10 @@ public class FileServer
     }
   }
 
-  private void handleMessage()
+  private boolean handleMessage()
     throws IOException
   {
+    fileMessage.readMessage();
     String path = fileMessage.getLastMessageData();
     //Only used for file data
     String outputData = new String();
@@ -150,11 +152,13 @@ public class FileServer
       outputStream.close();
       inputStream.close();
       fileServerConnection.close();
+      return false;
     }
     else
     {
       fileMessage.replyInvalidCommandMessage();
     }
+    return true;
   }
 
   // To correctly handle a GETDIRECTORYLIST command from
@@ -167,7 +171,7 @@ public class FileServer
     // Check that the file exists and is a directory.
     if (!theDirectory.isDirectory())
     {
-      fileMessage.replyDirectoryDoesNotExistMessage();
+      fileMessage.replyDirectoryDoesNotExistMessage(directoryPath);
       return;
     }
     // Read the directory
@@ -203,7 +207,7 @@ public class FileServer
     }
     catch (FileNotFoundException exception)
     {
-      fileMessage.replyFileDoesNotExistMessage();
+      fileMessage.replyFileDoesNotExistMessage(filename);
       return;
     }
     // Setup the necessary streams and read the file contents.
@@ -236,18 +240,19 @@ public class FileServer
     }
     catch (FileNotFoundException exception)
     {
-      fileMessage.replyFileDoesNotExistMessage();
+      fileMessage.replyFileDoesNotExistMessage(filename);
       return;
     }
     // Setup the necessary streams and read the file contents.
     outputStream = new DataOutputStream(outputFile);
     try
     {
-      outputStream.writeChars(outputData);
+      outputStream.write(outputData.getBytes());
+      outputStream.close();
     }
     catch (IOException theException)
     {
-      fileMessage.replyCannotAccessFileMessage();
+      fileMessage.replyCannotAccessFileMessage(filename);
       return;
     }
     fileMessage.replyWriteFileData();
@@ -267,7 +272,7 @@ public class FileServer
     }
     catch (FileNotFoundException exception)
     {
-      fileMessage.replyFileDoesNotExistMessage();
+      fileMessage.replyFileDoesNotExistMessage(filename);
       return;
     }
     // Setup the necessary streams and read the file contents.

@@ -28,13 +28,19 @@ public class FileMessages
 
   //Possible replies
   //Errors
+  public final static String A_INVALID_COMMAND = "A001";
+  public final static String A_INCORRECT_USAGE = "A002";
+  public final static String A_CANNOT_ACCESS_DIRECTORY = "A003";
+  public final static String A_DIRECTORY_DOES_NOT_EXIST = "A004";
+  public final static String A_CANNOT_ACCESS_FILE = "A005";
+  public final static String A_FILE_DOES_NOT_EXIST = "A006";
   private final static String padding = spacer + "0" + spacer + "1" + spacer;
-  public final static String A_INVALID_COMMAND = "A001" + padding + "Invalid Command";
-  public final static String A_INCORRECT_USAGE = "A002" + padding + "Incorrect Usage";
-  public final static String A_CANNOT_ACCESS_DIRECTORY = "A003"  + padding + "Cannot access directory";
-  public final static String A_DIRECTORY_DOES_NOT_EXIST = "A004" + padding + "Directory doesn't exist";
-  public final static String A_CANNOT_ACCESS_FILE = "A005" + padding + "Cannot access file";
-  public final static String A_FILE_DOES_NOT_EXIST = "A006" + padding + "File doesn't exist";
+  private final static String A_DESC_INVALID_COMMAND = "Invalid Command";
+  public final static String A_DESC_INCORRECT_USAGE = "Incorrect Usage";
+  public final static String A_DESC_CANNOT_ACCESS_DIRECTORY = "Cannot access directory";
+  public final static String A_DESC_DIRECTORY_DOES_NOT_EXIST = "Directory doesn't exist";
+  public final static String A_DESC_CANNOT_ACCESS_FILE = "Cannot access file";
+  public final static String A_DESC_FILE_DOES_NOT_EXIST = "File doesn't exist";
 
   //Success
   public final static String A_DIRECTORY_LIST = "A100";
@@ -71,7 +77,7 @@ public class FileMessages
         end = strTmpMessage.endsWith(EOF);
         tmpMessage.append(strTmpMessage);
       }
-//      System.out.println("Raw message: " + tmpMessage);
+      System.out.println("Raw message: " + tmpMessage);
       tmpMessage.setLength(tmpMessage.length() - EOF.length());
       message = tmpMessage.toString();
 
@@ -85,6 +91,8 @@ public class FileMessages
           messageSize = (Integer.parseInt(messageData.substring(0, messageData.indexOf(spacer))));
           messageData = messageData.substring(messageData.indexOf(spacer)+1, messageData.length());
         }
+//        System.out.println("Message Type: " + messageType);
+//        System.out.println("Valid Message Type: " + validMessageType(messageType));
         if (validMessageType(messageType))
         {
           if (messageData.length() > 0)
@@ -105,6 +113,7 @@ public class FileMessages
     catch (IOException ioe)
     {
       System.out.println("Error reading data from server: " + ioe);
+      ioe.printStackTrace();
     }
     catch (Exception e)
     {
@@ -196,7 +205,7 @@ public class FileMessages
     if (filename != null)
     {
       return(writeMessage(Q_WRITE_FILE_DATA + spacer + directoryIndicator + spacer +
-        filename + spacer + fileData));
+        "1" + spacer + filename + spacer + fileData));
     }
     else
     {
@@ -280,27 +289,31 @@ public class FileMessages
 
   public boolean replyCannotAccessDirectoryMessage()
   {
-    return(replyErrorMessage(A_CANNOT_ACCESS_DIRECTORY));
+    return(replyErrorMessage(A_CANNOT_ACCESS_DIRECTORY + padding +
+      A_DESC_CANNOT_ACCESS_DIRECTORY));
   }
 
-  public boolean replyCannotAccessFileMessage()
+  public boolean replyCannotAccessFileMessage(String filename)
   {
-    return(replyErrorMessage(A_CANNOT_ACCESS_FILE));
+    return(replyErrorMessage(A_CANNOT_ACCESS_FILE + padding +
+      A_DESC_CANNOT_ACCESS_FILE + ": " + filename));
   }
 
-  public boolean replyDirectoryDoesNotExistMessage()
+  public boolean replyDirectoryDoesNotExistMessage(String directory)
   {
-    return(replyErrorMessage(A_DIRECTORY_DOES_NOT_EXIST));
+    return(replyErrorMessage(A_DIRECTORY_DOES_NOT_EXIST + padding +
+      A_DESC_DIRECTORY_DOES_NOT_EXIST + ": " + directory));
   }
 
-  public boolean replyFileDoesNotExistMessage()
+  public boolean replyFileDoesNotExistMessage(String filename)
   {
-    return(replyErrorMessage(A_FILE_DOES_NOT_EXIST));
+    return(replyErrorMessage(A_FILE_DOES_NOT_EXIST + padding +
+      A_DESC_FILE_DOES_NOT_EXIST + ": " + filename));
   }
 
   private boolean replyErrorMessage(String message)
   {
-    System.err.println(message);
+    System.err.println("Error: " + message);
     return(writeMessage(message));
   }
 
