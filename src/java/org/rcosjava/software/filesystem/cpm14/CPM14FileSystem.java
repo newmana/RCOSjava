@@ -15,125 +15,54 @@ import org.rcosjava.software.util.IndexedList;
 import java.util.*;
 
 /**
- * Description of the Class
- *
- * @author administrator
- * @created 28 April 2002
+ * Implementation of a CPM file System.
+ * <P>
+ * @author Brett Carter
+ * @author Andrew Newman
+ * @created 28 March 1996
  */
 public class CPM14FileSystem implements FileSystem
 {
   /**
-   * Description of the Field
+   * Mount point which seperates the mount point with the file name.
    */
   private final static String MOUNT_POINT_SEPERATOR = ":";
 
   /**
-   * Description of the Field
+   * The block size of the file system in bytes.
    */
   private final static int BLOCK_SIZE = 1024;
 
   /**
-   * Description of the Field
+   * The total number of blocks that makes up the disk.
    */
   private final static int TOTAL_DISK_BLOCKS = 240;
 
   /**
-   * Description of the Field
+   * The total number of blocks that make up the directory.
    */
   private final static int TOTAL_DIR_BLOCKS = 2;
 
   /**
-   * Description of the Field
+   * The location of the start of the directory on the disk.
    */
   private final static int DIR_BLOCK_OFFSET = 0;
 
   /**
-   * Description of the Field
+   * The location of where to start writing data files.
    */
   private final static int DISK_BLOCK_OFFSET = DIR_BLOCK_OFFSET + TOTAL_DIR_BLOCKS;
 
   /**
-   * Description of the Field
+   * The length in bytes of a directory entry.
    */
   private final static int DIR_ENTRY_SIZE = 32;
 
   /**
-   * Description of the Field
+   * The total number of directory entries that the disk can support.
    */
   private final static int TOTAL_DIR_ENTRIES = (BLOCK_SIZE * TOTAL_DIR_BLOCKS)
        / DIR_ENTRY_SIZE;
-
-  // Dir Entry
-  /**
-   * Description of the Field
-   */
-  private final static int STATUS = 0;
-
-  /**
-   * Description of the Field
-   */
-  private final static int FILENAME = 1;
-
-  /**
-   * Description of the Field
-   */
-  private final static int EXTENSION = 9;
-
-  /**
-   * Description of the Field
-   */
-  private final static int EXTENT = 12;
-
-  /**
-   * Description of the Field
-   */
-  private final static int RESERVED = 13;
-
-  /**
-   * Description of the Field
-   */
-  private final static int RECORDS = 15;
-
-  /**
-   * Description of the Field
-   */
-  private final static int DATA_BLOCKS = 16;
-
-  // File Modes
-  /**
-   * Description of the Field
-   */
-  private final static int MODELESS = -1;
-
-  /**
-   * Description of the Field
-   */
-  private final static int ALLOCATED = 0;
-
-  /**
-   * Description of the Field
-   */
-  private final static int READING = 1;
-
-  /**
-   * Description of the Field
-   */
-  private final static int WRITING = 2;
-
-  /**
-   * Description of the Field
-   */
-  private final static int CREATING = 3;
-
-  /**
-   * Description of the Field
-   */
-  private final static int DELETING = 4;
-
-  /**
-   * Description of the Field
-   */
-  private final static int CLOSING = 5;
 
   /**
    * Description of the Field
@@ -145,9 +74,8 @@ public class CPM14FileSystem implements FileSystem
    */
   private final static int NOT_EOF = 0;
 
-  // Used to convert signed 8 bit numbers (byte) to integers.
   /**
-   * Description of the Field
+   * Used to convert signed 8 bit numbers (byte) to integers.
    */
   private final static int SVB2I = 255;
 
@@ -188,404 +116,72 @@ public class CPM14FileSystem implements FileSystem
   }
 
   /**
-   * Gets the number of the first entry for the file. Note, the filename
-   * should include the mountpoint as well.
+   * Handle a mount request.  Creates a new device and sets its status to
+   * mounted.
    *
-   * @param mvFilename the file name inclusive of a mount point.
-   * @return The DirectoryPosition value
-   */
-  public int getDirectoryPosition(String mvFilename)
-  {
-    String mountPoint;
-    Integer tmpId;
-    int deviceNumber;
-
-    // Determin the device and get a pointer to it's data.
-    mountPoint = getMountPoint(mvFilename);
-    tmpId = (Integer) mountTable.get(mountPoint);
-    if (tmpId == null)
-    {
-      return -1;
-    }
-
-    deviceNumber = tmpId.intValue();
-    CPM14DeviceTableEntry device =
-        (CPM14DeviceTableEntry) deviceTable.getItem(deviceNumber);
-
-    // Convert the filename to a byte[] for the search.
-    byte[] mvByteFilename = convertFilename(mvFilename);
-    // Search
-    int counter = 0;
-    int mvIndex = 0;
-    int mvOffset;
-
-    boolean mvFound = false;
-
-    while ((counter < TOTAL_DIR_ENTRIES) && (!mvFound))
-    {
-      mvIndex = 0;
-      mvOffset = (counter * DIR_ENTRY_SIZE) + FILENAME;
-      while ((mvIndex < 11) &&
-          (mvByteFilename[mvIndex] == device.directoryTable[mvOffset + mvIndex]))
-      {
-        mvIndex++;
-      }
-      mvFound = (mvIndex == 11);
-      if (mvFound)
-      {
-        mvFound = (device.directoryTable[mvOffset - FILENAME + EXTENT]
-             == 0);
-      }
-      counter++;
-    }
-
-    // Check sucess and return a value.
-    if (mvFound)
-    {
-      counter--;
-      // Counter is incremented in the loop to save cycles with
-      // an if or an else.
-      return counter;
-    }
-    else
-    {
-      return -1;
-    }
-
-  }
-
-  // Return a Free Directory entry for the specified device.
-  /**
-   * Gets the FreeEntry attribute of the CPM14FileSystem object
-   *
-   * @param deviceNumber Description of Parameter
-   * @return The FreeEntry value
-   */
-  public int getFreeEntry(int deviceNumber)
-  {
-    return resourceAllocator("DIR", deviceNumber, -1);
-  }
-
-  // Return a free blcok number on the specified device.
-  /**
-   * Gets the FreeBlock attribute of the CPM14FileSystem object
-   *
-   * @param deviceNumber Description of Parameter
-   * @return The FreeBlock value
-   */
-  public int getFreeBlock(int deviceNumber)
-  {
-    return resourceAllocator("BLOCK", deviceNumber, -1);
-  }
-
-  // Returns the next directory entry for the dirent on the specified device
-  /**
-   * Gets the NextDirectoryEntry attribute of the CPM14FileSystem object
-   *
-   * @param mvDirent Description of Parameter
-   * @param deviceNumber Description of Parameter
-   * @return The NextDirectoryEntry value
-   */
-  public int getNextDirectoryEntry(int mvDirent, int deviceNumber)
-  {
-    CPM14DeviceTableEntry device =
-        (CPM14DeviceTableEntry) deviceTable.getItem(deviceNumber);
-
-    int mvCurrentOffset = mvDirent * DIR_ENTRY_SIZE;
-
-    // First check if this entry is totally used. If so, look for next,
-    // otherwise exit.
-    if ((SVB2I & device.directoryTable[mvCurrentOffset + RECORDS]) != 0x80)
-    {
-      return -1;
-    }
-
-    // Get the filename to a byte[] for the search.
-    byte[] mvByteFilename = new byte[11];
-
-    byte mvCurrentExtent = device.directoryTable
-        [mvCurrentOffset + EXTENT];
-
-    int counter;
-
-    for (counter = 0; counter < 11; counter++)
-    {
-      mvByteFilename[counter] = device.directoryTable
-          [mvCurrentOffset + FILENAME + counter];
-    }
-
-    // Search
-    counter = 0;
-
-    int mvIndex = 0;
-    int mvOffset;
-
-    boolean mvFound = false;
-
-    while ((counter < TOTAL_DIR_ENTRIES) && (!mvFound))
-    {
-      mvIndex = 0;
-      mvOffset = (counter * DIR_ENTRY_SIZE) + FILENAME;
-      while ((mvIndex < 11) &&
-          (mvByteFilename[mvIndex] == device.directoryTable[
-          mvOffset + mvIndex]))
-      {
-        mvIndex++;
-      }
-      mvFound = (mvIndex == 11);
-      if (mvFound)
-      {
-        mvFound = (device.directoryTable[mvOffset - FILENAME + EXTENT]
-             == mvCurrentExtent + 1);
-      }
-      counter++;
-    }
-
-    // Check sucess and return a value.
-    if (mvFound)
-    {
-      counter--;
-      // Counter is incremented in the loop to save cycles with
-      // an if or an else.
-      return counter;
-    }
-    else
-    {
-      return -1;
-    }
-
-  }
-
-  /**
-   * Returns the mountpoint of the specified string.
-   *
-   * @param mvFilename Description of Parameter
-   * @return The MountPoint value
-   */
-  public String getMountPoint(String mvFilename)
-  {
-    int mvIndex;
-    String mountPoint;
-
-    mvIndex = mvFilename.indexOf(MOUNT_POINT_SEPERATOR);
-    if (mvIndex == -1)
-    {
-      return null;
-    }
-    mountPoint = mvFilename.substring(0, mvIndex);
-    return mountPoint;
-  }
-
-  //Handle a mount request
-  /**
-   * Description of the Method
-   *
-   * @param mountPoint Description of Parameter
-   * @param deviceName Description of Parameter
+   * @param newMountPoint The name of the new mount point e.g. "C"
+   * @param newDeviceName The name of the new device name e.g. "DISK1"
    */
   public void mount(String mountPoint, String deviceName)
   {
-    CPM14DeviceTableEntry device = new CPM14DeviceTableEntry();
-
     // Note, in the simulation, the disks are initialized each
     // time the program is run. For a disk structure that
     // remained between runs, the mount would be very different.
-    device.deviceName = deviceName;
-    device.directoryTable = new byte[BLOCK_SIZE * TOTAL_DIR_BLOCKS];
-    device.openFileNames = new HashMap();
-    device.status = 0;
-    device.blockList = new boolean[TOTAL_DISK_BLOCKS];
-    device.numberOfFreeBlocks = TOTAL_DISK_BLOCKS;
-    device.dirEntList = new boolean[TOTAL_DIR_ENTRIES];
-    device.numberOfFreeEntries = TOTAL_DIR_ENTRIES;
-
-    // This section would start the read operations to retrieve the
-    // directory blocks from the disk.  As it is, it simply sets the
-    // status on all files to deleted so the system knows it can write
-    // to them.
-    for (int counter = 0; counter < TOTAL_DIR_ENTRIES; counter++)
-    {
-      device.directoryTable[(DIR_ENTRY_SIZE * counter) + STATUS] =
-          (byte) 0xE5;
-      device.dirEntList[counter] = false;
-    }
-
-    // Setup the free dir entry and disk block arrays.
-    for (int counter = 0; counter < TOTAL_DISK_BLOCKS; counter++)
-    {
-      device.blockList[counter] = false;
-    }
+    CPM14DeviceTableEntry device = new CPM14DeviceTableEntry(deviceName,
+      BLOCK_SIZE, TOTAL_DIR_BLOCKS, TOTAL_DISK_BLOCKS, TOTAL_DIR_ENTRIES,
+      DIR_ENTRY_SIZE);
 
     // Add device to the device table and the Mount table.
     int deviceNumber = deviceTable.add(device);
     mountTable.put(mountPoint, new Integer(deviceNumber));
 
     // Set status to mounted.
-    device.status = 1;
+    device.mounted();
   }
 
   /**
    * Perfoms an allocation of the file. Creats an entry in the FID table
    * and inits it.
    *
-   * @param requestId Description of Parameter
-   * @param filename Description of Parameter
-   * @return Description of the Returned Value
+   * @param requestId unique identifier for this request.
+   * @param fileName the name of the file to allocate.
+   * @return the data structure indicating a success or failure.
    */
   public FileSystemReturnData allocate(int requestId, String filename)
   {
+    // Get the mount point of the file.
     String mountPoint = getMountPoint(filename);
 
-    // Assume device is mounted as FSMan has passed in request.
+    // Assume device is mounted as the manager has passed in request.
     int deviceNumber = ((Integer) mountTable.get(mountPoint)).intValue();
 
     CPM14DeviceTableEntry device =
         (CPM14DeviceTableEntry) deviceTable.getItem(deviceNumber);
 
     // Check if file is already open
-    if (device.openFileNames.containsKey(filename))
+    if (device.isFileOpen(filename))
     {
       return (new FileSystemReturnData(requestId, -1));
     }
 
-    device.openFileNames.put(filename, new Boolean(true));
+    // Set the file as being open.
+    device.setFileOpen(filename);
 
-    // create the entry and init it.
-    CPM14FIDTableEntry fidEntry = new CPM14FIDTableEntry();
-
-    fidEntry.Device = deviceNumber;
-    fidEntry.Filename = filename;
-    fidEntry.Mode = ALLOCATED;
-    fidEntry.Buffer = new byte[BLOCK_SIZE];
+    // Create the entry and init it.
+    CPM14FIDTableEntry fidEntry = new CPM14FIDTableEntry(deviceNumber, filename,
+      BLOCK_SIZE);
 
     int FID = fidTable.add(fidEntry);
 
     return (new FileSystemReturnData(requestId, FID));
   }
 
-  // Replys to the sender of the message 1 if at end of file
-  // 0 if not.
-  /**
-   * Description of the Method
-   *
-   * @param requestId Description of Parameter
-   * @param iFSFileNo Description of Parameter
-   * @return Description of the Returned Value
-   */
-  public FileSystemReturnData eof(int requestId, int iFSFileNo)
-  {
-    CPM14FIDTableEntry fidEntry =
-        (CPM14FIDTableEntry) fidTable.getItem(iFSFileNo);
-
-    CPM14DeviceTableEntry device =
-        (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.Device);
-
-    int mvReturnValue = NOT_EOF;
-
-    if (fidEntry.Mode == READING)
-    {
-      // Check if in the middle of a block
-      if (((fidEntry.CurrentPosition) % 1024) != 0)
-      {
-        // Easy, check the current character for 0x1A, EOF.
-        if ((SVB2I & fidEntry.Buffer[(fidEntry.CurrentPosition % 1024)]) == 0x1A)
-        {
-          mvReturnValue = EOF;
-        }
-      }
-      else
-      {
-        // The position is at the very end of a data block. Check if that block
-        // is the last one in the context.
-        int mvDiskBlockOffset = (fidEntry.FileNumber * DIR_ENTRY_SIZE) +
-            DATA_BLOCKS;
-
-        if (fidEntry.CurrentDiskBlock !=
-            (SVB2I & device.directoryTable[(fidEntry.FileNumber * DIR_ENTRY_SIZE) +
-            DATA_BLOCKS + 16]))
-        {
-          // We are not in the last one.
-          int mvCurrentBlockPosition = (fidEntry.CurrentPosition / 1024) % 16;
-
-          // Check if the next block in the list == 0. If it is, this is the
-          // end of the file.
-          if ((SVB2I & device.directoryTable[
-              mvDiskBlockOffset + mvCurrentBlockPosition + 1]) == 0)
-          {
-            mvReturnValue = EOF;
-          }
-        }
-        else
-        {
-          // If there isn't an entry for the file with a higher context,
-          // this be the end.
-          if (getNextDirectoryEntry(fidEntry.FileNumber, fidEntry.Device) == -1)
-          {
-            mvReturnValue = EOF;
-          }
-        }
-      }
-    }
-    return (new FileSystemReturnData(requestId, mvReturnValue));
-  }
-
-  // Free's all disk structures associated with the specified
-  // file. Leaves the file in the PID table though.
-  /**
-   * Description of the Method
-   *
-   * @param requestId Description of Parameter
-   * @param fsFileNumber Description of Parameter
-   * @return Description of the Returned Value
-   */
-  public FileSystemReturnData delete(int requestId, int fsFileNumber)
-  {
-    CPM14FIDTableEntry fidEntry =
-        (CPM14FIDTableEntry) fidTable.getItem(fsFileNumber);
-
-    // If file isn't at the allocated state
-    if (fidEntry.Mode != ALLOCATED)
-    {
-      return (new FileSystemReturnData(requestId, -1));
-    }
-
-    int deviceNumber = fidEntry.Device;
-    int mvCurrent;
-    int mvNext;
-
-    // eliminate all the dir entries associated with the file.
-    mvCurrent = getDirectoryPosition(fidEntry.Filename);
-    if (mvCurrent == -1)
-    {
-      // Fine, no work to be done.
-      return (new FileSystemReturnData(requestId, 0));
-    }
-
-    mvNext = getNextDirectoryEntry(mvCurrent, deviceNumber);
-    while (mvNext != -1)
-    {
-      deallocateEntry(deviceNumber, mvCurrent);
-      mvCurrent = mvNext;
-      mvNext = getNextDirectoryEntry(mvCurrent, deviceNumber);
-    }
-    deallocateEntry(mvCurrent, deviceNumber);
-
-    // Clear the data items in the FID table
-    fidEntry.Mode = ALLOCATED;
-    fidEntry.FileNumber = -1;
-    fidEntry.CurrentPosition = -1;
-    fidEntry.Buffer = null;
-    fidEntry.CurrentDiskBlock = -1;
-
-    return (new FileSystemReturnData(requestId, 0));
-  }
-
   /**
    * Sets up a directory entry for the file and sets it to a 0 length file.
    *
-   * @param requestId Description of Parameter
-   * @param fsFileNumber Description of Parameter
-   * @return Description of the Returned Value
+   * @param requestId unique identifier for this request.
+   * @param fsFileNumber unique identifier of the file.
+   * @return the data structure indicating a success or failure.
    */
   public FileSystemReturnData create(int requestId, int fsFileNumber)
   {
@@ -593,17 +189,17 @@ public class CPM14FileSystem implements FileSystem
         (CPM14FIDTableEntry) fidTable.getItem(fsFileNumber);
 
     CPM14DeviceTableEntry device =
-        (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.Device);
+        (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.getDeviceNumber());
 
     // Check for spaces and necessary conditions
-    if ((fidEntry.Mode != ALLOCATED) ||
-        (diskFull(fidEntry.Device)))
+    if ((!fidEntry.isAllocated()) ||
+        (diskFull(fidEntry.getDeviceNumber())))
     {
       // Return an error
       return (new FileSystemReturnData(requestId, -1));
     }
 
-    int deviceNumber = fidEntry.Device;
+    int deviceNumber = fidEntry.getDeviceNumber();
 
     // Allocate the dir entry
     int dirEntry = getFreeEntry(deviceNumber);
@@ -614,108 +210,61 @@ public class CPM14FileSystem implements FileSystem
 
     // Setup the entry
     int offset = dirEntry * DIR_ENTRY_SIZE;
-    device.directoryTable[offset + STATUS] = 0;
-    byte[] byteFilename = convertFilename(fidEntry.Filename);
+    device.setByteInEntry(offset, (byte) 0);
+    byte[] byteFilename = convertFilename(fidEntry.getFileName());
     System.err.println("Byte filename: " + byteFilename.length);
 
     for (int counter = 0; counter < 11; counter++)
     {
-      System.err.println("Dir offset: " + (offset + FILENAME + counter));
+      System.err.println("Dir offset: " + (offset + CPM14TableOffset.FILENAME + counter));
       System.err.println("Byte offset: " + (counter));
-      device.directoryTable[offset + FILENAME + counter] =
-          byteFilename[counter];
+      device.setByteInEntry(offset + CPM14TableOffset.FILENAME + counter, byteFilename[counter]);
     }
 
-    device.directoryTable[offset + EXTENT] = 0;
-    device.directoryTable[offset + RESERVED] = 0;
-    device.directoryTable[offset + RESERVED + 1] = 0;
-    device.directoryTable[offset + RECORDS] = 0;
+    device.setByteInEntry(offset + CPM14TableOffset.EXTENT, (byte) 0);
+    device.setByteInEntry(offset + CPM14TableOffset.RESERVED, (byte) 0);
+    device.setByteInEntry(offset + CPM14TableOffset.RESERVED + 1, (byte) 0);
+    device.setByteInEntry(offset + CPM14TableOffset.RECORDS, (byte) 0);
 
     for (int counter = 0; counter < 16; counter++)
     {
-      device.directoryTable[offset + DATA_BLOCKS + counter] = 0;
+      device.setByteInEntry(offset + CPM14TableOffset.DATA_BLOCKS + counter,
+          (byte) 0);
     }
 
     // Setup the initial data.
-    fidEntry.FileNumber = dirEntry;
-    fidEntry.Mode = WRITING;
-    fidEntry.CurrentPosition = 0;
+    fidEntry.setFileNumber(dirEntry);
+    fidEntry.isWriting();
+    fidEntry.setCurrentPosition(0);
 
     return (new FileSystemReturnData(requestId, 0));
   }
 
-  // Closes a file and removes it from the FID table. first
-  // writes the current buffer and the Dir blocks to disk.
   /**
-   * Description of the Method
+   * Opens the specified file for reading.
    *
-   * @param requestId Description of Parameter
-   * @param fsFileNumber Description of Parameter
-   * @return Description of the Returned Value
-   */
-  public FileSystemReturnData close(int requestId, int fsFileNumber)
-  {
-    CPM14FIDTableEntry fidEntry =
-        (CPM14FIDTableEntry) fidTable.getItem(fsFileNumber);
-
-    CPM14DeviceTableEntry device =
-        (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.Device);
-
-    if (fidEntry.Mode == WRITING)
-    {
-      // add EOF mark at the end of the file unless on a border line between the
-      // next block. If no eof is encountered, and no following block is allocated,
-      // Then the end of the file falls directly on the line.
-      if (((fidEntry.CurrentPosition) % BLOCK_SIZE) != 0)
-      {
-        //Currentposition will already point to the place to write the  EOF
-        // character
-        fidEntry.Buffer[(fidEntry.CurrentPosition % 1024)] = 0x1A;
-      }
-
-      diskRequest(device.deviceName, "FS_CLOSE::WRITE_BUFFER", "WRITING",
-          fsFileNumber, requestId, -1,
-          fidEntry.CurrentDiskBlock, fidEntry.Buffer);
-    }
-    else
-    {
-      if (device.openFileNames.containsKey(fidEntry.Filename))
-      {
-        device.openFileNames.remove(fidEntry.Filename);
-      }
-      fidTable.remove(fsFileNumber);
-      // Clean up entries in FID table.
-      return (new FileSystemReturnData(requestId, 0));
-    }
-    return null;
-  }
-
-  // Opens the specified file for reading.
-  /**
-   * Description of the Method
-   *
-   * @param requestId Description of Parameter
-   * @param fsFileNumber Description of Parameter
-   * @return Description of the Returned Value
+   * @param requestId unique identifier for this request.
+   * @param fsFileNumber unique identifier of the file.
+   * @return the data structure indicating a success or failure.
    */
   public FileSystemReturnData open(int requestId, int fsFileNumber)
   {
     CPM14FIDTableEntry fidEntry =
         (CPM14FIDTableEntry) fidTable.getItem(fsFileNumber);
     CPM14DeviceTableEntry device =
-        (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.Device);
-    int deviceNumber = fidEntry.Device;
+        (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.getDeviceNumber());
+    int deviceNumber = fidEntry.getDeviceNumber();
 
-    if (fidEntry.Mode == ALLOCATED)
+    if (fidEntry.isAllocated())
     {
       int mvTheFile;
 
       if ((mvTheFile = getNextDirectoryEntry(1, 1)) != -1)
       {
         // init for first read.
-        fidEntry.Mode = READING;
-        fidEntry.FileNumber = mvTheFile;
-        fidEntry.CurrentPosition = 0;
+        fidEntry.isReading();
+        fidEntry.setFileNumber(mvTheFile);
+        fidEntry.setCurrentPosition(0);
         return (new FileSystemReturnData(requestId, 0));
       }
       else
@@ -732,9 +281,9 @@ public class CPM14FileSystem implements FileSystem
   /**
    * Reads from the file if it is in the right mode.
    *
-   * @param requestId Description of Parameter
-   * @param fsFileNumber Description of Parameter
-   * @return Description of the Returned Value
+   * @param requestId unique identifier for this request.
+   * @param fsFileNumber unique identifier of the file.
+   * @return the data structure indicating a success or failure.
    */
   public FileSystemReturnData read(int requestId, int fsFileNumber)
   {
@@ -742,38 +291,40 @@ public class CPM14FileSystem implements FileSystem
     CPM14FIDTableEntry fidEntry =
         (CPM14FIDTableEntry) fidTable.getItem(fsFileNumber);
     CPM14DeviceTableEntry device =
-        (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.Device);
-    int deviceNumber = fidEntry.Device;
+        (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.getDeviceNumber());
+    int deviceNumber = fidEntry.getDeviceNumber();
     int mvTheEntry;
 
     // Check the current mode.
-    if (fidEntry.Mode == READING)
+    if (fidEntry.isBeingRead())
     {
       // The file is being read.
-      if (((fidEntry.CurrentPosition) % BLOCK_SIZE) == 0)
+      if (((fidEntry.getCurrentPosition()) % BLOCK_SIZE) == 0)
       {
         // check for end of dirent. Use disk blocks.
-        if (fidEntry.CurrentDiskBlock == device.directoryTable
-            [(fidEntry.FileNumber * DIR_ENTRY_SIZE) + DATA_BLOCKS + 15])
+        if (fidEntry.getCurrentDiskBlock() == device.getByteInEntry(
+          (fidEntry.getFileNumber() * DIR_ENTRY_SIZE) +
+           CPM14TableOffset.DATA_BLOCKS + 15))
         {
-          //this.dumpToScreen("DIR",0,fidEntry.FileNumber);
-          int mvNewEntry = getNextDirectoryEntry(fidEntry.FileNumber, deviceNumber);
+          //this.dumpToScreen("DIR",0,fidEntry.getFileNumber());
+          int mvNewEntry = getNextDirectoryEntry(fidEntry.getFileNumber(), deviceNumber);
 
           if (mvNewEntry == -1)
           {
             return (new FileSystemReturnData(requestId, -1));
           }
-          fidEntry.FileNumber = mvNewEntry;
-          fidEntry.CurrentDiskBlock = SVB2I & device.directoryTable
-              [(mvNewEntry * DIR_ENTRY_SIZE) + DATA_BLOCKS];
+          fidEntry.setFileNumber(mvNewEntry);
+          fidEntry.setCurrentDiskBlock(SVB2I & device.getByteInEntry(
+              (mvNewEntry * DIR_ENTRY_SIZE) + CPM14TableOffset.DATA_BLOCKS));
         }
         else
         {
           int mvNewBlock;
 
-          mvNewBlock = SVB2I & device.directoryTable[
-              (fidEntry.FileNumber * DIR_ENTRY_SIZE) + DATA_BLOCKS +
-              (fidEntry.CurrentPosition / BLOCK_SIZE) % 16];
+          mvNewBlock = SVB2I & device.getByteInEntry(
+              (fidEntry.getFileNumber() * DIR_ENTRY_SIZE) +
+              CPM14TableOffset.DATA_BLOCKS +
+              (fidEntry.getCurrentPosition() / BLOCK_SIZE) % 16);
           if (mvNewBlock == 0)
           {
             // 0 is used as it is a directory block
@@ -782,26 +333,26 @@ public class CPM14FileSystem implements FileSystem
           }
           else
           {
-            fidEntry.CurrentDiskBlock = (byte) mvNewBlock;
+            fidEntry.setCurrentDiskBlock(mvNewBlock);
           }
         }
 
-        diskRequest(device.deviceName, "FS_READ::GETBLOCK", "GETBLOCK",
-            fsFileNumber, requestId, -1, fidEntry.CurrentDiskBlock, null);
+//        diskRequest(device.getName(), "FS_READ::GETBLOCK", "GETBLOCK",
+//            fsFileNumber, requestId, -1, fidEntry.getCurrentDiskBlock(), null);
       }
       else
       {
         // No need to swap buffer. Just returnt he next character.
-        int mvDataItem = SVB2I & fidEntry.Buffer
-            [fidEntry.CurrentPosition % BLOCK_SIZE];
+        int mvDataItem = SVB2I & fidEntry.getByteInBuffer(
+            fidEntry.getCurrentPosition() % BLOCK_SIZE);
 
-        fidEntry.CurrentPosition++;
+        fidEntry.incCurrentPosition();
         if (mvDataItem == 0x1A)
         {
           // EOF
 
           mvDataItem = -1;
-          fidEntry.CurrentPosition--;
+          fidEntry.decCurrentPosition();
         }
 
         return (new FileSystemReturnData(requestId, mvDataItem));
@@ -827,43 +378,43 @@ public class CPM14FileSystem implements FileSystem
         (CPM14FIDTableEntry) fidTable.getItem(iFSFileNo);
 
     CPM14DeviceTableEntry device =
-        (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.Device);
+        (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.getDeviceNumber());
 
-    if (fidEntry.Mode == WRITING)
+    if (fidEntry.isBeingWritten())
     {
       // Do checking for a new context
-      if ((((fidEntry.CurrentPosition) % BLOCK_SIZE) == 0)
-           && (fidEntry.CurrentPosition != 0))
+      if ((((fidEntry.getCurrentPosition()) % BLOCK_SIZE) == 0)
+           && (fidEntry.getCurrentPosition() != 0))
       {
 
         /*        diskRequest ( devicedeviceName, "FS_WRITE::FLUSH", "WRITE",
                       iFSFileNo, requestId,
-                      mvRequestData.getData(), fidEntry.CurrentDiskBlock,
+                      mvRequestData.getData(), fidEntry.getCurrentDiskBlock(),
                       fidEntry.Buffer);
 */
       }
       else
       {
-        if (fidEntry.CurrentPosition == 0)
+        if (fidEntry.getCurrentPosition() == 0)
         {
           // Setup the buffer.
-          int mvNextBlock = getFreeBlock(fidEntry.Device);
+          int mvNextBlock = getFreeBlock(fidEntry.getDeviceNumber());
 
-          fidEntry.CurrentDiskBlock = (byte) mvNextBlock;
-          device.directoryTable[(fidEntry.FileNumber * DIR_ENTRY_SIZE)
-               + DATA_BLOCKS] = (byte) mvNextBlock;
+          fidEntry.setCurrentDiskBlock((byte) mvNextBlock);
+          device.setByteInEntry((fidEntry.getFileNumber() * DIR_ENTRY_SIZE)
+               + CPM14TableOffset.DATA_BLOCKS, (byte) mvNextBlock);
         }
 
-        //fidEntry.Buffer[ fidEntry.CurrentPosition % BLOCK_SIZE] =
+        //fidEntry.Buffer[ fidEntry.getCurrentPosition() % BLOCK_SIZE] =
         //                (byte)mvRequestData.getData();
 
-        if (((fidEntry.CurrentPosition + 1) % 128) == 0)
+        if (((fidEntry.getCurrentPosition() + 1) % 128) == 0)
         {
-          device.directoryTable[(fidEntry.FileNumber * DIR_ENTRY_SIZE)
-               + RECORDS] =
-              (byte) (((fidEntry.CurrentPosition + 1) % (16 * BLOCK_SIZE)) / 128);
+          device.setByteInEntry((fidEntry.getFileNumber() * DIR_ENTRY_SIZE)
+               + CPM14TableOffset.RECORDS,
+              (byte) (((fidEntry.getCurrentPosition() + 1) % (16 * BLOCK_SIZE)) / 128));
         }
-        fidEntry.CurrentPosition++;
+        fidEntry.incCurrentPosition();
         return (new FileSystemReturnData(requestId, 0));
       }
     }
@@ -875,18 +426,19 @@ public class CPM14FileSystem implements FileSystem
   }
 
   /**
-   * Checks to see if the File System indicated by MountPoint is full.
+   * Description of the Method
    *
-   * @param deviceNumber Description of Parameter
+   * @param requestId Description of Parameter
+   * @param msdosFile Description of the Parameter
+   * @param path Description of the Parameter
    * @return Description of the Returned Value
+   * @throws AllocationTableException Description of the Exception
+   * @throws DirectoryException Description of the Exception
    */
-  public boolean diskFull(int deviceNumber)
+  public FileSystemReturnData read(int requestId, FileSystemFile msdosFile,
+      String path) throws AllocationTableException, DirectoryException
   {
-    CPM14DeviceTableEntry device =
-        (CPM14DeviceTableEntry) deviceTable.getItem(deviceNumber);
-
-    return ((device.numberOfFreeBlocks == 0)
-         || (device.numberOfFreeEntries == 0));
+    return null;
   }
 
   /**
@@ -908,19 +460,178 @@ public class CPM14FileSystem implements FileSystem
   }
 
   /**
-   * Description of the Method
+   * Free's all disk structures associated with the specified file. Leaves the
+   * file in the PID table though.
    *
-   * @param requestId Description of Parameter
-   * @param msdosFile Description of the Parameter
-   * @param path Description of the Parameter
-   * @return Description of the Returned Value
-   * @throws AllocationTableException Description of the Exception
-   * @throws DirectoryException Description of the Exception
+   * @param requestId unique identifier for this request.
+   * @param fsFileNumber unique identifier of the file.
+   * @return the data structure indicating a success or failure.
    */
-  public FileSystemReturnData read(int requestId, FileSystemFile msdosFile,
-      String path) throws AllocationTableException, DirectoryException
+  public FileSystemReturnData close(int requestId, int fsFileNumber)
   {
+    CPM14FIDTableEntry fidEntry =
+        (CPM14FIDTableEntry) fidTable.getItem(fsFileNumber);
+
+    CPM14DeviceTableEntry device =
+        (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.getDeviceNumber());
+
+    if (fidEntry.isBeingWritten())
+    {
+      // add EOF mark at the end of the file unless on a border line between the
+      // next block. If no eof is encountered, and no following block is allocated,
+      // Then the end of the file falls directly on the line.
+      if (((fidEntry.getCurrentPosition()) % BLOCK_SIZE) != 0)
+      {
+        //Currentposition will already point to the place to write the  EOF
+        // character
+        fidEntry.setByteInBuffer((fidEntry.getCurrentPosition() % 1024),
+          (byte) 0x1A);
+      }
+
+//      diskRequest(device.getName(), "FS_CLOSE::WRITE_BUFFER", "WRITING",
+//          fsFileNumber, requestId, -1,
+//          fidEntry.getCurrentDiskBlock(), fidEntry.getBuffer());
+    }
+    else
+    {
+      if (device.isFileOpen(fidEntry.getFileName()))
+      {
+        device.setFileClosed(fidEntry.getFileName());
+      }
+      fidTable.remove(fsFileNumber);
+      // Clean up entries in FID table.
+      return (new FileSystemReturnData(requestId, 0));
+    }
     return null;
+  }
+
+  /**
+   * Replys to the sender of the message 1 if at end of file
+   * 0 if not.
+   *
+   * @param requestId unique identifier for this request.
+   * @param fsFileNumber unique identifier of the file.
+   * @return the data structure indicating a success or failure.
+   */
+  public FileSystemReturnData eof(int requestId, int fsFileNumber)
+  {
+    CPM14FIDTableEntry fidEntry =
+        (CPM14FIDTableEntry) fidTable.getItem(fsFileNumber);
+
+    CPM14DeviceTableEntry device =
+        (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.getDeviceNumber());
+
+    int mvReturnValue = NOT_EOF;
+
+    if (fidEntry.isBeingRead())
+    {
+      // Check if in the middle of a block
+      if (((fidEntry.getCurrentPosition()) % 1024) != 0)
+      {
+        // Easy, check the current character for 0x1A, EOF.
+        if ((SVB2I & fidEntry.getByteInBuffer((fidEntry.getCurrentPosition() % 1024))) == 0x1A)
+        {
+          mvReturnValue = EOF;
+        }
+      }
+      else
+      {
+        // The position is at the very end of a data block. Check if that block
+        // is the last one in the context.
+        int mvDiskBlockOffset = (fidEntry.getFileNumber() * DIR_ENTRY_SIZE) +
+            CPM14TableOffset.DATA_BLOCKS;
+
+        if (fidEntry.getCurrentDiskBlock() !=
+            (SVB2I & device.getByteInEntry((fidEntry.getFileNumber() * DIR_ENTRY_SIZE) +
+            CPM14TableOffset.DATA_BLOCKS + 16)))
+        {
+          // We are not in the last one.
+          int mvCurrentBlockPosition = (fidEntry.getCurrentPosition() / 1024) % 16;
+
+          // Check if the next block in the list == 0. If it is, this is the
+          // end of the file.
+          if ((SVB2I & device.getByteInEntry(
+              mvDiskBlockOffset + mvCurrentBlockPosition + 1)) == 0)
+          {
+            mvReturnValue = EOF;
+          }
+        }
+        else
+        {
+          // If there isn't an entry for the file with a higher context,
+          // this be the end.
+          int nextEntry = getNextDirectoryEntry(fidEntry.getFileNumber(),
+            fidEntry.getDeviceNumber());
+
+          if (nextEntry == -1)
+          {
+            mvReturnValue = EOF;
+          }
+        }
+      }
+    }
+    return (new FileSystemReturnData(requestId, mvReturnValue));
+  }
+
+  /**
+   * Free's all disk structures associated with the specified file. Leaves the
+   * file in the PID table though.
+   *
+   * @param requestId unique identifier for this request.
+   * @param fsFileNumber unique identifier of the file.
+   * @return the data structure indicating a success or failure.
+   */
+  public FileSystemReturnData delete(int requestId, int fsFileNumber)
+  {
+    CPM14FIDTableEntry fidEntry =
+        (CPM14FIDTableEntry) fidTable.getItem(fsFileNumber);
+
+    // If file isn't at the allocated state
+    if (!fidEntry.isAllocated())
+    {
+      return (new FileSystemReturnData(requestId, -1));
+    }
+
+    int deviceNumber = fidEntry.getDeviceNumber();
+    int current;
+    int next;
+
+    // eliminate all the dir entries associated with the file.
+    current = getDirectoryPosition(fidEntry.getFileName());
+    if (current == -1)
+    {
+      // Fine, no work to be done.
+      return (new FileSystemReturnData(requestId, 0));
+    }
+
+    next = getNextDirectoryEntry(current, deviceNumber);
+    while (next != -1)
+    {
+      deallocateEntry(deviceNumber, current);
+      current = next;
+      next = getNextDirectoryEntry(current, deviceNumber);
+    }
+    deallocateEntry(current, deviceNumber);
+
+    // Clear the data items in the FID table
+    fidEntry.initialize();
+
+    return (new FileSystemReturnData(requestId, 0));
+  }
+
+  /**
+   * Checks to see if the file system indicated by device number is full.
+   *
+   * @param deviceNumber the unique device number to check.
+   * @return true if the device has no free blocks or free directory entries.
+   */
+  public boolean diskFull(int deviceNumber)
+  {
+    CPM14DeviceTableEntry device =
+        (CPM14DeviceTableEntry) deviceTable.getItem(deviceNumber);
+
+    return ((device.getNumberOfFreeBlocks() == 0)
+         || (device.getNumberOfFreeEntries() == 0));
   }
 
   /**
@@ -940,114 +651,43 @@ public class CPM14FileSystem implements FileSystem
   }
 
   /**
-   * Coordinating this in the one synchronised function means that the
-   * allocation of the resources will be safe.
+   * Removes an entry from the top level directory.
    *
-   * @param type Description of Parameter
-   * @param deviceNumber Description of Parameter
-   * @param Item Description of Parameter
-   * @return Description of the Returned Value
+   * @param deviceNumber the device to get to remove directory from.
+   * @param entryNumber the entry to remove.
    */
-  public int resourceAllocator(String type, int deviceNumber, int Item)
+  public int cleanDirectoryEntry(int deviceNumber, int entryNumber)
   {
     CPM14DeviceTableEntry device =
         (CPM14DeviceTableEntry) deviceTable.getItem(deviceNumber);
 
-    if (type.equalsIgnoreCase("DIR"))
+    int counter = 0;
+
+    int entryOffset = entryNumber * DIR_ENTRY_SIZE;
+    int blockNum = SVB2I & device.getByteInEntry(
+      entryOffset + CPM14TableOffset.DATA_BLOCKS + counter);
+
+    while ((counter < 16) && (blockNum > 0))
     {
-      int counter;
+      System.out.println("Freeing block :" + blockNum);
+      device.deallocateBlock(blockNum - DISK_BLOCK_OFFSET);
+      device.setByteInEntry(entryOffset + CPM14TableOffset.DATA_BLOCKS +
+          counter, (byte) 0);
 
-      for (counter = 0;
-          ((counter < TOTAL_DIR_ENTRIES) &&
-          (device.dirEntList[counter]));
-          counter++)
-      {
-        ;
-      }
-      if (counter == TOTAL_DIR_ENTRIES)
-      {
-        return -1;
-      }
-      else
-      {
-        device.dirEntList[counter] = true;
-        device.numberOfFreeEntries--;
-        return counter;
-      }
+      counter++;
+
+      blockNum = SVB2I & device.getByteInEntry(entryOffset +
+          CPM14TableOffset.DATA_BLOCKS + counter);
     }
-    else if (type.equalsIgnoreCase("BLOCK"))
-    {
-      int counter;
 
-      for (counter = 0;
-          ((counter < TOTAL_DISK_BLOCKS) &&
-          (device.blockList[counter]));
-          counter++)
-      {
-        ;
-      }
-      if (counter == TOTAL_DISK_BLOCKS)
-      {
-        return -1;
-      }
-      else
-      {
-        device.blockList[counter] = true;
-        device.numberOfFreeBlocks--;
-        return counter + DISK_BLOCK_OFFSET;
-      }
+    device.setByteInEntry(entryOffset + CPM14TableOffset.STATUS, (byte) 0xE5);
+    device.deallocateEntry(entryNumber);
 
-    }
-    else if (type.equalsIgnoreCase("CLEARDIR"))
-    {
-
-      int mvEntryOffset = Item * DIR_ENTRY_SIZE;
-      int counter = 0;
-      int mvBlockNum;
-
-      mvBlockNum = SVB2I & device.directoryTable
-          [mvEntryOffset + DATA_BLOCKS + counter];
-
-      while ((counter < 16) && (mvBlockNum > 0))
-      {
-        System.out.println("Freeing block :" + mvBlockNum);
-        device.blockList[mvBlockNum - DISK_BLOCK_OFFSET] = false;
-        device.directoryTable[mvEntryOffset + DATA_BLOCKS + counter] = 0;
-
-        device.numberOfFreeBlocks++;
-        counter++;
-        mvBlockNum = SVB2I & device.directoryTable
-            [mvEntryOffset + DATA_BLOCKS + counter];
-      }
-      device.directoryTable[mvEntryOffset + STATUS] = (byte) 0xE5;
-      device.dirEntList[Item] = false;
-      device.numberOfFreeEntries++;
-      return 1;
-    }
-    else if (type.equalsIgnoreCase("CLEARBLOCK"))
-    {
-
-      device.blockList[Item] = false;
-      device.numberOfFreeBlocks++;
-
-      return 1;
-    }
-    else
-    {
-      return -1;
-    }
+    return 1;
   }
 
-  /**
-   * Deallocates the disk blocks for the specified device and sets the block to
-   * deleted.
-   *
-   * @param mvEntryNumber Description of Parameter
-   * @param deviceNumber Description of Parameter
-   */
-  public void deallocateEntry(int mvEntryNumber, int deviceNumber)
+  public void recordSystemFile()
   {
-    resourceAllocator("CLEARDIR", deviceNumber, mvEntryNumber);
   }
 
   public FileSystem requestSystemFile()
@@ -1055,65 +695,88 @@ public class CPM14FileSystem implements FileSystem
     return null;
   }
 
-  public void recordSystemFile()
+  /**
+   * Returns the mount point based on the given file name.
+   *
+   * @param fileName the name of file which contains the mount point e.g.
+   *   "C:fred.doc".
+   * @return the mount point e.g. "C".
+   */
+  public String getMountPoint(String fileName)
   {
+    int index;
+    String mountPoint;
 
+    index = fileName.indexOf(MOUNT_POINT_SEPERATOR);
+    if (index == -1)
+    {
+      return null;
+    }
+    mountPoint = fileName.substring(0, index);
+    return mountPoint;
   }
 
   /**
-   * Will display the specified data to the screen.
-   * Operation can be "DIR" or "BUFFER". For DIR, item1 will indicate
-   * the entry to dump, item2 will indicate the device. For Buffer,
-   * item1 is the FID.
+   * Displays a file's entry on a devices directory as a string.
    *
-   * @param Operation Description of Parameter
-   * @param item1 Description of Parameter
-   * @param item2 Description of Parameter
+   * @param deviceNumber the unique device number to check.
+   * @param fsFileNumber unique identifier of the file.
+   * @return a string representation of the file's directory entry.
    */
-  public String dump(String Operation, int item1, int item2)
+  public String dumpDirectoryEntry(int deviceNumber, int fsFileNumber)
   {
     StringBuffer data = new StringBuffer();
 
-    if (Operation.equalsIgnoreCase("DIR"))
+    CPM14DeviceTableEntry device =
+        (CPM14DeviceTableEntry) deviceTable.getItem(deviceNumber);
+
+    int x;
+    int offset = fsFileNumber * 32;
+
+    for (x = 0; x < 32; x++)
     {
-      CPM14DeviceTableEntry device =
-          (CPM14DeviceTableEntry) deviceTable.getItem(item2);
-
-      int x;
-      int Offset = item1 * 32;
-
-      for (x = 0; x < 32; x++)
+      if (x > 0 && x < 12)
       {
-        if (x > 0 && x < 12)
-        {
-          data.append((char) device.directoryTable[Offset + x] + " ");
-        }
-        else
-        {
-          data.append((SVB2I & device.directoryTable[Offset + x]) + " ");
-        }
-        if (x == 15)
-        {
-          data.append("\n");
-        }
+        data.append((char) device.getByteInEntry(offset + x) + " ");
+      }
+      else
+      {
+        // Converts bytes to integer
+        data.append((SVB2I & device.getByteInEntry(offset + x)) + " ");
+      }
+      if (x == 15)
+      {
+        data.append("\n");
       }
     }
-    else if (Operation.equalsIgnoreCase("BUFFER"))
-    {
-      CPM14FIDTableEntry fidEntry =
-          (CPM14FIDTableEntry) fidTable.getItem(item1);
-      int x;
 
-      for (x = 0; x < 1024; x++)
+    data.append("\n");
+    return data.toString();
+  }
+
+  /**
+   * Displays a file's entry on a devices directory as a string.
+   *
+   * @param fsFileNumber unique identifier of the file.
+   * @return a string representation of the file's directory entry.
+   */
+  public String dumpBuffer(int fsFileNumber)
+  {
+    StringBuffer data = new StringBuffer();
+
+    CPM14FIDTableEntry fidEntry =
+        (CPM14FIDTableEntry) fidTable.getItem(fsFileNumber);
+    int x;
+
+    for (x = 0; x < 1024; x++)
+    {
+      if ((SVB2I & fidEntry.getByteInBuffer(x)) == 0x1A)
       {
-        if ((SVB2I & fidEntry.Buffer[x]) == 0x1A)
-        {
-          data.append("<EOF>");
-        }
-        else
-        {
-          data.append((char) fidEntry.Buffer[x]);
-        }
+        data.append("<EOF>");
+      }
+      else
+      {
+        data.append((char) fidEntry.getByteInBuffer(x));
       }
     }
     data.append("\n");
@@ -1141,7 +804,7 @@ public class CPM14FileSystem implements FileSystem
         (CPM14FIDTableEntry) fidTable.getItem(mvFID);
 
     CPM14DeviceTableEntry device =
-        (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.Device);
+        (CPM14DeviceTableEntry) deviceTable.getItem(fidEntry.getDeviceNumber());
 
     if (mvRequestData.Type.equalsIgnoreCase("FS_CLOSE::WRITE_BUFFER"))
     {
@@ -1154,7 +817,7 @@ public class CPM14FileSystem implements FileSystem
 
       for (counter = 0; counter < 1024; counter++)
       {
-        mvToWrite[counter] = device.directoryTable[counter];
+        mvToWrite[counter] = device.getByteInEntry(counter);
       }
 
       DiskRequest mvNewReq = new DiskRequest(mvRequestID, 0, mvToWrite);
@@ -1173,7 +836,7 @@ public class CPM14FileSystem implements FileSystem
 
       for (counter = 0; counter < 1024; counter++)
       {
-        mvToWrite[counter] = device.directoryTable[counter + 1024];
+        mvToWrite[counter] = device.getByteInEntry(counter + 1024);
       }
 
 
@@ -1187,9 +850,9 @@ public class CPM14FileSystem implements FileSystem
 //      System.out.println("Handle Write dir2 return."); // DEBUG
 //      System.out.println("About to remove FID "+mvFID); // DEBUG
       //return(new FileSystemReturnData(requestId, 0));
-      if (device.openFileNames.containsKey(fidEntry.Filename))
+      if (device.isFileOpen(fidEntry.getFileName()))
       {
-        device.openFileNames.remove(fidEntry.Filename);
+        device.setFileClosed(fidEntry.getFileName());
       }
       fidTable.remove(mvFID);
       requestTable.remove(mvRequestID);
@@ -1202,13 +865,13 @@ public class CPM14FileSystem implements FileSystem
 
         for (counter = 0; counter < BLOCK_SIZE; counter++)
         {
-          fidEntry.Buffer[counter] = mvMessageData.getData()[counter];
+          fidEntry.setByteInBuffer(counter, mvMessageData.getData()[counter]);
         }
 
-        fidEntry.CurrentDiskBlock = (byte) mvMessageData.getDiskBlock();
+        fidEntry.setCurrentDiskBlock((byte) mvMessageData.getDiskBlock());
 
-        int mvReturnItem = SVB2I & fidEntry.Buffer[
-            fidEntry.CurrentPosition % BLOCK_SIZE];
+        int mvReturnItem = SVB2I & fidEntry.getByteInBuffer(
+            fidEntry.getCurrentPosition() % BLOCK_SIZE);
 
         if (mvReturnItem == 0x1A)
         {
@@ -1218,7 +881,7 @@ public class CPM14FileSystem implements FileSystem
         }
         else
         {
-          fidEntry.CurrentPosition++;
+          fidEntry.incCurrentPosition();
           //return(new FileSystemReturnData(requestId, mvReturnItem));
         }
         requestTable.remove(mvRequestID);
@@ -1238,25 +901,24 @@ public class CPM14FileSystem implements FileSystem
 
         // DEBUG
 
-        int mvLastBlock = SVB2I & device.directoryTable
-            [(fidEntry.FileNumber * DIR_ENTRY_SIZE) + DATA_BLOCKS + 15];
+        int mvLastBlock = SVB2I & device.getByteInEntry(
+            (fidEntry.getFileNumber() * DIR_ENTRY_SIZE) +
+            CPM14TableOffset.DATA_BLOCKS + 15);
 
         //System.out.print("Cmp: "+mvLastBlock+" - "); // DEBUG
-        //System.out.println("Entry :"+fidEntry.FileNumber); // DEBUG
+        //System.out.println("Entry :"+fidEntry.getFileNumber()); // DEBUG
         //System.out.println("entrysize : "+DIR_ENTRY_SIZE); // DEBUG
         //System.out.println("datablocks :"+ DATA_BLOCKS); // DEBUG
         //System.out.println
-        //     ((fidEntry.FileNumber*DIR_ENTRY_SIZE) + DATA_BLOCKS + 16); // DEBUG
+        //     ((fidEntry.getFileNumber()*DIR_ENTRY_SIZE) + DATA_BLOCKS + 16); // DEBUG
 
 
-        //System.out.println(fidEntry.CurrentDiskBlock); // DEBUG
-        if (fidEntry.CurrentDiskBlock == mvLastBlock)
+        //System.out.println(fidEntry.getCurrentDiskBlock()); // DEBUG
+        if (fidEntry.getCurrentDiskBlock() == mvLastBlock)
         {
           System.out.println("Setting up new DirEnt.");
 
-          // DEBUG
-
-          int mvNewEntry = getFreeEntry(fidEntry.Device);
+          int mvNewEntry = getFreeEntry(fidEntry.getDeviceNumber());
 
           if (mvNewEntry == -1)
           {
@@ -1265,25 +927,27 @@ public class CPM14FileSystem implements FileSystem
           }
 
           int mvNewOffset = mvNewEntry * DIR_ENTRY_SIZE;
-          int mvCurOffset = fidEntry.FileNumber * DIR_ENTRY_SIZE;
+          int mvCurOffset = fidEntry.getFileNumber() * DIR_ENTRY_SIZE;
           int x;
 
           for (x = 1; x <= 11; x++)
           {
-            device.directoryTable[mvNewOffset + x] =
-                device.directoryTable[mvCurOffset + x];
+            device.setByteInEntry(mvNewOffset + x,
+              device.getByteInEntry(mvCurOffset + x));
           }
-          device.directoryTable[mvNewOffset + 0] = 0;
-          device.directoryTable[mvNewOffset + EXTENT] =
-              (byte) (device.directoryTable[mvCurOffset + EXTENT] + (byte) 1);
-          device.directoryTable[mvCurOffset + RECORDS] = (byte) 0x80;
+          device.setByteInEntry(mvNewOffset + 0, (byte) 0);
+          device.setByteInEntry(mvNewOffset + CPM14TableOffset.EXTENT,
+              (byte) (device.getByteInEntry(mvCurOffset +
+              CPM14TableOffset.EXTENT) + (byte) 1));
+          device.setByteInEntry(mvCurOffset + CPM14TableOffset.RECORDS,
+              (byte) 0x80);
 
-          fidEntry.FileNumber = mvNewEntry;
+          fidEntry.setFileNumber(mvNewEntry);
           System.out.println("Setup dirent :" + mvNewEntry);
           // DEBUG
         }
 
-        int mvNewBlock = getFreeBlock(fidEntry.Device);
+        int mvNewBlock = getFreeBlock(fidEntry.getDeviceNumber());
 
         if (mvNewBlock >= 0)
         {
@@ -1291,15 +955,16 @@ public class CPM14FileSystem implements FileSystem
 
           //DEBUG
 
-          int mvOffset = (fidEntry.FileNumber * DIR_ENTRY_SIZE) + DATA_BLOCKS;
+          int mvOffset = (fidEntry.getFileNumber() * DIR_ENTRY_SIZE) +
+              CPM14TableOffset.DATA_BLOCKS;
           int mvBlockLocation = mvOffset +
-              ((fidEntry.CurrentPosition / BLOCK_SIZE) % 16);
+              ((fidEntry.getCurrentPosition() / BLOCK_SIZE) % 16);
 
-          device.directoryTable[mvBlockLocation] = (byte) mvNewBlock;
-          fidEntry.CurrentDiskBlock = (byte) mvNewBlock;
-          fidEntry.Buffer[fidEntry.CurrentPosition % BLOCK_SIZE] =
-              (byte) mvRequestData.Data;
-          fidEntry.CurrentPosition++;
+          device.setByteInEntry(mvBlockLocation, (byte) mvNewBlock);
+          fidEntry.setCurrentDiskBlock((byte) mvNewBlock);
+          fidEntry.setByteInBuffer(fidEntry.getCurrentPosition() % BLOCK_SIZE,
+              (byte) mvRequestData.Data);
+          fidEntry.incCurrentPosition();
           //return(new FileSystemReturnData(requestId, 0));
 //          Dump( "DIR", 0,0); // DEBUG
         }
@@ -1368,13 +1033,11 @@ public class CPM14FileSystem implements FileSystem
    * @param block Description of Parameter
    * @param data Description of Parameter
    */
-  private void diskRequest(String to, String from, String type, int FSFileNo,
+  private void diskRequest(int FSFileNo,
       int FSMRequestID, int RequestData, int block, byte[] data)
   {
     CPM14RequestTableEntry mvQueueEntry = new CPM14RequestTableEntry();
 
-    mvQueueEntry.Source = new String(from);
-    mvQueueEntry.Type = new String(type);
     mvQueueEntry.FSFileNum = FSFileNo;
     mvQueueEntry.FSMRequestID = FSMRequestID;
     mvQueueEntry.Data = RequestData;
@@ -1402,5 +1065,243 @@ public class CPM14FileSystem implements FileSystem
     /*Message mvReturnMessage = new Message(id, mvDestination,  "RETURNVALUE",
                                            mvToReturn);
     SendMessage ( mvReturnMessage );*/
+  }
+
+  /**
+   * Deallocates the disk blocks for the specified device and sets the block to
+   * deleted.
+   *
+   * @param mvEntryNumber Description of Parameter
+   * @param deviceNumber Description of Parameter
+   */
+  private boolean deallocateEntry(int deviceNumber, int entryNumber)
+  {
+    CPM14DeviceTableEntry device =
+        (CPM14DeviceTableEntry) deviceTable.getItem(deviceNumber);
+
+    int counter = 0;
+
+    int mvEntryOffset = entryNumber * DIR_ENTRY_SIZE;
+    int mvBlockNum = SVB2I & device.getByteInEntry(
+        mvEntryOffset + CPM14TableOffset.DATA_BLOCKS + counter);
+
+    while ((counter < 16) && (mvBlockNum > 0))
+    {
+      System.out.println("Freeing block :" + mvBlockNum);
+      device.deallocateBlock(mvBlockNum - DISK_BLOCK_OFFSET);
+      device.setByteInEntry(mvEntryOffset + CPM14TableOffset.DATA_BLOCKS +
+          counter, (byte) 0);
+
+      counter++;
+
+      mvBlockNum = SVB2I & device.getByteInEntry(
+          mvEntryOffset + CPM14TableOffset.DATA_BLOCKS + counter);
+    }
+
+    device.setByteInEntry(mvEntryOffset + CPM14TableOffset.STATUS, (byte) 0xE5);
+    device.deallocateEntry(entryNumber);
+
+    return true;
+  }
+
+  /**
+   * Returns a free directory entry for the specified device.
+   *
+   * @param deviceNumber the unique id of the device.
+   * @return a free directory entry for the specified device.
+   */
+  private int getFreeEntry(int deviceNumber)
+  {
+    CPM14DeviceTableEntry device =
+        (CPM14DeviceTableEntry) deviceTable.getItem(deviceNumber);
+
+    // Loop through until we find a free entry
+    int counter = 0;
+    while (counter < TOTAL_DIR_ENTRIES && (device.isEntryFree(counter)))
+    {
+      counter++;
+    }
+
+    // If we've come to the end return -1 or return the location of the
+    // newly allocated entry.
+    if (counter == TOTAL_DIR_ENTRIES)
+    {
+      return -1;
+    }
+    else
+    {
+      device.allocateEntry(counter);
+      return counter;
+    }
+  }
+
+  /**
+   * Return a free block number on the specified device.
+   *
+   * @param deviceNumber Description of Parameter
+   * @return The FreeBlock value
+   */
+  private int getFreeBlock(int deviceNumber)
+  {
+    CPM14DeviceTableEntry device =
+        (CPM14DeviceTableEntry) deviceTable.getItem(deviceNumber);
+
+    // Loop through until we find a free block.
+    int counter = 0;
+    while (counter < TOTAL_DISK_BLOCKS && (device.isBlockFree(counter)))
+    {
+      counter++;
+    }
+
+    // If we've come to the end return -1 or return the location of the
+    // newly allocated block.
+    if (counter == TOTAL_DISK_BLOCKS)
+    {
+      return -1;
+    }
+    else
+    {
+      device.allocateBlock(counter);
+      return counter + DISK_BLOCK_OFFSET;
+    }
+  }
+
+  /**
+   * Gets the number of the first entry for the file. Note, the filename
+   * should include the mountpoint as well.
+   *
+   * @param filename the file name inclusive of a mount point.
+   * @return the location of the file in the table entry.
+   */
+  private int getDirectoryPosition(String mvFilename)
+  {
+    String mountPoint;
+    Integer tmpId;
+    int deviceNumber;
+
+    // Determin the device and get a pointer to it's data.
+    mountPoint = getMountPoint(mvFilename);
+    tmpId = (Integer) mountTable.get(mountPoint);
+    if (tmpId == null)
+    {
+      return -1;
+    }
+
+    deviceNumber = tmpId.intValue();
+    CPM14DeviceTableEntry device =
+        (CPM14DeviceTableEntry) deviceTable.getItem(deviceNumber);
+
+    // Convert the filename to a byte[] for the search.
+    byte[] mvByteFilename = convertFilename(mvFilename);
+    int counter = 0;
+    int mvIndex = 0;
+    int mvOffset;
+
+    boolean mvFound = false;
+
+    while ((counter < TOTAL_DIR_ENTRIES) && (!mvFound))
+    {
+      mvIndex = 0;
+      mvOffset = (counter * DIR_ENTRY_SIZE) + CPM14TableOffset.FILENAME;
+      while ((mvIndex < 11) &&
+        (mvByteFilename[mvIndex] == device.getByteInEntry(mvOffset + mvIndex)))
+      {
+        mvIndex++;
+      }
+      mvFound = (mvIndex == 11);
+      if (mvFound)
+      {
+        mvFound = (device.getByteInEntry(mvOffset -
+          CPM14TableOffset.FILENAME + CPM14TableOffset.EXTENT) == 0);
+      }
+      counter++;
+    }
+
+    // Check sucess and return a value.
+    if (mvFound)
+    {
+      counter--;
+      // Counter is incremented in the loop to save cycles with
+      // an if or an else.
+      return counter;
+    }
+    else
+    {
+      return -1;
+    }
+
+  }
+
+  /**
+   * Returns the next directory entry for the dirent on the specified device
+   *
+   * @param mvDirent Description of Parameter
+   * @param deviceNumber Description of Parameter
+   * @return The NextDirectoryEntry value
+   */
+  private int getNextDirectoryEntry(int mvDirent, int deviceNumber)
+  {
+    CPM14DeviceTableEntry device =
+        (CPM14DeviceTableEntry) deviceTable.getItem(deviceNumber);
+
+    int mvCurrentOffset = mvDirent * DIR_ENTRY_SIZE;
+
+    // First check if this entry is totally used. If so, look for next,
+    // otherwise exit.
+    if ((SVB2I & device.getByteInEntry(mvCurrentOffset +
+        CPM14TableOffset.RECORDS)) != 0x80)
+    {
+      return -1;
+    }
+
+    // Get the filename to a byte[] for the search.
+    byte[] mvByteFilename = new byte[11];
+
+    byte mvCurrentExtent = device.getByteInEntry(mvCurrentOffset +
+        CPM14TableOffset.EXTENT);
+
+    for (int counter = 0; counter < 11; counter++)
+    {
+      mvByteFilename[counter] = device.getByteInEntry(
+        mvCurrentOffset + CPM14TableOffset.FILENAME + counter);
+    }
+
+    // Search
+    int counter = 0;
+    int mvIndex = 0;
+    int mvOffset;
+    boolean mvFound = false;
+
+    while ((counter < TOTAL_DIR_ENTRIES) && (!mvFound))
+    {
+      mvIndex = 0;
+      mvOffset = (counter * DIR_ENTRY_SIZE) + CPM14TableOffset.FILENAME;
+      while ((mvIndex < 11) &&
+        (mvByteFilename[mvIndex] == device.getByteInEntry(
+        mvOffset + mvIndex)))
+      {
+        mvIndex++;
+      }
+      mvFound = (mvIndex == 11);
+      if (mvFound)
+      {
+        mvFound = (device.getByteInEntry(mvOffset - CPM14TableOffset.FILENAME +
+           CPM14TableOffset.EXTENT) == mvCurrentExtent + 1);
+      }
+      counter++;
+    }
+
+    // Check sucess and return a value.
+    if (mvFound)
+    {
+      counter--;
+      // Counter is incremented in the loop to save cycles with
+      // an if or an else.
+      return counter;
+    }
+    else
+    {
+      return -1;
+    }
   }
 }
