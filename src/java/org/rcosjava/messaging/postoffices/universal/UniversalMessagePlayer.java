@@ -8,6 +8,8 @@ import org.rcosjava.messaging.postoffices.os.OSOffice;
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.pll2.FileClient;
 
+import java.util.*;
+
 /**
  * This deserializes the messages recorded in order that they were saved.
  * <P>
@@ -109,6 +111,13 @@ public class UniversalMessagePlayer extends OSMessageHandler
   public void setRecordingName(String newRecordingName)
   {
     recordingName = newRecordingName;
+
+    // Playback first message.  Assume first message is list of RCOS components.
+    ArrayList components = (ArrayList) readMessage();
+    for (int i = 0; i < components.size(); i++)
+    {
+      System.err.println("Got: " + components.get(0));
+    }
   }
 
   /**
