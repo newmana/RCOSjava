@@ -32,6 +32,8 @@ public class OSOffice extends PostOffice
    */
   private FIFOQueue postOfficeMessages = new FIFOQueue(5,1);
 
+  private Vector myPostOffices = postOffices;
+
   /**
    * To be done
    *
@@ -184,10 +186,10 @@ public class OSOffice extends PostOffice
             MessageAdapter message = (MessageAdapter)
               OSOffice.this.postOfficeMessages.retrieveCurrent();
 
-            if (!postOffices.isEmpty())
+            if (!myPostOffices.isEmpty())
             {
               int count;
-              for (count = 0; count < postOffices.size(); count++)
+              for (count = 0; count < myPostOffices.size(); count++)
               {
                 tmpPostOffice = getPostOffice(count);
                 if (message.forPostOffice(tmpPostOffice))

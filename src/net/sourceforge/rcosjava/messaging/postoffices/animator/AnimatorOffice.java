@@ -44,6 +44,8 @@ public class AnimatorOffice extends PostOffice
    */
   private FIFOQueue postOfficeMessages = new FIFOQueue(5,1);
 
+  private Vector myPostOffices = postOffices;
+
   /**
    * Attach animator to another post office.
    *
@@ -153,10 +155,10 @@ public class AnimatorOffice extends PostOffice
             MessageAdapter message = (MessageAdapter)
               AnimatorOffice.this.postOfficeMessages.retrieveCurrent();
 
-            if (!postOffices.isEmpty())
+            if (!myPostOffices.isEmpty())
             {
               int count;
-              for (count = 0; count < postOffices.size(); count++)
+              for (count = 0; count < myPostOffices.size(); count++)
               {
                 tmpPostOffice = getPostOffice(count);
                 if (message.forPostOffice(tmpPostOffice))
