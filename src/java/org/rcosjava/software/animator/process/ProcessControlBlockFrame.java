@@ -34,6 +34,32 @@ import org.rcosjava.software.process.RCOSProcess;
  */
 public class ProcessControlBlockFrame extends RCOSFrame
 {
+  private DefaultMutableTreeNode idNode;
+  private DefaultMutableTreeNode priorityNode;
+  private DefaultMutableTreeNode stateNode;
+  private DefaultMutableTreeNode fileNameNode;
+  private DefaultMutableTreeNode fileSizeNode;
+  private DefaultMutableTreeNode terminalIdNode;
+  private DefaultMutableTreeNode codePagesNode;
+  private DefaultMutableTreeNode stackPagesNode;
+  private DefaultMutableTreeNode cpuTicksNode;
+  private DefaultMutableTreeNode pcNode;
+  private DefaultMutableTreeNode spNode;
+  private DefaultMutableTreeNode bpNode;
+
+  private static final String ID = "ID: ";
+  private static final String PRIORITY = "Priority: ";
+  private static final String STATE = "State: ";
+  private static final String FILE_NAME = "Filename: ";
+  private static final String FILE_SIZE = "File Size: ";
+  private static final String TERMINAL_ID = "Terminal ID: ";
+  private static final String CODE_PAGES = "Code Pages: ";
+  private static final String STACK_PAGES = "Stack Pages: ";
+  private static final String CPU_TICKS = "CPU Ticks: ";
+  private static final String PROGRAM_COUNTER = "Program Counter: ";
+  private static final String STACK_POINTER = "Stack Pointer: ";
+  private static final String BASE_POINTER = "Base Pointer: ";
+
   /**
    * Constructor for the ProcessManagerFrame object
    *
@@ -67,46 +93,46 @@ public class ProcessControlBlockFrame extends RCOSFrame
     details = new DefaultMutableTreeNode("Details");
     top.add(details);
 
-    node = new DefaultMutableTreeNode("ID: 1");
-    details.add(node);
-    node = new DefaultMutableTreeNode("Priority: 50");
-    details.add(node);
-    node = new DefaultMutableTreeNode("State: Running");
-    details.add(node);
+    idNode = new DefaultMutableTreeNode(ID);
+    details.add(idNode);
+    priorityNode = new DefaultMutableTreeNode(PRIORITY);
+    details.add(priorityNode);
+    stateNode = new DefaultMutableTreeNode(STATE);
+    details.add(stateNode);
 
     details = new DefaultMutableTreeNode("I/O");
     top.add(details);
 
-    node = new DefaultMutableTreeNode("Filename: numbers.pcd");
-    details.add(node);
-    node = new DefaultMutableTreeNode("File size: 123");
-    details.add(node);
-    node = new DefaultMutableTreeNode("Terminal ID: 1");
-    details.add(node);
+    fileNameNode = new DefaultMutableTreeNode(FILE_NAME);
+    details.add(fileNameNode);
+    fileSizeNode = new DefaultMutableTreeNode(FILE_SIZE);
+    details.add(fileSizeNode);
+    terminalIdNode = new DefaultMutableTreeNode(TERMINAL_ID);
+    details.add(terminalIdNode);
 
     details = new DefaultMutableTreeNode("Memory");
     top.add(details);
 
-    node = new DefaultMutableTreeNode("Code Pages: 1");
-    details.add(node);
-    node = new DefaultMutableTreeNode("Stack Pages: 1");
-    details.add(node);
+    codePagesNode = new DefaultMutableTreeNode(CODE_PAGES);
+    details.add(codePagesNode);
+    stackPagesNode = new DefaultMutableTreeNode(STACK_PAGES);
+    details.add(stackPagesNode);
 
     details = new DefaultMutableTreeNode("Accounting");
     top.add(details);
 
-    node = new DefaultMutableTreeNode("CPU Ticks: 333");
-    details.add(node);
+    cpuTicksNode = new DefaultMutableTreeNode(CPU_TICKS);
+    details.add(cpuTicksNode);
 
     details = new DefaultMutableTreeNode("Context");
     top.add(details);
 
-    node = new DefaultMutableTreeNode("Program Counter: 2");
-    details.add(node);
-    node = new DefaultMutableTreeNode("Stack Pointer: 13");
-    details.add(node);
-    node = new DefaultMutableTreeNode("Base Pointer: 1");
-    details.add(node);
+    pcNode = new DefaultMutableTreeNode(PROGRAM_COUNTER);
+    details.add(pcNode);
+    spNode = new DefaultMutableTreeNode(STACK_POINTER);
+    details.add(spNode);
+    bpNode = new DefaultMutableTreeNode(BASE_POINTER);
+    details.add(bpNode);
 
     //Create a tree that allows one selection at a time.
     DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
@@ -170,7 +196,27 @@ public class ProcessControlBlockFrame extends RCOSFrame
    */
   public void updateDisplay(RCOSProcess newProcess)
   {
+    idNode.setUserObject(ID + newProcess.getPID());
+    priorityNode.setUserObject(PRIORITY + newProcess.getPriority().toString());
+    stateNode.setUserObject(STATE + newProcess.getState());
 
+    fileNameNode.setUserObject(FILE_NAME + newProcess.getFileName());
+    fileSizeNode.setUserObject(FILE_SIZE + newProcess.getFileSize());
+    terminalIdNode.setUserObject(TERMINAL_ID + newProcess.getTerminalId());
+
+    codePagesNode.setUserObject(CODE_PAGES + newProcess.getCodePages());
+    stackPagesNode.setUserObject(STACK_PAGES + newProcess.getStackPages());
+
+    cpuTicksNode.setUserObject(CPU_TICKS + newProcess.getCPUTicks());
+
+    pcNode.setUserObject(PROGRAM_COUNTER +
+        newProcess.getContext().getProgramCounter());
+    spNode.setUserObject(STACK_POINTER +
+        newProcess.getContext().getStackPointer());
+    bpNode.setUserObject(BASE_POINTER +
+        newProcess.getContext().getBasePointer());
+
+    repaint();
   }
 
   /**
