@@ -120,6 +120,11 @@ public class Kernel extends OSMessageHandler
   private boolean runningProcess;
 
   /**
+   * Step execution.
+   */
+  private boolean stepExecution = false;
+
+  /**
    * Initialise Kernel
    *
    * @param postOffice central post office for messaging system
@@ -261,15 +266,21 @@ public class Kernel extends OSMessageHandler
   }
 
   /**
-   * Description of the Method
+   * Execute one step in the process.
    */
-  public void processStep()
+  public void step()
   {
-    if (myCPU.hasCodeToExecute())
-    {
-      myCPU.executeCode();
-      myCPU.checkProcess();
-    }
+    stepExecution = true;
+  }
+
+  /**
+   * Whether the CPU/Kernel is paused.
+   *
+   * @return whether the CPU/Kernel is paused.
+   */
+  public boolean isPaused()
+  {
+    return myCPU.isPaused();
   }
 
   /**
@@ -316,25 +327,29 @@ public class Kernel extends OSMessageHandler
    */
   public void performInstructionExecutionCycle()
   {
-    if (!myCPU.isPaused())
+    if ((!myCPU.isPaused()) || (stepExecution))
     {
       sendMessage(scheduleMessage);
-      myCPU.performInstructionExecutionCycle();
+      myCPU.performInstructionExecutionCycle(stepExecution);
     }
 
     postOffice.deliverMessages();
 
     //Sends context and current instruction.
-    if (!myCPU.isPaused() && runningProcess())
+    if ((!myCPU.isPaused() && runningProcess()) ||
+        (stepExecution && runningProcess))
     {
       SetContext contextMsg = new SetContext(this, myCPU.getContext());
-
       sendMessage(contextMsg);
 
       InstructionExecution executionMsg = new InstructionExecution(this,
           myCPU.getProcessStack());
-
       sendMessage(executionMsg);
+    }
+
+    if (stepExecution)
+    {
+      stepExecution = false;
     }
   }
 
@@ -356,7 +371,6 @@ public class Kernel extends OSMessageHandler
         MemoryManager.CODE_SEGMENT, newProcess.getCodePages() *
         MemoryManager.PAGE_SIZE);
     ReadBytes msg = new ReadBytes(this, memRead);
-
     sendMessage(msg);
 
     memRead = new MemoryRequest(newProcess.getPID(),
@@ -713,23 +727,19 @@ public class Kernel extends OSMessageHandler
         //Assume that the stack is the only thing worth writing back that the
         //programs cannot modify their own memory?
         MemoryRequest memSave = new MemoryRequest(getCurrentProcess().getPID(),
-            MemoryManager.STACK_SEGMENT, myCPU.getProcessStack().getSegmentSize(),
-            myCPU.getProcessStack());
+            MemoryManager.STACK_SEGMENT,
+            myCPU.getProcessStack().getSegmentSize(), myCPU.getProcessStack());
         WriteBytes msg = new WriteBytes(this, memSave);
-
         sendMessage(msg);
 
         //Set the current process to nothing
         NullProcess nullMsg = new NullProcess(this);
-
         sendMessage(nullMsg);
 
         // no need to get a copy of the code as it won't change
         // Send a message to the ProcessScheduler to update old current
         // processes data structures
-        RunningToReady tmpMsg = new RunningToReady(this,
-            oldProcess);
-
+        RunningToReady tmpMsg = new RunningToReady(this, oldProcess);
         sendMessage(tmpMsg);
       }
     }
