@@ -103,17 +103,25 @@ public abstract class SimpleMessageHandler
    * @param handlerToGet the unique identifier of the registered object.
    * @return the message handler object related to the name given.
    */
-  public synchronized MessageHandler getHandler(String handlerToGet)
+  public MessageHandler getHandler(String handlerToGet)
   {
-    return ((MessageHandler) registeredHandlers.get(handlerToGet));
+    synchronized (registeredHandlers)
+    {
+      return ((MessageHandler) registeredHandlers.get(handlerToGet));
+    }
   }
 
   /**
-   * @return a copy of all the tree handlers.
+   * Returns a copy of the current collection of preregistered handlers.
+   *
+   * @return the handlers.
    */
-  public synchronized TreeMap getHandlers()
+  public TreeMap getHandlers()
   {
-    return ((TreeMap) registeredHandlers.clone());
+    synchronized (registeredHandlers)
+    {
+      return (TreeMap) registeredHandlers.clone();
+    }
   }
 
   /**
@@ -123,7 +131,10 @@ public abstract class SimpleMessageHandler
    */
   public synchronized Iterator getKeysHandlers()
   {
-    return registeredHandlers.keySet().iterator();
+    synchronized (registeredHandlers)
+    {
+      return registeredHandlers.keySet().iterator();
+    }
   }
 
   /**
@@ -157,9 +168,12 @@ public abstract class SimpleMessageHandler
    * @param newId name of the message handler.
    * @param newHandler the message handler to add.
    */
-  public synchronized void addHandler(String newId, MessageHandler newHandler)
+  public void addHandler(String newId, MessageHandler newHandler)
   {
-    registeredHandlers.put(newId, newHandler);
+    synchronized (registeredHandlers)
+    {
+      registeredHandlers.put(newId, newHandler);
+    }
   }
 
   /**
@@ -169,17 +183,23 @@ public abstract class SimpleMessageHandler
    *
    * @param oldId The id of the handler to remove.
    */
-  public synchronized void removeHandler(String oldId)
+  public void removeHandler(String oldId)
   {
-    registeredHandlers.remove(oldId);
+    synchronized (registeredHandlers)
+    {
+      registeredHandlers.remove(oldId);
+    }
   }
 
   /**
    * This is remove all handlers registered with the class.
    */
-  public synchronized void clearHandlers()
+  public void clearHandlers()
   {
-    registeredHandlers.clear();
+    synchronized (registeredHandlers)
+    {
+      registeredHandlers.clear();
+    }
   }
 
   /**
