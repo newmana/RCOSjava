@@ -25,6 +25,7 @@ public class StatementCompiler extends DepthFirstAdapter
   private Stack statementPosition;
   private boolean inAFunction = false;
   private short numberOfVariables = 3;
+  private Symbol currentSymbol;
 
   public StatementCompiler()
   {
@@ -73,10 +74,10 @@ public class StatementCompiler extends DepthFirstAdapter
     PValue expression2 = expr.getRight();
 
     // With the left hand load the variable or literal
-    handleIdentifierLoad(expression1);
+    handlePValueLoad(expression1);
 
     // With the right hand load the variable or literal
-    handleIdentifierLoad(expression2);
+    handlePValueLoad(expression2);
 
     expr.apply(this);
     short startPosition = Compiler.getInstructionIndex();
@@ -112,10 +113,10 @@ public class StatementCompiler extends DepthFirstAdapter
     PValue expression2 = expr.getRight();
 
     // With the left hand load the variable or literal
-    handleIdentifierLoad(expression1);
+    handlePValueLoad(expression1);
 
     // With the right hand load the variable or literal
-    handleIdentifierLoad(expression2);
+    handlePValueLoad(expression2);
 
     expr.apply(this);
     short startPosition = Compiler.getInstructionIndex();
@@ -177,9 +178,8 @@ public class StatementCompiler extends DepthFirstAdapter
    */
   public void caseAPrintf1RcosStatement(APrintf1RcosStatement node)
   {
-    String stringValue = node.getStringLitteral().getText();
-    //String name = variableCompiler.allocateVariable(1, stringValue.length());
-    handleLiteralLoad(stringValue);
+    currentSymbol = new Variable("const", (short) 0, (short) 0);
+    handleLiteralLoad(node.getStringLitteral());
 
     writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
       (byte) 0, SystemCall.STRING_OUT.getValue()));
@@ -216,10 +216,9 @@ public class StatementCompiler extends DepthFirstAdapter
    */
   public void caseASimpleUnaryExpression(ASimpleUnaryExpression node)
   {
-    String varValue = node.getSimpleExpression().toString().trim();
     if (node.getSimpleExpression() instanceof AConstantSimpleExpression)
     {
-      handleLiteralLoad(varValue);
+      handleLiteralLoad((AConstantSimpleExpression) node.getSimpleExpression());
     }
     else if (node.getSimpleExpression() instanceof AVarnameSimpleExpression)
     {
@@ -233,8 +232,8 @@ public class StatementCompiler extends DepthFirstAdapter
    */
   public void caseAIdentifierBinaryExpression(AIdentifierBinaryExpression node)
   {
-    handleIdentifierLoad(node.getValue());
-    handleIdentifierLoad(node.getIdentifier().toString().trim());
+    handlePValueLoad(node.getValue());
+    handleIdentifierLoad(node.getIdentifier());
     node.getBinop().apply(this);
   }
 
@@ -243,16 +242,8 @@ public class StatementCompiler extends DepthFirstAdapter
    */
   public void caseAConstantBinaryExpression(AConstantBinaryExpression node)
   {
-    handleLiteralLoad(node.getConstant().toString().trim());
-
-    if (node.getValue() instanceof AIdentifierValue)
-    {
-      handleIdentifierLoad(node.getValue().toString().trim());
-    }
-    else if (node.getValue() instanceof AConstantValue)
-    {
-      handleLiteralLoad(node.getValue().toString().trim());
-    }
+    handleLiteralLoad(node.getConstant());
+    handlePValueLoad(node.getValue());
     node.getBinop().apply(this);
   }
 
@@ -279,33 +270,12 @@ public class StatementCompiler extends DepthFirstAdapter
     try
     {
       String varName = node.getVarname().toString().trim();
-      Symbol newVar = table.getSymbol(varName, Compiler.getLevel());
+      currentSymbol = table.getSymbol(varName, Compiler.getLevel());
 
       PRhs rhs = node.getRhs();
       rhs.apply(this);
 
-      OpCode storeOpCode = null;
-      if (newVar instanceof Variable)
-      {
-        storeOpCode = OpCode.STORE;
-      }
-      else if (newVar instanceof Array)
-      {
-        storeOpCode = OpCode.STORE_INDEXED;
-      }
-
-      // Store variable at the variables location
-      if (Compiler.getLevel() == newVar.getLevel())
-      {
-          writePCode(new Instruction(storeOpCode.getValue(), (byte) 0,
-            newVar.getOffset()));
-      }
-      else
-      {
-        writePCode(new Instruction(storeOpCode.getValue(),
-          (byte) newVar.getLevel(),
-          newVar.getOffset()));
-      }
+      currentSymbol.handleStore(this);
     }
     catch (Exception e)
     {
@@ -484,7 +454,10 @@ public class StatementCompiler extends DepthFirstAdapter
     Compiler.incInstructionIndex();
   }
 
-  private void handleIdentifierLoad(PValue expression)
+  /**
+   * A PValue is unknown to be either a identifier or a literal value.
+   */
+  private void handlePValueLoad(PValue expression)
   {
     if (expression instanceof AIdentifierValue)
     {
@@ -492,46 +465,31 @@ public class StatementCompiler extends DepthFirstAdapter
     }
     else if (expression instanceof AConstantValue)
     {
-      handleIdentifierLoad((AConstantValue) expression);
+      handleLiteralLoad((AConstantValue) expression);
     }
   }
 
   private void handleIdentifierLoad(PVarname identifier)
   {
-    handleIdentifierLoad(identifier.toString().trim());
+    handleIdentifierLoading(identifier.toString().trim());
   }
 
   private void handleIdentifierLoad(AIdentifierValue identifier)
   {
-    handleIdentifierLoad(identifier.toString().trim());
+    handleIdentifierLoading(identifier.toString().trim());
   }
 
-  private void handleIdentifierLoad(String identifierName)
+  private void handleIdentifierLoad(TIdentifier identifier)
+  {
+    handleIdentifierLoading(identifier.toString().trim());
+  }
+
+  private void handleIdentifierLoading(String identifierName)
   {
     try
     {
-      Symbol newVar = table.getSymbol(identifierName, Compiler.getLevel());
-
-      OpCode loadOpCode = null;
-      if (newVar instanceof Variable)
-      {
-        loadOpCode = OpCode.LOAD;
-      }
-      else if (newVar instanceof Array)
-      {
-        loadOpCode = OpCode.LOAD_INDEXED;
-      }
-
-      if (Compiler.getLevel() == newVar.getLevel())
-      {
-        writePCode(new Instruction(loadOpCode.getValue(), (byte) 0,
-          newVar.getOffset()));
-      }
-      else
-      {
-        writePCode(new Instruction(loadOpCode.getValue(),
-          (byte) newVar.getLevel(), newVar.getOffset()));
-      }
+      currentSymbol = table.getSymbol(identifierName, Compiler.getLevel());
+      currentSymbol.handleLoad(this);
     }
     catch (Exception e)
     {
@@ -539,74 +497,50 @@ public class StatementCompiler extends DepthFirstAdapter
     }
   }
 
-  private void handleIdentifierLoad(AConstantValue constant)
+  private void handleLiteralLoad(PConstant constant)
   {
-    handleLiteralLoad(constant.toString());
+    handleLiteralLoading(constant.toString().trim());
   }
 
-  private void handleLiteralLoad(String varValue)
+  private void handleLiteralLoad(AConstantValue constant)
+  {
+    handleLiteralLoading(constant.toString().trim());
+  }
+
+  private void handleLiteralLoad(AConstantSimpleExpression literal)
+  {
+    handleLiteralLoading(literal.toString().trim());
+  }
+
+  private void handleLiteralLoad(TStringLitteral literal)
+  {
+    handleLiteralLoading(literal.toString().trim());
+  }
+
+  private void handleLiteralLoading(String varValue)
   {
     short length = 0;
 
     // Do char storage
     if (varValue.indexOf("'") >= 0)
     {
-      writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-        (short) varValue.charAt(1)));
+      currentSymbol.handleCharLiteral(this, varValue);
     }
     // Do string storage
     else if ((varValue.indexOf("\"") >= 0))
     {
-      int varStrLength = varValue.length()-1;
-      //emit each element in the string
-      int count = 1;
-      while(count < varStrLength)
-      {
-        // Check if it's a \n otherwise ignore
-        if ((varValue.charAt(count) == '\\') &&
-            (varValue.charAt(count + 1) == 'n'))
-        {
-          writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-            (short) 13));
-          writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-            (short) 10));
-          count = count + 2;
-        }
-        else
-        {
-          writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-            (short) varValue.charAt(count)));
-          count++;
-        }
-      }
-      //emit store a required pos
-      writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-        (short) (count-1)));
+      currentSymbol.handleStringLiteral(this, varValue);
     }
     // Do int storage
     else
     {
-      short varIntValue = Short.parseShort(varValue.trim());
-      writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-        varIntValue));
+      currentSymbol.handleIntLiteral(this, varValue);
     }
   }
 
   private void printOut(PPrintfControlStrings control, PValue value)
   {
-    System.out.println("Value: " + value);
-    System.out.println("Value: " + value.getClass());
-    System.out.println("Control: " + control);
-    System.out.println("Control: " + control.getClass());
-
-    if (value instanceof AConstantValue)
-    {
-      handleLiteralLoad(value.toString().trim());
-    }
-    else if (value instanceof AIdentifierValue)
-    {
-      handleIdentifierLoad(value.toString().trim());
-    }
+    handlePValueLoad(value);
 
     if (control instanceof AIntControlPrintfControlStrings)
     {

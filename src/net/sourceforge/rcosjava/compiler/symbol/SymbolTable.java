@@ -169,6 +169,11 @@ public class SymbolTable
     return symbol;
   }
 
+  /**
+   * Returns the total variable size (in bytes).
+   *
+   * @return the total variable size (in bytes).
+   */
   public short getVariableSize()
   {
     return size;

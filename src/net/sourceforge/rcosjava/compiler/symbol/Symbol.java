@@ -1,6 +1,8 @@
 package net.sourceforge.rcosjava.compiler.symbol;
 
 import net.sourceforge.rcosjava.hardware.cpu.*;
+import net.sourceforge.rcosjava.compiler.Compiler;
+import net.sourceforge.rcosjava.compiler.StatementCompiler;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -87,5 +89,54 @@ public abstract class Symbol
   public short getSize()
   {
     return size;
+  }
+
+  /**
+   * Handle a store instruction (STO or STOX) for this symbol.
+   *
+   * @param compile the compiler calling this function.
+   */
+  public void handleStore(StatementCompiler compiler)
+  {
+  }
+
+  /**
+   * Handle a store instruction (LOD or LODX) for this symbol.
+   *
+   * @param compile the compiler calling this function.
+   */
+  public void handleLoad(StatementCompiler compiler)
+  {
+  }
+
+  /**
+   * Handle loading of the symbol as a char literal.
+   *
+   * @param compile the compiler calling this function.
+   * @param newVarValue the value to handle.
+   */
+  public void handleCharLiteral(StatementCompiler compiler, String newVarValue)
+  {
+  }
+
+  /**
+   * Handle loading of the symbol as a string literal.
+   *
+   * @param compile the compiler calling this function.
+   * @param newVarValue the value to handle.
+   */
+  public void handleStringLiteral(StatementCompiler compiler, String
+    newVarValue)
+  {
+  }
+
+  /**
+   * Handle loading of the symbol as a int literal.
+   *
+   * @param compile the compiler calling this function.
+   * @param newVarValue the value to handle.
+   */
+  public void handleIntLiteral(StatementCompiler compiler, String newVarValue)
+  {
   }
 }

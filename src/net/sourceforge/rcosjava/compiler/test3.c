@@ -37,7 +37,7 @@ void main()
 
   printf(%s, hello);
   printf("\n");
-  printf("char 'a' is: ");
+  printf("char a is: ");
   printf(%c, a);
   printf("\n");  
 }
