@@ -199,7 +199,7 @@ public class FileSystemTest extends TestCase
       if (newMessage.getType() == "org.rcosjava.messaging.messages.os.AddDiskRequest")
       {
         AddDiskRequest msg = (AddDiskRequest) newMessage;
-        int requestType = (((CPM14RequestTableEntry)) fs.getRequestTable().
+        int requestType = ((CPM14RequestTableEntry) fs.getRequestTable().
             getItem(msg.getDiskRequest().getRequestId())).getRequestType();
 
         if (requestType == CPM14RequestTableEntry.FLUSH)
