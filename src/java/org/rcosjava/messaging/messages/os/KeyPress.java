@@ -13,21 +13,14 @@ import org.rcosjava.software.terminal.SoftwareTerminal;
 public class KeyPress extends OSMessageAdapter
 {
   /**
-   * The generated interrupt.
-   */
-  private Interrupt interrupt;
-
-  /**
    * Constructor for the KeyPress object
    *
    * @param theSource Description of Parameter
    * @param newInterrupt Description of Parameter
    */
-  public KeyPress(OSMessageHandler theSource,
-      Interrupt newInterrupt)
+  public KeyPress(OSMessageHandler theSource)
   {
     super(theSource);
-    interrupt = newInterrupt;
   }
 
   /**
@@ -39,15 +32,4 @@ public class KeyPress extends OSMessageAdapter
   {
     theElement.keyPress();
   }
-
-  /**
-   * Sets the Interrupt attribute of the KeyPress object
-   *
-   * @param newInterrupt The new Interrupt value
-   */
-  private void setInterrupt(Interrupt newInterrupt)
-  {
-    interrupt = newInterrupt;
-  }
 }
-
