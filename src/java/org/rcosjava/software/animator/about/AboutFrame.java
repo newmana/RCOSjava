@@ -2,7 +2,7 @@ package org.rcosjava.software.animator.about;
 
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.ImageIcon;
+import javax.swing.*;
 import org.rcosjava.RCOS;
 import org.rcosjava.software.animator.RCOSFrame;
 import org.rcosjava.software.animator.support.GraphicButton;
@@ -154,7 +154,7 @@ public class AboutFrame extends RCOSFrame
     pMain.add(panel4);
 
     panelClose.setLayout(new FlowLayout(FlowLayout.RIGHT));
-    tmpButton = new Button("Close");
+    tmpButton = new JButton("Close");
     panelClose.add(tmpButton);
     tmpButton.addMouseListener(new RCOSFrame.CloseAnimator());
 

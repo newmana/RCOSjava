@@ -3,7 +3,7 @@ import java.applet.*;
 
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.ImageIcon;
+import javax.swing.*;
 import java.net.*;
 import java.util.*;
 import org.rcosjava.messaging.messages.Message;
@@ -40,7 +40,7 @@ public class MultimediaFrame extends RCOSFrame
   /**
    * Description of the Field
    */
-  private Button recordButton, stepButton;
+  private JButton recordButton, stepButton;
   /**
    * Description of the Field
    */
@@ -115,12 +115,12 @@ public class MultimediaFrame extends RCOSFrame
     dialogTextField.setForeground(defaultFgColour);
     dialogPanel.add(dialogTextField);
 
-    Button tmpOkayButton = new Button("Ok");
+    JButton tmpOkayButton = new JButton("Ok");
 
     tmpOkayButton.addMouseListener(new OkFileDialog());
     dialogPanel.add(tmpOkayButton);
 
-    Button tmpCancelButton = new Button("Cancel");
+    JButton tmpCancelButton = new JButton("Cancel");
 
     tmpCancelButton.addMouseListener(new CancelFileDialog());
     dialogPanel.add(tmpCancelButton);
@@ -169,17 +169,17 @@ public class MultimediaFrame extends RCOSFrame
     mainPanel.add(fileNameTextField);
     fileNameTextField.setEditable(false);
 
-    stepButton = new Button("Step");
+    stepButton = new JButton("Step");
     closePanel.add(stepButton);
     stepButton.addMouseListener(new StepListener());
     stepButton.setEnabled(false);
 
-    recordButton = new Button("Record");
+    recordButton = new JButton("Record");
     closePanel.add(recordButton);
     recordButton.addMouseListener(new RecordToggle());
 
     closePanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-    tmpButton = new Button("Close");
+    tmpButton = new JButton("Close");
     closePanel.add(tmpButton);
     tmpButton.addMouseListener(new CloseAnimator());
 

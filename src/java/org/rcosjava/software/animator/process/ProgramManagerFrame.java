@@ -3,7 +3,7 @@ import java.applet.*;
 
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.ImageIcon;
+import javax.swing.*;
 import java.net.*;
 import java.util.*;
 import org.rcosjava.software.animator.RCOSFrame;
@@ -182,7 +182,7 @@ public class ProgramManagerFrame extends RCOSFrame
     gridBag.setConstraints(terminOptionPanel, constraints);
     mainPanel.add(terminOptionPanel);
 
-    Button tmpOpenAWTButton = new Button("Open");
+    JButton tmpOpenAWTButton = new JButton("Open");
 
     buttonPanel.add(tmpOpenAWTButton);
     buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));

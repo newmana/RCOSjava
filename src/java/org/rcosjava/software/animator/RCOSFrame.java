@@ -3,19 +3,20 @@ package org.rcosjava.software.animator;
 import fr.dyade.koala.serialization.GeneratorInputStream;
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.JButton;
 import java.io.*;
 
 import java.lang.reflect.Method;
 
 /**
  * Root class used for all animator frames. Also contains default values for the
- * colours and fonts used in all the UI. 
+ * colours and fonts used in all the UI.
  * <P>
  * <DT> <B>History:</B>
  * <DD> 20/11/1998 New Version Created.<BR>
  * </DD>
  * <DD> 25/02/2001 Added serialization support.<BR>
- * </DD> </DT> 
+ * </DD> </DT>
  * <P>
  * @author Andrew Newman
  * @created 22nd January 1996
@@ -85,7 +86,7 @@ public class RCOSFrame extends Frame implements Serializable
   /**
    * Description of the Field
    */
-  protected Button tmpButton;
+  protected JButton tmpButton;
   /**
    * Description of the Field
    */

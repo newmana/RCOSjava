@@ -2,6 +2,7 @@ package org.rcosjava.software.animator.terminal;
 
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.*;
 import javax.swing.ImageIcon;
 import org.rcosjava.software.animator.RCOSFrame;
 import org.rcosjava.software.animator.support.GraphicButton;
@@ -168,7 +169,7 @@ public class TerminalManagerFrame extends RCOSFrame
     }
 
     pClose.setLayout(new FlowLayout(FlowLayout.RIGHT));
-    tmpButton = new Button("Close");
+    tmpButton = new JButton("Close");
     pClose.add(tmpButton);
     tmpButton.addMouseListener(new RCOSFrame.CloseAnimator());
 

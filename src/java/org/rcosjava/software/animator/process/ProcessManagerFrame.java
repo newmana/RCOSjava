@@ -3,7 +3,7 @@ import java.applet.*;
 
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.ImageIcon;
+import javax.swing.*;
 import java.net.*;
 import java.util.*;
 import org.rcosjava.messaging.messages.Message;
@@ -107,12 +107,12 @@ public class ProcessManagerFrame extends RCOSFrame
     priorityTextField.setForeground(defaultFgColour);
     dialogPanel.add(priorityTextField);
 
-    Button tmpOkayButton = new Button("Ok");
+    JButton tmpOkayButton = new JButton("Ok");
 
     tmpOkayButton.addMouseListener(new OkPriorityDialog());
     dialogPanel.add(tmpOkayButton);
 
-    Button tmpCancelButton = new Button("Cancel");
+    JButton tmpCancelButton = new JButton("Cancel");
 
     tmpCancelButton.addMouseListener(new CancelPriorityDialog());
     dialogPanel.add(tmpCancelButton);
@@ -187,7 +187,7 @@ public class ProcessManagerFrame extends RCOSFrame
     tmpGButton.addMouseListener(new RunProcess());
 
     closePanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-    tmpButton = new Button("Close");
+    tmpButton = new JButton("Close");
     closePanel.add(tmpButton);
     tmpButton.addMouseListener(new CloseAnimator());
 

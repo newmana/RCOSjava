@@ -3,7 +3,7 @@ package org.rcosjava.software.animator.process;
 import java.applet.*;
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.ImageIcon;
+import javax.swing.*;
 import java.net.*;
 import java.util.*;
 import org.rcosjava.software.animator.RCOSFrame;
@@ -320,7 +320,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
     westPanel.add(box);
 
     closePanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-    tmpButton = new Button("Close");
+    tmpButton = new JButton("Close");
     closePanel.add(tmpButton);
     tmpButton.addMouseListener(new RCOSFrame.CloseAnimator());
 
