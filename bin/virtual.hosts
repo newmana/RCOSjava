@@ -4,5 +4,5 @@
 
 
 # If nothing else, fill this in with a a valid path!
-localhost=/source/test/dist
+localhost=../dist
 
