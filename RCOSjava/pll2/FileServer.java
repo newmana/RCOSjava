@@ -7,8 +7,9 @@ import java.net.*;
  * Provide a network server to enable remote clients to access.  Disk
  * resources on the machine the server is running on.
  * <P>
- * HISTORY: 12/01/97 Moved to Disk package and bugs fixed. AN<BR>
- *          01/01/98 Removed sun.net.*.  Rewritten for JDK 1.1. AN<BR>
+ * HISTORY: 12/01/1997 Moved to Disk package and bugs fixed. AN<BR>
+ *          01/01/1998 Removed sun.net.*.  Rewritten for JDK 1.1. AN<BR>
+ *          11/03/2001 Fixed write problems with sync mehotd. AN<BR>
  * <P>
  * @author Andrew Newman.
  * @author Brett Carter.
@@ -17,20 +18,58 @@ import java.net.*;
  */
 public class FileServer
 {
+  /**
+   * The location of the root file system of all executable (PLL) code.
+   */
   private static String executableRoot;
+
+  /**
+   * The location of the root file system of all the recorded (XML) files.
+   */
   private static String recorderRoot;
+
+  /**
+   * The port on which to listen on.
+   */
   private static int serverPortNumber;
+
+  /**
+   * Server socket to listen on.
+   */
   private ServerSocket fileServerSocket;
+
+  /**
+   * Socket to respond to all requests with.
+   */
   private Socket fileServerConnection;
+
+  /**
+   * The input stream of all incoming files.
+   */
   private DataInputStream inputStream;
+
+  /**
+   * The output stream of all files to be written.
+   */
   private DataOutputStream outputStream;
+
+  /**
+   * Contains a list of all the message to be used between client and server.
+   */
   private FileMessages fileMessage;
 
+  /**
+   * Default constructor simply calls serviceRequests().
+   */
   public FileServer()
   {
     serviceRequests();
   }
 
+  /**
+   * Checks to see that the arguments are correct and then calls new
+   * FileServer().
+   */
   public static void main(String args[])
   {
     if (args.length != 3)
@@ -56,7 +95,9 @@ public class FileServer
     new FileServer();
   }
 
-  // Handle a single connection from a client.
+  /**
+   * Handles a single connection from a client.
+   */
   private void serviceRequests()
   {
     // Start the server.
@@ -98,6 +139,9 @@ public class FileServer
     }
   }
 
+  /**
+   * Each message is handled individually.
+   */
   private boolean handleMessage()
     throws IOException
   {
@@ -120,7 +164,7 @@ public class FileServer
 
 //    System.out.println("Type: " + fileMessage.getLastMessageType());
 //    System.out.println("Size: " + fileMessage.getLastMessageSize());
-//    System.out.println("Date: " + fileMessage.getLastMessageData());
+//    System.out.println("Data: " + fileMessage.getLastMessageData());
 
     if (fileMessage.getLastMessageType()
       .equals(fileMessage.Q_DIRECTORY_LIST))
@@ -231,7 +275,7 @@ public class FileServer
   /**
    * Assumes that if the file exists it will append to the existing one.
    */
-  private void handleWriteFileRequest(String filename, String outputData)
+  private synchronized void handleWriteFileRequest(String filename, String outputData)
   {
     FileOutputStream outputFile;
     DataOutputStream outputStream;

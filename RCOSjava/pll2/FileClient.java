@@ -23,40 +23,41 @@ import fr.dyade.koala.xml.sax.*;
  */
 public class FileClient
 {
-  private Socket sktConnection;
-  private DataInputStream disInStream;
-  private DataOutputStream dosOutStream;
-  private FileMessages fmMessenger;
-  private String sHost;
-  private int iPort;
+  private Socket socketConnection;
+  private DataInputStream dataInStream;
+  private DataOutputStream dataOutStream;
+  private FileMessages messages;
+  private String host;
+  private int port;
 
-  public FileClient(String host, int port)
+  public FileClient(String newHost, int newPort)
   {
     // Connect to server.
     //System.err.print("Connecting to " + host + "...");
-    sHost = host;
-    iPort = port;
+    host = newHost;
+    port = newPort;
   }
 
-  public FileClient(URL host, int port)
+  public FileClient(URL newHost, int newPort)
   {
     // Connect to server.
     //System.err.print("Connecting to " + host + "...");
-    this(String.valueOf(host), port);
+    this(String.valueOf(newHost), newPort);
   }
 
   public boolean openConnection()
   {
     try
     {
-      sktConnection = new Socket(sHost, iPort);
-      disInStream = new DataInputStream(sktConnection.getInputStream());
-      dosOutStream = new DataOutputStream(sktConnection.getOutputStream());
-      fmMessenger = new FileMessages(disInStream, dosOutStream);
+      socketConnection = new Socket(host, port);
+      dataInStream = new DataInputStream(socketConnection.getInputStream());
+      dataOutStream = new DataOutputStream(socketConnection.getOutputStream());
+      messages = new FileMessages(dataInStream, dataOutStream);
       return true;
     }
     catch (IOException exception)
     {
+      exception.printStackTrace();
       return false;
     }
   }
@@ -95,14 +96,14 @@ public class FileClient
   {
     String[] sTheList = new String[0];
     //Ask for directory listing
-    if(fmMessenger.askDirectoryListing(iDirectory, sDirectory))
+    if(messages.askDirectoryListing(iDirectory, sDirectory))
     {
       //Read result
-      if (fmMessenger.readMessage())
+      if (messages.readMessage())
       {
-        String sData = fmMessenger.getLastMessageData();
-        int iMessageSize = fmMessenger.getLastMessageSize();
-        if (fmMessenger.getLastMessageType().equals(fmMessenger.A_DIRECTORY_LIST))
+        String sData = messages.getLastMessageData();
+        int iMessageSize = messages.getLastMessageSize();
+        if (messages.getLastMessageType().equals(messages.A_DIRECTORY_LIST))
         {
           sTheList = new String[iMessageSize];
           StringTokenizer stTokenizer = new StringTokenizer(sData, " ");
@@ -168,14 +169,14 @@ public class FileClient
   private String getFile(int iDirectory, String sFileName)
   {
     String mFileData = new String();
-    if(fmMessenger.askReadFileData(iDirectory, sFileName))
+    if(messages.askReadFileData(iDirectory, sFileName))
     {
       //Read result
-      if (fmMessenger.readMessage())
+      if (messages.readMessage())
       {
-        if (fmMessenger.getLastMessageType().equals(fmMessenger.A_READ_FILE_DATA))
+        if (messages.getLastMessageType().equals(messages.A_READ_FILE_DATA))
         {
-          mFileData = fmMessenger.getLastMessageData();
+          mFileData = messages.getLastMessageData();
         }
       }
     }
@@ -210,12 +211,12 @@ public class FileClient
       }
     }
     //2 for recorded area
-    if(fmMessenger.askWriteFileData(2, sFileName, tmpBuffer.toString()))
+    if(messages.askWriteFileData(2, sFileName, tmpBuffer.toString()))
     {
       //Read result
-      if (fmMessenger.readMessage())
+      if (messages.readMessage())
       {
-        if (fmMessenger.getLastMessageType().equals(fmMessenger.A_WRITE_FILE_DATA))
+        if (messages.getLastMessageType().equals(messages.A_WRITE_FILE_DATA))
         {
           return;
         }
@@ -240,16 +241,16 @@ public class FileClient
   private int statFile(int iDirectory, String sFileName)
   {
     int iMessageSize = 0;
-    if(fmMessenger.askFileStats(iDirectory, sFileName))
+    if(messages.askFileStats(iDirectory, sFileName))
     {
       //Read result
-      if (fmMessenger.readMessage())
+      if (messages.readMessage())
       {
-        if (fmMessenger.getLastMessageType().equals(fmMessenger.A_FILE_STATS))
+        if (messages.getLastMessageType().equals(messages.A_FILE_STATS))
         {
           try
           {
-            iMessageSize = Integer.parseInt(fmMessenger.getLastMessageData());
+            iMessageSize = Integer.parseInt(messages.getLastMessageData());
           }
           catch (NumberFormatException e)
           {
@@ -269,10 +270,10 @@ public class FileClient
   {
     try
     {
-      if (fmMessenger != null)
-        fmMessenger.askHangUp();
-      if (sktConnection != null)
-        sktConnection.close();
+      if (messages != null)
+        messages.askHangUp();
+      if (socketConnection != null)
+        socketConnection.close();
     }
     catch (IOException exception)
     {
