@@ -115,6 +115,7 @@ public class Pasm
 
       while (instructionLine != null)
       {
+        instructionLine = instructionLine.substring(7);
         Instruction theInstruction = new Instruction(instructionLine);
         System.out.write(theInstruction.toByte(),0,8);
         instructionLine = inputStream.readLine();
