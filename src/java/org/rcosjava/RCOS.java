@@ -39,6 +39,7 @@ import org.rcosjava.software.memory.MemoryManager;
 import org.rcosjava.software.process.ProcessScheduler;
 import org.rcosjava.software.process.ProgramManager;
 import org.rcosjava.software.terminal.TerminalManager;
+import org.rcosjava.software.filesystem.FileSystemManager;
 
 import org.apache.log4j.*;
 
@@ -240,6 +241,11 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   private static IPC theIPC;
 
   /**
+   * File System manager operating system object.
+   */
+  private static FileSystemManager theFileSystemManager;
+
+  /**
    * Main kernel thread.
    */
   private Thread kernelThread;
@@ -290,6 +296,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     pcmAnimator.setupLayout(this);
     memoryAnimator.setupLayout(this);
     ipcAnimator.setupLayout(this);
+    fsAnimator.setupLayout(this);
     cpuAnimator.setupLayout(this);
     pmAnimator.setupLayout(this);
     mmAnimator.setupLayout(this);
@@ -455,6 +462,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     theMemoryManager = new MemoryManager(osPostOffice);
     theProgramManager = new ProgramManager(osPostOffice, baseDomain, port,
         theKernel);
+    theFileSystemManager = new FileSystemManager(osPostOffice);
   }
 
   /**
@@ -480,6 +488,9 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 
     mmAnimator = new MultimediaAnimator(animatorPostOffice, 400, 300, recorder,
         player);
+
+    fsAnimator = new FileSystemAnimator(animatorPostOffice,
+        theFileSystemManager);
 
     aboutAnimator = new AboutAnimator(animatorPostOffice, 300, 300);
   }
@@ -559,7 +570,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     tabbedPane.add(memoryAnimator.getPanel(), "Memory");
     tabbedPane.add(ipcAnimator.getPanel(), "IPC");
     tabbedPane.add(new JPanel(), "Disk Scheduler");
-    tabbedPane.add(new JPanel(), "File System");
+    tabbedPane.add(fsAnimator.getPanel(), "File System");
 
     contentPane.add(tabbedPane, BorderLayout.CENTER);
 //    clips[0].play();
