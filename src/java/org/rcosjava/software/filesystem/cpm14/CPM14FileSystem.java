@@ -1,6 +1,7 @@
 package org.rcosjava.software.filesystem.cpm14;
 
 import org.rcosjava.messaging.messages.os.OSMessageAdapter;
+import org.rcosjava.messaging.messages.os.AddDiskRequest;
 import org.rcosjava.messaging.postoffices.os.OSOffice;
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.messaging.postoffices.MessageHandler;
@@ -21,7 +22,7 @@ import java.util.*;
  * @author Andrew Newman
  * @created 28 March 1996
  */
-public class CPM14FileSystem implements FileSystem
+public class CPM14FileSystem extends OSMessageHandler implements FileSystem
 {
   /**
    * Mount point which seperates the mount point with the file name.
@@ -107,8 +108,9 @@ public class CPM14FileSystem implements FileSystem
   /**
    * Constructor for the CPM14FileSystem object
    */
-  public CPM14FileSystem()
+  public CPM14FileSystem(OSOffice postOffice)
   {
+    super(MESSENGING_ID, postOffice);
     requestTable = new IndexedList(100, 10);
     mountTable = new HashMap();
     deviceTable = new IndexedList(100, 10);
@@ -210,12 +212,12 @@ public class CPM14FileSystem implements FileSystem
     int offset = dirEntry * DIR_ENTRY_SIZE;
     device.setByteInEntry(offset, (byte) 0);
     byte[] byteFilename = convertFilename(fidEntry.getFileName());
-    System.err.println("Byte filename: " + byteFilename.length);
+//    System.err.println("Byte filename: " + byteFilename.length);
 
     for (int counter = 0; counter < 11; counter++)
     {
-      System.err.println("Dir offset: " + (offset + CPM14TableOffset.FILENAME + counter));
-      System.err.println("Byte offset: " + (counter));
+//      System.err.println("Dir offset: " + (offset + CPM14TableOffset.FILENAME + counter));
+//      System.err.println("Byte offset: " + (counter));
       device.setByteInEntry(offset + CPM14TableOffset.FILENAME + counter, byteFilename[counter]);
     }
 
@@ -385,28 +387,24 @@ public class CPM14FileSystem implements FileSystem
       if ((((fidEntry.getCurrentPosition()) % BLOCK_SIZE) == 0)
            && (fidEntry.getCurrentPosition() != 0))
       {
-        diskRequest(CPM14RequestTableEntry.FLUSH, fsFileNumber, requestId, data,
-            fidEntry.getCurrentDiskBlock(), fidEntry.getBuffer());
-        /*        diskRequest ( devicedeviceName, "FS_WRITE::FLUSH", "WRITE",
-                      iFSFileNo, requestId,
-                      mvRequestData.getData(), fidEntry.getCurrentDiskBlock(),
-                      fidEntry.Buffer);
-*/
+//        System.err.println("About to write Block and get new one.");
+        sendDiskRequest(CPM14RequestTableEntry.FLUSH, fsFileNumber, requestId,
+            data, fidEntry.getCurrentDiskBlock(), fidEntry.getBuffer());
       }
       else
       {
         if (fidEntry.getCurrentPosition() == 0)
         {
           // Setup the buffer.
-          int mvNextBlock = getFreeBlock(fidEntry.getDeviceNumber());
+          int nextBlock = getFreeBlock(fidEntry.getDeviceNumber());
 
-          fidEntry.setCurrentDiskBlock((byte) mvNextBlock);
+          fidEntry.setCurrentDiskBlock((byte) nextBlock);
           device.setByteInEntry((fidEntry.getFileNumber() * DIR_ENTRY_SIZE)
-               + CPM14TableOffset.DATA_BLOCKS, (byte) mvNextBlock);
+               + CPM14TableOffset.DATA_BLOCKS, (byte) nextBlock);
         }
 
-        //fidEntry.Buffer[ fidEntry.getCurrentPosition() % BLOCK_SIZE] =
-        //                (byte)mvRequestData.getData();
+        fidEntry.setByteInBuffer(fidEntry.getCurrentPosition() % BLOCK_SIZE,
+            (byte) data);
 
         if (((fidEntry.getCurrentPosition() + 1) % 128) == 0)
         {
@@ -669,7 +667,7 @@ public class CPM14FileSystem implements FileSystem
 
     while ((counter < 16) && (blockNum > 0))
     {
-      System.out.println("Freeing block :" + blockNum);
+//      System.out.println("Freeing block :" + blockNum);
       device.deallocateBlock(blockNum - DISK_BLOCK_OFFSET);
       device.setByteInEntry(entryOffset + CPM14TableOffset.DATA_BLOCKS +
           counter, (byte) 0);
@@ -684,6 +682,109 @@ public class CPM14FileSystem implements FileSystem
     device.deallocateEntry(entryNumber);
 
     return 1;
+  }
+
+  /**
+   * A successful flush of data to disk.
+   *
+   * @param request the request from the disk manager.
+   */
+  public void flush(DiskRequest request)
+  {
+    // Get the requested data from the request table.
+    int requestId = request.getRequestId();
+    CPM14RequestTableEntry requestData =
+              (CPM14RequestTableEntry) requestTable.getItem(requestId);
+
+    // Get the file id from the request data.
+    int fileId = requestData.getFileSystemNumber();
+    CPM14FIDTableEntry fileIdEntry = (CPM14FIDTableEntry)
+        fidTable.getItem(fileId);
+
+    // Get the device from the device table based on fid entry.
+    CPM14DeviceTableEntry device = (CPM14DeviceTableEntry)
+        deviceTable.getItem(fileIdEntry.getDeviceNumber());
+
+    if (request.getDiskBlock() >= 0)
+    {
+//      System.out.println("Interupt reveived.bout to write");
+
+      // DEBUG
+
+      int lastBlock = SVB2I & device.getByteInEntry(
+          (fileIdEntry.getFileNumber() * DIR_ENTRY_SIZE) +
+          CPM14TableOffset.DATA_BLOCKS + 15);
+
+      //System.out.print("Cmp: "+mvLastBlock+" - "); // DEBUG
+      //System.out.println("Entry :"+fidEntry.getFileNumber()); // DEBUG
+      //System.out.println("entrysize : "+DIR_ENTRY_SIZE); // DEBUG
+      //System.out.println("datablocks :"+ DATA_BLOCKS); // DEBUG
+      //System.out.println
+      //     ((fidEntry.getFileNumber()*DIR_ENTRY_SIZE) + DATA_BLOCKS + 16); // DEBUG
+
+
+      //System.out.println(fidEntry.getCurrentDiskBlock()); // DEBUG
+      if (fileIdEntry.getCurrentDiskBlock() == lastBlock)
+      {
+//        System.out.println("Setting up new DirEnt.");
+
+        int newEntry = getFreeEntry(fileIdEntry.getDeviceNumber());
+
+        if (newEntry == -1)
+        {
+          requestTable.remove(requestId);
+          //return(new FileSystemReturnData(requestId, -1));
+        }
+
+        int newOffset = newEntry * DIR_ENTRY_SIZE;
+        int currentOffset = fileIdEntry.getFileNumber() * DIR_ENTRY_SIZE;
+        int x;
+
+        for (x = 1; x <= 11; x++)
+        {
+          device.setByteInEntry(newOffset + x,
+            device.getByteInEntry(currentOffset + x));
+        }
+        device.setByteInEntry(newOffset + 0, (byte) 0);
+        device.setByteInEntry(newOffset + CPM14TableOffset.EXTENT,
+            (byte) (device.getByteInEntry(currentOffset +
+            CPM14TableOffset.EXTENT) + (byte) 1));
+        device.setByteInEntry(currentOffset + CPM14TableOffset.RECORDS,
+            (byte) 0x80);
+
+        fileIdEntry.setFileNumber(newEntry);
+//        System.out.println("Setup dirent :" + newEntry);
+        // DEBUG
+      }
+
+      int mvNewBlock = getFreeBlock(fileIdEntry.getDeviceNumber());
+
+      if (mvNewBlock >= 0)
+      {
+//        System.out.println("New disk block :" + mvNewBlock);
+
+        //DEBUG
+        int mvOffset = (fileIdEntry.getFileNumber() * DIR_ENTRY_SIZE) +
+            CPM14TableOffset.DATA_BLOCKS;
+        int mvBlockLocation = mvOffset +
+            ((fileIdEntry.getCurrentPosition() / BLOCK_SIZE) % 16);
+
+        device.setByteInEntry(mvBlockLocation, (byte) mvNewBlock);
+        fileIdEntry.setCurrentDiskBlock((byte) mvNewBlock);
+        fileIdEntry.setByteInBuffer(
+            fileIdEntry.getCurrentPosition() % BLOCK_SIZE,
+            (byte) requestData.getData());
+        fileIdEntry.incCurrentPosition();
+        //return(new FileSystemReturnData(requestId, 0));
+//          Dump( "DIR", 0,0); // DEBUG
+      }
+      else
+      {
+        //return(new FileSystemReturnData(requestId, -1));
+      }
+
+      requestTable.remove(requestId);
+    }
   }
 
   public void recordSystemFile()
@@ -755,10 +856,10 @@ public class CPM14FileSystem implements FileSystem
   }
 
   /**
-   * Displays a file's entry on a devices directory as a string.
+   * Displays a file's buffer as a string.
    *
    * @param fsFileNumber unique identifier of the file.
-   * @return a string representation of the file's directory entry.
+   * @return a string representation of the file's buffer.
    */
   public String dumpBuffer(int fsFileNumber)
   {
@@ -766,20 +867,38 @@ public class CPM14FileSystem implements FileSystem
 
     CPM14FIDTableEntry fidEntry =
         (CPM14FIDTableEntry) fidTable.getItem(fsFileNumber);
-    int x;
 
-    for (x = 0; x < 1024; x++)
+    for (int index = 0; index < 1024; index++)
     {
-      if ((SVB2I & fidEntry.getByteInBuffer(x)) == 0x1A)
+      if ((SVB2I & fidEntry.getByteInBuffer(index)) == 0x1A)
       {
         data.append("<EOF>");
       }
       else
       {
-        data.append((char) fidEntry.getByteInBuffer(x));
+        data.append((char) fidEntry.getByteInBuffer(index));
       }
     }
     data.append("\n");
+    return data.toString();
+  }
+
+  /**
+   * Returns a file's entry id entry file.
+   *
+   * @param fsFileNumber unique identifier of the file.
+   * @return a string representation of the file's id entry.
+   */
+  public String dumpFIDEntry(int fsFileNumber)
+  {
+    StringBuffer data = new StringBuffer();
+
+    CPM14FIDTableEntry fidEntry =
+        (CPM14FIDTableEntry) fidTable.getItem(fsFileNumber);
+
+    data.append(fidEntry.getFileName() + ",");
+    data.append(fidEntry.mode);
+
     return data.toString();
   }
 
@@ -897,7 +1016,7 @@ public class CPM14FileSystem implements FileSystem
     {
       if (mvMessageData.getDiskBlock() >= 0)
       {
-        System.out.println("Interupt reveived.bout to write");
+//        System.out.println("Interupt reveived.bout to write");
 
         // DEBUG
 
@@ -916,7 +1035,7 @@ public class CPM14FileSystem implements FileSystem
         //System.out.println(fidEntry.getCurrentDiskBlock()); // DEBUG
         if (fidEntry.getCurrentDiskBlock() == mvLastBlock)
         {
-          System.out.println("Setting up new DirEnt.");
+//          System.out.println("Setting up new DirEnt.");
 
           int mvNewEntry = getFreeEntry(fidEntry.getDeviceNumber());
 
@@ -943,7 +1062,7 @@ public class CPM14FileSystem implements FileSystem
               (byte) 0x80);
 
           fidEntry.setFileNumber(mvNewEntry);
-          System.out.println("Setup dirent :" + mvNewEntry);
+//          System.out.println("Setup dirent :" + mvNewEntry);
           // DEBUG
         }
 
@@ -951,7 +1070,7 @@ public class CPM14FileSystem implements FileSystem
 
         if (mvNewBlock >= 0)
         {
-          System.out.println("New disk block :" + mvNewBlock);
+//          System.out.println("New disk block :" + mvNewBlock);
 
           //DEBUG
 
@@ -1033,18 +1152,17 @@ public class CPM14FileSystem implements FileSystem
    * @param block Description of Parameter
    * @param data Description of Parameter
    */
-  private void diskRequest(int requestType, int FSFileNo,
-      int FSMRequestID, int RequestData, int block, byte[] data)
+  private void sendDiskRequest(int requestType, int fsFileNumber,
+      int fsRequestId, int requestData, int block, byte[] data)
   {
-    CPM14RequestTableEntry mvQueueEntry = new CPM14RequestTableEntry(
-        requestType, FSFileNo, FSMRequestID, RequestData);
+    CPM14RequestTableEntry queueEntry = new CPM14RequestTableEntry(
+        requestType, fsFileNumber, fsRequestId, requestData);
+    int requestNumber = requestTable.add(queueEntry);
 
     // Request new block
-    int iReqNum = requestTable.add(mvQueueEntry);
-    DiskRequest mvTheRequest = new DiskRequest(iReqNum, block, data);
-
-    //Message mvTheReq = new Message( id,  new String(to),"DISKREQUEST", mvTheRequest);
-    //SendMessage ( mvTheReq );
+    DiskRequest request = new DiskRequest(requestNumber, block, data);
+    AddDiskRequest message = new AddDiskRequest(this, request);
+    sendMessage(message);
   }
 
   /**
@@ -1083,7 +1201,7 @@ public class CPM14FileSystem implements FileSystem
 
     while ((counter < 16) && (mvBlockNum > 0))
     {
-      System.out.println("Freeing block :" + mvBlockNum);
+//      System.out.println("Freeing block :" + mvBlockNum);
       device.deallocateBlock(mvBlockNum - DISK_BLOCK_OFFSET);
       device.setByteInEntry(mvEntryOffset + CPM14TableOffset.DATA_BLOCKS +
           counter, (byte) 0);
