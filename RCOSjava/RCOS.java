@@ -40,14 +40,18 @@ import MessageSystem.PostOffices.Universal.UniversalMessageRecorder;
 /**
  * Main startup file for RCOS.java Version 1.00
  * <P>
- * HISTORY: 22/01/96  Will execute any given PCD file that<BR>
- *                    uses output only, output appears a bit buggy<BR>
- *          30/03/96  Animators combined with OS<BR>
- *          01/01/97  Problem with loading images in Netscape fixed.<BR>
- *                    All files are case sensitive even in<BR>
- *                    Windows 95/NT.<BR>
- *          13/10/98  Started converting to Java 1.1.  Version<BR>
- *                    set to 1.00<BR>
+ * <DT><B>History:</B>
+ * <DD>
+ * 22/01/96  Will execute any given PCD file that uses output only, output
+ * appears a bit buggy
+ * </DD><DD>
+ * 30/03/96  Animators combined with OS<BR>
+ * </DD><DD>
+ * 01/01/97  Problem with loading images in Netscape fixed. All files are case
+ * sensitive even in Windows 95/NT.
+ * </DD><DD>
+ * 13/10/98  Started converting to Java 1.1.  Version set to 1.00
+ * </DD></DT>
  *
  * @author Andrew Newman
  * @created 21st January 1996
@@ -95,7 +99,7 @@ public class RCOS extends java.applet.Applet implements Runnable
   public int port;
   public String docBase;
   private static final String welcome = "Welcome to RCOS.java Version 1.00";
-  private static final String info = "Copyright 1995-2000.\nVersion 1.00.\n" +
+  private static final String info = "Copyright 1995-2001.\nVersion 1.00.\n" +
     "Authors: David Jones, Brett Carter, Bruce Jamieson, and Andrew Newman";
 
   // Images and sounds.
@@ -145,9 +149,9 @@ public class RCOS extends java.applet.Applet implements Runnable
     getParameters();
     getImagesAndSound();
     setScreenSize();
+    initialiseMessaging();
     initialiseOperatingSystem();
     initialiseAnimators();
-    initialiseRecorder();
     initialiseScreen();
   }
 
@@ -259,13 +263,28 @@ public class RCOS extends java.applet.Applet implements Runnable
   }
 
   /**
-   * Initialise all of the operating system components.
+   * Initialise the message system.  This includes the operating system and
+   * animators post offices as well as the recording of all messages
+   * passed between each sub-system.
    */
-  public void initialiseOperatingSystem()
+  public void initialiseMessaging()
   {
     //Start the Post Office (system messaging system).
     osPostOffice = new OSOffice(osPostOfficeId);
 
+    //Start the Animator PostOffice (animator messaging system).
+    animatorPostOffice = new AnimatorOffice(animatorPostOfficeId, osPostOffice);
+
+    //Start the recording subsystem
+    recorder = new UniversalMessageRecorder(this.defaultDomain, this.port,
+      "Recorder", this.osPostOffice, this.animatorPostOffice);
+  }
+
+  /**
+   * Initialise all of the operating system components.
+   */
+  public void initialiseOperatingSystem()
+  {
     // Start the Kernel and rest of OS.
     theKernel = new Kernel(osPostOffice);
     theTerminalManager = new TerminalManager(osPostOffice, maxTerminals);
@@ -281,34 +300,28 @@ public class RCOS extends java.applet.Applet implements Runnable
    */
   public void initialiseAnimators()
   {
-    //Start the Animator PostOffice (animator messaging system).
-    animatorPostOffice = new AnimatorOffice(animatorPostOfficeId, osPostOffice);
-
     tmAnimator = new TerminalManagerAnimator(animatorPostOffice, defX,
       defY, imgTerminal, maxTerminals, maxTerminalCols, maxTerminalRows);
+
     psAnimator = new ProcessSchedulerAnimator(animatorPostOffice, defX, defY,
       imgProcess);
+
     ipcAnimator = new IPCManagerAnimator(animatorPostOffice, defX, defY, imgIPC);
+
     cpuAnimator = new CPUAnimator(animatorPostOffice, smallX, smallY, null);
+
     pmAnimator = new ProgramManagerAnimator(animatorPostOffice, smallX, smallY,
       null);
+
     pcmAnimator = new ProcessManagerAnimator(animatorPostOffice, 250, 250,
       imgProcessMan);
+
     mmAnimator = new MultimediaAnimator(animatorPostOffice, smallX, smallY,
-      imgProcessMan);
+      imgProcessMan, recorder);
+
     aboutAnimator = new AboutAnimator(animatorPostOffice, largeX, largeY, imgAbout);
 //    overviewAnimator = new Overview("OverviewAnimator", animatorPostOffice, defX,
 //      defY, );
-  }
-
-  /**
-   * Initialise the message recording system.  This will record all message
-   * passed between each sub-system.
-   */
-  public void initialiseRecorder()
-  {
-    recorder = new UniversalMessageRecorder(this.defaultDomain, this.port,
-      "Recorder", this.osPostOffice, this.animatorPostOffice);
   }
 
   /**
