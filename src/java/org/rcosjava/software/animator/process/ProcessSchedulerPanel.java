@@ -373,6 +373,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     {
       speedOption.setSelectedItem("Slowest");
     }
+    speedOption.repaint();
   }
 
   /**
@@ -384,7 +385,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
   {
     Integer newValue = new Integer(newQuantum);
     quantumOption.setSelectedItem(newValue.toString());
-    myProcessScheduler.sendQuantum(newValue);
+    quantumOption.repaint();
   }
 
   /**
@@ -407,6 +408,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
       schedulerOption.setSelectedItem("Priority");
       myProcessScheduler.switchToPriority();
     }
+    schedulerOption.repaint();
   }
 
   /**
