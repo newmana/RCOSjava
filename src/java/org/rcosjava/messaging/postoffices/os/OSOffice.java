@@ -2,14 +2,18 @@ package org.rcosjava.messaging.postoffices.os;
 
 import java.lang.reflect.*;
 import java.util.*;
+
 import org.rcosjava.messaging.messages.MessageAdapter;
 import org.rcosjava.messaging.messages.os.OSMessageAdapter;
 import org.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import org.rcosjava.messaging.postoffices.PostOffice;
 import org.rcosjava.software.util.FIFOQueue;
 
+import org.apache.log4j.*;
+
 /**
- * Provide message handling centre of operations.
+ * Provide a message handling service for OS components.  This should be a
+ * thread safe object.
  * <P>
  * <DT> <B>History:</B>
  * <DD> 01/04/98 Modified to use TreeMap. </DD> </DT>
@@ -21,6 +25,11 @@ import org.rcosjava.software.util.FIFOQueue;
 public class OSOffice extends PostOffice
 {
   /**
+   * Logging class.
+   */
+  private final static Logger log = Logger.getLogger(OSOffice.class);
+
+  /**
    * The local messages to be sent.
    */
   private FIFOQueue localMessages = new FIFOQueue(5, 1);
@@ -31,7 +40,7 @@ public class OSOffice extends PostOffice
   private FIFOQueue postOfficeMessages = new FIFOQueue(5, 1);
 
   /**
-   * To be done
+   * Initalize the OS post office.
    *
    * @param newId To be done
    */
@@ -41,24 +50,26 @@ public class OSOffice extends PostOffice
   }
 
   /**
-   * Description of the Method
+   * Send a message to all registered post offices and to all locally registered
+   * components.
    *
-   * @param message Description of Parameter
+   * @param message message to send.
    */
   public void sendMessage(MessageAdapter message)
   {
     //Send to all other registered post offices by adding it to the list.
     //The send thread should move it along.
-    postOfficeMessages.add(message);
+    sendToPostOffices(message);
 
     //Send to locally registered components by adding it to the list
     localSendMessage(message);
   }
 
   /**
-   * Description of the Method
+   * Send a message to all registered post offices and to all locally registered
+   * components.
    *
-   * @param message Description of Parameter
+   * @param message message to send.
    */
   public void sendMessage(UniversalMessageAdapter message)
   {
@@ -66,10 +77,10 @@ public class OSOffice extends PostOffice
   }
 
   /**
-   * Sends messages to all conpontents registered to this post office. Calls
-   * localSendMessage.
+   * Send a message to all registered post offices and to all locally registered
+   * components.
    *
-   * @param message the message to send.
+   * @param message message to send.
    */
   public void sendMessage(OSMessageAdapter message)
   {
@@ -77,19 +88,22 @@ public class OSOffice extends PostOffice
   }
 
   /**
-   * Description of the Method
+   * Send a message to only registered objects of local post office.
    *
-   * @param message Description of Parameter
+   * @param message Message to send.
    */
   public void localSendMessage(MessageAdapter message)
   {
-    localMessages.add(message);
+    synchronized (localMessages)
+    {
+      localMessages.add(message);
+    }
   }
 
   /**
-   * To be done
+   * Send a message to only registered objects of local post office.
    *
-   * @param message To be done
+   * @param message Message to send.
    */
   public void localSendMessage(OSMessageAdapter message)
   {
@@ -97,19 +111,22 @@ public class OSOffice extends PostOffice
   }
 
   /**
-   * Description of the Method
+   * Send message only to other post offices.
    *
-   * @param message Description of Parameter
+   * @param message Message to send to all post offices.
    */
   public void sendToPostOffices(MessageAdapter message)
   {
-    postOfficeMessages.add(message);
+    synchronized (postOfficeMessages)
+    {
+      postOfficeMessages.add(message);
+    }
   }
 
   /**
-   * Description of the Method
+   * Process a sent message.
    *
-   * @param message Description of Parameter
+   * @param message Message received.
    */
   public void processMessage(MessageAdapter message)
   {
@@ -119,29 +136,36 @@ public class OSOffice extends PostOffice
     }
     catch (Exception e)
     {
-      System.err.println("Error Processing Message: " + e.getMessage());
+      log.error("Error Processing Message: " + e.getMessage());
       e.printStackTrace();
     }
   }
 
   /**
-   * Description of the Method
+   * This is called by another thread to deliver messages to any other
+   * postoffices and to any other registered handlers.
    */
   public void deliverMessages()
   {
-    while (postOfficeMessages.size() > 0)
+    synchronized (postOfficeMessages)
     {
-      postOfficeDeliverMessage();
+      while (postOfficeMessages.size() > 0)
+      {
+        postOfficeDeliverMessage();
+      }
     }
 
-    while (localMessages.size() > 0)
+    synchronized (localMessages)
     {
-      localDeliverMessage();
+      while (localMessages.size() > 0)
+      {
+        localDeliverMessage();
+      }
     }
   }
 
   /**
-   * Description of the Method
+   * Deliver one message to all registered post offices.
    */
   private void postOfficeDeliverMessage()
   {
@@ -172,7 +196,7 @@ public class OSOffice extends PostOffice
   }
 
   /**
-   * Description of the Method
+   * Deliver one message to all locally registered handlers.
    */
   private void localDeliverMessage()
   {
