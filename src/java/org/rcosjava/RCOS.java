@@ -642,19 +642,19 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     // Add animators
     list.add(tmAnimator);
     list.add(psAnimator);
-    list.add(memoryAnimator);
-    list.add(ipcAnimator);
+//    list.add(memoryAnimator);
+//    list.add(ipcAnimator);
 //    list.add(cpuAnimator);
 //    list.add(pmAnimator);
 //    list.add(pcmAnimator);
 //    list.add(mmAnimator);
 
     // Add operating system
-    list.add(theKernel);
+//    list.add(theKernel);
     list.add(theTerminalManager);
     list.add(theProcessScheduler);
-    list.add(theMemoryManager);
-    list.add(theIPC);
+//    list.add(theMemoryManager);
+//    list.add(theIPC);
 
     return list;
   }
@@ -670,19 +670,19 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     // Load animators.
     tmAnimator = (TerminalManagerAnimator) rcosComponents.get(0);
     psAnimator = (ProcessSchedulerAnimator) rcosComponents.get(1);
-    memoryAnimator = (MemoryManagerAnimator) rcosComponents.get(2);
-    ipcAnimator = (IPCManagerAnimator) rcosComponents.get(3);
+//    memoryAnimator = (MemoryManagerAnimator) rcosComponents.get(2);
+//    ipcAnimator = (IPCManagerAnimator) rcosComponents.get(3);
 //    cpuAnimator = (CPUAnimator) rcosComponents.get(4);
 //    pmAnimator = (ProgramManagerAnimator) rcosComponents.get(5);
 //    pcmAnimator = (ProcessManagerAnimator) rcosComponents.get(6);
 //    mmAnimator = (MultimediaAnimator) rcosComponents.get(7);
 
     // Load OS.
-    theKernel = (Kernel) rcosComponents.get(4);
-    theTerminalManager = (TerminalManager) rcosComponents.get(5);
-    theProcessScheduler = (ProcessScheduler) rcosComponents.get(6);
-    theMemoryManager = (MemoryManager) rcosComponents.get(7);
-    theIPC = (IPC) rcosComponents.get(8);
+//    theKernel = (Kernel) rcosComponents.get(4);
+    theTerminalManager = (TerminalManager) rcosComponents.get(2);
+    theProcessScheduler = (ProcessScheduler) rcosComponents.get(3);
+//    theMemoryManager = (MemoryManager) rcosComponents.get(5);
+//    theIPC = (IPC) rcosComponents.get(8);
     theProgramManager = new ProgramManager(osPostOffice, baseDomain, port,
         theKernel);
   }
