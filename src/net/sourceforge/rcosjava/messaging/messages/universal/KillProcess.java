@@ -3,6 +3,7 @@ package net.sourceforge.rcosjava.messaging.messages.universal;
 import net.sourceforge.rcosjava.software.animator.process.ProcessSchedulerAnimator;
 import net.sourceforge.rcosjava.software.animator.process.ProcessManagerAnimator;
 import net.sourceforge.rcosjava.hardware.memory.Memory;
+import net.sourceforge.rcosjava.hardware.cpu.Interrupt;
 import net.sourceforge.rcosjava.software.kernel.Kernel;
 import net.sourceforge.rcosjava.software.process.ProcessScheduler;
 import net.sourceforge.rcosjava.software.process.ProgramManager;
@@ -51,10 +52,14 @@ public class KillProcess extends UniversalMessageAdapter
 
   public void doMessage(Kernel theElement)
   {
-    /*if (theElement.runningProcess() && theElement.getCurrentProcess().getPID() == pid)
+    if (theElement.runningProcess() &&
+      theElement.getCurrentProcessPID() == pid)
     {
-      theElement.handleProcessFinishedInterrupt();
-    }*/
+      Interrupt processFinishedInterrupt = new Interrupt(-1,
+        "ProcessFinished");
+      theElement.generateInterrupt(processFinishedInterrupt);
+      theElement.killProcess();
+    }
   }
 }
 
