@@ -1,4 +1,3 @@
-
 //*************************************************************************/
 // FILE     : PagedMemoryManagement.java
 // PURPOSE  : Provides basic Memory/Page allocation.
@@ -28,7 +27,7 @@ import net.sourceforge.rcosjava.software.util.FIFOQueue;
 public class PagedMemoryManagement implements MemoryManagement
 {
   // Base page handler for the MMU
-  private MainMemory myMainMemory;
+  private static MainMemory myMainMemory;
   private FIFOQueue thePageTable;
 
   public PagedMemoryManagement(int MaxPages)
@@ -40,11 +39,12 @@ public class PagedMemoryManagement implements MemoryManagement
   //Goes through the entire section of memory allocating
   //a specific set of memory with the same PID and
   //Type.  Size, in this case is the number of pages.
-  public MemoryReturn open(int PID, int type, int size)
+  public MemoryReturn open(int PID, byte type, int size)
     throws MemoryOpenFailedException
   {
     // Allocate pages
     int count, noPages;
+    int freePageIndex;
     short[] pages = new short[size];
     noPages = 0;
     for (count = 0; count < size; count++)
@@ -53,7 +53,7 @@ public class PagedMemoryManagement implements MemoryManagement
       {
         try
         {
-          int freePageIndex = myMainMemory.findFirstFree();
+          freePageIndex = myMainMemory.findFirstFree();
           myMainMemory.allocateMemory(freePageIndex);
           pages[noPages] = (short) freePageIndex;
           noPages++;
@@ -69,7 +69,7 @@ public class PagedMemoryManagement implements MemoryManagement
     }
     //Write allocation information to page table.
     PageTableEntry newPageTableEntry = new PageTableEntry((byte) PID,
-      (byte) type, pages,(short) noPages);
+      type, pages,(short) noPages);
     thePageTable.insert(newPageTableEntry);
     /*PageTableEntry tmpPageTable;
     thePageTable.goToHead();
@@ -78,7 +78,8 @@ public class PagedMemoryManagement implements MemoryManagement
       tmpPageTable = (PageTableEntry) thePageTable.peek();
       thePageTable.goToNext();
     }*/
-    return (new MemoryReturn(PID, (byte) type, noPages, pages));
+
+    return (new MemoryReturn(PID, type, noPages, pages));
   }
 
   // Deallocate based on Process ID.
@@ -113,49 +114,57 @@ public class PagedMemoryManagement implements MemoryManagement
     return (new MemoryReturn(PID, (byte) 0, totalPages, indexTotalPages));
   }
 
-  // Get all memory from numerous pages belonging to PID of type Type.
-  public Memory getAllMemory(int PID, int type, int size)
+  /**
+   * Get all memory from numerous pages belonging to PID of type Type.
+   */
+  public Memory getAllMemory(int pid, byte type)
   {
-    PageTableEntry tmpPageTable;
-    int count;
+    //Temporary page table entry (all memory blocks of a certain type for a process)
+    PageTableEntry tmpEntry = null;
+
+    //Find the page table entry for this process and type
+    //Assume one per combination
+    short noPages = 0;
+    //Go to head of page table
     thePageTable.goToHead();
-    Memory tmpMemory = new Memory(size);
     while (!thePageTable.atTail())
     {
-      tmpPageTable = (PageTableEntry) thePageTable.peek();
-      thePageTable.goToNext();
-    }
-    thePageTable.goToHead();
-    tmpMemory = new Memory(size);
-    while (!thePageTable.atTail())
-    {
-      tmpPageTable = (PageTableEntry) thePageTable.peek();
-      if ((tmpPageTable.getPID() == ((byte) PID)) &&
-          (tmpPageTable.getType() == ((byte) type)))
+      tmpEntry = (PageTableEntry) thePageTable.peek();
+      if ((tmpEntry.getPID() == ((byte) pid)) &&
+          (tmpEntry.getType() == ((byte) type)))
       {
-        tmpMemory = myMainMemory.getMemory(tmpPageTable.getPages()[0]);
-        for(count = 1; count < tmpPageTable.getTotalNumberOfPages(); count++)
-        {
-          tmpMemory = Memory.combineMemory(tmpMemory,
-                      myMainMemory.getMemory(tmpPageTable.getPages()[count]));
-        }
-        return (tmpMemory);
+        break;
       }
       thePageTable.goToNext();
     }
-    return null;
+
+    Memory tmpMemory = null;
+
+    //Tempory memory block belonging to process
+    if (tmpEntry != null)
+    {
+      short pageNo;
+      int segmentSize = myMainMemory.getMemory(tmpEntry.getPages()[0]).getSegmentSize();
+      tmpMemory = new Memory(segmentSize * tmpEntry.getTotalNumberOfPages());
+      for(int count = 0; count < tmpEntry.getTotalNumberOfPages(); count++)
+      {
+        pageNo = tmpEntry.getPages()[count];
+        tmpMemory.write(segmentSize * count, myMainMemory.getMemory(pageNo));
+      }
+    }
+    return tmpMemory;
   }
 
   // Read page number Offset belonging to PID of type Type.
-  public Memory readPage(int PID, int type, int offset)
+  public Memory readPage(int PID, byte type, int offset)
   {
     return (readBytes(PID, type, Memory.DEFAULT_SEGMENT, offset*Memory.DEFAULT_SEGMENT));
   }
 
   //Read a number of bytes with given PID, Type, Size and Offset.
-  public Memory readBytes(int PID, int type, int size, int offset)
+  public Memory readBytes(int PID, byte type, int size, int offset)
   {
-    Memory tmpMemory = getAllMemory(PID, type, size);
+    Memory tmpMemory = getAllMemory(PID, type);
     if (tmpMemory != null)
     {
       return (tmpMemory.read(offset, size));
@@ -164,17 +173,19 @@ public class PagedMemoryManagement implements MemoryManagement
   }
 
   // Write page number Offset belonging to PID of type Type with Memory.
-  public void writePage(int PID, int type, int offset, Memory newMemory)
+  public void writePage(int PID, byte type, int offset, Memory newMemory)
   {
     writeBytes(PID, type, Memory.DEFAULT_SEGMENT, offset*Memory.DEFAULT_SEGMENT,
       newMemory);
   }
 
   // Write bytes given PID, Type, Size, Offset with Memory.
-  public void writeBytes(int PID, int type, int size, int offset, Memory newMemory)
+  public void writeBytes(int PID, byte type, int size, int offset,
+    Memory newMemory)
   {
     // Get all Memory from segments
-    Memory tmpMemory = getAllMemory(PID, type, size);
+    Memory tmpMemory = getAllMemory(PID, type);
+    tmpMemory.setAllocated();
     if (tmpMemory != null)
     {
       // Write new values to one large block of memory
