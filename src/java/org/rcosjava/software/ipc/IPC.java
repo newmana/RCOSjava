@@ -228,7 +228,7 @@ public class IPC extends OSMessageHandler
 
       // Inform other components that wait has been called
       SemaphoreWaiting waitingMessage = new SemaphoreWaiting(this,
-          existingSemaphore.getName(), pid, existingSemaphore.getValue());
+          existingSemaphore.getName(), pid, value);
       sendMessage(waitingMessage);
 
       // NOW - if the value was -1, then we have to block
