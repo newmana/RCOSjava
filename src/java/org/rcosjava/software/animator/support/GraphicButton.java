@@ -20,6 +20,11 @@ import javax.swing.*;
 public class GraphicButton extends JComponent
 {
   /**
+   * Serial id.
+   */
+  private static final long serialVersionUID = 8861753180791373817L;
+
+  /**
    * The image for greyed out button
    */
   private Image greyPic;

@@ -22,18 +22,11 @@ public class CPUTest extends TestCase
    * Description of the Field
    */
   private Context context1, context2;
-  /**
-   * Description of the Field
-   */
-  private CPU myCPU;
+
   /**
    * Description of the Field
    */
   private Instruction instruction1, instruction2;
-  /**
-   * Description of the Field
-   */
-  private Interrupt interrupt1, interrupt2;
 
   /**
    * Constructor for the CPUTest object
@@ -80,8 +73,6 @@ public class CPUTest extends TestCase
     context2 = new Context();
     instruction1 = new Instruction();
     instruction2 = new Instruction();
-    interrupt1 = new Interrupt(1, "fred");
-    interrupt1 = new Interrupt(1, "fred2");
   }
 
   /**
