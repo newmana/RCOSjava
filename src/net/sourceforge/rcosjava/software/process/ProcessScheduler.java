@@ -40,11 +40,11 @@ import net.sourceforge.rcosjava.software.util.*;
  * </DD><DD>
  * 02/04/2001 Removed schedule() call.  Turned into message called by Kernel.
  * </DD><DD>
- * 11/08/98  Removed String comparison for instructions.  AN
+ * 11/08/98 Removed String comparison for instructions.  AN
  * </DD><DD>
- * 12/08/98  Implemented Shared Memory and File system calls. AN
+ * 12/08/98 Implemented Shared Memory and File system calls. AN
  * </DD><DD>
- * 13/08/98  Fixed incomplete/buggy Semaphore and Shared memory. AN
+ * 13/08/98 Fixed incomplete/buggy Semaphore and Shared memory. AN
  * </DD></DT>
  * <P>
  * @author Andrew Newman.
