@@ -24,8 +24,12 @@ import net.sourceforge.rcosjava.software.util.FIFOQueue;
  * at any time.  The system holds the allocation of terminals in a separate
  * array.
  * <P>
- * HISTORY: 01/12/96  Added the ability to add and remove a terminal - AN.<BR>
- *          07/12/96  Added the ability to show terminals or hide them - AN.<BR>
+ * <DT><B>History:</B>
+ * <DD>
+ * 01/12/96  Added the ability to add and remove a terminal - AN.
+ * </DD><DD>
+ * 07/12/96  Added the ability to show terminals or hide them - AN.
+ * </DD></DT>
  * <P>
  * @author Andrew Newman.
  * @author David Jones.

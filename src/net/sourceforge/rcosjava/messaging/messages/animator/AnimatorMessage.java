@@ -15,7 +15,12 @@ import net.sourceforge.rcosjava.messaging.postoffices.MessageHandler;
 /**
  * Interface for all animator messages.
  * <P>
- * HISTORY:  03/07/1998   Used double dispatch
+ * <DT><B>History:</B>
+ * <DD>
+ * 03/07/1998   Used double dispatch
+ * </DD></DT>
+ * <P>
+ * HISTORY:
  * <P>
  * @author Andrew Newman.
  * @version 1.00 $Date$
