@@ -23,11 +23,39 @@ public class StatementCompiler extends DepthFirstAdapter
 // This will eventually be split into two.
   private SymbolTable table;
   private Stack statementPosition;
+  private boolean inAFunction = false;
+  private short numberOfVariables = 3;
 
   public StatementCompiler()
   {
     table = SymbolTable.getInstance();
     statementPosition = new Stack();
+  }
+
+  public void inAFunctionBody(AFunctionBody node)
+  {
+    inAFunction = true;
+    super.inAFunctionBody(node);
+  }
+
+  public void outAFunctionBody(AFunctionBody node)
+  {
+    inAFunction = false;
+    super.outAFunctionBody(node);
+  }
+
+  public void caseAVariableDeclaration(AVariableDeclaration node)
+  {
+    if (!inAFunction)
+    {
+      numberOfVariables++;
+    }
+    super.caseAVariableDeclaration(node);
+  }
+
+  public short getNumberOfVariables()
+  {
+    return numberOfVariables;
   }
 
   /**
@@ -180,14 +208,20 @@ public class StatementCompiler extends DepthFirstAdapter
 
       String varName = expr.getVarname().toString().trim();
       String varValue = expr.getRhs().toString().trim();
-      System.out.println("In modify statement");
       Variable newVar = table.getVariable(varName, Compiler.getLevel());
-      System.out.println("In modify statement" + newVar.getOffset());
       doLiteralLoading(varValue);
 
       // Store variable at the variables location
-      writePCode(new Instruction(OpCode.STORE.getValue(), (byte) 0,
-        newVar.getOffset()));
+      if (Compiler.getLevel() == newVar.getLevel())
+      {
+        writePCode(new Instruction(OpCode.STORE.getValue(), (byte) 0,
+          newVar.getOffset()));
+      }
+      else
+      {
+        writePCode(new Instruction(OpCode.STORE.getValue(),
+          (byte) newVar.getLevel(), newVar.getOffset()));
+      }
     }
     catch (Exception e)
     {
@@ -233,9 +267,9 @@ public class StatementCompiler extends DepthFirstAdapter
     // Get the number of declarations and set-up stack to do so.
     LinkedList declarations = node.getVariableDeclaration();
 
-    // At the moment hard coded for 3+1 (magic offset plus 1 global variable).
+    // Set the number of declared variables
     writePCode(new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
-      ((short) (declarations.size() + 4))));
+      ((short) (declarations.size() + 3))));
 
     super.caseAFunctionBody(node);
 
@@ -365,8 +399,17 @@ public class StatementCompiler extends DepthFirstAdapter
     {
       String identifierName = identifier.toString().trim();
       Variable newVar = table.getVariable(identifierName, Compiler.getLevel());
-      writePCode(new Instruction(OpCode.LOAD.getValue(), (byte) 0,
+
+      if (Compiler.getLevel() == newVar.getLevel())
+      {
+        writePCode(new Instruction(OpCode.LOAD.getValue(), (byte) 0,
           newVar.getOffset()));
+      }
+      else
+      {
+        writePCode(new Instruction(OpCode.LOAD.getValue(),
+          (byte) newVar.getLevel(), newVar.getOffset()));
+      }
     }
     catch (Exception e)
     {

@@ -21,7 +21,7 @@ import org.sablecc.simplec.parser.*;
 public class Compiler
 {
   private static ArrayList instructions = new ArrayList();
-  private static short level;
+  private static short level = 1;
   private static short instructionIndex;
   private static SymbolTable table;
   private static Lexer lexer;
@@ -45,7 +45,10 @@ public class Compiler
 
       parser = new Parser(lexer);
       Start tree = parser.parse();
-      tree.apply(new StatementCompiler());
+
+      // Does the meat.
+      StatementCompiler stmtCompiler = new StatementCompiler();
+      tree.apply(stmtCompiler);
 
       // Write out jump position to main function
       table = SymbolTable.getInstance();
@@ -54,9 +57,9 @@ public class Compiler
       addInstruction(0, new Instruction(OpCode.JUMP.getValue(), (byte) 0,
           (short) 1));
 
-      // Global variables declared
-//      addInstruction(1, new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
-//          (short) 4));
+      // At the moment hard coded for 3+1 (magic offset plus 1 global variable).
+      addInstruction(1, new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
+        stmtCompiler.getNumberOfVariables()));
 
       // Print out result to file
       Iterator tmpIter = instructions.iterator();
