@@ -167,8 +167,9 @@ public class ProcessManagerAnimator extends AnimatorMessageHandler
         killTmpItem = new JMenuItem(tmp.toString());
         priorityTmpItem = new JMenuItem(tmp.toString());
 
-        killTmpItem.addActionListener(rcos.new KillProcessListener(this));
-        priorityTmpItem.addActionListener(rcos.new ChangePriorityListener(this));
+        killTmpItem.addActionListener(rcos.createNewKillListener(this));
+        priorityTmpItem.addActionListener(
+            rcos.createChangePriorityListener(this));
 
         killMenuItem.add(killTmpItem);
         changeMenuItem.add(priorityTmpItem);
