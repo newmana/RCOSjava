@@ -553,8 +553,10 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     processMenuItem.addActionListener(new NewProcessListener());
     menu.add(processMenuItem);
     JMenuItem killMenuItem = new JMenuItem("Kill Process");
+    killMenuItem.setEnabled(false);
     menu.add(killMenuItem);
     JMenuItem changeMenuItem = new JMenuItem("Change Priority");
+    changeMenuItem.setEnabled(false);
     menu.add(changeMenuItem);
 
     pcmAnimator.addMenuItems(menu, processMenuItem, killMenuItem,
@@ -579,6 +581,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 
     menuItem = new JMenuItem("Play");
     menu.add(menuItem);
+
     menuItem = new JMenuItem("Record New");
     menu.add(menuItem);
 
