@@ -657,16 +657,17 @@ public class StatementCompiler extends DepthFirstAdapter
       ((PVariableDeclaration) temp[i]).apply(this);
     }
 
-    // Set the number of declared variables
+    // Set the number of declared variables plus 3.
+    // For return address, dynamic link and static link values.
     if (mainBlock)
     {
-      writePCode(OpCode.INTERVAL.getValue(), (byte) 0,
-        ((short) (this.globalVariables)));
+      writePCode(OpCode.INCREMENT_T_REGISTER.getValue(), (byte) 0,
+        ((short) (this.globalVariables+3)));
     }
     else
     {
-      writePCode(OpCode.INTERVAL.getValue(), (byte) 0,
-        ((short) (this.localVariables)));
+      writePCode(OpCode.INCREMENT_T_REGISTER.getValue(), (byte) 0,
+        ((short) (this.localVariables+3)));
     }
 
     Object temp2[] = node.getStatement().toArray();
