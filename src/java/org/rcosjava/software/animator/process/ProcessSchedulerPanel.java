@@ -40,11 +40,6 @@ public class ProcessSchedulerPanel extends RCOSPanel
   private GraphicsEngine engine;
 
   /**
-   * The positioning of the CPU.
-   */
-  private Position cpuPosition;
-
-  /**
    * The positions to move the process around the ready queue.
    */
   private Position[] readyPositions;
@@ -200,7 +195,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param c Description of Parameter
    */
-  public void setupLayout(Component c)
+  public synchronized void setupLayout(Component c)
   {
     // Initialise the graphics engine.
     engine = new GraphicsEngine();
@@ -951,7 +946,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param int processId the id of the process to display.
    */
-  private void displayPCB(int processId)
+  private synchronized void displayPCB(int processId)
   {
     myProcessScheduler.displayPCB(processId);
   }
