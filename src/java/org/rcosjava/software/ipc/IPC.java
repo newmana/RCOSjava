@@ -236,7 +236,7 @@ public class IPC extends OSMessageHandler
       // the process
       if (value == -1)
       {
-        BlockCurrentProcess blockMessage = new BlockCurrentProcess(this);
+        BlockCurrentProcess blockMessage = new BlockCurrentProcess(this, false);
         sendMessage(blockMessage);
       }
     }
