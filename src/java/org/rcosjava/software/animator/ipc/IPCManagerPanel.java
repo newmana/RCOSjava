@@ -5,6 +5,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import java.awt.event.*;
 import java.util.*;
+import org.rcosjava.software.animator.memory.MemoryGraphic;
 import org.rcosjava.software.animator.RCOSPanel;
 import org.rcosjava.software.animator.support.NewLabel;
 import org.rcosjava.software.animator.support.RCOSBox;
@@ -194,7 +195,7 @@ public class IPCManagerPanel extends RCOSPanel
     pTemp.setLayout(gridBag);
 
     allocBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.allocatedColour, Color.white);
-    unallocBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.unallocatedColour, Color.white);
+    unallocBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.deallocatedColour, Color.white);
     readBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.readingColour, Color.white);
     writeBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.writingColour, Color.white);
 
