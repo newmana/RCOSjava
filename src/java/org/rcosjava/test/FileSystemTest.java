@@ -72,6 +72,8 @@ public class FileSystemTest extends TestCase
 
       // Get file system request.
       int requestId = 0;
+
+      // Allocate a new file called "C:test.pas"
       FileSystemReturnData data = fs.allocate(requestId, "C:test.pas");
       int fileId = data.getReturnValue();
 
@@ -81,12 +83,31 @@ public class FileSystemTest extends TestCase
 
       // Increment the requestId each call.
       requestId++;
+
+      // Create a new directory entry for the file and sets the file length
+      // to zero.
       data = fs.create(requestId, fileId);
 
+      // Ensure that the file was created without error.
       assertEquals("Request Id should be equal", 1, requestId);
       assertEquals("File Id should be equal", 0, fileId);
 
-      System.out.println(fs.dump("DIR", 0, 0));
+      // Ensure that the first directory entry has been created correctly.
+      String dump = fs.dumpDirectoryEntry(0, 0);
+      System.out.println(dump);
+      assertEquals("Directory request should have one file",
+          "0 t e s t         p a s 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 " +
+          "\n", dump);
+
+      dump = fs.dumpDirectoryEntry(0, 0);
+      System.out.println(dump);
+
+      // Write to the file system some bytes.
+      for (int counter = 0; counter < 4000; counter++)
+      {
+        // (byte) 'b'
+        // fs.write();
+      }
     }
     catch (Exception e)
     {
