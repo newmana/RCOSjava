@@ -85,6 +85,9 @@ public class Kernel extends OSMessageHandler
   private Schedule scheduleMessage = new Schedule(this);
   private RCOSProcess currentProcess;
 
+  private Context myContext;
+  private Memory myCodeMemory, myStackMemory;
+
   /**
    * Initialise Kernel
    * @param postOffice	central post office for messaging system
@@ -159,9 +162,10 @@ public class Kernel extends OSMessageHandler
    */
   public void nullProcess()
   {
-    myCPU.setNewContext();
-    myCPU.setProcessCode(null);
-    myCPU.setProcessStack(null);
+    myContext = new Context();
+    myCodeMemory = null;
+    myStackMemory = null;
+    setMemory();
   }
 
   public void killProcess()
@@ -192,13 +196,50 @@ public class Kernel extends OSMessageHandler
 
   /**
    * Sets the current context of the CPU based on a given process.
+   * Sets the process code (the non-changing executing program).
+   * Sets the process stacking (the working area of the executing program).
    *
    * @param newProcess the process contains a contex that is accessed using
    * getContext.
+   * @param newProcessCode the value to set the process code to.
+   * @param newProcessStack the value to set the process stack to.
    */
-  public void setCurrentContext(Context newContext)
+  private synchronized void setMemory()
   {
-    myCPU.setContext(newContext);
+    if (myCodeMemory != null &&
+        myStackMemory != null &&
+        myContext.getBasePointer() != -1 &&
+        myContext.getProgramCounter() != -1 &&
+        myContext.getStackPointer() != -1)
+    {
+      myCPU.setMemory(myContext, myCodeMemory, myStackMemory);
+    }
+    if (myCodeMemory == null &&
+        myStackMemory == null &&
+        myContext.getBasePointer() != -1 &&
+        myContext.getProgramCounter() != -1 &&
+        myContext.getStackPointer() != -1)
+    {
+      myCPU.setMemory(myContext, myCodeMemory, myStackMemory);
+    }
+  }
+
+  public void setProcessCode(Memory newProcessCode)
+  {
+    myCodeMemory = newProcessCode;
+    setMemory();
+  }
+
+  public void setProcessStack(Memory newProcessStack)
+  {
+    myStackMemory = newProcessStack;
+    setMemory();
+  }
+
+  public void setContext(Context newContext)
+  {
+    myContext = newContext;
+    setMemory();
   }
 
   /**
@@ -210,7 +251,7 @@ public class Kernel extends OSMessageHandler
   public void switchProcess(RCOSProcess newProcess)
   {
     currentProcess = newProcess;
-    myCPU.setContext(currentProcess.getContext());
+    setContext(currentProcess.getContext());
 
     //Get new memory
     MemoryRequest memRead = new MemoryRequest(newProcess.getPID(),
@@ -224,26 +265,6 @@ public class Kernel extends OSMessageHandler
       newProcess.getStackPages()*MemoryManager.PAGE_SIZE);
     msg = new ReadBytes(this, memRead);
     sendMessage(msg);
-  }
-
-  /**
-   * Sets the process code (the non-changing executing program).
-   *
-   * @param newMemory the value to set the process code to.
-   */
-  public void setProcessCode(Memory newMemory)
-  {
-    myCPU.setProcessCode(newMemory);
-  }
-
-  /**
-   * Sets the process stacking (the working area of the executing program).
-   *
-   * @param newMemory the value to set the process stack to.
-   */
-  public void setProcessStack(Memory newMemory)
-  {
-    myCPU.setProcessStack(newMemory);
   }
 
   /**
@@ -307,7 +328,7 @@ public class Kernel extends OSMessageHandler
    *
    * @param value to set the process stack at the current stack pointer address.
    */
-  public void returnValue(short value)
+  public synchronized void returnValue(short value)
   {
     // place return value onto stack
     myCPU.getContext().incStackPointer();
@@ -321,7 +342,7 @@ public class Kernel extends OSMessageHandler
    *
    * @throws java.io.IOException
    */
-  public void handleSystemCall()
+  public synchronized void handleSystemCall()
     throws java.io.IOException
   {
     Instruction call = myCPU.getContext().getInstructionRegister();
@@ -555,7 +576,7 @@ public class Kernel extends OSMessageHandler
    * if it is ignore<BR>
    * else update CPU ticks and do ProcessSwitch
   */
-  public void handleTimerInterrupt()
+  public synchronized void handleTimerInterrupt()
   {
     timerInterrupts++;
 
