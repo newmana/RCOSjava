@@ -278,8 +278,8 @@ public class ProgramManager extends OSMessageHandler
         if ((directoryName.compareTo(java.io.File.separator) != 0) &&
             (directoryType == 1))
         {
-          directoryList.insert(new String("."));
-          directoryList.insert(new String("."));
+          directoryList.insert(".");
+          directoryList.insert("..");
         }
 
         for (int counter = 0; counter < dataArray.length; counter++)

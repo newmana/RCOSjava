@@ -70,7 +70,7 @@ public class TerminalManager extends OSMessageHandler
    * The string which prefixes the names of all the terminals (for the post
    * office).
    */
-  private final String terminalPrefix = "Terminal#";
+  private static final String terminalPrefix = "Terminal#";
 
   /**
    * Accept maximum number of terminals able to be created, TerminalManagers Id
@@ -323,8 +323,7 @@ public class TerminalManager extends OSMessageHandler
     {
       if (terminalOn[terminalNumber])
       {
-        String terminalIdStr = new String(terminalPrefix +
-            String.valueOf(terminalNumber));
+        String terminalIdStr = terminalPrefix + String.valueOf(terminalNumber);
         HardwareTerminal tmp = (HardwareTerminal)
             unallocatedTerminals.retrieve(terminalIdStr, false);
 
@@ -400,8 +399,7 @@ public class TerminalManager extends OSMessageHandler
       {
         terminalOn[terminalNumber] = true;
 
-        String terminalId = new String(terminalPrefix +
-            String.valueOf(terminalNumber));
+        String terminalId = terminalPrefix + String.valueOf(terminalNumber);
         HardwareTerminal newTerminal = new
             HardwareTerminal(terminalId, postOffice);
 
