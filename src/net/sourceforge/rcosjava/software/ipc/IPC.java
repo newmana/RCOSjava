@@ -264,6 +264,7 @@ public class IPC extends OSMessageHandler
       // We give this nice process some shared memory ;-)
       SharedMemory shShrm = new SharedMemory(shmName, shmCount, pid, size);
       sharedMemoryTable.put(shmName, shShrm);
+
       Integer shrmId = new Integer(shmCount);
       sharedMemoryIdTable.put(shrmId, shShrm);
 
@@ -291,7 +292,7 @@ public class IPC extends OSMessageHandler
       shShrm.open(pid);
 
       // Done.  Now we return a message
-      int sharedMemId = shShrm.getShrmID();
+      int sharedMemId = shShrm.getSharedMemoryId();
       ReturnValue returnMessage = new ReturnValue(this, (short) sharedMemId);
       sendMessage(returnMessage);
 
@@ -307,19 +308,26 @@ public class IPC extends OSMessageHandler
     }
   }
 
-  public void sharedMemoryRead(int shmId, int iOffset)
+  public void sharedMemoryRead(int currentShmId, int offset)
   {
-    Integer iShrmID = new Integer(shmId);
-    if (sharedMemoryIdTable.containsKey(iShrmID))
+    Integer shrmId = new Integer(currentShmId);
+    System.out.println("Reading ShmId: " + currentShmId);
+
+    if (sharedMemoryIdTable.containsKey(shrmId))
     {
       // Check that the shrm exists - it does
-      SharedMemory shShrm = (SharedMemory) sharedMemoryIdTable.get(iShrmID);
-      short sData = shShrm.read(iOffset);
+      SharedMemory shShrm = (SharedMemory) sharedMemoryIdTable.get(shrmId);
+      short data = shShrm.read(offset);
+
+      System.out.println("Reading Offset: " + offset);
+      System.out.println("Reading Read Data: " + data);
+
       // Return result to Kernel
-      //message = new ReturnValue(this, sData);
-      //sendMessage(message);
+      ReturnValue message = new ReturnValue(this, data);
+      sendMessage(message);
+
       // Was it a success?
-      if(sData != -1)
+      if (data != -1)
       {
         // Was successful let everyone else know.
         //message = new SharedMemoryReadedMessage(this,
@@ -330,70 +338,83 @@ public class IPC extends OSMessageHandler
     else
     {
       // No such Shrm
-      //message = new ReturnValue(this, -1);
-      //sendMessage(message);
+      ReturnValue message = new ReturnValue(this, (short) -1);
+      sendMessage(message);
     }
   }
 
-  public void sharedMemoryWrite(int shmId, int offset, short newValue)
+  public void sharedMemoryWrite(int currentShmId, int offset, short newValue)
   {
-    Integer iShrmID = new Integer(shmId);
-    if (sharedMemoryIdTable.containsKey(iShrmID))
+    Integer shrmId = new Integer(currentShmId);
+    System.out.println("Writing ShmId: " + currentShmId);
+    System.out.println("Id in: " + sharedMemoryIdTable.containsKey(shrmId));
+
+    if (sharedMemoryIdTable.containsKey(shrmId))
     {
-        // Check that the shrm exists - it does
-        SharedMemory shShrm = (SharedMemory) sharedMemoryIdTable.get(iShrmID);
-        short sResult = shShrm.write(offset, newValue);
-        // Let kernel know the result
-        //message = new ReturnValue(this, sResult);
+      // Check that the shrm exists - it does
+      SharedMemory shShrm = (SharedMemory) sharedMemoryIdTable.get(shrmId);
+      short result = shShrm.write(offset, newValue);
+
+      System.out.println("Writing ShmId: " + currentShmId);
+      System.out.println("Writing got Value: " + newValue);
+      System.out.println("Writing offset: " + offset);
+      System.out.println("Writing got Result: " + result);
+
+      // Let kernel know the result
+      ReturnValue message = new ReturnValue(this, result);
+      sendMessage(message);
+
+      // Was it a success?
+      if (result != -1)
+      {
+        // Then let others know
+        //message = new MessageAdapter(this, shmId);
         //sendMessage(message);
-        // Was it a success?
-        if(sResult != -1)
-        {
-          // Then let others know
-          //message = new MessageAdapter(this, shmId);
-          //sendMessage(message);
-        }
+      }
     }
     else
     {
       // No such Shrm?
-      //message = new ReturnValue(this, -1);
-      //sendMessage(message);
+      ReturnValue message = new ReturnValue(this, (short) -1);
+      sendMessage(message);
     }
   }
 
-  public void sharedMemoryClose(int shmId, int pid)
+  public void sharedMemoryClose(int currentShmId, int pid)
   {
-    Integer iShrmID = new Integer(shmId);
-    if (sharedMemoryIdTable.containsKey(iShrmID))
+    Integer shrmId = new Integer(currentShmId);
+    if (sharedMemoryIdTable.containsKey(shrmId))
     {
-        // Check that the semaphore exists - it does
-        // Now Close it
-        SharedMemory shShrm = (SharedMemory) sharedMemoryIdTable.get(iShrmID);
-        int iNoConnections = shShrm.close(pid);
-        if (iNoConnections == 0)
-        {
-          // Ok - That was the last connected PID - kill the semaphore
-          String semaphoreName = shShrm.getStrID();
-          sharedMemoryTable.remove(semaphoreName);
-          sharedMemoryIdTable.remove(iShrmID);
-          // Assume other handle this when the receive the MemoryClosed
-          // successful message.
-        }
-        // Was successful return 0 to Kernel.
-        //message = new ReturnValue(this, 0);
-        //sendMessage(message);
-        // Let everyone else know.
-        //message = new SharedMemoryClosedMessage(this,
-        //  shmId, pid);
-        //sendMessage(message);
-      }
-      else
+      // Check that the semaphore exists - it does
+      // Now Close it
+      SharedMemory shShrm = (SharedMemory) sharedMemoryIdTable.get(shrmId);
+      int noConnections = shShrm.close(pid);
+
+      if (noConnections == 0)
       {
-        // Some mistake?  Shrm does NOT exist?
-        //message = new ReturnValue(this, -1);
-        //sendMessage(message);
+        // Ok - That was the last connected PID - kill the semaphore
+        String semaphoreName = shShrm.getName();
+        sharedMemoryTable.remove(semaphoreName);
+        sharedMemoryIdTable.remove(shrmId);
+        // Assume other handle this when the receive the MemoryClosed
+        // successful message.
       }
+
+      // Was successful return 0 to Kernel.
+      ReturnValue returnMessage = new ReturnValue(this, (short) 0);
+      sendMessage(returnMessage);
+
+      // Let everyone else know.
+      //message = new SharedMemoryClosedMessage(this,
+      //  shmId, pid);
+      //sendMessage(message);
+    }
+    else
+    {
+      // Was successful return 0 to Kernel.
+      ReturnValue returnMessage = new ReturnValue(this, (short) -1);
+      sendMessage(returnMessage);
+    }
   }
 
   public void sharedMemorySize(int currentShmId)
