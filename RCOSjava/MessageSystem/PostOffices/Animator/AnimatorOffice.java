@@ -1,18 +1,3 @@
-//***************************************************************************
-// FILE     : AnimatorOffice.java
-// PACKAGE  : MessageSystem
-// PURPOSE  : Provide message handling centre of operations.
-//            Variation on PostOffice - Messages are CC'ed to the
-//            AnimatorOffice where they are distributed to
-//            various Animators (which are actually MessageHandlers)
-// AUTHOR   : Bruce Jamieson
-// MODIFIED : Andrew Newman
-// HISTORY  : 24/01/96 Created
-//            17/03/96 MOD for Animator to send to all
-//            20/05/97 Changed message system
-//            05/05/98 Removed sendToAll (now does this by default)
-//***************************************************************************/
-
 package MessageSystem.PostOffices.Animator;
 
 import MessageSystem.PostOffices.PostOffice;
@@ -23,14 +8,40 @@ import MessageSystem.Messages.Universal.UniversalMessageAdapter;
 import MessageSystem.PostOffices.MessageHandler;
 import java.util.Enumeration;
 
+/**
+ * Provide message handling centre of operations.  Variation on PostOffice -
+ * Messages are CC'ed to the AnimatorOffice where they are distributed to
+ * various Animators (which are actually MessageHandlers)
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 17/03/96 MOD for Animator to send to all
+ * </DD><DD>
+ * 20/05/97 Changed message system
+ * </DD><DD>
+ * 05/05/98 Removed sendToAll (now does this by default)
+ * </DD></DT>
+ * <P>
+ * @author Andrew Newman.
+ * @author Bruce Jamieson.
+ * @version 1.00 $Date$
+ * @created 24th January 1996
+ */
 public class AnimatorOffice extends PostOffice
 {
   private OSOffice theOSPostOffice;
 
-  //Attach animator to another post office.
-  public AnimatorOffice(String newID, OSOffice newPostOffice)
+  /**
+   * Attach animator to another post office.
+   *
+   * @param newId the string identifier to register the post office to the
+   * OS post office.
+   * @param OSOffice the post office to register to for universal messages
+   * to pass between.
+   */
+  public AnimatorOffice(String newId, OSOffice newPostOffice)
   {
-    id = newID;
+    id = newId;
     theOSPostOffice = newPostOffice;
     // Register OSPostOffice with Animator Office
     this.addPostOffice(theOSPostOffice);
@@ -38,14 +49,17 @@ public class AnimatorOffice extends PostOffice
     theOSPostOffice.addPostOffice(this);
   }
 
-  public void sendMessage(MessageAdapter aMessage)
+
+  public void sendMessage(MessageAdapter message)
   {
-    //Send to all other registered post offices.
-    sendToPostOffices(aMessage);
-    //Send to locally registered components.
-    localSendMessage(aMessage);
+    sendToPostOffices(message);
+    localSendMessage(message);
   }
 
+  /**
+   * Send a message to all registered post office and to all locally registered
+   * components.
+   */
   public void sendMessage(UniversalMessageAdapter aMessage)
   {
     sendMessage((MessageAdapter) aMessage);
@@ -66,6 +80,11 @@ public class AnimatorOffice extends PostOffice
     }
   }
 
+ /**
+   * Send a message to only registered object of local post office.
+   *
+   * @param message Message to send.
+   */
   public void localSendMessage(AnimatorMessageAdapter maMessage)
   {
     if (maMessage.forPostOffice(this))

@@ -8,10 +8,11 @@ import MessageSystem.PostOffices.MessageHandler;
 import java.util.Enumeration;
 
 /**
- *  Provide message handling centre of operations
- *
- * @author     Bruce Jamieson, Andrew Newman
- * @created    21 October 2000
+ * Provide message handling centre of operations
+ * <P>
+ * @author Bruce Jamieson
+ * @author Andrew Newman
+ * @created 21 October 2000
  */
 public class OSOffice extends PostOffice
 {

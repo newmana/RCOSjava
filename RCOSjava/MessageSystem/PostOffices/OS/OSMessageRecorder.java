@@ -5,11 +5,12 @@ import MessageSystem.Messages.Universal.UniversalMessageAdapter;
 import MessageSystem.PostOffices.Universal.UniversalMessageRecorder;
 
 /**
- *  Recording facilities for all operating system messages.
- *
+ * Recording facilities for all operating system messages.
+ * <P>
  * @author Andrew Newman
  * @created 25th February 2001
  * @version 1.00 $Date$
+ * @see MessageSystem.PostOffices.Universal.UniversalMessageRecorder
  */
 public class OSMessageRecorder extends OSMessageHandler
 {

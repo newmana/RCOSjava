@@ -72,9 +72,10 @@ public abstract class PostOffice extends SimpleMessageHandler
   public abstract void sendToPostOffices(MessageAdapter message);
 
   /**
-   * Send a message to appropriately registered objects.
+   * Send a message to all registered post offices and to all locally registered
+   * components.
    *
-   * @param message Message to send.
+   * @param the message to send to the post office and components.
    */
   public abstract void sendMessage(MessageAdapter message);
 

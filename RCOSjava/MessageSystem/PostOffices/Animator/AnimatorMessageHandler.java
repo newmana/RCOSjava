@@ -53,11 +53,6 @@ public abstract class AnimatorMessageHandler extends SimpleMessageHandler
     postOffice.processMessage(newMessage);
   }
 
-  /**
-   *
-   *
-   * @param message the message to send
-   */
   public void sendMessage(MessageAdapter message)
   {
     postOffice.sendMessage(message);
@@ -83,11 +78,6 @@ public abstract class AnimatorMessageHandler extends SimpleMessageHandler
     postOffice.sendMessage(message);
   }
 
-  /**
-   *
-   *
-   * @param message
-   */
   public void localSendMessage(MessageAdapter message)
   {
     postOffice.processMessage(message);
@@ -103,11 +93,6 @@ public abstract class AnimatorMessageHandler extends SimpleMessageHandler
     postOffice.localSendMessage(message);
   }
 
-  /**
-   *
-   *
-   * @param message
-   */
   public void processMessage(MessageAdapter message)
   {
     try
@@ -121,16 +106,18 @@ public abstract class AnimatorMessageHandler extends SimpleMessageHandler
   }
 
   /**
+   * The method that is called by the post office to a registered handler.  This
+   * is for Animator Messages only.
    *
-   *
-   * @param message
+   * @param message the message to execute and call.
    */
   public abstract void processMessage(AnimatorMessageAdapter message);
 
   /**
+   * The method that is called by the post office to a registered handler.  This
+   * is for Universal Messages only.
    *
-   *
-   * @param message
+   * @param message the message to execute and call.
    */
   public abstract void processMessage(UniversalMessageAdapter message);
 }

@@ -38,7 +38,7 @@ public interface MessageHandler
   public void localSendMessage(MessageAdapter message);
 
   /**
-   * Sends the message globally to all post offices and registered objects.
+   * Sends the message globally to all message handlers.
    *
    * @param the message to send to all the objects.
    */
@@ -85,7 +85,8 @@ public interface MessageHandler
   public void clearHandlers();
 
   /**
-   * The method that is called by the post office when to a registered handler.
+   * The method that is called by the post office to a registered handler.  This
+   * is for PostOffice based message only (those that extend MessageAdapter).
    *
    * @param message the message to do.
    */
