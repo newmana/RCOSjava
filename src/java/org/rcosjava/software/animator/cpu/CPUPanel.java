@@ -136,12 +136,15 @@ public class CPUPanel extends RCOSPanel
     constraints.gridwidth = 1;
     stackList = new JList();
     stackListModel = new DefaultListModel();
-    stackList.setVisibleRowCount(8);
+    stackList.setVisibleRowCount(10);
+    stackList.setFixedCellWidth(150);
     stackList.setModel(stackListModel);
     stackList.setForeground(defaultFgColour);
     stackList.setBackground(listColour);
     gridBag.setConstraints(stackList, constraints);
     JScrollPane stackListPane = new JScrollPane(stackList);
+    stackListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    stackListPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     main.add(stackListPane);
 
     // Middle/CPU section
@@ -206,11 +209,14 @@ public class CPUPanel extends RCOSPanel
     codeList = new JList();
     codeListModel = new DefaultListModel();
     codeList.setModel(codeListModel);
-    codeList.setVisibleRowCount(8);
+    codeList.setVisibleRowCount(10);
+    codeList.setFixedCellWidth(150);
     codeList.setForeground(defaultFgColour);
     codeList.setBackground(listColour);
     gridBag.setConstraints(codeList, constraints);
     JScrollPane codeListPane = new JScrollPane(codeList);
+    codeListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    codeListPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     main.add(codeListPane);
 
     // Add the two panels to the frame.
@@ -253,7 +259,6 @@ public class CPUPanel extends RCOSPanel
     if (processMemory != null)
     {
       // Each instruction is 8 bytes long.
-
       linesOfCode = (int) processMemory.getSegmentSize() / 8;
 
       for (count = 0; count < linesOfCode; count++)
@@ -288,23 +293,17 @@ public class CPUPanel extends RCOSPanel
         int listSize = codeList.getVisibleRowCount();
         int visible = cpuAnimator.getContext().getProgramCounter() + listSize / 2;
 
-        //int listSize = codeList.getRows();
-        //getRows doesn't seem to be reliable
-
         if (codeListModel.size() > cpuAnimator.getContext().getProgramCounter())
         {
-//      codeList.makeVisible(cpuAnimator.getContext().getProgramCounter());
           codeList.setSelectedIndex(cpuAnimator.getContext().getProgramCounter());
           codeList.ensureIndexIsVisible(cpuAnimator.getContext().getProgramCounter());
         }
         else
         {
-//      codeList.makeVisible(programSize - 1);
-//      codeList.setSelectedIndex(programSize - 1);
           codeList.ensureIndexIsVisible(codeListModel.size() - 1);
         }
+
         // make the selected instruction the ProgramCounter
-//    codeList.select(cpuAnimator.getContext().getProgramCounter());
         codeList.setSelectedIndex(cpuAnimator.getContext().getProgramCounter());
       }
     });
@@ -324,6 +323,7 @@ public class CPUPanel extends RCOSPanel
 
         for (int count = 0; count < 5; count++)
         {
+          codeListModel.addElement("No code");
           stackListModel.addElement("Empty Stack");
         }
         irValue.setText("None");
