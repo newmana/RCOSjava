@@ -24,7 +24,7 @@ import java.io.Serializable;
  * 23/03/96 Moved into CPU package.
  * </DD></DT>
  * <P>
- * @see net.sourceforge.rcosjava.hardware.CPU
+ * @see net.sourceforge.rcosjava.hardware.cpu.CPU
  * @author Andrew Newman.
  * @author David Jones.
  * @version 1.00 $Date$
