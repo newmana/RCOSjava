@@ -9,7 +9,6 @@ import org.sablecc.simplec.analysis.*;
 import org.sablecc.simplec.node.*;
 import org.sablecc.simplec.lexer.*;
 import org.sablecc.simplec.parser.*;
-import org.sablecc.simplec.tool.Version;
 
 /**
  * A function symbol is a call to a function.
@@ -22,7 +21,7 @@ public class Function extends Symbol
 {
   private int noParameters;
 
-  public Function(String newName, int newLevel, short newOffset,
+  public Function(String newName, short newLevel, short newOffset,
       int newNoParameters)
   {
     name = newName;

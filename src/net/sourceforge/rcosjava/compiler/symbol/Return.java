@@ -9,7 +9,6 @@ import org.sablecc.simplec.analysis.*;
 import org.sablecc.simplec.node.*;
 import org.sablecc.simplec.lexer.*;
 import org.sablecc.simplec.parser.*;
-import org.sablecc.simplec.tool.Version;
 
 /**
  * A return symbol is the type retuned by the return statmenet in a function.

@@ -1,6 +1,7 @@
 package net.sourceforge.rcosjava.compiler.symbol;
 
 import net.sourceforge.rcosjava.hardware.cpu.*;
+import net.sourceforge.rcosjava.compiler.Compiler;
 import net.sourceforge.rcosjava.software.util.FIFOQueue;
 import java.io.*;
 import java.net.*;
@@ -10,7 +11,6 @@ import org.sablecc.simplec.analysis.*;
 import org.sablecc.simplec.node.*;
 import org.sablecc.simplec.lexer.*;
 import org.sablecc.simplec.parser.*;
-import org.sablecc.simplec.tool.Version;
 
 /**
  * A symbol table which holds details for each variable.  Each variable contains
@@ -25,7 +25,7 @@ public class SymbolTable
   /**
    * Hashmap containing the symbols.
    */
-  private HashMap instructions;
+  private HashMap symbols;
 
   /**
    * The single instance of the symbol table.
@@ -37,7 +37,7 @@ public class SymbolTable
    */
   private SymbolTable()
   {
-    instructions = new HashMap();
+    symbols = new HashMap();
   }
 
   /**
@@ -59,25 +59,29 @@ public class SymbolTable
    * Gets the name of the symbol and saves it to
    */
   public void addSymbol(Symbol newSymbol)
-    throws Exception
+    throws ParserException, IOException, LexerException
   {
-    if (instructions.containsKey(newSymbol.getName()))
+    System.out.println("Adding symbol: " + newSymbol.getName());
+    if (symbols.containsKey(newSymbol.getName()))
     {
-      ArrayList list = (ArrayList) instructions.get(newSymbol.getName());
+      ArrayList list = (ArrayList) symbols.get(newSymbol.getName());
       if (null == list.get(newSymbol.getLevel()))
       {
         list.add(newSymbol.getLevel(), newSymbol);
       }
       else
       {
-        throw new Exception("Symbol already exists");
+        throw new org.sablecc.simplec.parser.ParserException(
+          Compiler.getLexer().peek().getLine(),
+          Compiler.getLexer().peek().getPos(),
+          "Duplicate declaration of " + newSymbol.getName());
       }
     }
     else
     {
       ArrayList list = new ArrayList();
       list.add(newSymbol.getLevel(), newSymbol);
-      instructions.put(newSymbol.getName(), list);
+      symbols.put(newSymbol.getName(), list);
     }
   }
 
@@ -122,7 +126,7 @@ public class SymbolTable
   }
 
   /**
-   * Find the symbol if the name exists in the instructions hashmap and if
+   * Find the symbol if the name exists in the symbols hashmap and if
    * the level matches.
    *
    * @param name the name of the symbol to find.
@@ -131,11 +135,12 @@ public class SymbolTable
    */
   private Symbol getSymbol(String name, int level) throws Exception
   {
+    System.out.println("Getting symbol: " + name);
     Symbol symbol = null;
 
-    if (instructions.containsKey(name))
+    if (symbols.containsKey(name))
     {
-      ArrayList list = (ArrayList) instructions.get(name);
+      ArrayList list = (ArrayList) symbols.get(name);
 
       if (null != list.get(level))
       {
