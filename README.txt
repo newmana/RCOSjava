@@ -1,5 +1,5 @@
-RCOSjava Version 1.0
-=====================
+** RCOSjava Version 1.0 **
+==========================
 
 
 ** Where is it? **
@@ -30,9 +30,9 @@ The requirements for running RCOSjava are:
 
 
 ** Running It **
-===========================
+================
 
-If you are using the standard distribution you will have three directories:
+If you are using the user distribution you will have three directories:
 bin, dist and lib.
 
 RCOSjava requires three programs running to operate successfully:
@@ -64,8 +64,38 @@ If you already have a web server set-up copy the entire contents of the
 above addresses.
 
 
+** Creating Your Own PCode Files **
+===================================
+
+There are two basic ways of producing new PCode files:
+* Using PASM or
+* Simple C compiler.
+
+PASM is the PCode assembler/dissambler.  To run it go into the bin directory
+and run either pasm.bat (for Windows) or pasm.sh (for Unix).
+
+To decompile a file use:
+./pasm.bat -d filename
+
+To compile a file:
+./pasm.bat -c filename
+
+The Simple C compiler is a compiler which takes a simplified C grammar (with
+RCOSjava specific extensions) and compiles it into PCode.  To run it execute 
+either compiler.bat (for Windows) or compile.sh (for Unix) from the bin
+directory.
+
+For more information on the extentions and limitations see the documentation 
+on the local web site at:
+http://localhost/Resources/compiler/index.html
+
+Once you have compiled the new PCode programs copy them into the
+dist/pll2/executable directory.  The next time you try to load a program it
+will appear there.
+
+
 ** Compiling **
-==============================
+===============
 
 If you have the source distribution you will four directories: bin, lib,
 src and web.  You will need to compile RCOSjava in order to be able to
@@ -79,13 +109,16 @@ This requires:
 The default process of installing RCOSjava is to use the Jakarta Ant build
 program.
 
-Just go to the root directory of the source code, and execute "ant".
+Just go to the root directory of the source code, and execute "ant".  Or if
+you prefer there are two scripts build.sh (for Unix) and build.bat (for
+Windows) that you can modify to your current installation.
 
-After compilation the directories "dist" and "javadoc" will have 
+After compilation, the directories "dist" and "javadoc" will have 
 been generated.  Follow the instructions above, after compilation, to run
 it.
 
-To recompile the SableCC grammar use the "sablecc" target.
+To recompile the Simple C SableCC grammar use the "sablecc" target.
+
 
 ** Programs in RCOSjava **
 ==========================
