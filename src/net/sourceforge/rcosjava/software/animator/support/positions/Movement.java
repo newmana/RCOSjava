@@ -166,10 +166,6 @@ public class Movement
       currentX += currentPosition.getDeltaX();
       currentY += currentPosition.getDeltaY();
 
-//      System.out.println("Current X,Y= " + currentX + " " + currentY);
-//      System.out.println("Item Count " + currentPosition + " Max " + positions.itemCount());
-//      System.out.println("next x,y = " + nextPosition.iDirectionX + " " + nextPosition.iDirectionY);
-
       if (((currentPosition.getDeltaX() > 0) &&
            (currentX >= nextPosition.getX())) ||
           ((currentPosition.getDeltaX() < 0) &&

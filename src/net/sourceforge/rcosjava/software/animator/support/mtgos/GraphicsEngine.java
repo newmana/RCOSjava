@@ -153,7 +153,6 @@ public class GraphicsEngine extends Canvas
 
     while (!found)
     {
-      //System.out.println("Looking for3: " + tempObjectChain.object.mtgoText);
       if (tempObjectChain.object.text.compareTo(mtgoText)==0)
       {
         found = true;

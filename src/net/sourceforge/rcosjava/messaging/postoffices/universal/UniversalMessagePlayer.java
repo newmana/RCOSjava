@@ -81,7 +81,6 @@ public class UniversalMessagePlayer
       osPostOffice.localSendMessage((OSMessageAdapter) tmpMessage);
     else if (tmpMessage.forPostOffice(animatorPostOffice))
       animatorPostOffice.localSendMessage((AnimatorMessageAdapter) tmpMessage);
-    //System.out.println(counter + "Got Message: " + tmpMessage.getClass().getName());
   }
 
   /**

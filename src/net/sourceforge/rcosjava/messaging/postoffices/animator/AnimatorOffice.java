@@ -108,7 +108,6 @@ public class AnimatorOffice extends PostOffice
    */
   public void localSendMessage(AnimatorMessageAdapter message)
   {
-    //System.out.println("AO Sending: " + message);
     if (message.forPostOffice(this))
     {
       //Go through the hashtable returning all the handlers

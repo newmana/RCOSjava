@@ -143,7 +143,7 @@ public class ProcessManagerAnimator extends RCOSAnimator
         }
         catch (Exception e)
         {
-          System.out.println(this + "- exception: " + e);
+          System.err.println(this + "- exception: " + e);
         }
         currentProcesses.goToNext();
       }
