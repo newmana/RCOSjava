@@ -155,11 +155,6 @@ public class ProcessSchedulerPanel extends RCOSPanel
   private boolean movementSetup = false;
 
   /**
-   * Process Control Block frame to display.
-   */
-  private ProcessControlBlockFrame pcbFrame;
-
-  /**
    * Constructor for the ProcessSchedulerFrame object
    *
    * @param images Description of Parameter
@@ -190,10 +185,6 @@ public class ProcessSchedulerPanel extends RCOSPanel
    */
   public void setupLayout(Component c)
   {
-    // Setup Process Control Block Frame
-    pcbFrame = new ProcessControlBlockFrame(350, 250, myProcessScheduler);
-    pcbFrame.setupLayout(((JComponent) this));
-
     engine = new GraphicsEngine();
 
     JPanel optionsPanel = new JPanel();
@@ -956,7 +947,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
    */
   private void displayPCB(int processId)
   {
-    pcbFrame.setVisible(true);
+    myProcessScheduler.displayPCB(processId);
   }
 
   /**
