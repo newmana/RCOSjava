@@ -129,8 +129,8 @@ public class CPUPanel extends RCOSPanel
     stackList.setVisibleRowCount(10);
     stackList.setFixedCellWidth(150);
     stackList.setModel(stackListModel);
-    stackList.setForeground(defaultFgColour);
-    stackList.setBackground(listColour);
+    stackList.setForeground(listFgColour);
+    stackList.setBackground(listBgColour);
     gridBag.setConstraints(stackList, constraints);
     JScrollPane stackListPane = new JScrollPane(stackList);
     stackListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -201,8 +201,8 @@ public class CPUPanel extends RCOSPanel
     codeList.setModel(codeListModel);
     codeList.setVisibleRowCount(10);
     codeList.setFixedCellWidth(150);
-    codeList.setForeground(defaultFgColour);
-    codeList.setBackground(listColour);
+    codeList.setForeground(listFgColour);
+    codeList.setBackground(listBgColour);
     gridBag.setConstraints(codeList, constraints);
     JScrollPane codeListPane = new JScrollPane(codeList);
     codeListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);

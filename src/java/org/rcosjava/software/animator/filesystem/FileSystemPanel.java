@@ -231,7 +231,7 @@ public class FileSystemPanel extends RCOSPanel
     browserPanel.setBorder(BorderFactory.createCompoundBorder(
         browserTitle, BorderFactory.createEmptyBorder(3, 3, 3, 3)));
 
-    browserPanel.add(new JLabel("Hellooooooooooooooooooooooo"));
+    browserPanel.add(new JLabel("                            "));
 
     constraints.gridheight = 2;
     constraints.gridwidth = 1;
