@@ -53,8 +53,10 @@ public class Compiler
       // Add header codes.
       addInstruction(0, new Instruction(OpCode.JUMP.getValue(), (byte) 0,
           (short) 1));
-      addInstruction(1, new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
-          (short) 1));
+
+      // Global variables declared
+//      addInstruction(1, new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
+//          (short) 4));
 
       // Print out result to file
       Iterator tmpIter = instructions.iterator();
