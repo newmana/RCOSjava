@@ -159,13 +159,13 @@ public class IPCManagerPanel extends RCOSPanel
     semValue = new JTextField(2);
 
     shmOption.addItem("None      ");
-    shmOption.setBackground(Color.black);
-    shmOption.setForeground(Color.white);
+    shmOption.setForeground(choiceColour);
+    shmOption.setBackground(defaultBgColour);
     shmOption.setSelectedIndex(0);
 
     semOption.addItem(NONE);
-    semOption.setBackground(Color.black);
-    semOption.setForeground(Color.white);
+    semOption.setForeground(choiceColour);
+    semOption.setBackground(defaultBgColour);
     semOption.setSelectedIndex(0);
     selectedSemaphoreName = NONE;
 
@@ -298,7 +298,7 @@ public class IPCManagerPanel extends RCOSPanel
   {
     if (semOption.getItemCount() == 1)
     {
-      semOption.removeAll();
+      semOption.removeAllItems();
       semOption.addItem(SOME);
       selectedSemaphoreName = SOME;
     }
@@ -384,7 +384,7 @@ public class IPCManagerPanel extends RCOSPanel
       semOption.removeItem(semaphoreId);
       if (semOption.getItemCount() == 1)
       {
-        semOption.removeAll();
+        semOption.removeAllItems();
         semOption.addItem(NONE);
         selectedSemaphoreName = NONE;
       }
@@ -408,7 +408,7 @@ public class IPCManagerPanel extends RCOSPanel
   {
     if (shmOption.getItemCount() == 1)
     {
-      shmOption.removeAll();
+      shmOption.removeAllItems();
       shmOption.addItem(SOME);
       selectedSharedMemoryName = SOME;
     }
@@ -457,7 +457,7 @@ public class IPCManagerPanel extends RCOSPanel
         shmOption.removeItem(sharedMemoryId);
         if (shmOption.getItemCount() == 1)
         {
-          shmOption.removeAll();
+          shmOption.removeAllItems();
           shmOption.addItem(NONE);
           selectedSharedMemoryName = NONE;
         }
@@ -559,7 +559,6 @@ public class IPCManagerPanel extends RCOSPanel
           sharedMemoryMap.get(selectedSharedMemoryName);
 
       shmListModel.addElement((String) tmpGraphic.getValue());
-
       Iterator tmpIter = tmpGraphic.getAttachedProcesses();
 
       while (tmpIter.hasNext())
