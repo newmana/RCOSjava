@@ -328,27 +328,16 @@ public class FileServer
    * @param filename Description of Parameter
    * @param outputData Description of Parameter
    */
-  private synchronized void handleWriteFileRequest(String filename, String outputData)
+  private synchronized void handleWriteFileRequest(String filename,
+      String outputData)
   {
-    FileOutputStream outputFile;
-    DataOutputStream outputStream;
-
-    // Open (with append) the file and throw an error if it takes exception to it.
+    // Open a file and write to it.
     try
     {
-      outputFile = new FileOutputStream(filename, false);
-    }
-    catch (FileNotFoundException exception)
-    {
-      fileMessage.replyFileDoesNotExistMessage(filename);
-      return;
-    }
-    // Setup the necessary streams and read the file contents.
-    outputStream = new DataOutputStream(outputFile);
-    try
-    {
-      outputStream.write(outputData.getBytes());
-      outputStream.close();
+      BufferedWriter outputFile = new BufferedWriter(new FileWriter(filename));
+      outputFile.write(outputData);
+      outputFile.flush();
+      outputFile.close();
     }
     catch (IOException theException)
     {
@@ -366,33 +355,16 @@ public class FileServer
   private synchronized void handleStatFileRequest(String filename)
   {
     // Setup variables.
-    FileInputStream inputFile;
-    DataInputStream inputStream;
+    File file = new File(filename);
 
-    // Open the file and throw an error if it takes exception to it.
-    try
-    {
-      inputFile = new FileInputStream(filename);
-    }
-    catch (FileNotFoundException exception)
+    // Check if file exists - if not return error.
+    if (!file.exists())
     {
       fileMessage.replyFileDoesNotExistMessage(filename);
       return;
     }
-    // Setup the necessary streams and read the file contents.
-    inputStream = new DataInputStream(inputFile);
 
-    int fileSize;
-
-    try
-    {
-      fileSize = inputStream.available();
-      inputStream.close();
-    }
-    catch (IOException theException)
-    {
-      fileSize = 0;
-    }
-    fileMessage.replyFileStat(fileSize);
+    // If the file exists get the length and return it.
+    fileMessage.replyFileStat(file.length());
   }
 }
