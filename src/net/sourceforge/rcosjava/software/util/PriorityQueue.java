@@ -1,9 +1,15 @@
 package net.sourceforge.rcosjava.software.util;
 
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * Implements priority queue (based on compareTo value).
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 09/05/2001 Changed insert to use comparable objects instead of string
+ * vales.
+ * </DD></DT>
  * <P>
  * @author Andrew Newman.
  * @version 1.00 $Date$
@@ -49,7 +55,8 @@ public class PriorityQueue extends BaseQueue
    * Insert the element into the queue based on it's comparison with the other
    * elements in the queue.  It will create a queue that is ascending is
    * value.  Therefore, greater priority will be taken off the queue first
-   * (because elements are removed at the end).
+   * (because elements are removed at the end).  Requires that the process
+   * extends java.lang.Comparable so that compareTo may-be called.
    *
    * @param theObject the object to insert into the queue.
    */
@@ -65,19 +72,21 @@ public class PriorityQueue extends BaseQueue
     }
     else
     {
-      if (compare(theObject, elementAt(position)) == 0)
-        insertElementAt(theObject, 0);
-      else
+      if (theObject instanceof java.lang.Comparable)
       {
-        while (compare(theObject, elementAt(position)) > 0)
+        Comparable compObject = (Comparable) theObject;
+        if (compObject.compareTo(elementAt(position)) == 0)
+          insertElementAt(theObject, 0);
+        else
         {
-          System.out.println("Position: " + String.valueOf(position));
-          position++;
-          if (position == size())
-            break;
+          while (compObject.compareTo(elementAt(position)) > 0)
+          {
+            position++;
+            if (position == size())
+              break;
+          }
+          insertElementAt(theObject, position);
         }
-        insertElementAt(theObject, position);
-        System.out.println("Element insterted into " + String.valueOf(position));
       }
     }
   }
