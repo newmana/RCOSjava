@@ -465,8 +465,8 @@ Productions
         {unary}  unary_expression;
 
     binary_expression =
-        {identifier}       l_par identifier binop value r_par |    // will be removed from AST
-        {constant}         l_par constant binop value r_par |      // will be removed from AST
+        {identifier} l_par identifier binop value r_par | // will be removed from AST
+        {constant}   l_par constant binop value r_par | // will be removed from AST
 
 // For modified AST
         ( l_par [l_value]:value binop [r_value]:value r_par );
