@@ -3,7 +3,7 @@ package org.rcosjava.software.animator;
 import fr.dyade.koala.serialization.GeneratorInputStream;
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.JButton;
+import javax.swing.*;
 import java.io.*;
 
 import java.lang.reflect.Method;
@@ -22,7 +22,7 @@ import java.lang.reflect.Method;
  * @created 22nd January 1996
  * @version 1.00 $Date$
  */
-public class RCOSFrame extends Frame implements Serializable
+public class RCOSFrame extends JFrame implements Serializable
 {
   /**
    * Default colour to display text on all buttons (Yellow).
@@ -83,14 +83,16 @@ public class RCOSFrame extends Frame implements Serializable
    * Default title font size (TimesRoman, Plain, 18).
    */
   public static Font titleFont = new Font("TimesRoman", Font.PLAIN, 16);
+
   /**
    * Description of the Field
    */
   protected JButton tmpButton;
+
   /**
    * Description of the Field
    */
-  protected Component myComponent;
+  protected JComponent myComponent;
 
   /**
    * Constructor for the RCOSFrame object
@@ -118,7 +120,7 @@ public class RCOSFrame extends Frame implements Serializable
    *
    * @param c Description of Parameter
    */
-  public void setupLayout(Component c)
+  public void setupLayout(JComponent c)
   {
     myComponent = c;
 
