@@ -30,117 +30,356 @@ public class Operator extends WordParameter
   /**
    * Operation constant (for OPCODE_OPR) RETurn
    */
-  public final static Operator RETURN = new Operator((short) 0, "_RET");
+  public final static Operator RETURN = new Operator((short) 0, "_RET")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().setStackPointer((short) (cpu.getContext().getBasePointer() - 1));
+      cpu.getContext().setBasePointer((short)
+          (cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 2)));
+      cpu.getContext().setProgramCounter((short)
+          (cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 3)));
+      //codeToExecute = !(cpu.getContext().getBasePointer() <= 0);
+
+      cpu.setProcessFinished(cpu.getContext().getBasePointer() <= 0);
+      cpu.setCodeToExecute(!cpu.processFinished());
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) NEGative
    */
-  public final static Operator NEGATIVE = new Operator((short) 1, "_NEG");
+  public final static Operator NEGATIVE = new Operator((short) 1, "_NEG")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          (short) (0 - cpu.getProcessStack().read(cpu.getContext().getStackPointer())));
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) ADDition
    */
-  public final static Operator ADD = new Operator((short) 2, "_ADD");
+  public final static Operator ADD = new Operator((short) 2, "_ADD")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().decStackPointer();
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          (short) (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) +
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+    }
+  };
+
 
   /**
    * Operation constant (for OPCODE_OPR) SUBtraction
    */
-  public final static Operator SUBTRACT = new Operator((short) 3, "_SUB");
+  public final static Operator SUBTRACT = new Operator((short) 3, "_SUB")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().decStackPointer();
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          (short) (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) -
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) MULtiply
    */
-  public final static Operator MULTIPLY = new Operator((short) 4, "_MUL");
+  public final static Operator MULTIPLY = new Operator((short) 4, "_MUL")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().decStackPointer();
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          (short) (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) *
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) DIVision
    */
-  public final static Operator DIVIDE = new Operator((short) 5, "_DIV");
+  public final static Operator DIVIDE = new Operator((short) 5, "_DIV")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().decStackPointer();
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          (short) (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) /
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) LOW bit
    */
-  public final static Operator LOW_BIT = new Operator((short) 6, "_LOW");
+  public final static Operator LOW_BIT = new Operator((short) 6, "_LOW")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          (short) (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) & 1));
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) MODulus
    */
-  public final static Operator MODULUS = new Operator((short) 7, "_MOD");
+  public final static Operator MODULUS = new Operator((short) 7, "_MOD")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().decStackPointer();
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          (short) (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) %
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) EQual test
    */
-  public final static Operator EQUAL = new Operator((short) 8, "_EQ");
+  public final static Operator EQUAL = new Operator((short) 8, "_EQ")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().decStackPointer();
+      if (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) ==
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1))
+      {
+        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 1);
+      }
+      else
+      {
+        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 0);
+      }
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) Not Equal test
    */
-  public final static Operator NOT_EQUAL = new Operator((short) 9, "_NE");
+  public final static Operator NOT_EQUAL = new Operator((short) 9, "_NE")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().decStackPointer();
+      if (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) !=
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1))
+      {
+        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 1);
+      }
+      else
+      {
+        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 0);
+      }
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) Less Than test
    */
-  public final static Operator LESS_THAN = new Operator((short) 10, "_LT");
+  public final static Operator LESS_THAN = new Operator((short) 10, "_LT")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().decStackPointer();
+      if (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) <
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1))
+      {
+        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 1);
+      }
+      else
+      {
+        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 0);
+      }
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) Greater than or Equal test
    */
-  public final static Operator GREATER_THAN_OR_EQUAL = new Operator((short) 11, "_GE");
+  public final static Operator GREATER_THAN_OR_EQUAL = new Operator((short) 11, "_GE")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().decStackPointer();
+      if (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) >=
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1))
+      {
+        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 1);
+      }
+      else
+      {
+        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 0);
+      }
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) Greater Than test
    */
-  public final static Operator GREATER_THAN = new Operator((short) 12, "_GT");
+  public final static Operator GREATER_THAN = new Operator((short) 12, "_GT")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().decStackPointer();
+      if (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) >
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1))
+      {
+        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 1);
+      }
+      else
+      {
+        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 0);
+      }
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) Less than or Equal test
    */
-  public final static Operator LESS_THAN_OR_EQUAL = new Operator((short) 13, "_LE");
+  public final static Operator LESS_THAN_OR_EQUAL = new Operator((short) 13, "_LE")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().decStackPointer();
+      if (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) <=
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1))
+      {
+        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 1);
+      }
+      else
+      {
+        cpu.getProcessStack().write(cpu.getContext().getStackPointer(), 0);
+      }
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) logical OR
    */
-  public final static Operator OR = new Operator((short) 14, "_OR");
+  public final static Operator OR = new Operator((short) 14, "_OR")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().decStackPointer();
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) |
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) logical AND
    */
-  public final static Operator AND = new Operator((short) 15, "_AND");
+  public final static Operator AND = new Operator((short) 15, "_AND")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().decStackPointer();
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) &
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) logical XOR
    */
-  public final static Operator XOR = new Operator((short) 16, "_XOR");
+  public final static Operator XOR = new Operator((short) 16, "_XOR")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().decStackPointer();
+      cpu.getContext().decStackPointer();
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) ^
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) logical NOT
    */
-  public final static Operator NOT = new Operator((short) 17, "_NOT");
+  public final static Operator NOT = new Operator((short) 17, "_NOT")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          (short) ~cpu.getProcessStack().read(cpu.getContext().getStackPointer()));
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) SHift Left operation
    */
-  public final static Operator SHIFT_LEFT = new Operator((short) 18, "_SHL");
+  public final static Operator SHIFT_LEFT = new Operator((short) 18, "_SHL")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().decStackPointer();
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) <<
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) SHift Right operation
    */
-  public final static Operator SHIFT_RIGHT = new Operator((short) 19, "_SHR");
+  public final static Operator SHIFT_RIGHT = new Operator((short) 19, "_SHR")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().decStackPointer();
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          (cpu.getProcessStack().read(cpu.getContext().getStackPointer()) >>
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() + 1)));
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) INCrement
    */
-  public final static Operator INCREMENT = new Operator((short) 20, "_INC");
+  public final static Operator INCREMENT = new Operator((short) 20, "_INC")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          (short) cpu.getProcessStack().read(cpu.getContext().getStackPointer()) + 1);
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) DECrement
    */
-  public final static Operator DECREMENT = new Operator((short) 21, "_DEC");
+  public final static Operator DECREMENT = new Operator((short) 21, "_DEC")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          (short) cpu.getProcessStack().read(cpu.getContext().getStackPointer()) - 1);
+    }
+  };
 
   /**
    * Operation constant (for OPCODE_OPR) CoPY
    */
-  public final static Operator COPY = new Operator((short) 22, "_CPY");
+  public final static Operator COPY = new Operator((short) 22, "_CPY")
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().incStackPointer();
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() - 1));
+    }
+  };
 
   /**
    * The internal value of the operator. Current valid between 0 and 22.
@@ -165,6 +404,17 @@ public class Operator extends WordParameter
     allOperatorsByName.put(operatorName, this);
     allOperatorsByValue.put(new Short(operatorValue), this);
   }
+
+  /**
+   * Execute the opcode on the CPU.
+   *
+   * @param cpu the cpu to execute the code.
+   */
+  void execute(CPU cpu)
+  {
+    //By default do nothing.
+  }
+
 
   /**
    * @param operatorValue Description of Parameter
