@@ -44,7 +44,7 @@ import org.rcosjava.software.filesystem.FileSystemManager;
 import org.apache.log4j.*;
 
 /**
- * Main startup file for RCOSjava Version 0.4.1
+ * Main startup file for RCOSjava Version 0.4.2
  * <P>
  * <DT> <B>History:</B>
  * <DD> 22/01/96 Will execute any given PCD file that uses output only, output
@@ -84,20 +84,13 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   /**
    * Welcome message to be displayed.
    */
-  private final static String WELCOME = "Welcome to RCOSjava Version 0.5";
-
-  /**
-   * Get line separator
-   */
-  private final static String lineSeparator =
-      System.getProperties().getProperty("line.separator");
+  private final static String WELCOME = "Welcome to RCOSjava Version 0.4.2";
 
   /**
    * Copyright notice.
    */
-  private final static String INFO = "Copyright 1995-2002." + lineSeparator +
-      "Version 0.5." + lineSeparator + "Authors: David Jones, Brett Carter, " +
-      "Bruce Jamieson, and Andrew Newman";
+  private final static String INFO = "Copyright 1995-2002.  Version 0.4.2." +
+      "Authors: David Jones, Brett Carter, Bruce Jamieson, and Andrew Newman";
 
   /**
    * How many terminals wide.
@@ -355,7 +348,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
    */
   public boolean getImagesAndSound()
   {
-    String rootDir = "org/rcosjava/software/animator";
+    String rootDir = "/org/rcosjava/software/animator";
 
 //    clips[0] = getAudioClip(getClass().getResource(rootDir +
 //        "/audio/start.au"));
@@ -365,21 +358,18 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     try
     {
       // Get Terminal Manager images.
-      tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-        "/images/termon.jpg");
+      tmpURL = getClass().getResource(rootDir + "/images/termon.jpg");
       terminalImages[0] = new ImageIcon(tmpURL);
-      tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-        "/images/termoff.jpg");
+
+      tmpURL = getClass().getResource(rootDir + "/images/termoff.jpg");
       terminalImages[1] = new ImageIcon(tmpURL);
 
       // Get Process Scheduler images.
-      tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-        "/images/rcoscpu.jpg");
+      tmpURL = getClass().getResource(rootDir + "/images/rcoscpu.jpg");
       processImages[0] = new ImageIcon(tmpURL);
 
       // Get Memory Manager images.
-      tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-        "/images/memory.jpg");
+      tmpURL = getClass().getResource(rootDir + "/images/memory.jpg");
       ipcImages[0] = new ImageIcon(tmpURL);
     }
     catch (NullPointerException npe)
