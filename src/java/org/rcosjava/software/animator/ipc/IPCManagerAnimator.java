@@ -55,12 +55,12 @@ public class IPCManagerAnimator extends RCOSAnimator
   /**
    * The current id of the semaphore selected.
    */
-  private String selectedSemaphoreName;
+  private String selectedSemaphoreName = "";
 
   /**
    * The current id of the shared memory selected.
    */
-  private String selectedSharedMemoryName;
+  private String selectedSharedMemoryName = "";
 
   /**
    * Constructor for the IPCManagerAnimator object
