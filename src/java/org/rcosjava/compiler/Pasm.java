@@ -157,7 +157,7 @@ public class Pasm
   public static void compile(InputStream input, OutputStream output,
       int inputLineOffset)
   {
-    String instructionLine = new String();
+    String instructionLine = "";
     try
     {
       BufferedReader inputBuffer =
