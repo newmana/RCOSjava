@@ -1,6 +1,7 @@
 package net.sourceforge.rcosjava.compiler;
 
 import net.sourceforge.rcosjava.hardware.cpu.*;
+import net.sourceforge.rcosjava.compiler.symbol.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -20,31 +21,12 @@ import org.sablecc.simplec.tool.Version;
  */
 public class VariableCompiler extends DepthFirstAdapter
 {
-  private static boolean isInFunction;
   private static short variableStackPointer = 0;
-  private static int basePosition = 0;
-  private static HashMap globalVarsTable = new HashMap();
-  private HashMap localVarsTable = new HashMap();
-  private static int anonymousVariableCounter = 0;
+  private SymbolTable table;
 
   public VariableCompiler()
   {
-    isInFunction = false;
-  }
-
-  public VariableCompiler(boolean newIsInFunction)
-  {
-    isInFunction = newIsInFunction;
-  }
-
-  public static void isInFunction()
-  {
-    isInFunction = true;
-  }
-
-  public static void isOutFunction()
-  {
-    isInFunction = false;
+    table = SymbolTable.getInstance();
   }
 
   /**
@@ -91,13 +73,18 @@ public class VariableCompiler extends DepthFirstAdapter
       node.getTypeSpecifier() instanceof AUnsignedShortTypeSpecifier ||
       node.getTypeSpecifier() instanceof ACharTypeSpecifier)
     {
-//      allocateVariable(node.getDeclarator().toString(), 2,
-//        getArraySize(node.getDeclarator().toString()));
-//    }
-//    else if ()
-//    {
-      allocateVariable(node.getDeclarator().toString(), 1,
-        getArraySize(node.getDeclarator().toString()));
+      try
+      {
+        Variable newVar = new Variable(node.getDeclarator().toString().trim(),
+            Compiler.getLevel(), Compiler.getInstructionIndex());
+        System.out.println("Name: " + node.getDeclarator().toString().trim());
+        System.out.println("Level: " + Compiler.getLevel());
+        table.addSymbol(newVar);
+      }
+      catch (Exception e)
+      {
+        e.printStackTrace();
+      }
     }
     else
     {
@@ -121,55 +108,5 @@ public class VariableCompiler extends DepthFirstAdapter
         declarator.indexOf("]")).trim());
     }
     return arraySize;
-  }
-
-  public String allocateVariable(int noBits, int size)
-  {
-    String name = "anonymous" + anonymousVariableCounter++;
-    allocateVariable(name, noBits, size);
-    return name;
-  }
-
-  /**
-   * Allocate the variables.  Used for initial jump once compiled and for
-   * referral later on.  Store for both global and local variables.  Locals will
-   * be cleaned up by deallocateVariable.
-   */
-  public void allocateVariable(String name, int noBits, int size)
-  {
-    name = name.trim();
-    if (isInFunction)
-    {
-      System.out.println("Allocating local: " + name + " position:" +
-        variableStackPointer);
-      localVarsTable.put(name, new Short(variableStackPointer));
-    }
-    else
-    {
-      System.out.println("Allocating global: " + name + " position:" +
-        variableStackPointer);
-      globalVarsTable.put(name, new Short(variableStackPointer));
-    }
-    variableStackPointer += noBits * size;
-  }
-
-  public static short getVariableStackPointer()
-  {
-    return variableStackPointer;
-  }
-
-  public short getVariableLocation(String name)
-  {
-    short location = -1;
-    name = name.trim();
-    if (localVarsTable.containsKey(name))
-    {
-      location = ((Short) localVarsTable.get(name)).shortValue();
-    }
-    else if (globalVarsTable.containsKey(name))
-    {
-      location = ((Short) globalVarsTable.get(name)).shortValue();
-    }
-    return location;
   }
 }

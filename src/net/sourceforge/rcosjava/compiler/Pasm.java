@@ -37,9 +37,9 @@ public class Pasm
     String theFileName = args[1];
 
     if (theSwitch.compareToIgnoreCase("-d") == 0)
-      decompile(theFileName);
+      decompileFileToStdOut(theFileName, true);
     else if (theSwitch.compareToIgnoreCase("-c") == 0)
-      compile(theFileName);
+      compileFileToStdOut(theFileName, true);
     else
       printUsageMessage();
   }
@@ -60,12 +60,27 @@ public class Pasm
    * Takes a file, reads instruction by instruction and prints it out to
    * standard output.
    */
-  public static void decompile(String theFileName)
+  public static void decompileFileToStdOut(String theFileName,
+      boolean printOffset)
   {
     try
     {
-      DataInputStream inputStream = new DataInputStream(
-        new FileInputStream(theFileName));
+      FileInputStream input = new FileInputStream(theFileName);
+      OutputStream output = System.out;
+      decompile(input, output, printOffset);
+    }
+    catch (java.io.IOException ioe)
+    {
+      ioe.printStackTrace();
+    }
+  }
+
+  public static void decompile(InputStream input, OutputStream output,
+      boolean printOffset)
+  {
+    try
+    {
+      DataInputStream inputStream = new DataInputStream(input);
 
       byte pcodeInstruction[] = new byte[8];
       int eof;
@@ -84,7 +99,13 @@ public class Pasm
           (pcodeInstruction[4]),
           (short) ((pcodeInstruction[5] << 8) + (pcodeInstruction[6])) );
 
-        System.out.println(format.format(offset) + ": " + theInstruction);
+        if (printOffset)
+        {
+          String tmpOffsetStr = format.format(offset) + ": ";
+          output.write(tmpOffsetStr.getBytes());
+        }
+        String instruction = theInstruction + "\n";
+        output.write(instruction.getBytes());
         offset++;
         eof = inputStream.read(pcodeInstruction);
       }
@@ -97,28 +118,56 @@ public class Pasm
 
   /**
    * Takes a file consisting of the pcode mnemonics.  Displays the result to
-   * stdout.
+   * stdout.  The mnemonics have an offset of 7 (the first 7 being offset).
+   * see decompileFileToStdOut method.
    *
    * @param theFileName the filename to compile into pcode.
    */
-  public static void compile(String theFileName)
+  public static void compileFileToStdOut(String theFileName, boolean hasOffset)
   {
-    String instructionLine = new String();
-
     try
     {
-      BufferedReader inputStream = new BufferedReader(
-        new InputStreamReader(new FileInputStream(theFileName)));
+      FileInputStream input = new FileInputStream(theFileName);
+      OutputStream output = System.out;
+      if (hasOffset)
+      {
+        compile(input, output, 7);
+      }
+      else
+      {
+        compile(input, output, 0);
+      }
+    }
+    catch (java.io.IOException ioe)
+    {
+      ioe.printStackTrace();
+    }
+  }
 
+  /**
+   * Compile the given input stream to produce assembly instructions.
+   *
+   * @param input the input stream consisting of the pcode mnemonics
+   * @param output the output stream to write the pcode binary
+   * @param inputLineOffset the offset to start parsing for the pcodes.
+   */
+  public static void compile(InputStream input, OutputStream output,
+      int inputLineOffset)
+  {
+    String instructionLine = new String();
+    try
+    {
+      BufferedReader inputBuffer =
+          new BufferedReader(new InputStreamReader(input));
       byte pcodeInstruction[] = new byte[8];
-      instructionLine = inputStream.readLine();
+      instructionLine = inputBuffer.readLine();
 
       while (instructionLine != null)
       {
-        instructionLine = instructionLine.substring(7);
+        instructionLine = instructionLine.substring(inputLineOffset);
         Instruction theInstruction = new Instruction(instructionLine);
-        System.out.write(theInstruction.toByte(),0,8);
-        instructionLine = inputStream.readLine();
+        output.write(theInstruction.toByte(), 0, 8);
+        instructionLine = inputBuffer.readLine();
       }
     }
     catch (java.lang.StringIndexOutOfBoundsException sioobe)

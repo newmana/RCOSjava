@@ -1,6 +1,7 @@
 package net.sourceforge.rcosjava.compiler;
 
 import net.sourceforge.rcosjava.hardware.cpu.*;
+import net.sourceforge.rcosjava.compiler.symbol.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -20,14 +21,19 @@ import org.sablecc.simplec.tool.Version;
  */
 public class Compiler
 {
+  private static ArrayList instructions = new ArrayList();
+  private static short level;
+  private static short instructionIndex;
+  private static SymbolTable table;
+
   public static void main(String args[])
   {
     System.out.println(Version.banner());
 
-    if(args.length != 1)
+    if(args.length != 2)
     {
       System.out.println("usage:");
-      System.out.println("  java Compiler filename");
+      System.out.println("  java Compiler sourceFile outputFile");
       System.exit(1);
     }
 
@@ -37,16 +43,70 @@ public class Compiler
         new FileReader(args[0])), 1024));
 
       Parser parser = new Parser(lexer);
+      Start tree = parser.parse();
+      tree.apply(new FunctionCompiler());
 
-      Node ast = parser.parse();
+      // Write out jump position to main function
+      table = SymbolTable.getInstance();
 
-      ast.apply(new FunctionCompiler());
+      // Add header codes.
+      addInstruction(0, new Instruction(OpCode.JUMP.getValue(), (byte) 0,
+          (short) 1));
+      addInstruction(0, new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
+          instructionIndex));
 
-      System.out.println(ast);
+      // Print out result to file
+      Iterator tmpIter = instructions.iterator();
+      StringBuffer tmpBuffer = new StringBuffer();
+      while (tmpIter.hasNext())
+      {
+        tmpBuffer.append((Instruction) tmpIter.next() + "\n");
+      }
+
+      System.out.println("Got " + tmpBuffer);
+      ByteArrayInputStream input = new ByteArrayInputStream(tmpBuffer.toString().getBytes());
+      FileOutputStream output = new FileOutputStream(args[1]);
+      Pasm.compile(input, output, 0);
+      output.close();
     }
     catch(Exception e)
     {
       e.printStackTrace();
     }
+  }
+
+  private static void addInstruction(int index, Instruction instruction)
+  {
+    instructions.add(index, instruction);
+  }
+
+  protected static void addInstruction(Instruction instruction)
+  {
+    instructions.add(instruction);
+  }
+
+  protected static  short getLevel()
+  {
+    return level;
+  }
+
+  protected static void incLevel()
+  {
+    level++;
+  }
+
+  protected static void decLevel()
+  {
+    level--;
+  }
+
+  protected static void incInstructionIndex()
+  {
+    instructionIndex++;
+  }
+
+  protected static short getInstructionIndex()
+  {
+    return instructionIndex;
   }
 }

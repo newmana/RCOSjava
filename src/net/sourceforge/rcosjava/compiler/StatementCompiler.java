@@ -1,6 +1,7 @@
 package net.sourceforge.rcosjava.compiler;
 
 import net.sourceforge.rcosjava.hardware.cpu.*;
+import net.sourceforge.rcosjava.compiler.symbol.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -21,15 +22,12 @@ import org.sablecc.simplec.tool.Version;
 public class StatementCompiler extends DepthFirstAdapter
 {
 // This will eventually be split into two.
-  private int basePosition = 0;
-  private int functionPosition = 0;
-  private boolean isInFunction = false;
-  private ArrayList instructions = new ArrayList();
-  private VariableCompiler variableCompiler = new VariableCompiler(false);
+  private VariableCompiler variableCompiler = new VariableCompiler();
+  private SymbolTable table;
 
-  public StatementCompiler(int newBasePosition)
+  public StatementCompiler()
   {
-    basePosition = newBasePosition;
+    table = SymbolTable.getInstance();
   }
 
   /**
@@ -49,11 +47,19 @@ public class StatementCompiler extends DepthFirstAdapter
     System.out.println("LH: " + expression1.getClass().toString());
     System.out.println("RH: " + expr.getRight());
     System.out.println("RH: " + expression2.getClass().toString());
+
     // With the left hand load the variable or literal
     handleIdentifierLoad(expression1);
 
     // With the right hand load the variable or literal
     handleIdentifierLoad(expression2);
+  }
+
+  public void outAIfStatement(AIfStatement node) {
+
+//    ArrayList tmpInstr = (ArrayList) previousInstruction.get(instructionIndex-1);
+    Compiler.addInstruction(new Instruction(OpCode.JUMP_ON_CONDITION.getValue(),
+      (byte) 0, (short) Compiler.getLevel()));
   }
 
   public void inAValueConditionalExpression(AValueConditionalExpression node)
@@ -68,11 +74,12 @@ public class StatementCompiler extends DepthFirstAdapter
       Operator.GREATER_THAN_OR_EQUAL.getValue()));
   }
 
-  public void caseAGtRelop(AGtRelop node)
+  public void inAGtRelop(AGtRelop node)
   {
     System.out.println("GT Node: " + node);
     writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
       Operator.GREATER_THAN.getValue()));
+    System.out.println("Begin call");
   }
 
   public void caseALteqRelop(ALteqRelop node)
@@ -107,6 +114,8 @@ public class StatementCompiler extends DepthFirstAdapter
 
     writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
       (byte) 0, SystemCall.STRING_OUT.getValue()));
+
+    System.out.println("End BasePosition: " + Compiler.getLevel());
   }
 
   /**
@@ -116,41 +125,35 @@ public class StatementCompiler extends DepthFirstAdapter
   public void inAModifyExpressionBasicStatement(
     AModifyExpressionBasicStatement node)
   {
-    //Need to find the way of getting the =, lt and rh sides.
-    ADirectModifyExpression expr = (ADirectModifyExpression)
-      node.getModifyExpression();
+    try
+    {
+      //Need to find the way of getting the =, lt and rh sides.
+      ADirectModifyExpression expr = (ADirectModifyExpression)
+        node.getModifyExpression();
 
-    String varName = expr.getVarname().toString().trim();
-    String varValue = expr.getRhs().toString().trim();
-    short varPos = variableCompiler.getVariableLocation(varName);
-    System.out.println("In a modify statement");
-    System.out.println("Varname: " + varName + " at: " +
-      varPos);
-    doLiteralLoading(varValue);
+      String varName = expr.getVarname().toString().trim();
+      String varValue = expr.getRhs().toString().trim();
+      Variable newVar = table.getVariable(varName, Compiler.getLevel());
+      short varPos = newVar.getOffset();
+      System.out.println("In a modify statement");
+      System.out.println("Varname: " + varName + " at: " +
+        varPos);
+      doLiteralLoading(varValue);
 
-    // Store variable at the variables location
-    writePCode(new Instruction(OpCode.STORE.getValue(), (byte) 0,
-      (short) varPos));
+      // Store variable at the variables location
+      writePCode(new Instruction(OpCode.STORE.getValue(), (byte) 0,
+        (short) varPos));
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
   }
 
   public void writePCode(Instruction newInstruction)
   {
-    basePosition++;
-    instructions.add(newInstruction);
-  }
-
-  public void emitInstructions()
-  {
-    Iterator tmpIter = instructions.iterator();
-    while (tmpIter.hasNext())
-    {
-      System.out.println((Instruction) tmpIter.next());
-    }
-  }
-
-  public short getBasePosition()
-  {
-    return (short) basePosition;
+    Compiler.incInstructionIndex();
+    Compiler.addInstruction(newInstruction);
   }
 
   private void handleIdentifierLoad(PValue expression)
@@ -167,10 +170,19 @@ public class StatementCompiler extends DepthFirstAdapter
 
   private void handleIdentifierLoad(AIdentifierValue identifier)
   {
-    String identifierName = identifier.toString();
-    short location = variableCompiler.getVariableLocation(identifierName);
-    System.out.println("Location: " + location);
-    writePCode(new Instruction(OpCode.LOAD.getValue(), (byte) 0, location));
+    try
+    {
+      String identifierName = identifier.toString().trim();
+      System.out.println("Level: " + Compiler.getLevel());
+      System.out.println("Name: [" + identifierName + "]");
+      Variable newVar = table.getVariable(identifierName, Compiler.getLevel());
+      short location = newVar.getOffset();
+      writePCode(new Instruction(OpCode.LOAD.getValue(), (byte) 0, location));
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
   }
 
   private void handleIdentifierLoad(AConstantValue constant)
