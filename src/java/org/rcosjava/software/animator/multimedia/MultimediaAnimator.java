@@ -32,7 +32,7 @@ public class MultimediaAnimator extends RCOSAnimator
   /**
    * Description of the Field
    */
-  private MultimediaFrame mmFrame;
+//  private MultimediaFrame mmFrame;
 
   /**
    * Description of the Field
@@ -74,9 +74,9 @@ public class MultimediaAnimator extends RCOSAnimator
       UniversalMessagePlayer newPlayer)
   {
     super(MESSENGING_ID, aPostOffice);
-    mmFrame = new MultimediaFrame(x, y, pmImages, this);
-    mmFrame.pack();
-    mmFrame.setSize(x, y);
+//    mmFrame = new MultimediaFrame(x, y, pmImages, this);
+//    mmFrame.pack();
+//    mmFrame.setSize(x, y);
     recorder = newRecorder;
     player = newPlayer;
     recording = false;
@@ -90,7 +90,7 @@ public class MultimediaAnimator extends RCOSAnimator
    */
   public void setupLayout(Component c)
   {
-    mmFrame.setupLayout(c);
+//    mmFrame.setupLayout(c);
   }
 
   /**
@@ -123,7 +123,7 @@ public class MultimediaAnimator extends RCOSAnimator
    */
   public void disposeFrame()
   {
-    mmFrame.dispose();
+//    mmFrame.dispose();
   }
 
   /**
@@ -131,7 +131,7 @@ public class MultimediaAnimator extends RCOSAnimator
    */
   public void showFrame()
   {
-    mmFrame.setVisible(true);
+//    mmFrame.setVisible(true);
   }
 
   /**
@@ -139,7 +139,7 @@ public class MultimediaAnimator extends RCOSAnimator
    */
   public void hideFrame()
   {
-    mmFrame.setVisible(false);
+//    mmFrame.setVisible(false);
   }
 
   /**
@@ -149,7 +149,7 @@ public class MultimediaAnimator extends RCOSAnimator
    */
   public void updateDirectoryList(FIFOQueue data)
   {
-    mmFrame.updateDirectoryList(data);
+//    mmFrame.updateDirectoryList(data);
   }
 
   /**
