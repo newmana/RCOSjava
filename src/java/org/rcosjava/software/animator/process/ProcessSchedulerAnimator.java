@@ -16,6 +16,7 @@ import org.rcosjava.messaging.messages.universal.SwitchToPriority;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.software.animator.RCOSAnimator;
 import org.rcosjava.software.process.ProcessScheduler;
+import org.rcosjava.software.process.RCOSProcess;
 
 /**
  * Receives messages from Process Scheduler and manipulates processScheduler
@@ -139,35 +140,35 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    * When a process has finished executed it needs to be removed from display.
    * This merely exposes this method to the messages.
    *
-   * @param pid the process id to remove from the CPU.
+   * @param process the process to remove from the CPU.
    */
-  public void processFinished(int pid)
+  public void processFinished(RCOSProcess process)
   {
-    panel.processFinished(pid);
+    panel.processFinished(process.getPID());
   }
 
   /**
    * When a process is killed (abruptly halted executed) it must be removed from
    * any of the queues or CPU. This calls the Frame method of the same name.
    *
-   * @param pid the process id to find and remove.
+   * @param process the process to find and remove.
    */
-  public void killProcess(int pid)
+  public void killProcess(RCOSProcess process)
   {
-    panel.killProcess(pid);
+    panel.killProcess(process.getPID());
   }
 
   /**
    * Exposes the frame method of the same name. Moves the process from the CPU
    * to the Blocked Queue.
    *
-   * @param pid the process id to move.
+   * @param process the process to move.
    */
-  public void cpuToBlocked(int pid)
+  public void cpuToBlocked(RCOSProcess process)
   {
     sendMessage(new Stop(this));
-    panel.cpuToBlocked(pid);
-    addQueue(ProcessScheduler.BLOCKEDQ, pid);
+    panel.cpuToBlocked(process.getPID());
+    addQueue(ProcessScheduler.BLOCKEDQ, process.getPID());
     sendMessage(new Run(this));
   }
 
@@ -175,14 +176,14 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    * Exposes the frame method of the same name. Moves the process from the
    * Blocked Queue to the Ready Queue.
    *
-   * @param pid the process id to move.
+   * @param process the process to move.
    */
-  public void blockedToReady(int pid)
+  public void blockedToReady(RCOSProcess process)
   {
     sendMessage(new Stop(this));
-    removeQueue(ProcessScheduler.BLOCKEDQ, pid);
-    panel.blockedToReady(pid);
-    addQueue(ProcessScheduler.READYQ, pid);
+    removeQueue(ProcessScheduler.BLOCKEDQ, process.getPID());
+    panel.blockedToReady(process.getPID());
+    addQueue(ProcessScheduler.READYQ, process.getPID());
     sendMessage(new Run(this));
   }
 
@@ -190,13 +191,13 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    * Exposes the frame method of the same name. Moves the process from the CPU
    * to the Ready Queue.
    *
-   * @param pid the process id to move.
+   * @param process the process to move.
    */
-  public void cpuToReady(int pid)
+  public void cpuToReady(RCOSProcess process)
   {
     sendMessage(new Stop(this));
-    panel.cpuToReady(pid);
-    addQueue(ProcessScheduler.READYQ, pid);
+    panel.cpuToReady(process.getPID());
+    addQueue(ProcessScheduler.READYQ, process.getPID());
     sendMessage(new Run(this));
   }
 
@@ -204,13 +205,13 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    * Exposes the frame method of the same name. Moves the process from the Ready
    * Queue to the CPU.
    *
-   * @param pid the process id to move.
+   * @param process the process to move.
    */
-  public void readyToCPU(int pid)
+  public void readyToCPU(RCOSProcess process)
   {
     sendMessage(new Stop(this));
-    removeQueue(ProcessScheduler.READYQ, pid);
-    panel.readyToCPU(pid);
+    removeQueue(ProcessScheduler.READYQ, process.getPID());
+    panel.readyToCPU(process.getPID());
     sendMessage(new Run(this));
   }
 
@@ -218,14 +219,14 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    * Exposes the frame method of the same name. Moves the process from the
    * Zombie Queue to the Ready Queue.
    *
-   * @param pid the process id to move.
+   * @param process the process to move.
    */
-  public void zombieToReady(int pid)
+  public void zombieToReady(RCOSProcess process)
   {
     sendMessage(new Stop(this));
-    removeQueue(ProcessScheduler.ZOMBIEQ, pid);
-    panel.zombieToReady(pid);
-    addQueue(ProcessScheduler.READYQ, pid);
+    removeQueue(ProcessScheduler.ZOMBIEQ, process.getPID());
+    panel.zombieToReady(process.getPID());
+    addQueue(ProcessScheduler.READYQ, process.getPID());
     sendMessage(new Run(this));
   }
 
@@ -233,13 +234,13 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    * Exposes the frame method of the same name. Adds a process to the Zombie
    * Queue.
    *
-   * @param pid the process id to move.
+   * @param process the process to move.
    */
-  public void zombieCreated(int pid)
+  public void zombieCreated(RCOSProcess process)
   {
     sendMessage(new Stop(this));
-    panel.newProcess(pid);
-    addQueue(ProcessScheduler.ZOMBIEQ, pid);
+    panel.newProcess(process.getPID());
+    addQueue(ProcessScheduler.ZOMBIEQ, process.getPID());
     sendMessage(new Run(this));
   }
 

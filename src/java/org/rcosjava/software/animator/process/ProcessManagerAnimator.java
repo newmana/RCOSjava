@@ -14,6 +14,8 @@ import org.rcosjava.messaging.messages.universal.SetProcessPriority;
 import org.rcosjava.messaging.messages.universal.Stop;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.messaging.postoffices.animator.AnimatorMessageHandler;
+import org.rcosjava.software.process.ProcessPriority;
+import org.rcosjava.software.process.RCOSProcess;
 import org.rcosjava.software.util.LIFOQueue;
 
 /**
@@ -112,25 +114,25 @@ public class ProcessManagerAnimator extends AnimatorMessageHandler
   /**
    * Add new process to list.
    *
-   * @param process the process id of the process to remove
+   * @param process the process to remove
    */
-  public void newProcess(int process)
+  public void newProcess(RCOSProcess process)
   {
-    currentProcesses.insert(new Integer(process));
+    currentProcesses.insert(new Integer(process.getPID()));
     updateProcessList();
   }
 
   /**
    * Delete process from list.
    *
-   * @param process the process id of the process to add
+   * @param the process to remove
    */
-  public void deleteProcess(int process)
+  public void deleteProcess(RCOSProcess process)
   {
     currentProcesses.goToHead();
     while (!currentProcesses.atTail())
     {
-      if (((Integer) currentProcesses.peek()).intValue() == process)
+      if (((Integer) currentProcesses.peek()).intValue() == process.getPID())
       {
         int tmp = ((Integer) currentProcesses.retrieveCurrent()).intValue();
       }
@@ -215,20 +217,21 @@ public class ProcessManagerAnimator extends AnimatorMessageHandler
    * Display a given process Id and it's process priority so that the user may
    * change it. Calls promptProcessPriority in the frame.
    *
-   * @param processId process id to display.
-   * @param processPriority the priority of the process.
+   * @param process to display.
+   * @param priority the priority to display.
    */
-  public void returnProcessPriority(int processId, int processPriority)
+  public void returnProcessPriority(RCOSProcess process,
+      ProcessPriority priority)
   {
-    myFrame.promptProcessPriority(processId, processPriority);
+    myFrame.promptProcessPriority(process.getPID(), priority);
   }
 
   /**
-   * Description of the Method
+   * Sends the change in process priority.
    *
-   * @param processPriority Description of Parameter
+   * @param processPriority the new priority set.
    */
-  public void sendSetProcessPriority(int processPriority)
+  public void sendSetProcessPriority(ProcessPriority processPriority)
   {
     SetProcessPriority tmpMessage = new SetProcessPriority(this,
         currentProcessId, processPriority);

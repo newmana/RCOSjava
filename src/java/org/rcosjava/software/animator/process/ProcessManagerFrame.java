@@ -11,11 +11,11 @@ import org.rcosjava.software.animator.RCOSFrame;
 import org.rcosjava.software.animator.support.GraphicButton;
 import org.rcosjava.software.animator.support.NewLabel;
 import org.rcosjava.software.animator.support.RCOSList;
+import org.rcosjava.software.process.ProcessPriority;
 
 /**
  * It is the interface which allows users to manipulate running processes. It
- * allows them to be killed, to stop the CPU or to execute one instruction at a
- * time.
+ * allows the user to modify the priority of the process.
  * <P>
  * <DT> <B>History:</B>
  * <DD> 10/1/97 Created. AN </DD>
@@ -111,10 +111,12 @@ public class ProcessManagerFrame extends RCOSFrame
    * @param processId the process id to modify.
    * @param processPriority the current priority of the process.
    */
-  public void promptProcessPriority(int processId, int processPriority)
+  public void promptProcessPriority(int processId,
+      ProcessPriority processPriority)
   {
     processPrompt.setText("Priority of Process " + processId + " (1-100): ");
-    priorityTextField.setText(Integer.toString(processPriority));
+    priorityTextField.setText(Byte.toString(
+        processPriority.getPriorityValue()));
     changePriorityDialog.show();
     priorityTextField.transferFocus();
   }
@@ -134,8 +136,8 @@ public class ProcessManagerFrame extends RCOSFrame
      */
     public void mouseClicked(MouseEvent e)
     {
-      myProcessManager.sendSetProcessPriority(
-          Integer.parseInt(priorityTextField.getText()));
+      myProcessManager.sendSetProcessPriority(new ProcessPriority((byte)
+          Integer.parseInt(priorityTextField.getText())));
       changePriorityDialog.setVisible(false);
     }
   }

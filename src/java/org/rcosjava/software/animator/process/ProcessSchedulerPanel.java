@@ -91,7 +91,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
   /**
    * Holds which processes are the the queue.
    */
-  private LIFOQueue ZombieQ, ReadyQ, BlockedQ;
+  private LIFOQueue zombieQueue, readyQueue, blockedQueue;
 
   /**
    * Holds the movement of the queue.
@@ -168,9 +168,9 @@ public class ProcessSchedulerPanel extends RCOSPanel
     {
       myImages[index] = images[index].getImage();
     }
-    ZombieQ = new LIFOQueue(10, 0);
-    BlockedQ = new LIFOQueue(10, 0);
-    ReadyQ = new LIFOQueue(10, 0);
+    zombieQueue = new LIFOQueue(10, 0);
+    blockedQueue = new LIFOQueue(10, 0);
+    readyQueue = new LIFOQueue(10, 0);
 
     delay = 1;
     myProcessScheduler = newProcessScheduler;
@@ -694,13 +694,13 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid Description of Parameter
    */
-  synchronized void moveReadyQ(int pid)
+  synchronized void movereadyQueue(int pid)
   {
     MTGO tmpMTGO = engine.returnMTGO("P" + pid);
 
     readyMovement.start();
 
-    int iPos = noBoxes - ReadyQ.itemCount();
+    int iPos = noBoxes - readyQueue.itemCount();
 
     while (!readyMovement.finished(iPos))
     {
@@ -716,13 +716,13 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid Description of Parameter
    */
-  synchronized void moveBlockedQ(int pid)
+  synchronized void moveblockedQueue(int pid)
   {
     MTGO tmpMTGO = engine.returnMTGO("P" + pid);
 
     blockedMovement.start();
 
-    int iPos = noBoxes - BlockedQ.itemCount();
+    int iPos = noBoxes - blockedQueue.itemCount();
 
     while (!blockedMovement.finished(iPos))
     {
@@ -738,13 +738,13 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid process id to move.
    */
-  synchronized void moveZombieQ(int pid)
+  synchronized void movezombieQueue(int pid)
   {
     MTGO tmpMTGO = engine.returnMTGO("P" + pid);
 
     zombieMovement.start();
 
-    int pos = noBoxes - ZombieQ.itemCount();
+    int pos = noBoxes - zombieQueue.itemCount();
 
     while (!zombieMovement.finished(pos))
     {
@@ -768,16 +768,16 @@ public class ProcessSchedulerPanel extends RCOSPanel
     switch (queueType)
     {
       case ProcessScheduler.READYQ:
-        ReadyQ.insert(processId);
-        moveReadyQ(pid);
+        readyQueue.insert(processId);
+        movereadyQueue(pid);
         break;
       case ProcessScheduler.BLOCKEDQ:
-        BlockedQ.insert(processId);
-        moveBlockedQ(pid);
+        blockedQueue.insert(processId);
+        moveblockedQueue(pid);
         break;
       case ProcessScheduler.ZOMBIEQ:
-        ZombieQ.insert(processId);
-        moveZombieQ(pid);
+        zombieQueue.insert(processId);
+        movezombieQueue(pid);
         break;
     }
     refreshQueue(queueType);
@@ -794,13 +794,13 @@ public class ProcessSchedulerPanel extends RCOSPanel
     switch (queueType)
     {
       case ProcessScheduler.READYQ:
-        removeProcId(pid, ReadyQ);
+        removeProcId(pid, readyQueue);
         break;
       case ProcessScheduler.BLOCKEDQ:
-        removeProcId(pid, BlockedQ);
+        removeProcId(pid, blockedQueue);
         break;
       case ProcessScheduler.ZOMBIEQ:
-        removeProcId(pid, ZombieQ);
+        removeProcId(pid, zombieQueue);
         break;
     }
     refreshQueue(queueType);
@@ -911,19 +911,19 @@ public class ProcessSchedulerPanel extends RCOSPanel
   private synchronized void refreshQueue(int queueType)
   {
     LIFOQueue tmpQ = new LIFOQueue();
-    int XPosition = engine.getCenterX() - ((noBoxes / 2) * boxWidth);
-    int YPosition = (queueType * height) + fm.getHeight() + 5;
+    int xPosition = engine.getCenterX() - ((noBoxes / 2) * boxWidth);
+    int yPosition = (queueType * height) + fm.getHeight() + 5;
 
     switch (queueType)
     {
       case ProcessScheduler.READYQ:
-        tmpQ = ReadyQ;
+        tmpQ = readyQueue;
         break;
       case ProcessScheduler.BLOCKEDQ:
-        tmpQ = BlockedQ;
+        tmpQ = blockedQueue;
         break;
       case ProcessScheduler.ZOMBIEQ:
-        tmpQ = ZombieQ;
+        tmpQ = zombieQueue;
         break;
     }
     tmpQ.goToHead();
@@ -932,12 +932,22 @@ public class ProcessSchedulerPanel extends RCOSPanel
       String procID = (String) tmpQ.peek();
       MTGO tmpMTGO = engine.returnMTGO(procID);
 
-      tmpMTGO.xPosition = XPosition;
-      tmpMTGO.yPosition = YPosition;
-      XPosition = XPosition + boxWidth;
+      tmpMTGO.xPosition = xPosition;
+      tmpMTGO.yPosition = yPosition;
+      xPosition = xPosition + boxWidth;
       tmpQ.goToNext();
     }
     syncPaint(delay);
+  }
+
+  /**
+   * Displays a frame with the given PCB of the process given.
+   *
+   * @param int processId the id of the process to display.
+   */
+  private void displayPCB(int processId)
+  {
+    System.out.println("Display pid: " + processId);
   }
 
   /**
@@ -956,13 +966,20 @@ public class ProcessSchedulerPanel extends RCOSPanel
     {
       try
       {
-        String temp = new String(engine.isInside(e.getX(), e.getY()));
+        String whichObject = engine.isInside(e.getX(), e.getY());
 
-        if (temp != " ")
+        // Have we hit a process?
+        if (whichObject.startsWith("P"))
         {
-          if (temp.compareTo("RCOS CPU") == 0)
+          try
           {
-            myProcessScheduler.showCPU();
+            int pid = (Integer.parseInt(whichObject.substring(1)));
+            displayPCB(pid);
+          }
+          catch (NumberFormatException nfe)
+          {
+            // This shouldn't happen
+            nfe.printStackTrace();
           }
         }
       }
