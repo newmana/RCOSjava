@@ -55,7 +55,7 @@ public abstract class PostOffice extends SimpleMessageHandler
   }
 
   /**
-   * Adds a post office to the vector.
+   * Adds another post office to the registered post offices.
    *
    * @param newPostOffice The post office to add to the vector.
    */
@@ -80,7 +80,7 @@ public abstract class PostOffice extends SimpleMessageHandler
   public abstract void sendMessage(MessageAdapter message);
 
   /**
-   * Send a message to only registered object of local post office.
+   * Send a message to only registered objects of local post office.
    *
    * @param message Message to send.
    */
