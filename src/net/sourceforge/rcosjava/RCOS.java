@@ -242,7 +242,7 @@ public class RCOS extends java.applet.Applet implements Runnable
 
     try
     {
-      tracker.waitForAll();
+      tracker.waitForAll(1);
     }
     catch (InterruptedException e)
     {
@@ -535,6 +535,9 @@ public class RCOS extends java.applet.Applet implements Runnable
     return (info);
   }
 
+  /**
+   * Starts the thread if it is stopped.
+   */
   public synchronized void startThread()
   {
     if (!running)
@@ -544,12 +547,18 @@ public class RCOS extends java.applet.Applet implements Runnable
     }
   }
 
+  /**
+   * Stops the running of the thread a calls notify.
+   */
   public synchronized void stepThread()
   {
     running = false;
     notify();
   }
 
+  /**
+   * Executes the performInstructionExecutionCycle on the kernel.
+   */
   public void run()
   {
     while (kernelThread != null)
