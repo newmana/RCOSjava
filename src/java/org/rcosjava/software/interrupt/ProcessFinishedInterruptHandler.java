@@ -1,24 +1,20 @@
 package org.rcosjava.software.interrupt;
 
-import org.rcosjava.software.terminal.SoftwareTerminal;
+import org.rcosjava.software.kernel.Kernel;
 
 /**
- * Interrupt handler for terminal input.
- * <P>
- * <DT> <B>History:</B>
- * <DD> 03/03/98 Tidied up and cleaned up. AN </DD> </DT>
+ * Interrupt handler for when a process has finished executing
  * <P>
  * @author Andrew Newman.
- * @author David Jones.
- * @created 29th of March 1996
+ * @created 29th March 2003
  * @version 1.00 $Date$
  */
-public class TerminalInterruptHandler extends InterruptHandler
+public class ProcessFinishedInterruptHandler extends InterruptHandler
 {
   /**
    * The handler.
    */
-  private SoftwareTerminal handler;
+  private Kernel handler;
 
   /**
    * Create a new interrupt handler.
@@ -26,7 +22,7 @@ public class TerminalInterruptHandler extends InterruptHandler
    * @param newHandler the handler.
    * @param newType the type of the interrupt (unique).
    */
-  public TerminalInterruptHandler(SoftwareTerminal newHandler, String newType)
+  public ProcessFinishedInterruptHandler(Kernel newHandler, String newType)
   {
     super(newType);
     handler = newHandler;
@@ -37,6 +33,6 @@ public class TerminalInterruptHandler extends InterruptHandler
    */
   public void handleInterrupt()
   {
-    handler.keyPress();
+    handler.processFinished();
   }
 }

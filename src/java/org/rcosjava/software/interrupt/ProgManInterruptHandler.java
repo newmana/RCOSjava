@@ -1,4 +1,5 @@
 package org.rcosjava.software.interrupt;
+
 import java.io.Serializable;
 import org.rcosjava.messaging.messages.os.GetNewFile;
 import org.rcosjava.messaging.postoffices.os.OSOffice;
@@ -17,16 +18,14 @@ import org.rcosjava.messaging.postoffices.os.OSOffice;
 public class ProgManInterruptHandler extends InterruptHandler
 {
   /**
-   * Constructor for the ProgManInterruptHandler object
+   * Create a new interrupt handler.
    *
-   * @param myId Description of Parameter
-   * @param postOffice Description of Parameter
-   * @param newType Description of Parameter
+   * @param newHandler the handler.
+   * @param newType the type of the interrupt (unique).
    */
-  public ProgManInterruptHandler(String myId, OSOffice postOffice,
-      String newType)
+  public ProgManInterruptHandler(Object newHandler, String newType)
   {
-    super(myId, postOffice, newType);
+    super(newType);
   }
 
   /**
@@ -34,12 +33,5 @@ public class ProgManInterruptHandler extends InterruptHandler
    */
   public void handleInterrupt()
   {
-    // perform any necesary clean up procedures so next
-    // Interrupt of this type can occur
-    // THERE IS NONE
-    // send a message to the appropriate DeviceDriver
-    GetNewFile message = new GetNewFile(this);
-
-    sendMessage(message);
   }
 }

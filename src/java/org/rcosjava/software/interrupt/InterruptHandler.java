@@ -18,35 +18,28 @@ import org.rcosjava.messaging.postoffices.os.OSOffice;
  * @see org.rcosjava.messaging.postoffices.SimpleMessageHandler
  * @version 1.00 $Date$
  */
-public class InterruptHandler extends OSMessageHandler implements Serializable
+public class InterruptHandler implements Serializable
 {
   /**
-   * Description of the Field
+   * The literal value that is unique for each interrupt handler giving the
+   * type of interrupt.
    */
-  public static final String IH_IDENTIFIER = "IH";
+  private String type;
 
   /**
-   * Description of the Field
-   */
-  public String type;
-
-  /**
-   * Constructor for the InterruptHandler object
+   * Create a new interrupt handler.
    *
-   * @param sID Description of Parameter
-   * @param mhPostOffice Description of Parameter
-   * @param newType Description of Parameter
+   * @param newType the type of the interrupt (unique).
    */
-  public InterruptHandler(String sID, OSOffice mhPostOffice, String newType)
+  public InterruptHandler(String newType)
   {
-    super((sID + IH_IDENTIFIER), mhPostOffice);
     type = newType;
   }
 
   /**
-   * Gets the Type attribute of the InterruptHandler object
+   * Returns the type of interrupt.
    *
-   * @return The Type value
+   * @return the type of interrupt.
    */
   public String getType()
   {
@@ -57,28 +50,6 @@ public class InterruptHandler extends OSMessageHandler implements Serializable
    * Had to change this from an abstract method because of crashing.
    */
   public void handleInterrupt()
-  {
-  }
-
-  // perform any necesary clean up procedures so next
-  // Interrupt of this type can occur
-  // send a message to the appropriate DeviceDriver
-
-  /**
-   * Description of the Method
-   *
-   * @param os Description of Parameter
-   */
-  public void processMessage(UniversalMessageAdapter os)
-  {
-  }
-
-  /**
-   * Description of the Method
-   *
-   * @param os Description of Parameter
-   */
-  public void processMessage(OSMessageAdapter os)
   {
   }
 }

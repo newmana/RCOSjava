@@ -1,6 +1,7 @@
 package org.rcosjava.software.interrupt;
+
 import java.io.Serializable;
-import org.rcosjava.messaging.postoffices.os.OSOffice;
+import org.rcosjava.software.disk.cpm14.CPM14DiskScheduler;
 
 /**
  * Interrupt for CPM14 Disk.
@@ -11,21 +12,23 @@ import org.rcosjava.messaging.postoffices.os.OSOffice;
  * @version 1.00 $Date$
  */
 public class CPM14DiskInterruptHandler extends InterruptHandler
-     implements Serializable
 {
   /**
-   * Constructor for the CPM14DiskInterruptHandler object
-   *
-   * @param id Description of Parameter
-   * @param postOffice Description of Parameter
-   * @param newType Description of Parameter
+   * Call this when the interrupt occurs.
    */
-  public CPM14DiskInterruptHandler(String id, OSOffice postOffice,
-      String newType)
-  {
-    super(id, postOffice, newType);
-  }
+  private CPM14DiskScheduler handler;
 
+  /**
+   * Create a new interrupt handler.
+   *
+   * @param newHandler the handler.
+   * @param newType the type of the interrupt (unique).
+   */
+  public CPM14DiskInterruptHandler(CPM14DiskScheduler newHandler, String newType)
+  {
+    super(newType);
+    handler = newHandler;
+  }
 
   /**
    * Description of the Method
