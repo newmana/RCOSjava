@@ -76,6 +76,11 @@ public class MultimediaPlayFrame extends RCOSFrame
   private JCheckBox startTerminalCheckbox = new JCheckBox();
 
   /**
+   * The step button.
+   */
+  private JButton stepButton;
+
+  /**
    * Constructor for the ProgramManagerFrame object
    *
    * @param x Description of Parameter
@@ -105,6 +110,7 @@ public class MultimediaPlayFrame extends RCOSFrame
     {
       myMultimediaAnimator.setRecordingName("");
       myMultimediaAnimator.updateList();
+      stepButton.enable();
     }
   }
 
@@ -208,11 +214,11 @@ public class MultimediaPlayFrame extends RCOSFrame
     gridBag.setConstraints(fileNamePanel, constraints);
     mainPanel.add(fileNamePanel);
 
-    JButton openButton = new JButton("Step");
+    stepButton = new JButton("Step");
 
-    buttonPanel.add(openButton);
+    buttonPanel.add(stepButton);
     buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-    openButton.addMouseListener(new StepButtonListener());
+    stepButton.addMouseListener(new StepButtonListener());
 
     JButton closeButton = new JButton("Close");
 
@@ -253,6 +259,14 @@ public class MultimediaPlayFrame extends RCOSFrame
     {
       directoryListModel.addElement((String) data.retrieve());
     }
+  }
+
+  /**
+   * Disable the next button.
+   */
+  void disableStepButton()
+  {
+    stepButton.setEnabled(false);
   }
 
   /**

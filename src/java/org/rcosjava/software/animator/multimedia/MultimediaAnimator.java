@@ -5,6 +5,7 @@ import java.awt.*;
 import javax.swing.ImageIcon;
 import java.net.*;
 import java.util.*;
+
 import org.rcosjava.messaging.messages.universal.CreateNewRecordingMessage;
 import org.rcosjava.messaging.messages.universal.PlayNextMessage;
 import org.rcosjava.messaging.messages.universal.SetRecordingNameMessage;
@@ -13,10 +14,14 @@ import org.rcosjava.messaging.messages.universal.UpdateList;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.messaging.postoffices.universal.UniversalMessagePlayer;
 import org.rcosjava.messaging.postoffices.universal.UniversalMessageRecorder;
+import org.rcosjava.messaging.postoffices.universal.EndOfMessagesException;
 import org.rcosjava.pll2.FileClient;
 import org.rcosjava.software.animator.RCOSAnimator;
 import org.rcosjava.software.animator.RCOSPanel;
+import org.rcosjava.software.animator.support.ErrorDialog;
 import org.rcosjava.software.util.FIFOQueue;
+
+import org.apache.log4j.*;
 
 /**
  * User interface which allows the recording and playback of messages that occur
@@ -29,45 +34,50 @@ import org.rcosjava.software.util.FIFOQueue;
 public class MultimediaAnimator extends RCOSAnimator
 {
   /**
-   * Description of the Field
+   * The unique identifier of this animator to register with the post office.
    */
   private final static String MESSENGING_ID = "MultimediaAnimator";
 
   /**
-   * Description of the Field
+   * Logging class.
+   */
+  private final static Logger log = Logger.getLogger(MultimediaAnimator.class);
+
+  /**
+   * The frame to display the playback interface.
    */
   private MultimediaPlayFrame mmPlayFrame;
 
   /**
-   *
+   * The frame to display the recording interface.
    */
   private MultimediaRecordFrame mmRecordFrame;
 
   /**
-   * Description of the Field
+   * The recorder of all messages.
    */
   private UniversalMessageRecorder recorder;
 
   /**
-   * Description of the Field
+   * The player of all messages.
    */
   private UniversalMessagePlayer player;
 
   /**
    * Constructor for the MultimediaAnimator object
    *
-   * @param aPostOffice Description of Parameter
+   * @param postOffice Description of Parameter
    * @param x Description of Parameter
    * @param y Description of Parameter
    * @param pmImages Description of Parameter
    * @param newRecorder Description of Parameter
    * @param newPlayer Description of Parameter
    */
-  public MultimediaAnimator(AnimatorOffice aPostOffice,
+  public MultimediaAnimator(AnimatorOffice postOffice,
       int x, int y, UniversalMessageRecorder newRecorder,
       UniversalMessagePlayer newPlayer)
   {
-    super(MESSENGING_ID, aPostOffice);
+    super(MESSENGING_ID, postOffice);
     mmPlayFrame = new MultimediaPlayFrame(x, y, this);
     mmRecordFrame = new MultimediaRecordFrame(x, y, this);
     recorder = newRecorder;
@@ -197,5 +207,13 @@ public class MultimediaAnimator extends RCOSAnimator
   {
     PlayNextMessage msg = new PlayNextMessage(this);
     sendMessage(msg);
+  }
+
+  /**
+   * Indicate to the user that there is no more messages left to playback.
+   */
+  public void noNextMessage()
+  {
+    mmPlayFrame.disableStepButton();
   }
 }
