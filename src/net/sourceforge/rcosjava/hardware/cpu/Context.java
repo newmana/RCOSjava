@@ -185,17 +185,14 @@ public class Context implements Cloneable, Serializable
 
   public Object clone()
   {
-    try
-    {
-      Context newObject = (Context) super.clone();
-      if (this.instructionRegister != null)
-        newObject.instructionRegister = (Instruction) this.instructionRegister.clone();
-      return newObject;
-    }
-    catch (java.lang.CloneNotSupportedException e)
-    {
-    }
-    return null;
+    Context newObject = (Context) new Context();
+    if (instructionRegister != null)
+      newObject.instructionRegister = (Instruction) instructionRegister.clone();
+    newObject.setBasePointer(this.getBasePointer());
+    newObject.setInstructionRegister(this.getInstructionRegister());
+    newObject.setProgramCounter(this.getProgramCounter());
+    newObject.setStackPointer(this.getStackPointer());
+    return newObject;
   }
 
   public boolean equals(Object obj)
