@@ -4,6 +4,7 @@ import java.util.*;
 
 import org.rcosjava.hardware.memory.*;
 import org.rcosjava.software.memory.*;
+import org.rcosjava.software.process.RCOSProcess;
 import org.rcosjava.messaging.messages.os.AllocateSharedMemoryPages;
 import org.rcosjava.messaging.messages.os.BlockCurrentProcess;
 import org.rcosjava.messaging.messages.os.ReturnValue;
@@ -191,13 +192,11 @@ public class IPC extends OSMessageHandler
       // Send the default response
       //ReturnValue returnMessage = new ReturnValue(this, (short) semaphoreId);
       ReturnValue returnMessage = new ReturnValue(this, (short) value);
-
       sendMessage(returnMessage);
 
       // Inform other components that wait has been called
       SemaphoreWaiting waitingMessage = new SemaphoreWaiting(this,
           existingSemaphore.getName(), pid, existingSemaphore.getValue());
-
       sendMessage(waitingMessage);
 
       // NOW - if the value was -1, then we have to block
@@ -205,14 +204,12 @@ public class IPC extends OSMessageHandler
       if (value == -1)
       {
         BlockCurrentProcess blockMessage = new BlockCurrentProcess(this);
-
         sendMessage(blockMessage);
       }
     }
     else
     {
       ReturnValue returnMessage = new ReturnValue(this, (short) -1);
-
       sendMessage(returnMessage);
     }
   }
@@ -236,21 +233,19 @@ public class IPC extends OSMessageHandler
 
       // Send the reply
       ReturnValue returnMessage = new ReturnValue(this, (short) processId);
-
       sendMessage(returnMessage);
 
       // Let other components know that a signal has been issued.
       SemaphoreSignalled signalledMessage = new SemaphoreSignalled(this,
           existingSemaphore.getName(), pid, existingSemaphore.getValue());
-
       sendMessage(signalledMessage);
 
       // NOW - if process id wasn't -1, then we have to wake
       // the process up.
       if (processId != -1)
       {
-        BlockedToReady toReadyMessage = new BlockedToReady(this, processId);
-
+        BlockedToReady toReadyMessage = new BlockedToReady(this,
+            new RCOSProcess(processId, ""));
         sendMessage(toReadyMessage);
       }
     }
