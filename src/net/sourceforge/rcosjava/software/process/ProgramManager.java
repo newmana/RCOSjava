@@ -126,9 +126,12 @@ public class ProgramManager extends OSMessageHandler
     // Create a new message body to send to Process Scheduler.
     // Contains file information and code
     open();
-    NewProcess newMsg = new NewProcess(this, filename,
-      getFileContents(filename), getFileSize(filename));
+    Memory fileContents = getFileContents(filename);
+    int fileSize = getFileSize(filename);
     close();
+
+    //Send the message with the given cotents.
+    NewProcess newMsg = new NewProcess(this, filename, fileContents, fileSize);
     sendMessage(newMsg);
 
     Interrupt intInterrupt = new Interrupt(-1, "NewProcess");
