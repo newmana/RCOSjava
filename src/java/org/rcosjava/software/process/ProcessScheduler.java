@@ -549,6 +549,16 @@ public class ProcessScheduler extends OSMessageHandler
   }
 
   /**
+   * Returns current processes.
+   *
+   * @return current processes.
+   */
+  public HashMap getAllProcesses()
+  {
+    return allProcesses;
+  }
+
+  /**
    * Returns zombie created queue.
    *
    * @return zombie created queue.
