@@ -69,6 +69,7 @@ public class MemoryGraphic extends Canvas
     id = 0;
     memoryType = 0;
     memorySize = 0;
+    repaint();
   }
 
   private void setValues(MemoryReturn aMemret)
