@@ -1,40 +1,97 @@
 package org.rcosjava.software.filesystem.msdos;
 
+import java.io.*;
 import java.util.*;
+
+import org.rcosjava.hardware.disk.Disk;
+import org.rcosjava.hardware.disk.SimpleDisk;
+import org.rcosjava.hardware.disk.msdos.MSDOSFloppy;
 import org.rcosjava.messaging.messages.os.OSMessageAdapter;
 import org.rcosjava.messaging.postoffices.MessageHandler;
 import org.rcosjava.software.disk.DiskRequest;
 import org.rcosjava.software.util.IndexedList;
+import org.rcosjava.software.filesystem.AllocationTableException;
+import org.rcosjava.software.filesystem.DirectoryException;
+import org.rcosjava.software.filesystem.FileSystem;
+import org.rcosjava.software.filesystem.FileSystemFile;
+import org.rcosjava.software.filesystem.msdos.MSDOSFATException;
+import org.rcosjava.software.filesystem.msdos.MSDOSDirectoryException;
+import org.rcosjava.software.filesystem.FileSystemReturnData;
+import org.rcosjava.software.util.Horario;
 
-import java.lang.Math;
-import java.io.*;
-import org.rcosjava.software.filesystem.msdos.exception.MSDOSFATException;
-import org.rcosjava.software.filesystem.msdos.exception.MSDOSDirectoryException;
-import org.rcosjava.software.filesystem.msdos.util.InterfaceMSDOS;
-import org.rcosjava.software.filesystem.FileSystemInterface;
-import org.rcosjava.software.filesystem.FileSystemData;
-
-
-public class MSDOSFileSystem implements FileSystemInterface{
-
-  // Constants
+/**
+ * Description of the Class
+ *
+ * @author andrew
+ * @created July 27, 2003
+ */
+public class MSDOSFileSystem implements FileSystem
+{
+  /**
+   * Seperator for the mount point. i.e. c:
+   *
+   * @author andrew
+   * @since July 27, 2003
+   */
   private final static String MOUNT_POINT_SEPERATOR = ":";
 
-    // The size of the block 4K
-//  private final static int BLOCK_SIZE = 4096;
+  /**
+   * The size of the block 4K
+   *
+   * @author andrew
+   * @since July 27, 2003
+   */
+  private final static int BLOCK_SIZE = 4096;
 
-  // The total of blocks of the system
-  private final static int TOTAL_DISK_BLOCKS = 240;
+  /**
+   * The total of blocks of the system
+   *
+   * @author andrew
+   * @since July 27, 2003
+   */
+  private final static int TOTAL_DISK_BLOCKS = 100;
 
-  // The total de Directiries of the blocks
+  /**
+   * Total number of blocks used to hold the directory information.
+   *
+   * @author andrew
+   * @since July 27, 2003
+   */
   private final static int TOTAL_DIR_BLOCKS = 2;
 
-  //
+  /**
+   * Where to start when place the directory block
+   *
+   * @author andrew
+   * @since July 27, 2003
+   */
   private final static int DIR_BLOCK_OFFSET = 0;
+
+  /**
+   * Where to start placing the disk data.
+   *
+   * @author andrew
+   * @since July 27, 2003
+   */
   private final static int DISK_BLOCK_OFFSET = DIR_BLOCK_OFFSET + TOTAL_DIR_BLOCKS;
+
+  /**
+   * Total size in bytes to store the directory entry.
+   *
+   * @author andrew
+   * @since July 27, 2003
+   */
   private final static int DIR_ENTRY_SIZE = 32;
-  private final static int TOTAL_DIR_ENTRIES = (InterfaceMSDOS.BLOCK_SIZE * TOTAL_DIR_BLOCKS)
-                        / DIR_ENTRY_SIZE;
+
+  /**
+   * The total number of directory entries.
+   *
+   * @author andrew
+   * @since July 27, 2003
+   */
+  private final static int TOTAL_DIR_ENTRIES = (BLOCK_SIZE * TOTAL_DIR_BLOCKS)
+      / DIR_ENTRY_SIZE;
+
   // Dir Entry
   private final static int STATUS = 0;
   private final static int FILENAME = 1;
@@ -55,7 +112,12 @@ public class MSDOSFileSystem implements FileSystemInterface{
   private final static int EOF = 1;
   private final static int NOT_EOF = 0;
 
-  // Used to convert signed 8 bit numbers (byte) to integers.
+  /**
+   * Used to convert signed 8 bit numbers (byte) to integers.
+   *
+   * @author andrew
+   * @since July 27, 2003
+   */
   private final static int SVB2I = 255;
 
   private IndexedList cvRequestTable;
@@ -64,7 +126,7 @@ public class MSDOSFileSystem implements FileSystemInterface{
   private IndexedList cvFIDTable;
 
   private MSDOSFAT msdosFat;
-  private Directory directory;
+  private MSDOSDirectory directory;
   private Disk disk;
 
   /**
@@ -73,30 +135,42 @@ public class MSDOSFileSystem implements FileSystemInterface{
    * @param myID Identify of the MSDOSFileSystem
    * @param myPO Description of Parameter
    */
-  public MSDOSFileSystem(String myID, MessageHandler myPO){
+  public MSDOSFileSystem(String myID, MessageHandler myPO)
+  {
     //super(myID, myPO);
     cvRequestTable = new IndexedList(100, 10);
     cvMountTable = new HashMap();
     cvDeviceTable = new IndexedList(100, 10);
     cvFIDTable = new IndexedList(100, 10);
 
-    msdosFat = new MSDOSFAT();
-    directory = new Directory();
-    disk = new Disk();
-    requestSystemFile();
+    // File allocation table used to store items - pass in total number of disk
+    // blocks.
+    msdosFat = new MSDOSFAT(TOTAL_DISK_BLOCKS);
+
+    // Directory file system.
+    directory = new MSDOSDirectory();
+
+    // The actual storage of the files.
+    disk = new MSDOSFloppy(10, 10, BLOCK_SIZE);
+
+    // Load a file image.
+//    requestSystemFile();
   }
 
   /**
    * Constructor for the MSDOSFileSystem object
    *
-   * @param myID Identify of the MSDOSFileSystem
-   * @param myPO Description of Parameter
+   * @param newMsdosFat Description of the Parameter
+   * @param newDirectory Description of the Parameter
+   * @param newDisk Description of the Parameter
    */
-  public MSDOSFileSystem(MSDOSFAT newMsdosFat, Directory newDirectory, Disk newDisk){
+  public MSDOSFileSystem(MSDOSFAT newMsdosFat, MSDOSDirectory newDirectory,
+      Disk newDisk)
+  {
     msdosFat = newMsdosFat;
     directory = newDirectory;
     disk = newDisk;
-    requestSystemFile();
+//    requestSystemFile();
   }
 
   // Gets the number of the first entry for the file. Note, the filename
@@ -107,7 +181,8 @@ public class MSDOSFileSystem implements FileSystemInterface{
    * @param mvFilename Description of Parameter
    * @return The DirectoryPosition value
    */
-  public int getDirectoryPosition(String mvFilename){
+  public int getDirectoryPosition(String mvFilename)
+  {
 //    String mvMountPoint;
 //    Integer mvTmpID;
 //    int mvDeviceNumber;
@@ -164,7 +239,7 @@ public class MSDOSFileSystem implements FileSystemInterface{
 //    {
 //      return -1;
 //    }
-     return -1;
+    return -1;
   }
 
   // Return a Free Directory entry for the specified device.
@@ -186,7 +261,8 @@ public class MSDOSFileSystem implements FileSystemInterface{
    * @param mvDeviceNumber Description of Parameter
    * @return The FreeBlock value
    */
-  public int getFreeBlock(int mvDeviceNumber){
+  public int getFreeBlock(int mvDeviceNumber)
+  {
 
     return resourceAllocator("BLOCK", mvDeviceNumber, -1);
   }
@@ -199,7 +275,8 @@ public class MSDOSFileSystem implements FileSystemInterface{
    * @param mvDeviceNumber Description of Parameter
    * @return The NextDirectoryEntry value
    */
-  public int getNextDirectoryEntry(int mvDirent, int mvDeviceNumber){
+  public int getNextDirectoryEntry(int mvDirent, int mvDeviceNumber)
+  {
 
 //    MSDOSFATEntry mvDevice =
 //        (MSDOSFATEntry) cvDeviceTable.getItem(mvDeviceNumber);
@@ -268,7 +345,6 @@ public class MSDOSFileSystem implements FileSystemInterface{
 //    }
 
     return -1;
-
   }
 
   // Returns the mountpoint of the specified string.
@@ -278,7 +354,8 @@ public class MSDOSFileSystem implements FileSystemInterface{
    * @param mvFilename Description of Parameter
    * @return The MountPoint value
    */
-  public String getMountPoint(String mvFilename){
+  public String getMountPoint(String mvFilename)
+  {
 
 //    int mvIndex;
 //    String mvMountPoint;
@@ -290,7 +367,7 @@ public class MSDOSFileSystem implements FileSystemInterface{
 //    }
 //    mvMountPoint = mvFilename.substring(0, mvIndex);
 //    return mvMountPoint;
-     return "";
+    return "";
   }
 
   //Handle a mount request
@@ -300,7 +377,8 @@ public class MSDOSFileSystem implements FileSystemInterface{
    * @param sMountPoint Description of Parameter
    * @param sDeviceName Description of Parameter
    */
-  public void mount(String sMountPoint, String sDeviceName){
+  public void mount(String sMountPoint, String sDeviceName)
+  {
 
 //    MSDOSFATEntry mvDevice = new MSDOSFATEntry();
 //
@@ -349,467 +427,261 @@ public class MSDOSFileSystem implements FileSystemInterface{
    * @param sFileName Description of Parameter
    * @return Description of the Returned Value
    */
-  public FileSystemData allocate(int iRequestID, String sFileName){
-
-//    String mvMountPoint = getMountPoint(sFileName);
-//
-//    // Assume device is mounted as FSMan has passed in request.
-//    int mvDeviceNumber = ((Integer) cvMountTable.get(mvMountPoint)).intValue();
-//
-//    MSDOSFATEntry mvDevice =
-//        (MSDOSFATEntry) cvDeviceTable.getItem(mvDeviceNumber);
-//
-//    // Check if file is already open
-//    if (mvDevice.openFileNames.containsKey(sFileName))
-//    {
-//      return (new FileSystemData(iRequestID, -1));
-//    }
-//
-//    mvDevice.openFileNames.put(sFileName, new Boolean(true));
-//
-//    // create the entry and init it.
-//    CPM14FIDTableEntry mvFIDEntry = new CPM14FIDTableEntry();
-//
-//    mvFIDEntry.Device = mvDeviceNumber;
-//    mvFIDEntry.Filename = sFileName;
-//    mvFIDEntry.Mode = ALLOCATED;
-//    mvFIDEntry.Buffer = new byte[BLOCK_SIZE];
-//
-//    int FID = cvFIDTable.add(mvFIDEntry);
-//
-//    return (new FileSystemData(iRequestID, FID));
+  public FileSystemReturnData allocate(int iRequestID, String sFileName)
+  {
     return null;
   }
 
-  // Replys to the sender of the message 1 if at end of file
-  // 0 if not.
   /**
-   * Description of the Method
+   * Replys to the sender of the message 1 if at end of file 0 if not.
    *
    * @param iRequestID Description of Parameter
    * @param iFSFileNo Description of Parameter
    * @return Description of the Returned Value
    */
-  public FileSystemData eof(int iRequestID, int iFSFileNo){
-
-//    CPM14FIDTableEntry mvFIDEntry =
-//        (CPM14FIDTableEntry) cvFIDTable.getItem(iFSFileNo);
-//
-//    MSDOSFATEntry mvDevice =
-//        (MSDOSFATEntry) cvDeviceTable.getItem(mvFIDEntry.Device);
-//
-//    int mvReturnValue = NOT_EOF;
-//
-//    if (mvFIDEntry.Mode == READING)
-//    {
-//      // Check if in the middle of a block
-//      if (((mvFIDEntry.CurrentPosition) % 1024) != 0)
-//      {
-//        // Easy, check the current character for 0x1A, EOF.
-//        if ((SVB2I & mvFIDEntry.Buffer[(mvFIDEntry.CurrentPosition % 1024)]) == 0x1A)
-//        {
-//          mvReturnValue = EOF;
-//        }
-//      }
-//      else
-//      {
-//        // The position is at the very end of a data block. Check if that block
-//        // is the last one in the context.
-//        int mvDiskBlockOffset = (mvFIDEntry.FileNumber * DIR_ENTRY_SIZE) +
-//            DATA_BLOCKS;
-//
-//        if (mvFIDEntry.CurrentDiskBlock !=
-//            (SVB2I & mvDevice.directoryTable[(mvFIDEntry.FileNumber * DIR_ENTRY_SIZE) +
-//            DATA_BLOCKS + 16]))
-//        {
-//          // We are not in the last one.
-//          int mvCurrentBlockPosition = (mvFIDEntry.CurrentPosition / 1024) % 16;
-//
-//          // Check if the next block in the list == 0. If it is, this is the
-//          // end of the file.
-//          if ((SVB2I & mvDevice.directoryTable[
-//              mvDiskBlockOffset + mvCurrentBlockPosition + 1]) == 0)
-//          {
-//            mvReturnValue = EOF;
-//          }
-//        }
-//        else
-//        {
-//          // If there isn't an entry for the file with a higher context,
-//          // this be the end.
-//          if (getNextDirectoryEntry(mvFIDEntry.FileNumber, mvFIDEntry.Device) == -1)
-//          {
-//            mvReturnValue = EOF;
-//          }
-//        }
-//      }
-//    }
-//    return (new FileSystemData(iRequestID, mvReturnValue));
-     return null;
-  }
-
-  // Free's all disk structures associated with the specified
-  // file. Leaves the file in the PID table though.
-  /**
-   * Description of the Method
-   *
-   * @param iRequestID Description of Parameter
-   * @param iFSFileNumber Description of Parameter
-   * @return Description of the Returned Value
-   */
-  public FileSystemData delete(int iRequestID, int iFSFileNumber){
-
-//    CPM14FIDTableEntry mvFIDEntry =
-//        (CPM14FIDTableEntry) cvFIDTable.getItem(iFSFileNumber);
-//
-//    // If file isn't at the allocated state
-//    if (mvFIDEntry.Mode != ALLOCATED)
-//    {
-//      return (new FileSystemData(iRequestID, -1));
-//    }
-//
-//    int mvDeviceNumber = mvFIDEntry.Device;
-//    int mvCurrent;
-//    int mvNext;
-//
-//    // eliminate all the dir entries associated with the file.
-//    mvCurrent = getDirectoryPosition(mvFIDEntry.Filename);
-//    if (mvCurrent == -1)
-//    {
-//      // Fine, no work to be done.
-//      return (new FileSystemData(iRequestID, 0));
-//    }
-//
-//    mvNext = getNextDirectoryEntry(mvCurrent, mvDeviceNumber);
-//    while (mvNext != -1)
-//    {
-//      deallocateEntry(mvDeviceNumber, mvCurrent);
-//      mvCurrent = mvNext;
-//      mvNext = getNextDirectoryEntry(mvCurrent, mvDeviceNumber);
-//    }
-//    deallocateEntry(mvCurrent, mvDeviceNumber);
-//
-//    // Clear the data items in the FID table
-//    mvFIDEntry.Mode = ALLOCATED;
-//    mvFIDEntry.FileNumber = -1;
-//    mvFIDEntry.CurrentPosition = -1;
-//    mvFIDEntry.Buffer = null;
-//    mvFIDEntry.CurrentDiskBlock = -1;
-
-     int[] indexesFAT = new int[1];
-    return (new FileSystemData(iRequestID, "", indexesFAT));
-  }
-
-  // Sets up a directory entry for the file and sets it
-  // to a 0 length file.
-  /**
-   * Description of the Method
-   *
-   * @param iRequestID Description of Parameter
-   * @param iFSFileNumber Description of Parameter
-   * @return Description of the Returned Value
-   */
-  public FileSystemData create(int iRequestID, int iFSFileNumber){
-
-//    CPM14FIDTableEntry mvFIDEntry =
-//        (CPM14FIDTableEntry) cvFIDTable.getItem(iFSFileNumber);
-//
-//    MSDOSFATEntry mvDevice =
-//        (MSDOSFATEntry) cvDeviceTable.getItem(mvFIDEntry.Device);
-//
-//    // Check for spaces and necessary conditions
-//    if ((mvFIDEntry.Mode != ALLOCATED) ||
-//        (diskFull(mvFIDEntry.Device)))
-//    {
-//      // Return an error
-//      return (new FileSystemData(iRequestID, -1));
-//    }
-//
-//    int mvDeviceNumber = mvFIDEntry.Device;
-//    // Allocate the dir entry
-//    int mvDirEntry = getFreeEntry(mvDeviceNumber);
-//
-//    if (mvDirEntry == -1)
-//    {
-//      return (new FileSystemData(iRequestID, -1));
-//    }
-//
-//    // Setup the entry
-//    int mvOffset = mvDirEntry * DIR_ENTRY_SIZE;
-//
-//    mvDevice.directoryTable[mvOffset + STATUS] = 0;
-//
-//    byte[] mvByteFilename = convertFilename(mvFIDEntry.Filename);
-//    int mvCounter;
-//
-//    for (mvCounter = 0; mvCounter < 11; mvCounter++)
-//    {
-//      mvDevice.directoryTable[mvOffset + FILENAME + mvCounter] =
-//          mvByteFilename[mvCounter];
-//    }
-//
-//    mvDevice.directoryTable[mvOffset + EXTENT] = 0;
-//    mvDevice.directoryTable[mvOffset + RESERVED] = 0;
-//    mvDevice.directoryTable[mvOffset + RESERVED + 1] = 0;
-//    mvDevice.directoryTable[mvOffset + RECORDS] = 0;
-//
-//    for (mvCounter = 0; mvCounter < 16; mvCounter++)
-//    {
-//      mvDevice.directoryTable[mvOffset + DATA_BLOCKS + mvCounter] = 0;
-//    }
-//
-//    // Setup the initial data.
-//    mvFIDEntry.FileNumber = mvDirEntry;
-//    mvFIDEntry.Mode = WRITING;
-//    mvFIDEntry.CurrentPosition = 0;
-
-    int[] indexesFAT = new int[1];
-    return (new FileSystemData(iRequestID, "", indexesFAT));
-  }
-
-  // Closes a file and removes it from the FID table. first
-  // writes the current buffer and the Dir blocks to disk.
-  /**
-   * Description of the Method
-   *
-   * @param iRequestID Description of Parameter
-   * @param iFSFileNumber Description of Parameter
-   * @return Description of the Returned Value
-   */
-  public FileSystemData close(int iRequestID, int iFSFileNumber){
-
-//    CPM14FIDTableEntry mvFIDEntry =
-//        (CPM14FIDTableEntry) cvFIDTable.getItem(iFSFileNumber);
-//
-//    MSDOSFATEntry mvDevice =
-//        (MSDOSFATEntry) cvDeviceTable.getItem(mvFIDEntry.Device);
-//
-//    if (mvFIDEntry.Mode == WRITING)
-//    {
-//      // add EOF mark at the end of the file unless on a border line between the
-//      // next block. If no eof is encountered, and no following block is allocated,
-//      // Then the end of the file falls directly on the line.
-//      if (((mvFIDEntry.CurrentPosition) % BLOCK_SIZE) != 0)
-//      {
-//        //Currentposition will already point to the place to write the  EOF
-//        // character
-//        mvFIDEntry.Buffer[(mvFIDEntry.CurrentPosition % 1024)] = 0x1A;
-//      }
-//
-//      diskRequest(mvDevice.deviceName, "FS_CLOSE::WRITE_BUFFER", "WRITING",
-//          iFSFileNumber, iRequestID, -1,
-//          mvFIDEntry.CurrentDiskBlock, mvFIDEntry.Buffer);
-//    }
-//    else
-//    {
-//      if (mvDevice.openFileNames.containsKey(mvFIDEntry.Filename))
-//      {
-//        mvDevice.openFileNames.remove(mvFIDEntry.Filename);
-//      }
-//      cvFIDTable.remove(iFSFileNumber);
-//      // Clean up entries in FID table.
-//      return (new FileSystemData(iRequestID, 0));
-//    }
+  public FileSystemReturnData eof(int iRequestID, int iFSFileNo)
+  {
     return null;
   }
 
-  // Opens the specified file for reading.
   /**
-   * Description of the Method
+   * Free's all disk structures associated with the specified file. Leaves the
+   * file in the PID table though.
    *
    * @param iRequestID Description of Parameter
    * @param iFSFileNumber Description of Parameter
    * @return Description of the Returned Value
    */
-  public FileSystemData open(int iRequestID, int iFSFileNumber){
-
-//    CPM14FIDTableEntry mvFIDEntry =
-//        (CPM14FIDTableEntry) cvFIDTable.getItem(iFSFileNumber);
-//    MSDOSFATEntry mvDevice =
-//        (MSDOSFATEntry) cvDeviceTable.getItem(mvFIDEntry.Device);
-//    int mvDeviceNumber = mvFIDEntry.Device;
-//
-//    if (mvFIDEntry.Mode == ALLOCATED)
-//    {
-//      int mvTheFile;
-//
-//      if ((mvTheFile = getNextDirectoryEntry(1, 1)) != -1)
-//      {
-//        // init for first read.
-//        mvFIDEntry.Mode = READING;
-//        mvFIDEntry.FileNumber = mvTheFile;
-//        mvFIDEntry.CurrentPosition = 0;
-//        return (new FileSystemData(iRequestID, 0));
-//      }
-//      else
-//      {
-//        return (new FileSystemData(iRequestID, -1));
-//      }
-//    }
-//    else
-//    {
-//      return (new FileSystemData(iRequestID, -1));
-//    }
-
-    // eu coloquei issooooooooooooooooo!!!!!!!!!!
-    int[] indexesFAT = new int[1];
-      return (new FileSystemData(iRequestID, "", indexesFAT));
+  public FileSystemReturnData delete(int iRequestID, int iFSFileNumber)
+  {
+    return (new FileSystemReturnData(iRequestID, 0));
   }
 
-  // Reads from the file if it is in the right mode.
   /**
-   * Description of the Method
+   * Sets up a directory entry for the file and sets it to a 0 length file.
    *
    * @param iRequestID Description of Parameter
    * @param iFSFileNumber Description of Parameter
    * @return Description of the Returned Value
    */
-  public FileSystemData delete(int iRequestID,
-                              MSDOSFile msdosFile,
-                              String path)
-    throws MSDOSFATException, MSDOSDirectoryException {
+  public FileSystemReturnData create(int iRequestID, int iFSFileNumber)
+  {
+    return (new FileSystemReturnData(iRequestID, 0));
+  }
 
-//    MSDOSFileSystem newMSDOSFileSystem = null;
-//    newMSDOSFileSystem = requestSystemFile();
+  public FileSystemFile create(String newNameFile, String newExtension, boolean newA,
+      boolean newD, boolean newV, boolean newS, boolean newH,
+      String newLastModificationDate, Horario newLastModificationHour,
+      int newFirstBlock, long newSizeMSDOSFile, int newNumeberBlocksArchive)
+  {
+    return new MSDOSFile(newNameFile, newExtension, newA, newD, newV, newS,
+        newH, newLastModificationDate, newLastModificationHour, newFirstBlock,
+        newSizeMSDOSFile, newNumeberBlocksArchive);
+  }
 
-//    requestSystemFile();
+  /**
+   * Closes a file and removes it from the FID table. first writes the current
+   * buffer and the Dir blocks to disk.
+   *
+   * @param iRequestID Description of Parameter
+   * @param iFSFileNumber Description of Parameter
+   * @return Description of the Returned Value
+   */
+  public FileSystemReturnData close(int iRequestID, int iFSFileNumber)
+  {
+    return null;
+  }
 
-//    System.out.println("FAT: "+newMSDOSFileSystem.msdosFat.toString());
+  /**
+   * Opens the specified file for reading.
+   *
+   * @param iRequestID Description of Parameter
+   * @param iFSFileNumber Description of Parameter
+   * @return Description of the Returned Value
+   */
+  public FileSystemReturnData open(int iRequestID, int iFSFileNumber)
+  {
 
+//    return (new FileSystemReturnData(iRequestID, "", indexesFAT));
+    return (new FileSystemReturnData(iRequestID, 0));
+  }
+
+  /**
+   * Reads from the file if it is in the right mode.
+   *
+   * @param iRequestID Description of Parameter
+   * @param msdosFile Description of the Parameter
+   * @param path Description of the Parameter
+   * @return Description of the Returned Value
+   * @throws AllocationTableException Description of the Exception
+   * @throws DirectoryException Description of the Exception
+   */
+  public FileSystemReturnData delete(int iRequestID, FileSystemFile msdosFile,
+      String path) throws AllocationTableException, DirectoryException
+  {
     // PRIMEIRO Vai-se no  Directory pra saber ver onde estah gravado o arquivo
     // ver isso pelo nome, depois descobre-se pra onde o primeiro bloco aponta
     // depois na FAT, depois ler os bloquinhos
-
     int firstBlock = -7;
     String value = "";
     int[] indexesFAT;
 
-    if(msdosFile.isA()){
-        firstBlock = readSubdirectoryAtBlock(msdosFile, path);
-        int[] indexes = msdosFat.getEntriesFileFromFAT(firstBlock);
-        // ler e depois deleta os dados do bloco
-        value = deleteDataFromBlock(indexes);
-        msdosFat.removeEntriesOfFAT(indexes);
-        // deleta a entrada de diretorio do (Subdiretorio dentro do bloco)
-        deleteEntryFromSubdirectoryAtBlock(msdosFile, path);
-        indexesFAT = indexes;
-    }else{
-        System.out.println("entrei no else");
-        firstBlock = readSubdirectoryAtBlock(msdosFile, path);
-        System.out.println("firstBlock: "+firstBlock);
-        if(firstBlock!=-1){
-          Directory directory = mountDirectoryFromBlock(firstBlock);
-          value = directory.dir();
+    MSDOSFile tmpFile = (MSDOSFile) msdosFile;
 
+    if (tmpFile.isA())
+    {
+      firstBlock = readSubdirectoryAtBlock(tmpFile, path);
+      int[] indexes = msdosFat.getEntriesFileFromFAT(firstBlock);
+
+      // ler e depois deleta os dados do bloco
+      value = deleteDataFromBlock(indexes);
+      msdosFat.removeEntriesOfFAT(indexes);
+
+      // deleta a entrada de diretorio do (Subdiretorio dentro do bloco)
+      deleteEntryFromSubdirectoryAtBlock(tmpFile, path);
+      indexesFAT = indexes;
+    }
+    else
+    {
+      System.out.println("entrei no else");
+      firstBlock = readSubdirectoryAtBlock(tmpFile, path);
+      System.out.println("firstBlock: " + firstBlock);
+
+      if (firstBlock != -1)
+      {
+        MSDOSDirectory directory = mountDirectoryFromBlock(firstBlock);
+        value = directory.dir();
 //          directory.removeFile(msdosFile.getNameFile());
-        }else{
-          value = this.directory.dir();
+      }
+      else
+      {
+        value = this.directory.dir();
 //          this.directory.removeFile(msdosFile.getNameFile());
-        }
-        indexesFAT = new int[1];
-        System.out.println("firstBlock do msdosFile: "+msdosFile.getFirstBlock());
-        indexesFAT[0] = firstBlock;
+      }
+      indexesFAT = new int[1];
+      System.out.println("firstBlock do msdosFile: " + tmpFile.getFirstBlock());
+      indexesFAT[0] = firstBlock;
 //        indexesFAT[0] = msdosFile.getFirstBlock();
-        // ler e depois deleta os dados do bloco
-        msdosFat.removeEntryFAT(firstBlock);
-        deleteEntryFromSubdirectoryAtBlock(msdosFile, path);
+
+      // ler e depois deleta os dados do bloco
+      msdosFat.removeEntryFAT(firstBlock);
+      deleteEntryFromSubdirectoryAtBlock(tmpFile, path);
     }
 
-//    int[] indexesFAT;
-//    System.out.println("firstBlock a ser pintado: "+firstBlock);
-//    if (firstBlock!=-1){
-//      indexesFAT = msdosFat.getEntriesFileFromFAT(firstBlock);
-//    }else{
-//      indexesFAT = new int[1];
-//      indexesFAT[0] = -1;
-//    }
-    return (new FileSystemData(iRequestID, value, indexesFAT));
-
+//    return (new FileSystemData(iRequestID, value, indexesFAT));
+    return (new FileSystemReturnData(iRequestID, 0));
   }
 
-  public String deleteDataFromBlock(int[] indexes) {
-      String value = "";
+  /**
+   * Description of the Method
+   *
+   * @param indexes Description of the Parameter
+   * @return Description of the Return Value
+   */
+  public String deleteDataFromBlock(int[] indexes)
+  {
+    StringBuffer block = null;
+    byte[] buffer;
 
-      Block block = null;
-//      for (int i = 0; i < indexes.length; i++) {
-      for (int i = (indexes.length-1); i >= 0; i--) {
-         block = disk.readBlock(indexes[i]);
-         value += new String(block.getData());
-         //primeiro ler depois remove o conteudo do disco
-         disk.removeBlock(indexes[i]);
-      }
+    for (int i = (indexes.length - 1); i >= 0; i--)
+    {
+      buffer = disk.readSector(indexes[i]);
+      block.append(buffer);
 
-      return value;
+      //primeiro ler depois remove o conteudo do disco
+      disk.writeSector(indexes[i], new byte[BLOCK_SIZE]);
+    }
 
+    return block.toString();
   }
 
+  /**
+   * Description of the Method
+   *
+   * @param msdosFile Description of the Parameter
+   * @param path Description of the Parameter
+   * @return Description of the Return Value
+   * @throws MSDOSFATException Description of the Exception
+   * @throws MSDOSDirectoryException Description of the Exception
+   * @throws AllocationTableException Description of the Exception
+   * @throws DirectoryException Description of the Exception
+   */
   public int deleteEntryFromSubdirectoryAtBlock(MSDOSFile msdosFile, String path)
-    throws MSDOSFATException, MSDOSDirectoryException{
-
+       throws AllocationTableException, DirectoryException
+  {
     boolean isAbsolutePath = path.startsWith("C:/");
     MSDOSFile msdosFileAux = null;
     int firstBlock = -1;
 
-    // Ex: C:/dany/x
-    if (isAbsolutePath){
-      System.out.println("path.substring(2, path.length()): "+path.substring(3, path.length()));
+// Ex: C:/dany/x
+    if (isAbsolutePath)
+    {
+      System.out.println("path.substring(2, path.length()): " + path.substring(3, path.length()));
       StringTokenizer st = new StringTokenizer(path.substring(3, path.length()), "/");
-      System.out.println("st "+st);
+      System.out.println("st " + st);
       int countTokens = st.countTokens();
-      if (countTokens==0){
-         System.out.println("lendo da raiz os arquivos");
-         if(!msdosFile.getNameFile().equals("")){
-           msdosFileAux = directory.readFile(msdosFile.getNameFile());
-           firstBlock = msdosFileAux.getFirstBlock();
-           msdosFile.setFirstBlock(msdosFileAux.getFirstBlock());
-           // deletando o arquivo
-           directory.removeFile(msdosFile.getNameFile());
-         }else{
-            firstBlock = -1;
-         }
+      if (countTokens == 0)
+      {
+        System.out.println("lendo da raiz os arquivos");
+        if (!msdosFile.getNameFile().equals(""))
+        {
+          msdosFileAux = directory.readFile(msdosFile.getNameFile());
+          firstBlock = msdosFileAux.getFirstBlock();
+          msdosFile.setFirstBlock(msdosFileAux.getFirstBlock());
+// deletando o arquivo
+          directory.removeFile(msdosFile.getNameFile());
+        }
+        else
+        {
+          firstBlock = -1;
+        }
 
-      }else{ // vai no Diretorio raiz procurar o caminho  e depois vai na FAT
-             // procurar o lugar dele, depois no disco
+      }
+      else
+      {
+        // vai no Diretorio raiz procurar o caminho  e depois vai na FAT
+        // procurar o lugar dele, depois no disco
         String aux = null;
         int initialBlock = -1;
         int[] listEntries;
         aux = st.nextToken();
-        System.out.println("nome dir "+aux);
+        System.out.println("nome dir " + aux);
         msdosFileAux = directory.readFile(aux);
         initialBlock = msdosFileAux.getFirstBlock();
         listEntries = msdosFat.getEntriesFileFromFAT(initialBlock);
         int indice = listEntries[0];
         MSDOSFile msdosFile2 = null;
 
-        if(listEntries.length==1){// ou ==
-
-          Directory subDirectory = null;
+        if (listEntries.length == 1)
+        {
+          MSDOSDirectory subDirectory = null;
           String teste = "";
-          for (int i = 0; i < (countTokens-1); i++) {
-
+          for (int i = 0; i < (countTokens - 1); i++)
+          {
 //             }else{
 //               // vai procurar o proximo subdiretorio nos blocos
-               subDirectory = mountDirectoryFromBlock(indice);
-               teste = st.nextToken();
-               msdosFile2 = subDirectory.readFile(teste);
-               indice = msdosFile2.getFirstBlock();
+            subDirectory = mountDirectoryFromBlock(indice);
+            teste = st.nextToken();
+            msdosFile2 = subDirectory.readFile(teste);
+            indice = msdosFile2.getFirstBlock();
 //             }
           }
 
-         // ve se chegou no diretorio onde sera gravado o novo
-         // diretorio
+          // ve se chegou no diretorio onde sera gravado o novo
+          // diretorio
 //         if(i==(st.countTokens()-2)){
 //           recordAtBlock(indice, msdosFile);
-             subDirectory = mountDirectoryFromBlock(indice);
-             msdosFile2 = subDirectory.readFile(msdosFile.getNameFile());
-             firstBlock = msdosFile2.getFirstBlock();
-             // deletando arquivo
-             subDirectory.removeFile(msdosFile.getNameFile());
+          subDirectory = mountDirectoryFromBlock(indice);
+          msdosFile2 = subDirectory.readFile(msdosFile.getNameFile());
+          firstBlock = msdosFile2.getFirstBlock();
+
+          // deletando arquivo
+          subDirectory.removeFile(msdosFile.getNameFile());
 //         }
-
-
-        }else{
-          throw new MSDOSFATException("Não há o diretório "+aux+" no sistema de arquivo");
+        }
+        else
+        {
+          throw new MSDOSFATException("Não há o diretório " + aux + " no sistema de arquivo");
         }
 
       }
@@ -822,21 +694,15 @@ public class MSDOSFileSystem implements FileSystemInterface{
    * Description of the Method
    *
    * @param iRequestID Description of Parameter
-   * @param iFSFileNumber Description of Parameter
+   * @param msdosFile Description of the Parameter
+   * @param path Description of the Parameter
    * @return Description of the Returned Value
+   * @throws AllocationTableException Description of the Exception
+   * @throws DirectoryException Description of the Exception
    */
-  public FileSystemData read(int iRequestID,
-                              MSDOSFile msdosFile,
-                              String path)
-    throws MSDOSFATException, MSDOSDirectoryException {
-
-//    MSDOSFileSystem newMSDOSFileSystem = null;
-//    newMSDOSFileSystem = requestSystemFile();
-
-//    requestSystemFile();
-
-//    System.out.println("FAT: "+newMSDOSFileSystem.msdosFat.toString());
-
+  public FileSystemReturnData read(int iRequestID, FileSystemFile msdosFile,
+      String path) throws AllocationTableException, DirectoryException
+  {
     // PRIMEIRO Vai-se no  Directory pra saber ver onde estah gravado o arquivo
     // ver isso pelo nome, depois descobre-se pra onde o primeiro bloco aponta
     // depois na FAT, depois ler os bloquinhos
@@ -845,23 +711,31 @@ public class MSDOSFileSystem implements FileSystemInterface{
     String value = "";
     int[] indexesFAT;
 
-    if(msdosFile.isA()){
-        firstBlock = readSubdirectoryAtBlock(msdosFile, path);
-        int[] indexes = msdosFat.getEntriesFileFromFAT(firstBlock);
-        value = readDataFromBlock(indexes);
-        indexesFAT = indexes;
-    }else{
-        System.out.println("entrei no else");
-        firstBlock = readSubdirectoryAtBlock(msdosFile, path);
-        System.out.println("firstBlock: "+firstBlock);
-        if(firstBlock!=-1){
-          Directory directory = mountDirectoryFromBlock(firstBlock);
-          value = directory.dir();
-        }else{
-          value = this.directory.dir();
-        }
-        indexesFAT = new int[1];
-        indexesFAT[0] = firstBlock;
+    MSDOSFile tmpFile = (MSDOSFile) msdosFile;
+
+    if (tmpFile.isA())
+    {
+      firstBlock = readSubdirectoryAtBlock(tmpFile, path);
+      int[] indexes = msdosFat.getEntriesFileFromFAT(firstBlock);
+      value = readDataFromBlock(indexes);
+      indexesFAT = indexes;
+    }
+    else
+    {
+      System.out.println("entrei no else");
+      firstBlock = readSubdirectoryAtBlock(tmpFile, path);
+      System.out.println("firstBlock: " + firstBlock);
+      if (firstBlock != -1)
+      {
+        MSDOSDirectory directory = mountDirectoryFromBlock(firstBlock);
+        value = directory.dir();
+      }
+      else
+      {
+        value = this.directory.dir();
+      }
+      indexesFAT = new int[1];
+      indexesFAT[0] = firstBlock;
     }
 
 //    int[] indexesFAT;
@@ -872,280 +746,341 @@ public class MSDOSFileSystem implements FileSystemInterface{
 //      indexesFAT = new int[1];
 //      indexesFAT[0] = -1;
 //    }
-    return (new FileSystemData(iRequestID, value, indexesFAT));
-
+    return (new FileSystemReturnData(iRequestID, 0));
+//    return (new FileSystemReturnData(iRequestID, value, indexesFAT));
   }
 
-  public String readDataFromBlock(int[] indexes) {
-      String value = "";
-
-      Block block = null;
-//      for (int i = 0; i < indexes.length; i++) {
-      for (int i = (indexes.length-1); i >= 0; i--) {
-         block = disk.readBlock(indexes[i]);
-         value += new String(block.getData());
-      }
-
-      return value;
-
-  }
-  // If the mode is correct, this starts or contines writing a
-  // file.
   /**
    * Description of the Method
    *
-   * @param iRequestID Description of Parameter
-   * @param iFSFileNo Description of Parameter
-   * @return Description of the Returned Value
+   * @param indexes Description of the Parameter
+   * @return Description of the Return Value
    */
-//  public FileSystemData write(int iRequestID, int iFSFileNo){
-  public FileSystemData write(int iRequestID,
-                              MSDOSFile msdosFile,
-                              String data,
-                              String path)
-       throws MSDOSFATException, MSDOSDirectoryException {
+  public String readDataFromBlock(int[] indexes)
+  {
+    StringBuffer block = null;
+    byte[] buffer;
 
-      // PRIMEIRO: Tratamos o relacionamento da escrita do dado na FAT
+    for (int i = (indexes.length - 1); i >= 0; i--)
+    {
+      buffer = disk.readSector(indexes[i]);
+      block.append(buffer);
+    }
 
-      // Checa a quantidade de entradas Livres na FAT
-      int sizeFreeFAT = msdosFat.getSizeFreeFAT();
-      int newPosicionFATAux1 = -1;
-      int[] indexesFAT;
-
-      // Pra garantir que tem entrada livre na FAT pra
-      if (sizeFreeFAT!=0){
-
-        // Eh um arquivo
-        if (msdosFile.isA()){
-
-           System.out.println("ARQUIVO: "+msdosFile.getNameFile());
-          // Pegar entrada de bloco disponivel pra colocar os dados
-          // do arquivo ou diretorio passado
-          byte[] valueBytes = data.getBytes();
-
-          int quantityBytes = valueBytes.length;
-
-          int numberEntryFAT = (new Double(Math.ceil((double)quantityBytes/InterfaceMSDOS.BLOCK_SIZE))).intValue();
-
-          System.out.println("numberEntryFAT: "+numberEntryFAT);
-
-          if (numberEntryFAT <= sizeFreeFAT){
-             newPosicionFATAux1 = msdosFat.getNewEntryFAT();
-
-             // Seta o primeiro bloco do arquivo que veio da fat
-             msdosFile.setFirstBlock(newPosicionFATAux1);
-
-             // Seta as entradas correspondentes ao bloco
-             // que vao ser ocupadas na FAT
-             setEntriesAtFAT(msdosFile, numberEntryFAT);
-
-             //Grava data at blocks and seta o caminho
-             // dos varios blocos ocupados pelo arquivo
-             writeDataAtBlock(msdosFile, data);
-
-             // Grava no diretorio raiz ou em algum bloco
-             // do disco (que representa um subdiretorio)
-             // o msdosFile
-             writeSubdirectoryAtBlock(msdosFile, path);
-
-             msdosFile.setNumeberBlocksArchive(numberEntryFAT);
-
-          // nao precisa desse else eh soh pra garantir
-          }else{
-              throw new MSDOSFATException("FAT is full");
-          }
-
-           indexesFAT = msdosFat.getEntriesFileFromFAT(newPosicionFATAux1);
-        }else{
-           // adicionar um novo diretorio
-           newPosicionFATAux1 = msdosFat.getNewEntryFAT();
-           msdosFile.setFirstBlock(newPosicionFATAux1);
-           msdosFat.addEntriesFAT(newPosicionFATAux1, -2);
-
-           // coloca no bloco um new de diretorio pra
-           // simbolizar q ele eh um diretorio e nao um pedaco de
-           // arquivo
-           writeNewDirectoryAtBlock(newPosicionFATAux1);
-
-           // coloca soh uma entrada onde deve estar o arquivo
-           writeSubdirectoryAtBlock(msdosFile, path);
-
-           indexesFAT = new int[1];
-           indexesFAT[0] = newPosicionFATAux1;
-           msdosFile.setNumeberBlocksArchive(1);
-        }
-      // nao precisa desse else eh soh pra garantir
-      }else{
-         throw new MSDOSFATException("FAT is full");
-      }
-
-//     int[] indexesFAT = msdosFat.getEntriesFileFromFAT(newPosicionFATAux1);
-     return new FileSystemData(iRequestID, "-1", indexesFAT);
+    return block.toString();
   }
 
+  /**
+   * If the mode is correct, this starts or contines writing a file.
+   *
+   * @param iRequestID Description of Parameter
+   * @param msdosFile Description of the Parameter
+   * @param data Description of the Parameter
+   * @param path Description of the Parameter
+   * @return Description of the Returned Value
+   * @throws AllocationTableException Description of the Exception
+   * @throws DirectoryException Description of the Exception
+   */
+  public FileSystemReturnData write(int iRequestID, FileSystemFile msdosFile,
+      String data, String path) throws AllocationTableException,
+      DirectoryException
+  {
+    // PRIMEIRO: Tratamos o relacionamento da escrita do dado na FAT
 
-  public void writeNewDirectoryAtBlock(int newPosicionFATAux)
-     throws MSDOSDirectoryException {
+    // Checa a quantidade de entradas Livres na FAT
+    int sizeFreeFAT = msdosFat.getSizeFreeFAT();
+    int newPosicionFATAux1 = -1;
+    int[] indexesFAT;
 
-     try{
-       Directory directory = new Directory();
-       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       ObjectOutputStream out = new ObjectOutputStream(baos);
-       out.writeObject(directory);
+    // Pra garantir que tem entrada livre na FAT pra
+    if (sizeFreeFAT != 0)
+    {
+      MSDOSFile tmpFile = (MSDOSFile) msdosFile;
 
-       byte[] byteDirectry = baos.toByteArray();
+      // Eh um arquivo
+      if (tmpFile.isA())
+      {
+        System.out.println("ARQUIVO: " + tmpFile.getNameFile());
 
-       Block block = new Block();
-       block.setData(byteDirectry);
-       disk.writeBlock(newPosicionFATAux, block);
-     }catch(IOException ioex){
-       throw new MSDOSDirectoryException("Error recording new directory");
-     }
+        // Pegar entrada de bloco disponivel pra colocar os dados
+        // do arquivo ou diretorio passado
+        byte[] valueBytes = data.getBytes();
+
+        int quantityBytes = valueBytes.length;
+
+        int numberEntryFAT = (new Double(Math.ceil((double) quantityBytes / BLOCK_SIZE))).intValue();
+
+        System.out.println("numberEntryFAT: " + numberEntryFAT);
+
+        if (numberEntryFAT <= sizeFreeFAT)
+        {
+          newPosicionFATAux1 = msdosFat.getNewEntryFAT();
+
+          // Seta o primeiro bloco do arquivo que veio da fat
+          msdosFile.setFirstBlock(newPosicionFATAux1);
+
+          // Seta as entradas correspondentes ao bloco
+          // que vao ser ocupadas na FAT
+          setEntriesAtFAT(tmpFile, numberEntryFAT);
+
+          //Grava data at blocks and seta o caminho
+          // dos varios blocos ocupados pelo arquivo
+          writeDataAtBlock(tmpFile, data);
+
+          // Grava no diretorio raiz ou em algum bloco
+          // do disco (que representa um subdiretorio)
+          // o msdosFile
+          writeSubdirectoryAtBlock(tmpFile, path);
+
+          msdosFile.setNumeberBlocksArchive(numberEntryFAT);
+
+          // nao precisa desse else eh soh pra garantir
+        }
+        else
+        {
+          throw new MSDOSFATException("FAT is full");
+        }
+
+        indexesFAT = msdosFat.getEntriesFileFromFAT(newPosicionFATAux1);
+      }
+      else
+      {
+        // adicionar um novo diretorio
+        newPosicionFATAux1 = msdosFat.getNewEntryFAT();
+        msdosFile.setFirstBlock(newPosicionFATAux1);
+        msdosFat.addEntriesFAT(newPosicionFATAux1, -2);
+
+        // coloca no bloco um new de diretorio pra
+        // simbolizar q ele eh um diretorio e nao um pedaco de
+        // arquivo
+        writeNewDirectoryAtBlock(newPosicionFATAux1);
+
+        // coloca soh uma entrada onde deve estar o arquivo
+        writeSubdirectoryAtBlock(tmpFile, path);
+
+        indexesFAT = new int[1];
+        indexesFAT[0] = newPosicionFATAux1;
+        msdosFile.setNumeberBlocksArchive(1);
+      }
+      // nao precisa desse else eh soh pra garantir
+    }
+    else
+    {
+      throw new MSDOSFATException("FAT is full");
+    }
+
+//     int[] indexesFAT = msdosFat.getEntriesFileFromFAT(newPosicionFATAux1);
+//    return new FileSystemData(iRequestID, "-1", indexesFAT);
+    return new FileSystemReturnData(iRequestID, -1);
   }
 
 
   /**
-   * Seta as entradas correspondentes ao bloco
-   * que vao ser ocupadas na FAT
+   * Description of the Method
+   *
+   * @param newPosicionFATAux Description of the Parameter
+   * @throws MSDOSDirectoryException Description of the Exception
+   * @throws DirectoryException Description of the Exception
+   */
+  public void writeNewDirectoryAtBlock(int newPosicionFATAux)
+       throws DirectoryException
+  {
+    try
+    {
+      MSDOSDirectory directory = new MSDOSDirectory();
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ObjectOutputStream out = new ObjectOutputStream(baos);
+      out.writeObject(directory);
+
+      byte[] byteDirectory = baos.toByteArray();
+      disk.writeSector(newPosicionFATAux, byteDirectory);
+    }
+    catch (IOException ioex)
+    {
+      throw new MSDOSDirectoryException("Error recording new directory");
+    }
+  }
+
+
+  /**
+   * Seta as entradas correspondentes ao bloco que vao ser ocupadas na FAT
+   *
+   * @param msdosFile The new entriesAtFAT value
+   * @param numberEntryFAT The new entriesAtFAT value
+   * @throws MSDOSFATException Description of the Exception
+   * @throws AllocationTableException Description of the Exception
    */
   public void setEntriesAtFAT(MSDOSFile msdosFile, int numberEntryFAT)
-         throws MSDOSFATException{
-     int newPosicionFATAux1 = -1;
-     int newPosicionFATAux2 = -1;
-     int i = 0;
+       throws AllocationTableException
+  {
+    int newPosicionFATAux1 = -1;
+    int newPosicionFATAux2 = -1;
+    int i = 0;
 
-     newPosicionFATAux1 = msdosFile.getFirstBlock();
+    newPosicionFATAux1 = msdosFile.getFirstBlock();
 
-     System.out.println("setEntriesAtFAT: "+msdosFile.getNameFile());
+    System.out.println("setEntriesAtFAT: " + msdosFile.getNameFile());
 
-     System.out.println("newPosicionFATAux1: "+newPosicionFATAux1);
-     System.out.println("numberEntryFAT: "+numberEntryFAT);
-     for (i = 0; i < numberEntryFAT-1; i++) {
+    System.out.println("newPosicionFATAux1: " + newPosicionFATAux1);
+    System.out.println("numberEntryFAT: " + numberEntryFAT);
+    for (i = 0; i < numberEntryFAT - 1; i++)
+    {
 
-        System.out.println("entrei no for!!!");
-        newPosicionFATAux2 = msdosFat.getNewEntryFAT();
-        msdosFat.addEntriesFAT(newPosicionFATAux1, newPosicionFATAux2);
-        newPosicionFATAux1 = newPosicionFATAux2;
-     }
+      System.out.println("entrei no for!!!");
+      newPosicionFATAux2 = msdosFat.getNewEntryFAT();
+      msdosFat.addEntriesFAT(newPosicionFATAux1, newPosicionFATAux2);
+      newPosicionFATAux1 = newPosicionFATAux2;
+    }
 
-     // Verifica se eh o ultimo numero a ser adicionado na FAT, para
-     // aponta-lo pra -2
+    // Verifica se eh o ultimo numero a ser adicionado na FAT, para
+    // aponta-lo pra -2
 //     if(i==(numberEntryFAT-1)){
-        System.out.println("newPosicionFATAux1: "+newPosicionFATAux1);
-        msdosFat.addEntriesFAT(newPosicionFATAux1, -2);
+    System.out.println("newPosicionFATAux1: " + newPosicionFATAux1);
+    msdosFat.addEntriesFAT(newPosicionFATAux1, -2);
 //     }
   }
 
   /**
    * Write Datas at Blocks, have known the entries at FAT
+   *
+   * @param msdosFile Description of the Parameter
+   * @param data Description of the Parameter
+   * @throws MSDOSFATException Description of the Exception
+   * @throws AllocationTableException Description of the Exception
    */
   public void writeDataAtBlock(MSDOSFile msdosFile, String data)
-         throws MSDOSFATException{
-     int newPosicionFATAux1 = -1;
-     int i = 0;
-     int[] entriesAtFAT;
+       throws AllocationTableException
+  {
+    int newPosicionFATAux1 = -1;
+    int i = 0;
+    int[] entriesAtFAT;
 
-     System.out.println("writeDataAtBlock: "+msdosFile.getNameFile());
-     byte[] valueBytes = data.getBytes();
+    System.out.println("writeDataAtBlock: " + msdosFile.getNameFile());
+    byte[] valueBytes = data.getBytes();
 
-     newPosicionFATAux1 = msdosFile.getFirstBlock();
-     int[] indexes = msdosFat.getEntriesFileFromFAT(newPosicionFATAux1);
+    newPosicionFATAux1 = msdosFile.getFirstBlock();
+    int[] indexes = msdosFat.getEntriesFileFromFAT(newPosicionFATAux1);
 
-     for (i = 0; i < indexes.length-1; i++) {
-        System.out.println("entrei no for222");
-        // Adiciona no disco realmente os dados do arquivo
-        int aux = -1;
-        if(i==0){
-           aux = 0;
-        }else{
-           aux = (i*InterfaceMSDOS.BLOCK_SIZE)-1;
-        }
-        byte[] auxDst = new byte[InterfaceMSDOS.BLOCK_SIZE];
-        System.arraycopy(valueBytes,aux,auxDst,0,InterfaceMSDOS.BLOCK_SIZE);
-        Block block = new Block();
-        block.setData(auxDst);
-        disk.writeBlock(newPosicionFATAux1, block);
-     }
+    for (i = 0; i < indexes.length - 1; i++)
+    {
+      System.out.println("entrei no for222");
+      // Adiciona no disco realmente os dados do arquivo
+      int aux = -1;
+      if (i == 0)
+      {
+        aux = 0;
+      }
+      else
+      {
+        aux = (i * BLOCK_SIZE) - 1;
+      }
+      byte[] auxDst = new byte[BLOCK_SIZE];
+      System.arraycopy(valueBytes, aux, auxDst, 0, BLOCK_SIZE);
+      disk.writeSector(newPosicionFATAux1, auxDst);
+    }
 
-     // Verifica se eh o ultimo numero pra colocar no disco nao mais pra
-     // preencher o bloco todo e sim apenas ateh o fim do arquivo
+    // Verifica se eh o ultimo numero pra colocar no disco nao mais pra
+    // preencher o bloco todo e sim apenas ateh o fim do arquivo
 //     if(i==(numberEntryFAT-1)){
-        // mandando para o disco
-        byte[] auxDst2 = new byte[InterfaceMSDOS.BLOCK_SIZE];
-        int restante = valueBytes.length - (i*InterfaceMSDOS.BLOCK_SIZE);
-        System.arraycopy(valueBytes,i*InterfaceMSDOS.BLOCK_SIZE,auxDst2,0,restante);
-        Block block2 = new Block();
-        System.out.println("auxDst2: "+auxDst2);
-        block2.setData(auxDst2);
-        System.out.println("newPosicionFATAux1: "+newPosicionFATAux1);
-        disk.writeBlock(newPosicionFATAux1, block2);
+    // mandando para o disco
+    byte[] auxDst2 = new byte[BLOCK_SIZE];
+    int restante = valueBytes.length - (i * BLOCK_SIZE);
+    System.arraycopy(valueBytes, i * BLOCK_SIZE, auxDst2, 0, restante);
+    System.out.println("auxDst2: " + auxDst2);
+    System.out.println("newPosicionFATAux1: " + newPosicionFATAux1);
+    disk.writeSector(newPosicionFATAux1, auxDst2);
 //     }
 
-   }
+  }
 
+  /**
+   * Description of the Method
+   *
+   * @param msdosFile Description of the Parameter
+   * @param path Description of the Parameter
+   * @return Description of the Return Value
+   * @throws MSDOSFATException Description of the Exception
+   * @throws MSDOSDirectoryException Description of the Exception
+   * @throws AllocationTableException Description of the Exception
+   * @throws DirectoryException Description of the Exception
+   */
   public int readSubdirectoryAtBlock(MSDOSFile msdosFile, String path)
-    throws MSDOSFATException, MSDOSDirectoryException{
+       throws AllocationTableException, DirectoryException
+  {
 
     boolean isAbsolutePath = path.startsWith("C:/");
     MSDOSFile msdosFileAux = null;
     int firstBlock = -1;
 
     // Ex: C:/dany/x
-    if (isAbsolutePath){
-      System.out.println("path.substring(2, path.length()): "+path.substring(3, path.length()));
+    if (isAbsolutePath)
+    {
+      System.out.println("path.substring(2, path.length()): " + path.substring(3, path.length()));
       StringTokenizer st = new StringTokenizer(path.substring(3, path.length()), "/");
-      System.out.println("st "+st);
+      System.out.println("st " + st);
       int countTokens = st.countTokens();
-      if (countTokens==0){
-         System.out.println("lendo da raiz os arquivos");
-         if(!msdosFile.getNameFile().equals("")){
-           msdosFileAux = directory.readFile(msdosFile.getNameFile());
-           firstBlock = msdosFileAux.getFirstBlock();
-           msdosFile.setFirstBlock(msdosFileAux.getFirstBlock());
-         }else{
-            firstBlock = -1;
-         }
+      if (countTokens == 0)
+      {
+        System.out.println("lendo da raiz os arquivos");
+        if (!msdosFile.getNameFile().equals(""))
+        {
+          msdosFileAux = directory.readFile(msdosFile.getNameFile());
+          firstBlock = msdosFileAux.getFirstBlock();
+          msdosFile.setFirstBlock(msdosFileAux.getFirstBlock());
+        }
+        else
+        {
+          firstBlock = -1;
+        }
 
-      }else{ // vai no Diretorio raiz procurar o caminho  e depois vai na FAT
-             // procurar o lugar dele, depois no disco
+      }
+      else
+      {
+        // vai no Diretorio raiz procurar o caminho  e depois vai na FAT
+        // procurar o lugar dele, depois no disco
         String aux = null;
         int initialBlock = -1;
         int[] listEntries;
         aux = st.nextToken();
-        System.out.println("nome dir "+aux);
+        System.out.println("nome dir " + aux);
         msdosFileAux = directory.readFile(aux);
         initialBlock = msdosFileAux.getFirstBlock();
         listEntries = msdosFat.getEntriesFileFromFAT(initialBlock);
         int indice = listEntries[0];
         MSDOSFile msdosFile2 = null;
 
-        if(listEntries.length==1){// ou ==
+        if (listEntries.length == 1)
+        {
+          // ou ==
 
-          Directory subDirectory = null;
+          MSDOSDirectory subDirectory = null;
           String teste = "";
-          for (int i = 0; i < (countTokens-1); i++) {
+          for (int i = 0; i < (countTokens - 1); i++)
+          {
 
 //             }else{
 //               // vai procurar o proximo subdiretorio nos blocos
-               subDirectory = mountDirectoryFromBlock(indice);
-               teste = st.nextToken();
-               msdosFile2 = subDirectory.readFile(teste);
-               indice = msdosFile2.getFirstBlock();
+            subDirectory = mountDirectoryFromBlock(indice);
+            teste = st.nextToken();
+            msdosFile2 = subDirectory.readFile(teste);
+            indice = msdosFile2.getFirstBlock();
 //             }
           }
 
-         // ve se chegou no diretorio onde sera gravado o novo
-         // diretorio
+          // ve se chegou no diretorio onde sera gravado o novo
+          // diretorio
 //         if(i==(st.countTokens()-2)){
 //           recordAtBlock(indice, msdosFile);
-             subDirectory = mountDirectoryFromBlock(indice);
-             msdosFile2 = subDirectory.readFile(msdosFile.getNameFile());
-             firstBlock = msdosFile2.getFirstBlock();
+          subDirectory = mountDirectoryFromBlock(indice);
+          msdosFile2 = subDirectory.readFile(msdosFile.getNameFile());
+          firstBlock = msdosFile2.getFirstBlock();
 //         }
 
 
-        }else{
-          throw new MSDOSFATException("Não há o diretório "+aux+" no sistema de arquivo");
+        }
+        else
+        {
+          throw new MSDOSFATException("Não há o diretório " + aux + " no sistema de arquivo");
         }
 
       }
@@ -1154,33 +1089,42 @@ public class MSDOSFileSystem implements FileSystemInterface{
   }
 
   /**
-   *   Vai ter acesso ao path e assim vai na fat saber se vai escrever
-   * no Direcoty root ou num bloco apontado pela FAT que representa na
-   * verdade um subdiretorio
+   * Vai ter acesso ao path e assim vai na fat saber se vai escrever no Direcoty
+   * root ou num bloco apontado pela FAT que representa na verdade um
+   * subdiretorio PS: Vemos aqui que tanto o arquivo como um subdiretorio sao
+   * gravados da mesma forma no bloco, porem os dados de um arquivo sao gravados
+   * de forma diferente e isso sera feito em outro metodo
    *
-   * PS: Vemos aqui que tanto o arquivo como um subdiretorio sao gravados da
-   * mesma forma no bloco, porem os dados de um arquivo sao gravados de forma
-   * diferente e isso sera feito em outro metodo
+   * @param msdosFile Description of the Parameter
+   * @param path Description of the Parameter
+   * @throws AllocationTableException Description of the Exception
+   * @throws DirectoryException Description of the Exception
    */
   public void writeSubdirectoryAtBlock(MSDOSFile msdosFile, String path)
-    throws MSDOSFATException, MSDOSDirectoryException{
+       throws AllocationTableException, DirectoryException
+  {
 
     boolean isAbsolutePath = path.startsWith("C:/");
 
-    System.out.println("writeSubdirectoryAtBlock: "+msdosFile.getNameFile());
+    System.out.println("writeSubdirectoryAtBlock: " + msdosFile.getNameFile());
     // Ex: C:/dany/x
-    if (isAbsolutePath){
-      System.out.println("path.substring(2, path.length()): "+path.substring(3, path.length()));
+    if (isAbsolutePath)
+    {
+      System.out.println("path.substring(2, path.length()): " + path.substring(3, path.length()));
       StringTokenizer st = new StringTokenizer(path.substring(3, path.length()), "/");
-      System.out.println("st "+st);
+      System.out.println("st " + st);
       int countTokens = st.countTokens();
-      if (countTokens==0){
-         System.out.println("adicionando na raiz o arquivo");
-         directory.addNewFile(msdosFile);
+      if (countTokens == 0)
+      {
+        System.out.println("adicionando na raiz o arquivo");
+        directory.addNewFile(msdosFile);
 
-      }else{ // vai no Diretorio raiz procurar o caminho  e depois vai na FAT
-             // procurar o lugar dele, depois no disco pra apenas setar o bloco
-             // que na verdade eh um subdiretorio com uma nova entrada de arquivo
+      }
+      else
+      {
+        // vai no Diretorio raiz procurar o caminho  e depois vai na FAT
+        // procurar o lugar dele, depois no disco pra apenas setar o bloco
+        // que na verdade eh um subdiretorio com uma nova entrada de arquivo
         String aux = null;
         MSDOSFile msdosFileAux = null;
         int initialBlock = -1;
@@ -1188,25 +1132,28 @@ public class MSDOSFileSystem implements FileSystemInterface{
         aux = st.nextToken();
         msdosFileAux = directory.readFile(aux);
         initialBlock = msdosFileAux.getFirstBlock();
-        System.out.println("initialBlock: "+initialBlock);
+        System.out.println("initialBlock: " + initialBlock);
         listEntries = msdosFat.getEntriesFileFromFAT(initialBlock);
         int indice = listEntries[0];
 
-        System.out.println("indice: "+indice);
-        if(listEntries.length==1){// ou ==
+        System.out.println("indice: " + indice);
+        if (listEntries.length == 1)
+        {
+          // ou ==
 
-          for (int i = 0; i < (countTokens-1); i++) {
+          for (int i = 0; i < (countTokens - 1); i++)
+          {
 
 //             // ve se chegou no diretorio onde sera gravado o novo
 //             // diretorio
 //             if(i==(st.countTokens()-2)){
 //               recordAtBlock(indice, msdosFile);
 //             }else{
-               // vai procurar o proximo subdiretorio nos blocos
-               Directory subDirectory = mountDirectoryFromBlock(indice);
-               String teste = st.nextToken();
-               MSDOSFile msdosFile2 = subDirectory.readFile(teste);
-               indice = msdosFile2.getFirstBlock();
+            // vai procurar o proximo subdiretorio nos blocos
+            MSDOSDirectory subDirectory = mountDirectoryFromBlock(indice);
+            String teste = st.nextToken();
+            MSDOSFile msdosFile2 = subDirectory.readFile(teste);
+            indice = msdosFile2.getFirstBlock();
 //             }
           }
 
@@ -1214,8 +1161,10 @@ public class MSDOSFileSystem implements FileSystemInterface{
           // diretorio
           recordAtBlock(indice, msdosFile);
 
-        }else{
-          throw new MSDOSFATException("Não há o diretório "+aux+" no sistema de arquivo");
+        }
+        else
+        {
+          throw new MSDOSFATException("Não há o diretório " + aux + " no sistema de arquivo");
         }
 
       }
@@ -1223,130 +1172,169 @@ public class MSDOSFileSystem implements FileSystemInterface{
 
   }
 
+  /**
+   * Description of the Method
+   *
+   * @param address Description of the Parameter
+   * @param msdosFile Description of the Parameter
+   * @throws MSDOSDirectoryException Description of the Exception
+   * @throws DirectoryException Description of the Exception
+   */
   public void recordAtBlock(int address, MSDOSFile msdosFile)
-     throws MSDOSDirectoryException{
-
-     try{
-       Block block = null;
-       Directory subDirectory = null;
+       throws DirectoryException
+  {
+    try
+    {
+      MSDOSDirectory subDirectory = null;
 //       boolean flag = false;
-       ByteArrayInputStream byteArrayInputStream = null;
-       ObjectInputStream byteInBlock = null;
+      ByteArrayInputStream byteArrayInputStream = null;
+      ObjectInputStream byteInBlock = null;
 
-       block = disk.readBlock(address);
+      byte[] subDirectoryAux = disk.readSector(address);
 //       if (block != null){
 //         flag = true;
-         byte[] subDirectoryAux = block.getData();
-         byteArrayInputStream = new ByteArrayInputStream(subDirectoryAux);
-         byteInBlock = new ObjectInputStream(byteArrayInputStream);
+      byteArrayInputStream = new ByteArrayInputStream(subDirectoryAux);
+      byteInBlock = new ObjectInputStream(byteArrayInputStream);
 
-         subDirectory = (Directory)byteInBlock.readObject();
+      subDirectory = (MSDOSDirectory) byteInBlock.readObject();
 //       }else{
 //         subDirectory = new Directory();
 //       }
 
-       subDirectory.addNewFile(msdosFile);
+      subDirectory.addNewFile(msdosFile);
 
-       ByteArrayOutputStream byteArray  = new ByteArrayOutputStream();
-       ObjectOutputStream byteOutBlock = new ObjectOutputStream(byteArray);
-       byteOutBlock.writeObject(subDirectory);
+      ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+      ObjectOutputStream byteOutBlock = new ObjectOutputStream(byteArray);
+      byteOutBlock.writeObject(subDirectory);
 
-       byteOutBlock.flush();
+      byteOutBlock.flush();
 
-       block.setData(byteArray.toByteArray());
+//       block.setData(byteArray.toByteArray());
 //       if(flag){
-         byteArrayInputStream.close();
-         byteInBlock.close();
+      byteArrayInputStream.close();
+      byteInBlock.close();
 //       }
-       byteArray.close();
-       byteOutBlock.close();
+      byteArray.close();
+      byteOutBlock.close();
 
-     }catch(StreamCorruptedException scex){
+    }
+    catch (StreamCorruptedException scex)
+    {
 
-     }catch(ClassNotFoundException cnfex){
+    }
+    catch (ClassNotFoundException cnfex)
+    {
 
-     }catch(IOException ioex){
+    }
+    catch (IOException ioex)
+    {
 
-     }
+    }
   }
 
-  public Directory mountDirectoryFromBlock(int address){
+  /**
+   * Description of the Method
+   *
+   * @param address Description of the Parameter
+   * @return Description of the Return Value
+   */
+  public MSDOSDirectory mountDirectoryFromBlock(int address)
+  {
+    MSDOSDirectory subDirectory = null;
+    try
+    {
+      byte[] subDirectoryAux = disk.readSector(address);
+      ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(subDirectoryAux);
 
-     Directory subDirectory = null;
-     try{
-       Block block = disk.readBlock(address);
-       byte[] subDirectoryAux = block.getData();
-       ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(subDirectoryAux);
+      ObjectInputStream byteInBlock = new ObjectInputStream(byteArrayInputStream);
+      subDirectory = (MSDOSDirectory) byteInBlock.readObject();
 
-       ObjectInputStream byteInBlock = new ObjectInputStream(byteArrayInputStream);
-       subDirectory = (Directory)byteInBlock.readObject();
+      byteArrayInputStream.close();
+      byteInBlock.close();
+    }
+    catch (ClassNotFoundException cnfex)
+    {
+      System.out.println("ClassNotFoundException " + cnfex);
+    }
+    catch (IOException ioex)
+    {
+      System.out.println("IOException " + ioex);
+    }
 
-       byteArrayInputStream.close();
-       byteInBlock.close();
-
-     }catch(ClassNotFoundException cnfex){
-       System.out.println("ClassNotFoundException "+cnfex);
-     }catch(IOException ioex){
-       System.out.println("IOException "+ioex);
-     }
-
-     return subDirectory;
+    return subDirectory;
   }
 
-  public void recordeSystemFile(){
+  /**
+   * Description of the Method
+   */
+  public void recordSystemFile()
+  {
+    try
+    {
+      FileOutputStream fileOutputStream = new FileOutputStream("fileSystem.dat");
+      ObjectOutputStream out = new ObjectOutputStream(fileOutputStream);
+      out.writeObject(msdosFat);
+      out.writeObject(directory);
+      out.writeObject(disk);
 
-    try{
+      fileOutputStream.close();
+      out.close();
 
-     FileOutputStream fileOutputStream = new FileOutputStream("fileSystem.dat");
-     ObjectOutputStream out = new ObjectOutputStream(fileOutputStream);
-     out.writeObject(msdosFat);
-     out.writeObject(directory);
-     out.writeObject(disk);
-
-     fileOutputStream.close();
-     out.close();
-
-   }catch(IOException ioex){
-      System.out.println("ERRO no recorde: "+ioex.getMessage());
+    }
+    catch (IOException ioex)
+    {
+      System.out.println("ERRO no recorde: " + ioex.getMessage());
       ioex.printStackTrace();
-   }
-
+    }
   }
 
-//  public MSDOSFileSystem requestSystemFile(){
-  public void requestSystemFile(){
+  /**
+   * Description of the Method
+   *
+   * @return Description of the Return Value
+   */
+  public FileSystem requestSystemFile()
+  {
+    MSDOSFileSystem newMSDOSFileSystem = null;
+    try
+    {
+      File file = new File("fileSystem.dat");
 
-//    MSDOSFileSystem newMSDOSFileSystem = null;
-    try{
-      File file = new File("/Users/andrew/java/RCOSFS/RCOSjava-0.4.1-src/dist/fileSystem.dat");
+      if (file.exists())
+      {
+        ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
+        msdosFat = (MSDOSFAT) in.readObject();
+        directory = (MSDOSDirectory) in.readObject();
+        disk = (Disk) in.readObject();
 
-      if(file.exists()){
-         ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
-         msdosFat = (MSDOSFAT)in.readObject();
-         directory = (Directory)in.readObject();
-         disk = (Disk)in.readObject();
+        this.setMsdosFat(msdosFat);
+        this.setDirectory(directory);
+        this.setDisk(disk);
 
-         this.setMsdosFat(msdosFat);
-         this.setDirectory(directory);
-         this.setDisk(disk);
-
-         in.close();
+        in.close();
       }
-
-   }catch(ClassNotFoundException ex){
-      System.out.println("ERRO em requestSystemFile: "+ex.getMessage());
+    }
+    catch (ClassNotFoundException ex)
+    {
+      System.out.println("ERRO em requestSystemFile: " + ex.getMessage());
       ex.printStackTrace();
-   }catch(FileNotFoundException ex){
-      System.out.println("ERRO em requestSystemFile: "+ex.getMessage());
+    }
+    catch (FileNotFoundException ex)
+    {
+      System.out.println("ERRO em requestSystemFile: " + ex.getMessage());
       ex.printStackTrace();
-   }catch(OptionalDataException ex){
-      System.out.println("ERRO em requestSystemFile: "+ex.getMessage());
+    }
+    catch (OptionalDataException ex)
+    {
+      System.out.println("ERRO em requestSystemFile: " + ex.getMessage());
       ex.printStackTrace();
-   }catch(IOException ex){
-      System.out.println("ERRO em requestSystemFile: "+ex.getMessage());
+    }
+    catch (IOException ex)
+    {
+      System.out.println("ERRO em requestSystemFile: " + ex.getMessage());
       ex.printStackTrace();
-   }
-//   return newMSDOSFileSystem;
+    }
+    return newMSDOSFileSystem;
   }
 
   // Checks to see if the File System indicated by MountPoint is full.
@@ -1363,7 +1351,7 @@ public class MSDOSFileSystem implements FileSystemInterface{
 //
 //    return ((mvDevice.numberOfFreeBlocks == 0)
 //         || (mvDevice.numberOfFreeEntries == 0));
-     return false;
+    return false;
   }
 
   // Coordinating this in the one synchronised function means that the
@@ -1492,7 +1480,8 @@ public class MSDOSFileSystem implements FileSystemInterface{
    * @param item1 Description of Parameter
    * @param item2 Description of Parameter
    */
-  public void dumpToScreen(String Operation, int item1, int item2){
+  public void dumpToScreen(String Operation, int item1, int item2)
+  {
 
 //    if (Operation.equalsIgnoreCase("DIR"))
 //    {
@@ -1547,7 +1536,8 @@ public class MSDOSFileSystem implements FileSystemInterface{
    *
    * @param mvTheMessage Description of Parameter
    */
-  private void handleReturnMessages(OSMessageAdapter mvTheMessage){
+  private void handleReturnMessages(OSMessageAdapter mvTheMessage)
+  {
 
 //    DiskRequest mvMessageData = (DiskRequest) mvTheMessage.getBody();
 //
@@ -1754,7 +1744,8 @@ public class MSDOSFileSystem implements FileSystemInterface{
    * @param mvFilename Description of Parameter
    * @return Description of the Returned Value
    */
-  private byte[] convertFilename(String mvFilename){
+  private byte[] convertFilename(String mvFilename)
+  {
 
     byte[] mvReturnData = new byte[11];
 //    StringTokenizer stTokenizer = new StringTokenizer(mvFilename, ":.");
@@ -1781,7 +1772,8 @@ public class MSDOSFileSystem implements FileSystemInterface{
    * @param data Description of Parameter
    */
   private void diskRequest(String to, String from, String type, int FSFileNo,
-      int FSMRequestID, int RequestData, int block, byte[] data){
+      int FSMRequestID, int RequestData, int block, byte[] data)
+  {
 
 //    CPM14RequestTableEntry mvQueueEntry = new CPM14RequestTableEntry();
 //
@@ -1812,17 +1804,64 @@ public class MSDOSFileSystem implements FileSystemInterface{
   {
 //    FileSystemData mvToReturn = new FileSystemData(mvFSMReqNo,
 //        mvReturnData);
-    /*Message mvReturnMessage = new Message(id, mvDestination,  "RETURNVALUE",
-                                           mvToReturn);
-    SendMessage ( mvReturnMessage );*/
+    /*
+     *  Message mvReturnMessage = new Message(id, mvDestination,  "RETURNVALUE",
+     *  mvToReturn);
+     *  SendMessage ( mvReturnMessage );
+     */
   }
-  public void setDirectory(Directory directory) {
+
+  /**
+   * Sets the directory attribute of the MSDOSFileSystem object
+   *
+   * @param directory The new directory value
+   */
+  public void setDirectory(MSDOSDirectory directory)
+  {
     this.directory = directory;
   }
-  public void setDisk(Disk disk) {
+
+  /**
+   * Sets the disk attribute of the MSDOSFileSystem object
+   *
+   * @param disk The new disk value
+   */
+  public void setDisk(Disk disk)
+  {
     this.disk = disk;
   }
-  public void setMsdosFat(MSDOSFAT msdosFat) {
+
+  /**
+   * Sets the msdosFat attribute of the MSDOSFileSystem object
+   *
+   * @param msdosFat The new msdosFat value
+   */
+  public void setMsdosFat(MSDOSFAT msdosFat)
+  {
     this.msdosFat = msdosFat;
+  }
+
+  /**
+   * If the mode is correct, this starts or contines writing a file.
+   *
+   * @param iRequestID Description of Parameter
+   * @param iFSFileNo Description of Parameter
+   * @return Description of the Returned Value
+   */
+  public FileSystemReturnData write(int iRequestID, int iFSFileNo)
+  {
+    return null;
+  }
+
+  /**
+   * Reads from the file if it is in the right mode.
+   *
+   * @param iRequestID Description of Parameter
+   * @param iFSFileNumber Description of Parameter
+   * @return Description of the Returned Value
+   */
+  public FileSystemReturnData read(int iRequestID, int iFSFileNumber)
+  {
+    return null;
   }
 }
