@@ -470,8 +470,8 @@ public class ProcessSchedulerFrame extends RCOSFrame
     while (!cpuToBlockedMovement.finished())
     {
       cpuToBlockedMovement.step();
-      tmpMTGO.xPosition = cpuToBlockedMovement.iCurrentX;
-      tmpMTGO.yPosition = cpuToBlockedMovement.iCurrentY;
+      tmpMTGO.xPosition = cpuToBlockedMovement.getCurrentX();
+      tmpMTGO.yPosition = cpuToBlockedMovement.getCurrentY();
       syncPaint(delay);
     }
   }
@@ -489,8 +489,8 @@ public class ProcessSchedulerFrame extends RCOSFrame
     while (!blockedToReadyMovement.finished())
     {
       blockedToReadyMovement.step();
-      tmpMTGO.xPosition = blockedToReadyMovement.iCurrentX;
-      tmpMTGO.yPosition = blockedToReadyMovement.iCurrentY;
+      tmpMTGO.xPosition = blockedToReadyMovement.getCurrentX();
+      tmpMTGO.yPosition = blockedToReadyMovement.getCurrentY();
       syncPaint(delay);
     }
   }
@@ -507,8 +507,8 @@ public class ProcessSchedulerFrame extends RCOSFrame
     while (!cpuToReadyMovement.finished())
     {
       cpuToReadyMovement.step();
-      tmpMTGO.xPosition = cpuToReadyMovement.iCurrentX;
-      tmpMTGO.yPosition = cpuToReadyMovement.iCurrentY;
+      tmpMTGO.xPosition = cpuToReadyMovement.getCurrentX();
+      tmpMTGO.yPosition = cpuToReadyMovement.getCurrentY();
       syncPaint(delay);
     }
   }
@@ -525,8 +525,8 @@ public class ProcessSchedulerFrame extends RCOSFrame
     while (!readyToCPUMovement.finished())
     {
       readyToCPUMovement.step();
-      tmpMTGO.xPosition = readyToCPUMovement.iCurrentX;
-      tmpMTGO.yPosition = readyToCPUMovement.iCurrentY;
+      tmpMTGO.xPosition = readyToCPUMovement.getCurrentX();
+      tmpMTGO.yPosition = readyToCPUMovement.getCurrentY();
       syncPaint(delay);
     }
   }
@@ -561,8 +561,8 @@ public class ProcessSchedulerFrame extends RCOSFrame
     while (!zombieToReadyMovement.finished())
     {
       zombieToReadyMovement.step();
-      tmpMTGO.xPosition = zombieToReadyMovement.iCurrentX;
-      tmpMTGO.yPosition = zombieToReadyMovement.iCurrentY;
+      tmpMTGO.xPosition = zombieToReadyMovement.getCurrentX();
+      tmpMTGO.yPosition = zombieToReadyMovement.getCurrentY();
       syncPaint(delay);
     }
   }
@@ -609,8 +609,8 @@ public class ProcessSchedulerFrame extends RCOSFrame
     while (!readyMovement.finished(iPos))
     {
       readyMovement.step();
-      tmpMTGO.xPosition = readyMovement.iCurrentX;
-      tmpMTGO.yPosition = readyMovement.iCurrentY;
+      tmpMTGO.xPosition = readyMovement.getCurrentX();
+      tmpMTGO.yPosition = readyMovement.getCurrentY();
       syncPaint(delay);
     }
   }
@@ -623,8 +623,8 @@ public class ProcessSchedulerFrame extends RCOSFrame
     while (!blockedMovement.finished(iPos))
     {
       blockedMovement.step();
-      tmpMTGO.xPosition = blockedMovement.iCurrentX;
-      tmpMTGO.yPosition = blockedMovement.iCurrentY;
+      tmpMTGO.xPosition = blockedMovement.getCurrentX();
+      tmpMTGO.yPosition = blockedMovement.getCurrentY();
       syncPaint(delay);
     }
   }
@@ -637,8 +637,8 @@ public class ProcessSchedulerFrame extends RCOSFrame
     while (!zombieMovement.finished(iPos))
     {
       zombieMovement.step();
-      tmpMTGO.xPosition = zombieMovement.iCurrentX;
-      tmpMTGO.yPosition = zombieMovement.iCurrentY;
+      tmpMTGO.xPosition = zombieMovement.getCurrentX();
+      tmpMTGO.yPosition = zombieMovement.getCurrentY();
       syncPaint(delay);
     }
   }
