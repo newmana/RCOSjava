@@ -106,7 +106,7 @@ public class CPU implements Serializable
   /**
    * A reference to the kernel that is currently using this CPU.
    */
-  private Kernel myKernel;
+  private transient Kernel myKernel;
 
   /**
    * Initialise the CPU by making it aware that the kernel exists.
@@ -124,6 +124,16 @@ public class CPU implements Serializable
     codeToExecute = false;
     processFinished = false;
     interruptsEnabled = true;
+  }
+
+  /**
+   * Allows you to set a new Kernel.
+   *
+   * @param newKernel new kernel to set.
+   */
+  public void setKernel(Kernel newKernel)
+  {
+    myKernel = newKernel;
   }
 
   /**
@@ -505,5 +515,25 @@ public class CPU implements Serializable
     Instruction call = getContext().getInstructionRegister();
     Operator tmpOperator = Operator.OPERATIONS[call.getWordParameter()];
     tmpOperator.execute(this);
+  }
+
+  /**
+   * Handle the serialization of the contents.
+   */
+  private void writeObject(ObjectOutputStream os) throws IOException
+  {
+    os.defaultWriteObject();
+  }
+
+  /**
+   * Handle deserialization of the contents.  Ensures non-serializable
+   * components correctly created.
+   *
+   * @param is stream that is being read.
+   */
+  private void readObject(ObjectInputStream is) throws IOException,
+      ClassNotFoundException
+  {
+    is.defaultReadObject();
   }
 }
