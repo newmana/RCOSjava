@@ -9,19 +9,18 @@ package fr.dyade.koala.xml.koml;
  * @version $Revision$
  * @author  Philippe Le Hégaret
  */
-public interface KOMLConstants {
+public class KOMLConstants {
 
     //    public static final String VERSION = "30, Jun 1998";
 //    public static final String KOML_DTD
 //	= "http://www.inria.fr/koala/XML/koml12.dtd";
-    public static final String KOML_DTD
-	= "http://localhost/pll2/koml12.dtd";
+    public static String KOML_DTD = "http://localhost/pll2/koml12.dtd";
 //     backward compatibility with an old version ..
     public static final String OLD_VERSION = "24, September 1998";
     public static final int MAJOR_VERSION = 1;
     public static final int MINOR_VERSION = 21;
 
-    public static final String KOML   = "koml";
+    public static String KOML   = "koml";
     public static final String OBJECT = "object";
     public static final String OBJECT_CLASS = "object-class";
     public static final String CLASSES  = "classes";

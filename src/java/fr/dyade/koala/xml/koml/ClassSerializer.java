@@ -5,6 +5,7 @@
  */
 package fr.dyade.koala.xml.koml;
 
+import fr.dyade.koala.xml.koml.KOMLConstants;
 import fr.dyade.koala.serialization.ObjectOutputHandler;
 import fr.dyade.koala.serialization.ClassDescription;
 import fr.dyade.koala.serialization.Field;
@@ -23,27 +24,27 @@ import java.io.OutputStream;
  * <pre class="example">
  *  <class name='java.lang.Boolean' uid='-3665804199014368530'>
  *   <field name='value' type='boolean'/>
- *  </class> 
+ *  </class>
  * </pre>
  *
  * @version $Revision$
  * @author  Philippe Le Hégaret
  */
-abstract class ClassSerializer 
-        implements ObjectOutputHandler, KOMLConstants {
+abstract class ClassSerializer
+        implements ObjectOutputHandler {
 
     private OutputStream out;
 
     /**
      * Creates a new class description XML file.
-     */    
+     */
     public ClassSerializer(OutputStream out) throws IOException {
 	this.out = new BufferedOutputStream(out);
     }
 
     void write(String s) throws IOException {
         int strlen = s.length();
-	
+
         for (int i = 0 ; i < strlen ; i++) {
             int c = s.charAt(i);
 	    // @@SEEME
@@ -62,17 +63,17 @@ abstract class ClassSerializer
     }
 
     /**
-     * All possible chars for representing a number as a String 
+     * All possible chars for representing a number as a String
      */
-    private final static byte[] digits = { 
-        (byte) '0' , (byte) '1' , (byte) '2' , (byte) '3' , (byte) '4' , 
-	(byte) '5' , (byte) '6' , (byte) '7' , (byte) '8' , (byte) '9' , 
-	(byte) 'a' , (byte) 'b' , (byte) 'c' , (byte) 'd' , (byte) 'e' , 
-	(byte) 'f' , (byte) 'g' , (byte) 'h' , (byte) 'i' , (byte) 'j' , 
-	(byte) 'k' , (byte) 'l' , (byte) 'm' , (byte) 'n' , (byte) 'o' , 
-	(byte) 'p' , (byte) 'q' , (byte) 'r' , (byte) 's' , (byte) 't' , 
-        (byte) 'u' , (byte) 'v' , (byte) 'w' , (byte) 'x' , (byte) 'y' , 
-	(byte) 'z' 
+    private final static byte[] digits = {
+        (byte) '0' , (byte) '1' , (byte) '2' , (byte) '3' , (byte) '4' ,
+	(byte) '5' , (byte) '6' , (byte) '7' , (byte) '8' , (byte) '9' ,
+	(byte) 'a' , (byte) 'b' , (byte) 'c' , (byte) 'd' , (byte) 'e' ,
+	(byte) 'f' , (byte) 'g' , (byte) 'h' , (byte) 'i' , (byte) 'j' ,
+	(byte) 'k' , (byte) 'l' , (byte) 'm' , (byte) 'n' , (byte) 'o' ,
+	(byte) 'p' , (byte) 'q' , (byte) 'r' , (byte) 's' , (byte) 't' ,
+        (byte) 'u' , (byte) 'v' , (byte) 'w' , (byte) 'x' , (byte) 'y' ,
+	(byte) 'z'
     };
 
     void writeUnicode(int value) throws IOException {
@@ -155,7 +156,7 @@ abstract class ClassSerializer
             } else if (c > 0x07FF) {
 		if ((c <= 0xD7FF)
 		    || ((c >= 0xE000) && (c <= 0xFFFD))
-		    || ((c >= 0x10000) && (c <= 0x10FFFF))) {	
+		    || ((c >= 0x10000) && (c <= 0x10FFFF))) {
 		    out.write(0xE0 | ((c >> 12) & 0x0F));
 		    out.write(0x80 | ((c >>  6) & 0x3F));
 		    out.write(0x80 | ((c >>  0) & 0x3F));
@@ -181,7 +182,7 @@ abstract class ClassSerializer
      * @exception IOException If an I/O error occurs
      */
     public void writeStartClasses() throws IOException {
-	write("<" + CLASSES + ">\n");
+	write("<" + KOMLConstants.CLASSES + ">\n");
     }
 
     /**
@@ -189,18 +190,18 @@ abstract class ClassSerializer
      * This methods flushs the internal PrintWriter.
      *
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void writeEndClasses() throws IOException {
-	write("</" + CLASSES + ">\n");
+	write("</" + KOMLConstants.CLASSES + ">\n");
 	out.flush();
     }
 
     private void writeFields(Field f) throws IOException {
-	write("<" + FIELD + " " + A_NAME + "='");
+	write("<" + KOMLConstants.FIELD + " " + KOMLConstants.A_NAME + "='");
 	write(f.getName());
-	write("' " + A_TYPE + "='");
+	write("' " + KOMLConstants.A_TYPE + "='");
 	write(f.getType().toString());
-	write("'/>\n");	
+	write("'/>\n");
     }
 
      /**
@@ -209,21 +210,21 @@ abstract class ClassSerializer
       * @param _class the new class description
       * @exception IOException If an I/O error occurs
       */
-    void _writeClassDescription(ClassDescription _class) 
+    void _writeClassDescription(ClassDescription _class)
 	    throws IOException {
-	write("<" + CLASS + " " + A_NAME + "='");
+	write("<" + KOMLConstants.CLASS + " " + KOMLConstants.A_NAME + "='");
 	write(_class.getType().toString());
-	write("' " + A_UID + "='");	
+	write("' " + KOMLConstants.A_UID + "='");
 	write(Long.toString(_class.getSerialVersionUID()));
 	if (_class.getSuperClass() != null) {
-	    write("' " + A_SUPER + "='");	
+	    write("' " + KOMLConstants.A_SUPER + "='");
 	    write(_class.getSuperClass().getType().toString());
 	}
 	if (_class.hasWriteMethod()) {
-	    write("' " + A_WRITEMETHOD + "='" + V_TRUE);	
+	    write("' " + KOMLConstants.A_WRITEMETHOD + "='" + KOMLConstants.V_TRUE);
 	}
 	if (_class.isExternalizable()) {
-	    write("' " + A_IMPLEMENTS + "='" + V_EXTERNALIZABLE);	
+	    write("' " + KOMLConstants.A_IMPLEMENTS + "='" + KOMLConstants.V_EXTERNALIZABLE);
 	}
 	write("'>\n");
 	Field[] fs = _class.getFields();
@@ -232,27 +233,27 @@ abstract class ClassSerializer
 		writeFields(fs[i]);
 	    }
 	}
-	write("</" + CLASS + ">\n");
+	write("</" + KOMLConstants.CLASS + ">\n");
     }
 
-    public void writeClassDescription(ClassDescription _class) 
+    public void writeClassDescription(ClassDescription _class)
 	    throws IOException {
 	// nothing to do !
     }
 
     /**
-     * Close this output stream and releases any system ressources associated 
+     * Close this output stream and releases any system ressources associated
      * with this stream.
-     * @exception IOException If an I/O error occurs 
-     */    
+     * @exception IOException If an I/O error occurs
+     */
     public void close() throws IOException {
 	out.close();
     }
 
     /**
      * Flushes the object output handler.
-     * @exception IOException If an I/O error occurs 
-     */    
+     * @exception IOException If an I/O error occurs
+     */
     public void flush() throws IOException {
 	out.flush();
     }

@@ -18,10 +18,10 @@ class Serializer extends ClassSerializer {
 
     /**
      * Creates a new XML serializer.
-     * 
+     *
      * @param instance the output for all instances.
      * @param classDescription the output for all class description.
-     */    
+     */
     public Serializer(OutputStream out) throws IOException {
 	super(out);
     }
@@ -30,21 +30,21 @@ class Serializer extends ClassSerializer {
      * Notify the start of the serialization.
      *
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void writeStartDocument() throws IOException {
 	write("<?xml version='1.0' encoding='UTF-8'?>\n");
-	write("<!DOCTYPE " + KOML + " SYSTEM \"" + KOML_DTD + "\">\n");
-	write("<" + KOML + " " + A_VERSION + "='" 
-		  + MAJOR_VERSION + "." + MINOR_VERSION + "'>\n");
+	write("<!DOCTYPE " + KOMLConstants.KOML + " SYSTEM \"" + KOMLConstants.KOML_DTD + "\">\n");
+	write("<" + KOMLConstants.KOML + " " + KOMLConstants.A_VERSION + "='"
+		  + KOMLConstants.MAJOR_VERSION + "." + KOMLConstants.MINOR_VERSION + "'>\n");
     }
 
     /**
      * Notify the end of the serialization.
      *
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void writeEndDocument() throws IOException {
- 	write("</" + KOML + ">\n");
+ 	write("</" + KOMLConstants.KOML + ">\n");
 	flush();
     }
 
@@ -55,19 +55,19 @@ class Serializer extends ClassSerializer {
      * @param _class the class description of this object.
      * @param isTransient <code>true</code> if this boolean is transient.
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void writeStartObject(int id, ClassDescription _class,
 				 boolean isTransient, Field field)
 	    throws IOException {
-	write("<" + OBJECT + " " + A_CLASS + "='");
+	write("<" + KOMLConstants.OBJECT + " " + KOMLConstants.A_CLASS + "='");
 	write(_class.getType().toString());
-	write("' " + A_ID + "='i");
+	write("' " + KOMLConstants.A_ID + "='i");
 	write(Integer.toString(id, 10));
 	if (field != null) {
-	    write("' " + A_NAME + "=\'" + field.getName());
+	    write("' " + KOMLConstants.A_NAME + "=\'" + field.getName());
 	}
 	if (isTransient) {
-	    write("' " + A_TRANSIENT + "=\'" + V_TRUE + "'>\n");
+	    write("' " + KOMLConstants.A_TRANSIENT + "=\'" + KOMLConstants.V_TRUE + "'>\n");
 	} else {
 	    write("'>\n");
 	}
@@ -78,10 +78,10 @@ class Serializer extends ClassSerializer {
      *
      * @param _super the class description of the super instance.
      * @exception IOException If an I/O error occurs
-     */    
-    public void writeEndObject(int id, ClassDescription _class, Field field) 
+     */
+    public void writeEndObject(int id, ClassDescription _class, Field field)
 	    throws IOException {
-	write("</" + OBJECT + ">\n");
+	write("</" + KOMLConstants.OBJECT + ">\n");
     }
 
     /**
@@ -91,19 +91,19 @@ class Serializer extends ClassSerializer {
      * @param _class the class description of this object.
      * @param isTransient <code>true</code> if this boolean is transient.
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void writeStartObjectClass(int id, ClassDescription _class,
 				      boolean isTransient, Field field)
 	    throws IOException {
-	write("<" + OBJECT_CLASS + " " + A_CLASS + "='");
+	write("<" + KOMLConstants.OBJECT_CLASS + " " + KOMLConstants.A_CLASS + "='");
 	write(_class.getType().toString());
-	write("' " + A_ID + "='i");
+	write("' " + KOMLConstants.A_ID + "='i");
 	write(Integer.toString(id, 10));
 	if (field != null) {
-	    write("' " + A_NAME + "=\'" + field.getName());
+	    write("' " +KOMLConstants. A_NAME + "=\'" + field.getName());
 	}
 	if (isTransient) {
-	    write("' " + A_TRANSIENT + "=\'" + V_TRUE + "'>\n");
+	    write("' " + KOMLConstants.A_TRANSIENT + "=\'" + KOMLConstants.V_TRUE + "'>\n");
 	} else {
 	    write("'>\n");
 	}
@@ -114,11 +114,11 @@ class Serializer extends ClassSerializer {
      *
      * @param _super the class description of the super instance.
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void writeEndObjectClass(int id, ClassDescription _class,
-				    Field field) 
+				    Field field)
 	    throws IOException {
-	write("</" + OBJECT_CLASS + ">\n");
+	write("</" + KOMLConstants.OBJECT_CLASS + ">\n");
     }
 
     /**
@@ -126,9 +126,9 @@ class Serializer extends ClassSerializer {
      *
      * @param _super the class description of the super instance.
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void writeStartSuper(ClassDescription _super) throws IOException {
-	write("<" + SUPER + " " +  A_CLASS + "='");
+	write("<" + KOMLConstants.SUPER + " " +  KOMLConstants.A_CLASS + "='");
 	write(_super.getType().toString());
 	write("'>\n");
     }
@@ -137,9 +137,9 @@ class Serializer extends ClassSerializer {
      * Write the end of the super instance.
      *
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void writeEndSuper(ClassDescription _super) throws IOException {
-	write("</" + SUPER + ">\n");
+	write("</" + KOMLConstants.SUPER + ">\n");
     }
 
     /**
@@ -150,21 +150,21 @@ class Serializer extends ClassSerializer {
      * @param size the size of this array.
      * @param isTransient <code>true</code> if this boolean is transient.
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void writeStartArray(int id, ClassDescription _class,
-				int size, boolean isTransient, Field field) 
+				int size, boolean isTransient, Field field)
 	    throws IOException {
-	write("<" + ARRAY + " " + A_CLASS + "='");
+	write("<" + KOMLConstants.ARRAY + " " + KOMLConstants.A_CLASS + "='");
 	write(_class.getType().toString());
-	write("' " + A_ID + "='i");
+	write("' " + KOMLConstants.A_ID + "='i");
 	write(Integer.toString(id, 10));
-	write("' " + A_LENGTH + "='");
+	write("' " + KOMLConstants.A_LENGTH + "='");
 	write(Integer.toString(size, 10));
 	if (field != null) {
-	    write("' " + A_NAME + "=\'" + field.getName());
+	    write("' " + KOMLConstants.A_NAME + "=\'" + field.getName());
 	}
 	if (isTransient) {
-	    write("' " + A_TRANSIENT + "=\'" + V_TRUE + "'>\n");
+	    write("' " + KOMLConstants.A_TRANSIENT + "=\'" + KOMLConstants.V_TRUE + "'>\n");
 	} else {
 	    write("'>\n");
 	}
@@ -175,21 +175,21 @@ class Serializer extends ClassSerializer {
      *
      * @param id the unique id of this array.
      * @exception IOException If an I/O error occurs
-     */    
-    public void writeEndArray(int id, ClassDescription _class, Field field) 
+     */
+    public void writeEndArray(int id, ClassDescription _class, Field field)
 	    throws IOException {
-	write("</" + ARRAY + ">\n");
+	write("</" + KOMLConstants.ARRAY + ">\n");
     }
 
     /**
      * Write a null reference to an object or an array.
      *
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void writeNullReference(Field field) throws IOException {
-	write("<" + NULL);	
+	write("<" + KOMLConstants.NULL);
  	if (field != null) {
-	    write(" " + A_NAME + "=\'" + field.getName() + "'/>\n");
+	    write(" " + KOMLConstants.A_NAME + "=\'" + field.getName() + "'/>\n");
 	} else {
 	    write("/>\n");
 	}
@@ -200,12 +200,12 @@ class Serializer extends ClassSerializer {
      *
      * @param id the id reference.
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void writeReference(int id, Field field) throws IOException {
-	write("<" + REFERENCE + " " + A_REF + "=\'i");
+	write("<" + KOMLConstants.REFERENCE + " " + KOMLConstants.A_REF + "=\'i");
 	write(Integer.toString(id, 10));
 	if (field != null) {
-	    write("' " + A_NAME + "=\'" + field.getName() + "'/>\n");
+	    write("' " + KOMLConstants.A_NAME + "=\'" + field.getName() + "'/>\n");
 	} else {
 	    write("'/>\n");
 	}
@@ -219,34 +219,34 @@ class Serializer extends ClassSerializer {
      * @param data the array of bytes.
      * @param offset the offset in the array of bytes
      * @param length the length of bytes to read from the offset.
-     * @exception IOException If an I/O error occurs 
+     * @exception IOException If an I/O error occurs
      */
-    public void writeRow(byte[] data, int offset, int length) 
+    public void writeRow(byte[] data, int offset, int length)
 	    throws IOException {
-	write("<" + ROW + " " + A_SIZE + "='");
+	write("<" + KOMLConstants.ROW + " " + KOMLConstants.A_SIZE + "='");
 	write(Integer.toString(length, 10));
 	write("'>");
 	writeBinary(data, offset, length);
-	write("</" + ROW + ">\n");
+	write("</" + KOMLConstants.ROW + ">\n");
     }
 
-    private final void write(String type, String value, 
-			     boolean isTransient, Field field) 
+    private final void write(String type, String value,
+			     boolean isTransient, Field field)
 	    throws IOException {
-	write("<" + VALUE + " " + A_TYPE + "='");
+	write("<" + KOMLConstants.VALUE + " " + KOMLConstants.A_TYPE + "='");
 	write(type);
 	if (field != null) {
-	    write("' " + A_NAME + "=\'" + field.getName());
+	    write("' " + KOMLConstants.A_NAME + "=\'" + field.getName());
 	}
 	if (isTransient) {
-	    write("' " + A_TRANSIENT + "=\'true'>");
+	    write("' " + KOMLConstants.A_TRANSIENT + "=\'true'>");
 	} else {
 	    write("'>");
 	}
 	writeProtected(value);
-	write("</" + VALUE + ">\n");
+	write("</" + KOMLConstants.VALUE + ">\n");
     }
-    
+
     /**
      * Write a string with a specified name.
      *
@@ -255,12 +255,12 @@ class Serializer extends ClassSerializer {
      * @param isTransient <code>true</code> if this string is transient.
      * @param id the unique id of this string.
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void write(String value, boolean isTransient, Field field)
 	    throws IOException {
-	write(V_STRING, value, isTransient, field);
+	write(KOMLConstants.V_STRING, value, isTransient, field);
     }
-    
+
     /**
      * Write a boolean with a specified name.
      *
@@ -268,12 +268,12 @@ class Serializer extends ClassSerializer {
      * @param value the value of this boolean
      * @param isTransient <code>true</code> if this boolean is transient.
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void write(boolean value, boolean isTransient, Field field)
 	    throws IOException {
-	write(V_BOOLEAN, (value)?V_TRUE:V_FALSE, isTransient, field);
+	write(KOMLConstants.V_BOOLEAN, (value)?KOMLConstants.V_TRUE:KOMLConstants.V_FALSE, isTransient, field);
     }
-    
+
     /**
      * Write a byte with a specified name.
      *
@@ -281,12 +281,12 @@ class Serializer extends ClassSerializer {
      * @param value the value of this byte
      * @param isTransient <code>true</code> if this byte is transient.
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void write(byte value, boolean isTransient, Field field)
 	    throws IOException {
-	write(V_BYTE, Byte.toString(value), isTransient, field);
+	write(KOMLConstants.V_BYTE, Byte.toString(value), isTransient, field);
     }
-    
+
     /**
      * Write a char with a specified name.
      *
@@ -294,12 +294,12 @@ class Serializer extends ClassSerializer {
      * @param value the value of this char
      * @param isTransient <code>true</code> if this char is transient.
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void write(char value, boolean isTransient, Field field)
 	    throws IOException {
-	write(V_CHAR, new Character(value).toString(), isTransient, field);
+	write(KOMLConstants.V_CHAR, new Character(value).toString(), isTransient, field);
     }
- 
+
     /**
      * Write a short with a specified name.
      *
@@ -307,12 +307,12 @@ class Serializer extends ClassSerializer {
      * @param value the value of this short
      * @param isTransient <code>true</code> if this short is transient.
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void write(short value, boolean isTransient, Field field)
 	throws IOException {
-	write(V_SHORT, Short.toString(value), isTransient, field);
+	write(KOMLConstants.V_SHORT, Short.toString(value), isTransient, field);
     }
-    
+
     /**
      * Write an int with a specified name.
      *
@@ -320,12 +320,12 @@ class Serializer extends ClassSerializer {
      * @param value the value of this int
      * @param isTransient <code>true</code> if this int is transient.
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void write(int value, boolean isTransient, Field field)
 	throws IOException {
-	write(V_INT, Integer.toString(value, 10), isTransient, field);
+	write(KOMLConstants.V_INT, Integer.toString(value, 10), isTransient, field);
     }
-    
+
     /**
      * Write a long with a specified name.
      *
@@ -336,9 +336,9 @@ class Serializer extends ClassSerializer {
      */
     public void write(long value, boolean isTransient, Field field)
 	throws IOException {
-	write(V_LONG, Long.toString(value, 10), isTransient, field);
+	write(KOMLConstants.V_LONG, Long.toString(value, 10), isTransient, field);
     }
-    
+
     /**
      * Write a float with a specified name.
       *
@@ -346,12 +346,12 @@ class Serializer extends ClassSerializer {
      * @param value the value of this float
      * @param isTransient <code>true</code> if this float is transient.
      * @exception IOException If an I/O error occurs
-    */    
+    */
     public void write(float value, boolean isTransient, Field field)
 	throws IOException {
-	write(V_FLOAT, Float.toString(value), isTransient, field);
+	write(KOMLConstants.V_FLOAT, Float.toString(value), isTransient, field);
     }
-    
+
     /**
      * Write a double with a specified name.
      *
@@ -359,10 +359,10 @@ class Serializer extends ClassSerializer {
      * @param value the value of this double
      * @param isTransient <code>true</code> if this double is transient.
      * @exception IOException If an I/O error occurs
-     */    
+     */
     public void write(double value, boolean isTransient, Field field)
 	throws IOException {
-	write(V_DOUBLE, Double.toString(value), isTransient, field);
+	write(KOMLConstants.V_DOUBLE, Double.toString(value), isTransient, field);
     }
 
 }

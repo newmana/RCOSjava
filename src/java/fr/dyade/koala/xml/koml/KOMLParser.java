@@ -34,7 +34,7 @@ import fr.dyade.koala.serialization.Field;
  * @version $Revision$
  * @author  Philippe Le Hégaret
  */
-class KOMLParser implements KOMLConstants, DocumentHandler {
+class KOMLParser implements DocumentHandler {
 
     Parser parser;
 
@@ -114,7 +114,7 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
      *
      * @param in an XML inputstream
      */
-    public void read(InputStream in) 
+    public void read(InputStream in)
 	    throws SAXException, IOException {
 	resetId();
 	getObjectOuputHandler().writeStartDocument();
@@ -135,26 +135,26 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
         }
     }
 
-    public void startElement(String name, AttributeList atts) 
-            throws SAXException {       
+    public void startElement(String name, AttributeList atts)
+            throws SAXException {
         if (KoalaDebug) {
             System.err.println("** element ** " + name);
         }
 	int h_name = name.hashCode();
-	if (h_name == H_KOML) {
-	    pushState(H_KOML);
-	    checkVersion(atts.getValue(A_VERSION));
+	if (h_name == KOMLConstants.H_KOML) {
+	    pushState(KOMLConstants.H_KOML);
+	    checkVersion(atts.getValue(KOMLConstants.A_VERSION));
 	} else if (!isEmptyState()) {
-	    if (h_name == H_CLASSES) {
-		pushState(H_CLASSES);
-	    } else if (h_name == H_OBJECT
-		       || h_name == H_ARRAY
-		       || h_name == H_OBJECT_CLASS) {
+	    if (h_name == KOMLConstants.H_CLASSES) {
+		pushState(KOMLConstants.H_CLASSES);
+	    } else if (h_name == KOMLConstants.H_OBJECT
+		       || h_name == KOMLConstants.H_ARRAY
+		       || h_name == KOMLConstants.H_OBJECT_CLASS) {
 		handleArrayOrObject(h_name, atts);
-	    } else if (h_name == H_VALUE) {
+	    } else if (h_name == KOMLConstants.H_VALUE) {
 		handleValue(h_name, atts);
-	    } else if (h_name == H_NULL) {
-		pushState(H_NULL);
+	    } else if (h_name == KOMLConstants.H_NULL) {
+		pushState(KOMLConstants.H_NULL);
 		try {
 		    getObjectOuputHandler().writeNullReference(null);
 		} catch (IOException e) {
@@ -162,41 +162,41 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 		}
 	    } else {
 		int _state = getState();
-		if (_state == H_CLASSES) {
-		    if (h_name == H_CLASS) {
-			pushState(H_CLASS);
+		if (_state == KOMLConstants.H_CLASSES) {
+		    if (h_name == KOMLConstants.H_CLASS) {
+			pushState(KOMLConstants.H_CLASS);
 			currentClass = new KOMLClassDescription(atts);
 		    } else {
 			throw new KOMLException("invalid document");
 		    }
-		} else if (_state == H_SUPER || _state == H_OBJECT 
-			   || _state == H_ARRAY || _state == H_OBJECT_CLASS) {
-		    if (h_name == H_OBJECT 
-			|| h_name == H_ARRAY 
-			|| h_name == H_OBJECT_CLASS) {
+		} else if (_state == KOMLConstants.H_SUPER || _state == KOMLConstants.H_OBJECT
+			   || _state == KOMLConstants.H_ARRAY || _state == KOMLConstants.H_OBJECT_CLASS) {
+		    if (h_name == KOMLConstants.H_OBJECT
+			|| h_name == KOMLConstants.H_ARRAY
+			|| h_name == KOMLConstants.H_OBJECT_CLASS) {
 			handleArrayOrObject(h_name, atts);
-		    } else if (h_name == H_SUPER) {
-			pushState(H_SUPER);
+		    } else if (h_name == KOMLConstants.H_SUPER) {
+			pushState(KOMLConstants.H_SUPER);
 			KOMLClassDescription _kclass = (KOMLClassDescription)
-			    classes.get(atts.getValue(A_CLASS));
+			    classes.get(atts.getValue(KOMLConstants.A_CLASS));
 			if (_kclass == null) {
 			    throw new KOMLException("invalid document");
 			}
 			ClassDescription _class = _kclass.getClassDescription();
-			try {			    
+			try {
 			    pushReference(new Pair(0, _class));
 
 			    getObjectOuputHandler().writeStartSuper(_class);
 			} catch (IOException e) {
-			    throw new KOMLException("internal error, sorry", 
+			    throw new KOMLException("internal error, sorry",
 						    e);
 			}
-		    } else if (h_name == H_REFERENCE) {
-			pushState(H_REFERENCE);			
-			String t = atts.getValue(A_REF);
+		    } else if (h_name == KOMLConstants.H_REFERENCE) {
+			pushState(KOMLConstants.H_REFERENCE);
+			String t = atts.getValue(KOMLConstants.A_REF);
 			if (t != null) {
 			    try {
-				getObjectOuputHandler().writeReference(getId(t), 
+				getObjectOuputHandler().writeReference(getId(t),
 								       null);
 			    } catch (NumberFormatException e) {
 				throw new KOMLException("invalid document", e);
@@ -205,8 +205,8 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 							e);
 			    }
 			}
-		    } else if (h_name == H_NULL) {
-			pushState(H_NULL);
+		    } else if (h_name == KOMLConstants.H_NULL) {
+			pushState(KOMLConstants.H_NULL);
 
 			try {
 			    getObjectOuputHandler().writeNullReference(null);
@@ -214,18 +214,18 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 			    throw new KOMLException("internal error, sorry",
 						    e);
 			}
-		    } else if (h_name == H_VALUE) {
-			pushState(H_VALUE);
-			String t = atts.getValue(A_TYPE);
-			
+		    } else if (h_name == KOMLConstants.H_VALUE) {
+			pushState(KOMLConstants.H_VALUE);
+			String t = atts.getValue(KOMLConstants.A_TYPE);
+
 			if (t != null) {
 			    valueType = t.hashCode();
 			}
-			isTransient = 
-			    V_TRUE.equals(atts.getValue(A_TRANSIENT));
-		    } else if (h_name == H_ROW) {
-			pushState(H_ROW);			
-			String t = atts.getValue(A_SIZE);
+			isTransient =
+			    KOMLConstants.V_TRUE.equals(atts.getValue(KOMLConstants.A_TRANSIENT));
+		    } else if (h_name == KOMLConstants.H_ROW) {
+			pushState(KOMLConstants.H_ROW);
+			String t = atts.getValue(KOMLConstants.A_SIZE);
 			if (t != null) {
 			    try {
 				rowSize = Integer.parseInt(t, 10);
@@ -236,11 +236,11 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 		    } else {
 			throw new KOMLException("invalid document");
 		    }
-		} else if (_state == H_CLASS) {
-		    if (h_name == H_FIELD) {
-			pushState(H_FIELD);
-			String type = atts.getValue(A_TYPE);
-			String __name = atts.getValue(A_NAME);
+		} else if (_state == KOMLConstants.H_CLASS) {
+		    if (h_name ==KOMLConstants. H_FIELD) {
+			pushState(KOMLConstants.H_FIELD);
+			String type = atts.getValue(KOMLConstants.A_TYPE);
+			String __name = atts.getValue(KOMLConstants.A_NAME);
 			if (type == null || (__name == null)) {
 			    throw new KOMLException("invalid document");
 			}
@@ -255,12 +255,12 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 		    } else {
 			throw new KOMLException("invalid document");
 		    }
-		} else if (h_name == H_REFERENCE) {
-		    pushState(H_REFERENCE);			
-		    String t = atts.getValue(A_REF);
+		} else if (h_name == KOMLConstants.H_REFERENCE) {
+		    pushState(KOMLConstants.H_REFERENCE);
+		    String t = atts.getValue(KOMLConstants.A_REF);
 		    if (t != null) {
 			try {
-			    getObjectOuputHandler().writeReference(getId(t), 
+			    getObjectOuputHandler().writeReference(getId(t),
 								   null);
 			} catch (NumberFormatException e) {
 			    throw new KOMLException("invalid document", e);
@@ -285,7 +285,7 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 
 	for (int i = 0; i < sb.length(); i++) {
 	    char c = sb.charAt(i);
-	    
+
 	    if (c == '\\') {
 		c = sb.charAt(++i);
 		switch (c) {
@@ -310,13 +310,13 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 		case '\'': case '\"':
 		    buf[current++] = c;
 		    break;
-		case '0': case '1': case '2': case '3': 
+		case '0': case '1': case '2': case '3':
 		case '4': case '5': case '6': case '7':
 		    t[0] = c;
 		    sb.getChars(i, i+2, t, 1);
 		    i += 1;
 		    try {
-			buf[current++] = 
+			buf[current++] =
 			    (char) Integer.parseInt(new String(t, 0, 3),
 						    8);
 		    } catch (NumberFormatException e) {
@@ -333,7 +333,7 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 		    sb.getChars(i, i+3, t, 1);
 		    i += 2;
 		    try {
-			buf[current++] = 
+			buf[current++] =
 			    (char) Integer.parseInt(new String(t, 0, 4),
 						    16);
 		    } catch (NumberFormatException e) {
@@ -352,76 +352,76 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 	}
 	return new String(buf, 0, current);
     }
-	    
-    public void endElement(String name) throws SAXException {   
+
+    public void endElement(String name) throws SAXException {
         if (KoalaDebug) {
             System.err.println("end element " + name);
         }
 	int h_name = name.hashCode();
 
 	popState(h_name);
-	if (h_name == H_VALUE) {
+	if (h_name == KOMLConstants.H_VALUE) {
 	    String value = convertProtected(buffer);
 
 	    try {
-		if (valueType == H_V_BYTE) {
-		    getObjectOuputHandler().write(Byte.parseByte(value.trim(), 
+		if (valueType == KOMLConstants.H_V_BYTE) {
+		    getObjectOuputHandler().write(Byte.parseByte(value.trim(),
 								 10),
 						  isTransient, null);
-		} else if (valueType == H_V_SHORT) {
-		    getObjectOuputHandler().write(Short.parseShort(value.trim(), 
+		} else if (valueType == KOMLConstants.H_V_SHORT) {
+		    getObjectOuputHandler().write(Short.parseShort(value.trim(),
 								   10),
 						  isTransient, null);
-		} else if (valueType == H_V_INT) {
-		    getObjectOuputHandler().write(Integer.parseInt(value.trim(), 
+		} else if (valueType == KOMLConstants.H_V_INT) {
+		    getObjectOuputHandler().write(Integer.parseInt(value.trim(),
 								   10),
 						  isTransient, null);
-		} else if (valueType == H_V_LONG) {
+		} else if (valueType == KOMLConstants.H_V_LONG) {
 		    getObjectOuputHandler().write(Long.parseLong(value.trim()),
 						  isTransient, null);
-		} else if (valueType == H_V_FLOAT) {
+		} else if (valueType == KOMLConstants.H_V_FLOAT) {
 		    String floatValue = value.trim();
 		    float f = 0;
 		    if (floatValue.equals("-Infinity")) {
 			f = Float.NEGATIVE_INFINITY;
 		    } else if (floatValue.equals("Infinity")) {
-			f = Float.POSITIVE_INFINITY;			
+			f = Float.POSITIVE_INFINITY;
 		    } else if (floatValue.equals("NaN")) {
-			f = Float.NaN;			
+			f = Float.NaN;
 		    } else {
 			f = Float.valueOf(floatValue).floatValue();
 		    }
 		    getObjectOuputHandler().write(f, isTransient, null);
-		} else if (valueType == H_V_DOUBLE) {
+		} else if (valueType == KOMLConstants.H_V_DOUBLE) {
 		    String doubleValue = value.trim();
 		    double d = 0;
 		    if (doubleValue.equals("-Infinity")) {
 			d = Double.NEGATIVE_INFINITY;
 		    } else if (doubleValue.equals("Infinity")) {
-			d = Double.POSITIVE_INFINITY;			
+			d = Double.POSITIVE_INFINITY;
 		    } else if (doubleValue.equals("NaN")) {
-			d = Double.NaN;			
+			d = Double.NaN;
 		    } else {
 			d = Double.valueOf(doubleValue).doubleValue();
 		    }
 		    getObjectOuputHandler().write(d, isTransient, null);
-		} else if (valueType == H_V_CHAR) {
-		    getObjectOuputHandler().write(value.charAt(0), 
+		} else if (valueType == KOMLConstants.H_V_CHAR) {
+		    getObjectOuputHandler().write(value.charAt(0),
 						  isTransient, null);
-		} else if (valueType == H_V_BOOLEAN) {
-		    getObjectOuputHandler().write(V_TRUE.equals(value.trim()), 
+		} else if (valueType == KOMLConstants.H_V_BOOLEAN) {
+		    getObjectOuputHandler().write(KOMLConstants.V_TRUE.equals(value.trim()),
 						  isTransient, null);
-		} else if (valueType == H_V_STRING) {
+		} else if (valueType == KOMLConstants.H_V_STRING) {
 		    getObjectOuputHandler().write(value, isTransient, null);
 		} else {
 		    throw new KOMLException("invalid type in value " + value);
 		}
 	    } catch (IOException e) {
 		throw new KOMLException("internal error, sorry", e);
-	    }	    
+	    }
 	    buffer.setLength(0);
-	    valueType = 0;		
-	} else if (h_name == H_ROW) {
+	    valueType = 0;
+	} else if (h_name == KOMLConstants.H_ROW) {
 	    try {
 		byte[] t = byteBuffer.getInternalArrayByte();
 		if (minor >= 2) {
@@ -432,10 +432,10 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 		getObjectOuputHandler().writeRow(t, 0, rowSize);
 	    } catch (IOException e) {
 		throw new KOMLException("internal error, sorry", e);
-	    }	    
+	    }
 	    byteBuffer.reset();
 	    rowSize = -1;
-	} else if (h_name ==  H_CLASS) {
+	} else if (h_name ==  KOMLConstants.H_CLASS) {
 	    /*/
 	     // hum, not really good here because the super is null.
 	     // so I suppressed this call
@@ -446,29 +446,29 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 		throw new KOMLException("internal error, sorry", e);
 	    }
 	    /*/
-	} else if (h_name == H_OBJECT_CLASS) {	    
+	} else if (h_name == KOMLConstants.H_OBJECT_CLASS) {
 	    try {
 		Pair p = popReference();
-		getObjectOuputHandler().writeEndObjectClass(p.id, p._class, 
+		getObjectOuputHandler().writeEndObjectClass(p.id, p._class,
 							    null);
 	    } catch (IOException e) {
 		throw new KOMLException("internal error, sorry", e);
 	    }
-	} else if (h_name == H_OBJECT) {	    
+	} else if (h_name == KOMLConstants.H_OBJECT) {
 	    try {
 		Pair p = popReference();
 		getObjectOuputHandler().writeEndObject(p.id, p._class, null);
 	    } catch (IOException e) {
 		throw new KOMLException("internal error, sorry", e);
 	    }
-	} else if (h_name == H_ARRAY) {	    
+	} else if (h_name == KOMLConstants.H_ARRAY) {
 	    try {
 		Pair p = popReference();
 		getObjectOuputHandler().writeEndArray(p.id, p._class, null);
 	    } catch (IOException e) {
 		throw new KOMLException("internal error, sorry", e);
 	    }
-	} else if (h_name == H_SUPER) {	    
+	} else if (h_name == KOMLConstants.H_SUPER) {
 	    try {
 		Pair p = popReference();
 		getObjectOuputHandler().writeEndSuper(p._class);
@@ -489,9 +489,9 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
                            int length) throws SAXException {
 	int _state = getState();
 
-	if (_state == H_VALUE) {
+	if (_state == KOMLConstants.H_VALUE) {
 	    buffer.append(ch, start, length);
-	} else if (_state == H_ROW) {
+	} else if (_state == KOMLConstants.H_ROW) {
 	    int c = start + length;
 	    for (int i = start; i < c; i++) {
 		byteBuffer.write(ch[i]);
@@ -508,7 +508,7 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
     public void processingInstruction(String target,
                                       String data) throws SAXException {
         // nothing to do with this
-    }                                        
+    }
 
     private boolean isEmptyState() {
 	return (currentSt == 0);
@@ -518,31 +518,31 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 	return stStack[currentSt - 1];
     }
 
-    private void handleValue(int h_name, AttributeList atts) 
+    private void handleValue(int h_name, AttributeList atts)
 	    throws SAXException {
-	pushState(H_VALUE);
-	String t = atts.getValue(A_TYPE);
-	
+	pushState(KOMLConstants.H_VALUE);
+	String t = atts.getValue(KOMLConstants.A_TYPE);
+
 	if (t != null) {
 	    valueType = t.hashCode();
 	}
 
-	isTransient = V_TRUE.equals(atts.getValue(A_TRANSIENT));
+	isTransient = KOMLConstants.V_TRUE.equals(atts.getValue(KOMLConstants.A_TRANSIENT));
     }
 
-    private void handleArrayOrObject(int h_name, AttributeList atts) 
+    private void handleArrayOrObject(int h_name, AttributeList atts)
 	    throws SAXException {
 	int id = 0;
-	
-	KOMLClassDescription _kclass = 
-	    (KOMLClassDescription) classes.get(atts.getValue(A_CLASS));
+
+	KOMLClassDescription _kclass =
+	    (KOMLClassDescription) classes.get(atts.getValue(KOMLConstants.A_CLASS));
 
 	if (_kclass == null) {
-	    throw new KOMLException("Unknown class " + atts.getValue(A_CLASS));
+	    throw new KOMLException("Unknown class " + atts.getValue(KOMLConstants.A_CLASS));
 	}
 	ClassDescription _class = _kclass.getClassDescription();
 
-	String t = atts.getValue(A_ID);
+	String t = atts.getValue(KOMLConstants.A_ID);
 
 	if (t != null) {
 	    try {
@@ -554,11 +554,11 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 
 	pushReference(new Pair(id, _class));
 
-	isTransient = V_TRUE.equals(atts.getValue(A_TRANSIENT));
-	if (h_name == H_OBJECT) {
-	    pushState(H_OBJECT);
+	isTransient = KOMLConstants.V_TRUE.equals(atts.getValue(KOMLConstants.A_TRANSIENT));
+	if (h_name == KOMLConstants.H_OBJECT) {
+	    pushState(KOMLConstants.H_OBJECT);
 	    if (!_class.getType().isObject()) {
-		throw new KOMLException("invalid object type " 
+		throw new KOMLException("invalid object type "
 					+ _class.getType());
 	    }
 	    try {
@@ -567,10 +567,10 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 	    } catch (IOException e) {
 		throw new KOMLException("internal error, sorry", e);
 	    }
-	} else if (h_name == H_ARRAY) {
+	} else if (h_name == KOMLConstants.H_ARRAY) {
 	    int size = 0;
-	    pushState(H_ARRAY);
-	    t = atts.getValue(A_LENGTH);		
+	    pushState(KOMLConstants.H_ARRAY);
+	    t = atts.getValue(KOMLConstants.A_LENGTH);
 	    if (t != null) {
 		try {
 		    size = Integer.parseInt(t, 10);
@@ -579,7 +579,7 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 		}
 	    }
 	    if (!_class.getType().isArray()) {
-		throw new KOMLException("invalid array type " 
+		throw new KOMLException("invalid array type "
 					+ _class.getType());
 	    }
 	    try {
@@ -589,10 +589,10 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 		throw new KOMLException("internal error, sorry", e);
 	    }
 	} else {
-	    pushState(H_OBJECT_CLASS);
+	    pushState(KOMLConstants.H_OBJECT_CLASS);
 	    if (!_class.getType().isObject()
 		&& !_class.getType().isString()) {
-		throw new KOMLException("invalid object type " 
+		throw new KOMLException("invalid object type "
 					+ _class.getType());
 	    }
 	    try {
@@ -615,7 +615,7 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
     }
 
     private void popState(int state) throws KOMLException {
-        if (currentSt == 0) {       
+        if (currentSt == 0) {
             throw new KOMLException("no state " + state);
         } else {
             if (stStack[currentSt - 1] == state) {
@@ -637,7 +637,7 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
     }
 
     private Pair popReference() throws KOMLException {
-        if (currentReference == 0) {       
+        if (currentReference == 0) {
             throw new KOMLException("no reference available ");
         } else {
             return stReference[--currentReference];
@@ -645,7 +645,7 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
     }
 
     private void checkVersion(String version) throws KOMLException {
-	if (OLD_VERSION.equals(version)) {
+	if (KOMLConstants.OLD_VERSION.equals(version)) {
 	    // old format
 	    // read it
 	} else {
@@ -655,7 +655,7 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 		    int major = Integer.parseInt(version.substring(0,
 								   index));
 		    minor = Integer.parseInt(version.substring(index+1));
-		    if (major > MAJOR_VERSION) {
+		    if (major > KOMLConstants.MAJOR_VERSION) {
 			throw new Exception();
 		    }
 		} else {
@@ -663,9 +663,9 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 		}
 	    } catch (Exception e) {
 		throw new KOMLException("Invalid version "
-					+ version + " <> " 
-					+ MAJOR_VERSION + "." 
-					+ MINOR_VERSION);
+					+ version + " <> "
+					+ KOMLConstants.MAJOR_VERSION + "."
+					+ KOMLConstants.MINOR_VERSION);
 	    }
 	}
     }
@@ -704,10 +704,10 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 	long   uid = 0;
 
 	KOMLClassDescription(AttributeList atts) throws KOMLException {
-	    String t = atts.getValue(A_UID);
+	    String t = atts.getValue(KOMLConstants.A_UID);
 
-	    nameC = atts.getValue(A_NAME);
-	    _super = atts.getValue(A_SUPER);
+	    nameC = atts.getValue(KOMLConstants.A_NAME);
+	    _super = atts.getValue(KOMLConstants.A_SUPER);
 	    uid = 0;
 
 	    if (t != null) {
@@ -722,13 +722,13 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 	    }
 	    _class = new ClassDescription(nameC);
 	    _class.setType(TypeFactory.createType(nameC));
-	    if (V_TRUE.equals(atts.getValue(A_WRITEMETHOD))) {
+	    if (KOMLConstants.V_TRUE.equals(atts.getValue(KOMLConstants.A_WRITEMETHOD))) {
 		_class.setHasWriteMethod();
 	    }
 	    _class.setSerialVersionUID(uid);
 
-	    t = atts.getValue(A_IMPLEMENTS);
-	    if ((t != null) && (t.equals(V_EXTERNALIZABLE))) {
+	    t = atts.getValue(KOMLConstants.A_IMPLEMENTS);
+	    if ((t != null) && (t.equals(KOMLConstants.V_EXTERNALIZABLE))) {
 		_class.setIsExternalizable();
 	    } else {
 		_class.setIsSerializable();
@@ -742,11 +742,11 @@ class KOMLParser implements KOMLConstants, DocumentHandler {
 
 	ClassDescription getClassDescription() throws KOMLException {
 	    if (_super != null) {
-		KOMLClassDescription superC = 
+		KOMLClassDescription superC =
 		    (KOMLClassDescription) classes.get(_super);
 		if (superC == null) {
 		    if (!_super.equals("java.lang.Object")) {
-			throw new KOMLException("no class definition for " 
+			throw new KOMLException("no class definition for "
 						+ _super);
 		    }
 		} else {
