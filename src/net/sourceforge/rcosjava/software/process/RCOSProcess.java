@@ -159,7 +159,7 @@ public class RCOSProcess implements Serializable, Comparable
   public RCOSProcess (int newPID, NewProcess newProcessBody)
   {
     this(newPID, newProcessBody.getFilename(), newProcessBody.getFileSize(),
-         newProcessBody.getStackPages(),newProcessBody.getCodePages());
+      newProcessBody.getStackPages(),newProcessBody.getCodePages());
   }
 
 
@@ -175,7 +175,7 @@ public class RCOSProcess implements Serializable, Comparable
    * process.
    */
   public RCOSProcess(int newPID, String newFileName, int newFileSize,
-                     int newStackPages, int newCodePages)
+    int newStackPages, int newCodePages)
   {
     this(newPID, newFileName);
     fileSize = newFileSize;
@@ -281,6 +281,12 @@ public class RCOSProcess implements Serializable, Comparable
     return currentContext;
   }
 
+  /**
+   * Compares the object based on priority value.
+   *
+   * @return -1 if the process of this object is less than the given process,
+   * 0 if it is equal and 1 if it is greater than.
+   */
   public int compareTo(Object object)
   {
     if ((object != null) && (object.getClass().equals(this.getClass())))

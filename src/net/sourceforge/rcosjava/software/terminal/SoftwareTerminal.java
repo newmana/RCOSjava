@@ -152,7 +152,8 @@ public class SoftwareTerminal extends OSMessageHandler
   {
     if (!softwareBuffer.queueEmpty())
     {
-      int newNum = 0, number = 0;
+      int newNum = 0;
+      int number = 0;
       boolean found = false;
 
       softwareBuffer.goToHead();
@@ -170,14 +171,15 @@ public class SoftwareTerminal extends OSMessageHandler
       }
 
       if (!found)
+      {
         number = toNumber((KeyEvent) softwareBuffer.retrieveCurrent());
+      }
 
       // Print the output.
       hardwareTerminal.printNum((short) number);
 
       // return character back
-      ReturnValue msg = new ReturnValue(this,
-        (short) number);
+      ReturnValue msg = new ReturnValue(this, (short) number);
       sendMessage(msg);
     }
     else
@@ -189,7 +191,9 @@ public class SoftwareTerminal extends OSMessageHandler
   }
 
   /**
-   *
+   * If a keypress event has occurred it checks the bueffer and if it's not
+   * empty awakens the process that was blocked.  If the key is a Ctrl-C then
+   * it kills this process.
    */
   public void keyPress()
   {
@@ -224,16 +228,24 @@ public class SoftwareTerminal extends OSMessageHandler
     }
   }
 
-  public void sendInterrupt(Interrupt theInt)
+  /**
+   * Creates a new interrupt and sends a handle interrupt message.
+   *
+   * @param newInterrupt the interrupt to send.
+   */
+  public void sendInterrupt(Interrupt newInterrupt)
   {
-    HandleInterrupt msg = new HandleInterrupt(this, theInt);
+    HandleInterrupt msg = new HandleInterrupt(this, newInterrupt);
     sendMessage(msg);
   }
 
+  /**
+   * Sends a terminal toggle message as the user has set the terminal to close.
+   */
   public void terminalClose()
   {
-    int iTerminalNo = Integer.parseInt(hardwareTerminal.getTitle().substring(9));
-    TerminalToggle msg = new TerminalToggle(this, iTerminalNo);
+    int terminalNo = Integer.parseInt(hardwareTerminal.getTitle().substring(9));
+    TerminalToggle msg = new TerminalToggle(this, terminalNo);
     sendMessage(msg);
   }
 
@@ -266,7 +278,7 @@ public class SoftwareTerminal extends OSMessageHandler
   /**
    * Check to see if the key that was pressed was a numeric key
    *
-   * @return TRUE if ASCII value is between 48 & 57 inclusive
+   * @return true if ASCII value is between 48 & 57 inclusive
    */
   boolean isNumber(KeyEvent evt)
   {
@@ -274,7 +286,7 @@ public class SoftwareTerminal extends OSMessageHandler
   }
 
   /**
-   * take KeyEvent (keypress) and return Integer value
+   * Take KeyEvent (keypress) and return Integer value
    */
   int toNumber(KeyEvent evt)
   {

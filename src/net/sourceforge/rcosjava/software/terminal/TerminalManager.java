@@ -38,11 +38,41 @@ import net.sourceforge.rcosjava.software.util.FIFOQueue;
  */
  public class TerminalManager extends OSMessageHandler
 {
-  private TerminalQueue allocatedTerminals, unallocatedTerminals;
+  /**
+   * The collection of terminals that have been allocated to a terminal.
+   */
+  private TerminalQueue allocatedTerminals;
+
+  /**
+   * The collection of termianls that have not been allocated a terminal.
+   */
+  private TerminalQueue unallocatedTerminals;
+
+  /**
+   * A collections of processes waiting to be allocated a terminal.
+   */
   private FIFOQueue waitingProcesses;
+
+  /**
+   * The maximum number of terminals that are avaiable.
+   */
   private int maxTerminals;
+
+  /**
+   * A simple array to track which terminals are "on" (viewable but not
+   * necessarily allocated to a terminal).
+   */
   private boolean[] terminalOn;
+
+  /**
+   * The string which prefixes the names of all the terminals (for the post
+   * office).
+   */
   private final String terminalPrefix = "Terminal#";
+
+  /**
+   * The name of the terminal manager.
+   */
   private static final String MESSENGING_ID = "TerminalManager";
 
   /**

@@ -1,7 +1,7 @@
 package net.sourceforge.rcosjava.software.process;
 
-import net.sourceforge.rcosjava.software.util.*;
-import java.util.Iterator;
+import java.util.*;
+import net.sourceforge.rcosjava.software.util.BaseQueue;
 
 /**
  * Implement a queue of processes used by the process scheduler.  It stores

@@ -19,7 +19,9 @@ import net.sourceforge.rcosjava.messaging.postoffices.os.OSOffice;
 import net.sourceforge.rcosjava.software.memory.MemoryManager;
 import net.sourceforge.rcosjava.software.memory.MemoryReturn;
 import net.sourceforge.rcosjava.software.memory.MemoryRequest;
-import net.sourceforge.rcosjava.software.util.*;
+import net.sourceforge.rcosjava.software.util.FIFOQueue;
+import net.sourceforge.rcosjava.software.util.LIFOQueue;
+import net.sourceforge.rcosjava.software.util.PriorityQueue;
 
 /**
  * Management of processes for RCOS.java

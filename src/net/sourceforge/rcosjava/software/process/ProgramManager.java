@@ -3,6 +3,7 @@ package net.sourceforge.rcosjava.software.process;
 import java.awt.*;
 import java.net.*;
 import java.lang.Thread;
+
 import net.sourceforge.rcosjava.RCOS;
 import net.sourceforge.rcosjava.messaging.*;
 import net.sourceforge.rcosjava.messaging.messages.os.OSMessageAdapter;
@@ -29,27 +30,62 @@ import net.sourceforge.rcosjava.software.util.*;
  * and other components. It's functions are to set up and comunicate with a
  * remote server for the loading of programs.
  * <P>
- * HISTORY: 31/03/96 Added fifoQueue for filenames. DJ<BR>
- *          30/12/96 Rewrote manager with frame moved to Animators. AN<BR>
- *          01/01/97 Changed it to be a client.  No tracking here at all. AN<BR>
- *          15/01/97 Added ability to kill processes, step and run. AN<BR>
+ * <DT><B>History:</B>
+ * <DD>
+ * 31/03/96 Added fifoQueue for filenames. DJ
+ * </DD><DD>
+ * <DD>
+ * 30/12/96 Rewrote manager with frame moved to Animators. AN
+ * </DD><DD>
+ * <DD>
+ * 01/01/97 Changed it to be a client.  No tracking here at all. AN
+ * </DD><DD>
+ * <DD>
+ * 15/01/97 Added ability to kill processes, step and run. AN
+ * </DD></DT>
  * <P>
- *
  * @author Andrew Newman
  * @author Brett Carter
  * @author David Jones
  * @created 19th March 1996
  * @version 1.00 $Date$
  */
- public class ProgramManager extends OSMessageHandler
+public class ProgramManager extends OSMessageHandler
 {
-  // Variables
+  /**
+   * The file client which is used to talk to the server to load files, etc.
+   */
   private FileClient theFileClient;
+
+  /**
+   * A simple list of strings of all the available directories excluding . and
+   * ..
+   */
   private FIFOQueue directoryList;
+
+  /**
+   * A simple list of string of all the file in the current directory.
+   */
   private FIFOQueue fileList;
+
+  /**
+   * The interrupt handler used to handle all the program manager interrupts.
+   */
   private ProgManInterruptHandler theIH;
+
+  /**
+   * A reference to the instance of RCOS startup program.
+   */
   private RCOS myRCOS;
-  private String sNewFilename;
+
+  /**
+   * The name of the currently selected file.
+   */
+  private String fileName;
+
+  /**
+   * The name of the manager to register as with the post office.
+   */
   private static final String MESSENGING_ID = "ProgramManager";
 
   /**
@@ -103,24 +139,35 @@ import net.sourceforge.rcosjava.software.util.*;
 
   public String getNewFilename()
   {
-    return this.sNewFilename;
+    return fileName;
   }
 
-  public void setNewFilename(String sFilename)
+  public void setNewFilename(String newFilename)
   {
-    this.sNewFilename = sFilename;
+    fileName = newFilename;
   }
 
+  /**
+   * Start the program execution thread.
+   */
   public void startThread()
   {
     myRCOS.startThread();
   }
 
+  /**
+   * Step the program execution thread one place forward.
+   */
   public void stepThread()
   {
     myRCOS.stepThread();
   }
 
+  /**
+   * Send a message to the kernel to kill the given process.
+   *
+   * @param pid the process id to kill.
+   */
   public void kill(int pid)
   {
     // send message to Kernel with Process number
@@ -128,13 +175,16 @@ import net.sourceforge.rcosjava.software.util.*;
     sendMessage(newMsg);
   }
 
+  /**
+   * Open a connection using the file client.
+   */
   public boolean open()
   {
     return theFileClient.openConnection();
   }
 
   /**
-   * Returns the file size. This method will return -1 if no file was selected.
+   * @return the file size. This method will return -1 if no file was selected.
    */
   public int getFileSize(String theFileName)
   {
@@ -142,18 +192,27 @@ import net.sourceforge.rcosjava.software.util.*;
   }
 
   /**
-   * This function returns a Memory object containing the file data.
+   * @returns a Memory object containing the file data.
    */
   public Memory getFileContents(String theFileName)
   {
     return theFileClient.getExeFile(theFileName);
   }
 
+  /**
+   * Close the connection using the file client.
+   */
   public void close()
   {
     theFileClient.closeConnection();
   }
 
+  /**
+   * Update the directory list.
+   *
+   * @param the directory name to list of.
+   * @param 1 or 2 for the executable and recording directories respectively.
+   */
   public void updateList(String directoryName, int directoryType)
   {
     String[] dataArray;
