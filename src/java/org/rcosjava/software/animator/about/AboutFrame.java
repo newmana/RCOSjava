@@ -171,6 +171,7 @@ public class AboutFrame extends RCOSFrame
     closePanel.setBackground(defaultBgColour);
     closePanel.setForeground(defaultFgColour);
     tmpButton = new JButton("Close");
+    tmpButton.setBackground(defaultBgColour);
     closePanel.add(tmpButton);
     tmpButton.addMouseListener(new RCOSFrame.CloseAnimator());
 
