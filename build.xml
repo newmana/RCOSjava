@@ -11,7 +11,7 @@
   <property name="dist.jar" value="${app.name}.jar"/>
   <property name="build.compiler" value="classic"/>
 
-  <target name="all" depends="clean,prepare,compile,dist,javadoc"
+  <target name="all" depends="prepare,compile,dist,javadoc"
    description="Call all the targets"/>
 
    <target name="clean"
