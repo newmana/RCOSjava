@@ -367,6 +367,7 @@ public class Memory implements Serializable, Cloneable
     }
     return toReturn.toString();
   }
+
   /**
    * Handle the serialization of the contents.
    */
@@ -376,7 +377,7 @@ public class Memory implements Serializable, Cloneable
     os.writeBoolean(allocated);
     for (int index = 0; index < memorySegment.length; index++)
     {
-      os.writeShort(memorySegment[index]);
+      os.writeInt(memorySegment[index]);
     }
   }
 
@@ -396,7 +397,7 @@ public class Memory implements Serializable, Cloneable
 
     for (int index = 0; index < segmentSize; index++)
     {
-      memorySegment[index] = is.readShort();
+      memorySegment[index] = (short) is.readInt();
     }
   }
 }
