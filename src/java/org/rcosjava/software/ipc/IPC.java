@@ -126,10 +126,11 @@ public class IPC extends OSMessageHandler
           semaphoreCount + " pid " + pid + " init value " + initValue);
       }
 
-      // We give this nice process a semaphore
+      // Create the semaphore and use the given PID and open the semaphore.
       Semaphore newSemaphore = new Semaphore(semaphoreName, semaphoreCount, pid,
           initValue);
 
+      // Insert semaphore into semaphore table for tracking.
       getSemaphoreTable().insert(newSemaphore);
 
       //Return the integer value (SemID) of the semaphore created.
@@ -186,7 +187,7 @@ public class IPC extends OSMessageHandler
 
       //Let other components know that the semaphore was created
       SemaphoreOpened openedMessage = new SemaphoreOpened(this,
-          existingSemaphore.getName(), pid, existingSemaphore.getValue());
+        existingSemaphore.getName(), pid, existingSemaphore.getValue());
       sendMessage(openedMessage);
     }
     else
@@ -215,7 +216,7 @@ public class IPC extends OSMessageHandler
     {
       // The semaphore exists - now do a wait on it
       Semaphore existingSemaphore = (Semaphore)
-          getSemaphoreTable().peek(semaphoreId);
+        getSemaphoreTable().peek(semaphoreId);
 
       // Increment the value of the semaphore as more processes are added
       // -1 if process is to be blocked, or positive if haven't run out.
@@ -228,7 +229,7 @@ public class IPC extends OSMessageHandler
 
       // Inform other components that wait has been called
       SemaphoreWaiting waitingMessage = new SemaphoreWaiting(this,
-          existingSemaphore.getName(), pid, value);
+        existingSemaphore.getName(), pid, value);
       sendMessage(waitingMessage);
 
       // NOW - if the value was -1, then we have to block
@@ -257,7 +258,7 @@ public class IPC extends OSMessageHandler
   {
     if (log.isInfoEnabled())
     {
-      log.info("Waiting semaphore: " + semaphoreId + " pid " + pid);
+      log.info("Signalling semaphore: " + semaphoreId + " pid " + pid);
     }
 
     if (getSemaphoreTable().isMember(semaphoreId))
@@ -265,7 +266,7 @@ public class IPC extends OSMessageHandler
       // Get the semaphore and find the next process that is attached to
       // it
       Semaphore existingSemaphore = (Semaphore)
-          getSemaphoreTable().peek(semaphoreId);
+        getSemaphoreTable().peek(semaphoreId);
       int processId = existingSemaphore.signal();
 
       // Send the reply
@@ -274,8 +275,8 @@ public class IPC extends OSMessageHandler
 
       // Let other components know that a signal has been issued.
       SemaphoreSignalled signalledMessage = new SemaphoreSignalled(this,
-          existingSemaphore.getName(), pid, existingSemaphore.getValue(),
-          processId);
+        existingSemaphore.getName(), pid, existingSemaphore.getValue(),
+        processId);
       sendMessage(signalledMessage);
 
       // NOW - if process id wasn't -1, then we have to wake
