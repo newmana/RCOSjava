@@ -14,6 +14,9 @@ import MessageSystem.Messages.Universal.UniversalMessageAdapter;
 import MessageSystem.PostOffices.Animator.AnimatorOffice;
 import MessageSystem.PostOffices.Universal.UniversalMessageRecorder;
 import MessageSystem.PostOffices.Universal.UniversalMessagePlayer;
+import MessageSystem.Messages.Universal.UpdateList;
+import Software.Util.FIFOQueue;
+import pll2.FileClient;
 
 /**
  * User interface which allows the recording and playback of messages that
@@ -33,6 +36,8 @@ public class MultimediaAnimator extends RCOSAnimator
   private UniversalMessageRecorder recorder;
   private UniversalMessagePlayer player;
   private boolean recording, playing;
+  private String currentFile;
+  private FileClient myClient;
 
   public MultimediaAnimator (AnimatorOffice aPostOffice,
     int x, int y, Image[] pmImages, UniversalMessageRecorder newRecorder,
@@ -68,11 +73,41 @@ public class MultimediaAnimator extends RCOSAnimator
     mmFrame.setVisible(false);
   }
 
+  public boolean getRecording()
+  {
+    return this.recording;
+  }
+
+  public void updateDirectoryList(FIFOQueue data)
+  {
+    mmFrame.updateDirectoryList(data);
+  }
+
+  /**
+   * Handle updating the list.  Send the
+   * @see MessageSystem.Messages.Universal.UpdateList message.
+   */
+  public void updateList()
+  {
+    UpdateList newMsg = new UpdateList(this, java.io.File.separator, 2);
+    sendMessage(newMsg);
+  }
+
+  public void setCurrentFile(String newFile)
+  {
+    currentFile = newFile;
+  }
+
+  public void createDirectory()
+  {
+    recorder.createDirectory(java.io.File.separatorChar + currentFile);
+  }
+
   public void recordToggle()
   {
     if (!recording)
     {
-      this.recorder.recordOn("test");
+      this.recorder.recordOn(currentFile);
       recording = true;
     }
     else
@@ -85,15 +120,14 @@ public class MultimediaAnimator extends RCOSAnimator
   //Basic step for now
   public void playStep()
   {
-    System.out.println("Play step");
-    this.player.sendNextMessage("test");
+    this.player.sendNextMessage(currentFile);
   }
 
-  public void processMessage(AnimatorMessageAdapter aMsg)
+  public void processMessage(AnimatorMessageAdapter message)
   {
     try
     {
-      aMsg.doMessage(this);
+      message.doMessage(this);
     }
     catch (Exception e)
     {
@@ -102,11 +136,11 @@ public class MultimediaAnimator extends RCOSAnimator
     }
   }
 
-  public void processMessage(UniversalMessageAdapter aMsg)
+  public void processMessage(UniversalMessageAdapter message)
   {
     try
     {
-      aMsg.doMessage(this);
+      message.doMessage(this);
     }
     catch (Exception e)
     {

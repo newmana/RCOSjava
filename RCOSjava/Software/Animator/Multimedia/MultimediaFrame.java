@@ -12,6 +12,7 @@ import Software.Animator.Support.RCOSList;
 import MessageSystem.Messages.Message;
 import MessageSystem.PostOffices.MessageHandler;
 import Software.Process.RCOSProcess;
+import Software.Util.FIFOQueue;
 
 /**
  * It is the interface that allows users to turn on/off or playback
@@ -29,8 +30,11 @@ public class MultimediaFrame extends RCOSFrame
   private MultimediaAnimator myMultimediaAnimator;
   private Image myImages[];
   private Message msg;
-  private RCOSList rMovies;
-  private GraphicButton recordButton, loadButton, pauseButton, playButton;
+  private java.awt.List movieList;
+  private Button recordButton, stepButton;
+  private TextField fileNameTextField = new TextField(20);
+  private Dialog fileNameDialog;
+  private TextField dialogTextField;
 
   public MultimediaFrame (int x, int y, Image[] mmImages,
     MultimediaAnimator newMultimediaAnimator)
@@ -47,17 +51,62 @@ public class MultimediaFrame extends RCOSFrame
     super.addNotify();
   }
 
+  public void setVisible(boolean visibility)
+  {
+     super.setVisible(visibility);
+     if (visibility)
+     {
+       myMultimediaAnimator.setCurrentFile("");
+       myMultimediaAnimator.updateList();
+     }
+  }
+
+  void updateDirectoryList(FIFOQueue data)
+  {
+    movieList.removeAll();
+    String tmpString;
+    while (data.peek() != null)
+    {
+      tmpString = (String) data.retrieve();
+      movieList.add(tmpString.substring(0,tmpString.length()-1));
+    }
+  }
+
   public void setupLayout(Component c)
   {
     super.setupLayout(c);
 
-    Panel pMain = new Panel();
-    Panel pClose = new Panel();
-    NewLabel lTmpLabel;
+    //Set up modal file name dialog
+
+    Panel dialogPanel = new Panel();
+    fileNameDialog = new
+      Dialog(MultimediaFrame.this , "Recording name", true);
+    fileNameDialog.setBackground(defaultBgColour);
+    fileNameDialog.setForeground(defaultFgColour);
+    fileNameDialog.setFont(defaultFont);
+    fileNameDialog.setSize(new Dimension(250,90));
+    dialogPanel.add(new NewLabel("Filename: ", titleFont));
+    dialogTextField = new TextField(20);
+    dialogTextField.setBackground(defaultBgColour);
+    dialogTextField.setForeground(defaultFgColour);
+    dialogPanel.add(dialogTextField);
+    Button tmpOkayButton = new Button("Ok");
+    tmpOkayButton.addMouseListener(new OkFileDialog());
+    dialogPanel.add(tmpOkayButton);
+    Button tmpCancelButton = new Button("Cancel");
+    tmpCancelButton.addMouseListener(new CancelFileDialog());
+    dialogPanel.add(tmpCancelButton);
+    fileNameDialog.add(dialogPanel);
+
+    // Set up main windows
+
+    Panel mainPanel = new Panel();
+    Panel closePanel = new Panel();
+    NewLabel tmpLabel;
 
     GridBagConstraints constraints = new GridBagConstraints();
     GridBagLayout gridBag = new GridBagLayout();
-    pMain.setLayout(gridBag);
+    mainPanel.setLayout(gridBag);
     constraints.gridwidth=1;
     constraints.gridheight=1;
     constraints.weighty=1;
@@ -66,99 +115,119 @@ public class MultimediaFrame extends RCOSFrame
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
-    lTmpLabel = new NewLabel("Existing Recordings", titleFont);
-    gridBag.setConstraints(lTmpLabel,constraints);
-    pMain.add(lTmpLabel);
-
-    constraints.gridwidth=1;
-    constraints.anchor = GridBagConstraints.CENTER;
-    rMovies = new RCOSList(this,3,false);
-    gridBag.setConstraints(rMovies,constraints);
-    pMain.add(rMovies);
+    tmpLabel = new NewLabel("Existing Recordings", titleFont);
+    gridBag.setConstraints(tmpLabel,constraints);
+    mainPanel.add(tmpLabel);
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
-    loadButton = new GraphicButton (myImages[0], myImages[1],
-      "Load", defaultFont, buttonColour, true);
-    gridBag.setConstraints(loadButton,constraints);
-    pMain.add(loadButton);
-
-    constraints.gridwidth=GridBagConstraints.REMAINDER;
-    constraints.anchor = GridBagConstraints.WEST;
-    lTmpLabel = new NewLabel("Commands", titleFont);
-    gridBag.setConstraints(lTmpLabel,constraints);
-    pMain.add(lTmpLabel);
+    movieList = new java.awt.List(5,false);
+    movieList.setBackground(listColour);
+    movieList.setForeground(defaultFgColour);
+    gridBag.setConstraints(movieList,constraints);
+    mainPanel.add(movieList);
+    movieList.addMouseListener(new movieListListener());
 
     constraints.gridwidth=1;
     constraints.anchor = GridBagConstraints.CENTER;
-    playButton = new GraphicButton (myImages[0], myImages[1],
-      "Play", defaultFont, buttonColour, true);
-    gridBag.setConstraints(playButton,constraints);
-    pMain.add(playButton);
-    playButton.addMouseListener(new PlayStep());
+    mainPanel.add(new NewLabel("Filename: ", titleFont));
+    fileNameTextField.setFont(defaultFont);
+    fileNameTextField.setBackground(textBoxColour);
+    fileNameTextField.setForeground(defaultFgColour);
 
-    constraints.gridwidth=1;
     constraints.anchor = GridBagConstraints.CENTER;
-    pauseButton = new GraphicButton (myImages[0], myImages[1],
-      "Pause", defaultFont, buttonColour, true);
-    gridBag.setConstraints(pauseButton,constraints);
-    pMain.add(pauseButton);
-
     constraints.gridwidth=GridBagConstraints.REMAINDER;
-    constraints.anchor = GridBagConstraints.CENTER;
-    recordButton = new GraphicButton (myImages[0], myImages[1],
-      "Record", defaultFont, buttonColour, true, true, false);
-    gridBag.setConstraints(recordButton,constraints);
-    pMain.add(recordButton);
+    mainPanel.add(fileNameTextField);
+    fileNameTextField.setEditable(false);
+
+    stepButton = new Button("Step");
+    closePanel.add(stepButton);
+    stepButton.addMouseListener(new StepListener());
+    stepButton.setEnabled(false);
+
+    recordButton = new Button("Record");
+    closePanel.add(recordButton);
     recordButton.addMouseListener(new RecordToggle());
 
-/*    tmpButton = new Button ("Open");
-    pClose.add(tmpButton);
+    closePanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+    tmpButton = new Button("Close");
+    closePanel.add(tmpButton);
     tmpButton.addMouseListener(new CloseAnimator());
 
-    tmpButton = new Button ("Save");
-    pClose.add(tmpButton);
-    tmpButton.addMouseListener(new CloseAnimator());*/
-
-    pClose.setLayout(new FlowLayout(FlowLayout.RIGHT));
-    tmpButton = new Button ("Close");
-    pClose.add(tmpButton);
-    tmpButton.addMouseListener(new CloseAnimator());
-
-    add("Center", pMain);
-    add("South", pClose);
+    add("Center", mainPanel);
+    add("South", closePanel);
   }
+
+  public void setFilenameAndRecord(String fileName)
+  {
+    recordButton.setLabel("Pause");
+    stepButton.setEnabled(false);
+  }
+
+////////////////////////////////////////////////////////////////////////////////
 
   class RecordToggle extends MouseAdapter
   {
     public void mouseClicked(MouseEvent e)
     {
-      myMultimediaAnimator.recordToggle();
-      recordButton.toggleGrey();
+      if (!myMultimediaAnimator.getRecording())
+      {
+        fileNameDialog.show();
+        dialogTextField.transferFocus();
+      }
+      else
+      {
+        stepButton.setEnabled(true);
+        recordButton.setLabel("Record");
+      }
     }
   }
 
-  class PlayStep extends MouseAdapter
+  class StepListener extends MouseAdapter
   {
     public void mouseClicked(MouseEvent e)
     {
       myMultimediaAnimator.playStep();
     }
   }
-/*
-  class StepProcess extends MouseAdapter
+
+  class movieListListener extends MouseAdapter
   {
     public void mouseClicked(MouseEvent e)
     {
-      myProcessManager.step();
+      if (e.getClickCount() == 2)
+      {
+        //A double click was detected.
+
+        String selected = movieList.getSelectedItem();
+
+        myMultimediaAnimator.setCurrentFile(selected);
+        fileNameTextField.setText(selected);
+        recordButton.setEnabled(false);
+        stepButton.setEnabled(true);
+      }
     }
   }
 
-  class RunProcess extends MouseAdapter
+  class OkFileDialog extends MouseAdapter
   {
     public void mouseClicked(MouseEvent e)
     {
-      myProcessManager.run();
+      fileNameTextField.setText(dialogTextField.getText());
+      myMultimediaAnimator.setCurrentFile(dialogTextField.getText());
+      myMultimediaAnimator.createDirectory();
+      myMultimediaAnimator.recordToggle();
+      recordButton.setLabel("Stop");
+      stepButton.setEnabled(false);
+      fileNameDialog.setVisible(false);
     }
-  }*/
+  }
+
+  class CancelFileDialog extends MouseAdapter
+  {
+    public void mouseClicked(MouseEvent e)
+    {
+      fileNameDialog.setVisible(false);
+    }
+  }
 }
