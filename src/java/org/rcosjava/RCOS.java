@@ -56,63 +56,54 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   /**
    * Messaging constant for OS Post Office.
    */
-  public final static String osPostOfficeId = "OSPOSTOFFICE";
+  public final static String OS_POST_OFFICE_ID = "OSPOSTOFFICE";
 
   /**
    * Messaging constant  for Animator Post Office.
    */
-  public final static String animatorPostOfficeId = "ANIMATORPOSTOFFICE";
+  public final static String ANIMATOR_POST_OFFICE_ID = "ANIMATORPOSTOFFICE";
 
   /**
    * Number of images of people.
    */
-  public final static int numberPeople = 4;
+  public final static int NUMBER_OF_PEOPLE = 4;
 
   /**
    * Number of images for buttons.
    */
-  public final static int numberButtons = 3;
+  public final static int NUMBER_OF_BUTTONS = 3;
+
+  /**
+   * Welcome message to be displayed.
+   */
+  private final static String WELCOME = "Welcome to RCOSjava Version 0.5";
+
+  /**
+   * Copyright notice.
+   */
+  private final static String INFO = "Copyright 1995-2002.\nVersion 0.5.\n" +
+      "Authors: David Jones, Brett Carter, Bruce Jamieson, and Andrew Newman";
+
+  /**
+   * How many terminals wide.
+   */
+  private static final int MAX_TERMINAL_COLUMNS = 4;
+
+  /**
+   * How many termianl tall.
+   */
+  private static final int MAX_TERMINAL_ROWS = 2;
+
+  /**
+   * Maximum number of terminals
+   */
+  private static final int MAX_TERMINALS = (MAX_TERMINAL_COLUMNS *
+      MAX_TERMINAL_ROWS);
 
   /**
    * If we are running the thread or not.
    */
   private static volatile boolean running = false;
-
-  /**
-   * Menu name 1.
-   */
-  private final static String menu1 = "System";
-
-  /**
-   * Menu name 2.
-   */
-  private final static String menu2 = "Animators";
-
-  /**
-   * Menu name 3.
-   */
-  private final static String menu3 = "System";
-
-  /**
-   * Menu name 4.
-   */
-  private final static String menu4 = "Interface";
-
-  /**
-   * Menu name 5.
-   */
-  private final static String menu5 = "Information";
-
-  /**
-   * Welcome message to be displayed.
-   */
-  private final static String welcome = "Welcome to RCOSjava Version 0.5";
-
-  /**
-   * Copyright notice.
-   */
-  private final static String info = "Copyright 1995-2002.\nVersion 0.588888888888888.\n" +
-      "Authors: David Jones, Brett Carter, Bruce Jamieson, and Andrew Newman";
 
   /**
    * URL to access the help system
@@ -178,31 +169,6 @@ public class RCOS extends javax.swing.JApplet implements Runnable
    * Status bar for messages.
    */
   private static JTextArea statusBar;
-
-  /**
-   * Small x,y window sizes.
-   */
-  public int smallX, smallY;
-
-  /**
-   * Default x,y windows sizes.
-   */
-  public int defX, defY;
-
-  /**
-   * Large x,y windows sizes.
-   */
-  public int largeX, largeY;
-
-  /**
-   * Screen size width.
-   */
-  public final int screenX = 640;
-
-  /**
-   * Screen size height.
-   */
-  public final int screenY = 480;
 
   /**
    * Base domain of location of applet.
@@ -283,21 +249,6 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   private Thread kernelThread;
 
   /**
-   * How many terminals wide.
-   */
-  private final int maxTerminalCols = 4;
-
-  /**
-   * How many termianl tall.
-   */
-  private final int maxTerminalRows = 2;
-
-  /**
-   * Maximum number of terminals
-   */
-  private final int maxTerminals = (maxTerminalCols * maxTerminalRows);
-
-  /**
    * Audio clips.
    */
   private AudioClip clips[] = new AudioClip[1];
@@ -305,12 +256,12 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   /**
    * Up button images.
    */
-  private ImageIcon upButtons[] = new ImageIcon[numberButtons];
+  private ImageIcon upButtons[] = new ImageIcon[NUMBER_OF_BUTTONS];
 
   /**
    * Down button images.
    */
-  private ImageIcon downButtons[] = new ImageIcon[numberButtons];
+  private ImageIcon downButtons[] = new ImageIcon[NUMBER_OF_BUTTONS];
 
   /**
    * Images for terminal animator.
@@ -356,22 +307,6 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   public static void updateStatusBar(String newMessage)
   {
     statusBar.insert(newMessage + "\n", 0);
-  }
-
-  /**
-   * Sets the screen size. Used to be dynamic. Should either be removed or
-   * rewritten at the point. Shouldn't have much impact.
-   */
-  public void setScreenSize()
-  {
-    smallX = (int) (screenX * 0.65);
-    smallY = (int) (screenY * 0.65);
-
-    defX = (int) (screenX * 0.85);
-    defY = (int) (screenY * 0.92);
-
-    largeX = (int) (screenX * 0.95);
-    largeY = (int) (screenY * 0.95);
   }
 
   /**
@@ -433,15 +368,16 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 
     URL tmpURL;
 
-    for (int count = 0; count < numberPeople; count++)
+    for (int count = 0; count < NUMBER_OF_PEOPLE; count++)
     {
       tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
         "/images/p" + count + ".jpg");
 
+      // TODO Check for null before calling this
       aboutImages[count] = new ImageIcon(tmpURL);
     }
 
-    for (int count = 0; count < numberButtons; count++)
+    for (int count = 0; count < NUMBER_OF_BUTTONS; count++)
     {
       tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
         "/images/b" + count + "up.jpg");
@@ -484,7 +420,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
    */
   public String getAppletInfo()
   {
-    return (info);
+    return (this.INFO);
   }
 
   /**
@@ -496,7 +432,6 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   {
     getParameters();
     getImagesAndSound();
-    setScreenSize();
     initialiseMessaging();
     initialiseOperatingSystem();
     initialiseAnimators();
@@ -511,10 +446,11 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   public void initialiseMessaging()
   {
     //Start the Post Office (system messaging system).
-    osPostOffice = new OSOffice(osPostOfficeId);
+    osPostOffice = new OSOffice(OS_POST_OFFICE_ID);
 
     //Start the animator PostOffice (animator messaging system).
-    animatorPostOffice = new AnimatorOffice(animatorPostOfficeId, osPostOffice);
+    animatorPostOffice = new AnimatorOffice(ANIMATOR_POST_OFFICE_ID,
+        osPostOffice);
 
     //Start the recording subsystem
     recorder = new UniversalMessageRecorder(defaultDomain, port, "*Recorder",
@@ -531,7 +467,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   {
     // Start the Kernel and rest of OS.
     theKernel = new Kernel(osPostOffice);
-    theTerminalManager = new TerminalManager(osPostOffice, maxTerminals);
+    theTerminalManager = new TerminalManager(osPostOffice, MAX_TERMINALS);
     theProcessScheduler = new ProcessScheduler(osPostOffice);
     theIPC = new IPC(osPostOffice);
     theMemoryManager = new MemoryManager(osPostOffice);
@@ -544,27 +480,25 @@ public class RCOS extends javax.swing.JApplet implements Runnable
    */
   public void initialiseAnimators()
   {
-    tmAnimator = new TerminalManagerAnimator(animatorPostOffice, defX,
-        defY, terminalImages, maxTerminals, maxTerminalCols, maxTerminalRows);
+    tmAnimator = new TerminalManagerAnimator(animatorPostOffice, terminalImages,
+        MAX_TERMINALS, MAX_TERMINAL_COLUMNS, MAX_TERMINAL_ROWS);
 
-    psAnimator = new ProcessSchedulerAnimator(animatorPostOffice, defX, defY,
+    psAnimator = new ProcessSchedulerAnimator(animatorPostOffice,
         processImages);
 
-    ipcAnimator = new IPCManagerAnimator(animatorPostOffice, defX, defY,
-        ipcImages);
+    ipcAnimator = new IPCManagerAnimator(animatorPostOffice, ipcImages);
 
-    cpuAnimator = new CPUAnimator(animatorPostOffice, smallX, smallY, null);
+    cpuAnimator = new CPUAnimator(animatorPostOffice, null);
 
-    pmAnimator = new ProgramManagerAnimator(animatorPostOffice, smallX, smallY,
-        null);
+    pmAnimator = new ProgramManagerAnimator(animatorPostOffice, null);
 
-    pcmAnimator = new ProcessManagerAnimator(animatorPostOffice, 250, 250,
+    pcmAnimator = new ProcessManagerAnimator(animatorPostOffice,
         processManagerImages);
 
     mmAnimator = new MultimediaAnimator(animatorPostOffice, 250, 250,
         processManagerImages, recorder, player);
 
-    aboutAnimator = new AboutAnimator(animatorPostOffice, largeX, largeY,
+    aboutAnimator = new AboutAnimator(animatorPostOffice, 250, 250,
         aboutImages);
 //    overviewanimator = new Overview("Overviewanimator", animatorPostOffice, defX,
 //      defY, );
@@ -618,7 +552,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     menu.setMnemonic(KeyEvent.VK_H);
     menuBar.add(menu);
 
-    menuItem = new JMenuItem("Topics");
+    menuItem = new JMenuItem("Help Topics");
     menu.add(menuItem);
     menuItem = new JMenuItem("About");
     menu.add(menuItem);
