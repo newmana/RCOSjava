@@ -39,7 +39,7 @@ int main()
        /** Do nothing **/
      }     
 
-     semResult = semsignal(semValue4);
+     semResult = semsignal(semValue1);
      semResult = semsignal(semValue5);
    }
 

@@ -39,8 +39,8 @@ int main()
        /** Do nothing **/
      }     
 
-     semResult = semsignal(semValue2);
      semResult = semsignal(semValue3);
+     semResult = semsignal(semValue2);
    }
 
    /*semResult = semclose(semValue);*/
