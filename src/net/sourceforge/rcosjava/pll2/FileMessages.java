@@ -1,19 +1,15 @@
-// *************************************************************************
-// FILE     : FileMessages.java
-// PACKAGE  : Disk
-// PURPOSE  : Provides support for FileClient and FileServer.  Based
-//            on Brett Carter's original design.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 10/1/98 Created.
-//
-// *************************************************************************
-
 package net.sourceforge.rcosjava.pll2;
 
 import java.io.*;
 import java.net.*;
-
+/**
+ * Provides support for FileClient and FileServer.  Based on Brett Carter's
+ * original design.
+ * <P>
+ * @author Andrew Newman (based on code by Brett Carter).
+ * @version 1.00 $Date$
+ * @created 10th January 1998
+ */
 public class FileMessages
 {
   public final static char spacer = ' ';
@@ -64,7 +60,9 @@ public class FileMessages
     outputStream = newOutputStream;
   }
 
-  //Try to read the next message in the stream.
+  /**
+   * Try to read the next message in the stream.
+   */
   public boolean readMessage()
   {
     messageData = null;
@@ -127,31 +125,41 @@ public class FileMessages
     return false;
   }
 
-  //Return the last message type returned by read message
+  /**
+   * @return the last message type returned by read message
+   */
   public String getLastMessageType()
   {
     return messageType;
   }
 
-  //Return the last message directory by read message
+  /**
+   * @return the last message directory by read message
+   */
   public int getLastMessageDirectory()
   {
     return messageDirectory;
   }
 
-  //Return the last message data returned by read message
+  /**
+   * @return the last message data returned by read message
+   */
   public String getLastMessageData()
   {
     return messageData;
   }
 
-  //Return the size of the last message
+  /**
+   * @return the size of the last message
+   */
   public int getLastMessageSize()
   {
     return messageSize;
   }
 
-  //Is the message a valid type?
+  /**
+   * Is the message a valid type?
+   */
   private boolean validMessageType(String messageType)
   {
     if (messageType.equals(Q_HANGUP) ||
@@ -178,7 +186,6 @@ public class FileMessages
     return false;
   }
 
-  //Questions - requests
   public boolean askDirectoryListing(int directoryIndicator,
     String directoryName)
   {
@@ -252,7 +259,6 @@ public class FileMessages
     writeMessage(Q_HANGUP + spacer + "0" + spacer + "NOW");
   }
 
-  //Answers - replies
   public boolean replyDirectoryListing(String[] directoryList)
   {
     previousRequestSize = directoryList.length;

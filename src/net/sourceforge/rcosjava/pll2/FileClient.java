@@ -13,10 +13,14 @@ import fr.dyade.koala.xml.sax.*;
  * Implement a class that will contact a server and communicate with it.
  * The server can fetch file listings or actual files.
  * <P>
- * HISTORY: 20/01/1996 Updated to break down to method calls.<BR>
- *          12/01/1997 Moved to Disk package and closed connection
- *          gracefully. AN<BR>
- *          10/01/198  Rewritten for JDK 1.1. AN<BR>
+ * <DT><B>History:</B>
+ * <DD>
+ * 20/01/1996 Updated to break down to method calls.
+ * </DD><DD>
+ * 12/01/1997 Moved to Disk package and closed connection gracefully.
+ * </DD><DD>
+ * 10/01/198  Rewritten for JDK 1.1.
+ * </DD></DT>
  * <P>
  * @author Andrew Newman (based on code by Brett Carter).
  * @version 1.00 $Date$
@@ -155,8 +159,8 @@ public class FileClient
   public Object getRecFile(String filename)
   {
     String serializedObject = getFile(2, filename);
-    System.out.println("Filename: " + filename);
-    System.out.println("Got: " + serializedObject);
+//    System.out.println("Filename: " + filename);
+//    System.out.println("Got: " + serializedObject);
     ByteArrayInputStream tmpBuffer = new
       ByteArrayInputStream(serializedObject.getBytes());
     KOMLDeserializer deserializer = null;

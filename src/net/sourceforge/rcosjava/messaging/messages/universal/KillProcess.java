@@ -1,15 +1,4 @@
-//*******************************************************************/
-// FILE     : KillProcessMessage.java
-// PURPOSE  : Kill a process.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 24/03/96   Created
-//          : 01/07/96   Uses Memory
-//          : 03/08/97   Moved to message system
-//*******************************************************************/
-
 package net.sourceforge.rcosjava.messaging.messages.universal;
-
 
 import net.sourceforge.rcosjava.software.animator.process.ProcessSchedulerAnimator;
 import net.sourceforge.rcosjava.software.animator.process.ProcessManagerAnimator;
@@ -21,21 +10,31 @@ import net.sourceforge.rcosjava.software.process.RCOSProcess;
 import net.sourceforge.rcosjava.software.terminal.SoftwareTerminal;
 import net.sourceforge.rcosjava.messaging.postoffices.os.OSMessageHandler;
 
+/**
+ * Sent by the user (control-C on the terminal) or by the process manager to
+ * kill a given process with a given process Id.  Currently, no security is
+ * in place - everyone is root!
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 24th of March 1996
+ */
 public class KillProcess  extends UniversalMessageAdapter
 {
-  private int iPID;
-  private boolean bHandleInterrupt = false;
+  private int pid;
+  private boolean handleInterrupt = false;
 
-  public KillProcess(OSMessageHandler theSource, int iNewPID, boolean bNewHandleInterrupt)
+  public KillProcess(OSMessageHandler theSource, int newPID,
+    boolean newHandleInterrupt)
   {
     super(theSource);
-    iPID = iNewPID;
-    bHandleInterrupt = bNewHandleInterrupt;
+    pid = newPID;
+    handleInterrupt = newHandleInterrupt;
   }
 
-  public void setProcessID(int iNewPID)
+  public void setProcessID(int newPID)
   {
-    iPID = iNewPID;
+    pid = newPID;
   }
 
   public void doMessage(ProcessScheduler theElement)
@@ -44,17 +43,17 @@ public class KillProcess  extends UniversalMessageAdapter
 
   public void doMessage(ProcessSchedulerAnimator theElement)
   {
-     theElement.killProcess(iPID);
+     theElement.killProcess(pid);
   }
 
   public void doMessage(ProcessManagerAnimator theElement)
   {
-    theElement.deleteProcess(new Integer(iPID));
+    theElement.deleteProcess(new Integer(pid));
   }
 
   public void doMessage(Kernel theElement)
   {
-    if (bHandleInterrupt)
+    if (handleInterrupt)
       theElement.handleProcessFinishedInterrupt();
   }
 }
