@@ -45,14 +45,14 @@ public class KOMLDeserializer implements Deserializer, TaskCounter {
 
     // let people to follow the process
     private TaskCounterInputStream       counter;
-    
+
     /**
      * Creates a new KOMLDeserializer
      *
      * @param in the input stream.
      * @param buffered If true, the KOMLDeserializer uses a temporary file (to
      *                 prevent memory crash) instead of an array of bytes.
-     * @exception IOException an I/O error occurs.  
+     * @exception IOException an I/O error occurs.
      */
     public KOMLDeserializer(InputStream in, boolean buffered)
 	    throws IOException {
@@ -74,10 +74,10 @@ public class KOMLDeserializer implements Deserializer, TaskCounter {
 		i = - i;
 	    }
 	    input = Integer.toString(i, 10);
-	    out = new GeneratorOutputStream(new FileOutputStream(input)); 
+	    out = new GeneratorOutputStream(new FileOutputStream(input));
 	} else {
 	    bytes = new ByteInputOutputStream(1024);
-	    out = new GeneratorOutputStream(bytes); 
+	    out = new GeneratorOutputStream(bytes);
 	}
 	try {
 	    KOMLParser parser = new KOMLParser();
@@ -93,17 +93,17 @@ public class KOMLDeserializer implements Deserializer, TaskCounter {
 
 	if (buffered) {
 	    tmpFile = new File(input);
-	    counter = 
-		new TaskCounterInputStream(new FileInputStream(tmpFile), 
+	    counter =
+		new TaskCounterInputStream(new FileInputStream(tmpFile),
 					   tmpFile.length());
 	} else {
-	    counter = 
-		new TaskCounterInputStream(bytes.getInputStream(), 
+	    counter =
+		new TaskCounterInputStream(bytes.getInputStream(),
 					   bytes.getSize());
 	    bytes.close();
 	}
     }
-    
+
     /**
      * Creates a new KOMLDeserializer with a source.
      * The source can be a File, an URL, a String, etc.
@@ -127,11 +127,11 @@ public class KOMLDeserializer implements Deserializer, TaskCounter {
 	} else if (o instanceof String) {
 	    try {
 		URL url = new URL(o.toString());
-		URLConnection uc = url.openConnection(); 
+		URLConnection uc = url.openConnection();
 		initialize(uc.getInputStream());
 	    } catch (MalformedURLException ex) {
 		initialize(new FileInputStream(o.toString()));
-	    } 	    
+	    }
 	} else {
 	    throw new IOException("unsupported source " + o.getClass());
 	}
@@ -142,8 +142,8 @@ public class KOMLDeserializer implements Deserializer, TaskCounter {
      * Overrides this function to change the object input stream.
      *
      * @exception IOException an I/O error occurs.
-     */    
-    protected ObjectInputStream getObjectInputStream(InputStream in) 
+     */
+    protected ObjectInputStream getObjectInputStream(InputStream in)
             throws IOException {
 	return new ObjectInputStream(counter);
     }
@@ -154,19 +154,19 @@ public class KOMLDeserializer implements Deserializer, TaskCounter {
      * @exception IOException an I/O error occurs
      * @exception ClassNotFoundException .
      * @return an object or throws an EOFException
-     */    
-    public Object readObject() throws ClassNotFoundException, IOException {	
-	if (istream == null) {
-	    istream = getObjectInputStream(counter);
-	}
-	return istream.readObject();
+     */
+    public Object readObject() throws ClassNotFoundException, IOException {
+      if (istream == null) {
+        istream = getObjectInputStream(counter);
+      }
+      return istream.readObject();
     }
 
     /**
      * Close the deserializer and releases any system resources.
      *
      * @exception IOException an I/O error occurs.
-     */    
+     */
     public void close() throws IOException {
 	if (tmpFile != null) {
 	    tmpFile.delete();
@@ -178,7 +178,7 @@ public class KOMLDeserializer implements Deserializer, TaskCounter {
 
     /**
      * Called by the garbage collector and call the close() method.
-     */    
+     */
     protected void finalize() {
 	try {
 	    close();
@@ -189,7 +189,7 @@ public class KOMLDeserializer implements Deserializer, TaskCounter {
      * This method returns the total length of the task.
      *
      * @return the length of the task, -1 otherwise
-     */    
+     */
     public long getMaximumValue() {
 	if (counter == null) {
 	    return -1;
@@ -199,7 +199,7 @@ public class KOMLDeserializer implements Deserializer, TaskCounter {
 
     /**
      * This method returns the current position of the task.
-     */    
+     */
     public long getValue() {
 	if (counter == null) {
 	    return 0;
