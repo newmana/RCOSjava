@@ -104,7 +104,7 @@ public class RCOSFrame extends Frame implements Serializable
     setLayout(new BorderLayout());
   }
 
-  public synchronized void addNotify()
+  public void addNotify()
   {
     this.repaint();
     super.addNotify();
