@@ -95,7 +95,7 @@ public class OSMessageHandler extends SimpleMessageHandler
    */
   public void sendMessage(OSMessageAdapter adapter)
   {
-    localSendMessage(adapter);
+    postOffice.sendMessage(adapter);
   }
 
   /**
@@ -138,7 +138,8 @@ public class OSMessageHandler extends SimpleMessageHandler
     }
     catch (Exception e)
     {
-      log.error("Error invoking doMessage on: " + this.getClass().getName());
+      log.error("Error invoking processMessage on: " +
+          this.getClass().getName(), e);
     }
   }
 
@@ -159,16 +160,14 @@ public class OSMessageHandler extends SimpleMessageHandler
     try
     {
       Class[] classes = {this.getClass()};
-      Method method = message.getClass().getMethod(
-          "doMessage", classes);
-
+      Method method = message.getClass().getMethod("doMessage", classes);
       Object[] args = {this};
-
       method.invoke(message, args);
     }
     catch (Exception e)
     {
-      log.error("Error invoking doMessage on: " + this.getClass().getName());
+      log.error("Error processing OS Message, invoking doMessage on: " +
+          this.getClass().getName(), e);
     }
   }
 
@@ -189,17 +188,15 @@ public class OSMessageHandler extends SimpleMessageHandler
     try
     {
       Class[] classes = {this.getClass()};
-
       Method method = message.getClass().getSuperclass().getMethod(
           "doMessage", classes);
-
       Object[] args = {this};
-
       method.invoke(message, args);
     }
     catch (Exception e)
     {
-      log.error("Error invoking doMessage on: " + this.getClass().getName());
+      log.error("Error processing Universal Message, invoking doMessage on: " +
+          this.getClass().getName(), e);
     }
   }
 }
