@@ -16,6 +16,8 @@ import net.sourceforge.rcosjava.messaging.messages.animator.ShowCPU;
 import net.sourceforge.rcosjava.messaging.messages.MessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.os.OSMessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.universal.Quantum;
+import net.sourceforge.rcosjava.messaging.messages.universal.Run;
+import net.sourceforge.rcosjava.messaging.messages.universal.Stop;
 import net.sourceforge.rcosjava.messaging.messages.universal.SwitchToFIFO;
 import net.sourceforge.rcosjava.messaging.messages.universal.SwitchToLIFO;
 import net.sourceforge.rcosjava.messaging.messages.universal.SwitchToPriority;
@@ -110,9 +112,11 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void sendQuantum(Integer quantumValue)
   {
+    sendMessage(new Stop(this));
     //Create and send Quantum message
     Quantum msg = new Quantum(this, quantumValue.intValue());
     sendMessage(msg);
+    sendMessage(new Run(this));
   }
 
   /**
@@ -120,8 +124,10 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void sendSwitchFIFO()
   {
+    sendMessage(new Stop(this));
     SwitchToFIFO msg = new SwitchToFIFO(this);
     sendMessage(msg);
+    sendMessage(new Run(this));
   }
 
   /**
@@ -129,8 +135,10 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void sendSwitchLIFO()
   {
+    sendMessage(new Stop(this));
     SwitchToLIFO msg = new SwitchToLIFO(this);
     sendMessage(msg);
+    sendMessage(new Run(this));
   }
 
   /**
@@ -138,8 +146,10 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void sendSwitchPriority()
   {
+    sendMessage(new Stop(this));
     SwitchToPriority msg = new SwitchToPriority(this);
     sendMessage(msg);
+    sendMessage(new Run(this));
   }
 
   /**
@@ -196,8 +206,10 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void cpuToBlocked(int pid)
   {
+    sendMessage(new Stop(this));
     myFrame.cpuToBlocked(pid);
     addQueue(ProcessScheduler.BLOCKEDQ, pid);
+    sendMessage(new Run(this));
   }
 
   /**
@@ -208,9 +220,11 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void blockedToReady(int pid)
   {
+    sendMessage(new Stop(this));
     removeQueue(ProcessScheduler.BLOCKEDQ, pid);
     myFrame.blockedToReady(pid);
     addQueue(ProcessScheduler.READYQ, pid);
+    sendMessage(new Run(this));
   }
 
   /**
@@ -221,8 +235,10 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void cpuToReady(int pid)
   {
+    sendMessage(new Stop(this));
     myFrame.cpuToReady(pid);
     addQueue(ProcessScheduler.READYQ, pid);
+    sendMessage(new Run(this));
   }
 
   /**
@@ -233,8 +249,10 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void readyToCPU(int pid)
   {
+    sendMessage(new Stop(this));
     removeQueue(ProcessScheduler.READYQ, pid);
     myFrame.readyToCPU(pid);
+    sendMessage(new Run(this));
   }
 
   /**
@@ -245,9 +263,11 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void zombieToReady(int pid)
   {
+    sendMessage(new Stop(this));
     removeQueue(ProcessScheduler.ZOMBIEQ, pid);
     myFrame.zombieToReady(pid);
     addQueue(ProcessScheduler.READYQ, pid);
+    sendMessage(new Run(this));
   }
 
   /**
@@ -258,8 +278,10 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void zombieCreated(int pid)
   {
+    sendMessage(new Stop(this));
     myFrame.newProcess(pid);
     addQueue(ProcessScheduler.ZOMBIEQ, pid);
+    sendMessage(new Run(this));
   }
 
   /**
@@ -272,4 +294,3 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
     localSendMessage(scmMsg);
   }
 }
-
