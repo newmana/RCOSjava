@@ -371,6 +371,7 @@ public class Kernel extends OSMessageHandler
   {
     int call = myCPU.getContext().
       getInstructionRegister().getWordParameter();
+
     if (call == Instruction.SYS_CHIN)
     {
       ChIn message = new
@@ -450,7 +451,6 @@ public class Kernel extends OSMessageHandler
     else if (call == Instruction.SYS_SEM_SIGNAL)
     {
       int semaphoreId = myCPU.getProcessStack().read(myCPU.getContext().getStackPointer());
-      System.out.println("Doing Semaphore signal" + semaphoreId);
       myCPU.getContext().decStackPointer();
       SemaphoreSignal message = new SemaphoreSignal(
         this, semaphoreId, getCurrentProcess().getPID());
@@ -570,10 +570,9 @@ public class Kernel extends OSMessageHandler
   }
 
   /**
-   handle Timer interrupts
-   - check if timerInterrupts < QUANTUM
-   - if it is ignore
-   - else update CPU ticks and do ProcessSwitch
+   * Check if timerInterrupts < QUANTUM<BR>
+   * if it is ignore<BR>
+   * else update CPU ticks and do ProcessSwitch
   */
   public void handleTimerInterrupt()
   {
