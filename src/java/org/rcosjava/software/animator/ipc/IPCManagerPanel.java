@@ -7,8 +7,8 @@ import javax.swing.border.TitledBorder;
 import java.util.*;
 
 import org.rcosjava.software.animator.RCOSPanel;
-import org.rcosjava.software.animator.support.RCOSQueue;
 import org.rcosjava.software.animator.support.RCOSBox;
+import org.rcosjava.software.animator.support.RCOSQueue;
 import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.software.ipc.SharedMemory;
 import org.rcosjava.software.memory.MemoryManager;
@@ -42,16 +42,6 @@ public class IPCManagerPanel extends RCOSPanel
   private Image myImages[];
 
   /**
-   * Semaphore queue to display.
-   */
-  private RCOSQueue semQueue;
-
-  /**
-   * Shared memory queue to display.
-   */
-  private RCOSQueue shmQueue;
-
-  /**
    * Animator that I receive calls from and makes calls back when a user event
    * occurs.
    */
@@ -61,16 +51,6 @@ public class IPCManagerPanel extends RCOSPanel
    * Window dimensions.
    */
   private int windowWidth, windowHeight;
-
-  /**
-   * Map of current semaphores.
-   */
-  private HashMap semaphoreMap;
-
-  /**
-   * Map of current shared memory segments.
-   */
-  private HashMap sharedMemoryMap;
 
   /**
    * Combo boxes for shared memory and semaphores.
@@ -88,14 +68,14 @@ public class IPCManagerPanel extends RCOSPanel
   private JTextField semValue;
 
   /**
-   * The current id of the semaphore selected.
+   * Semaphore queue to display.
    */
-  private String selectedSemaphoreName;
+  private RCOSQueue semQueue;
 
   /**
-   * The current id of the shared memory selected.
+   * Shared memory queue to display.
    */
-  private String selectedSharedMemoryName;
+  private RCOSQueue shmQueue;
 
   /**
    * Constructor for the IPCManagerFrame object
@@ -114,8 +94,6 @@ public class IPCManagerPanel extends RCOSPanel
     windowWidth = getWidth();
     windowHeight = getHeight();
     myAnimator = newIPCManager;
-    semaphoreMap = new HashMap();
-    sharedMemoryMap = new HashMap();
   }
 
   /**
@@ -164,7 +142,7 @@ public class IPCManagerPanel extends RCOSPanel
     semOption.setForeground(choiceColour);
     semOption.setBackground(defaultBgColour);
     semOption.setSelectedIndex(0);
-    selectedSemaphoreName = NONE;
+    myAnimator.setSelectedSemaphoreName(NONE);
 
     // Setup the semaphore panel with a panel and border with title.
     JPanel semPanel = new JPanel();
@@ -352,11 +330,11 @@ public class IPCManagerPanel extends RCOSPanel
     {
       semOption.removeAllItems();
       semOption.addItem(SOME);
-      selectedSemaphoreName = SOME;
+      myAnimator.setSelectedSemaphoreName(SOME);
     }
     semOption.addItem(semaphoreId);
-    semaphoreMap.put(semaphoreId, new SemaphoreSharedMemoryGraphic(pid,
-        new Integer(value)));
+    myAnimator.setSemaphoreGraphic(semaphoreId,
+        new SemaphoreSharedMemoryGraphic(pid, new Integer(value)));
     updateSemaphoreQueue();
   }
 
@@ -369,8 +347,8 @@ public class IPCManagerPanel extends RCOSPanel
    */
   void semaphoreOpened(String semaphoreId, int pid, int value)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
-        semaphoreMap.get(semaphoreId);
+    SemaphoreSharedMemoryGraphic tmpGraphic = myAnimator.getSemaphoreGraphic(
+        semaphoreId);
 
     if (tmpGraphic != null)
     {
@@ -388,8 +366,8 @@ public class IPCManagerPanel extends RCOSPanel
    */
   void semaphoreWaiting(String semaphoreId, int pid, int value)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
-        semaphoreMap.get(semaphoreId);
+    SemaphoreSharedMemoryGraphic tmpGraphic = myAnimator.getSemaphoreGraphic(
+        semaphoreId);
 
     if (tmpGraphic != null)
     {
@@ -406,8 +384,8 @@ public class IPCManagerPanel extends RCOSPanel
    */
   void semaphoreSignalled(String semaphoreId, int pid, int value)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
-        semaphoreMap.get(semaphoreId);
+    SemaphoreSharedMemoryGraphic tmpGraphic = myAnimator.getSemaphoreGraphic(
+        semaphoreId);
 
     if (tmpGraphic != null)
     {
@@ -425,8 +403,8 @@ public class IPCManagerPanel extends RCOSPanel
    */
   void semaphoreClosed(String semaphoreId, int pid, int value)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
-        semaphoreMap.get(semaphoreId);
+    SemaphoreSharedMemoryGraphic tmpGraphic = myAnimator.getSemaphoreGraphic(
+        semaphoreId);
 
     if (tmpGraphic != null)
     {
@@ -439,11 +417,11 @@ public class IPCManagerPanel extends RCOSPanel
       {
         semOption.removeAllItems();
         semOption.addItem(NONE);
-        selectedSemaphoreName = NONE;
+        myAnimator.setSelectedSemaphoreName(NONE);
       }
       else
       {
-        selectedSemaphoreName = SOME;
+        myAnimator.setSelectedSemaphoreName(SOME);
       }
     }
     updateSemaphoreQueue();
@@ -464,10 +442,11 @@ public class IPCManagerPanel extends RCOSPanel
     {
       shmOption.removeAllItems();
       shmOption.addItem(SOME);
-      selectedSharedMemoryName = SOME;
+      myAnimator.setSelectedSemaphoreName(SOME);
     }
-    sharedMemoryMap.put(sharedMemoryId, new SemaphoreSharedMemoryGraphic(
-      memoryReturn.getPID(), memory.toString()));
+    myAnimator.setSharedMemoryGraphic(sharedMemoryId,
+        new SemaphoreSharedMemoryGraphic(memoryReturn.getPID(),
+        memory.toString()));
     shmOption.addItem(sharedMemoryId);
     updateSharedMemoryQueue();
   }
@@ -480,8 +459,8 @@ public class IPCManagerPanel extends RCOSPanel
    */
   void sharedMemoryOpened(String sharedMemoryId, int pid)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
-        sharedMemoryMap.get(sharedMemoryId);
+    SemaphoreSharedMemoryGraphic tmpGraphic =
+        myAnimator.getSharedMemoryGraphic(sharedMemoryId);
 
     if (tmpGraphic != null)
     {
@@ -500,8 +479,8 @@ public class IPCManagerPanel extends RCOSPanel
    */
   void sharedMemoryClosed(String sharedMemoryId, int pid)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
-        sharedMemoryMap.get(sharedMemoryId);
+    SemaphoreSharedMemoryGraphic tmpGraphic =
+        myAnimator.getSharedMemoryGraphic(sharedMemoryId);
 
     if (tmpGraphic != null)
     {
@@ -517,11 +496,11 @@ public class IPCManagerPanel extends RCOSPanel
         {
           shmOption.removeAllItems();
           shmOption.addItem(NONE);
-          selectedSharedMemoryName = NONE;
+          myAnimator.setSelectedSharedMemoryName(NONE);
         }
         else
         {
-          selectedSharedMemoryName = SOME;
+          myAnimator.setSelectedSharedMemoryName(SOME);
         }
       }
     }
@@ -549,8 +528,8 @@ public class IPCManagerPanel extends RCOSPanel
    */
   void sharedMemoryWrote(String sharedMemoryId, Memory memory)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
-        sharedMemoryMap.get(sharedMemoryId);
+    SemaphoreSharedMemoryGraphic tmpGraphic =
+        myAnimator.getSharedMemoryGraphic(sharedMemoryId);
 
     tmpGraphic.setValue(memory.toString());
     updateSharedMemoryQueue();
@@ -584,11 +563,11 @@ public class IPCManagerPanel extends RCOSPanel
     semValue.setText("");
 
     //Check that it's a real semaphore
-    if (!selectedSemaphoreName.startsWith(NONE) &&
-        !selectedSemaphoreName.startsWith(SOME))
+    if (!myAnimator.getSelectedSemaphoreName().startsWith(NONE) &&
+        !myAnimator.getSelectedSemaphoreName().startsWith(SOME))
     {
-      SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
-          semaphoreMap.get(selectedSemaphoreName);
+      SemaphoreSharedMemoryGraphic tmpGraphic =
+          myAnimator.getCurrentSemaphore();
 
       semValue.setText(((Integer) tmpGraphic.getValue()).toString());
 
@@ -612,11 +591,11 @@ public class IPCManagerPanel extends RCOSPanel
     shmList.removeAll();
 
     //Check that it's a real shared memory queue.
-    if (!selectedSharedMemoryName.startsWith(NONE) &&
-        !selectedSharedMemoryName.startsWith(SOME))
+    if (!myAnimator.getSelectedSharedMemoryName().startsWith(NONE) &&
+        !myAnimator.getSelectedSharedMemoryName().startsWith(SOME))
     {
-      SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
-          sharedMemoryMap.get(selectedSharedMemoryName);
+      SemaphoreSharedMemoryGraphic tmpGraphic =
+          myAnimator.getCurrentSharedMemory();
 
       String tmpValue = (String) tmpGraphic.getValue();
       shmList.setText(tmpValue);
@@ -643,7 +622,7 @@ public class IPCManagerPanel extends RCOSPanel
     public void itemStateChanged(ItemEvent e)
     {
       //Get new selection
-      selectedSemaphoreName = (String) e.getItem();
+      myAnimator.setSelectedSemaphoreName((String) e.getItem());
       updateSemaphoreQueue();
     }
   }
@@ -661,7 +640,7 @@ public class IPCManagerPanel extends RCOSPanel
     public void itemStateChanged(ItemEvent e)
     {
       //Get new selection
-      selectedSharedMemoryName = (String) e.getItem();
+      myAnimator.setSelectedSemaphoreName((String) e.getItem());
       updateSharedMemoryQueue();
     }
   }

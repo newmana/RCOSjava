@@ -1,7 +1,9 @@
 package org.rcosjava.software.animator.ipc;
 
-import java.awt.*;
+import java.awt.Component;
+import java.util.HashMap;
 import javax.swing.ImageIcon;
+
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.software.animator.RCOSAnimator;
@@ -31,6 +33,26 @@ public class IPCManagerAnimator extends RCOSAnimator
   private IPCManagerPanel panel;
 
   /**
+   * Map of current semaphores.
+   */
+  private HashMap semaphoreMap;
+
+  /**
+   * Map of current shared memory segments.
+   */
+  private HashMap sharedMemoryMap;
+
+  /**
+   * The current id of the semaphore selected.
+   */
+  private String selectedSemaphoreName;
+
+  /**
+   * The current id of the shared memory selected.
+   */
+  private String selectedSharedMemoryName;
+
+  /**
    * Constructor for the IPCManagerAnimator object
    *
    * @param postOffice the post office to register to.
@@ -39,6 +61,8 @@ public class IPCManagerAnimator extends RCOSAnimator
   public IPCManagerAnimator(AnimatorOffice postOffice, ImageIcon[] images)
   {
     super(MESSENGING_ID, postOffice);
+    semaphoreMap = new HashMap();
+    sharedMemoryMap = new HashMap();
     panel = new IPCManagerPanel(images, this);
   }
 
@@ -185,5 +209,113 @@ public class IPCManagerAnimator extends RCOSAnimator
   public void sharedMemoryWrote(String sharedMemoryId, Memory memory)
   {
     panel.sharedMemoryWrote(sharedMemoryId, memory);
+  }
+
+  /**
+   * Returns the currently selected semaphore.
+   *
+   * @return the currently selected semaphore.
+   */
+  String getSelectedSemaphoreName()
+  {
+    return selectedSemaphoreName;
+  }
+
+  /**
+   * Sets the selected semaphore.
+   *
+   * @param newSelectedSemaphoreName new semaphore.
+   */
+  void setSelectedSemaphoreName(String newSelectedSemaphoreName)
+  {
+    selectedSemaphoreName = newSelectedSemaphoreName;
+  }
+
+  /**
+   * Returns the currently selected shared memory.
+   *
+   * @return the currently selected shared memory.
+   */
+  String getSelectedSharedMemoryName()
+  {
+    return selectedSharedMemoryName;
+  }
+
+  /**
+   * Sets the selected shared memory.
+   *
+   * @param newSelectedSharedMemoryName new semaphore.
+   */
+  void setSelectedSharedMemoryName(String newSelectedSharedMemoryName)
+  {
+    selectedSharedMemoryName = newSelectedSharedMemoryName;
+  }
+
+  /**
+   * Sets the semaphore map consisting of the name of the semaphore and a
+   * graphic object.
+   *
+   * @param semaphoreId the name of the semaphore.
+   * @param graphic the semaphore graphic.
+   */
+  void setSemaphoreGraphic(String semaphoreId,
+      SemaphoreSharedMemoryGraphic graphic)
+  {
+    semaphoreMap.put(semaphoreId, graphic);
+  }
+
+  /**
+   * Gets the semaphore graphic based on the semaphore id.
+   *
+   * @param semaphoreId the name of the semaphore.
+   * @return graphic the semaphore graphic.
+   */
+  SemaphoreSharedMemoryGraphic getSemaphoreGraphic(String semaphoreId)
+  {
+    return (SemaphoreSharedMemoryGraphic) semaphoreMap.get(semaphoreId);
+  }
+
+  /**
+   * Sets the shared memory map consisting of the name of the shared memory and
+   * a graphic object.
+   *
+   * @param sharedMemoryId the name of the shared memory.
+   * @param graphic the shared memory graphic.
+   */
+  void setSharedMemoryGraphic(String sharedMemoryId,
+      SemaphoreSharedMemoryGraphic graphic)
+  {
+    sharedMemoryMap.put(sharedMemoryId, graphic);
+  }
+
+  /**
+   * Gets the graphic based on the shared memory id.
+   *
+   * @param sharedMemoryId the name of the shared memory.
+   * @return graphic the semaphore graphic.
+   */
+  SemaphoreSharedMemoryGraphic getSharedMemoryGraphic(String sharedMemoryId)
+  {
+    return (SemaphoreSharedMemoryGraphic) sharedMemoryMap.get(sharedMemoryId);
+  }
+
+  /**
+   * Returns the currently selected semaphore.
+   *
+   * @return the currently selected semaphore.
+   */
+  SemaphoreSharedMemoryGraphic getCurrentSemaphore()
+  {
+    return getSemaphoreGraphic(getSelectedSemaphoreName());
+  }
+
+  /**
+   * Returns the currently selected shared memory.
+   *
+   * @return the currently selected shared memory.
+   */
+  SemaphoreSharedMemoryGraphic getCurrentSharedMemory()
+  {
+    return getSharedMemoryGraphic(getSelectedSharedMemoryName());
   }
 }

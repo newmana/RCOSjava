@@ -137,4 +137,34 @@ public class MemoryState implements Serializable
   {
     beingWritten = false;
   }
+
+  /**
+   * Returns true if allocated.
+   *
+   * @return true if allocated.
+   */
+  public boolean isAllocated()
+  {
+    return allocated;
+  }
+
+  /**
+   * Returns true if being read.
+   *
+   * @return true if being read.
+   */
+  public boolean isBeingRead()
+  {
+    return beingRead;
+  }
+
+  /**
+   * Returns true if being written.
+   *
+   * @return true if being written.
+   */
+  public boolean isBeingWritten()
+  {
+    return beingWritten;
+  }
 }

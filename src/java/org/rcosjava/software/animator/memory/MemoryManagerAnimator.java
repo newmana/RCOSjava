@@ -236,14 +236,38 @@ public class MemoryManagerAnimator extends RCOSAnimator
   {
     register(MESSENGING_ID, RCOS.getAnimatorPostOffice());
 
-//    panel = (MemoryManagerPanel) RCOS.getMemoryManagerAnimator().getPanel();
-//
-//    int numberMemoryStates = is.readInt();
-//    memoryState = new MemoryState[numberMemoryStates];
-//
-//    for (int index = 0; index < numberMemoryStates; index++)
-//    {
-//      memoryState[index] = (MemoryState) is.readObject();
-//    }
+    panel = (MemoryManagerPanel) RCOS.getMemoryManagerAnimator().getPanel();
+
+    int numberMemoryStates = is.readInt();
+    memoryState = new MemoryState[numberMemoryStates];
+
+    for (int index = 0; index < numberMemoryStates; index++)
+    {
+      memoryState[index] = (MemoryState) is.readObject();
+
+      // Set the current values in the panel.
+      ArrayList list = new ArrayList();
+      list.add(new Integer(index));
+
+      // If not allocated set unallocated
+      if (!memoryState[index].isAllocated())
+      {
+        panel.unallocatedPages(list);
+      }
+      else
+      {
+        // If allocated set PID and set if being read or written.
+        panel.allocatedPages(list);
+        panel.setPID(memoryState[index].getPID(), list);
+        if (memoryState[index].isBeingRead())
+        {
+          panel.readingMemory(list);
+        }
+        else if (memoryState[index].isBeingWritten())
+        {
+          panel.writingMemory(list);
+        }
+      }
+    }
   }
 }
