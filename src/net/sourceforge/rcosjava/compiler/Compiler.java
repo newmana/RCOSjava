@@ -47,7 +47,7 @@ public class Compiler extends DepthFirstAdapter
     }
     catch(Exception e)
     {
-      System.out.println(e);
+      e.printStackTrace();
     }
   }
 
@@ -56,7 +56,9 @@ public class Compiler extends DepthFirstAdapter
   private int variableStackPosition = 0;
   private int basePosition = 0;
   private int functionPosition = 0;
-  private Hashtable table = new Hashtable();
+  private Hashtable globalVarsTable = new Hashtable();
+  private Hashtable localVarsTable = new Hashtable();
+  boolean isInFunction = false;
 
   public Compiler()
   {
@@ -103,13 +105,11 @@ public class Compiler extends DepthFirstAdapter
       node.getTypeSpecifier() instanceof ASignedShortTypeSpecifier ||
       node.getTypeSpecifier() instanceof AUnsignedShortTypeSpecifier)
     {
-      System.out.println("Is a 16 bit int: " + node.getDeclarator());
       allocateVariable(node.getDeclarator().toString(), 2,
         getArraySize(node.getDeclarator().toString()));
     }
     else if (node.getTypeSpecifier() instanceof ACharTypeSpecifier)
     {
-      System.out.println("Is a 8 bit char: " + node.getDeclarator());
       allocateVariable(node.getDeclarator().toString(), 1,
         getArraySize(node.getDeclarator().toString()));
     }
@@ -118,6 +118,68 @@ public class Compiler extends DepthFirstAdapter
       //Do some sort of error processing.
       System.out.println("Variable type not handled!");
     }
+  }
+
+  /**
+   * If statement
+   */
+  public void inAIfStatement(AIfStatement node)
+  {
+    System.out.println("If stmt: " + node.getCompoundStatement());
+
+    PConditionalExpression expr = node.getConditionalExpression();
+    System.out.println("expr: " + expr);
+  }
+
+  public void caseAGteqRelop(AGteqRelop node)
+  {
+    System.out.println("GTE Node: " + node);
+    writePCode(new Instruction(Instruction.OPCODE_OPR, (byte) 0,
+      Instruction.OPERATOR_GE));
+  }
+
+  public void caseAGtRelop(AGtRelop node)
+  {
+    System.out.println("GT Node: " + node);
+    writePCode(new Instruction(Instruction.OPCODE_OPR, (byte) 0,
+      Instruction.OPERATOR_GT));
+  }
+
+  /**
+   * Simple assignment statements
+   */
+  public void inABasicStmtStatement(ABasicStmtStatement node)
+  {
+    String basicStatement = node.getBasicStatement().toString();
+    int equalLoc = basicStatement.indexOf("=");
+    String varName = basicStatement.substring(0,equalLoc);
+    String varValue = basicStatement.substring(equalLoc+1,
+      basicStatement.length()).trim();
+    System.out.println("Varname: " + varName + " at: " + getVariableLocation(varName));
+
+    // Do string storage
+    if ((varValue.indexOf("'") > 0) || (varValue.indexOf("\"") > 0))
+    {
+      int varStrLength = varValue.length()-2;
+      //emit each element in the string
+      for (int count = 0; count < varStrLength; count++)
+      {
+        writePCode(new Instruction(Instruction.OPCODE_LIT, (byte) 0,
+          (short) varValue.charAt(count)));
+      }
+    }
+    // Do int storage
+    else
+    {
+      System.out.println("[" + varValue + "]");
+      short varIntValue = Short.parseShort(varValue);
+      writePCode(new Instruction(Instruction.OPCODE_LIT, (byte) 0,
+        varIntValue));
+    }
+
+    //emit store a required pos
+    writePCode(new Instruction(Instruction.OPCODE_STO, (byte) 0,
+      (short) getVariableLocation(varName)));
   }
 
   /**
@@ -139,13 +201,38 @@ public class Compiler extends DepthFirstAdapter
 
   /**
    * Allocate the variables.  Used for initial jump once compiled and for
-   * referral later on.
+   * referral later on.  Store for both global and local variables.  Locals will
+   * be cleaned up by deallocateVariable.
    */
   private void allocateVariable(String name, int noBits, int size)
   {
-    System.out.println("Allocating to: " + name + " position:" + variableStackPosition);
-    table.put(name.toUpperCase(), new Integer(variableStackPosition));
+    name = name.trim();
+    if (isInFunction)
+    {
+      System.out.println("Allocating local: " + name + " position:" + variableStackPosition);
+      localVarsTable.put(name, new Integer(variableStackPosition));
+    }
+    else
+    {
+      System.out.println("Allocating global: " + name + " position:" + variableStackPosition);
+      globalVarsTable.put(name, new Integer(variableStackPosition));
+    }
     variableStackPosition += noBits * size;
+  }
+
+  private int getVariableLocation(String name)
+  {
+    int location = -1;
+    name = name.trim();
+    if (localVarsTable.containsKey(name))
+    {
+      location = ((Integer) localVarsTable.get(name)).intValue();
+    }
+    else if (globalVarsTable.containsKey(name))
+    {
+      location = ((Integer) globalVarsTable.get(name)).intValue();
+    }
+    return location;
   }
 
   /**
@@ -153,7 +240,8 @@ public class Compiler extends DepthFirstAdapter
    */
   public void inAFunctionBody(AFunctionBody node)
   {
-    System.out.println("In main body!");
+    System.out.println("In a function!");
+    isInFunction = true;
   }
 
   /**
@@ -161,6 +249,13 @@ public class Compiler extends DepthFirstAdapter
    */
   public void outAFunctionBody(AFunctionBody node)
   {
-    System.out.println("Out a main body!");
+    System.out.println("Out of function!");
+    isInFunction = false;
+    localVarsTable = new Hashtable();
+  }
+
+  public void writePCode(Instruction newInstruction)
+  {
+    System.out.println("Instr: " + newInstruction);
   }
 }
