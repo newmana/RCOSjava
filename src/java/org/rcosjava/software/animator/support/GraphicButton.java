@@ -8,6 +8,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.image.*;
 import java.io.*;
 import java.util.*;
+import javax.swing.*;
 
 /**
  * A graphical button class.
@@ -16,22 +17,25 @@ import java.util.*;
  * @created 22nd July 2002
  * @version 1.00 $Date$
  */
-public class GraphicButton extends Canvas
+public class GraphicButton extends JComponent
 {
-
-//buttonPic is the image.
-//onButton and pressButton define when the mouse is over the button area and
-//when someone presses the mouse on that area respectively.
-//The button is the name or arguement of the object - to uniquely identify
-//it.  bDepress text indicates if the text on the button moves.
-
   /**
-   * The images for greyed out, up and down.
+   * The image for greyed out button
    */
-  private Image greyPic, buttonUpPic, buttonDownPic;
+  private Image greyPic;
 
   /**
-   * Text to write on the image
+   * The image for the up button.
+   */
+  private Image buttonUpPic;
+
+  /**
+   * The image for the down button.
+   */
+  private Image buttonDownPic;
+
+  /**
+   * Text to write on the image/
    */
   private String buttonText;
 
@@ -46,9 +50,19 @@ public class GraphicButton extends Canvas
   private boolean pressedButton;
 
   /**
-   * Dimensions of image.
+   * Width of image.
    */
-  private int imageWidth, imageHeight;
+  private int imageWidth;
+
+  /**
+   * Height of image.
+   */
+  private int imageHeight;
+
+  /**
+   * The dimensions of the button used for setting minimum and preferred size.
+   */
+  private Dimension totalSize;
 
   /**
    * The font to display the name of the button.
@@ -56,172 +70,150 @@ public class GraphicButton extends Canvas
   private Font textFont;
 
   /**
-   * Description of the Field
+   * Colour of the text on the button.
    */
-  private Color cTextColour;
+  private Color textColour;
 
   /**
-   * Description of the Field
+   * Whether to move the text when the button is pressed.
    */
-  private boolean bDepressText;
+  private boolean depressText;
 
   /**
-   * Description of the Field
+   * Whether the button is greyed out.
    */
-  private boolean bGreyedOut = false;
+  private boolean greyedOut = false;
 
   /**
-   * Description of the Field
+   * Whether to display the name or the text on the button.
    */
-  private boolean bShowText;
+  private boolean showText;
 
   /**
-   * Description of the Field
+   * Filter to apply over the image (produces greyed out image).
    */
   private ImageFilter filter;
+
   /**
-   * Description of the Field
+   * Produces a new image (greyed out image).
    */
   private ImageProducer producer;
+
   /**
-   * Description of the Field
+   * Graphic button's mouse listener.
    */
   private GraphicButtonListener gblMouse = null;
+
   /**
-   * Description of the Field
+   * Graphic button's actioner listener.
    */
   private ActionListener actionListener = null;
 
-  /*
-  This is the basic constructor.  @param iPic is the image that is displayed
-  on the background on the button.  @param sButton is the the name of the
-  event to be generated and is also the label on the button.
-*/
   /**
-   * Constructor for the GraphicButton object
-   *
-   * @param iPic Description of Parameter
-   * @param sButton Description of Parameter
+   * More explicit way to setup default values of the graphic button rather
+   * than in the declarators.
    */
-  public GraphicButton(Image iPic, String sButton)
+  private GraphicButton()
   {
     super();
     overButton = false;
     pressedButton = false;
-    buttonUpPic = iPic;
-    buttonDownPic = iPic;
-    buttonText = sButton;
-    cTextColour = Color.yellow;
+    textColour = Color.yellow;
     textFont = new Font("TimesRoman", Font.PLAIN, 12);
-    imageWidth = buttonUpPic.getWidth(getParent());
-    imageHeight = buttonUpPic.getHeight(getParent());
-    bShowText = true;
-    setSize(imageWidth, imageHeight);
-    repaint();
-  }
-
-  /*
-  This allows a greater control over what is generated.  @param iPic is the
-  image that is displayed on the background on the button.  @param sButton
-  is the the name of the event to be generated and is also the label on
-  the button.  @param fFont is the type of Font to be used.  @cColour
-  sets the colour of the text to be displayed.
-*/
-  /**
-   * Constructor for the GraphicButton object
-   *
-   * @param iPicUp Description of Parameter
-   * @param iPicDown Description of Parameter
-   * @param sButton Description of Parameter
-   * @param fFont Description of Parameter
-   * @param cColour Description of Parameter
-   * @param bDepress Description of Parameter
-   */
-  public GraphicButton(Image iPicUp, Image iPicDown, String sButton,
-      Font fFont, Color cColour, boolean bDepress)
-  {
-    super();
-    overButton = false;
-    pressedButton = false;
-    buttonUpPic = iPicUp;
-    buttonDownPic = iPicDown;
-    buttonText = sButton;
-    textFont = fFont;
-    cTextColour = cColour;
-    imageWidth = buttonUpPic.getWidth(getParent());
-    imageHeight = buttonUpPic.getHeight(getParent());
-    bDepressText = bDepress;
-    bShowText = true;
-    setSize(imageWidth, imageHeight);
-    repaint();
+    showText = true;
   }
 
   /**
-   * Constructor for the GraphicButton object
+   * This is the basic constructor.  Shows the text of the button and sets the
+   * up and down images to the same.
    *
-   * @param iPicUp Description of Parameter
-   * @param iPicDown Description of Parameter
-   * @param sButton Description of Parameter
-   * @param fFont Description of Parameter
-   * @param cColour Description of Parameter
-   * @param bDepress Description of Parameter
-   * @param bDisplayText Description of Parameter
+   * @param pic is the image that is displayed on the background on the button.
+   * @param buttonText is the the name of the event to be generated and is also
+   *   the label on the button.
    */
-  public GraphicButton(Image iPicUp, Image iPicDown, String sButton,
-      Font fFont, Color cColour, boolean bDepress, boolean bDisplayText)
+  public GraphicButton(Image newPic, String newButtonText)
   {
-    super();
-    overButton = false;
-    pressedButton = false;
-    buttonUpPic = iPicUp;
-    buttonDownPic = iPicDown;
-    buttonText = sButton;
-    textFont = fFont;
-    cTextColour = cColour;
+    this();
+    buttonUpPic = newPic;
+    buttonDownPic = newPic;
+    buttonText = newButtonText;
     imageWidth = buttonUpPic.getWidth(getParent());
     imageHeight = buttonUpPic.getHeight(getParent());
-    bDepressText = bDepress;
-    bShowText = bDisplayText;
+    totalSize = new Dimension(imageWidth, imageHeight);
     setSize(imageWidth, imageHeight);
-    repaint();
   }
 
   /**
-   * Constructor for the GraphicButton object
+   * Sets the up and down images, name of the button, the font size, displays
+   * the name of the button and sets whether to move the text on click.
    *
-   * @param iPicUp Description of Parameter
-   * @param iPicDown Description of Parameter
-   * @param sButton Description of Parameter
-   * @param fFont Description of Parameter
-   * @param cColour Description of Parameter
-   * @param bDepress Description of Parameter
-   * @param bDisplayText Description of Parameter
-   * @param bGreyed Description of Parameter
+   * @param newButtonUpPic Picture of button to display when up (normal).
+   * @param newButtonDownPic Picture of button to display when down (pressed).
+   * @param newButtonText Name of the button and used to display on button if
+   *   set.
+   * @param newTextFont Font to use on the text of button.
+   * @param newTextColour Text colour of the text on the button.
+   * @param newDepressText Depress the text on the button when pressed.
    */
-  public GraphicButton(Image iPicUp, Image iPicDown, String sButton,
-      Font fFont, Color cColour, boolean bDepress, boolean bDisplayText,
-      boolean bGreyed)
+  public GraphicButton(Image newButtonUpPic, Image newButtonDownPic,
+      String newButtonText, Font newTextFont, Color newTextColour,
+      boolean newDepressText)
   {
-    super();
-    overButton = false;
-    pressedButton = false;
-    buttonUpPic = iPicUp;
-    buttonDownPic = iPicDown;
-    buttonText = sButton;
-    textFont = fFont;
-    cTextColour = cColour;
-    imageWidth = buttonUpPic.getWidth(getParent());
-    imageHeight = buttonUpPic.getHeight(getParent());
-    bDepressText = bDepress;
-    bShowText = bDisplayText;
-    bGreyedOut = bGreyed;
+    this(newButtonUpPic, newButtonText);
+    buttonDownPic = newButtonDownPic;
+    textFont = newTextFont;
+    textColour = newTextColour;
+    depressText = newDepressText;
+  }
 
+  /**
+   * Sets the up and down images, name of the button, the font size, whether to
+   * display the name of the button and sets whether to move the text on click.
+   *
+   * @param newButtonUpPic Picture of button to display when up (normal).
+   * @param newButtonDownPic Picture of button to display when down (pressed).
+   * @param newButtonText Name of the button and used to display on button if
+   *   set.
+   * @param newTextFont Font to use on the text of button.
+   * @param newTextColour Text colour of the text on the button.
+   * @param newDepressText Depress the text on the button when pressed.
+   * @param newShowText Display the name of the button.
+   */
+  public GraphicButton(Image newButtonUpPic, Image newButtonDownPic,
+      String newButtonText, Font newTextFont, Color newTextColour,
+      boolean newDepressText, boolean newShowText)
+  {
+    this(newButtonUpPic, newButtonDownPic, newButtonText, newTextFont,
+      newTextColour, newDepressText);
+    showText = newShowText;
+  }
+
+  /**
+   * Sets the up and down images, name of the button, the font size, whether to
+   * display the name of the button and sets whether to move the text on click.
+   * Also, creates a greyed out image for when it's disabled.
+   *
+   * @param newButtonUpPic Picture of button to display when up (normal).
+   * @param newButtonDownPic Picture of button to display when down (pressed).
+   * @param newButtonText Name of the button and used to display on button
+   *   if set.
+   * @param newTextFont Font to use on the text of button.
+   * @param newTextColour Text colour of the text on the button.
+   * @param newDepressText Depress the text on the button when pressed.
+   * @param newShowText Display the name of the button.
+   * @param newGreyedOut Whether the button is disabled and greyed out.
+   */
+  public GraphicButton(Image newButtonUpPic, Image newButtonDownPic,
+      String newButtonText, Font newTextFont, Color newTextColour,
+      boolean newDepressText, boolean newShowText, boolean newGreyedOut)
+  {
+    this(newButtonUpPic, newButtonDownPic, newButtonText, newTextFont,
+      newTextColour, newDepressText, newShowText);
+    greyedOut = newGreyedOut;
     ImageFilter filter = new GreyOutImage();
-
     producer = new FilteredImageSource(buttonUpPic.getSource(), filter);
     greyPic = this.createImage(producer);
     setSize(imageWidth, imageHeight);
-    repaint();
   }
 
   /**
@@ -241,7 +233,7 @@ public class GraphicButton extends Canvas
    */
   public Dimension getPreferredSize()
   {
-    return new Dimension(imageWidth, imageHeight);
+    return totalSize;
   }
 
   /**
@@ -256,16 +248,6 @@ public class GraphicButton extends Canvas
       addMouseListener(gblMouse);
     }
     repaint();
-  }
-
-  /**
-   * Description of the Method
-   *
-   * @param g Description of Parameter
-   */
-  public void paint(Graphics g)
-  {
-    update(g);
   }
 
   /**
@@ -289,9 +271,9 @@ public class GraphicButton extends Canvas
   }
 
   /**
-   * Description of the Method
+   * Returns the name of the button.
    *
-   * @return Description of the Returned Value
+   * @return the name of the button.
    */
   public String toString()
   {
@@ -299,30 +281,31 @@ public class GraphicButton extends Canvas
   }
 
   /**
-   * Description of the Method
+   * Toggles the button from being greyed and disabled or being normal and
+   * enabled.
    */
   public void toggleGrey()
   {
-    bGreyedOut = !bGreyedOut;
+    greyedOut = !greyedOut;
   }
 
   /**
-   * Description of the Method
+   * Paints the graphical button.
    *
-   * @param g Description of Parameter
+   * @param g graphics object to paint to.
    */
-  public void update(Graphics g)
+  public void paintComponent(Graphics g)
   {
+    super.paintComponent(g);
     FontMetrics fm = g.getFontMetrics();
 
     //Using image width and height and text size
     //center text (the program gets the font from
     //the current Graphics context).
+    int x = (imageWidth / 2) - (fm.stringWidth(buttonText) / 2);
+    int y = (imageHeight / 2) + (fm.getAscent() / 2);
 
-    int iX = (imageWidth / 2) - (fm.stringWidth(buttonText) / 2);
-    int iY = (imageHeight / 2) + (fm.getAscent() / 2);
-
-    if ((bGreyedOut) && (greyPic != null))
+    if ((greyedOut) && (greyPic != null))
     {
       g.drawImage(greyPic, 0, 0, this);
     }
@@ -341,24 +324,24 @@ public class GraphicButton extends Canvas
     //When drawing text to the screen the x,y co-ordinate
     //is of the baseline of the text.
 
-    if (bShowText)
+    if (showText)
     {
-      if (bGreyedOut)
+      if (greyedOut)
       {
         g.setColor(Color.lightGray);
       }
       else
       {
-        g.setColor(cTextColour);
+        g.setColor(textColour);
       }
       g.setFont(textFont);
-      if (bDepressText && pressedButton)
+      if (depressText && pressedButton)
       {
-        g.drawString(buttonText, iX + 1, iY + 1);
+        g.drawString(buttonText, x + 1, y + 1);
       }
       else
       {
-        g.drawString(buttonText, iX, iY);
+        g.drawString(buttonText, x, y);
       }
     }
   }
@@ -424,28 +407,14 @@ public class GraphicButton extends Canvas
   }
 
   /**
-   * Description of the Method
-   *
-   * @param e Description of Parameter
-   */
-  public void processEvent(AWTEvent e)
-  {
-    repaint();
-    super.processEvent(e);
-  }
-
-  /**
-   * Description of the Class
-   *
-   * @author administrator
-   * @created 28 April 2002
+   * Listens for mouse events on the graphic button.
    */
   class GraphicButtonListener extends MouseAdapter
   {
     /**
-     * Description of the Method
+     * Mouse enters button.
      *
-     * @param evt Description of Parameter
+     * @param evt mouse event generated.
      */
     public void mouseEntered(java.awt.event.MouseEvent evt)
     {
@@ -453,9 +422,9 @@ public class GraphicButton extends Canvas
     }
 
     /**
-     * Description of the Method
+     * Mouse exits button
      *
-     * @param e Description of Parameter
+     * @param e mouse event generated.
      */
     public void mouseExited(java.awt.event.MouseEvent e)
     {
@@ -463,9 +432,9 @@ public class GraphicButton extends Canvas
     }
 
     /**
-     * Description of the Method
+     * Button pressed.
      *
-     * @param e Description of Parameter
+     * @param e mouse event generated.
      */
     public void mousePressed(java.awt.event.MouseEvent e)
     {
@@ -474,13 +443,13 @@ public class GraphicButton extends Canvas
     }
 
     /**
-     * Description of the Method
+     * Button released.
      *
-     * @param e Description of Parameter
+     * @param e mouse event generated.
      */
     public void mouseReleased(java.awt.event.MouseEvent e)
     {
-      if (pressedButton && overButton && bDepressText)
+      if (pressedButton && overButton && depressText)
       {
         dispatchEvent(new ActionEvent(buttonUpPic, Event.ACTION_EVENT, buttonText));
       }

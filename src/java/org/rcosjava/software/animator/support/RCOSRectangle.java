@@ -1,6 +1,7 @@
 package org.rcosjava.software.animator.support;
 
 import java.awt.*;
+import javax.swing.*;
 
 /**
  * A simple filled rectangle with a border colour.
@@ -9,7 +10,7 @@ import java.awt.*;
  * @created 1st July 1997
  * @version 1.00 $Date$
  */
-public class RCOSRectangle extends Canvas
+public class RCOSRectangle extends JComponent
 {
   /**
    * Background colour inside the rectangle.
@@ -25,6 +26,11 @@ public class RCOSRectangle extends Canvas
    * Coordinates of the rectangle.
    */
   private int top, left, bottom, right;
+
+  /**
+   * The dimension of the box.
+   */
+  private Dimension totalSize;
 
   /**
    * Constructor for the RCOSRectangle object
@@ -44,6 +50,7 @@ public class RCOSRectangle extends Canvas
     left = newLeft;
     bottom = newBottom;
     right = newRight;
+    totalSize = new Dimension(Math.abs(left - right), Math.abs(top - bottom));
     boxColour = newBoxColour;
     borderColour = newBorderColour;
     repaint();
@@ -66,35 +73,17 @@ public class RCOSRectangle extends Canvas
    */
   public Dimension getPreferredSize()
   {
-    return new Dimension(Math.abs(top - bottom), Math.abs(left - right));
+    return totalSize;
   }
 
   /**
-   * Adds a feature to the Notify attribute of the RCOSRectangle object
-   */
-  public void addNotify()
-  {
-    repaint();
-    super.addNotify();
-  }
-
-  /**
-   * Paint the component.
+   * Paints the rectangle with a border.
    *
-   * @param g graphics object.
+   * @param g graphics object to paint to.
    */
-  public void paint(Graphics g)
+  public void paintComponent(Graphics g)
   {
-    update(g);
-  }
-
-  /**
-   * Update the component.
-   *
-   * @param g graphics object.
-   */
-  public void update(Graphics g)
-  {
+    super.paintComponent(g);
     g.setColor(boxColour);
     g.fillRect(top, left, bottom, right);
     g.setColor(borderColour);
