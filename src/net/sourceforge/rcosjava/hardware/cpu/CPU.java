@@ -96,6 +96,14 @@ public class CPU
     interruptsEnabled = true;
   }
 
+  public boolean setProcessFinished()
+  {
+    Interrupt aInt = new Interrupt(-1, "ProcessFinished");
+    generateInterrupt(aInt);
+    processFinished = false;
+    return false;
+  }
+
   /**
    * The new CPU context to set the CPU.  Currently, there is no protection
    * or error checking.  The kernel is assumed to know what it's doing.
@@ -223,10 +231,7 @@ public class CPU
     //the last execution cycle.
     if (processFinished)
     {
-      Interrupt aInt = new Interrupt(-1, "ProcessFinished");
-      generateInterrupt(aInt);
-      continueExecuting = false;
-      processFinished = false;
+      continueExecuting = setProcessFinished();
     }
 
     handleInterrupts();
