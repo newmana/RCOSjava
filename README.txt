@@ -85,6 +85,7 @@ After compilation the directories "dist" and "javadoc" will have
 been generated.  Follow the instructions above, after compilation, to run
 it.
 
+To recompile the SableCC grammar use the "sablecc" target.
 
 ** Programs in RCOSjava **
 ==========================
