@@ -5,6 +5,10 @@ import java.awt.*;
 import javax.swing.ImageIcon;
 import java.net.*;
 import java.util.*;
+import org.rcosjava.messaging.messages.universal.CreateNewRecordingMessage;
+import org.rcosjava.messaging.messages.universal.PlayNextMessage;
+import org.rcosjava.messaging.messages.universal.SetRecordingNameMessage;
+import org.rcosjava.messaging.messages.universal.ToggleRecordingMessage;
 import org.rcosjava.messaging.messages.universal.UpdateList;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.messaging.postoffices.universal.UniversalMessagePlayer;
@@ -52,11 +56,6 @@ public class MultimediaAnimator extends RCOSAnimator
   /**
    * Description of the Field
    */
-  private boolean recording, playing;
-
-  /**
-   * Description of the Field
-   */
   private String currentFile;
 
   /**
@@ -83,8 +82,6 @@ public class MultimediaAnimator extends RCOSAnimator
     mmRecordFrame = new MultimediaRecordFrame(x, y, pmImages, this);
     recorder = newRecorder;
     player = newPlayer;
-    recording = false;
-    playing = false;
   }
 
   /**
@@ -98,26 +95,6 @@ public class MultimediaAnimator extends RCOSAnimator
     mmRecordFrame.setupLayout(c);
   }
 
-  /**
-   * Sets the CurrentFile attribute of the MultimediaAnimator object
-   *
-   * @param newFile The new CurrentFile value
-   */
-  public void setCurrentFile(String newFile)
-  {
-    currentFile = newFile;
-  }
-
-  /**
-   * Gets the Recording attribute of the MultimediaAnimator object
-   *
-   * @return The Recording value
-   */
-  public boolean getRecording()
-  {
-    return this.recording;
-  }
-
   public RCOSPanel getPanel()
   {
     return null;
@@ -128,7 +105,8 @@ public class MultimediaAnimator extends RCOSAnimator
    */
   public void disposeFrame()
   {
-//    mmFrame.dispose();
+    mmRecordFrame.dispose();
+    mmPlayFrame.dispose();
   }
 
   /**
@@ -170,7 +148,14 @@ public class MultimediaAnimator extends RCOSAnimator
    */
   public void updateDirectoryList(FIFOQueue data)
   {
-//    mmFrame.updateDirectoryList(data);
+    if (mmRecordFrame.isVisible())
+    {
+      mmRecordFrame.updateDirectoryList(data);
+    }
+    else
+    {
+      mmPlayFrame.updateDirectoryList(data);
+    }
   }
 
   /**
@@ -182,41 +167,45 @@ public class MultimediaAnimator extends RCOSAnimator
   public void updateList()
   {
     UpdateList newMsg = new UpdateList(this, java.io.File.separator, 2);
-
     sendMessage(newMsg);
   }
 
   /**
-   * Description of the Method
+   * Sets the name of the current recording.
+   *
+   * @param newRecordingName the name of the recording to set.
    */
-  public void createDirectory()
+  public void setRecordingName(String newRecordingName)
   {
-    recorder.createDirectory(java.io.File.separatorChar + currentFile);
+    SetRecordingNameMessage msg = new SetRecordingNameMessage(this,
+        newRecordingName);
+    sendMessage(msg);
   }
 
   /**
-   * Description of the Method
+   * Creates a new recording.  Must set the recording name first.
    */
-  public void recordToggle()
+  public void createNewRecording()
   {
-    if (!recording)
-    {
-      this.recorder.recordOn(currentFile);
-      recording = true;
-    }
-    else
-    {
-      this.recorder.recordOff();
-      recording = false;
-    }
+    CreateNewRecordingMessage msg = new CreateNewRecordingMessage(this);
+    sendMessage(msg);
   }
 
-  //Basic step for now
   /**
-   * Description of the Method
+   * Turn recording of messages on or off.
+   */
+  public void toggleRecording()
+  {
+    ToggleRecordingMessage msg = new ToggleRecordingMessage(this);
+    sendMessage(msg);
+  }
+
+  /**
+   * Playback a single recorded message.
    */
   public void playStep()
   {
-    this.player.sendNextMessage(currentFile);
+    PlayNextMessage msg = new PlayNextMessage(this);
+    sendMessage(msg);
   }
 }

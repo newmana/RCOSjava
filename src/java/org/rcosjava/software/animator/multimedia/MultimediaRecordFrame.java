@@ -33,7 +33,7 @@ public class MultimediaRecordFrame extends RCOSFrame
   /**
    * Description of the Field
    */
-  private MultimediaAnimator myProgramManager;
+  private MultimediaAnimator myMultimediaAnimator;
 
   /**
    * Filename and directories that's currently selected.
@@ -81,10 +81,10 @@ public class MultimediaRecordFrame extends RCOSFrame
    * @param x Description of Parameter
    * @param y Description of Parameter
    * @param pmImages Description of Parameter
-   * @param thisProgramManager Description of Parameter
+   * @param newMultimediaAnimator Description of Parameter
    */
   public MultimediaRecordFrame(int x, int y, ImageIcon[] images,
-      MultimediaAnimator thisProgramManager)
+      MultimediaAnimator newMultimediaAnimator)
   {
     super();
     setTitle("Tour Recording");
@@ -96,7 +96,7 @@ public class MultimediaRecordFrame extends RCOSFrame
         myImages[index] = images[index].getImage();
       }
     }
-    myProgramManager = thisProgramManager;
+    myMultimediaAnimator = newMultimediaAnimator;
     setSize(x, y);
   }
 
@@ -111,8 +111,8 @@ public class MultimediaRecordFrame extends RCOSFrame
     super.setVisible(visibility);
     if (visibility)
     {
-      myProgramManager.setCurrentFile("");
-      myProgramManager.updateList();
+      myMultimediaAnimator.setRecordingName("");
+      myMultimediaAnimator.updateList();
     }
   }
 
@@ -186,7 +186,6 @@ public class MultimediaRecordFrame extends RCOSFrame
     directoryListPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     gridBag.setConstraints(directoryListPane, constraints);
     mainPanel.add(directoryListPane);
-    directoryListBox.addMouseListener(new DirectoryListBoxListener());
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
@@ -202,7 +201,6 @@ public class MultimediaRecordFrame extends RCOSFrame
     fileListPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     gridBag.setConstraints(fileListPane, constraints);
     mainPanel.add(fileListPane);
-    fileListBox.addMouseListener(new FileListBoxListener());
 
     tmpLabel = new JLabel("Filename: ");
     tmpLabel.setBackground(defaultBgColour);
@@ -217,21 +215,6 @@ public class MultimediaRecordFrame extends RCOSFrame
     constraints.anchor = GridBagConstraints.CENTER;
     gridBag.setConstraints(fileNamePanel, constraints);
     mainPanel.add(fileNamePanel);
-
-    startTerminalCheckbox.setSelected(startTerminal);
-    terminOptionPanel.add(startTerminalCheckbox);
-    startTerminalCheckbox.addItemListener(new StartTerminalListener());
-    startTerminalCheckbox.setBackground(defaultBgColour);
-    startTerminalCheckbox.setForeground(defaultFgColour);
-    tmpLabel = new JLabel("Automatically start terminal.");
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(defaultFgColour);
-    terminOptionPanel.add(tmpLabel);
-
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
-    constraints.anchor = GridBagConstraints.WEST;
-    gridBag.setConstraints(terminOptionPanel, constraints);
-    mainPanel.add(terminOptionPanel);
 
     JButton openButton = new JButton("Open");
 
@@ -288,105 +271,12 @@ public class MultimediaRecordFrame extends RCOSFrame
    */
   public class OkayButtonListener extends MouseAdapter
   {
-    /**
-     * Description of the Method
-     *
-     * @param e Description of Parameter
-     */
     public void mouseClicked(MouseEvent e)
     {
+      myMultimediaAnimator.setRecordingName(fileNameTextField.getText());
+      myMultimediaAnimator.createNewRecording();
+      myMultimediaAnimator.toggleRecording();
       setVisible(false);
-      fileNameTextField.setText("");
-      fileListBox.clearSelection();
-    }
-  }
-
-  /**
-   * Description of the Class
-   *
-   * @author administrator
-   * @created 28 April 2002
-   */
-  class StartTerminalListener implements ItemListener
-  {
-    /**
-     * Description of the Method
-     *
-     * @param e Description of Parameter
-     */
-    public void itemStateChanged(ItemEvent e)
-    {
-      startTerminal = e.getStateChange() == ItemEvent.SELECTED;
-    }
-  }
-
-  /**
-   * Description of the Class
-   *
-   * @author administrator
-   * @created 28 April 2002
-   */
-  class FileListBoxListener extends MouseAdapter
-  {
-    /**
-     * Description of the Method
-     *
-     * @param e Description of Parameter
-     */
-    public void mouseClicked(MouseEvent e)
-    {
-      switch (e.getClickCount())
-      {
-        case 1:
-          //File name has been selected.
-          myProgramManager.setCurrentFile((String) fileListModel.getElementAt(
-              fileListBox.getSelectedIndex()));
-          break;
-        case 2:
-          //File has been double clicked on.
-          myProgramManager.setCurrentFile((String) fileListModel.getElementAt(
-              fileListBox.getSelectedIndex()));
-          fileNameTextField.setText("");
-          fileListBox.clearSelection();
-          setVisible(false);
-          break;
-      }
-    }
-  }
-
-  /**
-   * Description of the Class
-   *
-   * @author administrator
-   * @created 28 April 2002
-   */
-  class DirectoryListBoxListener extends MouseAdapter
-  {
-    /**
-     * Description of the Method
-     *
-     * @param e Description of Parameter
-     */
-    public void mouseClicked(MouseEvent e)
-    {
-      if (e.getClickCount() == 2)
-      {
-        //A double click was detected.
-
-        String selected = (String) directoryListModel.getElementAt(
-            directoryListBox.getSelectedIndex());
-
-        if (selected.compareTo(".") == 0)
-        {
-        }
-        else if (selected.compareTo(".") == 0)
-        {
-        }
-        else
-        {
-          // Go into directory
-        }
-      }
     }
   }
 }
