@@ -51,8 +51,6 @@ public class AboutFrame extends RCOSFrame
    */
   public void setupLayout(Component c)
   {
-    super.setupLayout(c);
-
     Panel pMain = new Panel();
     Panel panelClose = new Panel();
     GraphicButton tmpGButton;
@@ -158,8 +156,8 @@ public class AboutFrame extends RCOSFrame
     panelClose.add(tmpButton);
     tmpButton.addMouseListener(new RCOSFrame.CloseAnimator());
 
-    add("Center", pMain);
-    add("South", panelClose);
+    getContentPane().add("Center", pMain);
+    getContentPane().add("South", panelClose);
 
     repaint();
   }
