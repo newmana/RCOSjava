@@ -450,7 +450,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 
     pcmAnimator = new ProcessManagerAnimator(animatorPostOffice, this);
 
-    mmAnimator = new MultimediaAnimator(animatorPostOffice, 250, 250, recorder,
+    mmAnimator = new MultimediaAnimator(animatorPostOffice, 400, 300, recorder,
         player);
 
     aboutAnimator = new AboutAnimator(animatorPostOffice, 300, 300);
@@ -613,13 +613,13 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 
     // Add animators
     list.add(tmAnimator);
-    list.add(psAnimator);
-    list.add(memoryAnimator);
-    list.add(ipcAnimator);
-    list.add(cpuAnimator);
-    list.add(pmAnimator);
-    list.add(pcmAnimator);
-    list.add(mmAnimator);
+//    list.add(psAnimator);
+//    list.add(memoryAnimator);
+//    list.add(ipcAnimator);
+//    list.add(cpuAnimator);
+//    list.add(pmAnimator);
+//    list.add(pcmAnimator);
+//    list.add(mmAnimator);
 
     // Add operating system
     list.add(theKernel);
@@ -642,21 +642,21 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   {
     // Load animators.
     tmAnimator = (TerminalManagerAnimator) rcosComponents.get(0);
-    psAnimator = (ProcessSchedulerAnimator) rcosComponents.get(1);
-    memoryAnimator = (MemoryManagerAnimator) rcosComponents.get(2);
-    ipcAnimator = (IPCManagerAnimator) rcosComponents.get(3);
-    cpuAnimator = (CPUAnimator) rcosComponents.get(4);
-    pmAnimator = (ProgramManagerAnimator) rcosComponents.get(5);
-    pcmAnimator = (ProcessManagerAnimator) rcosComponents.get(6);
-    mmAnimator = (MultimediaAnimator) rcosComponents.get(7);
+//    psAnimator = (ProcessSchedulerAnimator) rcosComponents.get(1);
+//    memoryAnimator = (MemoryManagerAnimator) rcosComponents.get(2);
+//    ipcAnimator = (IPCManagerAnimator) rcosComponents.get(3);
+//    cpuAnimator = (CPUAnimator) rcosComponents.get(4);
+//    pmAnimator = (ProgramManagerAnimator) rcosComponents.get(5);
+//    pcmAnimator = (ProcessManagerAnimator) rcosComponents.get(6);
+//    mmAnimator = (MultimediaAnimator) rcosComponents.get(7);
 
     // Load OS.
-    theKernel = (Kernel) rcosComponents.get(8);
-    theTerminalManager = (TerminalManager) rcosComponents.get(9);
-    theProcessScheduler = (ProcessScheduler) rcosComponents.get(10);
-    theIPC = (IPC) rcosComponents.get(11);
-    theMemoryManager = (MemoryManager) rcosComponents.get(12);
-    theProgramManager = (ProgramManager) rcosComponents.get(13);
+//    theKernel = (Kernel) rcosComponents.get(8);
+//    theTerminalManager = (TerminalManager) rcosComponents.get(9);
+//    theProcessScheduler = (ProcessScheduler) rcosComponents.get(10);
+//    theIPC = (IPC) rcosComponents.get(11);
+//    theMemoryManager = (MemoryManager) rcosComponents.get(12);
+//    theProgramManager = (ProgramManager) rcosComponents.get(13);
   }
 
   /**

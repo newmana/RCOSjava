@@ -70,7 +70,7 @@ public class IPCManagerPanel extends RCOSPanel
   /**
    * Map of current shared memory segments.
    */
-   private HashMap sharedMemoryMap;
+  private HashMap sharedMemoryMap;
 
   /**
    * Combo boxes for shared memory and semaphores.
