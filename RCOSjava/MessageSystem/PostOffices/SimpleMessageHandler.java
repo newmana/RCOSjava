@@ -127,6 +127,6 @@ public abstract class SimpleMessageHandler
   public static void readObject(GeneratorInputStream in)
     throws IOException, ClassNotFoundException
   {
-    in.defaultReadObject();
+//    in.defaultReadObject();
   }
 }
