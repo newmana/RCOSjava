@@ -1,4 +1,5 @@
 package org.rcosjava.software.process;
+
 import java.io.Serializable;
 import java.util.Comparator;
 import org.rcosjava.hardware.cpu.Context;
@@ -116,7 +117,7 @@ public class RCOSProcess implements Serializable, Comparable
    */
   public RCOSProcess(int newPID, NewProcess newProcessBody)
   {
-    this(newPID, newProcessBody.getFilename(), newProcessBody.getFileSize(),
+    this(newPID, newProcessBody.getFileName(), newProcessBody.getFileSize(),
         newProcessBody.getStackPages(), newProcessBody.getCodePages());
   }
 
@@ -327,18 +328,29 @@ public class RCOSProcess implements Serializable, Comparable
    * @param object RCOSPRocess object to compare with.
    * @return -1 if the process of this object is less than the given process, 0
    *      if it is equal and 1 if it is greater than.
+   * @throws ClassCastException if the object passed is not RCOSProcess.
    */
   public int compareTo(Object object)
   {
-    if ((object != null) && (object.getClass().equals(this.getClass())))
-    {
-      RCOSProcess tmpProcess = (RCOSProcess) object;
-      return getPriority().compareTo(tmpProcess.getPriority());
-    }
-    throw new ClassCastException();
+    RCOSProcess tmpProcess = (RCOSProcess) object;
+    return getPriority().compareTo(tmpProcess.getPriority());
   }
 
   /**
+   * Returns the hash code of the object.
+   *
+   * @return the hash code of the object.
+   */
+  public int hashCode()
+  {
+    return getPID() ^ getPriority().hashCode() ^ getFileName().hashCode() ^
+        getFileSize() ^ getState().hashCode() ^ getCPUTicks();
+  }
+
+  /**
+   * Returns true if the object is equal to this one by process id, priority,
+   * file name, file size, status, number of stack pages and cpu ticks.
+   *
    * @param object Description of Parameter
    * @return true if the process id, priority, file name, file size, status,
    *      number of stack pages and cpu ticks are the same.
