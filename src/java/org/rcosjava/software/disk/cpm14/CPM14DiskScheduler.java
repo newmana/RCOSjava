@@ -24,28 +24,34 @@ public class CPM14DiskScheduler implements DiskScheduler
    * Description of the Field
    */
   private static int blockSize = 1;
+
   /**
    * Description of the Field
    */
   private static int size = 1;
+
   //Defaults based on size of 247808 bytes and 1024 bytes per sector
   /**
    * Description of the Field
    */
-  private final int SECTOR_SIZE = 1024;
+  private static final int SECTOR_SIZE = 1024;
+
   /**
    * Description of the Field
    */
-  private final int SECTORS_PER_TRACK = 11;
+  private static final int SECTORS_PER_TRACK = 11;
+
   /**
    * Description of the Field
    */
-  private final int TRACKS = 22;
+  private static final int TRACKS = 22;
+
   // Variables
   /**
    * Description of the Field
    */
   private CPM14DiskInterruptHandler interruptHandler;
+
   /**
    * Description of the Field
    */
