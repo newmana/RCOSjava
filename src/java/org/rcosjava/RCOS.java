@@ -438,7 +438,6 @@ public class RCOS extends javax.swing.JApplet implements Runnable
       tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
         "/images/p" + count + ".jpg");
 
-      System.out.println("Got: " + tmpURL.toString());
       aboutImages[count] = new ImageIcon(tmpURL);
     }
 
