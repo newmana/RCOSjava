@@ -104,7 +104,7 @@ public class AboutFrame extends RCOSFrame
     tmpPanel = new JPanel();
     tmpPanel.setBackground(defaultBgColour);
     tmpPanel.setForeground(defaultFgColour);
-    tmpLabel = new JLabel("Copyright 1997-2002");
+    tmpLabel = new JLabel("Copyright 1997-2003");
     tmpLabel.setBackground(defaultBgColour);
     tmpLabel.setForeground(defaultFgColour);
     tmpPanel.add(tmpLabel);
