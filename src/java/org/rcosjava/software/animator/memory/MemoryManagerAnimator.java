@@ -1,6 +1,6 @@
 package org.rcosjava.software.animator.memory;
 
-import java.awt.*;
+import java.awt.Component;
 import javax.swing.ImageIcon;
 import java.io.*;
 import java.util.*;
@@ -29,6 +29,21 @@ public class MemoryManagerAnimator extends RCOSAnimator
   private final static String MESSENGING_ID = "MemoryManagerAnimator";
 
   /**
+   * No access to memory.
+   */
+  private final static Integer NO_ACCESS = new Integer(0);
+
+  /**
+   * Reading memory.
+   */
+  private final static Integer READING_ACCESS = new Integer(1);
+
+  /**
+   * Writing memory.
+   */
+  private final static Integer WRITING_ACCESS = new Integer(2);
+
+  /**
    * Array that register allocated and deallocated memory.
    */
   private static ArrayList allocatedList = new ArrayList();
@@ -36,7 +51,7 @@ public class MemoryManagerAnimator extends RCOSAnimator
   /**
    * Array that registers reading and writing memory.
    */
-  private static ArrayList readingWritingList = new ArrayList();
+  private static HashMap readingWritingList = new HashMap();
 
   /**
    * The panel in which to display all of the results to.
@@ -85,6 +100,8 @@ public class MemoryManagerAnimator extends RCOSAnimator
     for (int count = 0; count < returnedMemory.getSize(); count++)
     {
       allocatedList.add(returnedMemory.getPage(count), new Boolean(true));
+      readingWritingList.put(new Integer(returnedMemory.getPage(count)),
+          NO_ACCESS);
     }
     panel.allocatedPages(returnedMemory);
   }
@@ -111,6 +128,12 @@ public class MemoryManagerAnimator extends RCOSAnimator
    */
   public void readingMemory(MemoryRequest requestedMemory)
   {
+    List offsets = panel.getMemoryIndices(requestedMemory.getPID(),
+        requestedMemory.getMemoryType());
+    for (int count = 0; count < offsets.size(); count++)
+    {
+      readingWritingList.put(offsets.get(count), READING_ACCESS);
+    }
     panel.readingMemory(requestedMemory.getPID(),
         requestedMemory.getMemoryType());
   }
@@ -122,6 +145,12 @@ public class MemoryManagerAnimator extends RCOSAnimator
    */
   public void writingMemory(MemoryRequest requestedMemory)
   {
+    List offsets = panel.getMemoryIndices(requestedMemory.getPID(),
+        requestedMemory.getMemoryType());
+    for (int count = 0; count < offsets.size(); count++)
+    {
+      readingWritingList.put(offsets.get(count), WRITING_ACCESS);
+    }
     panel.writingMemory(requestedMemory.getPID(),
         requestedMemory.getMemoryType());
   }
@@ -134,6 +163,12 @@ public class MemoryManagerAnimator extends RCOSAnimator
    */
   public void finishedReadingMemory(MemoryRequest requestedMemory)
   {
+    List offsets = panel.getMemoryIndices(requestedMemory.getPID(),
+        requestedMemory.getMemoryType());
+    for (int count = 0; count < offsets.size(); count++)
+    {
+      readingWritingList.put(offsets.get(count), NO_ACCESS);
+    }
     panel.finishedReadingMemory(requestedMemory.getPID(),
         requestedMemory.getMemoryType());
   }
@@ -146,6 +181,12 @@ public class MemoryManagerAnimator extends RCOSAnimator
    */
   public void finishedWritingMemory(MemoryRequest requestedMemory)
   {
+    List offsets = panel.getMemoryIndices(requestedMemory.getPID(),
+        requestedMemory.getMemoryType());
+    for (int count = 0; count < offsets.size(); count++)
+    {
+      readingWritingList.put(offsets.get(count), NO_ACCESS);
+    }
     panel.finishedWritingMemory(requestedMemory.getPID(),
         requestedMemory.getMemoryType());
   }

@@ -1,6 +1,13 @@
 package org.rcosjava.software.animator.memory;
 
-import java.awt.*;
+import java.awt.Image;
+import java.awt.Component;
+import java.awt.Color;
+import java.awt.BorderLayout;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Graphics;
+import java.awt.Insets;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.event.*;
@@ -243,7 +250,7 @@ public class MemoryManagerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Started writing memory, set to allocated colour.
    *
    * @param pid Description of Parameter
    * @param memoryType Description of Parameter
@@ -254,10 +261,10 @@ public class MemoryManagerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Finished reading from memory, change back to allocated colour.
    *
-   * @param pid Description of Parameter
-   * @param memoryType Description of Parameter
+   * @param pid the process id belonging to the graphic.
+   * @param memoryType the memory type.
    */
   void finishedReadingMemory(int pid, byte memoryType)
   {
@@ -265,10 +272,10 @@ public class MemoryManagerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Finished writing memory, change back to allocated colour.
    *
-   * @param pid Description of Parameter
-   * @param memoryType Description of Parameter
+   * @param pid the process id belonging to the graphic.
+   * @param memoryType the memory type.
    */
   void finishedWritingMemory(int pid, byte memoryType)
   {
@@ -276,20 +283,40 @@ public class MemoryManagerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Changes the colour of the memory graphic object.
    *
-   * @param cColor Description of Parameter
-   * @param pid Description of Parameter
-   * @param bMemoryType Description of Parameter
+   * @param color colour to change the graphic to.
+   * @param pid the process id belonging to the memory.
+   * @param memoryType the memory type.
    */
   private void colourMemory(Color color, int pid, byte memoryType)
   {
+    List offsets = getMemoryIndices(pid, memoryType);
+    Iterator iter = offsets.iterator();
+    while (iter.hasNext())
+    {
+      int offset = ((Integer) iter.next()).intValue();
+      memoryGraphics[offset].setCurrentColour(color);
+    }
+  }
+
+  /**
+   * Returns an array of an set of offsets of a certain PID and type.
+   *
+   * @param pid the process id belonging to the memory.
+   * @param memoryType the memory type.
+   * @return List the integer offsets.
+   */
+  List getMemoryIndices(int pid, byte memoryType)
+  {
+    ArrayList offsets = new ArrayList();
     for (int count = 0; count < MemoryManager.MAX_PAGES; count++)
     {
       if (memoryGraphics[count].isMemory(pid, memoryType))
       {
-        memoryGraphics[count].setCurrentColour(color);
+        offsets.add(new Integer(count));
       }
     }
+    return offsets;
   }
 }
