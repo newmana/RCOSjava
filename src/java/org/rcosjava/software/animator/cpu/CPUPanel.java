@@ -233,39 +233,45 @@ public class CPUPanel extends RCOSPanel
    *
    * @param processMemory Description of Parameter
    */
-  void loadCode(Memory processMemory)
+  void loadCode(final Memory processMemory)
   {
-    int count;
-    int linesOfCode;
-
-    if (codeListModel.size() != 0)
+    SwingUtilities.invokeLater(new Runnable()
     {
-      codeListModel.removeAllElements();
-    }
-
-    // test to see if the memory is not null
-    if (processMemory != null)
-    {
-      // Each instruction is 8 bytes long.
-      linesOfCode = (int) processMemory.getSegmentSize() / 8;
-
-      for (count = 0; count < linesOfCode; count++)
+      public void run()
       {
-        short instr1 = (short) processMemory.getOneMemorySegment(count * 8 + 5);
-        short instr2 = (short) processMemory.getOneMemorySegment(count * 8 + 6);
-        short loc = (short) ((256 * (instr1 & 255)) + (instr2 & 255));
+        int count;
+        int linesOfCode;
 
-        Instruction theInstruction = Instruction.INSTRUCTIONS[
-          processMemory.getOneMemorySegment(count * 8) & 0xff];
-        theInstruction.setByteParameter((byte)
-          processMemory.getOneMemorySegment(count * 8 + 4));
-        theInstruction.setWordParameter(loc);
+        if (codeListModel.size() != 0)
+        {
+          codeListModel.removeAllElements();
+        }
 
-        codeListModel.addElement(theInstruction.toString());
+        // test to see if the memory is not null
+        if (processMemory != null)
+        {
+          // Each instruction is 8 bytes long.
+          linesOfCode = (int) processMemory.getSegmentSize() / 8;
+
+          for (count = 0; count < linesOfCode; count++)
+          {
+            short instr1 = (short) processMemory.getOneMemorySegment(count * 8 + 5);
+            short instr2 = (short) processMemory.getOneMemorySegment(count * 8 + 6);
+            short loc = (short) ((256 * (instr1 & 255)) + (instr2 & 255));
+
+            Instruction theInstruction = Instruction.INSTRUCTIONS[
+                processMemory.getOneMemorySegment(count * 8) & 0xff];
+            theInstruction.setByteParameter((byte)
+                processMemory.getOneMemorySegment(count * 8 + 4));
+            theInstruction.setWordParameter(loc);
+
+            codeListModel.addElement(theInstruction.toString());
+          }
+          // make the selected instruction the ProgramCounter
+          codeList.setSelectedIndex(0);
+        }
       }
-      // make the selected instruction the ProgramCounter
-      codeList.setSelectedIndex(0);
-    }
+    });
   }
 
   /**
