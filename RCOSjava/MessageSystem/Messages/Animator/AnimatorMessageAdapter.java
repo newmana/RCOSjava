@@ -82,4 +82,9 @@ public class AnimatorMessageAdapter extends MessageAdapter
   public void doMessage(TerminalManagerAnimator theElement)
   {
   }
+
+  public boolean undoableMessage()
+  {
+    return true;
+  }
 }

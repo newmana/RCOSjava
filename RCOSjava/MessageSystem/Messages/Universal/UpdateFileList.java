@@ -57,4 +57,9 @@ import java.io.Serializable;
     theElement.updateFileList(fileList);
     theElement.updateDirectoryList(directoryList);
   }
+
+  public boolean undoableMessage()
+  {
+    return false;
+  }
 }

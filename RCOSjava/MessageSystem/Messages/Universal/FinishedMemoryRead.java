@@ -1,12 +1,3 @@
-//******************************************************/
-// FILE     : FinishedMemoryReadMessage.java
-// PACKAGE  : MessageSystem.Universal
-// PURPOSE  : MMU is responding with requested memory.
-// AUTHOR   : Andrew Newman
-// MODIFIED : 
-// HISTORY  : 01/01/1998   Created
-//******************************************************/
-
 package MessageSystem.Messages.Universal;
 
 import MessageSystem.PostOffices.OS.OSMessageHandler;
@@ -16,16 +7,23 @@ import Software.Animator.CPU.CPUAnimator;
 import Software.Animator.IPC.IPCManagerAnimator;
 import Software.Memory.MemoryManager;
 
+/**
+ * MMU is responding with requested memory.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 1st of January 1998
+ */
 public class FinishedMemoryRead extends UniversalMessageAdapter
 {
-  private MemoryRequest mrRequest;  
-  
+  private MemoryRequest mrRequest;
+
   public FinishedMemoryRead(OSMessageHandler theSource, MemoryRequest newRequest)
   {
     super(theSource);
     mrRequest = newRequest;
   }
-  
+
   public void doMessage(Kernel theElement)
   {
     if (mrRequest.getMemoryType() == MemoryManager.CODE_SEGMENT)
@@ -33,11 +31,11 @@ public class FinishedMemoryRead extends UniversalMessageAdapter
       theElement.setProcessCode(mrRequest.getMemory());
     }
     else if (mrRequest.getMemoryType() == MemoryManager.STACK_SEGMENT)
-    {     
+    {
       theElement.setProcessStack(mrRequest.getMemory());
     }
   }
-  
+
   public void doMessage(CPUAnimator theElement)
   {
     if (mrRequest.getMemoryType() == MemoryManager.CODE_SEGMENT)
@@ -49,10 +47,15 @@ public class FinishedMemoryRead extends UniversalMessageAdapter
       theElement.updateStack(mrRequest.getMemory());
     }
   }
-  
+
   public void doMessage(IPCManagerAnimator theElement)
   {
     theElement.finishedReadingMemory(this.mrRequest);
+  }
+
+  public boolean undoableMessage()
+  {
+    return false;
   }
 }
 

@@ -16,6 +16,7 @@ import MessageSystem.Messages.OS.ChOut;
 import MessageSystem.Messages.OS.NumIn;
 import MessageSystem.Messages.OS.NumOut;
 import MessageSystem.Messages.OS.OSMessageAdapter;
+import MessageSystem.Messages.OS.Schedule;
 import MessageSystem.Messages.OS.SemaphoreClose;
 import MessageSystem.Messages.OS.SemaphoreCreate;
 import MessageSystem.Messages.OS.SemaphoreOpen;
@@ -61,6 +62,8 @@ import Software.Memory.MemoryRequest;
  * 12/08/98  Implemented Shared Memory and File system calls. AN
  * </DD><DD>
  * 13/08/98  Fixed incomplete/buggy Semaphore and Shared memory. AN
+ * </DD><DD>
+ * 02/04/2001 Added schedule message call.
  * </DD></DT>
  * <P>
  * @author Andrew Newman.
@@ -79,6 +82,7 @@ public class Kernel extends OSMessageHandler
   private CPU myCPU;
   private Hashtable interruptHandlers = new Hashtable();
   private RCOSProcess currentProcess;
+  private Schedule scheduleMessage = new Schedule(this);
 
   /**
    * Initialise Kernel
@@ -176,6 +180,7 @@ public class Kernel extends OSMessageHandler
    */
   public void performInstructionExecutionCycle()
   {
+    sendMessage(this.scheduleMessage);
     myCPU.performInstructionExecutionCycle();
     //Sends context and current instruction to the kernel.
     if (runningProcess())

@@ -1,19 +1,15 @@
-//**********************************************************************/
-// FILE     : SemaphoreQueue.java
-// PACKAGE  : Util
-// PURPOSE  : For IPC to hold a queue of semaphores
-//            written because of problems with HashTables
-// AUTHOR   : David Jones using Bruce Jamieson's Semaphore class
-//            and Andrew Newman's FIFOQueue class
-// MODIFIED : Andrew Newman
-// HISTORY  : 31/03/96  Created
-//            11/08/98  Last Modified AN.
-//**********************************************************************/
-
 package Software.Util;
 
 import Software.IPC.Semaphore;
 
+/**
+ * For IPC to hold a queue of semaphores written because of problems with HashTables
+ * <P>
+ * @author Andrew Newman.
+ * @author David Jones.
+ * @version 1.00 $Date$
+ * @created 31st March 1996
+ */
 public class SemaphoreQueue extends FIFOQueue
 {
   public SemaphoreQueue(int initialCapacity, int capacityIncrement)
@@ -21,8 +17,10 @@ public class SemaphoreQueue extends FIFOQueue
     super(initialCapacity, capacityIncrement);
   }
 
-  // return String type of Process to occur at the specified time
-  // return null it no interrupt
+  /**
+   * @return String type of Process to occur at the specified time or null if
+   * no interrupt
+   */
   public Semaphore getSemaphore(int semaphoreId)
   {
     Semaphore tmp;
@@ -58,13 +56,17 @@ public class SemaphoreQueue extends FIFOQueue
     return null;
   }
 
-  // isMember by numeric id (inc int value)
+  /**
+   * isMember by numeric id (inc int value)
+   */
   public boolean isMember(int iSempahoreID)
   {
     return (peek(iSempahoreID) != null);
   }
 
-  // isMember by string id (defined in program)
+  /**
+   * isMember by string id (defined in program)
+   */
   public boolean isMember(String sSempahoreID)
   {
     return (peek(sSempahoreID) != null);
@@ -87,8 +89,8 @@ public class SemaphoreQueue extends FIFOQueue
     do
     {
       tmp = (Semaphore) peek();
-      System.out.println("tmpSID = " + tmp.getId());
-      System.out.println("mySID = " + semaphoreId);
+      //System.out.println("tmpSID = " + tmp.getId());
+      //System.out.println("mySID = " + semaphoreId);
       if (tmp.getId() == semaphoreId)
         return (Object) tmp;
       goToNext();
@@ -97,7 +99,9 @@ public class SemaphoreQueue extends FIFOQueue
     return null;
   }
 
-  // peek by string id (defined in program)
+  /**
+   * peek by string id (defined in program)
+   */
   public Semaphore peek(String sSempahoreID)
   {
     Semaphore tmp;

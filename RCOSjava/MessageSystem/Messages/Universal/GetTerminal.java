@@ -16,27 +16,38 @@ import MessageSystem.PostOffices.OS.OSMessageHandler;
  */
 public class GetTerminal extends UniversalMessageAdapter
 {
-  private int iPID;
+  /**
+   * The process id that is looking for a terminal.
+   */
+  private int PID;
 
-  public GetTerminal(OSMessageHandler theSource, int iProcessID)
+  /**
+   * Create a new get terminal message.
+   *
+   * @param newSource the source of the message.
+   * @param newPID the process id that is looking for a terminal.
+   */
+  public GetTerminal(OSMessageHandler theSource, int newPID)
   {
     super(theSource);
-    iPID = iProcessID;
+    PID = newPID;
   }
 
+  /**
+   * Executes the getTerminal method passing the stored process id..
+   *
+   * @param theElement the terminal manager to do work on.
+   */
   public void doMessage(TerminalManager theElement)
   {
-    theElement.getTerminal(iPID);
+    theElement.getTerminal(PID);
   }
 
-  public void doMessage(ProcessSchedulerAnimator theElement)
+  /**
+   * Set to false so it is not recorded.
+   */
+  public boolean undoableMessage()
   {
-    theElement.newProcess(iPID);
-  }
-
-  public void doMessage(ProcessManagerAnimator theElement)
-  {
-    theElement.newProcess(new Integer(iPID));
+    return false;
   }
 }
-

@@ -141,4 +141,9 @@ public class OSMessageAdapter extends MessageAdapter
   public void doMessage(DiskManager theElement)
   {
   }
+
+  public boolean undoableMessage()
+  {
+    return true;
+  }
 }

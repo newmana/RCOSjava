@@ -1,14 +1,3 @@
-//***************************************************************************
-// FILE     : ProcessSchedulerAnimator.java
-// PACKAGE  : Animator
-// PURPOSE  : Receives messages from Process Scheduler and manipulates
-//            processScheduler frame based on messages received.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 10/1/97  Created.
-//
-//***************************************************************************/
-
 package Software.Animator.Process;
 
 import java.awt.*;
@@ -30,50 +19,101 @@ import MessageSystem.Messages.Universal.Quantum;
 import Software.Process.RCOSProcess;
 import Software.Process.ProcessScheduler;
 
+/**
+ * Receives messages from Process Scheduler and manipulates processScheduler
+ * frame based on messages received.  This tracks the location of the processes
+ * in the Queue.  The frame is merely a representation of the queues which means
+ * it should be easier to modify.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 10th of January 1997
+ */
 public class ProcessSchedulerAnimator extends RCOSAnimator
 {
-  private static ProcessSchedulerFrame psFrame;
-  private static String sCurrentProcess = new String();
-	private static final String MESSENGING_ID = "ProcessSchedulerAnimator";
+  /**
+   * The frame in which to display all the details to.
+   */
+  private static ProcessSchedulerFrame myFrame;
 
-  public ProcessSchedulerAnimator (AnimatorOffice aPostOffice,
-                                  int x, int y, Image[] psImages)
+  /**
+   * The string (e.g. "PID 1") of the current process running.
+   */
+  private static String currentProcess = new String();
+
+  /**
+   * Uniquely identifies the process scheduler to the post office.
+   */
+  private static final String MESSENGING_ID = "ProcessSchedulerAnimator";
+
+  /**
+   * Create an animator office, register with the animator office, set the size
+   * of the frame and the images to use to represent the processes and the
+   * buttons.
+   *
+   * @param postOffice the post office to register to.
+   * @param x width of frame
+   * @param y height of frame
+   * @param images the images to use for process and buttons.
+   */
+  public ProcessSchedulerAnimator (AnimatorOffice postOffice,
+                                  int x, int y, Image[] images)
   {
-    super(MESSENGING_ID, aPostOffice);
-    psFrame = new ProcessSchedulerFrame(x, y, psImages, this);
-    psFrame.pack();
-    psFrame.setSize(x,y);
+    super(MESSENGING_ID, postOffice);
+    myFrame = new ProcessSchedulerFrame(x, y, images, this);
+    myFrame.pack();
+    myFrame.setSize(x,y);
   }
 
+  /**
+   * Setup the layout of the frame (menus, etc).
+   *
+   * @param c the parent component.
+   */
   public void setupLayout(Component c)
   {
-    psFrame.setupLayout(c);
+    myFrame.setupLayout(c);
   }
 
+  /**
+   * Remove the frame (called when closing the applet).
+   */
   public void disposeFrame()
   {
-    psFrame.dispose();
+    myFrame.dispose();
   }
 
+  /**
+   * Display the frame (setVisible to true)
+   */
   public void showFrame()
   {
-    psFrame.setVisible(true);
+    myFrame.setVisible(true);
   }
 
+  /**
+   * Hide the frame (setVisible to false)
+   */
   public void hideFrame()
   {
-    psFrame.setVisible(false);
+    myFrame.setVisible(false);
   }
 
-  public synchronized void processMessage(AnimatorMessageAdapter aMsg)
+  /**
+   * Process the animator message received (currently none).
+   */
+  public void processMessage(AnimatorMessageAdapter message)
   {
   }
 
-  public synchronized void processMessage(UniversalMessageAdapter aMsg)
+  /**
+   * Process the universal message received (currently none).
+   */
+  public void processMessage(UniversalMessageAdapter message)
   {
     try
     {
-      aMsg.doMessage(this);
+      message.doMessage(this);
     }
     catch (Exception e)
     {
@@ -82,71 +122,143 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
     }
   }
 
-  public void sendQuantum(Integer iQuantum)
+  /**
+   * Called by the frame to set the quantum in the kernel.  Sends a new
+   * quantum message.
+   *
+   * @param quantumValue the number of CPU ticks to set the quantum to.
+   */
+  public void sendQuantum(Integer quantumValue)
   {
     //Create and send Quantum message
-    Quantum msg = new Quantum(this, iQuantum.intValue());
+    Quantum msg = new Quantum(this, quantumValue.intValue());
     sendMessage(msg);
   }
 
-  private void addQueue(int iQType, int iPID)
+  /**
+   * Each of the three queues have a numeric value.  This simply calls the
+   * addQueue on the Frame.  Exposed for Animator Messages.
+   *
+   * @param queueType the numeric representation of the queue.
+   * @param pid the process id to add to the queue.
+   */
+  private void addQueue(int queueType, int pid)
   {
-    psFrame.addQueue(iQType, iPID);
+    myFrame.addQueue(queueType, pid);
   }
 
-  private void removeQueue(int iQType, int iPID)
+  /**
+   * Each of the three queues have a numeric value.  This simply calls the
+   * removeQueue on the Frame.  Exposed for Animator Messages.
+   *
+   * @param queueType the numeric representation of the queue.
+   * @param pid the process id to add to the queue.
+   */
+  private void removeQueue(int queueType, int pid)
   {
-    psFrame.removeQueue(iQType, iPID);
+    myFrame.removeQueue(queueType, pid);
   }
 
-  public void processFinished(int iPID)
+  /**
+   * When a process has finished executed it needs to be removed from display.
+   * This merely exposes this method to the messages.
+   *
+   * @param pid the process id to remove from the CPU.
+   */
+  public void processFinished(int pid)
   {
-    psFrame.processFinished(iPID);
+    myFrame.processFinished(pid);
   }
 
-  public void killProcess(int iPID)
+  /**
+   * When a process is killed (abruptly halted executed) it must be removed from
+   * any of the queues or CPU.  This calls the Frame method of the same name.
+   *
+   * @param pid the process id to find and remove.
+   */
+  public void killProcess(int pid)
   {
-    psFrame.killProcess(iPID);
+    myFrame.killProcess(pid);
   }
 
-  public void cpuToBlocked(int iPID)
+  /**
+   * Exposes the frame method of the same name.  Moves the process from the CPU
+   * to the Blocked Queue.
+   *
+   * @param pid the process id to move.
+   */
+  public void cpuToBlocked(int pid)
   {
-    psFrame.cpuToBlocked(iPID);
-    addQueue(ProcessScheduler.BLOCKEDQ, iPID);
+    myFrame.cpuToBlocked(pid);
+    addQueue(ProcessScheduler.BLOCKEDQ, pid);
   }
 
-  public void blockedToReady(int iPID)
+  /**
+   * Exposes the frame method of the same name.  Moves the process from the
+   * Blocked Queue to the Ready Queue.
+   *
+   * @param pid the process id to move.
+   */
+  public void blockedToReady(int pid)
   {
-    removeQueue(ProcessScheduler.BLOCKEDQ, iPID);
-    psFrame.blockedToReady(iPID);
-    addQueue(ProcessScheduler.READYQ, iPID);
+    removeQueue(ProcessScheduler.BLOCKEDQ, pid);
+    myFrame.blockedToReady(pid);
+    addQueue(ProcessScheduler.READYQ, pid);
   }
 
-  public void cpuToReady(int iPID)
+  /**
+   * Exposes the frame method of the same name.  Moves the process from the
+   * CPU to the Ready Queue.
+   *
+   * @param pid the process id to move.
+   */
+  public void cpuToReady(int pid)
   {
-    psFrame.cpuToReady(iPID);
-    addQueue(ProcessScheduler.READYQ, iPID);
+    myFrame.cpuToReady(pid);
+    addQueue(ProcessScheduler.READYQ, pid);
   }
 
-  public void readyToCPU(int iPID)
+  /**
+   * Exposes the frame method of the same name.  Moves the process from the
+   * Ready Queue to the CPU.
+   *
+   * @param pid the process id to move.
+   */
+  public void readyToCPU(int pid)
   {
-    removeQueue(ProcessScheduler.READYQ, iPID);
-    psFrame.readyToCPU(iPID);
+    removeQueue(ProcessScheduler.READYQ, pid);
+    myFrame.readyToCPU(pid);
   }
 
-  public void zombieToReady(int iPID)
+  /**
+   * Exposes the frame method of the same name.  Moves the process from the
+   * Zombie Queue to the Ready Queue.
+   *
+   * @param pid the process id to move.
+   */
+  public void zombieToReady(int pid)
   {
-    removeQueue(ProcessScheduler.ZOMBIEQ, iPID);
-    psFrame.zombieToReady(iPID);
-    addQueue(ProcessScheduler.READYQ, iPID);
+    removeQueue(ProcessScheduler.ZOMBIEQ, pid);
+    myFrame.zombieToReady(pid);
+    addQueue(ProcessScheduler.READYQ, pid);
   }
 
-  public void newProcess(int iPID)
+  /**
+   * Exposes the frame method of the same name.  Adds a process to the Zombie
+   * Queue.
+   *
+   * @param pid the process id to move.
+   */
+  public void zombieCreated(int pid)
   {
-    psFrame.newProcess(iPID);
-    addQueue(ProcessScheduler.ZOMBIEQ, iPID);
+    myFrame.newProcess(pid);
+    addQueue(ProcessScheduler.ZOMBIEQ, pid);
   }
 
+  /**
+   * Sends a message to the CPU Animator when someone clicks on the CPU
+   * representation in the ProcessSchedulerFrame.
+   */
   public void showCPU()
   {
     ShowCPU scmMsg = new ShowCPU(this);

@@ -6,6 +6,7 @@ import MessageSystem.PostOffices.MessageHandler;
 import MessageSystem.Messages.OS.OSMessageAdapter;
 import MessageSystem.PostOffices.OS.OSMessageHandler;
 import MessageSystem.PostOffices.OS.OSOffice;
+import MessageSystem.Messages.OS.AllocateTerminal;
 import MessageSystem.Messages.Universal.ProcessAllocatedTerminalMessage;
 import MessageSystem.Messages.Universal.UniversalMessageAdapter;
 import MessageSystem.Messages.Universal.TerminalOn;
@@ -255,7 +256,8 @@ import Software.Util.FIFOQueue;
     }
     else
     {
-      allocateTerminal(processId);
+      AllocateTerminal allocateTerminal = new AllocateTerminal(this, processId);
+      sendMessage(allocateTerminal);
     }
   }
 
@@ -264,7 +266,7 @@ import Software.Util.FIFOQueue;
    *
    * @param processId the process to allocate the a terminal to.
    */
-  private boolean allocateTerminal(int processId)
+  public void allocateTerminal(int processId)
   {
     HardwareTerminal newTerminal = (HardwareTerminal)
       unallocatedTerminals.retrieve();
@@ -273,7 +275,6 @@ import Software.Util.FIFOQueue;
     ProcessAllocatedTerminalMessage msg = new ProcessAllocatedTerminalMessage
       (this, newTerminal.getTitle(), processId);
     sendMessage(msg);
-    return true;
   }
 
   /**
@@ -287,7 +288,8 @@ import Software.Util.FIFOQueue;
       // there's a process waiting on a free terminal so allocate it
       Integer tmp = (Integer)
         waitingProcesses.retrieve();
-      allocateTerminal(tmp.intValue());
+      AllocateTerminal allocateTerminal = new AllocateTerminal(this, tmp.intValue());
+      sendMessage(allocateTerminal);
     }
   }
 

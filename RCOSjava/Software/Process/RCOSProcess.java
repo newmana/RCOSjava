@@ -21,149 +21,250 @@ import java.io.Serializable;
  */
 public class RCOSProcess implements Serializable
 {
+  /**
+   * The numeric value of the lowest priority that a process can have.
+   */
   public static final byte MINIMUM_PRIORITY = 1;
-  public static final byte DEFAULT_PRIORITY = 50;
-  public static final byte MAXIMUM_PRIORITY = 100;
-  public static final byte ZOMBIE = 1;
-  public static final byte READY = 2;
-  public static final byte RUNNING = 3;
-  public static final byte BLOCKED = 4;
-  private int iPID, iPriority; // process Id and priority
-  private byte bStatus;     // current status (Running, Ready ...)
-  private String sFileName;   // filename for process code
-  private int iFileSize;      // size of process' code (in bytes)
-  private int iStackPages;    // Number of stack pages.
-  private int iCodePages;     // Number of code pages.
-  private String sTerminalID; // string id for process' terminal
-  private int iCPUTicks;      // time spent on the CPU
-  private Context cContext;   // current CPU context
 
+  /**
+   * The numeric value of the default priority that a process can have.
+   */
+  public static final byte DEFAULT_PRIORITY = 50;
+
+  /**
+   * The numeric value of the highest priority that a process can have.
+   */
+  public static final byte MAXIMUM_PRIORITY = 100;
+
+  /**
+   * The numeric value of a process that is in a zombie state.
+   */
+  public static final byte ZOMBIE = 1;
+
+  /**
+   * The numeric value of a process that is in a ready state.
+   */
+  public static final byte READY = 2;
+
+  /**
+   * The numeric value of a process that is in a running state.
+   */
+  public static final byte RUNNING = 3;
+
+  /**
+   * The numeric value of a process that is in a blocked state.
+   */
+  public static final byte BLOCKED = 4;
+
+  /**
+   * The process id.
+   */
+  private int PID;
+
+  /**
+   * The actual priority (from MINIMUM_PRIORITY to MAXIMUM_PRIORITY) of the
+   * process.
+   */
+  private int priority;
+
+  /**
+   * Current status (Running, Ready ...)
+   */
+  private byte status;
+
+  /**
+   * Filename for process code
+   */
+  private String fileName;
+
+  /**
+   * Size of process' code (in bytes)
+   */
+  private int fileSize;
+
+  /**
+   * Number of stack pages.
+   */
+  private int stackPages;
+
+  /**
+   * Number of code pages.
+   */
+  private int codePages;
+
+  /**
+   * String id for process' terminal
+   */
+  private String terminalId;
+
+  /**
+   * Time spent on the CPU
+   */
+  private int cpuTicks;
+
+  /**
+   * Current CPU context
+   */
+  private Context currentContext;
+
+  /**
+   * Creates a process with a PID of 0, priority of DEFAULT, a ZOMBIE status,
+   * with no filename, filesize, stackpages, etc.
+   */
   public RCOSProcess()
   {
-    iPID = 0;
-    iPriority = DEFAULT_PRIORITY;
-    bStatus = ZOMBIE;
-    sFileName = null;
-    iFileSize = 0;
-    iStackPages = 0;
-    iCodePages = 0;
-    sTerminalID = null;
-    iCPUTicks = 0;
-    cContext = new Context();
+    PID = 0;
+    priority = DEFAULT_PRIORITY;
+    status = ZOMBIE;
+    fileName = null;
+    fileSize = 0;
+    stackPages = 0;
+    codePages = 0;
+    terminalId = null;
+    cpuTicks = 0;
+    currentContext = new Context();
   }
 
-  public RCOSProcess(int iNewPID, String sNewFileName)
+  /**
+   * Creates a new process with the given PID and filename.
+   *
+   * @param newPID the given PID (generated from the Process Scheduler
+   * probably).
+   * @param newFileName the path (relative to the file server) of the code of
+   * the program.
+   */
+  public RCOSProcess(int newPID, String newFileName)
   {
     this();
-    iPID = iNewPID;
-    sFileName = sNewFileName;
+    PID = newPID;
+    fileName = newFileName;
   }
 
-  public RCOSProcess (int iNewPID, NewProcess npmNewBody)
+  /**
+   * Creates a given process with the NewProcess object (which is a sub-set of
+   * the information stored here) and a given process ID.
+   *
+   * @param newPID the process id of the new process (generated automatically).
+   * @param newProcessBody contains the values to set to this object such as the
+   * file name, file size, stack pages and code pages.
+   */
+  public RCOSProcess (int newPID, NewProcess newProcessBody)
   {
-    this(iNewPID, npmNewBody.getFilename(), npmNewBody.getFileSize(),
-         npmNewBody.getStackPages(),npmNewBody.getCodePages());
+    this(newPID, newProcessBody.getFilename(), newProcessBody.getFileSize(),
+         newProcessBody.getStackPages(),newProcessBody.getCodePages());
   }
 
 
-  public RCOSProcess(int iNewPID, String sNewFileName, int iNewFileSize,
-                     int iNewStackPages, int iNewCodePages)
+  /**
+   * Creates a new process with the available set of attributes available to
+   * set at start up.
+   *
+   * @param newPID the automatically generated process id,
+   * @param newFileName the filename of the processes code.
+   * @param newFileSize the length in bytes of the process code.
+   * @param newStackPages the number of stack pages to allocate for this process.
+   * @param newCodePages the number of code pages (based on file size) for this
+   * process.
+   */
+  public RCOSProcess(int newPID, String newFileName, int newFileSize,
+                     int newStackPages, int newCodePages)
   {
-    this(iNewPID, sNewFileName);
-    iFileSize = iNewFileSize;
-    iStackPages = iNewStackPages;
-    iCodePages = iNewCodePages;
+    this(newPID, newFileName);
+    fileSize = newFileSize;
+    stackPages = newStackPages;
+    codePages = newCodePages;
   }
 
-
-  public RCOSProcess(RCOSProcess rpOld)
+  /**
+   * Accepts an existing RCOSProcess to create a new copy.
+   */
+  public RCOSProcess(RCOSProcess oldProcess)
   {
-    iPID = rpOld.iPID;
-    iPriority = rpOld.iPriority;
-    sFileName = rpOld.sFileName;
-    iCodePages = rpOld.iCodePages;
-    iStackPages = rpOld.iStackPages;
-    iFileSize = rpOld.iFileSize;
-    bStatus = rpOld.bStatus;
-    iCPUTicks = rpOld.iCPUTicks;
-    sTerminalID = rpOld.sTerminalID;
-    cContext = (Context) rpOld.cContext.clone();
+    PID = oldProcess.PID;
+    priority = oldProcess.priority;
+    fileName = oldProcess.fileName;
+    codePages = oldProcess.codePages;
+    stackPages = oldProcess.stackPages;
+    fileSize = oldProcess.fileSize;
+    status = oldProcess.status;
+    cpuTicks = oldProcess.cpuTicks;
+    terminalId = oldProcess.terminalId;
+    currentContext = (Context) oldProcess.currentContext.clone();
   }
 
   //getters and setters
-
   public int getPID()
   {
-    return iPID;
+    return PID;
   }
 
-  public void setPID(int iNewPID)
+  public void setPID(int newPID)
   {
-    iPID = iNewPID;
+    PID = newPID;
   }
 
   public int getPriority()
   {
-    return iPriority;
+    return priority;
   }
 
   public String getFileName()
   {
-    return sFileName;
+    return fileName;
   }
 
   public int getFileSize()
   {
-    return iFileSize;
+    return fileSize;
   }
 
   public byte getStatus()
   {
-    return bStatus;
+    return status;
   }
 
-  public void setStatus(byte bNewStatus)
+  public void setStatus(byte newStatus)
   {
-    bStatus = bNewStatus;
+    status = newStatus;
   }
 
   public void setContext(Context newContext)
   {
-    cContext = newContext;
+    currentContext = newContext;
   }
 
   public int getStackPages()
   {
-    return iStackPages;
+    return stackPages;
   }
 
   public int getCodePages()
   {
-    return iCodePages;
+    return codePages;
   }
 
   public int getCPUTicks()
   {
-    return iCPUTicks;
+    return cpuTicks;
   }
 
-  public void addToCPUTicks(int iNewCPUTicks)
+  public void addToCPUTicks(int newCPUTicks)
   {
-    iCPUTicks = iCPUTicks + iNewCPUTicks;
+    cpuTicks = cpuTicks + newCPUTicks;
   }
 
-  public String getTerminalID()
+  public String getTerminalId()
   {
-    return sTerminalID;
+    return terminalId;
   }
 
-  public void setTerminalID(String sNewTerminalID)
+  public void setTerminalId(String newTerminalId)
   {
-    sTerminalID = sNewTerminalID;
+    terminalId = newTerminalId;
   }
 
   public Context getContext()
   {
-    return cContext;
+    return currentContext;
   }
 }

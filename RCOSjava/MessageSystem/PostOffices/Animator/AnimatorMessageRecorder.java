@@ -48,7 +48,8 @@ public class AnimatorMessageRecorder extends AnimatorMessageHandler
    */
   public void processMessage(AnimatorMessageAdapter newMessage)
   {
-    recorder.processAnimatorMessage(newMessage);
+    if (newMessage.undoableMessage())
+      recorder.processAnimatorMessage(newMessage);
   }
 
   /**

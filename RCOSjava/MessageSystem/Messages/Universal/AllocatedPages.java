@@ -32,4 +32,9 @@ public class AllocatedPages extends UniversalMessageAdapter
   {
     theElement.allocatedPages(memoryReturn);
   }
+
+  public boolean undoableMessage()
+  {
+    return false;
+  }
 }

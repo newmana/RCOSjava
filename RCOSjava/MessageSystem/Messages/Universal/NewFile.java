@@ -35,4 +35,12 @@ public class NewFile extends UniversalMessageAdapter
   {
     theElement.newFile(filename);
   }
+
+  /**
+   * Set to false so it is not recorded.
+   */
+  public boolean undoableMessage()
+  {
+    return false;
+  }
 }

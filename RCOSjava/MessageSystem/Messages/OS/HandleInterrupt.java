@@ -1,14 +1,3 @@
-//***************************************************************************
-// FILE    : HandleInterrupt.java
-// PACKAGE : 
-// PURPOSE : 
-// AUTHOR  : Andrew Newman
-// MODIFIED: 
-// HISTORY : 28/03/96  Created
-//           
-//
-//***************************************************************************
-
 package MessageSystem.Messages.OS;
 
 import Software.Kernel.Kernel;
@@ -21,14 +10,14 @@ import MessageSystem.PostOffices.OS.OSMessageHandler;
 public class HandleInterrupt extends OSMessageAdapter
 {
   private Interrupt intInterrupt;
-  
+
   public HandleInterrupt(OSMessageHandler theSource,
     Interrupt intNewInterrupt)
   {
     super(theSource);
     intInterrupt = intNewInterrupt;
   }
-  
+
   private void setInterrupt(Interrupt intNewInterrupt)
   {
     intInterrupt = intNewInterrupt;
@@ -37,6 +26,14 @@ public class HandleInterrupt extends OSMessageAdapter
   public void doMessage(Kernel theElement)
   {
     theElement.handleInterrupt(intInterrupt);
+  }
+
+  public boolean undoableMessage()
+  {
+    if (intInterrupt.getType().equals("NewProcess"))
+      return false;
+    else
+      return true;
   }
 }
 

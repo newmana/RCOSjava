@@ -68,9 +68,9 @@ public class AnimatorOffice extends PostOffice
     sendMessage((MessageAdapter) aMessage);
   }
 
-  public void localSendMessage(MessageAdapter maMessage)
+  public void localSendMessage(MessageAdapter message)
   {
-    if (maMessage.forPostOffice(this))
+    if (message.forPostOffice(this))
     {
       //Go through the hashtable returning all the handlers
       //registered.  Send the message to all of them.
@@ -82,7 +82,7 @@ public class AnimatorOffice extends PostOffice
         AnimatorMessageHandler theDestination = (AnimatorMessageHandler)
           tmpIter.next();
 	//Send the message to the destination
-	theDestination.processMessage(maMessage);
+	theDestination.processMessage(message);
       }
     }
   }
@@ -92,9 +92,10 @@ public class AnimatorOffice extends PostOffice
    *
    * @param message Message to send.
    */
-  public void localSendMessage(AnimatorMessageAdapter maMessage)
+  public void localSendMessage(AnimatorMessageAdapter message)
   {
-    if (maMessage.forPostOffice(this))
+    //System.out.println("AO Sending: " + message);
+    if (message.forPostOffice(this))
     {
       //Go through the hashtable returning all the handlers
       //registered.  Send the message to all of them.
@@ -105,12 +106,12 @@ public class AnimatorOffice extends PostOffice
         AnimatorMessageHandler theDestination = (AnimatorMessageHandler)
           tmpIter.next();
 	//Send the message to the destination
-	theDestination.processMessage(maMessage);
+	theDestination.processMessage(message);
       }
     }
   }
 
-  public void sendToPostOffices(MessageAdapter maMessage)
+  public void sendToPostOffices(MessageAdapter message)
   {
     PostOffice poTmpPostOffice;
 
@@ -120,9 +121,9 @@ public class AnimatorOffice extends PostOffice
       for (iCount = 0; iCount < postOffices.size(); iCount++)
       {
         poTmpPostOffice = getPostOffice(iCount);
-        if (maMessage.forPostOffice(poTmpPostOffice))
+        if (message.forPostOffice(poTmpPostOffice))
         {
-          poTmpPostOffice.localSendMessage(maMessage);
+          poTmpPostOffice.localSendMessage(message);
         }
       }
     }

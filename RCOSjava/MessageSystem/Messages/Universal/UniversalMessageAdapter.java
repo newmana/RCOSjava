@@ -151,4 +151,9 @@ public class UniversalMessageAdapter extends MessageAdapter
   public void doMessage(TerminalManagerAnimator theElement)
   {
   }
+
+  public boolean undoableMessage()
+  {
+    return true;
+  }
 }

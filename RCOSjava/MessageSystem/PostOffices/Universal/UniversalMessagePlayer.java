@@ -61,6 +61,12 @@ public class UniversalMessagePlayer
     id = newId;
   }
 
+  /**
+   * Reads the next mesage in order and sends it to the appropriate post
+   * offices.
+   *
+   * @param newFileName the base file name to read.
+   */
   public void sendNextMessage(String newFileName)
   {
     fileName = newFileName;
@@ -75,7 +81,7 @@ public class UniversalMessagePlayer
       osPostOffice.localSendMessage((OSMessageAdapter) tmpMessage);
     else if (tmpMessage.forPostOffice(animatorPostOffice))
       animatorPostOffice.localSendMessage((AnimatorMessageAdapter) tmpMessage);
-    System.out.println("Got Message: " + tmpMessage.getClass().getName());
+    //System.out.println(counter + "Got Message: " + tmpMessage.getClass().getName());
   }
 
   /**

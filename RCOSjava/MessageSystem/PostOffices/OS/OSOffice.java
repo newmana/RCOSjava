@@ -23,58 +23,48 @@ import java.util.SortedMap;
 public class OSOffice extends PostOffice
 {
   /**
-   *  Constructor for the OSOffice object
+   * To be done
    *
-   * @param  sMyID  Description of Parameter
+   * @param newId To be done
    */
-  public OSOffice(String newID)
+  public OSOffice(String newId)
   {
-    id = newID;
+    id = newId;
     // Register ourselves
     //addHandler(sMyID, this);
   }
 
-  /**
-   *  Description of the Method
-   *
-   * @param  aMessage  Description of Parameter
-   */
-  public void sendMessage(MessageAdapter aMessage)
+  public void sendMessage(MessageAdapter message)
   {
     //Send to all other registered post offices.
-    sendToPostOffices(aMessage);
+    sendToPostOffices(message);
     //Send to locally registered components.
-    localSendMessage(aMessage);
+    localSendMessage(message);
   }
 
   /**
    *  Description of the Method
    *
-   * @param  aMessage  Description of Parameter
+   * @param  message  Description of Parameter
    */
-  public void sendMessage(UniversalMessageAdapter aMessage)
+  public void sendMessage(UniversalMessageAdapter message)
   {
-    sendMessage((MessageAdapter) aMessage);
+    sendMessage((MessageAdapter) message);
   }
 
   /**
-   *  Description of the Method
+   * To be done
    *
-   * @param  aMessage  Description of Parameter
+   * @param message To be done
    */
-  public void sendMessage(OSMessageAdapter aMessage)
+  public void sendMessage(OSMessageAdapter message)
   {
-    sendMessage((MessageAdapter) aMessage);
+    sendMessage((MessageAdapter) message);
   }
 
-  /**
-   *  Description of the Method
-   *
-   * @param  maMessage  Description of Parameter
-   */
-  public void localSendMessage(MessageAdapter maMessage)
+  public void localSendMessage(MessageAdapter message)
   {
-    if (maMessage.forPostOffice(this))
+    if (message.forPostOffice(this))
     {
       //Go through the hashtable returning all the handlers
       //registered.  Send the message to all of them.
@@ -85,15 +75,15 @@ public class OSOffice extends PostOffice
       {
         OSMessageHandler theDestination = (OSMessageHandler) tmpIter.next();
         //Send the message to the destination
-        theDestination.processMessage(maMessage);
+        theDestination.processMessage(message);
       }
     }
   }
 
   /**
-   *  Description of the Method
+   * To be done
    *
-   * @param  maMessage  Description of Parameter
+   * @param message To be done
    */
   public void localSendMessage(OSMessageAdapter message)
   {
@@ -113,11 +103,6 @@ public class OSOffice extends PostOffice
     }
   }
 
-  /**
-   *  Description of the Method
-   *
-   * @param  maMessage  Description of Parameter
-   */
   public void sendToPostOffices(MessageAdapter message)
   {
     PostOffice tmpPostOffice;
@@ -136,11 +121,6 @@ public class OSOffice extends PostOffice
     }
   }
 
-  /**
-   *  Description of the Method
-   *
-   * @param  maMsg  Description of Parameter
-   */
   public void processMessage(MessageAdapter message)
   {
     try

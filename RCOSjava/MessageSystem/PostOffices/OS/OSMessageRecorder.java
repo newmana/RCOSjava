@@ -48,7 +48,8 @@ public class OSMessageRecorder extends OSMessageHandler
    */
   public void processMessage(OSMessageAdapter newMessage)
   {
-    recorder.processOSMessage(newMessage);
+    if (newMessage.undoableMessage())
+      recorder.processOSMessage(newMessage);
   }
 
   /**
@@ -59,6 +60,7 @@ public class OSMessageRecorder extends OSMessageHandler
    */
   public void processMessage(UniversalMessageAdapter newMessage)
   {
-    recorder.processOSUniversalMessage(newMessage);
+    if (newMessage.undoableMessage())
+      recorder.processOSUniversalMessage(newMessage);
   }
 }

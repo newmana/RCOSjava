@@ -1,14 +1,3 @@
-//*******************************************************************/
-// FILE     : ProcessAllocatedTerminalMessage.java
-// PURPOSE  : Used to assign a terminal to the next
-//            waiting process.
-// AUTHOR   : David Jones
-// MODIFIED : Andrew Newman
-// HISTORY  : 24/03/96   Created
-//          : 01/07/96   Uses Memory
-//          : 03/08/97   Moved to message system
-//*******************************************************************/
-
 package MessageSystem.Messages.Universal;
 
 import Hardware.Memory.Memory;
@@ -18,26 +7,49 @@ import Software.Animator.Process.ProcessSchedulerAnimator;
 import Software.Terminal.TerminalManager;
 import MessageSystem.PostOffices.OS.OSMessageHandler;
 
+/**
+ * Used to assign a terminal to the next waiting process.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 24th March 1996
+ */
 public class ProcessAllocatedTerminalMessage extends UniversalMessageAdapter
 {
-  private String sTerminalID;
-  private int iPID;
+  private String terminalId;
+  private int pid;
 
-  public ProcessAllocatedTerminalMessage(OSMessageHandler theSource, String sTerminalID, int iPID)
+  /**
+   * Create a new process allocated terminal message.
+   *
+   * @param newSource the source of the message.
+   * @param newTerminalId the terminal id to assign to the process.
+   * @param newPID the process id that is assigned the terminal.
+   */
+  public ProcessAllocatedTerminalMessage(OSMessageHandler newSource,
+    String newTerminalId, int newPID)
   {
-    super(theSource);
-    this.sTerminalID = sTerminalID;
-    this.iPID = iPID;
+    super(newSource);
+    terminalId = newTerminalId;
+    pid = newPID;
   }
 
+  /**
+   * Executes the processAllocatedTerminal method passing the stored process id..
+   *
+   * @param theElement the process scheduler to do work on.
+   */
   public void doMessage(ProcessScheduler theElement)
   {
-    theElement.processAllocatedTerminal(iPID, sTerminalID);
+    theElement.processAllocatedTerminal(pid, terminalId);
   }
 
-  public void doMessage(ProcessSchedulerAnimator theElement)
+  /**
+   * Set to false so it is not recorded.
+   */
+  public boolean undoableMessage()
   {
-    theElement.zombieToReady(iPID);
+    return false;
   }
 }
 

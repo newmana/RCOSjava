@@ -58,5 +58,11 @@ public class UpdateList extends UniversalMessageAdapter
   {
     theElement.updateList(directory);
   }
+
+  public boolean undoableMessage()
+  {
+    return false;
+  }
+
 }
 
