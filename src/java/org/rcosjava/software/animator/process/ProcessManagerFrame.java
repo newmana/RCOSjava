@@ -79,27 +79,27 @@ public class ProcessManagerFrame extends RCOSFrame
     Container dialogContainer = changePriorityDialog.getContentPane();
     dialogContainer.setLayout(new BorderLayout());
 
-    changePriorityDialog.setBackground(DEFAULT_BG_COLOUR);
-    changePriorityDialog.setForeground(DEFAULT_FG_COLOUR);
+    changePriorityDialog.setBackground(defaultBgColour);
+    changePriorityDialog.setForeground(defaultFgColour);
     changePriorityDialog.setFont(defaultFont);
     changePriorityDialog.setSize(new Dimension(250, 90));
 
     JPanel priorityPanel = new JPanel();
-    priorityPanel.setBackground(DEFAULT_BG_COLOUR);
-    priorityPanel.setForeground(DEFAULT_FG_COLOUR);
+    priorityPanel.setBackground(defaultBgColour);
+    priorityPanel.setForeground(defaultFgColour);
     processPrompt = new JLabel("Priority of Process XX (1-100): ");
-    processPrompt.setBackground(DEFAULT_BG_COLOUR);
-    processPrompt.setForeground(DEFAULT_FG_COLOUR);
+    processPrompt.setBackground(defaultBgColour);
+    processPrompt.setForeground(defaultFgColour);
     priorityPanel.add(processPrompt,  BorderLayout.CENTER);
     priorityTextField = new JTextField(3);
-    priorityTextField.setBackground(DEFAULT_BG_COLOUR);
-    priorityTextField.setForeground(DEFAULT_FG_COLOUR);
+    priorityTextField.setBackground(defaultBgColour);
+    priorityTextField.setForeground(defaultFgColour);
     priorityPanel.add(priorityTextField);
 
     JPanel okCancelPanel = new JPanel();
     okCancelPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-    okCancelPanel.setBackground(DEFAULT_BG_COLOUR);
-    okCancelPanel.setForeground(DEFAULT_FG_COLOUR);
+    okCancelPanel.setBackground(defaultBgColour);
+    okCancelPanel.setForeground(defaultFgColour);
     JButton tmpOkayButton = new JButton("Ok");
     tmpOkayButton.addMouseListener(new OkPriorityDialog());
     okCancelPanel.add(tmpOkayButton);

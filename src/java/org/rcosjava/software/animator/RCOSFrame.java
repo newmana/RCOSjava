@@ -25,19 +25,24 @@ import java.lang.reflect.Method;
 public class RCOSFrame extends JFrame implements Serializable
 {
   /**
-   * Default colour to display text on all buttons (Yellow).
+   * Default foreground colour to display on all radio buttons (Dark Gray).
    */
-  protected transient static final Color buttonColour = Color.yellow;
+  protected transient static final Color choiceFgColour = Color.darkGray;
 
   /**
-   * Default colour to display on all radio text colours (Dark Gray).
+   * Default background colour to display on all radio buttons (Black).
    */
-  protected transient static final Color choiceColour = Color.darkGray;
+  protected transient static final Color choiceBgColour = Color.black;
 
   /**
-   * Default colour of text to display on all drop down menus (Dark Gray).
+   * Default colour of text to display on all drop down menus (White).
    */
-  protected transient static final Color listColour = Color.darkGray;
+  protected transient static final Color listFgColour = Color.white;
+
+  /**
+   * Default colour of background to display on all drop down menus (Dark Gray).
+   */
+  protected transient static final Color listBgColour = Color.darkGray;
 
   /**
    * Default colour to use on all text boxes (Dark Gray).
@@ -47,35 +52,39 @@ public class RCOSFrame extends JFrame implements Serializable
   /**
    * Default background of all windows (Black).
    */
-  public static final Color DEFAULT_BG_COLOUR = Color.black;
+  protected transient static final Color defaultBgColour = Color.black;
 
   /**
    * Default foreground colour of all text (White).
    */
-  public static final Color DEFAULT_FG_COLOUR = Color.white;
+  protected transient static final Color defaultFgColour = Color.white;
 
   /**
    * Default font size (TimesRoman, Plain, 12).
    */
-  public transient static final Font defaultFont = new Font("TimesRoman", Font.PLAIN, 11);
+  protected transient static final Font defaultFont = new Font("TimesRoman",
+      Font.PLAIN, 11);
 
   /**
    * Default label font size (TimesRoman, Plain, 14).
    */
-  public transient static final Font labelFont = new Font("TimesRoman", Font.PLAIN, 11);
+  protected transient static final Font labelFont = new Font("TimesRoman",
+      Font.PLAIN, 11);
 
   /**
    * Default button font size (Courier, Bold, 14).
    */
-  public transient static final Font buttonFont = new Font("Courier", Font.BOLD, 11);
+  protected transient static final Font buttonFont = new Font("Courier",
+      Font.BOLD, 11);
 
   /**
    * Default title font size (TimesRoman, Plain, 18).
    */
-  public transient static final Font titleFont = new Font("TimesRoman", Font.PLAIN, 16);
+  protected transient static final Font titleFont = new Font("TimesRoman",
+      Font.PLAIN, 16);
 
   /**
-   * Description of the Field
+   * Temporary button.
    */
   protected JButton tmpButton;
 
@@ -113,13 +122,12 @@ public class RCOSFrame extends JFrame implements Serializable
   public void setupLayout(JComponent c)
   {
     myComponent = c;
-
     SymWindow theSymWindow = new SymWindow();
-
     this.addWindowListener(theSymWindow);
+
     // Set default colours, fonts and layout manager.
-    setBackground(DEFAULT_BG_COLOUR);
-    setForeground(DEFAULT_FG_COLOUR);
+    setBackground(defaultBgColour);
+    setForeground(defaultFgColour);
     setFont(defaultFont);
     getContentPane().setLayout(new BorderLayout());
   }

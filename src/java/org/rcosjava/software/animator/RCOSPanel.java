@@ -21,29 +21,38 @@ import java.lang.reflect.Method;
 public abstract class RCOSPanel extends JPanel implements Serializable
 {
   /**
-   * Default colour to display text on all buttons (Yellow).
+   * Default colour to display on foreground of all radio text colours
+   * (Black).
    */
-  protected transient static final Color buttonColour = Color.yellow;
+  protected transient static final Color choiceFgColour = Color.lightGray;
 
   /**
-   * Default colour to display on all radio text colours (Dark Gray).
+   * Default colour to display on background of all radio text background
+   * colours (Light Gray).
    */
-  protected transient static final Color choiceColour = Color.darkGray;
+  protected transient static final Color choiceBgColour = Color.darkGray;
 
   /**
-   * Default colour of text to display on all drop down menus (Dark Gray).
+   * Default colour of text to display foreground on all drop down
+   * menus (Black).
    */
-  protected transient static final Color listColour = Color.darkGray;
+  protected transient static final Color listFgColour = Color.lightGray;
 
   /**
-   * Default colour to use on all text boxes (Dark Gray).
+   * Default colour to display on background of all radio text background
+   * colours (Dark Gray).
    */
-  protected transient static final Color textBoxColour = Color.darkGray;
+  protected transient static final Color listBgColour = Color.darkGray;
 
   /**
-   * Default text colour of all terminals (Green).
+   * Default colour to use on foreground of all text boxes (Dark Gray).
    */
-  protected transient static final Color terminalColour = Color.green;
+  protected transient static final Color textBoxFgColour = Color.darkGray;
+
+  /**
+   * Default colour to use on background of all text boxes (Black).
+   */
+  protected transient static final Color textBoxBgColour = Color.black;
 
   /**
    * Default background of all windows (Black).
@@ -53,32 +62,25 @@ public abstract class RCOSPanel extends JPanel implements Serializable
   /**
    * Default foreground colour of all text (White).
    */
-  protected transient static final Color defaultFgColour = Color.white;
+  protected transient static final Color defaultFgColour = Color.lightGray;
 
   /**
    * Default font size (TimesRoman, Plain, 12).
    */
-  protected transient static final Font defaultFont = new Font("TimesRoman", Font.PLAIN, 11);
+  protected transient static final Font defaultFont = new Font("TimesRoman",
+      Font.PLAIN, 11);
 
   /**
    * Default label font size (TimesRoman, Plain, 14).
    */
-  protected transient static final Font labelFont = new Font("TimesRoman", Font.PLAIN, 11);
-
-  /**
-   * Default button font size (Courier, Bold, 14).
-   */
-  protected transient static final Font buttonFont = new Font("Courier", Font.BOLD, 11);
-
-  /**
-   * Default terminal font size (Courier, Plain, 10).
-   */
-  protected transient static final Font terminlFont = new Font("Courier", Font.PLAIN, 10);
+  protected transient static final Font labelFont = new Font("TimesRoman",
+      Font.PLAIN, 11);
 
   /**
    * Default title font size (TimesRoman, Plain, 16).
    */
-  protected transient static final Font titleFont = new Font("TimesRoman", Font.PLAIN, 16);
+  protected transient static final Font titleFont = new Font("TimesRoman",
+      Font.PLAIN, 16);
 
   /**
    * Constructor for the RCOSFrame object

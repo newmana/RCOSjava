@@ -76,19 +76,26 @@ public class ProgramManagerFrame extends RCOSFrame
   private JCheckBox startTerminalCheckbox = new JCheckBox();
 
   /**
+   * Checkbox images.
+   */
+  private ImageIcon[] checkboxIcons;
+
+  /**
    * Constructor for the ProgramManagerFrame object
    *
    * @param x Description of Parameter
    * @param y Description of Parameter
    * @param thisProgramManager Description of Parameter
+   * @param checkboxIcons the icons to display for the checkbox.
    */
   public ProgramManagerFrame(int x, int y,
-      ProgramManagerAnimator thisProgramManager)
+      ProgramManagerAnimator thisProgramManager, ImageIcon[] newCheckboxIcons)
   {
     super();
     setTitle("Program Manager");
     myProgramManager = thisProgramManager;
     setSize(x, y);
+    checkboxIcons = newCheckboxIcons;
   }
 
   /**
@@ -121,17 +128,20 @@ public class ProgramManagerFrame extends RCOSFrame
     getContentPane().setLayout(new BorderLayout());
 
     JPanel mainPanel = new JPanel();
-    mainPanel.setBackground(DEFAULT_BG_COLOUR);
-    mainPanel.setForeground(DEFAULT_FG_COLOUR);
-    JPanel fileNamePanel = new JPanel();
-    fileNamePanel.setBackground(DEFAULT_BG_COLOUR);
-    fileNamePanel.setForeground(DEFAULT_FG_COLOUR);
-    JPanel terminOptionPanel = new JPanel();
-    terminOptionPanel.setBackground(DEFAULT_BG_COLOUR);
-    terminOptionPanel.setForeground(DEFAULT_FG_COLOUR);
+    mainPanel.setBackground(defaultBgColour);
+    mainPanel.setForeground(defaultFgColour);
+
+    JPanel fileNamePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    fileNamePanel.setBackground(defaultBgColour);
+    fileNamePanel.setForeground(defaultFgColour);
+
+    JPanel terminalOptionPanel = new JPanel();
+    terminalOptionPanel.setBackground(defaultBgColour);
+    terminalOptionPanel.setForeground(defaultFgColour);
+
     JPanel buttonPanel = new JPanel();
-    buttonPanel.setBackground(DEFAULT_BG_COLOUR);
-    buttonPanel.setForeground(DEFAULT_FG_COLOUR);
+    buttonPanel.setBackground(defaultBgColour);
+    buttonPanel.setForeground(defaultFgColour);
 
     GridBagConstraints constraints = new GridBagConstraints();
     GridBagLayout gridBag = new GridBagLayout();
@@ -149,8 +159,8 @@ public class ProgramManagerFrame extends RCOSFrame
     constraints.anchor = GridBagConstraints.CENTER;
     tmpLabel = new JLabel("Directories");
     tmpLabel.setFont(titleFont);
-    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
-    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
     gridBag.setConstraints(tmpLabel, constraints);
     mainPanel.add(tmpLabel);
 
@@ -158,8 +168,8 @@ public class ProgramManagerFrame extends RCOSFrame
     constraints.anchor = GridBagConstraints.CENTER;
     tmpLabel = new JLabel("Files");
     tmpLabel.setFont(titleFont);
-    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
-    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
     gridBag.setConstraints(tmpLabel, constraints);
     mainPanel.add(tmpLabel);
 
@@ -170,8 +180,8 @@ public class ProgramManagerFrame extends RCOSFrame
     directoryListBox.setVisibleRowCount(8);
     directoryListBox.setFixedCellWidth(100);
     directoryListBox.setModel(directoryListModel);
-    directoryListBox.setBackground(listColour);
-    directoryListBox.setForeground(DEFAULT_FG_COLOUR);
+    directoryListBox.setBackground(listBgColour);
+    directoryListBox.setForeground(listFgColour);
     JScrollPane directoryListPane = new JScrollPane(directoryListBox);
     directoryListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     directoryListPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -186,8 +196,8 @@ public class ProgramManagerFrame extends RCOSFrame
     fileListBox.setModel(fileListModel);
     fileListBox.setVisibleRowCount(8);
     fileListBox.setFixedCellWidth(100);
-    fileListBox.setBackground(listColour);
-    fileListBox.setForeground(DEFAULT_FG_COLOUR);
+    fileListBox.setBackground(listBgColour);
+    fileListBox.setForeground(listFgColour);
     JScrollPane fileListPane = new JScrollPane(fileListBox);
     fileListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     fileListPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -196,12 +206,12 @@ public class ProgramManagerFrame extends RCOSFrame
     fileListBox.addMouseListener(new FileListBoxListener());
 
     tmpLabel = new JLabel("Filename: ");
-    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
-    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
     fileNamePanel.add(tmpLabel);
     fileNameTextField.setFont(defaultFont);
     fileNameTextField.setBackground(textBoxColour);
-    fileNameTextField.setForeground(DEFAULT_FG_COLOUR);
+    fileNameTextField.setForeground(defaultFgColour);
     fileNamePanel.add(fileNameTextField);
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
@@ -210,19 +220,31 @@ public class ProgramManagerFrame extends RCOSFrame
     mainPanel.add(fileNamePanel);
 
     startTerminalCheckbox.setSelected(startTerminal);
-    terminOptionPanel.add(startTerminalCheckbox);
+
+    // Only set icons if we're running Metal look and feel.
+    if (UIManager.getLookAndFeel().getClass().getName().compareTo(
+        UIManager.getCrossPlatformLookAndFeelClassName()) == 0)
+    {
+      startTerminalCheckbox.setIcon(checkboxIcons[0]);
+      startTerminalCheckbox.setSelectedIcon(checkboxIcons[1]);
+    }
+
     startTerminalCheckbox.addItemListener(new StartTerminalListener());
-    startTerminalCheckbox.setBackground(DEFAULT_BG_COLOUR);
-    startTerminalCheckbox.setForeground(DEFAULT_FG_COLOUR);
+    startTerminalCheckbox.setContentAreaFilled(false);
+    startTerminalCheckbox.setForeground(choiceFgColour);
+    startTerminalCheckbox.setBackground(choiceBgColour);
+
+    terminalOptionPanel.add(startTerminalCheckbox);
     tmpLabel = new JLabel("Automatically start terminal.");
-    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
-    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
-    terminOptionPanel.add(tmpLabel);
+    tmpLabel.addMouseListener(new LabelStartTerminalListener());
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
+    terminalOptionPanel.add(tmpLabel);
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
-    gridBag.setConstraints(terminOptionPanel, constraints);
-    mainPanel.add(terminOptionPanel);
+    gridBag.setConstraints(terminalOptionPanel, constraints);
+    mainPanel.add(terminalOptionPanel);
 
     JButton openButton = new JButton("Open");
 
@@ -319,6 +341,26 @@ public class ProgramManagerFrame extends RCOSFrame
     public void itemStateChanged(ItemEvent e)
     {
       startTerminal = e.getStateChange() == ItemEvent.SELECTED;
+    }
+  }
+
+  /**
+   * Description of the Class
+   *
+   * @author administrator
+   * @created 28 April 2002
+   */
+  class LabelStartTerminalListener extends MouseAdapter
+  {
+    /**
+     * Description of the Method
+     *
+     * @param e Description of Parameter
+     */
+    public void mousePressed(MouseEvent e)
+    {
+      startTerminal = !startTerminal;
+      startTerminalCheckbox.setSelected(startTerminal);
     }
   }
 

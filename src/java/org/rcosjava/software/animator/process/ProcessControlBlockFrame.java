@@ -237,13 +237,13 @@ public class ProcessControlBlockFrame extends RCOSFrame
     DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
 
     // Make the cells black background and white text at all times.
-    renderer.setBackground(DEFAULT_BG_COLOUR);
-    renderer.setForeground(DEFAULT_FG_COLOUR);
-    renderer.setTextNonSelectionColor(DEFAULT_FG_COLOUR);
-    renderer.setTextSelectionColor(DEFAULT_FG_COLOUR);
-    renderer.setBackgroundNonSelectionColor(DEFAULT_BG_COLOUR);
-    renderer.setBackgroundSelectionColor(DEFAULT_BG_COLOUR);
-    renderer.setBorderSelectionColor(DEFAULT_BG_COLOUR);
+    renderer.setBackground(defaultBgColour);
+    renderer.setForeground(defaultFgColour);
+    renderer.setTextNonSelectionColor(defaultFgColour);
+    renderer.setTextSelectionColor(defaultFgColour);
+    renderer.setBackgroundNonSelectionColor(defaultBgColour);
+    renderer.setBackgroundSelectionColor(defaultBgColour);
+    renderer.setBorderSelectionColor(defaultBgColour);
     renderer.setFont(defaultFont);
 
     // Remove all icons.
@@ -262,8 +262,8 @@ public class ProcessControlBlockFrame extends RCOSFrame
     // colours
     final JTree tree = new JTree(top);
     tree.putClientProperty("JTree.lineStyle", "Angled");
-    tree.setBackground(DEFAULT_BG_COLOUR);
-    tree.setForeground(DEFAULT_FG_COLOUR);
+    tree.setBackground(defaultBgColour);
+    tree.setForeground(defaultFgColour);
     tree.setCellRenderer(renderer);
     tree.getSelectionModel().setSelectionMode(
         TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -271,15 +271,15 @@ public class ProcessControlBlockFrame extends RCOSFrame
 
     //Create the scroll pane and add the tree to it.
     JScrollPane treeView = new JScrollPane(tree);
-    treeView.setBackground(DEFAULT_BG_COLOUR);
-    treeView.setForeground(DEFAULT_FG_COLOUR);
+    treeView.setBackground(defaultBgColour);
+    treeView.setForeground(defaultFgColour);
     treeView.setBorder(new EmptyBorder(3,3,3,3));
 
     // Create the ok panel and the ok button.
     JPanel okPanel = new JPanel();
     okPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-    okPanel.setBackground(DEFAULT_BG_COLOUR);
-    okPanel.setForeground(DEFAULT_FG_COLOUR);
+    okPanel.setBackground(defaultBgColour);
+    okPanel.setForeground(defaultFgColour);
     JButton tmpOkayButton = new JButton("Ok");
     okPanel.add(tmpOkayButton);
     tmpOkayButton.addMouseListener(new OkPCB());

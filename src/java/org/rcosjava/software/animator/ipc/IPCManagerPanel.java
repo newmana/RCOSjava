@@ -150,8 +150,8 @@ public class IPCManagerPanel extends RCOSPanel
     // Setup the shared memory and semaphore widgets
     shmOption = new JComboBox();
     shmList = new JTextArea();
-    shmList.setBackground(defaultBgColour);
-    shmList.setForeground(textBoxColour);
+    shmList.setBackground(textBoxBgColour);
+    shmList.setForeground(textBoxFgColour);
     shmList.setLineWrap(true);
     JScrollPane shmListPane = new JScrollPane(shmList);
     shmListPane.setVerticalScrollBarPolicy(
@@ -159,22 +159,22 @@ public class IPCManagerPanel extends RCOSPanel
     shmListPane.setPreferredSize(new Dimension(500, 90));
 
     shmOption.addItem(NONE);
-    shmOption.setForeground(choiceColour);
-    shmOption.setBackground(defaultBgColour);
+    shmOption.setForeground(listFgColour);
+    shmOption.setBackground(listBgColour);
     shmOption.setSelectedIndex(0);
 
     semOption = new JComboBox();
     semValue = new JTextField(2);
     semOption.addItem(NONE);
-    semOption.setForeground(choiceColour);
-    semOption.setBackground(defaultBgColour);
+    semOption.setForeground(listFgColour);
+    semOption.setBackground(listBgColour);
     semOption.setSelectedIndex(0);
     myAnimator.setSelectedSemaphoreName(NONE);
 
     // Setup the semaphore panel with a panel and border with title.
     JPanel semPanel = new JPanel();
-    semPanel.setBackground(defaultBgColour);
-    semPanel.setForeground(textBoxColour);
+    semPanel.setBackground(textBoxBgColour);
+    semPanel.setForeground(textBoxFgColour);
     TitledBorder semTitle = BorderFactory.createTitledBorder("Semaphores");
     semTitle.setTitleColor(defaultFgColour);
     semPanel.setBorder(BorderFactory.createCompoundBorder(semTitle,
@@ -247,7 +247,6 @@ public class IPCManagerPanel extends RCOSPanel
     tmpPanel.add(tmpLabel);
 
     semValue.setFont(defaultFont);
-    semValue.setBackground(textBoxColour);
     semValue.setForeground(defaultFgColour);
     semValue.setBackground(defaultBgColour);
     tmpPanel.add(semValue);
@@ -258,8 +257,8 @@ public class IPCManagerPanel extends RCOSPanel
 
     // Setup the shared memory panel with a border and title.
     JPanel sharedMemPanel = new JPanel();
-    sharedMemPanel.setBackground(defaultBgColour);
-    sharedMemPanel.setForeground(textBoxColour);
+    sharedMemPanel.setBackground(textBoxBgColour);
+    sharedMemPanel.setForeground(textBoxFgColour);
     TitledBorder sharedMemTitle = BorderFactory.createTitledBorder(
         "Shared Memory");
     sharedMemTitle.setTitleColor(defaultFgColour);

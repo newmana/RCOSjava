@@ -122,17 +122,17 @@ public class MultimediaRecordFrame extends RCOSFrame
     getContentPane().setLayout(new BorderLayout());
 
     JPanel mainPanel = new JPanel();
-    mainPanel.setBackground(DEFAULT_BG_COLOUR);
-    mainPanel.setForeground(DEFAULT_FG_COLOUR);
+    mainPanel.setBackground(defaultBgColour);
+    mainPanel.setForeground(defaultFgColour);
     JPanel fileNamePanel = new JPanel();
-    fileNamePanel.setBackground(DEFAULT_BG_COLOUR);
-    fileNamePanel.setForeground(DEFAULT_FG_COLOUR);
+    fileNamePanel.setBackground(defaultBgColour);
+    fileNamePanel.setForeground(defaultFgColour);
     JPanel terminOptionPanel = new JPanel();
-    terminOptionPanel.setBackground(DEFAULT_BG_COLOUR);
-    terminOptionPanel.setForeground(DEFAULT_FG_COLOUR);
+    terminOptionPanel.setBackground(defaultBgColour);
+    terminOptionPanel.setForeground(defaultFgColour);
     JPanel buttonPanel = new JPanel();
-    buttonPanel.setBackground(DEFAULT_BG_COLOUR);
-    buttonPanel.setForeground(DEFAULT_FG_COLOUR);
+    buttonPanel.setBackground(defaultBgColour);
+    buttonPanel.setForeground(defaultFgColour);
 
     GridBagConstraints constraints = new GridBagConstraints();
     GridBagLayout gridBag = new GridBagLayout();
@@ -150,8 +150,8 @@ public class MultimediaRecordFrame extends RCOSFrame
     constraints.anchor = GridBagConstraints.CENTER;
     tmpLabel = new JLabel("Directories");
     tmpLabel.setFont(titleFont);
-    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
-    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
     gridBag.setConstraints(tmpLabel, constraints);
     mainPanel.add(tmpLabel);
 
@@ -159,8 +159,8 @@ public class MultimediaRecordFrame extends RCOSFrame
     constraints.anchor = GridBagConstraints.CENTER;
     tmpLabel = new JLabel("Files");
     tmpLabel.setFont(titleFont);
-    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
-    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
     gridBag.setConstraints(tmpLabel, constraints);
     mainPanel.add(tmpLabel);
 
@@ -171,8 +171,8 @@ public class MultimediaRecordFrame extends RCOSFrame
     directoryListBox.setVisibleRowCount(8);
     directoryListBox.setFixedCellWidth(100);
     directoryListBox.setModel(directoryListModel);
-    directoryListBox.setBackground(listColour);
-    directoryListBox.setForeground(DEFAULT_FG_COLOUR);
+    directoryListBox.setBackground(listBgColour);
+    directoryListBox.setForeground(listFgColour);
     JScrollPane directoryListPane = new JScrollPane(directoryListBox);
     directoryListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     directoryListPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -186,8 +186,8 @@ public class MultimediaRecordFrame extends RCOSFrame
     fileListBox.setModel(fileListModel);
     fileListBox.setVisibleRowCount(8);
     fileListBox.setFixedCellWidth(100);
-    fileListBox.setBackground(listColour);
-    fileListBox.setForeground(DEFAULT_FG_COLOUR);
+    fileListBox.setBackground(listBgColour);
+    fileListBox.setForeground(listFgColour);
     JScrollPane fileListPane = new JScrollPane(fileListBox);
     fileListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     fileListPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -195,12 +195,12 @@ public class MultimediaRecordFrame extends RCOSFrame
     mainPanel.add(fileListPane);
 
     tmpLabel = new JLabel("Filename: ");
-    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
-    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
     fileNamePanel.add(tmpLabel);
     fileNameTextField.setFont(defaultFont);
     fileNameTextField.setBackground(textBoxColour);
-    fileNameTextField.setForeground(DEFAULT_FG_COLOUR);
+    fileNameTextField.setForeground(defaultFgColour);
     fileNamePanel.add(fileNameTextField);
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;

@@ -260,8 +260,8 @@ public class ProcessSchedulerPanel extends RCOSPanel
     speedOption.addItem("Normal");
     speedOption.addItem("Slow");
     speedOption.addItem("Slowest");
-    speedOption.setForeground(choiceColour);
-    speedOption.setBackground(defaultBgColour);
+    speedOption.setForeground(listFgColour);
+    speedOption.setBackground(listBgColour);
     speedOption.setSelectedItem("Fastest");
 
     // Set-up the options for the choice of quantum ie.
@@ -272,16 +272,16 @@ public class ProcessSchedulerPanel extends RCOSPanel
     quantumOption.addItem("3");
     quantumOption.addItem("2");
     quantumOption.addItem("1");
-    quantumOption.setForeground(choiceColour);
-    quantumOption.setBackground(defaultBgColour);
+    quantumOption.setForeground(listFgColour);
+    quantumOption.setBackground(listBgColour);
     quantumOption.setSelectedItem("2");
 
     // Set-up the options for the choice of queue
     schedulerOption.addItem("FIFO");
     schedulerOption.addItem("LIFO");
     schedulerOption.addItem("Priority");
-    schedulerOption.setForeground(choiceColour);
-    schedulerOption.setBackground(defaultBgColour);
+    schedulerOption.setForeground(choiceFgColour);
+    schedulerOption.setBackground(choiceBgColour);
     schedulerOption.setSelectedItem("FIFO");
 
     // Create speed label and add the drop down.
