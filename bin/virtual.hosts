@@ -5,4 +5,5 @@
 
 # If nothing else, fill this in with a a valid path!
 localhost=../dist
+127.0.0.1=../dist
 
