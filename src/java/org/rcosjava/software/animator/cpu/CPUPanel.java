@@ -214,7 +214,7 @@ public class CPUPanel extends RCOSPanel
     main.add(codeListPane);
 
     // Add the two panels to the frame.
-    add("Center", main);
+    add(main, BorderLayout.CENTER);
 
     screenReset();
   }
