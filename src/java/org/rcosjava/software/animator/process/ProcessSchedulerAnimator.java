@@ -41,9 +41,19 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   private static ProcessSchedulerPanel panel;
 
   /**
-   * The string (e.g. "PID 1") of the current process running.
+   * Process Control Block frame to display.
    */
-  private static String currentProcess = new String();
+  private ProcessControlBlockFrame pcbFrame;
+
+  /**
+   * The current processes running.
+   */
+  private HashMap currentProcesses;
+
+  /**
+   * The seletected by the user to display.
+   */
+  private int pcbSelectedProcess;
 
   /**
    * Create an animator office, register with the animator office, set the size
@@ -58,6 +68,11 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
     super(MESSENGING_ID, postOffice);
     panel = new ProcessSchedulerPanel(images, this);
     panel.repaint();
+
+    // Setup Process Control Block Frame
+    pcbFrame = new ProcessControlBlockFrame(350, 250, this);
+    pcbFrame.setupLayout(panel);
+    currentProcesses = new HashMap();
   }
 
   /**
@@ -145,6 +160,9 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   public void processFinished(RCOSProcess process)
   {
     panel.processFinished(process.getPID());
+
+    // Remove the process from the list of current processes
+    currentProcesses.remove(new Integer(process.getPID()));
   }
 
   /**
@@ -156,6 +174,9 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   public void killProcess(RCOSProcess process)
   {
     panel.killProcess(process.getPID());
+
+    // Remove the process from the list of current processes
+    currentProcesses.remove(new Integer(process.getPID()));
   }
 
   /**
@@ -166,9 +187,15 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void cpuToBlocked(RCOSProcess process)
   {
+    // Stop the execution of the OS
     sendMessage(new Stop(this));
+
+    // Update the values of the current processes and animate
+    currentProcesses.put(new Integer(process.getPID()), process);
     panel.cpuToBlocked(process.getPID());
     addQueue(ProcessScheduler.BLOCKEDQ, process.getPID());
+
+    // Start the execution of the OS
     sendMessage(new Run(this));
   }
 
@@ -180,10 +207,16 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void blockedToReady(RCOSProcess process)
   {
+    // Stop the execution of the OS
     sendMessage(new Stop(this));
+
+    // Update the values of the current processes and animate
+    currentProcesses.put(new Integer(process.getPID()), process);
     removeQueue(ProcessScheduler.BLOCKEDQ, process.getPID());
     panel.blockedToReady(process.getPID());
     addQueue(ProcessScheduler.READYQ, process.getPID());
+
+    // Start the execution of the OS
     sendMessage(new Run(this));
   }
 
@@ -195,9 +228,15 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void cpuToReady(RCOSProcess process)
   {
+    // Stop the execution of the OS
     sendMessage(new Stop(this));
+
+    // Update the values of the current processes and animate
+    currentProcesses.put(new Integer(process.getPID()), process);
     panel.cpuToReady(process.getPID());
     addQueue(ProcessScheduler.READYQ, process.getPID());
+
+    // Start the execution of the OS
     sendMessage(new Run(this));
   }
 
@@ -209,9 +248,15 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void readyToCPU(RCOSProcess process)
   {
+    // Stop the execution of the OS
     sendMessage(new Stop(this));
+
+    // Update the values of the current processes and animate
+    currentProcesses.put(new Integer(process.getPID()), process);
     removeQueue(ProcessScheduler.READYQ, process.getPID());
     panel.readyToCPU(process.getPID());
+
+    // Start the execution of the OS
     sendMessage(new Run(this));
   }
 
@@ -223,10 +268,16 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void zombieToReady(RCOSProcess process)
   {
+    // Stop the execution of the OS
     sendMessage(new Stop(this));
+
+    // Update the values of the current processes and animate
+    currentProcesses.put(new Integer(process.getPID()), process);
     removeQueue(ProcessScheduler.ZOMBIEQ, process.getPID());
     panel.zombieToReady(process.getPID());
     addQueue(ProcessScheduler.READYQ, process.getPID());
+
+    // Start the execution of the OS
     sendMessage(new Run(this));
   }
 
@@ -238,9 +289,15 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void zombieCreated(RCOSProcess process)
   {
+    // Stop the execution of the OS
     sendMessage(new Stop(this));
+
+    // Update the values of the current processes and animate
+    currentProcesses.put(new Integer(process.getPID()), process);
     panel.newProcess(process.getPID());
     addQueue(ProcessScheduler.ZOMBIEQ, process.getPID());
+
+    // Start the execution of the OS
     sendMessage(new Run(this));
   }
 
@@ -251,7 +308,6 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   public void showCPU()
   {
     ShowCPU scmMsg = new ShowCPU(this);
-
     localSendMessage(scmMsg);
   }
 
@@ -277,5 +333,23 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   private void removeQueue(int queueType, int pid)
   {
     panel.removeQueue(queueType, pid);
+  }
+
+  /**
+   * Displays a frame with the given PCB of the process given.
+   *
+   * @param int processId the id of the process to display.
+   */
+  public void displayPCB(int processId)
+  {
+    pcbFrame.setVisible(true);
+
+    // Get the details of the process selected
+    Integer tmpProcessId = new Integer(processId);
+    if (currentProcesses.containsKey(tmpProcessId))
+    {
+      pcbSelectedProcess = processId;
+      pcbFrame.updateDisplay((RCOSProcess) currentProcesses.get(tmpProcessId));
+    }
   }
 }
