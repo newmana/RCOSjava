@@ -189,11 +189,11 @@ public class CPUFrame extends RCOSFrame
       {
         short instr1 = (short) processMemory.getOneMemorySegment(count*8+5);
         short instr2 = (short) processMemory.getOneMemorySegment(count*8+6);
+        short loc = (short) ((256*(instr1 & 255)) + (instr2 & 255));
 
         Instruction theInstruction = new Instruction(
           (processMemory.getOneMemorySegment(count*8) & 0xff),
-          ((byte) processMemory.getOneMemorySegment(count*8+4)),
-          ((short) ((instr1 & 255 << 8) + instr2 & 255)));
+          ((byte) processMemory.getOneMemorySegment(count*8+4)), loc);
         codeList.add(theInstruction.toString());
       }
       // make the selected instruction the ProgramCounter

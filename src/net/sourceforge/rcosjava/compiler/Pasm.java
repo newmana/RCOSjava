@@ -94,11 +94,11 @@ public class Pasm
 
       while (eof != -1)
       {
-        short instr1 = (short) pcodeInstruction[5];
-        short instr2 = (short) pcodeInstruction[6];
+        byte instr1 = pcodeInstruction[5];
+        byte instr2 = pcodeInstruction[6];
+        short loc = (short) ((256*(instr1 & 255)) + (instr2 & 255));
         Instruction theInstruction = new Instruction((
-          pcodeInstruction[0] & 0xff), (pcodeInstruction[4]),
-          (short) ((instr1 & 255 << 8) + (instr2 & 255)) );
+          pcodeInstruction[0] & 0xff), (pcodeInstruction[4]), loc);
 
         if (printOffset)
         {

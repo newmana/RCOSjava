@@ -367,10 +367,10 @@ public class CPU
   {
     short instr1 = (short) processCode.read(address*8+5);
     short instr2 = (short) processCode.read(address*8+6);
+    short loc = (short) ((256*(instr1 & 255)) + (instr2 & 255));
 
     return (new Instruction((processCode.read(address*8) & 0xff),
-      ((byte) processCode.read(address*8+4)),
-      ((short) ((instr1 & 255 << 8) + instr2 & 255))));
+      ((byte) processCode.read(address*8+4)), loc));
   }
 
   /**
