@@ -23,62 +23,62 @@ public abstract class RCOSPanel extends JPanel implements Serializable
   /**
    * Default colour to display text on all buttons (Yellow).
    */
-  public transient static Color buttonColour = Color.yellow;
+  protected transient static final Color buttonColour = Color.yellow;
 
   /**
    * Default colour to display on all radio text colours (Dark Gray).
    */
-  public transient static Color choiceColour = Color.darkGray;
+  protected transient static final Color choiceColour = Color.darkGray;
 
   /**
    * Default colour of text to display on all drop down menus (Dark Gray).
    */
-  public transient static Color listColour = Color.darkGray;
+  protected transient static final Color listColour = Color.darkGray;
 
   /**
    * Default colour to use on all text boxes (Dark Gray).
    */
-  public transient static Color textBoxColour = Color.darkGray;
+  protected transient static final Color textBoxColour = Color.darkGray;
 
   /**
    * Default text colour of all terminals (Green).
    */
-  public transient static Color terminalColour = Color.green;
+  protected transient static final Color terminalColour = Color.green;
 
   /**
    * Default background of all windows (Black).
    */
-  public transient static Color defaultBgColour = Color.black;
+  protected transient static final Color defaultBgColour = Color.black;
 
   /**
    * Default foreground colour of all text (White).
    */
-  public transient static Color defaultFgColour = Color.white;
+  protected transient static final Color defaultFgColour = Color.white;
 
   /**
    * Default font size (TimesRoman, Plain, 12).
    */
-  public transient static Font defaultFont = new Font("TimesRoman", Font.PLAIN, 11);
+  protected transient static final Font defaultFont = new Font("TimesRoman", Font.PLAIN, 11);
 
   /**
    * Default label font size (TimesRoman, Plain, 14).
    */
-  public transient static Font labelFont = new Font("TimesRoman", Font.PLAIN, 11);
+  protected transient static final Font labelFont = new Font("TimesRoman", Font.PLAIN, 11);
 
   /**
    * Default button font size (Courier, Bold, 14).
    */
-  public transient static Font buttonFont = new Font("Courier", Font.BOLD, 11);
+  protected transient static final Font buttonFont = new Font("Courier", Font.BOLD, 11);
 
   /**
    * Default terminal font size (Courier, Plain, 10).
    */
-  public transient static Font terminlFont = new Font("Courier", Font.PLAIN, 10);
+  protected transient static final Font terminlFont = new Font("Courier", Font.PLAIN, 10);
 
   /**
    * Default title font size (TimesRoman, Plain, 16).
    */
-  public transient static Font titleFont = new Font("TimesRoman", Font.PLAIN, 16);
+  protected transient static final Font titleFont = new Font("TimesRoman", Font.PLAIN, 16);
 
   /**
    * Constructor for the RCOSFrame object

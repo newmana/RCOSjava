@@ -42,12 +42,12 @@ public class AboutFrame extends RCOSFrame
   public void setupLayout(Component c)
   {
     JPanel titlePanel = new JPanel();
-    titlePanel.setBackground(defaultBgColour);
-    titlePanel.setForeground(defaultFgColour);
+    titlePanel.setBackground(DEFAULT_BG_COLOUR);
+    titlePanel.setForeground(DEFAULT_FG_COLOUR);
 
     JPanel contentPanel = new JPanel();
-    contentPanel.setBackground(defaultBgColour);
-    contentPanel.setForeground(defaultFgColour);
+    contentPanel.setBackground(DEFAULT_BG_COLOUR);
+    contentPanel.setForeground(DEFAULT_FG_COLOUR);
     GridBagConstraints constraints = new GridBagConstraints();
     GridBagLayout gridBag = new GridBagLayout();
     constraints.gridwidth = 1;
@@ -60,63 +60,63 @@ public class AboutFrame extends RCOSFrame
     contentPanel.setLayout(gridBag);
 
     JPanel closePanel = new JPanel();
-    closePanel.setBackground(defaultBgColour);
-    closePanel.setForeground(defaultFgColour);
+    closePanel.setBackground(DEFAULT_BG_COLOUR);
+    closePanel.setForeground(DEFAULT_FG_COLOUR);
 
     JLabel tmpLabel;
 
     tmpLabel = new JLabel("About RCOSjava");
     tmpLabel.setFont(titleFont);
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(defaultFgColour);
+    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
+    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
     titlePanel.add(tmpLabel);
 
     JPanel tmpPanel = new JPanel();
-    tmpPanel.setBackground(defaultBgColour);
-    tmpPanel.setForeground(defaultFgColour);
+    tmpPanel.setBackground(DEFAULT_BG_COLOUR);
+    tmpPanel.setForeground(DEFAULT_FG_COLOUR);
     tmpLabel = new JLabel("Version 0.5");
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(defaultFgColour);
+    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
+    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
     tmpPanel.add(tmpLabel);
     gridBag.setConstraints(tmpPanel, constraints);
     contentPanel.add(tmpPanel);
 
     tmpPanel = new JPanel();
-    tmpPanel.setBackground(defaultBgColour);
-    tmpPanel.setForeground(defaultFgColour);
+    tmpPanel.setBackground(DEFAULT_BG_COLOUR);
+    tmpPanel.setForeground(DEFAULT_FG_COLOUR);
     tmpLabel = new JLabel("Licensed under the GPL (GNU Public Licence)");
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(defaultFgColour);
+    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
+    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
     tmpPanel.add(tmpLabel);
     gridBag.setConstraints(tmpPanel, constraints);
     contentPanel.add(tmpPanel);
 
     tmpPanel = new JPanel();
-    tmpPanel.setBackground(defaultBgColour);
-    tmpPanel.setForeground(defaultFgColour);
+    tmpPanel.setBackground(DEFAULT_BG_COLOUR);
+    tmpPanel.setForeground(DEFAULT_FG_COLOUR);
     tmpLabel = new JLabel("Copyright 1997-2003");
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(defaultFgColour);
+    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
+    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
     tmpPanel.add(tmpLabel);
     gridBag.setConstraints(tmpPanel, constraints);
     contentPanel.add(tmpPanel);
 
     tmpPanel = new JPanel();
-    tmpPanel.setBackground(defaultBgColour);
-    tmpPanel.setForeground(defaultFgColour);
+    tmpPanel.setBackground(DEFAULT_BG_COLOUR);
+    tmpPanel.setForeground(DEFAULT_FG_COLOUR);
     tmpLabel = new JLabel("Current Contributors:");
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(defaultFgColour);
+    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
+    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
     tmpPanel.add(tmpLabel);
     gridBag.setConstraints(tmpPanel, constraints);
     contentPanel.add(tmpPanel);
 
     tmpPanel = new JPanel();
-    tmpPanel.setBackground(defaultBgColour);
-    tmpPanel.setForeground(defaultFgColour);
+    tmpPanel.setBackground(DEFAULT_BG_COLOUR);
+    tmpPanel.setForeground(DEFAULT_FG_COLOUR);
     tmpLabel = new JLabel("Andrew Newman");
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(defaultFgColour);
+    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
+    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
     tmpLabel.setFont(defaultFont);
     tmpPanel.add(tmpLabel);
     constraints.anchor = GridBagConstraints.CENTER;
@@ -124,37 +124,37 @@ public class AboutFrame extends RCOSFrame
     contentPanel.add(tmpPanel);
 
     tmpPanel = new JPanel();
-    tmpPanel.setBackground(defaultBgColour);
-    tmpPanel.setForeground(defaultFgColour);
+    tmpPanel.setBackground(DEFAULT_BG_COLOUR);
+    tmpPanel.setForeground(DEFAULT_FG_COLOUR);
     tmpLabel = new JLabel("Original Contributors:");
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(defaultFgColour);
+    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
+    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
     tmpPanel.add(tmpLabel);
     constraints.anchor = GridBagConstraints.WEST;
     gridBag.setConstraints(tmpPanel, constraints);
     contentPanel.add(tmpPanel);
 
     tmpPanel = new JPanel(new GridLayout(4,1));
-    tmpPanel.setBackground(defaultBgColour);
-    tmpPanel.setForeground(defaultFgColour);
+    tmpPanel.setBackground(DEFAULT_BG_COLOUR);
+    tmpPanel.setForeground(DEFAULT_FG_COLOUR);
     tmpLabel = new JLabel("Brett Carter");
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(defaultFgColour);
+    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
+    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
     tmpLabel.setFont(defaultFont);
     tmpPanel.add(tmpLabel);
     tmpLabel = new JLabel("Bruce Jamieson");
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(defaultFgColour);
+    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
+    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
     tmpLabel.setFont(defaultFont);
     tmpPanel.add(tmpLabel);
     tmpLabel = new JLabel("David Jones");
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(defaultFgColour);
+    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
+    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
     tmpLabel.setFont(defaultFont);
     tmpPanel.add(tmpLabel);
     tmpLabel = new JLabel("Andrew Newman");
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(defaultFgColour);
+    tmpLabel.setBackground(DEFAULT_BG_COLOUR);
+    tmpLabel.setForeground(DEFAULT_FG_COLOUR);
     tmpLabel.setFont(defaultFont);
     tmpPanel.add(tmpLabel);
     constraints.anchor = GridBagConstraints.CENTER;
@@ -162,8 +162,8 @@ public class AboutFrame extends RCOSFrame
     contentPanel.add(tmpPanel);
 
     closePanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-    closePanel.setBackground(defaultBgColour);
-    closePanel.setForeground(defaultFgColour);
+    closePanel.setBackground(DEFAULT_BG_COLOUR);
+    closePanel.setForeground(DEFAULT_FG_COLOUR);
     tmpButton = new JButton("Close");
     closePanel.add(tmpButton);
     tmpButton.addMouseListener(new RCOSFrame.CloseAnimator());

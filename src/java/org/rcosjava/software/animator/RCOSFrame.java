@@ -27,62 +27,52 @@ public class RCOSFrame extends JFrame implements Serializable
   /**
    * Default colour to display text on all buttons (Yellow).
    */
-  public static Color buttonColour = Color.yellow;
+  protected transient static final Color buttonColour = Color.yellow;
 
   /**
    * Default colour to display on all radio text colours (Dark Gray).
    */
-  public static Color choiceColour = Color.darkGray;
+  protected transient static final Color choiceColour = Color.darkGray;
 
   /**
    * Default colour of text to display on all drop down menus (Dark Gray).
    */
-  public static Color listColour = Color.darkGray;
+  protected transient static final Color listColour = Color.darkGray;
 
   /**
    * Default colour to use on all text boxes (Dark Gray).
    */
-  public static Color textBoxColour = Color.darkGray;
-
-  /**
-   * Default text colour of all terminals (Green).
-   */
-  public static Color terminalColour = Color.green;
+  protected transient static final Color textBoxColour = Color.darkGray;
 
   /**
    * Default background of all windows (Black).
    */
-  public static Color defaultBgColour = Color.black;
+  public static final Color DEFAULT_BG_COLOUR = Color.black;
 
   /**
    * Default foreground colour of all text (White).
    */
-  public static Color defaultFgColour = Color.white;
+  public static final Color DEFAULT_FG_COLOUR = Color.white;
 
   /**
    * Default font size (TimesRoman, Plain, 12).
    */
-  public static Font defaultFont = new Font("TimesRoman", Font.PLAIN, 11);
+  protected transient static final Font defaultFont = new Font("TimesRoman", Font.PLAIN, 11);
 
   /**
    * Default label font size (TimesRoman, Plain, 14).
    */
-  public static Font labelFont = new Font("TimesRoman", Font.PLAIN, 11);
+  protected transient static final Font labelFont = new Font("TimesRoman", Font.PLAIN, 11);
 
   /**
    * Default button font size (Courier, Bold, 14).
    */
-  public static Font buttonFont = new Font("Courier", Font.BOLD, 11);
-
-  /**
-   * Default terminal font size (Courier, Plain, 10).
-   */
-  public static Font terminlFont = new Font("Courier", Font.PLAIN, 10);
+  protected transient static final Font buttonFont = new Font("Courier", Font.BOLD, 11);
 
   /**
    * Default title font size (TimesRoman, Plain, 18).
    */
-  public static Font titleFont = new Font("TimesRoman", Font.PLAIN, 16);
+  protected transient static final Font titleFont = new Font("TimesRoman", Font.PLAIN, 16);
 
   /**
    * Description of the Field
@@ -128,8 +118,8 @@ public class RCOSFrame extends JFrame implements Serializable
 
     this.addWindowListener(theSymWindow);
     // Set default colours, fonts and layout manager.
-    setBackground(defaultBgColour);
-    setForeground(defaultFgColour);
+    setBackground(DEFAULT_BG_COLOUR);
+    setForeground(DEFAULT_FG_COLOUR);
     setFont(defaultFont);
     getContentPane().setLayout(new BorderLayout());
   }
