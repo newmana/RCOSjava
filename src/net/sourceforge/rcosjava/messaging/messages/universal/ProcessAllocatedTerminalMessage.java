@@ -1,10 +1,7 @@
 package net.sourceforge.rcosjava.messaging.messages.universal;
 
-import net.sourceforge.rcosjava.hardware.memory.Memory;
 import net.sourceforge.rcosjava.software.process.ProcessScheduler;
-import net.sourceforge.rcosjava.software.process.RCOSProcess;
-import net.sourceforge.rcosjava.software.animator.process.ProcessSchedulerAnimator;
-import net.sourceforge.rcosjava.software.terminal.TerminalManager;
+import net.sourceforge.rcosjava.software.animator.terminal.TerminalManagerAnimator;
 import net.sourceforge.rcosjava.messaging.postoffices.os.OSMessageHandler;
 
 /**
@@ -32,6 +29,18 @@ public class ProcessAllocatedTerminalMessage extends UniversalMessageAdapter
     super(newSource);
     terminalId = newTerminalId;
     pid = newPID;
+  }
+
+  /**
+   * Executes the terminalOn to indicate that the terminal has been allocated.
+   * Takes the terminalId and expects that the last character is a number which
+   * is the current terminal.
+   *
+   * @param theElement the terminal manager animator to do work on.
+   */
+  public void doMessage(TerminalManagerAnimator theElement)
+  {
+    theElement.terminalOn(Integer.parseInt(terminalId.substring(terminalId.length()-1)));
   }
 
   /**
