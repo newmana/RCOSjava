@@ -81,6 +81,8 @@ public class ProcessSchedulerTest extends TestCase
     try
     {
       scheduler = new ProcessScheduler(new OSOffice("test"));
+
+      // Create new process
       scheduler.newProcess(new NewProcess(scheduler, "test.pll", new Memory(),
           10));
       tmpProcess1 = (RCOSProcess) scheduler.getAllProcesses().get(new Integer(1));
@@ -163,6 +165,8 @@ public class ProcessSchedulerTest extends TestCase
     try
     {
       scheduler = new ProcessScheduler(new OSOffice("test"));
+
+      // Create new process
       scheduler.newProcess(new NewProcess(scheduler, "test.pll", new Memory(),
           10));
       tmpProcess1 = (RCOSProcess) scheduler.getAllProcesses().get(new Integer(1));
@@ -177,7 +181,7 @@ public class ProcessSchedulerTest extends TestCase
           scheduler.getZombieCreatedQueue().getProcess(1).equals(tmpProcess1));
 
       // Zombie process allocated a terminal
-      scheduler.processAllocatedTerminal(tmpProcess1, "Termainl1");
+      scheduler.processAllocatedTerminal(tmpProcess1, "Terminal1");
 
       // Zombie process moved to read queue
       scheduler.zombieToReady(tmpProcess1);
@@ -286,6 +290,8 @@ public class ProcessSchedulerTest extends TestCase
     try
     {
       scheduler = new ProcessScheduler(new OSOffice("test"));
+
+      // Create new process
       scheduler.newProcess(new NewProcess(scheduler, "test.pll", new Memory(),
           10));
       tmpProcess1 = (RCOSProcess) scheduler.getAllProcesses().get(new Integer(1));
