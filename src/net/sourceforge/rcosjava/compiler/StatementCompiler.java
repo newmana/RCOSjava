@@ -41,8 +41,19 @@ public class StatementCompiler extends DepthFirstAdapter
 
     ARelConditionalExpression expr = (ARelConditionalExpression)
         node.getConditionalExpression();
+
+    PValue expression1 = expr.getLeft();
+    PValue expression2 = expr.getRight();
+
     System.out.println("LH: " + expr.getLeft());
+    System.out.println("LH: " + expression1.getClass().toString());
     System.out.println("RH: " + expr.getRight());
+    System.out.println("RH: " + expression2.getClass().toString());
+    // With the left hand load the variable or literal
+    handleIdentifierLoad(expression1);
+
+    // With the right hand load the variable or literal
+    handleIdentifierLoad(expression2);
   }
 
   public void inAValueConditionalExpression(AValueConditionalExpression node)
@@ -92,7 +103,7 @@ public class StatementCompiler extends DepthFirstAdapter
 
     String stringValue = node.getStringLitteral().getText();
     //String name = variableCompiler.allocateVariable(1, stringValue.length());
-    doVariableLoading(stringValue);
+    doLiteralLoading(stringValue);
 
     writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
       (byte) 0, SystemCall.STRING_OUT.getValue()));
@@ -100,6 +111,7 @@ public class StatementCompiler extends DepthFirstAdapter
 
   /**
    * Simple assignment statements
+   * e.g. i = 0;
    */
   public void inAModifyExpressionBasicStatement(
     AModifyExpressionBasicStatement node)
@@ -110,11 +122,15 @@ public class StatementCompiler extends DepthFirstAdapter
 
     String varName = expr.getVarname().toString().trim();
     String varValue = expr.getRhs().toString().trim();
+    short varPos = variableCompiler.getVariableLocation(varName);
     System.out.println("In a modify statement");
     System.out.println("Varname: " + varName + " at: " +
-      variableCompiler.getVariableLocation(varName));
+      varPos);
+    doLiteralLoading(varValue);
 
-    //doVariableLoading(varName, varValue);
+    // Store variable at the variables location
+    writePCode(new Instruction(OpCode.STORE.getValue(), (byte) 0,
+      (short) varPos));
   }
 
   public void writePCode(Instruction newInstruction)
@@ -137,7 +153,32 @@ public class StatementCompiler extends DepthFirstAdapter
     return (short) basePosition;
   }
 
-  private void doVariableLoading(String varValue)
+  private void handleIdentifierLoad(PValue expression)
+  {
+    if (expression instanceof AIdentifierValue)
+    {
+      handleIdentifierLoad((AIdentifierValue) expression);
+    }
+    else if (expression instanceof AConstantValue)
+    {
+      handleIdentifierLoad((AConstantValue) expression);
+    }
+  }
+
+  private void handleIdentifierLoad(AIdentifierValue identifier)
+  {
+    String identifierName = identifier.toString();
+    short location = variableCompiler.getVariableLocation(identifierName);
+    System.out.println("Location: " + location);
+    writePCode(new Instruction(OpCode.LOAD.getValue(), (byte) 0, location));
+  }
+
+  private void handleIdentifierLoad(AConstantValue constant)
+  {
+    doLiteralLoading(constant.toString());
+  }
+
+  private void doLiteralLoading(String varValue)
   {
     short length = 0;
 
@@ -167,18 +208,17 @@ public class StatementCompiler extends DepthFirstAdapter
         }
         length++;
       }
+      //emit store a required pos
+      writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
+        length));
     }
     // Do int storage
     else
     {
       System.out.println("[" + varValue + "]");
-      short varIntValue = Short.parseShort(varValue);
+      short varIntValue = Short.parseShort(varValue.trim());
       writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
         varIntValue));
     }
-
-    //emit store a required pos
-    writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-      length));
   }
 }
