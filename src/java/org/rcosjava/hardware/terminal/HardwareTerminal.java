@@ -6,6 +6,7 @@ import java.io.*;
 import org.rcosjava.hardware.cpu.Interrupt;
 import org.rcosjava.messaging.postoffices.os.OSOffice;
 import org.rcosjava.software.animator.RCOSFrame;
+import org.rcosjava.software.interrupt.TerminalInterruptHandler;
 import org.rcosjava.software.terminal.SoftwareTerminal;
 import org.rcosjava.software.util.FIFOQueue;
 
@@ -215,7 +216,7 @@ public class HardwareTerminal extends RCOSFrame
         hardwareBuffer.insert(e);
 
         // Send msg to CPU to generate Interrupt
-        Interrupt theInt = new Interrupt(-1, theTitle + "KeyPress");
+        Interrupt theInt = new Interrupt(-1, TerminalInterruptHandler.myType);
         softwareTerminal.sendInterrupt(theInt);
       }
     }
