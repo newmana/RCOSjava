@@ -22,9 +22,12 @@ public class StatementCompiler extends DepthFirstAdapter
 {
 // This will eventually be split into two.
   private SymbolTable table;
+  private HashMap functionPosition = new HashMap();
   private Stack statementPosition;
   private boolean inAFunction = false;
-  private short numberOfVariables = 3;
+  private boolean mainBlock = false;
+  private short globalVariables = 0;
+  private short localVariables = 0;
   private Symbol currentSymbol = new Variable("", (short) 0, (short) 0);
   private int noLoops = 0;
 
@@ -32,6 +35,27 @@ public class StatementCompiler extends DepthFirstAdapter
   {
     table = SymbolTable.getInstance();
     statementPosition = new Stack();
+  }
+
+  public void inAFunctionDefinition(AFunctionDefinition node)
+  {
+    Compiler.incLevel();
+    if (node.getFunctionDeclarator().toString().startsWith("main"))
+    {
+      mainBlock = true;
+    }
+    else
+    {
+      mainBlock = false;
+    }
+    String func = node.getFunctionDeclarator().toString();
+    Short pos = new Short((short) (Compiler.getInstructionIndex() + 1));
+    functionPosition.put(func.substring(0, func.indexOf(" (")),  pos);
+  }
+
+  public void outAFunctionDefinition(AFunctionDefinition node)
+  {
+    Compiler.decLevel();
   }
 
   public void inAFunctionBody(AFunctionBody node)
@@ -43,6 +67,8 @@ public class StatementCompiler extends DepthFirstAdapter
   public void outAFunctionBody(AFunctionBody node)
   {
     inAFunction = false;
+    // Reset the number of local variables
+    localVariables = 0;
     super.outAFunctionBody(node);
   }
 
@@ -154,18 +180,19 @@ public class StatementCompiler extends DepthFirstAdapter
     currentSymbol.handleStore(this);
   }
 
-  public void caseAVariableDeclaration(AVariableDeclaration node)
+  public short mainPosition()
   {
-    if (!inAFunction)
-    {
-      numberOfVariables++;
-    }
-    super.caseAVariableDeclaration(node);
+    return methodPosition("main");
   }
 
-  public short getNumberOfVariables()
+  public short methodPosition(String methodName)
   {
-    return numberOfVariables;
+    return ((Short) functionPosition.get(methodName)).shortValue();
+  }
+
+  public short numberOfGlobalVariables()
+  {
+    return globalVariables;
   }
 
   /**
@@ -590,6 +617,15 @@ public class StatementCompiler extends DepthFirstAdapter
     }
   }
 
+  public void caseACallExpression(ACallExpression node)
+  {
+    System.out.println("Got: " + node.toString());
+    System.out.println(node.toString().substring(0, node.toString().indexOf(" (")));
+    short pos = methodPosition(node.toString().substring(0, node.toString().indexOf(" (")));
+    System.out.println("Pos: " + pos);
+    writePCode(new Instruction(OpCode.CALL.getValue(), (byte) 0, pos));
+  }
+
   /**
    * Identifies the function name e.g.
    * void test(void)
@@ -617,7 +653,6 @@ public class StatementCompiler extends DepthFirstAdapter
   public void caseAFunctionBody(AFunctionBody node)
   {
     inAFunctionBody(node);
-    Compiler.incLevel();
 
     if (node.getLBrace() != null)
     {
@@ -631,8 +666,16 @@ public class StatementCompiler extends DepthFirstAdapter
     }
 
     // Set the number of declared variables
-    writePCode(new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
-      ((short) (table.getVariableSize() + 3))));
+    if (mainBlock)
+    {
+      writePCode(new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
+        ((short) (this.globalVariables))));
+    }
+    else
+    {
+      writePCode(new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
+        ((short) (this.localVariables))));
+    }
 
     Object temp2[] = node.getStatement().toArray();
     for (int i = 0; i < temp2.length; i++)
@@ -653,7 +696,6 @@ public class StatementCompiler extends DepthFirstAdapter
     writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
       Operator.RETURN.getValue()));
 
-    Compiler.decLevel();
     outAFunctionBody(node);
   }
 
@@ -696,6 +738,9 @@ public class StatementCompiler extends DepthFirstAdapter
 
   private void doVarDeclarator(String name)
   {
+
+    short size;
+
 //    System.out.println("Adding: "+ node.getDeclarator().toString());
 //    System.out.println("Adding: "+ name);
     // This compiler understands only 16 bit int/short and chars
@@ -703,7 +748,7 @@ public class StatementCompiler extends DepthFirstAdapter
     {
       if (isArray(name))
       {
-        short size = getArraySize(name);
+        size = getArraySize(name);
         name = name.substring(0, name.indexOf("[")).trim();
         Array newArray = new Array(name, Compiler.getLevel(),
             Compiler.getInstructionIndex(), size);
@@ -712,10 +757,24 @@ public class StatementCompiler extends DepthFirstAdapter
       else
       {
 //          System.out.println("Type: " + node.getTypeSpecifier().toString());
-//          System.out.println("Compiler Level: " + Compiler.getLevel());
+          System.out.println("Name: " + name);
+          System.out.println("VAR DEC Compiler Level: " + Compiler.getLevel());
+        size = 1;
         Variable newVar = new Variable(name,
             Compiler.getLevel(), Compiler.getInstructionIndex());
         table.addSymbol(newVar);
+      }
+
+      // Ensure we could the number of global variables.
+      if (!inAFunction)
+      {
+        globalVariables += size;
+        System.out.println("No global: " + globalVariables);
+      }
+      else
+      {
+        localVariables += size;
+        System.out.println("No local: " + localVariables);
       }
     }
     catch (ParserException pe)

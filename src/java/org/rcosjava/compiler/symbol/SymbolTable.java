@@ -49,7 +49,7 @@ public class SymbolTable
    * Returns the instance of the symbol table or creates one if it doesn't exist
    * yet.
    * @return the instance of the symbol table or creates one if it doesn't exist
-   *         yet.
+   *  yet.
    */
   public static SymbolTable getInstance()
   {
@@ -76,7 +76,7 @@ public class SymbolTable
       // variable.
       if (null == symbolMap.get(new Short(newSymbol.getLevel())))
       {
-        short newOffset = (short) (symbolIndex + symbolMap.size() + 3);
+        short newOffset = (short) (symbolIndex + symbolMap.size());
         newSymbol.setOffset(newOffset);
         symbolMap.put(new Short(newSymbol.getLevel()), newSymbol);
         symbolIndex += newSymbol.getSize();
@@ -92,7 +92,7 @@ public class SymbolTable
     else
     {
       HashMap symbolMap = new HashMap();
-      newSymbol.setOffset(((short) (symbolIndex + 3)));
+      newSymbol.setOffset(((short) (symbolIndex)));
       symbolMap.put(new Short(newSymbol.getLevel()), newSymbol);
       symbols.put(newSymbol.getName(), symbolMap);
       symbolIndex += newSymbol.getSize();
@@ -139,6 +139,8 @@ public class SymbolTable
    */
   public Variable getVariable(String name, short level) throws Exception
   {
+    System.out.println("Get var: " + name);
+    System.out.println("Get var: " + level);
     return (Variable) getSymbol(name, level);
   }
 

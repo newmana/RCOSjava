@@ -41,7 +41,7 @@ public class Variable extends Symbol
     else
     {
       compiler.writePCode(new Instruction(storeOpCode.getValue(),
-        (byte) getLevel(), getOffset()));
+        (byte) (Compiler.getLevel() - getLevel()), getOffset()));
     }
   }
 
@@ -49,6 +49,9 @@ public class Variable extends Symbol
   {
     OpCode loadOpCode = null;
     loadOpCode = OpCode.LOAD;
+
+    System.out.println("LOAD Compiler Level: " + Compiler.getLevel());
+    System.out.println("My level: " + getLevel());
 
     if (Compiler.getLevel() == getLevel())
     {
@@ -58,7 +61,7 @@ public class Variable extends Symbol
     else
     {
       compiler.writePCode(new Instruction(loadOpCode.getValue(),
-        (byte) getLevel(), getOffset()));
+        (byte) (Compiler.getLevel() - getLevel()), getOffset()));
     }
   }
 
