@@ -11,6 +11,7 @@ import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.software.animator.RCOSAnimator;
 import org.rcosjava.software.animator.RCOSPanel;
 import org.rcosjava.software.ipc.SharedMemory;
+import org.rcosjava.software.memory.MemoryManager;
 import org.rcosjava.software.memory.MemoryRequest;
 import org.rcosjava.software.memory.MemoryReturn;
 
@@ -29,29 +30,11 @@ public class MemoryManagerAnimator extends RCOSAnimator
   private final static String MESSENGING_ID = "MemoryManagerAnimator";
 
   /**
-   * No access to memory.
+   * Array that registers allocated and deallocated memory and other various
+   * states that the memory object can be in.
    */
-  private final static Integer NO_ACCESS = new Integer(0);
-
-  /**
-   * Reading memory.
-   */
-  private final static Integer READING_ACCESS = new Integer(1);
-
-  /**
-   * Writing memory.
-   */
-  private final static Integer WRITING_ACCESS = new Integer(2);
-
-  /**
-   * Array that register allocated and deallocated memory.
-   */
-  private static ArrayList allocatedList = new ArrayList();
-
-  /**
-   * Array that registers reading and writing memory.
-   */
-  private static HashMap readingWritingList = new HashMap();
+  private static MemoryState memoryState[] =
+      new MemoryState[MemoryManager.MAX_PAGES];
 
   /**
    * The panel in which to display all of the results to.
@@ -67,6 +50,13 @@ public class MemoryManagerAnimator extends RCOSAnimator
   public MemoryManagerAnimator(AnimatorOffice postOffice, ImageIcon[] images)
   {
     super(MESSENGING_ID, postOffice);
+
+    // Initialise memory state.
+    for (int index = 0; index < memoryState.length; index++)
+    {
+      memoryState[index] = new MemoryState((byte) 0, 0, false);
+    }
+
     panel = new MemoryManagerPanel(images, this);
   }
 
@@ -91,33 +81,44 @@ public class MemoryManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Calls allocatedPages on the associated frame.
+   * Sets memory state to allacted and the associated PID and memory type.
+   * Refreshes the graphical representation of them.
    *
    * @param returnedMemory the object representing the allocated memory.
    */
   public void allocatedPages(MemoryReturn returnedMemory)
   {
+    ArrayList list = new ArrayList();
     for (int count = 0; count < returnedMemory.getSize(); count++)
     {
-      allocatedList.add(returnedMemory.getPage(count), new Boolean(true));
-      readingWritingList.put(new Integer(returnedMemory.getPage(count)),
-          NO_ACCESS);
+      int index = returnedMemory.getPage(count);
+      memoryState[index].allocated();
+      memoryState[index].setPID(returnedMemory.getPID());
+      memoryState[index].setMemoryType(returnedMemory.getMemoryType());
+      list.add(new Integer(index));
     }
-    panel.allocatedPages(returnedMemory);
+    panel.allocatedPages(list);
+    panel.setPID(returnedMemory.getPID(), list);
   }
 
   /**
-   * Calls deallocatedPages on the associated frame.
+   * Sets memory state to unallacted and PID to 0.  Refreshes the graphical
+   * representation of them.
    *
    * @param returnedMemory the object representing the deallocated memory.
    */
   public void deallocatedPages(MemoryReturn returnedMemory)
   {
+    ArrayList list = new ArrayList();
     for (int count = 0; count < returnedMemory.getSize(); count++)
     {
-      allocatedList.add(returnedMemory.getPage(count), new Boolean(false));
+      int index = returnedMemory.getPage(count);
+      memoryState[index].unallocated();
+      memoryState[index].setPID(0);
+      list.add(new Integer(index));
     }
-    panel.deallocatedPages(returnedMemory);
+    panel.unallocatedPages(list);
+    panel.setPID(0, list);
   }
 
   /**
@@ -128,14 +129,14 @@ public class MemoryManagerAnimator extends RCOSAnimator
    */
   public void readingMemory(MemoryRequest requestedMemory)
   {
-    List offsets = panel.getMemoryIndices(requestedMemory.getPID(),
+    List list = getMemoryIndices(requestedMemory.getPID(),
         requestedMemory.getMemoryType());
-    for (int count = 0; count < offsets.size(); count++)
+    for (int count = 0; count < list.size(); count++)
     {
-      readingWritingList.put(offsets.get(count), READING_ACCESS);
+      int index = ((Integer) list.get(count)).intValue();
+      memoryState[index].beingRead();
     }
-    panel.readingMemory(requestedMemory.getPID(),
-        requestedMemory.getMemoryType());
+    panel.readingMemory(list);
   }
 
   /**
@@ -145,14 +146,14 @@ public class MemoryManagerAnimator extends RCOSAnimator
    */
   public void writingMemory(MemoryRequest requestedMemory)
   {
-    List offsets = panel.getMemoryIndices(requestedMemory.getPID(),
+    List list = getMemoryIndices(requestedMemory.getPID(),
         requestedMemory.getMemoryType());
-    for (int count = 0; count < offsets.size(); count++)
+    for (int count = 0; count < list.size(); count++)
     {
-      readingWritingList.put(offsets.get(count), WRITING_ACCESS);
+      int index = ((Integer) list.get(count)).intValue();
+      memoryState[index].beingWritten();
     }
-    panel.writingMemory(requestedMemory.getPID(),
-        requestedMemory.getMemoryType());
+    panel.writingMemory(list);
   }
 
   /**
@@ -163,14 +164,14 @@ public class MemoryManagerAnimator extends RCOSAnimator
    */
   public void finishedReadingMemory(MemoryRequest requestedMemory)
   {
-    List offsets = panel.getMemoryIndices(requestedMemory.getPID(),
+    List list = getMemoryIndices(requestedMemory.getPID(),
         requestedMemory.getMemoryType());
-    for (int count = 0; count < offsets.size(); count++)
+    for (int count = 0; count < list.size(); count++)
     {
-      readingWritingList.put(offsets.get(count), NO_ACCESS);
+      int index = ((Integer) list.get(count)).intValue();
+      memoryState[index].finishedBeingRead();
     }
-    panel.finishedReadingMemory(requestedMemory.getPID(),
-        requestedMemory.getMemoryType());
+    panel.finishedReadingMemory(list);
   }
 
   /**
@@ -181,14 +182,35 @@ public class MemoryManagerAnimator extends RCOSAnimator
    */
   public void finishedWritingMemory(MemoryRequest requestedMemory)
   {
-    List offsets = panel.getMemoryIndices(requestedMemory.getPID(),
+    List list = getMemoryIndices(requestedMemory.getPID(),
         requestedMemory.getMemoryType());
-    for (int count = 0; count < offsets.size(); count++)
+    for (int count = 0; count < list.size(); count++)
     {
-      readingWritingList.put(offsets.get(count), NO_ACCESS);
+      int index = ((Integer) list.get(count)).intValue();
+      memoryState[index].finishedBeingWritten();
     }
-    panel.finishedWritingMemory(requestedMemory.getPID(),
-        requestedMemory.getMemoryType());
+    panel.finishedWritingMemory(list);
+  }
+
+  /**
+   * Returns an array of an set of offsets of a certain PID and type.
+   *
+   * @param pid the process id belonging to the memory.
+   * @param memoryType the memory type.
+   * @return List the integer offsets.
+   */
+  List getMemoryIndices(int pid, byte memoryType)
+  {
+    ArrayList offsets = new ArrayList();
+    for (int count = 0; count < MemoryManager.MAX_PAGES; count++)
+    {
+      if ((memoryState[count].getPID() == pid) &&
+          (memoryState[count].getMemoryType() == memoryType))
+      {
+        offsets.add(new Integer(count));
+      }
+    }
+    return offsets;
   }
 
   /**
@@ -196,7 +218,11 @@ public class MemoryManagerAnimator extends RCOSAnimator
    */
   private void writeObject(ObjectOutputStream os) throws IOException
   {
-
+    os.writeInt(memoryState.length);
+    for (int index = 0; index < memoryState.length; index++)
+    {
+      os.writeObject(memoryState[index]);
+    }
   }
 
   /**
@@ -209,5 +235,15 @@ public class MemoryManagerAnimator extends RCOSAnimator
       ClassNotFoundException
   {
     register(MESSENGING_ID, RCOS.getAnimatorPostOffice());
+
+//    panel = (MemoryManagerPanel) RCOS.getMemoryManagerAnimator().getPanel();
+//
+//    int numberMemoryStates = is.readInt();
+//    memoryState = new MemoryState[numberMemoryStates];
+//
+//    for (int index = 0; index < numberMemoryStates; index++)
+//    {
+//      memoryState[index] = (MemoryState) is.readObject();
+//    }
   }
 }

@@ -36,21 +36,6 @@ public class MemoryGraphic extends JComponent
   public final static Color unallocatedColour = Color.black;
 
   /**
-   * The unique id of the memory graphic.
-   */
-  private int id;
-
-  /**
-   * The type of the memory as defined by the memory manager.
-   */
-  private byte memoryType;
-
-  /**
-   * The size in bytes of the memory.
-   */
-  private int memorySize;
-
-  /**
    * The default width of the memory graphic.  Usually determined by the image.
    */
   private int defaultWidth;
@@ -86,12 +71,6 @@ public class MemoryGraphic extends JComponent
   private Font textFont = new Font("TimesRoman", Font.PLAIN, 12);
 
   /**
-   * Whether the graphic is current allocated or not (determines the its
-   * colour).
-   */
-  private boolean allocated = false;
-
-  /**
    * The text to display on the memory graphic.
    */
   private String text;
@@ -123,62 +102,35 @@ public class MemoryGraphic extends JComponent
   }
 
   /**
-   * Sets the memory graphic as being allocated with the values in the memory
-   * return object.
+   * Change what is displayed on the graphic.  Pass it a zero length string
+   * i.e. "" and nothing will be displayed.
    *
-   * @param newMemoryReturn used to set the type, process id, size, etc.
+   * @param newText the text to display.
    */
-  public void setAllocated(MemoryReturn newMemoryReturn)
+  public void setText(String newText)
   {
-    allocated = true;
-    setValues(newMemoryReturn);
+    text = newText;
   }
 
   /**
-   * Sets the memory graphic as being deallocated and resets the values to their
-   * defaults.
-   */
-  public void setDeallocated()
-  {
-    text = "";
-    allocated = false;
-    id = 0;
-    memoryType = 0;
-    memorySize = 0;
-    repaint();
-  }
-
-  /**
-   * Returns if the memory is from the correct id and type given.
+   * Gets the MinimumSize attribute of the RCOSRectangle object
    *
-   * @param memoryId the id of the memory to be equal.
-   * @param memoryType the type of the memory to be equal.
-   * @return if the memory is from the correct id and type given.
+   * @return The MinimumSize value
    */
-  public boolean isMemory(int memoryId, byte memoryType)
+  public Dimension getMinimumSize()
   {
-    return ((id == memoryId) && (memoryType == memoryType));
+    return getPreferredSize();
   }
 
   /**
-    * Gets the MinimumSize attribute of the RCOSRectangle object
-    *
-    * @return The MinimumSize value
-    */
-   public Dimension getMinimumSize()
-   {
-     return getPreferredSize();
-   }
-
-   /**
-    * Gets the PreferredSize attribute of the RCOSRectangle object
-    *
-    * @return The PreferredSize value
-    */
-   public Dimension getPreferredSize()
-   {
-     return totalSize;
-   }
+   * Gets the PreferredSize attribute of the RCOSRectangle object
+   *
+   * @return The PreferredSize value
+   */
+  public Dimension getPreferredSize()
+  {
+    return totalSize;
+  }
 
   /**
    * Paints the memory graphic.
@@ -196,14 +148,7 @@ public class MemoryGraphic extends JComponent
     int x = (defaultWidth / 2) - (fm.stringWidth(text) / 2);
     int y = (defaultHeight / 2) + (fm.getAscent() / 2);
 
-    if (allocated)
-    {
-      g.setColor(currentColour);
-    }
-    else
-    {
-      g.setColor(unallocatedColour);
-    }
+    g.setColor(currentColour);
 
     g.drawImage(memoryImage, 0, 0, this);
     g.fillRect(((int) defaultWidth / 2) - 10, ((int) defaultHeight / 2) - 10,
@@ -214,21 +159,5 @@ public class MemoryGraphic extends JComponent
     g.setColor(textColour);
     g.setFont(textFont);
     g.drawString(text, x, y);
-  }
-
-  /**
-   * Sets the text, id, memory type and memory size of the memory object based
-   * on the given memory return object.
-   *
-   * @param memoryReturn memory return object used to set the values of this
-   *     memory graphic object.
-   */
-  private void setValues(MemoryReturn memoryReturn)
-  {
-    text = "P" + memoryReturn.getPID();
-    id = memoryReturn.getPID();
-    memoryType = memoryReturn.getMemoryType();
-    memorySize = memoryReturn.getSize();
-    this.repaint();
   }
 }

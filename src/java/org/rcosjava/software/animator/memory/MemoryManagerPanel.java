@@ -50,7 +50,8 @@ public class MemoryManagerPanel extends RCOSPanel
   /**
    * Memory images to display.
    */
-  private MemoryGraphic[] memoryGraphics = new MemoryGraphic[20];
+  private MemoryGraphic[] memoryGraphics =
+      new MemoryGraphic[MemoryManager.MAX_PAGES];
 
   /**
    * Constructor for the MemoryManagerFrame object
@@ -213,110 +214,105 @@ public class MemoryManagerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Indicate that the page has been allocated.
    *
-   * @param memoryReturn Description of Parameter
+   * @param memoryIndex list of memory being read.
+   * @param text text to display.
    */
-  void allocatedPages(MemoryReturn memoryReturn)
+  void allocatedPages(List memoryIndex)
   {
-    for (int count = 0; count < memoryReturn.getSize(); count++)
-    {
-      memoryGraphics[memoryReturn.getPage(count)].setAllocated(memoryReturn);
-    }
+    colourMemory(MemoryGraphic.allocatedColour, memoryIndex);
   }
 
   /**
-   * Description of the Method
+   * Indiciate that the page is no longer allocated.
    *
-   * @param returnedMemory Description of Parameter
+   * @param memoryIndex list of memory being read.
    */
-  void deallocatedPages(MemoryReturn memoryReturn)
+  void unallocatedPages(List memoryIndex)
   {
-    for (int count = 0; count < memoryReturn.getSize(); count++)
-    {
-      memoryGraphics[memoryReturn.getPage(count)].setDeallocated();
-    }
+    colourMemory(MemoryGraphic.unallocatedColour, memoryIndex);
   }
 
   /**
-   * Description of the Method
+   * Indicate that we are reading a memory.
    *
-   * @param pid Description of Parameter
-   * @param memoryType Description of Parameter
+   * @param memoryIndex list of memory being read.
    */
-  void readingMemory(int pid, byte memoryType)
+  void readingMemory(List memoryIndex)
   {
-    colourMemory(MemoryGraphic.readingColour, pid, memoryType);
+    colourMemory(MemoryGraphic.readingColour, memoryIndex);
   }
 
   /**
    * Started writing memory, set to allocated colour.
    *
-   * @param pid Description of Parameter
-   * @param memoryType Description of Parameter
+   * @param memoryIndex list of memory being read.
    */
-  void writingMemory(int pid, byte memoryType)
+  void writingMemory(List memoryIndex)
   {
-    colourMemory(MemoryGraphic.writingColour, pid, memoryType);
+    colourMemory(MemoryGraphic.writingColour, memoryIndex);
   }
 
   /**
    * Finished reading from memory, change back to allocated colour.
    *
-   * @param pid the process id belonging to the graphic.
-   * @param memoryType the memory type.
+   * @param memoryIndex list of memory being read.
    */
-  void finishedReadingMemory(int pid, byte memoryType)
+  void finishedReadingMemory(List memoryIndex)
   {
-    colourMemory(MemoryGraphic.allocatedColour, pid, memoryType);
+    colourMemory(MemoryGraphic.allocatedColour, memoryIndex);
   }
 
   /**
    * Finished writing memory, change back to allocated colour.
    *
-   * @param pid the process id belonging to the graphic.
-   * @param memoryType the memory type.
+   * @param memoryIndex list of memory being read.
    */
-  void finishedWritingMemory(int pid, byte memoryType)
+  void finishedWritingMemory(List memoryIndex)
   {
-    colourMemory(MemoryGraphic.allocatedColour, pid, memoryType);
+    colourMemory(MemoryGraphic.allocatedColour, memoryIndex);
   }
 
   /**
    * Changes the colour of the memory graphic object.
    *
    * @param color colour to change the graphic to.
-   * @param pid the process id belonging to the memory.
-   * @param memoryType the memory type.
+   * @param memoryIndex the index to the memory array to colour each item.
    */
-  private void colourMemory(Color color, int pid, byte memoryType)
+  private void colourMemory(Color color, List memoryIndex)
   {
-    List offsets = getMemoryIndices(pid, memoryType);
-    Iterator iter = offsets.iterator();
+    Iterator iter = memoryIndex.iterator();
     while (iter.hasNext())
     {
-      int offset = ((Integer) iter.next()).intValue();
-      memoryGraphics[offset].setCurrentColour(color);
+      int index = ((Integer) iter.next()).intValue();
+      memoryGraphics[index].setCurrentColour(color);
     }
+    repaint();
   }
 
   /**
-   * Returns an array of an set of offsets of a certain PID and type.
+   * Sets the process id of a given list of memory pages.  If the PID is 0 it
+   * will not display anything.
    *
-   * @param pid the process id belonging to the memory.
-   * @param memoryType the memory type.
-   * @return List the integer offsets.
+   * @param PID the process to use.
+   * @param memoryIndex the index to the memory array to colour each item.
    */
-  List getMemoryIndices(int pid, byte memoryType)
+  void setPID(int PID, List memoryIndex)
   {
-    ArrayList offsets = new ArrayList();
-    for (int count = 0; count < MemoryManager.MAX_PAGES; count++)
+    Iterator iter = memoryIndex.iterator();
+    while (iter.hasNext())
     {
-      if (memoryGraphics[count].isMemory(pid, memoryType))
+      int index = ((Integer) iter.next()).intValue();
+      if (PID != 0)
       {
-        offsets.add(new Integer(count));
+        memoryGraphics[index].setText("P" + PID);
+      }
+      else
+      {
+        memoryGraphics[index].setText("  ");
       }
     }
-    return offsets;
+    repaint();
   }
 }
