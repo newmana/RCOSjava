@@ -1,19 +1,15 @@
-//*******************************************************************/
-// FILE     : Interrupt.java
-// PURPOSE  : Used by CPU to maintain a queue of Interrupts and
-//            when they should occur.
-//
-// AUTHOR   : David Jones
-// MODIFIED : Andrew Newman
-// VERSION  : 1.00
-// HISTORY  : 23/03/96  Created
-//            24/09/98  Made private and added get/set methods.
-//*******************************************************************/
-
 package Hardware.CPU;
 
 import java.io.Serializable;
 
+/**
+ * Used by CPU to maintain a queue of Interrupts and when they should occur.
+ *
+ * @author Andrew Newman.
+ * @author David Jones.
+ * @version 1.00 $Date$
+ * @created 28th March 1997
+ */
 public class Interrupt implements Serializable
 {
   private int iTime;

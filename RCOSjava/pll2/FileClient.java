@@ -1,17 +1,3 @@
-// *************************************************************************
-// FILE     : FileClient.java
-// PACKAGE  : Disk
-// PURPOSE  : Implement a class that will contact a server and communicate
-//            with it. The server can fetch file listings or actual files.
-// AUTHOR   : Andrew Newman (based on code by Brett Carter)
-// MODIFIED :
-// HISTORY  : 19/1/96 Created.
-//            20/1/96 Updated to break down to method calls.
-//            12/1/97 Moved to Disk package and closed connection
-//                    gracefully. AN
-//            10/1/98 Rewritten for JDK 1.1. AN
-// *************************************************************************
-
 package pll2;
 
 import java.io.*;
@@ -22,6 +8,19 @@ import Hardware.Memory.Memory;
 import fr.dyade.koala.xml.koml.*;
 import fr.dyade.koala.xml.sax.*;
 
+/**
+ * Implement a class that will contact a server and communicate with it.
+ * The server can fetch file listings or actual files.
+ * <P>
+ * HISTORY: 20/01/1996 Updated to break down to method calls.<BR>
+ *          12/01/1997 Moved to Disk package and closed connection
+ *                     gracefully. AN<BR>
+ *          10/01/198  Rewritten for JDK 1.1. AN<BR>
+ * <P>
+ * @author Andrew Newman (based on code by Brett Carter).
+ * @version 1.00 $Date$
+ * @created 19th January 1996
+ */
 public class FileClient
 {
   private Socket sktConnection;
@@ -62,9 +61,11 @@ public class FileClient
     }
   }
 
-  // Purpose:  To retrieve a list of the root document directory from
-  //           the server
-  // Returns:  An array of strings, one for each file in the list.
+  /**
+   * To retrieve a list of the root document directory from the server.
+   *
+   * @return An array of strings, one for each file in the list.
+   */
   public String[] getExeDir()
   {
     return(getDir(1, "/"));
@@ -85,9 +86,11 @@ public class FileClient
     return(getDir(2, sDirectory));
   }
 
-  // Purpose:  Retrieve a list of the specified directory from the
-  //           server.
-  // Returns:  An array of Strings, one for each entry in the directory list.
+  /**
+   * Retrieve a list of the specified directory from the server.
+   *
+   * @return An array of Strings, one for each entry in the directory list.
+   */
   private String[] getDir(int iDirectory, String sDirectory)
   {
     String[] sTheList = new String[0];
@@ -157,8 +160,11 @@ public class FileClient
     return null;
   }
 
-  // Purpose:  Retrieve the specified file from the server.
-  // Returns:  An array of bytes containing the file contents.
+  /**
+   * Retrieve the specified file from the server.
+   *
+   * @return An array of bytes containing the file contents.
+   */
   private String getFile(int iDirectory, String sFileName)
   {
     String mFileData = new String();
@@ -180,7 +186,7 @@ public class FileClient
   public void writeRecFile(String sFileName, Object object)
     throws Exception
   {
-    System.out.println("Serializing: " + object.getClass());
+//    System.out.println("Serializing: " + object.getClass());
     KOMLSerializer serializer = null;
     ByteArrayOutputStream tmpBuffer = new ByteArrayOutputStream();
     try
@@ -228,9 +234,9 @@ public class FileClient
     return statFile(2, sFileName);
   }
 
-  // Function: statFile(String sFileName)
-  // Purpose:  Retrieve the sizeof the specified file
-  // Returns:  an integer.
+  /**
+   * Retrieve the sizeof the specified file
+   */
   private int statFile(int iDirectory, String sFileName)
   {
     int iMessageSize = 0;
@@ -255,10 +261,10 @@ public class FileClient
     return iMessageSize;
   }
 
-  // Function: close ()
-  // Purpose : When shutting down the applet we should disconnect the
-  //           connections to the server gracefully.
-  // Returns : Nothing.
+  /**
+   * When shutting down the applet we should disconnect the connections to the
+   * server gracefully.
+   */
   public void closeConnection()
   {
     try

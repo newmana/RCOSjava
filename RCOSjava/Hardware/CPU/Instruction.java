@@ -1,3 +1,7 @@
+package Hardware.CPU;
+
+import java.io.Serializable;
+
 /**
  * The P-Code Instruction class.  Contains data for a single P-Code instruction.
  * Each value is stored as an integer but a string representation can be
@@ -12,12 +16,7 @@
  * @version 1.00 $Date$
  * @author Andrew Newman.
  * @author David Jones.
- **/
-
-package Hardware.CPU;
-
-import java.io.Serializable;
-
+ */
 public class Instruction implements Cloneable, Serializable
 {
   /** Constant for LITeral call */

@@ -1,28 +1,3 @@
-//***************************************************************************
-// FILE    : HardwareTerminal.java
-// PACKAGE : Terminal
-// PURPOSE : A simulation of a "real" terminal (keyboard and screen).
-//           This is basically the I/O keyboard section.
-// AUTHOR  : Andrew Newman (based on code by David Jones)
-// HISTORY : 24/01/96  Created
-//           23/03/96  Moved into package Terminal
-//           24/03/96  Modified to reverse membership
-//                     Terminal now extends Frame and
-//                     has a MessageHandler as a member
-//           29/03/96  Separated into Hardware|SoftwareTerminal
-//           01/12/96  Some bugs to do with displaying on the
-//                     screen are fixed.  Text nolonger has
-//                     a box at the end and updating is done
-//                     by rows instead of each character.
-//           03/12/96  Double buffering for flicker free animation
-//                     and you can set the screen colours too.
-//           14/04/97  Split Hardware Terminal into HardwareTerminal and
-//                     and HardwareTerminalScreen
-//           28/11/98  Converted to Java 1.1.
-//           29/11/98  Removed any message passing.
-//
-//***************************************************************************/
-
 package Hardware.Terminal;
 
 import java.io.*;
@@ -35,7 +10,30 @@ import Software.Animator.RCOSFrame;
 import Software.Terminal.SoftwareTerminal;
 import Software.Util.FIFOQueue;
 
-public class HardwareTerminal extends RCOSFrame
+/**
+ * A simulation of a "real" terminal (keyboard and screen).  This is basically
+ * the I/O keyboard section.
+ * <P>
+ * HISTORY: 23/03/1996  Moved into package Terminal<BR>
+ *          24/03/1996  Modified to reverse membership
+ *                      Terminal now extends Frame and
+ *                      has a MessageHandler as a member<BR>
+ *           29/03/1996 Separated into Hardware|SoftwareTerminal
+ *           01/12/1996 Some bugs to do with displaying on the
+ *                      screen are fixed.  Text nolonger has
+ *                      a box at the end and updating is done
+ *                      by rows instead of each character.<BR>
+ *           03/12/1996 Double buffering for flicker free animation
+ *                      and you can set the screen colours too.<BR>
+ *           14/04/1997 Split Hardware Terminal into HardwareTerminal and
+ *                      and HardwareTerminalScreen<BR>
+ *           28/11/1998 Converted to Java 1.1.<BR>
+ *           29/11/1998 Removed any message passing.<BR>
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 24th January 1996
+ */public class HardwareTerminal extends RCOSFrame
 {
   private HardwareTerminalScreen myScreen;
   private SoftwareTerminal softwareTerminal;
@@ -61,7 +59,7 @@ public class HardwareTerminal extends RCOSFrame
   }
 
   //Set Process ID using this terminal
-  public void setCurrentProcessID(int iCurrentProcess)
+  public void setCurrentProcessId(int iCurrentProcess)
   {
     softwareTerminal.currentProcess = iCurrentProcess;
   }

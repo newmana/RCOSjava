@@ -39,8 +39,8 @@
 //            05/09/98 Removed all messages sending from CPU. AN
 //            10/10/98 Finished removal of String based opcodes. AN
 //
-// @version	1.0  10th October, 1998
-// @see		MessageSystem.SimpleMessageHandler
+// @version 1.0  10th October, 1998
+// @see MessageSystem.SimpleMessageHandler
 //
 //*******************************************************************/
 

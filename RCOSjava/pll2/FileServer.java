@@ -1,21 +1,20 @@
-// *************************************************************************
-// FILE     : FileServer.java
-// PACKAGE  : Disk
-// PURPOSE  : Provide a network server to enable remote clients to access
-//            Disk resources on the machine the server is running on.
-// AUTHOR   : Brett Carter
-// MODIFIED : Andrew Newman
-// HISTORY  : 19/01/96 Created.
-//            12/01/97 Moved to Disk package and bugs fixed. AN
-//            1/1/98   Removed sun.net.*.  Rewritten for JDK 1.1. AN
-//
-// *************************************************************************
-
 package pll2;
 
 import java.io.*;
 import java.net.*;
 
+/**
+ * Provide a network server to enable remote clients to access.  Disk
+ * resources on the machine the server is running on.
+ * <P>
+ * HISTORY: 12/01/97 Moved to Disk package and bugs fixed. AN<BR>
+ *          01/01/98 Removed sun.net.*.  Rewritten for JDK 1.1. AN<BR>
+ * <P>
+ * @author Andrew Newman.
+ * @author Brett Carter.
+ * @version 1.00 $Date$
+ * @created 19th January 1996
+ */
 public class FileServer
 {
   private static String executableRoot;
@@ -161,8 +160,9 @@ public class FileServer
     return true;
   }
 
-  // To correctly handle a GETDIRECTORYLIST command from
-  // the client.
+  /**
+   * To correctly handle a GETDIRECTORYLIST command from the client.
+   */
   private void handleGetDirectoryListRequest(String directoryPath)
   {
     // Setup variables.
@@ -191,8 +191,9 @@ public class FileServer
     fileMessage.replyDirectoryListing(theDirectoryList);
   }
 
-  // To correctly handle a GETFILE command from
-  // the client.
+  /**
+   * To correctly handle a GETFILE command from the client.
+   */
   private void handleGetFileRequest(String filename)
   {
     // Setup variables.
@@ -227,7 +228,9 @@ public class FileServer
     fileMessage.replyLoadFileData(fileData);
   }
 
-  //Assumes that if the file exists it will append to the existing one.
+  /**
+   * Assumes that if the file exists it will append to the existing one.
+   */
   private void handleWriteFileRequest(String filename, String outputData)
   {
     FileOutputStream outputFile;
@@ -258,8 +261,9 @@ public class FileServer
     fileMessage.replyWriteFileData();
   }
 
-  // To correctly handle a STATFILE command from
-  // the client.
+  /**
+   * To correctly handle a STATFILE command from the client.
+   */
   private void handleStatFileRequest(String filename)
   {
     // Setup variables.
