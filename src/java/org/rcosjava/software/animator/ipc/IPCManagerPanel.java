@@ -113,6 +113,16 @@ public class IPCManagerPanel extends RCOSPanel
   }
 
   /**
+   * Sets a new IPC Manager animator.
+   *
+   * @param newIPCManagerAnimator the new IPC Manager animator.
+   */
+  void setManager(IPCManagerAnimator newIPCManagerAnimator)
+  {
+    myAnimator = newIPCManagerAnimator;
+  }
+
+  /**
    * Sets up the layout of the paenl.  It creates two drop downs to display
    * shared memory and semaphores.
    *
@@ -364,37 +374,37 @@ public class IPCManagerPanel extends RCOSPanel
   }
 
   /**
-   * Gets the shared memory graphic and adds the given process to its queue.
+   * The semaphore has been opened - currently does nothing.
    *
    * @param semaphore that contains the semaphore id and other pertant details.
    * @param processId the semaphore that opened the semaphore.
    */
   void semaphoreOpened(Semaphore semaphore, int processId)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
-        semaphoreMap.get(semaphore.getName());
-
-    if (tmpGraphic != null)
-    {
-      tmpGraphic.addProcess(processId);
-    }
-    updateSemaphoreQueue();
   }
 
   /**
    * Sets the value of the shared memory graphic if it already exists.
    *
    * @param semaphore that contains the semaphore id and other pertant details.
-   * @param waitingId the semaphore that is waiting to be added to the queue.
+   * @param processId the id of the process that is waiting.
+   * @param value the current value of the semaphore.
    */
-  void semaphoreWaiting(Semaphore semaphore, int waitingId)
+  void semaphoreWaiting(Semaphore semaphore, int processId, int value)
   {
     SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
         semaphoreMap.get(semaphore.getName());
 
     if (tmpGraphic != null)
     {
-      tmpGraphic.setValue(new Integer(waitingId));
+      if (value == -1)
+      {
+        tmpGraphic.addProcess(processId);
+      }
+      else
+      {
+        tmpGraphic.setValue(new Integer(value));
+      }
     }
 
     updateSemaphoreQueue();
@@ -405,15 +415,20 @@ public class IPCManagerPanel extends RCOSPanel
    *
    * @param semaphore that contains the semaphore id and other pertant details.
    * @param signalledId the semaphore that was signalled remove from the queue.
+   * @param value the value of the semaphore.
    */
-  void semaphoreSignalled(Semaphore semaphore, int signalledId)
+  void semaphoreSignalled(Semaphore semaphore, int signalledId, int value)
   {
     SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
         semaphoreMap.get(semaphore.getName());
 
     if (tmpGraphic != null)
     {
-      tmpGraphic.setValue(new Integer(semaphore.getValue()));
+      if (signalledId != -1)
+      {
+        tmpGraphic.removeProcess(signalledId);
+      }
+      tmpGraphic.setValue(new Integer(value));
     }
 
     updateSemaphoreQueue();
@@ -579,7 +594,7 @@ public class IPCManagerPanel extends RCOSPanel
    */
   void sharedMemoryWrote(String sharedMemoryId, Memory memory)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic =(SemaphoreSharedMemoryGraphic)
+    SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
         sharedMemoryMap.get(sharedMemoryId);
 
     tmpGraphic.setValue(memory.toString());
