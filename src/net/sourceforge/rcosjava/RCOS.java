@@ -246,7 +246,7 @@ public class RCOS extends java.applet.Applet implements Runnable
     }
     catch (InterruptedException e)
     {
-      System.out.println("Image Loading Failed!");
+      System.err.println("Image Loading Failed!");
       updateStatusBar("Images failed to load from " + docBase +
         rootDir + "/images/");
     }
@@ -623,7 +623,7 @@ public class RCOS extends java.applet.Applet implements Runnable
       }
       catch (Exception e)
       {
-        System.out.println(this + "- exception: " + e);
+        System.err.println(this + "- exception: " + e);
       }
     }
   }
