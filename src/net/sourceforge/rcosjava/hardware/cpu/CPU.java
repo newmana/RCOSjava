@@ -3,12 +3,10 @@ package net.sourceforge.rcosjava.hardware.cpu;
 import java.io.*;
 import java.util.*;
 
-import net.sourceforge.rcosjava.hardware.memory.Memory;
-import net.sourceforge.rcosjava.software.memory.MemoryManager;
+import net.sourceforge.rcosjava.hardware.memory.*;
 import net.sourceforge.rcosjava.software.kernel.Kernel;
 import net.sourceforge.rcosjava.software.process.RCOSProcess;
 import net.sourceforge.rcosjava.software.interrupt.InterruptQueue;
-import net.sourceforge.rcosjava.hardware.cpu.Instruction;
 
 /**
  * Implements Pcode CPU for RCOS.java. Based on PCode interpreter used in
@@ -250,34 +248,45 @@ public class CPU
    */
   public boolean performInstructionExecutionCycle()
   {
-    boolean continueExecuting = true;
     if ((!isPaused()) && (hasCodeToExecute()))
     {
-      // fetch and execute if we aren't on the NullProcess
-      try
-      {
-        fetchInstruction();
-        executeInstruction();
-      }
-      catch (java.io.IOException e)
-      {
-        System.err.println("IO Exception while executing code: " +
-          e.getMessage());
-        e.printStackTrace();
-      }
-      catch (java.lang.NullPointerException e2)
-      {
-        System.err.println("Null Pointer while executing code: " +
-          e2.getMessage());
-        e2.printStackTrace();
-      }
-      catch (java.lang.Exception e3)
-      {
-        System.err.println("Exception while executing code: " +
-          e3.getMessage());
-        e3.printStackTrace();
-      }
+      executeCode();
     }
+    return checkProcess();
+  }
+
+  public void executeCode()
+  {
+    // fetch and execute if we aren't on the NullProcess
+    try
+    {
+      fetchInstruction();
+      executeInstruction();
+    }
+    catch (java.io.IOException e)
+    {
+      System.err.println("IO Exception while executing code: " +
+        e.getMessage());
+      e.printStackTrace();
+    }
+    catch (java.lang.NullPointerException e2)
+    {
+      System.err.println("Null Pointer while executing code: " +
+        e2.getMessage());
+      e2.printStackTrace();
+    }
+    catch (java.lang.Exception e3)
+    {
+      System.err.println("Exception while executing code: " +
+        e3.getMessage());
+      e3.printStackTrace();
+    }
+  }
+
+  public boolean checkProcess()
+  {
+    boolean continueExecuting = true;
+
     //Check again to see if we came to the end of the program during
     //the last execution cycle.
     if (processFinished)
@@ -356,10 +365,12 @@ public class CPU
    */
   private Instruction getInstruction(int address)
   {
+    short instr1 = (short) processCode.read(address*8+5);
+    short instr2 = (short) processCode.read(address*8+6);
+
     return (new Instruction((processCode.read(address*8) & 0xff),
       ((byte) processCode.read(address*8+4)),
-      ((short) ((processCode.read(address*8+5) << 8) +
-      processCode.read(address*8+6)))));
+      ((short) ((instr1 & 255 << 8) + instr2 & 255))));
   }
 
   /**
