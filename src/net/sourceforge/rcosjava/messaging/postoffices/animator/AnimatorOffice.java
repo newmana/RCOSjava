@@ -34,9 +34,6 @@ import java.util.*;
  */
 public class AnimatorOffice extends PostOffice
 {
-  /**
-   * The operating system post office to send all of the message.
-   */
   private OSOffice theOSPostOffice;
 
   /**
@@ -62,10 +59,12 @@ public class AnimatorOffice extends PostOffice
    * @param OSOffice the post office to register to for universal messages
    * to pass between.
    */
-  public AnimatorOffice(String newId, OSOffice newPostOffice)
+  public AnimatorOffice(String newId, OSOffice newOSPostOffice)
   {
-    super(newId);
-    theOSPostOffice = newPostOffice;
+    super(newId, null);
+
+    theOSPostOffice = newOSPostOffice;
+
     // Register OSPostOffice with Animator Office
     this.addPostOffice(theOSPostOffice);
     // Register the Animator with the OSPostOffice

@@ -27,7 +27,7 @@ import java.lang.reflect.*;
 public abstract class OSMessageHandler extends SimpleMessageHandler
 {
   /**
-   *  The operating system post office that will handle all messages.
+   * The operating system post office that will handle all messages.
    */
   protected OSOffice postOffice;
 
@@ -40,7 +40,11 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
    */
   public OSMessageHandler(String newId, OSOffice newPostOffice)
   {
-    super(newId, newPostOffice);
+    super(newId);
+
+    // Set the current post office
+    postOffice = newPostOffice;
+
     // Tell the PostOffice that I'm alive
     AddHandler newMessage = new AddHandler(this, newId, this);
     newPostOffice.processMessage(newMessage);

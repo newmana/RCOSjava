@@ -35,8 +35,6 @@ public class OSOffice extends PostOffice
    */
   private FIFOQueue postOfficeMessages = new FIFOQueue(5,1);
 
-  private ArrayList myPostOffices = postOffices;
-
   /**
    * To be done
    *
@@ -44,7 +42,7 @@ public class OSOffice extends PostOffice
    */
   public OSOffice(String newId)
   {
-    super(newId);
+    super(newId, null);
   }
 
   public void sendMessage(MessageAdapter message)
@@ -122,10 +120,10 @@ public class OSOffice extends PostOffice
         MessageAdapter message = (MessageAdapter)
           OSOffice.this.postOfficeMessages.retrieveCurrent();
 
-        if (!myPostOffices.isEmpty())
+        if (!postOffices.isEmpty())
         {
           int count;
-          for (count = 0; count < myPostOffices.size(); count++)
+          for (count = 0; count < postOffices.size(); count++)
           {
             tmpPostOffice = getPostOffice(count);
             if (message.forPostOffice(tmpPostOffice))
