@@ -45,7 +45,7 @@ public class Compiler
 
       parser = new Parser(lexer);
       Start tree = parser.parse();
-      tree.apply(new FunctionCompiler());
+      tree.apply(new StatementCompiler());
 
       // Write out jump position to main function
       table = SymbolTable.getInstance();

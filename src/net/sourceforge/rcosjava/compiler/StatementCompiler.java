@@ -21,7 +21,6 @@ import org.sablecc.simplec.parser.*;
 public class StatementCompiler extends DepthFirstAdapter
 {
 // This will eventually be split into two.
-  private VariableCompiler variableCompiler = new VariableCompiler();
   private SymbolTable table;
   private Stack statementPosition;
 
@@ -32,20 +31,51 @@ public class StatementCompiler extends DepthFirstAdapter
   }
 
   /**
-   * Forward variable declarations to appropriate object.
-   */
-  public void inAVariableDeclaration(AVariableDeclaration node)
-  {
-    node.apply(variableCompiler);
-  }
-
-  /**
    * If statement
    */
   public void inAIfStatement(AIfStatement node)
   {
-    ARelConditionalExpression expr = (ARelConditionalExpression)
-        node.getConditionalExpression();
+    processIfStatement(node);
+  }
+
+  /**
+   * If-Else statement
+   */
+  public void inAIfElseStatement(AIfElseStatement node)
+  {
+    processIfStatement(node);
+  }
+
+  /**
+   * If-Then-Else statement
+   */
+  public void inAIfThenElseStatement(AIfThenElseStatement node)
+  {
+    processIfStatement(node);
+  }
+
+  private void processIfStatement(Node node)
+  {
+    ARelConditionalExpression expr = null;
+
+    if (node instanceof AIfStatement)
+    {
+      expr = (ARelConditionalExpression)
+          ((AIfStatement) node).getConditionalExpression();
+    }
+    else if (node instanceof AIfThenElseStatement)
+    {
+      expr = (ARelConditionalExpression)
+          ((AIfThenElseStatement) node).getConditionalExpression();
+    }
+    else if (node instanceof AIfElseStatement)
+    {
+      expr = (ARelConditionalExpression)
+          ((AIfElseStatement) node).getConditionalExpression();
+    }
+
+    System.out.println("If Else stmt: " + node.toString());
+    Compiler.incLevel();
 
     PValue expression1 = expr.getLeft();
     PValue expression2 = expr.getRight();
@@ -61,14 +91,30 @@ public class StatementCompiler extends DepthFirstAdapter
     statementPosition.push(new Integer(Compiler.getInstructionIndex()));
   }
 
-  public void outAIfStatement(AIfStatement node) {
+  public void outAIfStatement(AIfStatement node)
+  {
+    processOutIfStatement(node);
+  }
 
+  public void outAIfElseStatement(AIfElseStatement node)
+  {
+    processOutIfStatement(node);
+  }
+
+  public void outAIfThenElseStatement(AIfThenElseStatement node)
+  {
+    processOutIfStatement(node);
+  }
+
+  private void processOutIfStatement(Node node)
+  {
 //    ArrayList tmpInstr = (ArrayList) previousInstruction.get(instructionIndex-1);
     int position = ((Integer) statementPosition.pop()).intValue();
     Compiler.incInstructionIndex();
     Compiler.addInstruction(position+1,
       new Instruction(OpCode.JUMP_ON_CONDITION.getValue(),
       (byte) 0, (short) (Compiler.getInstructionIndex()+2)));
+    Compiler.decLevel();
   }
 
   public void inAValueConditionalExpression(AValueConditionalExpression node)
@@ -102,6 +148,13 @@ public class StatementCompiler extends DepthFirstAdapter
     System.out.println("LT Node: " + node);
     writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
       Operator.LESS_THAN.getValue()));
+  }
+
+  public void caseANeqRelop(ANeqRelop node)
+  {
+    System.out.println("NEQ Node: " + node);
+    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
+      Operator.NOT_EQUAL.getValue()));
   }
 
   public void caseAEqRelop(AEqRelop node)
@@ -160,6 +213,144 @@ public class StatementCompiler extends DepthFirstAdapter
     {
       e.printStackTrace();
     }
+  }
+  /**
+   * Identifies the function name e.g.
+   * void test(void)
+   * int test(int in1, int in2)
+   */
+  public void inAIdentifierDirectFunctionDeclarator(
+    AIdentifierDirectFunctionDeclarator node)
+  {
+    //System.out.println("Identifier direct function declarator [" + node
+    //+ "]");
+  }
+
+  /**
+   * The name of the identifier.  e.g. in the cast of int global it returns
+   * "global".
+   */
+  public void inAIdentifierValue(AIdentifierValue node)
+  {
+    //System.out.println("Here [" + node + "]");
+  }
+
+  /**
+   * Right hand side of a variable assignment.
+   */
+  public void caseAUnaryRhs(AUnaryRhs node)
+  {
+    //System.out.println("Here: " + node + "");
+  }
+
+  /**
+   * When the compiler enters a function block/body send it to statement
+   * compiler.
+   */
+  public void inAFunctionBody(AFunctionBody node)
+  {
+    Compiler.incLevel();
+  }
+
+  /**
+   * When the compiler leaves a function block/body.
+   */
+  public void outAFunctionBody(AFunctionBody node)
+  {
+    //System.out.println("Out of function!");
+    //Modify the jump point code
+    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
+      Operator.RETURN.getValue()));
+    //localVarsTable = new HashMap();
+    Compiler.decLevel();
+  }
+
+  /**
+   * Any variable declaration such as:
+   * int global;
+   * char test;
+   */
+  public void inAVariableDeclaration(AVariableDeclaration node)
+  {
+    System.out.println("Adding: "+ node.getDeclarator().toString());
+    System.out.println("Adding: "+ node.toString());
+    // This compiler understands only 16 bit int/short and chars
+    if (node.getTypeSpecifier() instanceof ASignedIntTypeSpecifier ||
+        node.getTypeSpecifier() instanceof AUnsignedIntTypeSpecifier ||
+        node.getTypeSpecifier() instanceof ASignedShortTypeSpecifier ||
+        node.getTypeSpecifier() instanceof AUnsignedShortTypeSpecifier ||
+        node.getTypeSpecifier() instanceof ACharTypeSpecifier)
+    {
+      try
+      {
+        String name = node.getDeclarator().toString().trim();
+        if (isArray(name))
+        {
+          short size = getArraySize(name);
+          Array newArray = new Array(name, Compiler.getLevel(),
+              Compiler.getInstructionIndex(), size);
+          table.addSymbol(newArray);
+        }
+        else
+        {
+          System.out.println("Type: " + node.getTypeSpecifier().toString());
+          System.out.println("Level: " + Compiler.getLevel());
+          Variable newVar = new Variable(name,
+              Compiler.getLevel(), Compiler.getInstructionIndex());
+          table.addSymbol(newVar);
+        }
+      }
+      catch (ParserException pe)
+      {
+        throw new RuntimeException(pe.getMessage() + " at line: " +
+            pe.getStartLine() + " at position: " +
+            pe.getStartPos());
+      }
+      catch (Exception e)
+      {
+        e.printStackTrace();
+      }
+    }
+    else
+    {
+      //Do some sort of error processing.
+      System.out.println("Variable type not handled!");
+    }
+  }
+
+  /**
+   * Returns if a declarator is a variable or not.
+   *
+   * @return if a declarator is a variaable or not.
+   */
+  private boolean isArray(String declarator)
+  {
+    return ((declarator.indexOf("[") > 0) && (declarator.indexOf("]") > 0));
+  }
+
+  /**
+   * Get the size of the array if possible
+   *
+   * @param declarator the declaration of the variable.
+   */
+  private short getArraySize(String declarator)
+  {
+    int arrayStartIndex = declarator.indexOf("[");
+    int arrayFinishedIndex = 0;
+    short arraySize = 0;
+    declarator = declarator.trim();
+    if (arrayStartIndex > 0)
+    {
+      arrayFinishedIndex = declarator.indexOf("]");
+      System.out.println("Dec: " + (arrayFinishedIndex - arrayStartIndex));
+      System.out.println("Dec: " + declarator);
+      if ((arrayFinishedIndex - arrayStartIndex) > 2)
+      {
+        arraySize = Short.parseShort(declarator.substring(arrayStartIndex+1,
+          arrayFinishedIndex).trim());
+      }
+    }
+    return arraySize;
   }
 
   public void writePCode(Instruction newInstruction)
