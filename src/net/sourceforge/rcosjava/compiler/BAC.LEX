@@ -372,6 +372,9 @@ void store_ident(char *s)
 /*
  *
  *  $Log$
+ *  Revision 1.1.1.1  2001/04/08 06:08:13  newmana
+ *
+ *
  *  Revision 2.9  1997/11/26 20:59:22  bynum
  *  add code to comment() to check for EOF
  *
