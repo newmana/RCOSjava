@@ -14,15 +14,16 @@ import org.rcosjava.software.kernel.Kernel;
 public class ReturnValue extends OSMessageAdapter
 {
   /**
-   * Description of the Field
+   * The value to send.
    */
   private short returnValue;
 
   /**
-   * Constructor for the ReturnValue object
+   * Create a new ReturnValue message - an external process wishes to give a
+   * value to the kernel.
    *
-   * @param theSource Description of Parameter
-   * @param newReturnValue Description of Parameter
+   * @param theSource the sender of the message.
+   * @param newReturnValue the value to send.
    */
   public ReturnValue(OSMessageHandler theSource, short newReturnValue)
   {
@@ -31,9 +32,9 @@ public class ReturnValue extends OSMessageAdapter
   }
 
   /**
-   * Sets the ReturnValue attribute of the ReturnValue object
+   * Sets the return value.
    *
-   * @param newReturnValue The new ReturnValue value
+   * @param newReturnValue The new return value.
    */
   public void setReturnValue(short newReturnValue)
   {
@@ -41,9 +42,9 @@ public class ReturnValue extends OSMessageAdapter
   }
 
   /**
-   * Description of the Method
+   * Calls the return value on the kernel.
    *
-   * @param theElement Description of Parameter
+   * @param theElement the kernel which has returnValue called.
    */
   public void doMessage(Kernel theElement)
   {

@@ -1,4 +1,5 @@
 package org.rcosjava.messaging.messages.universal;
+
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.software.animator.process.ProcessSchedulerAnimator;
 import org.rcosjava.software.process.ProcessScheduler;
