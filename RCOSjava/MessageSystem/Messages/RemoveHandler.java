@@ -1,6 +1,7 @@
 package MessageSystem.Messages;
 
 import MessageSystem.PostOffices.PostOffice;
+import MessageSystem.PostOffices.SimpleMessageHandler;
 
 /**
  * Remove a handler from the
@@ -12,11 +13,21 @@ import MessageSystem.PostOffices.PostOffice;
 public class RemoveHandler extends MessageAdapter
 {
   /**
+   * The unique id of the handler to add.
+   */
+  private String deviceId;
+
+  public RemoveHandler(String newDeviceId)
+  {
+    deviceId = newDeviceId;
+  }
+
+  /**
    * Removes the handler (the object that sent the message) from the registered
    * handlers in the post office.
    */
   public void doMessage(PostOffice theElement)
   {
-    theElement.removeHandler(getSource().getId());
+    theElement.removeHandler(deviceId);
   }
 }

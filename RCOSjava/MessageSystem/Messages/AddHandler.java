@@ -26,14 +26,14 @@ public class AddHandler extends MessageAdapter
   /**
    * Creates a new handler message.
    *
-   * @param source the message handler that sent the message.
+   * @param newSource the message handler that sent the message.
    * @param newDeviceId the key to associate the message handler with.
    * @param newToRegisterTo the actual message handler object.
    */
-  public AddHandler(SimpleMessageHandler source, String newDeviceId,
+  public AddHandler(SimpleMessageHandler newSource, String newDeviceId,
       SimpleMessageHandler newToRegisterTo)
   {
-    super(source);
+    super(newSource);
     deviceId = newDeviceId;
     toRegisterTo = newToRegisterTo;
   }
