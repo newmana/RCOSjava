@@ -6,6 +6,8 @@ import org.rcosjava.messaging.messages.MessageAdapter;
 import org.rcosjava.messaging.postoffices.PostOffice;
 import org.rcosjava.messaging.postoffices.SimpleMessageHandler;
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
+import org.rcosjava.messaging.postoffices.universal.UniversalMessagePlayer;
+import org.rcosjava.messaging.postoffices.universal.UniversalMessageRecorder;
 import org.rcosjava.software.disk.DiskManager;
 import org.rcosjava.software.disk.DiskScheduler;
 import org.rcosjava.software.filesystem.FileSystemManager;
@@ -29,7 +31,7 @@ import org.rcosjava.software.terminal.TerminalManager;
  * @version 1.00 $Date$
  */
 public class OSMessageAdapter extends MessageAdapter
-     implements OSMessage, Serializable
+    implements OSMessage, Serializable
 {
   /**
    * Calls the MessageAdapters constructor.
@@ -155,6 +157,24 @@ public class OSMessageAdapter extends MessageAdapter
    * @param theElement Description of Parameter
    */
   public void doMessage(TerminalManager theElement)
+  {
+  }
+
+  /**
+   * Execute the command on the universal message player.
+   *
+   * @param theElement Description of Parameter
+   */
+  public void doMessage(UniversalMessagePlayer theElement)
+  {
+  }
+
+  /**
+   * Execute the command on the universal message recorder.
+   *
+   * @param theElement Description of Parameter
+   */
+  public void doMessage(UniversalMessageRecorder theElement)
   {
   }
 
