@@ -28,15 +28,224 @@ import java.io.Serializable;
 public class Instruction implements Cloneable, Serializable
 {
   /**
-   * Description of the Field
+   * Literal instruction.
+   */
+  public static final Instruction LIT_INSTRUCTION = new Instruction(OpCode.LITERAL)
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().incStackPointer();
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+        cpu.getContext().getInstructionRegister().getWordParameter());
+    }
+  };
+
+  /**
+   * Operation instruction.
+   */
+  public static final Instruction OPR_INSTRUCTION = new Instruction(OpCode.OPERATION)
+  {
+    void execute(CPU cpu)
+    {
+      cpu.handleOperator();
+    }
+  };
+
+  /**
+  * Load instruction.
+  */
+  public static final Instruction LOD_INSTRUCTION = new Instruction(OpCode.LOAD)
+  {
+    void execute(CPU cpu)
+    {
+      // LOD 255, 0
+      if (cpu.getContext().getInstructionRegister().getByteParameter() == 255)
+      {
+        cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          (short) cpu.getProcessStack().read(
+            cpu.getContext().getStackPointer()));
+      }
+      // LOD L, N
+      else
+      {
+        cpu.getContext().incStackPointer();
+        cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+          (cpu.getProcessStack().read(
+          cpu.findBase(
+            cpu.getContext().getInstructionRegister().getByteParameter()) +
+            cpu.getContext().getInstructionRegister().getWordParameter())));
+      }
+    }
+  };
+
+  /**
+   * Store instruction.
+   */
+  public static final Instruction STO_INSTRUCTION = new Instruction(OpCode.STORE)
+  {
+    void execute(CPU cpu)
+    {
+      // STO 255, 0
+      if (cpu.getContext().getInstructionRegister().getByteParameter() == 255)
+      {
+        cpu.getProcessStack().write(cpu.getProcessStack().read(
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() - 1)),
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer()));
+        cpu.getContext().decStackPointer();
+        cpu.getContext().decStackPointer();
+      }
+      // STO L, N
+      else
+      {
+        cpu.getProcessStack().write(
+          cpu.findBase(
+            cpu.getContext().getInstructionRegister().getByteParameter()) +
+            cpu.getContext().getInstructionRegister().getWordParameter(),
+            cpu.getProcessStack().read(cpu.getContext().getStackPointer()));
+        cpu.getContext().decStackPointer();
+      }
+    }
+  };
+
+  /**
+   * Call instruction.
+   */
+  public static final Instruction CAL_INSTRUCTION = new Instruction(OpCode.CALL)
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer() + 1,
+        cpu.findBase(
+          cpu.getContext().getInstructionRegister().getByteParameter()));
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer() + 2,
+        cpu.getContext().getBasePointer());
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer() + 3,
+        cpu.getContext().getProgramCounter());
+      cpu.getContext().setBasePointer(
+        (short) (cpu.getContext().getStackPointer() + 1));
+      cpu.getContext().setProgramCounter(
+        cpu.getContext().getInstructionRegister().getWordParameter());
+    }
+  };
+
+  /**
+   * Interval instruction.
+   */
+  public static final Instruction INT_INSTRUCTION = new Instruction(OpCode.INTERVAL)
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().setStackPointer((short)
+          (cpu.getContext().getStackPointer() +
+          cpu.getContext().getInstructionRegister().getWordParameter()));
+    }
+  };
+
+  /**
+   * Jump instruction.
+   */
+  public static final Instruction JMP_INSTRUCTION = new Instruction(OpCode.JUMP)
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getContext().setProgramCounter(
+          cpu.getContext().getInstructionRegister().getWordParameter());
+    }
+  };
+
+  /**
+   * Jump on condition instruction.
+   */
+  public static final Instruction JPC_INSTRUCTION = new Instruction(OpCode.JUMP_ON_CONDITION)
+  {
+    void execute(CPU cpu)
+    {
+      if (cpu.getProcessStack().read(cpu.getContext().getStackPointer())
+           ==
+          cpu.getContext().getInstructionRegister().getByteParameter())
+      {
+        cpu.getContext().setProgramCounter(
+            cpu.getContext().getInstructionRegister().getWordParameter());
+      }
+      cpu.getContext().decStackPointer();
+    }
+  };
+
+  /**
+   * Call system procedure instruction.
+   */
+  public static final Instruction CSP_INSTRUCTION = new Instruction(OpCode.CALL_SYSTEM_PROCEDURE)
+  {
+    void execute(CPU cpu)
+    {
+      try
+      {
+        cpu.getKernel().handleSystemCall();
+      }
+      catch (java.io.IOException ioe)
+      {
+        ioe.printStackTrace();
+      }
+    }
+  };
+
+  /**
+   * Load indexed instruction.
+   */
+  public static final Instruction LODX_INSTRUCTION = new Instruction(OpCode.LOAD_INDEXED)
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getProcessStack().write(cpu.getContext().getStackPointer(),
+        (cpu.getProcessStack().read(
+          cpu.findBase(
+            cpu.getContext().getInstructionRegister().getByteParameter()) +
+          cpu.getContext().getInstructionRegister().getWordParameter() +
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer()))));
+    }
+  };
+
+  /**
+   * Store indexed instruction.
+   */
+  public static final Instruction STOX_INSTRUCTION = new Instruction(OpCode.STORE_INDEXED)
+  {
+    void execute(CPU cpu)
+    {
+      cpu.getProcessStack().write(
+        cpu.findBase(
+          cpu.getContext().getInstructionRegister().getByteParameter()) +
+          cpu.getContext().getInstructionRegister().getWordParameter() +
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer() - 1),
+          cpu.getProcessStack().read(cpu.getContext().getStackPointer()));
+      cpu.getContext().decStackPointer();
+      cpu.getContext().decStackPointer();
+    }
+  };
+
+  /**
+   * Illegal instruction.
+   */
+  public static final Instruction ILL_INSTRUCTION = new Instruction(OpCode.ILLEGAL)
+  {
+    void execute(CPU cpu)
+    {
+      System.err.println("Illegal Instruction");
+    }
+  };
+
+  /**
+   * Opcode of the instruction.
    */
   private OpCode opCode;
+
   /**
-   * Description of the Field
+   * Byte parameter of the instruction.
    */
   private byte byteParam;
+
   /**
-   * Description of the Field
+   * Word parameter of the instruction.
    */
   private WordParameter wordParam;
 
@@ -56,14 +265,12 @@ public class Instruction implements Cloneable, Serializable
    * opCode and parameters are invalid.
    *
    * @param newOpCode the index to the thirteen opcodes available.
-   * @param newByteParam the 0, lexical offset or condition of the opCode.
-   * @param newWordParam the literal value of the opCode.
    */
-  public Instruction(int newOpCode, byte newByteParam, short newWordParam)
+  public Instruction(OpCode newOpCode)
   {
-    opCode = OpCode.getOpCodesByValue(newOpCode);
-    byteParam = newByteParam;
-    setWordParam(newWordParam);
+    opCode = newOpCode;
+    byteParam = -1;
+    wordParam = WordParameter.ILLEGAL;
   }
 
   /**
@@ -107,7 +314,7 @@ public class Instruction implements Cloneable, Serializable
   /**
    * Sets the new word parameter. There is no error checking performed.
    *
-   * @param newWordParameter The new WordParameter value
+   * @param newWordParameter The new word parameter value.
    */
   public void setWordParameter(short newWordParameter)
   {
@@ -120,9 +327,19 @@ public class Instruction implements Cloneable, Serializable
    *
    * @return The OpCode value
    */
-  public int getOpCode()
+  public OpCode getOpCode()
   {
-    return opCode.getValue();
+    return opCode;
+  }
+
+  /**
+   * Sets the new byte parameter. There is no error checking performed.
+   *
+   * @param newByteParameter The new byte parameter value.
+   */
+  public void setByteParameter(byte newByteParameter)
+  {
+    byteParam = newByteParameter;
   }
 
   /**
@@ -145,6 +362,16 @@ public class Instruction implements Cloneable, Serializable
   public short getWordParameter()
   {
     return wordParam.getValue();
+  }
+
+  /**
+   * Execute the opcode on the CPU.
+   *
+   * @param cpu the cpu to execute the code.
+   */
+  void execute(CPU cpu)
+  {
+    //By default do nothing.
   }
 
   /**
@@ -668,8 +895,9 @@ public class Instruction implements Cloneable, Serializable
    */
   public Object clone()
   {
-    Instruction newInstruction = new Instruction(opCode.getValue(), byteParam,
-        wordParam.getValue());
+    Instruction newInstruction = new Instruction(getOpCode());
+    newInstruction.setWordParameter(getWordParameter());
+    newInstruction.setByteParameter(getByteParameter());
 
     return newInstruction;
   }
