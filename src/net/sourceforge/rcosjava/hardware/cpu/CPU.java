@@ -51,6 +51,8 @@ import net.sourceforge.rcosjava.software.interrupt.InterruptQueue;
  * 05/09/98 Removed all messages sending from CPU. AN
  * </DD><DD>
  * 10/10/98 Finished removal of String based opcodes. AN
+ * </DD><DD>
+ * 10/12/2001 Implements STO 255,0 and STOX and LODX correctly. AN
  * </DD></DT>
  * <P>
  * @see net.sourceforge.rcosjava.software.kernel.Kernel
@@ -413,30 +415,6 @@ public class CPU
     {
       handleOperator();
     }
-    else if (instruction.isLoad())
-    {
-      if (getContext().getInstructionRegister().getByteParameter() == 255)
-      {
-        processStack.write(getContext().getStackPointer(),
-         (short) processStack.read(getContext().getStackPointer()));
-      }
-      else
-      {
-        getContext().incStackPointer();
-        processStack.write(getContext().getStackPointer(),
-          (processStack.read(findBase(
-           getContext().getInstructionRegister().getByteParameter()) +
-           getContext().getInstructionRegister().getWordParameter())));
-      }
-    }
-    else if (instruction.isStore())
-    {
-        processStack.write(
-          findBase(getContext().getInstructionRegister().getByteParameter())
-          + getContext().getInstructionRegister().getWordParameter(),
-          processStack.read(getContext().getStackPointer()));
-        getContext().decStackPointer();
-    }
     else if (instruction.isCallFunction())
     {
       processStack.write(getContext().getStackPointer()+1,
@@ -476,25 +454,62 @@ public class CPU
     {
       myKernel.handleSystemCall();
     }
+    else if (instruction.isLoad())
+    {
+      // LOD 255, 0
+      if (getContext().getInstructionRegister().getByteParameter() == 255)
+      {
+        processStack.write(getContext().getStackPointer(),
+         (short) processStack.read(getContext().getStackPointer()));
+      }
+      // LOD L, N
+      else
+      {
+        getContext().incStackPointer();
+        processStack.write(getContext().getStackPointer(),
+          (processStack.read(
+            findBase(getContext().getInstructionRegister().getByteParameter()) +
+            getContext().getInstructionRegister().getWordParameter())));
+      }
+    }
     else if (instruction.isLoadX())
     {
-      getContext().getInstructionRegister().setWordParameter(
-        (short)(getContext().getInstructionRegister().getWordParameter() +
-        processStack.read(getContext().getStackPointer())));
       processStack.write(getContext().getStackPointer(),
        (processStack.read(
-         findBase(getContext().getInstructionRegister().getByteParameter())
-       + getContext().getInstructionRegister().getWordParameter())));
+         findBase(getContext().getInstructionRegister().getByteParameter()) +
+         getContext().getInstructionRegister().getWordParameter() +
+         getContext().getStackPointer())));
+    }
+    else if (instruction.isStore())
+    {
+      // STO 255, 0
+      if (getContext().getInstructionRegister().getByteParameter() == 255)
+      {
+        processStack.write(processStack.read(
+          processStack.read(getContext().getStackPointer()-1)),
+          processStack.read(getContext().getStackPointer()));
+        getContext().decStackPointer();
+        getContext().decStackPointer();
+      }
+      // STO L, N
+      else
+      {
+        processStack.write(
+          findBase(getContext().getInstructionRegister().getByteParameter()) +
+          getContext().getInstructionRegister().getWordParameter(),
+          processStack.read(getContext().getStackPointer()));
+        getContext().decStackPointer();
+      }
     }
     else if (instruction.isStoreX())
     {
-      getContext().getInstructionRegister().setWordParameter((short)
-        (processStack.read(getContext().getStackPointer()-1) +
-         getContext().getInstructionRegister().getWordParameter()));
-       processStack.write(
-         (findBase(getContext().getInstructionRegister().getByteParameter()) +
-         getContext().getInstructionRegister().getWordParameter()),
-         processStack.read(getContext().getStackPointer()));
+      processStack.write(
+        findBase(getContext().getInstructionRegister().getByteParameter()) +
+        getContext().getInstructionRegister().getWordParameter() +
+        getContext().getStackPointer(),
+        processStack.read(getContext().getStackPointer()+1));
+      getContext().decStackPointer();
+      getContext().decStackPointer();
     }
   }
 
@@ -508,13 +523,13 @@ public class CPU
 
     if (call.isReturn())
     {
-      getContext().setStackPointer((short)
-        (getContext().getBasePointer() - 1));
+      getContext().setStackPointer((short) (getContext().getBasePointer() - 1));
       getContext().setBasePointer((short)
         (processStack.read(getContext().getStackPointer()+2)));
       getContext().setProgramCounter((short)
         (processStack.read(getContext().getStackPointer()+3)));
       //codeToExecute = !(getContext().getBasePointer() <= 0);
+
       processFinished = getContext().getBasePointer() <= 0;
       codeToExecute = !processFinished;
     }
