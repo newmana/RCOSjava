@@ -18,14 +18,14 @@ import java.net.*;
 
 public class FileServer
 {
-  private static String sExecutableRoot;
-  private static String sRecorderRoot;
-  private static int iServerPort;
-  private ServerSocket ssktServer;
-  private Socket sktConnection;
-  private DataInputStream disInStream;
-  private DataOutputStream dosOutStream;
-  private FileMessages fmMessenger;
+  private static String executableRoot;
+  private static String recorderRoot;
+  private static int serverPortNumber;
+  private ServerSocket fileServerSocket;
+  private Socket fileServerConnection;
+  private DataInputStream inputStream;
+  private DataOutputStream outputStream;
+  private FileMessages fileMessage;
 
   public FileServer()
   {
@@ -43,11 +43,11 @@ public class FileServer
       System.err.println("     <port> is the port to listen on.");
       return;
     }
-    sExecutableRoot = args[0];
-    sRecorderRoot = args[1];
+    executableRoot = args[0];
+    recorderRoot = args[1];
     try
     {
-      iServerPort = (new Integer(args[2])).intValue();
+      serverPortNumber = (new Integer(args[2])).intValue();
     }
     catch (Exception e)
     {
@@ -61,15 +61,15 @@ public class FileServer
   private void serviceRequests()
   {
     // Start the server.
-    System.out.println("Starting up server on port " + this.iServerPort + "...");
+    System.out.println("Starting up server on port " + this.serverPortNumber + "...");
     try
     {
-      ssktServer = new ServerSocket(this.iServerPort);
+      fileServerSocket = new ServerSocket(this.serverPortNumber);
       System.out.println("Server ready...");
     }
     catch (IOException exception)
     {
-      System.out.println("Unable to start server on port " + this.iServerPort);
+      System.out.println("Unable to start server on port " + this.serverPortNumber);
       return;
     }
     // Use a while loop to process commands. Wrap it in a try loop so that
@@ -78,67 +78,17 @@ public class FileServer
     {
       while (true)
       {
-        sktConnection = ssktServer.accept();
+        fileServerConnection = fileServerSocket.accept();
         System.out.println("Client "+
-          sktConnection.getInetAddress().getHostName() + " has connected...");
+          fileServerConnection.getInetAddress().getHostName() + " has connected...");
         // Get Input Stream
-        disInStream = new DataInputStream(sktConnection.getInputStream());
+        inputStream = new DataInputStream(fileServerConnection.getInputStream());
         // Set Output Stream
-        dosOutStream = new DataOutputStream(sktConnection.getOutputStream());
-        fmMessenger = new FileMessages(disInStream, dosOutStream);
-        while (fmMessenger.readMessage())
+        outputStream = new DataOutputStream(fileServerConnection.getOutputStream());
+        fileMessage = new FileMessages(inputStream, outputStream);
+        while (fileMessage.readMessage())
         {
-          if (fmMessenger.getLastMessageType()
-            .equals(fmMessenger.Q_DIRECTORY_LIST))
-          {
-            handleGetDirectoryListRequest(fmMessenger.getLastMessageDirectory(),
-              fmMessenger.getLastMessageData());
-          }
-          else if (fmMessenger.getLastMessageType()
-            .equals(fmMessenger.Q_READ_FILE_DATA))
-          {
-            handleGetFileRequest(fmMessenger.getLastMessageDirectory(),
-              fmMessenger.getLastMessageData());
-          }
-          else if (fmMessenger.getLastMessageType()
-            .equals(fmMessenger.Q_OPEN_FILE_DATA))
-          {
-            //handleOpenFileRequest(fmMessenger.getLastMessageDirectory(),
-            //fmMessenger.getLastMessageData());
-          }
-          else if (fmMessenger.getLastMessageType()
-            .equals(fmMessenger.Q_WRITE_FILE_DATA))
-          {
-            //handleWriteFileRequest(fmMessenger.getLastMessageDirectory(),
-            //fmMessenger.getLastMessageData());
-          }
-          else if (fmMessenger.getLastMessageType()
-            .equals(fmMessenger.Q_CLOSE_FILE_DATA))
-          {
-            //handleCloseFileRequest(fmMessenger.getLastMessageDirectory(),
-            //fmMessenger.getLastMessageData());
-          }
-          else if (fmMessenger.getLastMessageType()
-            .equals(fmMessenger.Q_FILE_STATS))
-          {
-            handleStatFileRequest(fmMessenger.getLastMessageDirectory(),
-              fmMessenger.getLastMessageData());
-          }
-          else if (fmMessenger.getLastMessageType()
-            .equals(fmMessenger.Q_HANGUP))
-          {
-            System.out.println("Client " +
-              sktConnection.getInetAddress().getHostName() +
-              " has disconnected...");
-            dosOutStream.close();
-            disInStream.close();
-            sktConnection.close();
-            break;
-          }
-          else
-          {
-            fmMessenger.replyInvalidCommandMessage();
-          }
+          handleMessage();
         }
       }
     }
@@ -148,114 +98,190 @@ public class FileServer
     }
   }
 
+  private void handleMessage()
+    throws IOException
+  {
+    String path = fileMessage.getLastMessageData();
+    //Only used for file data
+    String outputData = new String();
+
+    if (fileMessage.getLastMessageType().equals(fileMessage.Q_WRITE_FILE_DATA))
+    {
+      outputData = path.substring(path.indexOf(FileMessages.spacer)+1, path.length());
+      path = path.substring(0, path.indexOf(FileMessages.spacer));
+    }
+
+    int directoryIndicator = fileMessage.getLastMessageDirectory();
+    if (directoryIndicator == 1)
+      path = executableRoot + path;
+    else if (directoryIndicator == 2)
+      path = recorderRoot + path;
+
+//    System.out.println("Type: " + fileMessage.getLastMessageType());
+//    System.out.println("Size: " + fileMessage.getLastMessageSize());
+//    System.out.println("Date: " + fileMessage.getLastMessageData());
+
+    if (fileMessage.getLastMessageType()
+      .equals(fileMessage.Q_DIRECTORY_LIST))
+    {
+      handleGetDirectoryListRequest(path);
+    }
+    else if (fileMessage.getLastMessageType()
+      .equals(fileMessage.Q_READ_FILE_DATA))
+    {
+      handleGetFileRequest(path);
+    }
+    else if (fileMessage.getLastMessageType()
+      .equals(fileMessage.Q_WRITE_FILE_DATA))
+    {
+      handleWriteFileRequest(path, outputData);
+    }
+    else if (fileMessage.getLastMessageType()
+      .equals(fileMessage.Q_FILE_STATS))
+    {
+      handleStatFileRequest(path);
+    }
+    else if (fileMessage.getLastMessageType()
+      .equals(fileMessage.Q_HANGUP))
+    {
+      System.out.println("Client " +
+        fileServerConnection.getInetAddress().getHostName() +
+        " has disconnected...");
+      outputStream.close();
+      inputStream.close();
+      fileServerConnection.close();
+    }
+    else
+    {
+      fileMessage.replyInvalidCommandMessage();
+    }
+  }
+
   // To correctly handle a GETDIRECTORYLIST command from
   // the client.
-  private void handleGetDirectoryListRequest(int iDirectory, String sDirectory)
+  private void handleGetDirectoryListRequest(String directoryPath)
   {
     // Setup variables.
-    String[] sDirectoryList;
-    File fDirectory;
-    if (iDirectory == 1)
-      sDirectory = sExecutableRoot + sDirectory;
-    else if (iDirectory == 2)
-      sDirectory = sRecorderRoot + sDirectory;
-    // Setup the directory File object.
-    fDirectory = new File(sDirectory);
+    String[] theDirectoryList;
+    File theDirectory = new File(directoryPath);
     // Check that the file exists and is a directory.
-    if (!fDirectory.isDirectory())
+    if (!theDirectory.isDirectory())
     {
-      fmMessenger.replyDirectoryDoesNotExistMessage();
+      fileMessage.replyDirectoryDoesNotExistMessage();
       return;
     }
     // Read the directory
-    sDirectoryList = fDirectory.list();
-    int iCounter;
+    theDirectoryList = theDirectory.list();
+    int counter;
     // Send the data to the client.
-    for (iCounter = 0; iCounter < sDirectoryList.length; iCounter++)
+    for (counter = 0; counter < theDirectoryList.length; counter++)
     {
       // Put a trailing "/" on directories for identification.
-      File tmpFile = new File(fDirectory.getAbsolutePath() + "/" + sDirectoryList[iCounter]);
+      File tmpFile = new File(theDirectory.getAbsolutePath() + "/" +
+        theDirectoryList[counter]);
       if (tmpFile.isDirectory())
       {
-        sDirectoryList[iCounter]  = sDirectoryList[iCounter] + "/";
+        theDirectoryList[counter]  = theDirectoryList[counter] + "/";
       }
     }
-    fmMessenger.replyDirectoryListing(iDirectory, sDirectoryList);
+    fileMessage.replyDirectoryListing(theDirectoryList);
   }
 
   // To correctly handle a GETFILE command from
   // the client.
-  private void handleGetFileRequest(int iDirectory, String sFileName)
+  private void handleGetFileRequest(String filename)
   {
     // Setup variables.
-    FileInputStream fisFile;
-    DataInputStream disFile;
-    int iSize;
-    byte[] bFileData;
-    if (iDirectory == 1)
-      sFileName = sExecutableRoot + sFileName;
-    else if (iDirectory == 2)
-      sFileName = sRecorderRoot + sFileName;
+    FileInputStream inputFile;
+    DataInputStream inputStream;
+    int fileSize;
+    byte[] fileData;
     // Open the file and throw an error if it takes exception to it.
     try
     {
-      fisFile = new FileInputStream(sFileName);
+      inputFile = new FileInputStream(filename);
     }
     catch (FileNotFoundException exception)
     {
-      fmMessenger.replyFileDoesNotExistMessage();
+      fileMessage.replyFileDoesNotExistMessage();
       return;
     }
     // Setup the necessary streams and read the file contents.
-    disFile = new DataInputStream(fisFile);
+    inputStream = new DataInputStream(inputFile);
     try
     {
-      iSize = disFile.available();
-      bFileData = new byte[iSize];
-      disFile.readFully(bFileData, 0, iSize);
-      disFile.close();
+      fileSize = inputStream.available();
+      fileData = new byte[fileSize];
+      inputStream.readFully(fileData, 0, fileSize);
+      inputStream.close();
     }
     catch (IOException theException)
     {
-      iSize = 0;
-      bFileData = null;
+      fileSize = 0;
+      fileData = null;
     }
-    fmMessenger.replyLoadFileData(iDirectory, bFileData);
+    fileMessage.replyLoadFileData(fileData);
+  }
+
+  //Assumes that if the file exists it will append to the existing one.
+  private void handleWriteFileRequest(String filename, String outputData)
+  {
+    FileOutputStream outputFile;
+    DataOutputStream outputStream;
+
+    // Open (with append) the file and throw an error if it takes exception to it.
+    try
+    {
+      outputFile = new FileOutputStream(filename, true);
+    }
+    catch (FileNotFoundException exception)
+    {
+      fileMessage.replyFileDoesNotExistMessage();
+      return;
+    }
+    // Setup the necessary streams and read the file contents.
+    outputStream = new DataOutputStream(outputFile);
+    try
+    {
+      outputStream.writeChars(outputData);
+    }
+    catch (IOException theException)
+    {
+      fileMessage.replyCannotAccessFileMessage();
+      return;
+    }
+    fileMessage.replyWriteFileData();
   }
 
   // To correctly handle a STATFILE command from
   // the client.
-  private void handleStatFileRequest(int iDirectory, String sFileName)
+  private void handleStatFileRequest(String filename)
   {
     // Setup variables.
-    FileInputStream fisFile;
-    DataInputStream disFile;
-    int iSize;
-    if (iDirectory == 1)
-      sFileName = sExecutableRoot + sFileName;
-    else if (iDirectory == 2)
-      sFileName = sRecorderRoot + sFileName;
+    FileInputStream inputFile;
+    DataInputStream inputStream;
     // Open the file and throw an error if it takes exception to it.
     try
     {
-      fisFile = new FileInputStream (sFileName);
+      inputFile = new FileInputStream(filename);
     }
     catch (FileNotFoundException exception)
     {
-      fmMessenger.replyFileDoesNotExistMessage();
+      fileMessage.replyFileDoesNotExistMessage();
       return;
     }
     // Setup the necessary streams and read the file contents.
-    disFile = new DataInputStream(fisFile);
+    inputStream = new DataInputStream(inputFile);
+    int fileSize;
     try
     {
-      iSize = disFile.available();
-      disFile.close();
+      fileSize = inputStream.available();
+      inputStream.close();
     }
     catch (IOException theException)
     {
-      iSize = 0;
+      fileSize = 0;
     }
-    fmMessenger.replyFileStat(iDirectory, iSize);
+    fileMessage.replyFileStat(fileSize);
   }
 }

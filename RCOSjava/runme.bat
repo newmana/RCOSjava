@@ -1,3 +1,3 @@
 @echo off
-java -classpath %CLASSPATH%;. PLL2.FileServer .\PLL2\executable .\PLL2\recorded 4242
+java -classpath %CLASSPATH%;. pll2.FileServer .\pll2\executable .\pll2\recorded 4242
 

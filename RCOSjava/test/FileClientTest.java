@@ -36,15 +36,17 @@ public class FileClientTest extends TestCase
   public void testGetFiles()
   {
 //    myClient.getRecFile();
-    myClient.getExeFile("/NUMBERS.PCD");
-    myClient.getExeFile("/FRED.PCD");
+    System.out.println("File: " + myClient.getExeFile("/NUMBERS.PCD"));
+    System.out.println("File: " + myClient.getExeFile("/FRED.PCD"));
   }
 
   public void testStatFiles()
   {
 //    myClient.getRecFile();
-    myClient.statExeFile("/NUMBERS.PCD");
-    myClient.statExeFile("/FRED.PCD");
+    assertEquals("Getting known file of length 288", myClient.statExeFile("/NUMBERS.PCD"),
+      288);
+    assertEquals("Getting a file that doesn't exist", myClient.statExeFile("/FRED.PCD"),
+      0);
   }
 
   public static Test suite()
@@ -52,7 +54,7 @@ public class FileClientTest extends TestCase
     TestSuite suite = new TestSuite();
     suite.addTest(new FileClientTest("testGetDirs"));
     suite.addTest(new FileClientTest("testGetFiles"));
-    suite.addTest(new FileClientTest("testGetFiles"));
+    suite.addTest(new FileClientTest("testStatFiles"));
     return suite;
   }
 

@@ -16,79 +16,78 @@ import java.net.*;
 
 public class FileMessages
 {
-  public final static char cSpacer = ' ';
+  public final static char spacer = ' ';
   public final static String EOF = "[EOF]";
 
   //Possible requests
   public final static String Q_HANGUP = "Q000";
   public final static String Q_DIRECTORY_LIST = "Q100";
   public final static String Q_READ_FILE_DATA = "Q200";
-  public final static String Q_OPEN_FILE_DATA = "Q300";
-  public final static String Q_WRITE_FILE_DATA = "Q301";
-  public final static String Q_CLOSE_FILE_DATA = "Q302";
+  public final static String Q_WRITE_FILE_DATA = "Q300";
   public final static String Q_FILE_STATS = "Q400";
 
   //Possible replies
   //Errors
-  public final static String A_INVALID_COMMAND = "A001" + cSpacer + "Invalid Command";
-  public final static String A_INCORRECT_USAGE = "A002" + cSpacer + "Incorrect Usage";
-  public final static String A_CANNOT_ACCESS_DIRECTORY = "A003" + cSpacer + "Cannot access directory";
-  public final static String A_DIRECTORY_DOES_NOT_EXIST = "A004" + cSpacer + "Directory doesn't exist";
-  public final static String A_CANNOT_ACCESS_FILE = "A005" + cSpacer + "Cannot access file";
-  public final static String A_FILE_DOES_NOT_EXIST = "A006" + cSpacer + "File doesn't exist";
+  private final static String padding = spacer + "0" + spacer + "1" + spacer;
+  public final static String A_INVALID_COMMAND = "A001" + padding + "Invalid Command";
+  public final static String A_INCORRECT_USAGE = "A002" + padding + "Incorrect Usage";
+  public final static String A_CANNOT_ACCESS_DIRECTORY = "A003"  + padding + "Cannot access directory";
+  public final static String A_DIRECTORY_DOES_NOT_EXIST = "A004" + padding + "Directory doesn't exist";
+  public final static String A_CANNOT_ACCESS_FILE = "A005" + padding + "Cannot access file";
+  public final static String A_FILE_DOES_NOT_EXIST = "A006" + padding + "File doesn't exist";
 
   //Success
   public final static String A_DIRECTORY_LIST = "A100";
   public final static String A_READ_FILE_DATA = "A200";
-  public final static String A_OPEN_FILE_DATA = "A300";
-  public final static String A_WRITE_FILE_DATA = "A301";
-	public final static String A_CLOSE_FILE_DATA = "A302";
+  public final static String A_WRITE_FILE_DATA = "A300";
   public final static String A_FILE_STATS = "A400";
 
-  private DataOutputStream dosOutStream;
-  private DataInputStream disInStream;
-  private String sMessage, sMessageData, sMessageType, sPreviousRequest;
-  private int iPreviousSize, iMessageSize, iMessageDirectory;
+  private DataOutputStream outputStream;
+  private DataInputStream inputStream;
+  private String message, messageData, messageType, previousRequestMessage;
+  private int previousRequestSize, messageSize, messageDirectory;
 
-  public FileMessages(DataInputStream disStream, DataOutputStream dosStream)
+  public FileMessages(DataInputStream newInputStream,
+    DataOutputStream newOutputStream)
   {
-    this.disInStream = disStream;
-    this.dosOutStream = dosStream;
+    inputStream = newInputStream;
+    outputStream = newOutputStream;
   }
 
   //Try to read the next message in the stream.
   public boolean readMessage()
   {
-    sMessageData = null;
-    iMessageDirectory = 0;
-    sMessageType = null;
+    messageData = null;
+    messageDirectory = 0;
+    messageType = null;
     try
     {
-      boolean bEnd = false;
-      StringBuffer sbTmpMessage = new StringBuffer();
-      String sTmpMessage;
-      while (!bEnd)
+      boolean end = false;
+      StringBuffer tmpMessage = new StringBuffer();
+      String strTmpMessage;
+      while (!end)
       {
-        sTmpMessage = disInStream.readUTF();
-        bEnd = sTmpMessage.endsWith(EOF);
-        sbTmpMessage.append(sTmpMessage);
+        strTmpMessage = inputStream.readUTF();
+        end = strTmpMessage.endsWith(EOF);
+        tmpMessage.append(strTmpMessage);
       }
-      sbTmpMessage.setLength(sbTmpMessage.length() - EOF.length());
-      sMessage = sbTmpMessage.toString();
+//      System.out.println("Raw message: " + tmpMessage);
+      tmpMessage.setLength(tmpMessage.length() - EOF.length());
+      message = tmpMessage.toString();
 
-      if (sMessage != null)
+      if (message != null)
       {
-        sMessageType = sMessage.substring(0, 4);
-        iMessageDirectory = Integer.parseInt(sMessage.substring(5, 6));
-        sMessageData = sMessage.substring(7, sMessage.length());
-        if (sMessageData.indexOf(" ") != -1)
+        messageType = message.substring(0, 4);
+        messageDirectory = Integer.parseInt(message.substring(5, 6));
+        messageData = message.substring(7, message.length());
+        if (messageData.indexOf(" ") != -1)
         {
-          iMessageSize = (Integer.parseInt(sMessageData.substring(0, sMessageData.indexOf(cSpacer))));
-          sMessageData = sMessageData.substring(sMessageData.indexOf(cSpacer)+1, sMessageData.length());
+          messageSize = (Integer.parseInt(messageData.substring(0, messageData.indexOf(spacer))));
+          messageData = messageData.substring(messageData.indexOf(spacer)+1, messageData.length());
         }
-        if (validMessageType(sMessageType))
+        if (validMessageType(messageType))
         {
-          if (sMessageData.length() > 0)
+          if (messageData.length() > 0)
             return true;
           else
             replyIncorrectUsageMessage();
@@ -106,11 +105,11 @@ public class FileMessages
     catch (IOException ioe)
     {
       System.out.println("Error reading data from server: " + ioe);
-		}
+    }
     catch (Exception e)
     {
       System.out.println("Error: " + e);
-			e.printStackTrace();
+      e.printStackTrace();
     }
     return false;
   }
@@ -118,49 +117,45 @@ public class FileMessages
   //Return the last message type returned by read message
   public String getLastMessageType()
   {
-    return sMessageType;
+    return messageType;
   }
 
   //Return the last message directory by read message
   public int getLastMessageDirectory()
   {
-          return iMessageDirectory;
+    return messageDirectory;
   }
 
   //Return the last message data returned by read message
   public String getLastMessageData()
   {
-    return sMessageData;
+    return messageData;
   }
 
   //Return the size of the last message
   public int getLastMessageSize()
   {
-    return iMessageSize;
+    return messageSize;
   }
 
   //Is the message a valid type?
-  private boolean validMessageType(String sMessageType)
+  private boolean validMessageType(String messageType)
   {
-    if (sMessageType.equals(Q_HANGUP) ||
-        sMessageType.equals(Q_DIRECTORY_LIST) ||
-        sMessageType.equals(Q_READ_FILE_DATA) ||
-	sMessageType.equals(Q_OPEN_FILE_DATA) ||
-	sMessageType.equals(Q_WRITE_FILE_DATA) ||
-	sMessageType.equals(Q_CLOSE_FILE_DATA) ||
-        sMessageType.equals(Q_FILE_STATS) ||
-        sMessageType.equals(A_DIRECTORY_LIST) ||
-        sMessageType.equals(A_READ_FILE_DATA) ||
-	sMessageType.equals(A_OPEN_FILE_DATA) ||
-	sMessageType.equals(A_WRITE_FILE_DATA) ||
-	sMessageType.equals(A_CLOSE_FILE_DATA) ||
-        sMessageType.equals(A_FILE_STATS) ||
-	sMessageType.equals(A_INVALID_COMMAND) ||
-        sMessageType.equals(A_INCORRECT_USAGE) ||
-        sMessageType.equals(A_CANNOT_ACCESS_DIRECTORY) ||
-        sMessageType.equals(A_DIRECTORY_DOES_NOT_EXIST) ||
-        sMessageType.equals(A_CANNOT_ACCESS_FILE) ||
-        sMessageType.equals(A_FILE_DOES_NOT_EXIST))
+    if (messageType.equals(Q_HANGUP) ||
+        messageType.equals(Q_DIRECTORY_LIST) ||
+        messageType.equals(Q_READ_FILE_DATA) ||
+	messageType.equals(Q_WRITE_FILE_DATA) ||
+        messageType.equals(Q_FILE_STATS) ||
+        messageType.equals(A_DIRECTORY_LIST) ||
+        messageType.equals(A_READ_FILE_DATA) ||
+	messageType.equals(A_WRITE_FILE_DATA) ||
+        messageType.equals(A_FILE_STATS) ||
+	messageType.equals(A_INVALID_COMMAND) ||
+        messageType.equals(A_INCORRECT_USAGE) ||
+        messageType.equals(A_CANNOT_ACCESS_DIRECTORY) ||
+        messageType.equals(A_DIRECTORY_DOES_NOT_EXIST) ||
+        messageType.equals(A_CANNOT_ACCESS_FILE) ||
+        messageType.equals(A_FILE_DOES_NOT_EXIST))
     {
       return true;
     }
@@ -168,82 +163,109 @@ public class FileMessages
   }
 
   //Questions - requests
-  public boolean askDirectoryListing(int iDirectory, String sDirectoryName)
+  public boolean askDirectoryListing(int directoryIndicator,
+    String directoryName)
   {
-    if (sDirectoryName != null)
-      return(writeMessage(Q_DIRECTORY_LIST + cSpacer + iDirectory + cSpacer + sDirectoryName));
-    return false;
+    if (directoryName != null)
+    {
+      return(writeMessage(Q_DIRECTORY_LIST + spacer + directoryIndicator + spacer +
+        directoryName));
+    }
+    else
+    {
+      return false;
+    }
   }
 
-  public boolean askReadFileData(int iDirectory, String sFileName)
+  public boolean askReadFileData(int directoryIndicator, String filename)
   {
-    if (sFileName != null)
-      return(writeMessage(Q_READ_FILE_DATA + cSpacer + iDirectory + cSpacer + sFileName));
-    return false;
+    if (filename != null)
+    {
+      return(writeMessage(Q_READ_FILE_DATA + spacer + directoryIndicator + spacer +
+        filename));
+    }
+    else
+    {
+      return false;
+    }
   }
 
-  public boolean askOpenFileData(int iDirectory, String sFileName)
+  public boolean askWriteFileData(int directoryIndicator, String filename,
+    String fileData)
   {
-  if (sFileName != null)
-    return(writeMessage(Q_OPEN_FILE_DATA + cSpacer + iDirectory + cSpacer + sFileName));
-  return false;
+    if (filename != null)
+    {
+      return(writeMessage(Q_WRITE_FILE_DATA + spacer + directoryIndicator + spacer +
+        filename + spacer + fileData));
+    }
+    else
+    {
+      return false;
+    }
   }
 
-  public boolean askWriteFileData(int iDirectory, String sFileName)
+  public boolean askFileStats(int directoryIndicator, String filename)
   {
-    if (sFileName != null)
-      return(writeMessage(Q_WRITE_FILE_DATA + cSpacer + iDirectory + cSpacer + sFileName));
-    return false;
-  }
-
-  public boolean askCloseFileData(int iDirectory, String sFileName)
-  {
-    if (sFileName != null)
-      return(writeMessage(Q_CLOSE_FILE_DATA + cSpacer + iDirectory + cSpacer + sFileName));
-    return false;
-  }
-
-  public boolean askFileStats(int iDirectory, String sFileName)
-  {
-    if (sFileName != null)
-      return(writeMessage(Q_FILE_STATS + cSpacer + iDirectory + cSpacer + sFileName));
-    return false;
+    if (filename != null)
+    {
+      return(writeMessage(Q_FILE_STATS + spacer + directoryIndicator + spacer +
+        filename));
+    }
+    else
+    {
+      return false;
+    }
   }
 
   public void askHangUp()
   {
-    writeMessage(Q_HANGUP + cSpacer + "0" + cSpacer + "NOW");
+    writeMessage(Q_HANGUP + spacer + "0" + spacer + "NOW");
   }
 
   //Answers - replies
-  public boolean replyDirectoryListing(int iDirectory, String[] sDirectoryList)
+  public boolean replyDirectoryListing(String[] directoryList)
   {
-    iPreviousSize = sDirectoryList.length;
-    int iCount;
-    if (!writeMessage(A_DIRECTORY_LIST + cSpacer + iDirectory + cSpacer + iPreviousSize, false))
-      return false;
-    for (iCount = 0; iCount < iPreviousSize; iCount++)
+    previousRequestSize = directoryList.length;
+    if (!writeMessage(A_DIRECTORY_LIST + spacer + "0" + spacer +
+      previousRequestSize, false))
     {
-      if(!writeMessage(cSpacer + sDirectoryList[iCount], false))
+      return false;
+    }
+    int count;
+    for (count = 0; count < previousRequestSize; count++)
+    {
+      if(!writeMessage((spacer + directoryList[count]), false))
+      {
         return false;
+      }
     }
     flushOutStream();
     return true;
   }
 
-  public boolean replyLoadFileData(int iDirectory, byte[] bFileData)
+  public boolean replyLoadFileData(byte[] fileData)
   {
-    iPreviousSize = bFileData.length;
-    if (!writeMessage(A_READ_FILE_DATA + cSpacer + iDirectory + cSpacer + iPreviousSize + cSpacer, false))
+    previousRequestSize = fileData.length;
+    if (!writeMessage(A_READ_FILE_DATA + spacer + "0" + spacer +
+      previousRequestSize + spacer, false))
+    {
       return false;
-    if (!writeMessage(bFileData, true))
+    }
+    if (!writeMessage(fileData, true))
+    {
       return false;
+    }
     return true;
   }
 
-  public boolean replyFileStat(int iDirectory, int iSize)
+  public boolean replyWriteFileData()
   {
-    return(writeMessage(A_FILE_STATS + cSpacer + iDirectory + cSpacer + iSize));
+    return(writeMessage(A_WRITE_FILE_DATA + spacer + "0" + spacer + "OK"));
+  }
+
+  public boolean replyFileStat(int fileSize)
+  {
+    return(writeMessage(A_FILE_STATS + spacer + "0" + spacer + fileSize));
   }
 
   public boolean replyInvalidCommandMessage()
@@ -276,34 +298,36 @@ public class FileMessages
     return(replyErrorMessage(A_FILE_DOES_NOT_EXIST));
   }
 
-  private boolean replyErrorMessage(String sMessage)
+  private boolean replyErrorMessage(String message)
   {
-    System.err.println(sMessage + ": " + sPreviousRequest);
-    return(writeMessage(sMessage));
+    System.err.println(message);
+    return(writeMessage(message));
   }
 
-  private boolean writeMessage(String sMessage)
+  private boolean writeMessage(String message)
   {
-    return(writeMessage(sMessage, true));
+    return(writeMessage(message, true));
   }
 
-  private boolean writeMessage(byte[] bMessage, boolean bFlush)
+  private boolean writeMessage(byte[] message, boolean flush)
   {
-    return(writeMessage(new String(bMessage), bFlush));
+    return(writeMessage(new String(message), flush));
   }
 
-  private boolean writeMessage(String sMessage, boolean bFlush)
+  private boolean writeMessage(String message, boolean flush)
   {
     try
     {
-      sPreviousRequest = sMessage;
-      dosOutStream.writeUTF(sMessage);
-      if (bFlush)
+      previousRequestMessage = message;
+      outputStream.writeUTF(message);
+      if (flush)
+      {
         flushOutStream();
+      }
     }
     catch (IOException ioe)
     {
-      System.out.println(ioe + " Error when trying to write: " + sMessage);
+      System.out.println(ioe + " Error when trying to write: " + message);
       return false;
     }
     return true;
@@ -313,8 +337,8 @@ public class FileMessages
   {
     try
     {
-      dosOutStream.writeUTF(EOF);
-      dosOutStream.flush();
+      outputStream.writeUTF(EOF);
+      outputStream.flush();
     }
     catch (IOException ioe)
     {

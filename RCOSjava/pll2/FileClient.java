@@ -88,7 +88,7 @@ public class FileClient
   // Returns:  An array of Strings, one for each entry in the directory list.
   private String[] getDir(int iDirectory, String sDirectory)
   {
-    String[] sTheList = null;
+    String[] sTheList = new String[0];
     //Ask for directory listing
     if(fmMessenger.askDirectoryListing(iDirectory, sDirectory))
     {
@@ -136,8 +136,7 @@ public class FileClient
   // Returns:  An array of bytes containing the file contents.
   private Memory getFile(int iDirectory, String sFileName)
   {
-    byte bFileData[] = null;
-    Memory mFileData = null;
+    Memory mFileData = new Memory();
     if(fmMessenger.askReadFileData(iDirectory, sFileName))
     {
       //Read result
@@ -153,15 +152,7 @@ public class FileClient
     return mFileData;
   }
 
-  public void openRecFile(String sFileName)
-  {
-  }
-
   public void writeRecFile()
-  {
-  }
-
-  public void closeRecFile(String sFileName)
   {
   }
 
@@ -188,7 +179,14 @@ public class FileClient
       {
         if (fmMessenger.getLastMessageType().equals(fmMessenger.A_FILE_STATS))
         {
-          iMessageSize = fmMessenger.getLastMessageSize();
+          try
+          {
+            iMessageSize = Integer.parseInt(fmMessenger.getLastMessageData());
+          }
+          catch (NumberFormatException e)
+          {
+            iMessageSize = 0;
+          }
         }
       }
     }
