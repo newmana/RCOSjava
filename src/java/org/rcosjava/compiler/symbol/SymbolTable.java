@@ -76,8 +76,6 @@ public class SymbolTable
       // variable.
       if (null == symbolMap.get(new Short(newSymbol.getLevel())))
       {
-        short newOffset = (short) (symbolIndex + symbolMap.size());
-        newSymbol.setOffset(newOffset);
         symbolMap.put(new Short(newSymbol.getLevel()), newSymbol);
         symbolIndex += newSymbol.getSize();
       }
@@ -91,7 +89,6 @@ public class SymbolTable
     else
     {
       HashMap symbolMap = new HashMap();
-      newSymbol.setOffset(((short) (symbolIndex)));
       symbolMap.put(new Short(newSymbol.getLevel()), newSymbol);
       symbols.put(newSymbol.getName(), symbolMap);
       symbolIndex += newSymbol.getSize();
