@@ -41,11 +41,6 @@ public class MultimediaPlayFrame extends RCOSFrame
   private JTextField fileNameTextField = new JTextField(20);
 
   /**
-   * Description of the Field
-   */
-  private Image myImages[];
-
-  /**
    * List of directories.
    */
   private JList directoryListBox;
@@ -83,19 +78,11 @@ public class MultimediaPlayFrame extends RCOSFrame
    * @param pmImages Description of Parameter
    * @param thisProgramManager Description of Parameter
    */
-  public MultimediaPlayFrame(int x, int y, ImageIcon[] images,
+  public MultimediaPlayFrame(int x, int y,
       MultimediaAnimator thisProgramManager)
   {
     super();
     setTitle("Tour Playback");
-    if (images != null)
-    {
-      myImages = new Image[images.length];
-      for (int index = 0; index < images.length-1; index++)
-      {
-        myImages[index] = images[index].getImage();
-      }
-    }
     myMultimediaAnimator = thisProgramManager;
     setSize(x, y);
   }

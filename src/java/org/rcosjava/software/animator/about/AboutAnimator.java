@@ -33,11 +33,10 @@ public class AboutAnimator extends RCOSAnimator
    * @param y Description of Parameter
    * @param images Description of Parameter
    */
-  public AboutAnimator(AnimatorOffice postOffice, int x, int y,
-      ImageIcon[] images)
+  public AboutAnimator(AnimatorOffice postOffice, int x, int y)
   {
     super(MESSENGING_ID, postOffice);
-    myFrame = new AboutFrame(x, y, images);
+    myFrame = new AboutFrame(x, y);
     myFrame.pack();
     myFrame.setSize(x, y);
   }

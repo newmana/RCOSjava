@@ -21,25 +21,15 @@ import org.rcosjava.software.animator.support.GraphicButton;
 public class AboutFrame extends RCOSFrame
 {
   /**
-   * Images of authors.
-   */
-  private Image[] myImages;
-
-  /**
    * Constructor for the AboutFrame object
    *
    * @param x width of the frame.
    * @param y height of the frame.
    * @param images pictures of the authors.
    */
-  public AboutFrame(int x, int y, ImageIcon images[])
+  public AboutFrame(int x, int y)
   {
     setTitle("About RCOSjava");
-    myImages = new Image[images.length];
-    for (int index = 0; index < images.length; index++)
-    {
-      myImages[index] = images[index].getImage();
-    }
     setSize(x, y);
   }
 

@@ -74,12 +74,12 @@ public class MultimediaAnimator extends RCOSAnimator
    * @param newPlayer Description of Parameter
    */
   public MultimediaAnimator(AnimatorOffice aPostOffice,
-      int x, int y, ImageIcon[] pmImages, UniversalMessageRecorder newRecorder,
+      int x, int y, UniversalMessageRecorder newRecorder,
       UniversalMessagePlayer newPlayer)
   {
     super(MESSENGING_ID, aPostOffice);
-    mmPlayFrame = new MultimediaPlayFrame(x, y, pmImages, this);
-    mmRecordFrame = new MultimediaRecordFrame(x, y, pmImages, this);
+    mmPlayFrame = new MultimediaPlayFrame(x, y, this);
+    mmRecordFrame = new MultimediaRecordFrame(x, y, this);
     recorder = newRecorder;
     player = newPlayer;
   }

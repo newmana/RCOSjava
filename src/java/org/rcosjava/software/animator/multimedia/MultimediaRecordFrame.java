@@ -41,11 +41,6 @@ public class MultimediaRecordFrame extends RCOSFrame
   private JTextField fileNameTextField = new JTextField(20);
 
   /**
-   * Description of the Field
-   */
-  private Image myImages[];
-
-  /**
    * List of directories.
    */
   private JList directoryListBox;
@@ -83,19 +78,11 @@ public class MultimediaRecordFrame extends RCOSFrame
    * @param pmImages Description of Parameter
    * @param newMultimediaAnimator Description of Parameter
    */
-  public MultimediaRecordFrame(int x, int y, ImageIcon[] images,
+  public MultimediaRecordFrame(int x, int y,
       MultimediaAnimator newMultimediaAnimator)
   {
     super();
     setTitle("Tour Recording");
-    if (images != null)
-    {
-      myImages = new Image[images.length];
-      for (int index = 0; index < images.length-1; index++)
-      {
-        myImages[index] = images[index].getImage();
-      }
-    }
     myMultimediaAnimator = newMultimediaAnimator;
     setSize(x, y);
   }
