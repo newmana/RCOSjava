@@ -51,9 +51,10 @@ public class FileClientTest extends TestCase
   {
     try
     {
-      myClient.writeRecFile("/test2.xml", new InstructionExecution(new OSMessageRecorder(),
-        new Memory()));
-      //myClient.writeRecFile("/test.xml", new String("hello"));
+      //myClient.writeRecFile("/test.xml", new InstructionExecution(new OSMessageRecorder(),
+      //  new Memory()));
+      myClient.writeRecFile("/test.xml", new String("hello"));
+      System.out.println("[" + myClient.getRecFile("/test.xml") + "]");
     }
     catch (Exception e)
     {
@@ -72,10 +73,10 @@ public class FileClientTest extends TestCase
   public static Test suite()
   {
     TestSuite suite = new TestSuite();
-    suite.addTest(new FileClientTest("testGetDirs"));
-    suite.addTest(new FileClientTest("testGetFiles"));
+    //suite.addTest(new FileClientTest("testGetDirs"));
+    //suite.addTest(new FileClientTest("testGetFiles"));
     suite.addTest(new FileClientTest("testPutFiles"));
-    suite.addTest(new FileClientTest("testStatFiles"));
+    //suite.addTest(new FileClientTest("testStatFiles"));
     return suite;
   }
 

@@ -97,19 +97,19 @@ public class Kernel extends OSMessageHandler
 
   public void setCurrentProcess(RCOSProcess newCurrentProcess)
   {
-    System.out.println("Setting Current Process: " + newCurrentProcess);
+//    System.out.println("Setting Current Process: " + newCurrentProcess);
     currentProcess = newCurrentProcess;
     setCurrentContext(newCurrentProcess);
   }
 
   public void setCurrentProcessNull()
   {
-    System.out.println("Setting Current Process to Null");
+//    System.out.println("Setting Current Process to Null");
     currentProcess = null;
     myCPU.setProcessCode(null);
     myCPU.setProcessStack(null);
-    System.out.println("CPU Code to execute: " + myCPU.hasCodeToExecute());
-    System.out.println("Kernel Code to execute: " + this.runningProcess());
+//    System.out.println("CPU Code to execute: " + myCPU.hasCodeToExecute());
+//    System.out.println("Kernel Code to execute: " + this.runningProcess());
   }
 
   public void performInstructionExecutionCycle()
@@ -214,8 +214,8 @@ public class Kernel extends OSMessageHandler
 
   public void switchProcess(RCOSProcess newProcess)
   {
-    System.out.println("-----Start Switch Process-----");
-    System.out.println("New Process: " + newProcess.getPID());
+//    System.out.println("-----Start Switch Process-----");
+//    System.out.println("New Process: " + newProcess.getPID());
     //Save memory if program hasn't terminated.
     if (myCPU.hasCodeToExecute())
     {
@@ -233,7 +233,7 @@ public class Kernel extends OSMessageHandler
     }
 
     setCurrentProcess(newProcess);
-    System.out.println("New Current Process: " + newProcess.getPID());
+//    System.out.println("New Current Process: " + newProcess.getPID());
 
     //Get new memory
     MemoryRequest memRead = new MemoryRequest(newProcess.getPID(),
@@ -245,7 +245,7 @@ public class Kernel extends OSMessageHandler
     memRead.setSize(newProcess.getStackPages()*MemoryManager.PAGE_SIZE);
     msg = new ReadBytes(this, memRead);
     sendMessage(msg);
-    System.out.println("-----End Switch Process-----");
+//    System.out.println("-----End Switch Process-----");
   }
 
   public void setProcessCode(Memory mMemory)
@@ -266,7 +266,7 @@ public class Kernel extends OSMessageHandler
     }
     catch (Exception e)
     {
-      System.out.println("Error processing message: "+e);
+      System.err.println("Error processing message: "+e);
       e.printStackTrace();
     }
   }
@@ -279,7 +279,7 @@ public class Kernel extends OSMessageHandler
     }
     catch (Exception e)
     {
-      System.out.println("Error processing message: "+e);
+      System.err.println("Error processing message: "+e);
       e.printStackTrace();
     }
   }
@@ -493,12 +493,12 @@ public class Kernel extends OSMessageHandler
   */
   public void handleTimerInterrupt()
   {
-    System.out.println("-----Start Handling Timer Interrupt-----");
+    //System.out.println("-----Start Handling Timer Interrupt-----");
     iTimerInterrupts++;
 
     if (iTimerInterrupts >= iQuantum)
     {
-      System.out.println("Quantum Expired");
+      //System.out.println("Quantum Expired");
       iTimerInterrupts = 0;
 
       if (myCPU.hasCodeToExecute())
@@ -510,23 +510,23 @@ public class Kernel extends OSMessageHandler
         // processes data structures
         RunningToReady rrMsg = new RunningToReady(this,
           oldProcess);
-        System.out.println("Running to Ready: " + oldProcess.getPID());
+        //System.out.println("Running to Ready: " + oldProcess.getPID());
         sendMessage(rrMsg);
-        System.out.println("Sent Running to Ready: " + oldProcess.getPID());
+        //System.out.println("Sent Running to Ready: " + oldProcess.getPID());
       }
     }
-    System.out.println("-----Finish Handling Timer Interrupt-----");
+    //System.out.println("-----Finish Handling Timer Interrupt-----");
   }
 
   public void handleProcessFinishedInterrupt()
   {
-    System.out.println("-----Start Handling Process Finished-----");
+    //System.out.println("-----Start Handling Process Finished-----");
     RCOSProcess oldCurrent = new RCOSProcess(getCurrentProcess());
-    System.out.println("Got process: " + oldCurrent.getPID());
+    //System.out.println("Got process: " + oldCurrent.getPID());
     oldCurrent.addToCPUTicks(getCurrentProcessTicks());
     ProcessFinished pfMsg = new ProcessFinished(this,
       oldCurrent);
     sendMessage(pfMsg);
-    System.out.println("-----End Handling Process Finished-----");
+    //System.out.println("-----End Handling Process Finished-----");
   }
 }

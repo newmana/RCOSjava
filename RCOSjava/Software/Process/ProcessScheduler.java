@@ -67,41 +67,41 @@ public class ProcessScheduler extends OSMessageHandler
 
   private void insertIntoZombieCreatedQ(RCOSProcess rpZombieProcess)
   {
-    System.out.println("Insert into zombie created q: " + rpZombieProcess.getPID());
+    //System.out.println("Insert into zombie created q: " + rpZombieProcess.getPID());
     pqZombieCreatedQ.insert(rpZombieProcess);
   }
 
   private RCOSProcess removeFromZombieCreatedQ(int iPID)
   {
-    System.out.println("Remove from zombie created q: " + iPID);
+    //System.out.println("Remove from zombie created q: " + iPID);
     return (RCOSProcess) pqZombieCreatedQ.getProcess(iPID);
   }
 
   private void insertIntoBlockedQ(RCOSProcess rpBlockedProcess)
   {
-    System.out.println("Insert into blocked q: " + rpBlockedProcess.getPID());
+    //System.out.println("Insert into blocked q: " + rpBlockedProcess.getPID());
     pqBlockedQ.insert(rpBlockedProcess);
   }
 
   private RCOSProcess removeFromBlockedQ(int iPID)
   {
-    System.out.println("Remove from blocked q: " + iPID);
+    //System.out.println("Remove from blocked q: " + iPID);
     return (RCOSProcess) pqBlockedQ.getProcess(iPID);
   }
 
   private void insertIntoReadyQ(RCOSProcess rpReadyProcess)
   {
-    System.out.println("Insert into ready q: " + rpReadyProcess.getPID());
+    //System.out.println("Insert into ready q: " + rpReadyProcess.getPID());
     pqReadyQ.insert(rpReadyProcess);
-    System.out.println("Ready Q size: " + pqReadyQ.size());
-    System.out.println("First element: " + ((RCOSProcess) pqReadyQ.peek(0)).getPID());
-    if (pqReadyQ.size() > 1)
-      System.out.println("2nd element: " + ((RCOSProcess) pqReadyQ.peek(1)).getPID());
+    //System.out.println("Ready Q size: " + pqReadyQ.size());
+    //System.out.println("First element: " + ((RCOSProcess) pqReadyQ.peek(0)).getPID());
+    //if (pqReadyQ.size() > 1)
+    //  System.out.println("2nd element: " + ((RCOSProcess) pqReadyQ.peek(1)).getPID());
   }
 
   private RCOSProcess removeFromReadyQ(int iPID)
   {
-    System.out.println("Remove from ready q: " + iPID);
+    //System.out.println("Remove from ready q: " + iPID);
     return (RCOSProcess) pqReadyQ.getProcess(iPID);
   }
 
@@ -195,8 +195,8 @@ public class ProcessScheduler extends OSMessageHandler
   public void runningToReady(RCOSProcess newProcess)
   {
     RCOSProcess rm = removeExecutingProcess(newProcess.getPID());
-    System.out.println("New Process: " + newProcess.getPID());
-    System.out.println("Removed: " + rm.getPID());
+    //System.out.println("New Process: " + newProcess.getPID());
+    //System.out.println("Removed: " + rm.getPID());
     newProcess.setStatus(RCOSProcess.READY);
     insertIntoReadyQ(newProcess);
     schedule();
@@ -224,7 +224,7 @@ public class ProcessScheduler extends OSMessageHandler
 
   public void processFinished(RCOSProcess rpOldProcess)
   {
-    System.out.println("Process Finished: " + rpOldProcess.getPID());
+    //System.out.println("Process Finished: " + rpOldProcess.getPID());
     removeExecutingProcess(rpOldProcess.getPID());
     if (rpOldProcess.getTerminalID() != null)
     {
@@ -324,7 +324,7 @@ public class ProcessScheduler extends OSMessageHandler
   //public synchronized void schedule()
   public void schedule()
   {
-    System.out.println("----- Start Schuduling-----");
+    //System.out.println("----- Start Schuduling-----");
     //Make sure that there isn't a process currently running.
     //Check to see if there are processes ready to execute.
     if (!runningProcess())
@@ -333,14 +333,14 @@ public class ProcessScheduler extends OSMessageHandler
       {
         RCOSProcess rpCurrentProcess = (RCOSProcess) pqReadyQ.retrieve();
 
-        System.out.println("Running: " + rpCurrentProcess.getPID());
+        //System.out.println("Running: " + rpCurrentProcess.getPID());
         setExecutingProcess(rpCurrentProcess);
         rpCurrentProcess.setStatus(RCOSProcess.RUNNING);
 
         ProcessSwitch aMsg = new ProcessSwitch(this,
           rpCurrentProcess);
         sendMessage(aMsg);
-        System.out.println("Running: " + rpCurrentProcess.getPID());
+        //System.out.println("Running: " + rpCurrentProcess.getPID());
       }
       else
       {
@@ -348,9 +348,9 @@ public class ProcessScheduler extends OSMessageHandler
         sendMessage(osmMsg);
       }
     }
-    else
-      System.out.println("Already running!");
-    System.out.println("-----End Schuduling-----");
+    //else
+      //System.out.println("Already running!");
+    //System.out.println("-----End Schuduling-----");
   }
 
   public void processMessage(OSMessageAdapter aMsg)
@@ -361,7 +361,7 @@ public class ProcessScheduler extends OSMessageHandler
     }
     catch (Exception e)
     {
-      System.out.println("Error processing message: "+e);
+      System.err.println("Error processing message: "+e);
       e.printStackTrace();
     }
   }
@@ -374,7 +374,7 @@ public class ProcessScheduler extends OSMessageHandler
     }
     catch (Exception e)
     {
-      System.out.println("Error processing message: "+e);
+      System.err.println("Error processing message: "+e);
       e.printStackTrace();
     }
   }

@@ -51,41 +51,41 @@ public class FileSystemManager extends OSMessageHandler
     cvMountTable = new Hashtable(20);
   }
 
-	
+
   public void processMessage(OSMessageAdapter aMsg)
   {
     try
-    {          
-      aMsg.doMessage(this);        
+    {
+      aMsg.doMessage(this);
     }
     catch (Exception e)
     {
-      System.out.println("Error processing message: "+e);
+      System.err.println("Error processing message: "+e);
       e.printStackTrace();
-    }  
+    }
   }
 
   public void processMessage(UniversalMessageAdapter aMsg)
   {
     try
-    {          
-      aMsg.doMessage(this);        
+    {
+      aMsg.doMessage(this);
     }
     catch (Exception e)
     {
-      System.out.println("Error processing message: "+e);
+      System.err.println("Error processing message: "+e);
       e.printStackTrace();
-    }  
+    }
   }
 
-	
+
   // Registers and dynamically creates a file system with the specified FS type.
   // File System type is the class name of the file system.
   // e.g. FileSystem.CPM14.CPM14FileSystem
   // File System name is the unique identifier of the file system.  e.g. CPM14.
 	// One file system name per file system type.
   public void register(String sFSName, String sFSType)
-  { 
+  {
     if (!cvFileSystems.containsKey(sFSName))
     {
       try
@@ -95,7 +95,7 @@ public class FileSystemManager extends OSMessageHandler
       }
       catch (Exception e)
       {
-        System.out.println("Error registering file system: "+e);
+        System.err.println("Error registering file system: "+e);
         e.printStackTrace();
       }
     }
@@ -110,7 +110,7 @@ public class FileSystemManager extends OSMessageHandler
   public void mount(String sFSName, String sMountPoint, String sDeviceName)
   {
 		FileSystem fsExistingFS = (FileSystem) cvFileSystems.get(sFSName);
-		
+
     if (fsExistingFS == null)
     {
       //No filesystem registered under that name
@@ -121,7 +121,7 @@ public class FileSystemManager extends OSMessageHandler
       if (!cvMountTable.containsKey(sMountPoint))
       {
         cvMountTable.put(sMountPoint, sFSName);
-        fsExistingFS.mount(sMountPoint, sDeviceName);        
+        fsExistingFS.mount(sMountPoint, sDeviceName);
       }
       else
       {
@@ -129,7 +129,7 @@ public class FileSystemManager extends OSMessageHandler
       }
     }
   }
-  
+
   public void allocate(DiskRequestData drdNewRequest)
   {
 		FileSystem fsExistingFS = getFSForFile(drdNewRequest.getFileName());
@@ -172,13 +172,13 @@ public class FileSystemManager extends OSMessageHandler
 			}
 		}
 	}
-	
+
   // Handles the return value from requests sent to the file systems.
   synchronized void handleReturnValue(OSMessageAdapter mvTheMessage)
   {
-    FileSystemReturnData mvReturnData = 
+    FileSystemReturnData mvReturnData =
            (FileSystemReturnData) mvTheMessage.getBody();
-    RequestTableData mvRequestData = 
+    RequestTableData mvRequestData =
            (RequestTableData) cvRequestTable.getItem(mvReturnData.getRequestID());
     if (mvRequestData == null)
     {
@@ -209,7 +209,7 @@ public class FileSystemManager extends OSMessageHandler
         RequestTableData mvOriginalRequest =
          (RequestTableData)(cvRequestTable.getItem(mvReturnData.getRequestID()));
 
-        //FileSystemReturnData mvOriginalRequestData = 
+        //FileSystemReturnData mvOriginalRequestData =
         //          (FileMessageData)mvOriginalRequest.getData();
 
         //int mvFID = mvOriginalRequestData.getFID();
@@ -243,23 +243,23 @@ public class FileSystemManager extends OSMessageHandler
   {
     FileSystemReturnData mvToReturn = new FileSystemReturnData(mvPID, mvRetVal);
 
-    //MessageAdapter mvReplyMessage = new MessageAdapter(getID(), 
+    //MessageAdapter mvReplyMessage = new MessageAdapter(getID(),
     //  "ProcessScheduler", "SysCallReturnValue", mvToReturn);
     //sendMessage(mvReplyMessage);
   }
 
-  // Returns a the File System that a request should be sent to. This 
+  // Returns a the File System that a request should be sent to. This
   // essentially  breaks down the filename and checks the mount point
   // table. If an entry is found, it returns the name
   // of the filesystem to handle the request.
   public FileSystem getFSForFile(String sFileName)
   {
-    // extract mount point from file name. 
+    // extract mount point from file name.
     int mvSearchIndex = sFileName.indexOf(":");
     if (mvSearchIndex == -1)
     {
       return null;
-    }    
+    }
     String mvMountPoint = sFileName.substring(0, mvSearchIndex);
     // Get the file system name based on mount point name
     String mvTheFSName = (String) cvMountTable.get(mvMountPoint);
@@ -267,8 +267,8 @@ public class FileSystemManager extends OSMessageHandler
     FileSystem fsFileSystem = (FileSystem) cvFileSystems.get(mvTheFSName);
     return fsFileSystem;
   }
-	
- 	// Returns the Files entry stored in the 
+
+ 	// Returns the Files entry stored in the
   private FIDTableData getTableData(DiskRequestData drdNewRequest)
 	{
 		// Get FID table entry
@@ -286,7 +286,7 @@ public class FileSystemManager extends OSMessageHandler
     }
 		return mvFileData;
 	}
-		
+
   private int addRequest(DiskRequestData drdNewRequest)
   {
     //RequestTableData rtdNewEntry = new RequestTableData(drdNewRequest);
