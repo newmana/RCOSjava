@@ -131,6 +131,16 @@ public class RCOSQueue extends JComponent
   }
 
   /**
+   * Returns the queue.
+   *
+   * @return the queue.
+   */
+  public LIFOQueue getQueue()
+  {
+    return queueMembers;
+  }
+
+  /**
    * Draws the queues with any values in them.
    *
    * @param g graphics object to paint to.
