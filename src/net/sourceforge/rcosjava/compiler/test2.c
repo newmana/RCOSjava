@@ -2,8 +2,9 @@ int global;
 
 void main()
 {
-  printf("Global variable test\n");
   global = 1;
+
+  printf("Global variable test\n");
 
   if ((global > 0))
   {
