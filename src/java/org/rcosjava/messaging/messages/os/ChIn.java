@@ -3,23 +3,23 @@ import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.software.terminal.SoftwareTerminal;
 
 /**
- * Description of the Class
+ * User has type a character.
  *
- * @author administrator
+ * @author Andrew Newman
  * @created 28 April 2002
  */
 public class ChIn extends OSMessageAdapter
 {
   /**
-   * Description of the Field
+   * The unique id of the terminal that the character was pressed.
    */
   private String terminalId;
 
   /**
-   * Constructor for the ChIn object
+   * Create a new ChIn message.
    *
-   * @param theSource Description of Parameter
-   * @param newTerminalID Description of Parameter
+   * @param theSource the sender of the message.
+   * @param newTerminalID the terminal id where the character orginated.
    */
   public ChIn(OSMessageHandler theSource, String newTerminalID)
   {
@@ -28,9 +28,9 @@ public class ChIn extends OSMessageAdapter
   }
 
   /**
-   * Sets the TerminalId attribute of the ChIn object
+   * Sets a new value of the terminal id.
    *
-   * @param newTerminalId The new TerminalId value
+   * @param newTerminalId The new terminal id value.
    */
   public void setTerminalId(String newTerminalId)
   {
@@ -38,14 +38,13 @@ public class ChIn extends OSMessageAdapter
   }
 
   /**
-   * Description of the Method
+   * If the Software Terminal object has the same terminal id then chIn() is
+   * called.
    *
-   * @param theElement Description of Parameter
+   * @param theElement the software terminal.
    */
   public void doMessage(SoftwareTerminal theElement)
   {
-    System.out.println("Element id:" + theElement.getId());
-    System.out.println("My id:" + terminalId);
     if (theElement.getId().compareTo(terminalId) == 0)
     {
       theElement.chIn();

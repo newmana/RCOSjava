@@ -2,7 +2,7 @@ package org.rcosjava.messaging.messages.os;
 
 import org.rcosjava.hardware.cpu.Interrupt;
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
-import org.rcosjava.hardware.cpu.CPU;
+import org.rcosjava.software.kernel.Kernel;
 
 /**
  * Adds an interrupt to the CPU's interrupt queue to be handled.
@@ -30,11 +30,11 @@ public class AddInterrupt extends OSMessageAdapter
   }
 
   /**
-   * Calls addInterrupt on the CPU.
+   * Calls addInterrupt on the CPU via the Kernel.
    *
-   * @param theElement the CPU object to call.
+   * @param theElement the Kernel object to call.
    */
-  public void doMessage(CPU theElement)
+  public void doMessage(Kernel theElement)
   {
     theElement.addInterrupt(interrupt);
   }
@@ -66,4 +66,3 @@ public class AddInterrupt extends OSMessageAdapter
     interrupt = newInterrupt;
   }
 }
-
