@@ -49,9 +49,6 @@ public class Variable extends Symbol
     OpCode loadOpCode = null;
     loadOpCode = OpCode.LOAD;
 
-    System.out.println("LOAD Compiler Level: " + Compiler.getLevel());
-    System.out.println("My level: " + getLevel());
-
     if (Compiler.getLevel() == getLevel())
     {
       compiler.writePCode(loadOpCode.getValue(), (byte) 0, getOffset());
