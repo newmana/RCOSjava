@@ -1,7 +1,7 @@
 package org.rcosjava.software.animator.ipc;
 
 import java.util.*;
-import org.rcosjava.software.util.FIFOQueue;
+import org.rcosjava.software.util.LIFOQueue;
 
 /**
  * Provides a way to display the list of processes using the currently selected
@@ -16,7 +16,7 @@ public class SemaphoreSharedMemoryGraphic
   /**
    * The processes connected to the semaphore or shared memory segment.
    */
-  private FIFOQueue attachedProcesses;
+  private LIFOQueue attachedProcesses;
 
   /**
    * The value of the shared memory or semaphore segment.
@@ -32,7 +32,7 @@ public class SemaphoreSharedMemoryGraphic
    */
   public SemaphoreSharedMemoryGraphic(int newProcess, Object newValue)
   {
-    attachedProcesses = new FIFOQueue(10, 1);
+    attachedProcesses = new LIFOQueue(10, 1);
     attachedProcesses.add(new Integer(newProcess));
     value = newValue;
   }
@@ -48,13 +48,13 @@ public class SemaphoreSharedMemoryGraphic
   }
 
   /**
-   * Returns the iterator to go through the processes attached.
+   * Returns the queue to go through the processes attached.
    *
-   * @return the iterator to go through the processes attached.
+   * @return the queue to go through the processes attached.
    */
-  public Iterator getAttachedProcesses()
+  public LIFOQueue getAttachedProcesses()
   {
-    return attachedProcesses.iterator();
+    return attachedProcesses;
   }
 
   /**

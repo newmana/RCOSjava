@@ -13,6 +13,7 @@ import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.software.ipc.SharedMemory;
 import org.rcosjava.software.memory.MemoryManager;
 import org.rcosjava.software.memory.MemoryReturn;
+import org.rcosjava.software.util.LIFOQueue;
 
 /**
  * Based on the commands sent and received to the IPC and displays graphically
@@ -344,8 +345,8 @@ public class IPCManagerPanel extends RCOSPanel
       semOption.addItem(SOME);
       myAnimator.setSelectedSemaphoreName(SOME);
     }
+
     semOption.addItem(semaphore.getName());
-    myAnimator.setSelectedSemaphoreName(semaphore.getName());
     updateSemaphoreQueue();
   }
 
@@ -382,6 +383,8 @@ public class IPCManagerPanel extends RCOSPanel
     {
       tmpGraphic.setValue(new Integer(waitingId));
     }
+
+    updateSemaphoreQueue();
   }
 
   /**
@@ -401,6 +404,8 @@ public class IPCManagerPanel extends RCOSPanel
     {
       tmpGraphic.setValue(new Integer(semaphore.getValue()));
     }
+
+    updateSemaphoreQueue();
   }
 
   /**
@@ -426,10 +431,6 @@ public class IPCManagerPanel extends RCOSPanel
         semOption.removeAllItems();
         semOption.addItem(NONE);
         myAnimator.setSelectedSemaphoreName(NONE);
-      }
-      else
-      {
-        myAnimator.setSelectedSemaphoreName(SOME);
       }
     }
     updateSemaphoreQueue();
@@ -577,11 +578,11 @@ public class IPCManagerPanel extends RCOSPanel
 
       semValue.setText(((Integer) tmpGraphic.getValue()).toString());
 
-      Iterator tmpIter = tmpGraphic.getAttachedProcesses();
+      LIFOQueue queue = tmpGraphic.getAttachedProcesses();
 
-      while (tmpIter.hasNext())
+      for (int index = 0; index < queue.size(); index++)
       {
-        semQueue.addToQueue("P" + ((Integer) tmpIter.next()).toString());
+        semQueue.addToQueue("P" + ((Integer) queue.peek(index)).toString());
       }
     }
     semQueue.repaint();
@@ -605,11 +606,11 @@ public class IPCManagerPanel extends RCOSPanel
 
       String tmpValue = (String) tmpGraphic.getValue();
       shmList.setText(tmpValue);
-      Iterator tmpIter = tmpGraphic.getAttachedProcesses();
+      LIFOQueue queue = tmpGraphic.getAttachedProcesses();
 
-      while (tmpIter.hasNext())
+      for (int index = 0; index < queue.size(); index++)
       {
-        shmQueue.addToQueue("P" + ((Integer) tmpIter.next()).toString());
+        semQueue.addToQueue("P" + ((Integer) queue.peek(index)).toString());
       }
     }
     shmQueue.repaint();
