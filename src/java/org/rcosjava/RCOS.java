@@ -375,6 +375,9 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     {
       port = 4242;
     }
+
+    fr.dyade.koala.xml.koml.KOMLConstants.KOML_DTD = getCodeBase().toString() +
+        "pll2/koml12.dtd";
     //helpURLStr = getClass().getResource("/Help/index.html").toString();
   }
 
@@ -484,11 +487,11 @@ public class RCOS extends javax.swing.JApplet implements Runnable
         osPostOffice);
 
     //Start the recording subsystem
-    recorder = new UniversalMessageRecorder(defaultDomain, port, "*Recorder",
-        osPostOffice, animatorPostOffice);
+    recorder = new UniversalMessageRecorder(animatorPostOffice, osPostOffice,
+        defaultDomain, port, "*Recorder");
 
-    player = new UniversalMessagePlayer(defaultDomain, port, "*Player",
-        osPostOffice, animatorPostOffice);
+    player = new UniversalMessagePlayer(animatorPostOffice, osPostOffice,
+        defaultDomain, port, "*Player");
   }
 
   /**
