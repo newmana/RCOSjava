@@ -140,7 +140,7 @@ public class ProcessQueue
   public RCOSProcess removeProcess(int pid) throws ProcessNotFoundException
   {
     RCOSProcess tmpProcess = findProcess(pid);
-    processes.retrieveCurrent();
+    processes.remove(tmpProcess);
     return tmpProcess;
   }
 
@@ -154,21 +154,18 @@ public class ProcessQueue
   {
     RCOSProcess tmpProcess = null;
 
-    processes.goToHead();
-
     // loop through contents of queue until
     // - we find a match, which should be removed and the process returned
     // - or we reach the end of the Q
     // - or the PID of the Processs are greater than the PID we
     //   are looking for
-    while (!processes.atTail())
+    for (int index = 0; index < processes.size(); index++)
     {
-      tmpProcess = (RCOSProcess) processes.peek();
+      tmpProcess = (RCOSProcess) processes.get(index);
       if (tmpProcess.getPID() == pid)
       {
         break;
       }
-      tmpProcess = null;
       processes.goToNext();
     }
 
