@@ -22,6 +22,7 @@ public class FileMessages
   //Possible requests
   public final static String Q_HANGUP = "Q000";
   public final static String Q_DIRECTORY_LIST = "Q100";
+  public final static String Q_DIRECTORY_CREATE = "Q101";
   public final static String Q_READ_FILE_DATA = "Q200";
   public final static String Q_WRITE_FILE_DATA = "Q300";
   public final static String Q_FILE_STATS = "Q400";
@@ -34,6 +35,7 @@ public class FileMessages
   public final static String A_DIRECTORY_DOES_NOT_EXIST = "A004";
   public final static String A_CANNOT_ACCESS_FILE = "A005";
   public final static String A_FILE_DOES_NOT_EXIST = "A006";
+  public final static String A_CANNOT_CREATE_DIRECTORY = "A007";
   private final static String padding = spacer + "0" + spacer + "1" + spacer;
   private final static String A_DESC_INVALID_COMMAND = "Invalid Command";
   public final static String A_DESC_INCORRECT_USAGE = "Incorrect Usage";
@@ -41,12 +43,14 @@ public class FileMessages
   public final static String A_DESC_DIRECTORY_DOES_NOT_EXIST = "Directory doesn't exist";
   public final static String A_DESC_CANNOT_ACCESS_FILE = "Cannot access file";
   public final static String A_DESC_FILE_DOES_NOT_EXIST = "File doesn't exist";
+  public final static String A_DESC_CANNOT_CREATE_DIRECTORY = "Couldn't create directory";
 
   //Success
   public final static String A_DIRECTORY_LIST = "A100";
   public final static String A_READ_FILE_DATA = "A200";
   public final static String A_WRITE_FILE_DATA = "A300";
   public final static String A_FILE_STATS = "A400";
+  public final static String A_DIRECTORY_CREATED = "A500";
 
   private DataOutputStream outputStream;
   private DataInputStream inputStream;
@@ -152,6 +156,7 @@ public class FileMessages
   {
     if (messageType.equals(Q_HANGUP) ||
         messageType.equals(Q_DIRECTORY_LIST) ||
+        messageType.equals(Q_DIRECTORY_CREATE) ||
         messageType.equals(Q_READ_FILE_DATA) ||
 	messageType.equals(Q_WRITE_FILE_DATA) ||
         messageType.equals(Q_FILE_STATS) ||
@@ -159,12 +164,14 @@ public class FileMessages
         messageType.equals(A_READ_FILE_DATA) ||
 	messageType.equals(A_WRITE_FILE_DATA) ||
         messageType.equals(A_FILE_STATS) ||
+        messageType.equals(A_DIRECTORY_CREATED) ||
 	messageType.equals(A_INVALID_COMMAND) ||
         messageType.equals(A_INCORRECT_USAGE) ||
         messageType.equals(A_CANNOT_ACCESS_DIRECTORY) ||
         messageType.equals(A_DIRECTORY_DOES_NOT_EXIST) ||
         messageType.equals(A_CANNOT_ACCESS_FILE) ||
-        messageType.equals(A_FILE_DOES_NOT_EXIST))
+        messageType.equals(A_FILE_DOES_NOT_EXIST) ||
+        messageType.equals(A_CANNOT_CREATE_DIRECTORY))
     {
       return true;
     }
@@ -178,6 +185,20 @@ public class FileMessages
     if (directoryName != null)
     {
       return(writeMessage(Q_DIRECTORY_LIST + spacer + directoryIndicator + spacer +
+        directoryName));
+    }
+    else
+    {
+      return false;
+    }
+  }
+
+  public boolean askDirectoryCreate(int directoryIndicator,
+    String directoryName)
+  {
+    if (directoryName != null)
+    {
+      return(writeMessage(Q_DIRECTORY_CREATE + spacer + directoryIndicator + spacer +
         directoryName));
     }
     else
@@ -277,6 +298,11 @@ public class FileMessages
     return(writeMessage(A_FILE_STATS + spacer + "0" + spacer + fileSize));
   }
 
+  public boolean replyDirectoryCreated(int fileSize)
+  {
+    return(writeMessage(A_DIRECTORY_CREATED + spacer + "0" + spacer + "0"));
+  }
+
   public boolean replyInvalidCommandMessage()
   {
     return(replyErrorMessage(A_INVALID_COMMAND));
@@ -309,6 +335,12 @@ public class FileMessages
   {
     return(replyErrorMessage(A_FILE_DOES_NOT_EXIST + padding +
       A_DESC_FILE_DOES_NOT_EXIST + ": " + filename));
+  }
+
+  public boolean replyCannotCreateDirectory(String filename)
+  {
+    return(replyErrorMessage(A_CANNOT_CREATE_DIRECTORY + padding +
+      A_DESC_CANNOT_CREATE_DIRECTORY + ": " + filename));
   }
 
   private boolean replyErrorMessage(String message)

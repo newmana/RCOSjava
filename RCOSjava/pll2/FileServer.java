@@ -172,6 +172,11 @@ public class FileServer
       handleGetDirectoryListRequest(path);
     }
     else if (fileMessage.getLastMessageType()
+      .equals(fileMessage.Q_DIRECTORY_CREATE))
+    {
+      handleCreateDir(path);
+    }
+    else if (fileMessage.getLastMessageType()
       .equals(fileMessage.Q_READ_FILE_DATA))
     {
       handleGetFileRequest(path);
@@ -224,12 +229,13 @@ public class FileServer
     // Send the data to the client.
     for (counter = 0; counter < theDirectoryList.length; counter++)
     {
-      // Put a trailing "/" on directories for identification.
-      File tmpFile = new File(theDirectory.getAbsolutePath() + "/" +
-        theDirectoryList[counter]);
+      // Put a trailing file separator on directories for identification.
+      File tmpFile = new File(theDirectory.getAbsolutePath() +
+        java.io.File.separatorChar + theDirectoryList[counter]);
       if (tmpFile.isDirectory())
       {
-        theDirectoryList[counter]  = theDirectoryList[counter] + "/";
+        theDirectoryList[counter]  = theDirectoryList[counter] +
+          java.io.File.separatorChar;
       }
     }
     fileMessage.replyDirectoryListing(theDirectoryList);
@@ -337,5 +343,16 @@ public class FileServer
       fileSize = 0;
     }
     fileMessage.replyFileStat(fileSize);
+  }
+
+  public void handleCreateDir(String directory)
+  {
+    boolean success = false;
+    File tmpDirectory = new File(directory);
+    success = tmpDirectory.mkdir();
+    if (success)
+      fileMessage.replyDirectoryCreated(0);
+    else
+      fileMessage.replyCannotCreateDirectory("");
   }
 }

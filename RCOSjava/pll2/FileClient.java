@@ -69,22 +69,39 @@ public class FileClient
    */
   public String[] getExeDir()
   {
-    return(getDir(1, "/"));
+    return(getDir(1, java.io.File.separator));
   }
 
   public String[] getRecDir()
   {
-    return(getDir(2, "/"));
+    return(getDir(2, java.io.File.separator));
   }
 
-  public String[] getExeDir(String sDirectory)
+  public String[] getExeDir(String directoryName)
   {
-    return(getDir(1, sDirectory));
+    return(getDir(1, directoryName));
   }
 
-  public String[] getRecDir(String sDirectory)
+  public String[] getRecDir(String directoryName)
   {
-    return(getDir(2, sDirectory));
+    return(getDir(2, directoryName));
+  }
+
+  public boolean createRecDir(String directoryName)
+  {
+    int messageSize = 0;
+    if(messages.askDirectoryCreate(2, directoryName))
+    {
+      //Read result
+      if (messages.readMessage())
+      {
+        if (messages.getLastMessageType().equals(messages.A_DIRECTORY_CREATED))
+        {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   /**
@@ -92,26 +109,27 @@ public class FileClient
    *
    * @return An array of Strings, one for each entry in the directory list.
    */
-  private String[] getDir(int iDirectory, String sDirectory)
+  private String[] getDir(int directoryType, String directoryName)
   {
-    String[] sTheList = new String[0];
+    String[] theList = new String[0];
     //Ask for directory listing
-    if(messages.askDirectoryListing(iDirectory, sDirectory))
+    if(messages.askDirectoryListing(directoryType, directoryName))
     {
       //Read result
       if (messages.readMessage())
       {
-        String sData = messages.getLastMessageData();
-        int iMessageSize = messages.getLastMessageSize();
-        if (messages.getLastMessageType().equals(messages.A_DIRECTORY_LIST))
+        String data = messages.getLastMessageData();
+        int messageSize = messages.getLastMessageSize();
+        if ((messages.getLastMessageType().equals(messages.A_DIRECTORY_LIST)) &&
+            (messageSize > 0))
         {
-          sTheList = new String[iMessageSize];
-          StringTokenizer stTokenizer = new StringTokenizer(sData, " ");
-          int iCount = 0;
-          while(stTokenizer.hasMoreElements())
+          theList = new String[messageSize];
+          StringTokenizer tokenizer = new StringTokenizer(data, " ");
+          int count = 0;
+          while(tokenizer.hasMoreElements())
           {
-            sTheList[iCount] = stTokenizer.nextToken();
-            iCount++;
+            theList[count] = tokenizer.nextToken();
+            count++;
           }
         }
       }
@@ -125,7 +143,7 @@ public class FileClient
       System.err.println(this + " getDir() Couldn't send command.");
     }
     // Return the lines read in.
-    return sTheList;
+    return theList;
   }
 
   public Memory getExeFile(String filename)
@@ -136,6 +154,8 @@ public class FileClient
   public Object getRecFile(String filename)
   {
     String serializedObject = getFile(2, filename);
+    System.out.println("Filename: " + filename);
+    System.out.println("Got: " + serializedObject);
     ByteArrayInputStream tmpBuffer = new
       ByteArrayInputStream(serializedObject.getBytes());
     KOMLDeserializer deserializer = null;
@@ -167,10 +187,10 @@ public class FileClient
    *
    * @return An array of bytes containing the file contents.
    */
-  private String getFile(int iDirectory, String sFileName)
+  private String getFile(int directoryType, String sFileName)
   {
     String mFileData = new String();
-    if(messages.askReadFileData(iDirectory, sFileName))
+    if(messages.askReadFileData(directoryType, sFileName))
     {
       //Read result
       if (messages.readMessage())
@@ -239,10 +259,10 @@ public class FileClient
   /**
    * Retrieve the sizeof the specified file
    */
-  private int statFile(int iDirectory, String sFileName)
+  private int statFile(int directoryType, String sFileName)
   {
-    int iMessageSize = 0;
-    if(messages.askFileStats(iDirectory, sFileName))
+    int messageSize = 0;
+    if(messages.askFileStats(directoryType, sFileName))
     {
       //Read result
       if (messages.readMessage())
@@ -251,16 +271,16 @@ public class FileClient
         {
           try
           {
-            iMessageSize = Integer.parseInt(messages.getLastMessageData());
+            messageSize = Integer.parseInt(messages.getLastMessageData());
           }
           catch (NumberFormatException e)
           {
-            iMessageSize = 0;
+            messageSize = 0;
           }
         }
       }
     }
-    return iMessageSize;
+    return messageSize;
   }
 
   /**
