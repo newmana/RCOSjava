@@ -30,9 +30,8 @@ public class CPM14DiskScheduler implements DiskScheduler
    */
   private static int size = 1;
 
-  //Defaults based on size of 247808 bytes and 1024 bytes per sector
   /**
-   * Description of the Field
+   * Defaults based on size of 247808 bytes and 1024 bytes per sector
    */
   private static final int SECTOR_SIZE = 1024;
 
@@ -46,7 +45,6 @@ public class CPM14DiskScheduler implements DiskScheduler
    */
   private static final int TRACKS = 22;
 
-  // Variables
   /**
    * Description of the Field
    */
@@ -56,14 +54,17 @@ public class CPM14DiskScheduler implements DiskScheduler
    * Description of the Field
    */
   private FIFOQueue requestQueue;
+
   /**
    * Description of the Field
    */
   private DiskQueueItem currentRequest;
+
   /**
    * Description of the Field
    */
   private boolean busy;
+
   /**
    * Description of the Field
    */
@@ -161,9 +162,8 @@ public class CPM14DiskScheduler implements DiskScheduler
     }
   }
 
-  // Complete request.
   /**
-   * Description of the Method
+   * Complete request.
    */
   public void currentRequestComplete()
   {
@@ -194,10 +194,10 @@ public class CPM14DiskScheduler implements DiskScheduler
     busy = false;
   }
 
-  // This proceedure is part of the Simulation. In a real system, this
-  // is where the device driver talks to the disk.
+  //
   /**
-   * Description of the Method
+   * This proceedure is part of the Simulation. In a real system, this
+   * is where the device driver talks to the disk.
    *
    * @param mvBlockNumber Description of Parameter
    * @return Description of the Returned Value
@@ -216,10 +216,9 @@ public class CPM14DiskScheduler implements DiskScheduler
     return mvReadData;
   }
 
-  // Note: This proceedure is part of the Simulation. In a real system, this
-  // is where the device driver talks to the disk.
   /**
-   * Description of the Method
+   * Note: This proceedure is part of the Simulation. In a real system, this
+   * is where the device driver talks to the disk.
    *
    * @param mvBlockNumber Description of Parameter
    * @param mvWriteData Description of Parameter
@@ -236,10 +235,9 @@ public class CPM14DiskScheduler implements DiskScheduler
     }
   }
 
-  // Used for debugging. Will dump the specified block to the screen.
-  // Also part of the simulation.
   /**
-   * Description of the Method
+   * Used for debugging. Will dump the specified block to the screen.
+   * Also part of the simulation.
    *
    * @param Block Description of Parameter
    */
