@@ -167,7 +167,7 @@ public class SoftwareTerminal extends OSMessageHandler
     else
     {
       processBlocked = true;
-      BlockCurrentProcess msg = new BlockCurrentProcess(this);
+      BlockCurrentProcess msg = new BlockCurrentProcess(this, true);
       sendMessage(msg);
     }
   }
@@ -219,7 +219,7 @@ public class SoftwareTerminal extends OSMessageHandler
     else
     {
       processBlocked = true;
-      BlockCurrentProcess msg = new BlockCurrentProcess(this);
+      BlockCurrentProcess msg = new BlockCurrentProcess(this, true);
       sendMessage(msg);
     }
   }
