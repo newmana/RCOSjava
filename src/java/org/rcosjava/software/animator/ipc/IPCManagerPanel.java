@@ -113,9 +113,10 @@ public class IPCManagerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Sets up the layout of the paenl.  It creates two drop downs to display
+   * shared memory and semaphores.
    *
-   * @param c the parent component.
+   * @param c Description of Parameter
    */
   public void setupLayout(Component c)
   {
@@ -338,21 +339,28 @@ public class IPCManagerPanel extends RCOSPanel
    *
    * @param semaphore that contains the semaphore id and other pertant details.
    */
-  void semaphoreCreated(Semaphore semaphore)
+  void semaphoreCreated(final Semaphore semaphore)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic = new SemaphoreSharedMemoryGraphic(
-        semaphore.getCreatorId(), new Integer(semaphore.getValue()));
-    semaphoreMap.put(semaphore.getName(), tmpGraphic);
-
-    if (semOption.getItemCount() == 1)
+    SwingUtilities.invokeLater(new Runnable()
     {
-      semOption.removeAllItems();
-      semOption.addItem(SOME);
-      myAnimator.setSelectedSemaphoreName(SOME);
-    }
+      public void run()
+      {
+        SemaphoreSharedMemoryGraphic tmpGraphic = new SemaphoreSharedMemoryGraphic(
+            semaphore.getCreatorId(), new Integer(semaphore.getValue()));
 
-    semOption.addItem(semaphore.getName());
-    updateSemaphoreQueue();
+        semaphoreMap.put(semaphore.getName(), tmpGraphic);
+
+        if (semOption.getItemCount() == 1)
+        {
+          semOption.removeAllItems();
+          semOption.addItem(SOME);
+          myAnimator.setSelectedSemaphoreName(SOME);
+        }
+
+        semOption.addItem(semaphore.getName());
+        updateSemaphoreQueue();
+      }
+    });
   }
 
   /**
@@ -417,40 +425,47 @@ public class IPCManagerPanel extends RCOSPanel
    *
    * @param semaphore that contains the semaphore id and other pertant details.
    */
-  void semaphoreClosed(Semaphore semaphore)
+  void semaphoreClosed(final Semaphore semaphore)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
-        semaphoreMap.get(semaphore.getName());
-
-    // Remove first process
-    if (tmpGraphic != null)
+    SwingUtilities.invokeLater(new Runnable()
     {
-      tmpGraphic.removeFirstProcess();
-    }
-
-    if (log.isDebugEnabled())
-    {
-      log.debug("Number of attached process after removal: " +
-          tmpGraphic.attachedProcesses());
-    }
-
-    // Remove semaphore from all data structures if there are no attached
-    // processes left
-    if (tmpGraphic.attachedProcesses() == 0)
-    {
-      // Remove from semaphore map.
-      semaphoreMap.remove(semaphore.getName());
-
-      // Remove from semaphore options.
-      semOption.removeItem(semaphore.getName());
-      if (semOption.getItemCount() == 1)
+      public void run()
       {
-        semOption.removeAllItems();
-        semOption.addItem(NONE);
-        myAnimator.setSelectedSemaphoreName(NONE);
+        SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
+            semaphoreMap.get(semaphore.getName());
+
+        // Remove first process
+        if (tmpGraphic != null)
+        {
+          tmpGraphic.removeFirstProcess();
+        }
+
+        if (log.isDebugEnabled())
+        {
+          log.debug("Number of attached process after removal: " +
+                    tmpGraphic.attachedProcesses());
+        }
+
+        // Remove semaphore from all data structures if there are no attached
+        // processes left
+        if (tmpGraphic.attachedProcesses() == 0)
+        {
+          // Remove from semaphore map.
+          semaphoreMap.remove(semaphore.getName());
+
+          // Remove from semaphore options.
+          semOption.removeItem(semaphore.getName());
+
+          if (semOption.getItemCount() == 1)
+          {
+            semOption.removeAllItems();
+            semOption.addItem(NONE);
+            myAnimator.setSelectedSemaphoreName(NONE);
+          }
+        }
+        updateSemaphoreQueue();
       }
-    }
-    updateSemaphoreQueue();
+    });
   }
 
   /**
@@ -461,18 +476,24 @@ public class IPCManagerPanel extends RCOSPanel
    * @param processId the process id that is creating the shared memory segment.
    * @param memory the memory object being shared.
    */
-  void sharedMemoryCreated(String sharedMemoryId, MemoryReturn memoryReturn,
-      Memory memory)
+  void sharedMemoryCreated(final String sharedMemoryId,
+      MemoryReturn memoryReturn, Memory memory)
   {
-    if (shmOption.getItemCount() == 1)
+    SwingUtilities.invokeLater(new Runnable()
     {
-      shmOption.removeAllItems();
-      shmOption.addItem(SOME);
-      myAnimator.setSelectedSemaphoreName(SOME);
-    }
-    myAnimator.setSelectedSharedMemoryName(sharedMemoryId);
-    shmOption.addItem(sharedMemoryId);
-    updateSharedMemoryQueue();
+      public void run()
+      {
+        if (shmOption.getItemCount() == 1)
+        {
+          shmOption.removeAllItems();
+          shmOption.addItem(SOME);
+          myAnimator.setSelectedSemaphoreName(SOME);
+        }
+        myAnimator.setSelectedSharedMemoryName(sharedMemoryId);
+        shmOption.addItem(sharedMemoryId);
+        updateSharedMemoryQueue();
+      }
+    });
   }
 
   /**
@@ -501,34 +522,40 @@ public class IPCManagerPanel extends RCOSPanel
    * @param sharedMemoryId the unique id of the shared memory segment to close.
    * @param processId the process id that is closing the shared memory segment.
    */
-  void sharedMemoryClosed(String sharedMemoryId, int pid)
+  void sharedMemoryClosed(final String sharedMemoryId, final int pid)
   {
-    SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
-        sharedMemoryMap.get(sharedMemoryId);
-
-    if (tmpGraphic != null)
+    SwingUtilities.invokeLater(new Runnable()
     {
-      tmpGraphic.removeProcess(pid);
-
-      // Remove the last graphic.
-      if (tmpGraphic.attachedProcesses() == 0)
+      public void run()
       {
-        shmOption.removeItem(sharedMemoryId);
+        SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
+            sharedMemoryMap.get(sharedMemoryId);
 
-        // Update the drop down.
-        if (shmOption.getItemCount() == 1)
+        if (tmpGraphic != null)
         {
-          shmOption.removeAllItems();
-          shmOption.addItem(NONE);
-          myAnimator.setSelectedSharedMemoryName(NONE);
+          tmpGraphic.removeProcess(pid);
+
+          // Remove the last graphic.
+          if (tmpGraphic.attachedProcesses() == 0)
+          {
+            shmOption.removeItem(sharedMemoryId);
+
+            // Update the drop down.
+            if (shmOption.getItemCount() == 1)
+            {
+              shmOption.removeAllItems();
+              shmOption.addItem(NONE);
+              myAnimator.setSelectedSharedMemoryName(NONE);
+            }
+            else
+            {
+              myAnimator.setSelectedSharedMemoryName(SOME);
+            }
+          }
         }
-        else
-        {
-          myAnimator.setSelectedSharedMemoryName(SOME);
-        }
+        updateSharedMemoryQueue();
       }
-    }
-    updateSharedMemoryQueue();
+    });
   }
 
   /**
@@ -557,24 +584,6 @@ public class IPCManagerPanel extends RCOSPanel
 
     tmpGraphic.setValue(memory.toString());
     updateSharedMemoryQueue();
-  }
-
-  /**
-   * Description of the Method
-   *
-   * @param processId Description of Parameter
-   */
-  void shmQueueAdd(String processId)
-  {
-    shmQueue.addToQueue(processId);
-  }
-
-  /**
-   * Description of the Method
-   */
-  void shmQueueRemove()
-  {
-    shmQueue.removeFromQueue();
   }
 
   /**
@@ -639,15 +648,22 @@ public class IPCManagerPanel extends RCOSPanel
   class SemaphoreSelection implements ItemListener
   {
     /**
-     * Description of the Method
+     * The item being viewed has changed.
      *
-     * @param e Description of Parameter
+     * @param e the item that has changed - assumed casting to String on
+     *   getItem.
      */
-    public void itemStateChanged(ItemEvent e)
+    public void itemStateChanged(final ItemEvent e)
     {
-      //Get new selection
-      myAnimator.setSelectedSemaphoreName((String) e.getItem());
-      updateSemaphoreQueue();
+      SwingUtilities.invokeLater(new Runnable()
+      {
+        public void run()
+        {
+          //Get new selection
+          myAnimator.setSelectedSemaphoreName((String) e.getItem());
+          updateSemaphoreQueue();
+        }
+      });
     }
   }
 
@@ -657,15 +673,22 @@ public class IPCManagerPanel extends RCOSPanel
   class SharedMemorySelection implements ItemListener
   {
     /**
-     * Description of the Method
+     * The item being viewed has changed.
      *
-     * @param e Description of Parameter
+     * @param e the item that has changed - assumed casting to String on
+     *   getItem.
      */
-    public void itemStateChanged(ItemEvent e)
+    public void itemStateChanged(final ItemEvent e)
     {
-      //Get new selection
-      myAnimator.setSelectedSemaphoreName((String) e.getItem());
-      updateSharedMemoryQueue();
+      SwingUtilities.invokeLater(new Runnable()
+      {
+        public void run()
+        {
+          //Get new selection
+          myAnimator.setSelectedSemaphoreName((String) e.getItem());
+          updateSharedMemoryQueue();
+        }
+      });
     }
   }
 }
