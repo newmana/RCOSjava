@@ -428,8 +428,8 @@ Productions
         {shrclose}     varname equal shrclose l_par [handle]:value r_par semicolon |
         {shrcreate}    varname equal shrcreate l_par [id]:value comma [size]:value r_par semicolon |
         {shropen}      varname equal shropen l_par [id]:value r_par semicolon |
-        {shrread}      varname equal shrread l_par [handle]:value comma [size]:value r_par semicolon |
-        {shrwrite}     varname equal shrwrite l_par [handle]:value [c1]:comma [offset]:value [c2]:comma [variable]:identifier [c3]:comma r_par semicolon |
+        {shrread}      varname equal shrread l_par [handle]:value comma [offset]:value r_par semicolon |
+        {shrwrite}     varname equal shrwrite l_par [handle]:value [c1]:comma [offset]:value [c2]:comma [value]:identifier r_par semicolon |
         {shrsize}      varname equal shrsize l_par [handle]:value r_par semicolon |
         {fork}         fork l_par r_par semicolon |
         {exec1}        exec l_par [file_name]:value r_par semicolon |
