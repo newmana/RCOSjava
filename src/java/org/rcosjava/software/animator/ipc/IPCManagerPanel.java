@@ -77,7 +77,7 @@ public class IPCManagerPanel extends RCOSPanel
    private HashMap sharedMemoryMap;
 
   /**
-   * Description of the Field
+   * Combo boxes for shared memory and semaphores.
    */
   private JComboBox shmOption, semOption;
 
@@ -87,22 +87,22 @@ public class IPCManagerPanel extends RCOSPanel
   private DefaultListModel shmListModel, semListModel;
 
   /**
-   * Description of the Field
+   * The list of shared memory.
    */
   private JList shmList;
 
   /**
-   * Description of the Field
+   * The current value of the currently selected semaphore.
    */
   private JTextField semValue;
 
   /**
-   * Description of the Field
+   * The current id of the semaphore selected.
    */
   private String selectedSemaphoreName;
 
   /**
-   * Description of the Field
+   * The current id of the shared memory selected.
    */
   private String selectedSharedMemoryName;
 
@@ -130,7 +130,7 @@ public class IPCManagerPanel extends RCOSPanel
   /**
    * Description of the Method
    *
-   * @param c Description of Parameter
+   * @param c the parent component.
    */
   public void setupLayout(Component c)
   {
@@ -288,11 +288,12 @@ public class IPCManagerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Creates a new semaphore graphic item of the given id and updates the
+   * drop down of the current semaphores.
    *
-   * @param semaphoreId Description of Parameter
-   * @param pid Description of Parameter
-   * @param value Description of Parameter
+   * @param semaphoreId the unique id of the semaphore that created.
+   * @param processId the process id that created semaphore.
+   * @param value the initial value of the semaphore.
    */
   void semaphoreCreated(String semaphoreId, int pid, int value)
   {
@@ -309,11 +310,11 @@ public class IPCManagerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Gets the shared memory graphic and adds the given process to its queue.
    *
-   * @param semaphoreId Description of Parameter
-   * @param pid Description of Parameter
-   * @param value Description of Parameter
+   * @param semaphoreId the unique id of the semaphore that is opened.
+   * @param processId the process id that opened the semaphore.
+   * @param value the value of the semaphore.
    */
   void semaphoreOpened(String semaphoreId, int pid, int value)
   {
@@ -328,11 +329,11 @@ public class IPCManagerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Sets the value of the shared memory graphic if it already exists.
    *
-   * @param semaphoreId Description of Parameter
-   * @param pid Description of Parameter
-   * @param value Description of Parameter
+   * @param semaphoreId the unique id of the semaphore to wait on.
+   * @param processId the process id that is waiting on the semaphore.
+   * @param value the value of the semaphore.
    */
   void semaphoreWaiting(String semaphoreId, int pid, int value)
   {
@@ -346,11 +347,11 @@ public class IPCManagerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Sets the new value of the semaphore graphic if it exists.
    *
-   * @param semaphoreId Description of Parameter
-   * @param pid Description of Parameter
-   * @param value Description of Parameter
+   * @param semaphoreId the unique id of the semaphore to signal on.
+   * @param processId the process id that is signalling the semaphore.
+   * @param value the value of the semaphore.
    */
   void semaphoreSignalled(String semaphoreId, int pid, int value)
   {
@@ -364,11 +365,12 @@ public class IPCManagerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Removes the semaphore graphics if it exsts and then updates the drop downs
+   * of current semaphores.
    *
-   * @param semaphoreId Description of Parameter
-   * @param pid Description of Parameter
-   * @param value Description of Parameter
+   * @param semaphoreId the unique id of the semaphore to close.
+   * @param processId the process id that is closing the semaphore.
+   * @param value the value of the semaphore.
    */
   void semaphoreClosed(String semaphoreId, int pid, int value)
   {
@@ -400,8 +402,9 @@ public class IPCManagerPanel extends RCOSPanel
    * Add a newly created shared memory to the options to be selected by the
    * user.
    *
-   * @param sharedMemoryId the name of the shared memory id.
-   * @param memory the process id, memory type and how much memory was created.
+   * @param sharedMemoryId the unique id of the shared memeory segment created.
+   * @param processId the process id that is creating the shared memory segment.
+   * @param memory the memory object being shared.
    */
   void sharedMemoryCreated(String sharedMemoryId, MemoryReturn memoryReturn,
       Memory memory)
@@ -419,10 +422,10 @@ public class IPCManagerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Creates a new shared memory graphics and adds the process to its queue.
    *
-   * @param sharedMemoryId Description of Parameter
-   * @param pid Description of Parameter
+   * @param sharedMemoryId the unique id of the shared memory segment opened.
+   * @param processId the process id that is opening the shared memory segment.
    */
   void sharedMemoryOpened(String sharedMemoryId, int pid)
   {
@@ -437,10 +440,12 @@ public class IPCManagerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Gets the shared memory graphic and removes it if it exists.  Also removes
+   * the objects from the queue and updates the drop down of the current
+   * shared memory segments.
    *
-   * @param sharedMemoryId Description of Parameter
-   * @param pid Description of Parameter
+   * @param sharedMemoryId the unique id of the shared memory segment to close.
+   * @param processId the process id that is closing the shared memory segment.
    */
   void sharedMemoryClosed(String sharedMemoryId, int pid)
   {
@@ -455,6 +460,8 @@ public class IPCManagerPanel extends RCOSPanel
       if (tmpGraphic.attachedProcesses() == 0)
       {
         shmOption.removeItem(sharedMemoryId);
+
+        // Update the drop down.
         if (shmOption.getItemCount() == 1)
         {
           shmOption.removeAllItems();
@@ -471,10 +478,11 @@ public class IPCManagerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Called when a memory segment is read.  Currently does nothing.
    *
-   * @param semaphoreId Description of Parameter
-   * @param memory Description of Parameter
+   * @param semaphoreId the unique id of the shared memory segment to read.
+   * @param memoryReturn the resultant object from a memory read.
+   * @param memory the current memory segment object.
    */
   void sharedMemoryRead(String semaphoreId, MemoryReturn memoryReturn,
       Memory memory)
@@ -482,11 +490,11 @@ public class IPCManagerPanel extends RCOSPanel
   }
 
   /**
-   * Description of the Method
+   * Sets the graphic of the shared memory object ot the value in the memory
+   * object and updates the shared memory queue.
    *
-   * @param sharedMemoryId Description of Parameter
-   * @param pid Description of Parameter
-   * @param memory Description of Parameter
+   * @param sharedMemoryId the unique id of the shared memory segment written.
+   * @param memory the current memory object being written.
    */
   void sharedMemoryWrote(String sharedMemoryId, Memory memory)
   {
@@ -571,9 +579,6 @@ public class IPCManagerPanel extends RCOSPanel
 
   /**
    * Change the semaphore information displayed based on the selection.
-   *
-   * @author administrator
-   * @created 28 April 2002
    */
   class SemaphoreSelection implements ItemListener
   {
@@ -592,9 +597,6 @@ public class IPCManagerPanel extends RCOSPanel
 
   /**
    * Change the shared memory information displayed based on the selection.
-   *
-   * @author administrator
-   * @created 28 April 2002
    */
   class SharedMemorySelection implements ItemListener
   {

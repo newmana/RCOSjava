@@ -43,8 +43,8 @@ public class CPUAnimator extends RCOSAnimator
   /**
    * Constructor for the CPUAnimator object
    *
-   * @param postOffice Description of Parameter
-   * @param cpuImages Description of Parameter
+   * @param postOffice the post office to register to.
+   * @param cpuImages the image of the CPU to display.
    */
   public CPUAnimator(AnimatorOffice postOffice, ImageIcon[] cpuImages)
   {

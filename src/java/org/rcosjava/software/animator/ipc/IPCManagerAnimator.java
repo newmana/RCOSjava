@@ -33,8 +33,8 @@ public class IPCManagerAnimator extends RCOSAnimator
   /**
    * Constructor for the IPCManagerAnimator object
    *
-   * @param postOffice Description of Parameter
-   * @param images Description of Parameter
+   * @param postOffice the post office to register to.
+   * @param images any images for the IPC to use.
    */
   public IPCManagerAnimator(AnimatorOffice postOffice, ImageIcon[] images)
   {
@@ -63,9 +63,11 @@ public class IPCManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * @param semaphoreId Description of Parameter
-   * @param processId Description of Parameter
-   * @param value Description of Parameter
+   * New semaphore created.  Assumes the semaphore does not already exist.
+   *
+   * @param semaphoreId the unique id of the semaphore that created.
+   * @param processId the process id that created semaphore.
+   * @param value the initial value of the semaphore.
    */
   public void semaphoreCreated(String semaphoreId, int processId, int value)
   {
@@ -73,11 +75,11 @@ public class IPCManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * Open the semaphore.  Requires that the semaphore be created.
    *
-   * @param semaphoreId Description of Parameter
-   * @param processId Description of Parameter
-   * @param value Description of Parameter
+   * @param semaphoreId the unique id of the semaphore that is opened.
+   * @param processId the process id that opened the semaphore.
+   * @param value the value of the semaphore.
    */
   public void semaphoreOpened(String semaphoreId, int processId, int value)
   {
@@ -85,11 +87,11 @@ public class IPCManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * Wait on the semaphore.  Requires that the semaphore be opened and created.
    *
-   * @param semaphoreId Description of Parameter
-   * @param processId Description of Parameter
-   * @param value Description of Parameter
+   * @param semaphoreId the unique id of the semaphore to wait on.
+   * @param processId the process id that is waiting on the semaphore.
+   * @param value the value of the semaphore.
    */
   public void semaphoreWaiting(String semaphoreId, int processId, int value)
   {
@@ -97,11 +99,12 @@ public class IPCManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * Signal the semaphore.  Requires that a semaphore is being opened and
+   * created and usually means that something is waiting on it.
    *
-   * @param semaphoreId Description of Parameter
-   * @param processId Description of Parameter
-   * @param value Description of Parameter
+   * @param semaphoreId the unique id of the semaphore to signal on.
+   * @param processId the process id that is signalling the semaphore.
+   * @param value the value of the semaphore.
    */
   public void semaphoreSignalled(String semaphoreId, int processId, int value)
   {
@@ -109,11 +112,12 @@ public class IPCManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * Close the semaphore.  Assumes that the semaphore exists and that any
+   * processes will have finished using it.
    *
-   * @param semaphoreId Description of Parameter
-   * @param processId Description of Parameter
-   * @param value Description of Parameter
+   * @param semaphoreId the unique id of the semaphore to close.
+   * @param processId the process id that is closing the semaphore.
+   * @param value the value of the semaphore.
    */
   public void semaphoreClosed(String semaphoreId, int processId, int value)
   {
@@ -121,11 +125,11 @@ public class IPCManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * Called when a memory segment has been created.
    *
-   * @param sharedMemoryId Description of Parameter
-   * @param processId
-   * @param memory Description of Parameter
+   * @param sharedMemoryId the unique id of the shared memeory segment created.
+   * @param processId the process id that is creating the shared memory segment.
+   * @param memory the memory object being shared.
    */
   public void sharedMemoryCreated(String sharedMemoryId,
       MemoryReturn memoryReturn, Memory memory)
@@ -134,10 +138,11 @@ public class IPCManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * Called when a memory segment is being opened by a process.  It's assumed
+   * that it's already created.
    *
-   * @param sharedMemoryId Description of Parameter
-   * @param processId Description of Parameter
+   * @param sharedMemoryId the unique id of the shared memory segment opened.
+   * @param processId the process id that is opening the shared memory segment.
    */
   public void sharedMemoryOpened(String sharedMemoryId, int processId)
   {
@@ -145,10 +150,11 @@ public class IPCManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * Called when a memory segment is being closed by a process.  It's assumed
+   * that all process are not accessing it and that it does exist.
    *
-   * @param sharedMemoryId Description of Parameter
-   * @param processId Description of Parameter
+   * @param sharedMemoryId the unique id of the shared memory segment to close.
+   * @param processId the process id that is closing the shared memory segment.
    */
   public void sharedMemoryClosed(String sharedMemoryId, int processId)
   {
@@ -156,10 +162,12 @@ public class IPCManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * Called when a memory segment is being read by a process.  Assumes that the
+   * process already exists.
    *
-   * @param sharedMemoryId Description of Parameter
-   * @param memory Description of Parameter
+   * @param sharedMemoryId the unique id of the shared memory segment to read.
+   * @param memoryReturn the resultant object from a memory read.
+   * @param memory the current memory object being read.
    */
   public void sharedMemoryRead(String sharedMemoryId, MemoryReturn memoryReturn,
       Memory memory)
@@ -168,14 +176,14 @@ public class IPCManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * Called when a memory segment has been written by a process.  Assumes that
+   * the process already exists.
    *
-   * @param sharedMemoryId Description of Parameter
-   * @param memory Description of Parameter
+   * @param sharedMemoryId the unique id of the shared memory segment written.
+   * @param memory the current memory object being written.
    */
   public void sharedMemoryWrote(String sharedMemoryId, Memory memory)
   {
     panel.sharedMemoryWrote(sharedMemoryId, memory);
   }
 }
-
