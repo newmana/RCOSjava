@@ -142,13 +142,12 @@ public class CPUPanel extends RCOSPanel
     stackList.setBackground(listColour);
     gridBag.setConstraints(stackList, constraints);
     JScrollPane stackListPane = new JScrollPane(stackList);
-    stackListPane.setMinimumSize(new Dimension(100, 200));
     main.add(stackListPane);
 
     // Middle/CPU section
     cpu.setLayout(new GridLayout(8, 2));
 
-    titleFont = new Font("TimesRoman", Font.BOLD, 14);
+    titleFont = new Font("TimesRoman", Font.BOLD, 12);
 
     irTitle = new JLabel("Instruction Register", JLabel.CENTER);
     irTitle.setForeground(defaultFgColour);
