@@ -2,6 +2,8 @@
 // No warranty; no copyright -- use this as you will.
 // $Id$
 
+package org.xml.sax;
+
 import org.xml.sax.InputSource;
 import org.xml.sax.Parser;
 import org.xml.sax.SAXException;
@@ -18,7 +20,7 @@ import java.net.URL;
   * <p>Usage: java -Dorg.xml.sax.parser=<var>classname</var> EntityDemo
   * <var>systemId</var></p>
   *
-  * <p>If you create an XML document which references an 
+  * <p>If you create an XML document which references an
   * external text entity with the public identifier
   * "-//megginson//TEXT Sample Entity//EN", this application will
   * substitute the string "Entity resolution works!" for the
@@ -26,7 +28,7 @@ import java.net.URL;
   *
   * <pre>
   * &lt;!DOCTYPE doc [
-  *   &lt;!ENTITY ent 
+  *   &lt;!ENTITY ent
   *     PUBLIC "-//megginson//TEXT Sample Entity//EN" "ent.xml">
   * ]>
   * &lt;doc>
@@ -83,7 +85,7 @@ public class EntityDemo extends DemoHandler {
     *
     * <p>If the public identifier is "-//megginson//TEXT Sample
     * //Entity//EN", instruct the parser to read the entity's
-    * contents from the StringReader rather than from the 
+    * contents from the StringReader rather than from the
     * system identifier.</p>
     *
     * <p>The public identifier is safer than the system identifier,

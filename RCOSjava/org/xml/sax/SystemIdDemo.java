@@ -2,6 +2,8 @@
 // No warranty; no copyright -- use this as you will.
 // $Id$
 
+package org.xml.sax;
+
 import org.xml.sax.InputSource;
 import org.xml.sax.Parser;
 import org.xml.sax.SAXException;

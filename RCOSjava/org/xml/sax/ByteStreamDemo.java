@@ -2,6 +2,8 @@
 // No warranty; no copyright -- use this as you will.
 // $Id$
 
+package org.xml.sax;
+
 import org.xml.sax.Parser;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -52,7 +54,7 @@ public class ByteStreamDemo {
 
 				// Allocate an event handler, and register
 				// it with the SAX parser for all four
-				// types of events (we could use a 
+				// types of events (we could use a
 				// separate object for each).
     handler = new DemoHandler();
     parser.setEntityResolver(handler);
