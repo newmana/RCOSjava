@@ -72,6 +72,12 @@
      srcdir="${gen.dir}/src" destdir="${gen.dir}/classes"
      debug="off" optimize="on" deprecation="on"/>
 
+    <copy file="${gen.dir}/src/org/sablecc/simplec/lexer/lexer.dat"
+          toDir="${gen.dir}/classes/org/sablecc/simplec/lexer"/>
+
+    <copy file="${gen.dir}/src/org/sablecc/simplec/parser/parser.dat"
+          toDir="${gen.dir}/classes/org/sablecc/simplec/parser"/>
+
     <jar jarfile="${lib.dir}/${grammar.jar}" basedir="${gen.dir}/classes"/>
   </target>
 
