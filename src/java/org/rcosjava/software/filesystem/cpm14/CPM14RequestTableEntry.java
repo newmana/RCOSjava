@@ -25,6 +25,16 @@ public class CPM14RequestTableEntry
   public static final int FLUSH = 3;
 
   /**
+   * Write directory
+   */
+  public static final int WRITE_DIR = 4;
+
+  /**
+   * Remove files handles.
+   */
+  public static final int REMOVE_FILE_HANDLE = 5;
+
+  /**
    * The type of request.
    */
   public int requestType;
@@ -84,6 +94,16 @@ public class CPM14RequestTableEntry
   public int getRequestId()
   {
     return requestId;
+  }
+
+  /**
+   * Sets the request type.
+   *
+   * @param newRequestId the new request type.
+   */
+  public void setRequestType(int newRequestType)
+  {
+    requestType = newRequestType;
   }
 
   /**

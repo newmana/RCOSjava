@@ -52,7 +52,8 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
   /**
    * The location of where to start writing data files.
    */
-  private final static int DISK_BLOCK_OFFSET = DIR_BLOCK_OFFSET + TOTAL_DIR_BLOCKS;
+  private final static int DISK_BLOCK_OFFSET = DIR_BLOCK_OFFSET +
+      TOTAL_DIR_BLOCKS;
 
   /**
    * The length in bytes of a directory entry.
@@ -409,7 +410,8 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
         {
           device.setByteInEntry((fidEntry.getFileNumber() * DIR_ENTRY_SIZE)
                + CPM14TableOffset.RECORDS,
-              (byte) (((fidEntry.getCurrentPosition() + 1) % (16 * BLOCK_SIZE)) / 128));
+              (byte) (((fidEntry.getCurrentPosition() + 1) %
+              (16 * BLOCK_SIZE)) / 128));
         }
         fidEntry.incCurrentPosition();
         return (new FileSystemReturnData(requestId, 0));
@@ -487,10 +489,6 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
 
       sendDiskRequest(CPM14RequestTableEntry.WRITE_BUFFER, fsFileNumber,
           requestId, -1, fidEntry.getCurrentDiskBlock(), fidEntry.getBuffer());
-
-//      diskRequest(device.getName(), "FS_CLOSE::WRITE_BUFFER", "WRITING",
-//          fsFileNumber, requestId, -1,
-//          fidEntry.getCurrentDiskBlock(), fidEntry.getBuffer());
     }
     else
     {
@@ -751,6 +749,7 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
           device.setByteInEntry(newOffset + x,
             device.getByteInEntry(currentOffset + x));
         }
+
         device.setByteInEntry(newOffset + 0, (byte) 0);
         device.setByteInEntry(newOffset + CPM14TableOffset.EXTENT,
             (byte) (device.getByteInEntry(currentOffset +
@@ -799,12 +798,12 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
    * @param request the request details the request id and file and the data
    *   to write to the device.
    */
-  public void writeBuffer(DiskRequest request)
+  public void writeFileBuffer(DiskRequest request)
   {
     // Get the requested data from the request table.
     int requestId = request.getRequestId();
     CPM14RequestTableEntry requestData =
-              (CPM14RequestTableEntry) requestTable.getItem(requestId);
+        (CPM14RequestTableEntry) requestTable.getItem(requestId);
 
     // Get the file id from the request data.
     int fileId = requestData.getFileSystemNumber();
@@ -815,19 +814,90 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
     CPM14DeviceTableEntry device = (CPM14DeviceTableEntry)
         deviceTable.getItem(fileIdEntry.getDeviceNumber());
 
-    //     System.out.println("Handle Write byffer return."); // DEBUG
-    //      mvRequestData.Type = "FS_CLOSE::WRITE_DIR1";
-
+    // Get the blocks to write out to disk.
     byte[] toWrite = new byte[BLOCK_SIZE];
     for (int counter = 0; counter < BLOCK_SIZE; counter++)
     {
       toWrite[counter] = device.getByteInEntry(counter);
     }
 
-    //DiskRequest mvNewReq = new DiskRequest(requestID, 0, mvToWrite);
-    //Message mvNewMessage = new Message ( id, devicedeviceName,
-    //                                      "DISKREQUEST", mvNewReq);
-    //SendMessage( mvNewMessage );
+    // Set request type to WRITE_DIR
+    requestData.setRequestType(CPM14RequestTableEntry.WRITE_DIR);
+
+    // Create a new disk request and send with a new request id set to
+    request = new DiskRequest(requestId, 0, toWrite);
+    AddDiskRequest message = new AddDiskRequest(this, request);
+    sendMessage(message);
+  }
+
+  /**
+   * Writes out the directory table to disk.
+   *
+   * @param request the request details the request id and file and the data
+   *   to write to the device.
+   */
+  public void writeDirectoryBuffer(DiskRequest request)
+  {
+    // Get the requested data from the request table.
+    int requestId = request.getRequestId();
+    CPM14RequestTableEntry requestData =
+        (CPM14RequestTableEntry) requestTable.getItem(requestId);
+
+    // Get the file id from the request data.
+    int fileId = requestData.getFileSystemNumber();
+    CPM14FIDTableEntry fileIdEntry = (CPM14FIDTableEntry)
+        fidTable.getItem(fileId);
+
+    // Get the device from the device table based on fid entry.
+    CPM14DeviceTableEntry device = (CPM14DeviceTableEntry)
+        deviceTable.getItem(fileIdEntry.getDeviceNumber());
+
+    // Get the blocks to write out to disk.
+    byte[] toWrite = new byte[BLOCK_SIZE];
+    for (int counter = 0; counter < BLOCK_SIZE; counter++)
+    {
+      toWrite[counter] = device.getByteInEntry(counter);
+    }
+
+    // Set request type to REMOVE_FILE_HANDLE
+    requestData.setRequestType(CPM14RequestTableEntry.REMOVE_FILE_HANDLE);
+
+    // Create a new disk request
+    request = new DiskRequest(requestId, 1, toWrite);
+    AddDiskRequest message = new AddDiskRequest(this, request);
+    sendMessage(message);
+  }
+
+  /**
+   * Removes the file handle from a given file.
+   *
+   * @param request the request details the request id and file and the data
+   *   to write (if any).
+   */
+  public void removeFileHandle(DiskRequest request)
+  {
+    // Get the requested data from the request table.
+    int requestId = request.getRequestId();
+    CPM14RequestTableEntry requestData =
+        (CPM14RequestTableEntry) requestTable.getItem(requestId);
+
+    // Get the file id from the request data.
+    int fileId = requestData.getFileSystemNumber();
+    CPM14FIDTableEntry fileIdEntry = (CPM14FIDTableEntry)
+        fidTable.getItem(fileId);
+
+    // Get the device from the device table based on fid entry.
+    CPM14DeviceTableEntry device = (CPM14DeviceTableEntry)
+        deviceTable.getItem(fileIdEntry.getDeviceNumber());
+
+    //ReturnValue( mvRequestData.Source, mvRequestData.FSMRequestID, 0 );
+
+    // Set the file as closed.
+    device.setFileClosed(fileIdEntry.getFileName());
+
+    // Remove request and file id entry from tables.
+    fidTable.remove(fileId);
+    requestTable.remove(requestId);
   }
 
   public void recordSystemFile()
@@ -837,6 +907,16 @@ public class CPM14FileSystem extends OSMessageHandler implements FileSystem
   public FileSystem requestSystemFile()
   {
     return null;
+  }
+
+  /**
+   * Returns the request table.
+   *
+   * @return the request table.
+   */
+  public IndexedList getRequestTable()
+  {
+    return requestTable;
   }
 
   /**

@@ -1,6 +1,7 @@
 package org.rcosjava.software.filesystem;
 
 import org.rcosjava.software.disk.DiskRequest;
+import org.rcosjava.software.util.IndexedList;
 
 /**
  * An interface in which all file system implementations must implement. This
@@ -160,12 +161,28 @@ public interface FileSystem
   public void flush(DiskRequest request);
 
   /**
+   * Writes out the directory table to disk.
+   *
+   * @param request the request details the request id and file and the data
+   *   to write to the device.
+   */
+  public void writeDirectoryBuffer(DiskRequest request);
+
+  /**
+   * Removes the file handle from a given file.
+   *
+   * @param request the request details the request id and file and the data
+   *   to write (if any).
+   */
+  public void removeFileHandle(DiskRequest request);
+
+  /**
    * Writes the buffer to the device.
    *
    * @param request the request details the request id and file and the data
    *   to write to the device.
    */
-  public void writeBuffer(DiskRequest request);
+  public void writeFileBuffer(DiskRequest request);
 
   /**
    * Store the current file system's state.
@@ -178,6 +195,13 @@ public interface FileSystem
    * @return a fully create system file.
    */
   public FileSystem requestSystemFile();
+
+  /**
+   * Returns the request table.
+   *
+   * @return the request table.
+   */
+  public IndexedList getRequestTable();
 
   /**
    * Returns the mount point based on the given file name.

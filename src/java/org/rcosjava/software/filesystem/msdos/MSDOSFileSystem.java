@@ -242,6 +242,16 @@ public class MSDOSFileSystem implements FileSystem
     return -1;
   }
 
+  /**
+   * Returns the request table.
+   *
+   * @return the request table.
+   */
+  public IndexedList getRequestTable()
+  {
+    return null;
+  }
+
   // Return a Free Directory entry for the specified device.
   /**
    * Gets the FreeEntry attribute of the CPM14FileSystem object
@@ -901,6 +911,27 @@ public class MSDOSFileSystem implements FileSystem
     }
   }
 
+  /**
+   * Writes the buffer to the device.
+   *
+   * @param request the request details the request id and file and the data
+   *   to write to the device.
+   */
+  public void writeFileBuffer(DiskRequest request)
+  {
+
+  }
+
+  /**
+   * Writes out the directory table to disk.
+   *
+   * @param request the request details the request id and file and the data
+   *   to write to the device.
+   */
+  public void writeDirectoryBuffer(DiskRequest request)
+  {
+
+  }
 
   /**
    * Seta as entradas correspondentes ao bloco que vao ser ocupadas na FAT
@@ -1354,6 +1385,16 @@ public class MSDOSFileSystem implements FileSystem
     return false;
   }
 
+  /**
+   * Removes the file handle from a given file.
+   *
+   * @param request the request details the request id and file and the data
+   *   to write (if any).
+   */
+  public void removeFileHandle(DiskRequest request)
+  {
+
+  }
   // Coordinating this in the one synchronised function means that the
   // allocation of the resources will be safe.
   /**
