@@ -64,9 +64,12 @@ public class SemaphoreQueue extends FIFOQueue
     return (peek(iSempahoreID) != null);
   }
 
+  /**
+   * Removes the item from the queue - added synchronization.
+   */
   public synchronized boolean remove(Object object)
   {
-    return super.remove(object);
+    return remove(object);
   }
 
   /**

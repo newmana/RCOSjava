@@ -1,62 +1,83 @@
-//**************************************************************************/
-// FILE     : Positions.java
-// PACKAGE  : Animator.Positions
-// PURPOSE  : This class is designed to manipulate the Position and
-//            Position chain objects.  It allows a chain of positions
-//            to be created and for these positions to move from the
-//            beginning of the chain to the end.  By doing this you
-//            can create screen objects that can be plotted and moved
-//            based on predetermined co-ordinates.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 17/12/96  First created.
-//
-//**************************************************************************/
-
 package net.sourceforge.rcosjava.software.animator.support.positions;
 
+/**
+ * This class is designed to hold an X,Y value representing the start point
+ * of a set of movement.  The Delta X and Delta Y represent the steps to take
+ * moving away from the given X,Y value.
+ * <P>
+ * @author Andrew Newman
+ * @version 1.00 $Date$
+ * @created 17th December 1996
+ */
 public class Position
 {
-  private int iX;
-  private int iY;
-  private int iDirectionX;
-  private int iDirectionY;
+  private int xPosition;
+  private int yPosition;
+  private int deltaX;
+  private int deltaY;
 
-  public Position (int iX, int iY)
+  /**
+   * Creates a new position object with the given value and sets the default
+   * delta X and delta Y to 1.
+   *
+   * @param newXPosition the X co-ordinate to set the position to.
+   * @param newYPosition the Y co-ordinate to set the position to.
+   */
+  public Position (int newXPosition, int newYPosition)
   {
-    super();
-    this.iX = iX;
-    this.iY = iY;
-    this.iDirectionX = 1;
-    this.iDirectionY = 1;
+    xPosition = newXPosition;
+    yPosition = newYPosition;
+    deltaX = 1;
+    deltaY = 1;
   }
 
-  public Position (int iX, int iY, int iDirectionX, int iDirectionY)
+  /**
+   * Creates a new position object with the given X,Y co-ordinates and delta
+   * settings.
+   *
+   * @param newXPosition the X co-ordinate to set the position to.
+   * @param newYPosition the Y co-ordinate to set the position to.
+   * @param newDeltaX the change in the X position.
+   * @param newDeltaY the change in the Y position.
+   */
+  public Position (int newXPosition, int newYPosition, int newDeltaX,
+    int newDeltaY)
   {
-    super();
-    this.iX = iX;
-    this.iY = iY;
-    this.iDirectionX = iDirectionX;
-    this.iDirectionY = iDirectionY;
+    xPosition = newXPosition;
+    yPosition = newYPosition;
+    deltaX = newDeltaX;
+    deltaY = newDeltaY;
   }
 
+  /**
+   * @return the current X starting co-ordinate of the position.
+   */
   public int getX()
   {
-    return iX;
+    return xPosition;
   }
 
+  /**
+   * @return the current Y starting co-ordinate of the position.
+   */
   public int getY()
   {
-    return iY;
+    return yPosition;
   }
 
-  public int getDirectionX()
+  /**
+   * @return the current X change in starting point.
+   */
+  public int getDeltaX()
   {
-    return iDirectionX;
+    return deltaX;
   }
 
-  public int getDirectionY()
+  /**
+   * @return the current Y change in starting point.
+   */
+  public int getDeltaY()
   {
-    return iDirectionY;
+    return deltaY;
   }
 }

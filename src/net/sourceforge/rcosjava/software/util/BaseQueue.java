@@ -3,7 +3,10 @@ package net.sourceforge.rcosjava.software.util;
 import java.util.*;
 
 /**
- * Implements base Queue type (FIFO).
+ * Implements a based queue object.  The default implementation is of a FIFO
+ * (First In, First Out) algorithm.  It achieves this by inserting objects at
+ * the start of the Vector (which it extends) and removes objects from the end
+ * of the queue.
  * <P>
  * @author Andrew Newman.
  * @version 1.00 $Date$
@@ -14,7 +17,7 @@ public class BaseQueue extends Vector implements Queue
   /**
    * This is an integer that points to an element in the queue.
    */
-  public int thePointer;
+  private int pointer;
 
   /**
    * Default constructor.  Cannot construct a BaseQueue from outside this
@@ -23,7 +26,7 @@ public class BaseQueue extends Vector implements Queue
   protected BaseQueue()
   {
     super();
-    thePointer = 0;
+    pointer = 0;
   }
 
   /**
@@ -37,7 +40,7 @@ public class BaseQueue extends Vector implements Queue
   protected BaseQueue(int initialCapacity, int capacityIncrement)
   {
     super(initialCapacity, capacityIncrement);
-    thePointer = 0;
+    pointer = 0;
   }
 
   /**
@@ -59,11 +62,22 @@ public class BaseQueue extends Vector implements Queue
     }
   }
 
+  /**
+   * Inserts an object to the first element of the queue.
+   *
+   * @param theObject the object to insert in.
+   */
   public void insert(Object theObject)
   {
     insertElementAt(theObject, 0);
   }
 
+  /**
+   * Removes the element end of the queue if the queue is not null.  If the
+   * queue is empty it will return null.
+   *
+   * @param the object stored at the end of the queue or null if it's empty.
+   */
   public Object retrieve()
   {
     if (queueEmpty()) return null;
@@ -74,16 +88,28 @@ public class BaseQueue extends Vector implements Queue
     return theObject;
   }
 
+  /**
+   * Removes the element at the current location of the pointer in the queue.
+   * If the queue is empty it will return null.
+   *
+   * @param the object stored at the current location of the pointer or null
+   * if it's empty.
+   */
   public Object retrieveCurrent()
   {
     if (queueEmpty()) return null;
 
-    Object theObject = elementAt(thePointer);
+    Object theObject = elementAt(pointer);
 
-    removeElementAt(thePointer);
+    removeElementAt(pointer);
     return theObject;
   }
 
+  /**
+   * Does a simple string based comparison on two objects.
+   *
+   * @return the results of a compareTo on the string values of the object.
+   */
   public int compare(Object first, Object second)
   {
     String firstString = first.toString();
@@ -91,25 +117,40 @@ public class BaseQueue extends Vector implements Queue
     return (firstString.compareTo(secondString));
   }
 
-  public int position (Object item)
+  /**
+   * Based on the object given it will return the index of that object within
+   * the object's queue.
+   *
+   * @param item the item to find in the queue.
+   * @return the integer value of the position of the object if it's found
+   * otherwise it will be -1.
+   */
+  public int position(Object item)
   {
-    int iWhere, iCurrentPos;
-    iWhere = 0;
-    iCurrentPos = thePointer;
+    int where, currentPos;
+    where = 0;
+    currentPos = pointer;
     goToHead();
     while (!atTail())
     {
       if (compare(item,retrieveCurrent()) == 0)
       {
-        iWhere = thePointer;
-        thePointer = iCurrentPos;
-        return iWhere;
+        where = pointer;
+        pointer = currentPos;
+        return where;
       }
       goToNext();
     }
     return -1;
   }
 
+  /**
+   * This is a non-distructive way to determine what object is at a certain
+   * index location.
+   *
+   * @param index the position of the element to return the object
+   * @return the object found at the location - null if the queue is empty.
+   */
   public Object peek(int index)
   {
     if (queueEmpty())
@@ -117,60 +158,119 @@ public class BaseQueue extends Vector implements Queue
     return elementAt(index);
   }
 
+  /**
+   * This is a non-distructive way to determine what object is at the current
+   * location of the index.
+   *
+   * @return the object found at the current location - null if the queue is
+   * empty.
+   */
   public Object peek()
   {
     if (queueEmpty())
       return null;
-    return elementAt(thePointer);
+    return elementAt(pointer);
   }
 
+  /**
+   * @return if the size of the queue is zero it will be true.
+   */
   public boolean queueEmpty()
   {
-    return (this.size() == 0);
+    return (size() == 0);
   }
 
+  /**
+   * @return the number of elements located in the queue.
+   */
   public int itemCount()
   {
-    return (this.size());
+    return size();
   }
 
+  /**
+   * Sets the index of the queue to the given value if it is not bigger than
+   * the size of the queue and is greater than or equal to zero.
+   *
+   * @param index the index to set the pointer value to.
+   */
   public void goTo(int index)
   {
-    if ((index <= this.size()-1) && (index >= 0))
+    if ((index <= size()-1) && (index >= 0))
     {
-      thePointer = index;
+      pointer = index;
     }
   }
 
+  /**
+   * Sets the pointer to the top of the queue.
+   */
   public void goToHead()
   {
-    thePointer = 0;
+    pointer = 0;
   }
 
+  /**
+   * If the index is not at the end of the queue it will increment the
+   * index's location.
+   */
   public void goToNext()
   {
     if (!atTail())
-      thePointer++;
+      pointer++;
   }
 
+  /**
+   * If the index is not at the start of the queue it will decrement the
+   * pointers location.
+   */
   public void goToPrevious()
   {
-    if (thePointer != 0)
-      thePointer--;
+    if (pointer != 0)
+      pointer--;
   }
 
+  /**
+   * Will set the pointer to the end of the queue.
+   */
   public void goToTail()
   {
-    thePointer = this.size()-1;
+    pointer = size()-1;
   }
 
+  /**
+   * Will set the index to the start of the queue.
+   */
   public boolean atHead()
   {
-    return (thePointer == 0);
+    return (pointer == 0);
   }
 
+  /**
+   * @return true if the index is currently at the last item.
+   */
   public boolean atTail()
   {
-    return (thePointer == this.size());
+    return (pointer == size());
+  }
+
+  /**
+   * @return the current location of the index.
+   */
+  public int getPointer()
+  {
+    return pointer;
+  }
+
+  /**
+   * Will set the pointer to the give value.
+   *
+   * @param newPointer the new value of the pointer to set as long as it's
+   * not greater than the current size of the queue or less than zero.
+   */
+  public void setPointer(int newPointer)
+  {
+    if (newPointer > size() && newPointer >= 0)
+      pointer = newPointer;
   }
 }

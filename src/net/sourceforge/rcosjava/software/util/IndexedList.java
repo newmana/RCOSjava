@@ -1,88 +1,83 @@
-//**************************************************************************
-//FILE    : IndexedList
-//PACKAGE : Util
-//PURPOSE : To maintain an indexable list of data. Indexing done for
-//          Quick lookup time.
-//AUTHOR  : Brett Carter
-//MODIFIED: Andrew Newman
-//HISTORY : 9/03/96  First created.
-//
-//**************************************************************************
-
 package net.sourceforge.rcosjava.software.util;
 
-class IndexedListElement
-{
-  public boolean cvUsed;
-  public Object cvData;
-}
-
+/**
+ * To maintain an indexable list of data. Indexing done for quick lookup time.
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 8/5/2001 - Updated and made indexed list element an inner class. AN
+ * </DD></DT>
+ * <P>
+ * @author Brett Carter.
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 9th March 1996
+ */
 public class IndexedList
 {
-  private int cvFreeListIndex, cvFreeListSize, cvDataListSize;
-  private int[] cvFreeList;
-  private IndexedListElement[] cvDataList;
-  private boolean cvFull;
+  private int freeListIndex, freeListSize, dataListSize;
+  private int[] freeList;
+  private IndexedListElement[] dataList;
+  private boolean full;
 
-  public IndexedList(int mvDataSize, int mvFreeListSize)
-  {
-    init(mvDataSize, mvFreeListSize);
-  }
-
+  /**
+   * Default constructor.  Creates a data size of 100 and a free list size of
+   * 10.
+   */
   public IndexedList()
   {
-    init(100, 10);
+    this(100, 10);
   }
 
-  public void init(int mvDataSize, int mvFreeListSize)
+  /**
+   * Create a new data set with the given data size and list size.
+   *
+   * @param newDataSize the total number of data items
+   */
+  public IndexedList(int newDataSize, int newFreeListSize)
   {
     // Setup class variables and sizes.
-    cvDataListSize = mvDataSize;
-    cvFreeListSize = mvFreeListSize;
-    cvFull = false;
+    dataListSize = newDataSize;
+    freeListSize = newFreeListSize;
+    full = false;
 
     // Make sure freelist is not larger than the Data List.
-    if (cvFreeListSize > cvDataListSize)
+    if (freeListSize > dataListSize)
     {
-      cvFreeListSize = cvDataListSize;
+      freeListSize = dataListSize;
     }
 
     // Allocate space for both lists.
-    cvFreeList = new int[cvFreeListSize];
-    cvDataList = new IndexedListElement[cvDataListSize];
+    freeList = new int[freeListSize];
+    dataList = new IndexedListElement[dataListSize];
 
     // Inititalize both lists.
-    int mvCounter;
-    for (mvCounter = 0; mvCounter < cvDataListSize; mvCounter++)
+    int counter;
+    for (counter = 0; counter < dataListSize; counter++)
     {
-      cvDataList[mvCounter] = new IndexedListElement();
-      cvDataList[mvCounter].cvUsed = false;
+      dataList[counter] = new IndexedListElement();
+      dataList[counter].used = false;
     }
-    for (mvCounter = 0; mvCounter < cvFreeListSize; mvCounter++)
+    for (counter = 0; counter < freeListSize; counter++)
     {
-      cvFreeList[mvCounter] = mvCounter;
+      freeList[counter] = counter;
     }
-
   }
 
-  public int add(Object mvData)
+  public int add(Object newData)
   {
-
-    if (!cvFull)
+    if (!full)
     {
-      int Current = cvFreeList[cvFreeListIndex];
-      cvDataList[Current].cvData = mvData;
-      cvDataList[Current].cvUsed = true;
-      cvFreeListIndex++;
-      if (cvFreeListIndex == 10)
+      int currentFreeIndex = freeList[freeListIndex];
+      dataList[currentFreeIndex].data = newData;
+      dataList[currentFreeIndex].used = true;
+      freeListIndex++;
+      if (freeListIndex == 10)
       {
         refillFreeList();
+        full = true;
       }
-      if (cvFreeListIndex == 10)
-      {
-        cvFull = true;
-      }
-      return Current;
+      return currentFreeIndex;
     }
     else
     {
@@ -90,21 +85,21 @@ public class IndexedList
     }
   }
 
-  public int remove(int mvItem)
+  public int remove(int existingItem)
   {
-    if ((mvItem < cvDataListSize) && (cvDataList[mvItem].cvUsed))
+    if ((existingItem < dataListSize) && (dataList[existingItem].used))
     {
-      cvDataList[mvItem].cvUsed = false;
-      if (cvFreeListIndex > 0)
+      dataList[existingItem].used = false;
+      if (freeListIndex > 0)
       {
-        cvFreeListIndex--;
-        cvFreeList[cvFreeListIndex] = mvItem;
+        freeListIndex--;
+        freeList[freeListIndex] = existingItem;
       }
-      if (cvFull)
+      if (full)
       {
-        cvFull = false;
+        full = false;
       }
-      return mvItem;
+      return existingItem;
     }
     else
     {
@@ -114,28 +109,46 @@ public class IndexedList
 
   public int refillFreeList()
   {
-    int mvCounter = 0;
-    while ((cvFreeListIndex > 0) && (mvCounter < cvDataListSize))
+    int counter = 0;
+    while ((freeListIndex > 0) && (counter < dataListSize))
     {
-      if ( ! cvDataList[mvCounter].cvUsed)
+      if (!dataList[counter].used)
       {
-        cvFreeListIndex--;
-        cvFreeList[cvFreeListIndex] = mvCounter;
+        freeListIndex--;
+        freeList[freeListIndex] = counter;
       }
-      mvCounter++;
+      counter++;
     }
     return 0;
   }
 
-  public Object getItem (int mvItem)
+  /**
+   * Will determine if the given in position fits between the ranges of the
+   * currently held data and will either return the value of the object held
+   * there or return null if the index is out of range.
+   *
+   * @param existingItemPosition the index to find an existing item.
+   * @return will return the object or null if it's not found.
+   */
+  public Object getItem(int existingItemPosition)
   {
-    if ((mvItem < cvDataListSize) && (cvDataList[ mvItem ].cvUsed))
+    if ((existingItemPosition < dataListSize) &&
+      (dataList[existingItemPosition].used))
     {
-      return cvDataList[mvItem].cvData;
+      return dataList[existingItemPosition].data;
     }
     else
     {
       return null;
     }
+  }
+
+  /**
+   * The simple object which contains an attribute "used" and the data.
+   */
+  class IndexedListElement
+  {
+    public boolean used;
+    public Object data;
   }
 }

@@ -1,117 +1,152 @@
-//**************************************************************************/
-// FILE     : Movement.java
-// PACKAGE  : Animator.Positions
-// PURPOSE  : This class is designed to manipulate the Position and
-//            Position chain objects.  It allows a chain of positions
-//            to be created and for these positions to move from the
-//            beginning of the chain to the end.  By doing this you
-//            can create screen objects that can be plotted and moved
-//            based on predetermined co-ordinates.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 17/12/96  First created.
-//
-//**************************************************************************/
-
 package net.sourceforge.rcosjava.software.animator.support.positions;
 
 import net.sourceforge.rcosjava.software.util.LIFOQueue;
 
+/**
+ * This class is designed to manipulate the Position and Position chain
+ * objects.  It allows a chain of positions to be created and for these
+ * positions to move from the beginning of the chain to the end.  By doing
+ * this you can create screen objects that can be plotted and moved based on
+ * predetermined co-ordinates.
+ * <P>
+ * @author Andrew Newman
+ * @version 1.00 $Date$
+ * @created 17th December 1996
+ */
 public class Movement
-
-// PositionChain is a vector class which holds Position objects.
-// pCurrentPosition and pNextPosition contain the current and
-// next Position objects in the PositionChain.  iCurrentX and
-// iCurrentY contain the current X,Y co-ordinates of where the
-// object is.  iCurrentPosition is the index to the
-// PositionChain.  If bForward is true then the object moves from
-// the current X,Y position to the next X,Y position.
-
 {
+  /**
+   * Contains all of the position objects
+   */
   private LIFOQueue positions;
-  private Position pCurrentPosition, pNextPosition;
-  private boolean bFinished;
-  public int iCurrentX, iCurrentY, iCurrentPosition;
-  public boolean bForward;
-  public boolean bRepeat;
 
-//Default initialisation.
+  /**
+   * Current position in chain.
+   */
+  private Position currentPosition;
 
+  /**
+   * Next position in chain.
+   */
+  private Position nextPosition;
+
+  /**
+   * True if the movement has completed (and not looping).
+   */
+  private boolean finishedMoving;
+
+  /**
+   * Current X position of the object.
+   */
+  private int currentX;
+
+  /**
+   * Current Y position of the object.
+   */
+  private int currentY;
+
+  /**
+   * Current index to the position in the chain of positions.
+   */
+  private int currentIndexPosition;
+
+  /**
+   * Whether to move forward in positions (or backwards if false).
+   */
+  private boolean moveForward;
+
+  /**
+   * Whether to loop the positions once the end has been reached.
+   */
+  private boolean repeatMovement;
+
+  /**
+   * Default constructor.
+   */
   public Movement()
   {
-    super();
-    positions = new LIFOQueue(10,10);
-    pCurrentPosition = new Position(0,0,0,0);
-    pNextPosition = new Position(0,0,0,0);
-    iCurrentX = 0;
-    iCurrentY = 0;
-    bForward = true;
-    bRepeat = false;
-    bFinished = true;
+    this(false);
   }
 
-//Able to set whether the item repeats or not.
-
-  public Movement(boolean bInitRepeat)
+  /**
+   * Able to set whether the item repeats or not.
+   */
+  public Movement(boolean newRepeatMovement)
   {
     super();
     positions = new LIFOQueue(10,10);
-    pCurrentPosition = new Position(0,0,0,0);
-    pNextPosition = new Position(0,0,0,0);
-    iCurrentX = 0;
-    iCurrentY = 0;
-    bForward = true;
-    bRepeat = bInitRepeat;
-    bFinished = true;
+    currentPosition = new Position(0,0,0,0);
+    nextPosition = new Position(0,0,0,0);
+    currentX = 0;
+    currentY = 0;
+    moveForward = true;
+    repeatMovement = newRepeatMovement;
+    finishedMoving = true;
   }
 
-  // Current position in queue of Positions
-
+  /**
+   * @return the current position in queue of Positions
+   */
   public int currentPosition()
   {
-    return positions.thePointer;
+    return positions.getPointer();
   }
 
-// Adds a position to the PostionChain.
-
+  /**
+   * Adds a position to the Postion Chain.
+   *
+   * @param the given position to add to the chain.
+   */
   public void addPosition(Position newPosition)
   {
     positions.insert(newPosition);
   }
 
-// Sets the variables to be set to the start of the PositionChain.
-
+  /**
+   * Sets the variables to be set to the start of the PositionChain.
+   */
   public synchronized void start()
   {
     if (positions.itemCount() > 1)
     {
-      bFinished = false;
-      iCurrentPosition = 0;
+      finishedMoving = false;
+      currentIndexPosition = 0;
       positions.goToHead();
-      pCurrentPosition = (Position) positions.peek();
-      iCurrentX = pCurrentPosition.getX();
-      iCurrentY = pCurrentPosition.getY();
+      currentPosition = (Position) positions.peek();
+      currentX = currentPosition.getX();
+      currentY = currentPosition.getY();
       positions.goToNext();
-      pNextPosition = (Position) positions.peek();
+      nextPosition = (Position) positions.peek();
     }
   }
 
+  /**
+   * @return whether the movement has been completed to the end or not.
+   */
   public synchronized boolean finished()
   {
-    return (bFinished);
+    return (finishedMoving);
   }
 
-  public synchronized boolean finished(int iTo)
+  /**
+   * This will return whether or not a certain position in the chain has been
+   * reached (exactly).
+   *
+   * @param toPosition the position to check for.
+   * @return whether the current pointer matched the given position.
+   */
+  public synchronized boolean finished(int toPosition)
   {
-    return (positions.thePointer == iTo);
+    return (positions.getPointer() == toPosition);
   }
 
-// Steps forward or backward one motion depending on whether bForward
-// is true or not.
-
+  /**
+   * Steps forward or backward one motion depending on whether moveForward is
+   * true or not.
+   */
   public synchronized void step ()
   {
-    if (bForward)
+    if (moveForward)
     {
       this.forward();
     }
@@ -121,41 +156,44 @@ public class Movement
     }
   }
 
+  /**
+   * Move to the next position.
+   */
   private void forward()
   {
-    if ((positions.itemCount() > 1) && (!bFinished))
+    if ((positions.itemCount() > 1) && (!finishedMoving))
     {
-      iCurrentX += pCurrentPosition.getDirectionX();
-      iCurrentY += pCurrentPosition.getDirectionY();
+      currentX += currentPosition.getDeltaX();
+      currentY += currentPosition.getDeltaY();
 
-//      System.out.println("Current X,Y= " + iCurrentX + " " + iCurrentY);
-//      System.out.println("Item Count " + iCurrentPosition + " Max " + positions.itemCount());
-//      System.out.println("next x,y = " + pNextPosition.iDirectionX + " " + pNextPosition.iDirectionY);
+//      System.out.println("Current X,Y= " + currentX + " " + currentY);
+//      System.out.println("Item Count " + currentPosition + " Max " + positions.itemCount());
+//      System.out.println("next x,y = " + nextPosition.iDirectionX + " " + nextPosition.iDirectionY);
 
-      if (((pCurrentPosition.getDirectionX() > 0) &&
-           (iCurrentX >= pNextPosition.getX())) ||
-          ((pCurrentPosition.getDirectionX() < 0) &&
-           (iCurrentX <= pNextPosition.getX())) ||
-          ((pCurrentPosition.getDirectionY() > 0) &&
-           (iCurrentY >= pNextPosition.getY())) ||
-          ((pCurrentPosition.getDirectionY() < 0) &&
-           (iCurrentY <= pNextPosition.getY())))
+      if (((currentPosition.getDeltaX() > 0) &&
+           (currentX >= nextPosition.getX())) ||
+          ((currentPosition.getDeltaX() < 0) &&
+           (currentX <= nextPosition.getX())) ||
+          ((currentPosition.getDeltaY() > 0) &&
+           (currentY >= nextPosition.getY())) ||
+          ((currentPosition.getDeltaY() < 0) &&
+           (currentY <= nextPosition.getY())))
       {
-        if ((pNextPosition.getDirectionX() != 0) ||
-            (pNextPosition.getDirectionY() != 0))
+        if ((nextPosition.getDeltaX() != 0) ||
+            (nextPosition.getDeltaY() != 0))
         {
-          pCurrentPosition = pNextPosition;
+          currentPosition = nextPosition;
           positions.goToNext();
-          pNextPosition = (Position) positions.peek();
-          iCurrentPosition++;
+          nextPosition = (Position) positions.peek();
+          currentIndexPosition++;
         }
         else
         {
-          if (!bRepeat)
+          if (!repeatMovement)
           {
-            iCurrentX = pNextPosition.getX();
-            iCurrentY = pNextPosition.getY();
-            bFinished = true;
+            currentX = nextPosition.getX();
+            currentY = nextPosition.getY();
+            finishedMoving = true;
           }
           else
           {
@@ -166,8 +204,27 @@ public class Movement
     }
   }
 
+  /**
+   * Not implemented.  But will go backwards through the positions if required.
+   */
   private void back()
   {
     // Something in here to be added later.
+  }
+
+  /**
+   * @return the current x value
+   */
+  public int getCurrentX()
+  {
+    return currentX;
+  }
+
+  /**
+   * @return the current y value
+   */
+  public int getCurrentY()
+  {
+    return currentY;
   }
 }
