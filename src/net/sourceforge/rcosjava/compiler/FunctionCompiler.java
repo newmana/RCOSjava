@@ -20,13 +20,27 @@ import org.sablecc.simplec.tool.Version;
  */
 public class FunctionCompiler extends DepthFirstAdapter
 {
-// This will eventually be split into two.
+  // This will eventually be split into two.
   private int basePosition = 0;
   private ArrayList instructions = new ArrayList();
+  private boolean isInFunction;
+
+  private VariableCompiler variableCompiler = new
+      VariableCompiler();
 
   public FunctionCompiler()
   {
     super();
+  }
+
+  /**
+   * Any variable declaration such as:
+   * int global;
+   * char test;
+   */
+  public void inAVariableDeclaration(AVariableDeclaration node)
+  {
+    node.apply(variableCompiler);
   }
 
   /**
@@ -35,11 +49,21 @@ public class FunctionCompiler extends DepthFirstAdapter
   public void inAFunctionBody(AFunctionBody node)
   {
     System.out.println("In a function!: ");
-    StatementCompiler tmpCompiler = new StatementCompiler(basePosition);
-    node.apply(tmpCompiler);
-    writePCode(new Instruction(OpCode.JUMP.getValue(), (byte) 0,
-      tmpCompiler.getBasePosition()));
-    tmpCompiler.emitInstructions();
+    isInFunction = true;
+
+    StatementCompiler statementCompiler = new StatementCompiler(basePosition);
+    node.apply(statementCompiler);
+
+    // Write out jump position to main function
+//    writePCode(new Instruction(OpCode.JUMP.getValue(), (byte) 0,
+//      statementCompiler.getBasePosition()));
+    writePCode(new Instruction(OpCode.JUMP.getValue(), (byte) 0, (short) 1));
+
+    // Write out stack pointer size for allocated variables
+    writePCode(new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
+        variableCompiler.getVariableStackPointer()));
+
+    statementCompiler.emitInstructions();
   }
 
   /**
@@ -47,11 +71,11 @@ public class FunctionCompiler extends DepthFirstAdapter
    */
   public void outAFunctionBody(AFunctionBody node)
   {
-//    System.out.println("Out of function!");
+    //System.out.println("Out of function!");
     //Modify the jump point code
     writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
       Operator.RETURN.getValue()));
-    //isInFunction = false;
+    isInFunction = false;
     //localVarsTable = new HashMap();
   }
 

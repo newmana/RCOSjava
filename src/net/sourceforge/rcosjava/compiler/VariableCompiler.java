@@ -20,15 +20,31 @@ import org.sablecc.simplec.tool.Version;
  */
 public class VariableCompiler extends DepthFirstAdapter
 {
-  private boolean isInFunction;
-  private int variableStackPosition = 0;
-  private int basePosition = 0;
+  private static boolean isInFunction;
+  private static short variableStackPointer = 1;
+  private static int basePosition = 0;
   private static HashMap globalVarsTable = new HashMap();
   private HashMap localVarsTable = new HashMap();
+  private static int anonymousVariableCounter = 0;
+
+  public VariableCompiler()
+  {
+    isInFunction = false;
+  }
 
   public VariableCompiler(boolean newIsInFunction)
   {
     isInFunction = newIsInFunction;
+  }
+
+  public static void isInFunction()
+  {
+    isInFunction = true;
+  }
+
+  public static void isOutFunction()
+  {
+    isInFunction = false;
   }
 
   /**
@@ -67,6 +83,7 @@ public class VariableCompiler extends DepthFirstAdapter
    */
   public void inAVariableDeclaration(AVariableDeclaration node)
   {
+    System.out.println("In var declaration");
     // This compiler understands only 16 bit int/short and chars
     if (node.getTypeSpecifier() instanceof ASignedIntTypeSpecifier ||
       node.getTypeSpecifier() instanceof AUnsignedIntTypeSpecifier ||
@@ -105,6 +122,13 @@ public class VariableCompiler extends DepthFirstAdapter
     return arraySize;
   }
 
+  public String allocateVariable(int noBits, int size)
+  {
+    String name = "anonymous" + anonymousVariableCounter++;
+    allocateVariable(name, noBits, size);
+    return name;
+  }
+
   /**
    * Allocate the variables.  Used for initial jump once compiled and for
    * referral later on.  Store for both global and local variables.  Locals will
@@ -116,16 +140,21 @@ public class VariableCompiler extends DepthFirstAdapter
     if (isInFunction)
     {
       System.out.println("Allocating local: " + name + " position:" +
-        variableStackPosition);
-      localVarsTable.put(name, new Integer(variableStackPosition));
+        variableStackPointer);
+      localVarsTable.put(name, new Integer(variableStackPointer));
     }
     else
     {
       System.out.println("Allocating global: " + name + " position:" +
-        variableStackPosition);
-      globalVarsTable.put(name, new Integer(variableStackPosition));
+        variableStackPointer);
+      globalVarsTable.put(name, new Integer(variableStackPointer));
     }
-    variableStackPosition += noBits * size;
+    variableStackPointer += noBits * size;
+  }
+
+  public static short getVariableStackPointer()
+  {
+    return variableStackPointer;
   }
 
   public int getVariableLocation(String name)

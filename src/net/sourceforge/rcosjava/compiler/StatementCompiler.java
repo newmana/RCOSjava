@@ -89,6 +89,13 @@ public class StatementCompiler extends DepthFirstAdapter
   {
     System.out.println("Str contstant: " + node);
     System.out.println("Literal: " + node.getStringLitteral());
+
+    String stringValue = node.getStringLitteral().getText();
+    //String name = variableCompiler.allocateVariable(1, stringValue.length());
+    doVariableLoading(stringValue);
+
+    writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
+      (byte) 0, SystemCall.STRING_OUT.getValue()));
   }
 
   /**
@@ -103,32 +110,11 @@ public class StatementCompiler extends DepthFirstAdapter
 
     String varName = expr.getVarname().toString().trim();
     String varValue = expr.getRhs().toString().trim();
+    System.out.println("In a modify statement");
     System.out.println("Varname: " + varName + " at: " +
       variableCompiler.getVariableLocation(varName));
 
-    // Do string storage
-    if ((varValue.indexOf("'") >= 0) || (varValue.indexOf("\"") >= 0))
-    {
-      int varStrLength = varValue.length()-2;
-      //emit each element in the string
-      for (int count = 0; count < varStrLength; count++)
-      {
-        writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-          (short) varValue.charAt(count)));
-      }
-    }
-    // Do int storage
-    else
-    {
-      System.out.println("[" + varValue + "]");
-      short varIntValue = Short.parseShort(varValue);
-      writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-        varIntValue));
-    }
-
-    //emit store a required pos
-    writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-      (short) variableCompiler.getVariableLocation(varName)));
+    //doVariableLoading(varName, varValue);
   }
 
   public void writePCode(Instruction newInstruction)
@@ -149,5 +135,50 @@ public class StatementCompiler extends DepthFirstAdapter
   public short getBasePosition()
   {
     return (short) basePosition;
+  }
+
+  private void doVariableLoading(String varValue)
+  {
+    short length = 0;
+
+    // Do string storage
+    if ((varValue.indexOf("'") >= 0) || (varValue.indexOf("\"") >= 0))
+    {
+      int varStrLength = varValue.length()-1;
+      //emit each element in the string
+      int count = 0;
+      while(count < varStrLength)
+      {
+        // Check if it's a \n otherwise ignore
+        if ((varValue.charAt(count) == '\\') &&
+            (varValue.charAt(count+1) == 'n'))
+        {
+          writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
+            (short) 13));
+          writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
+            (short) 10));
+          count = count + 2;
+        }
+        else
+        {
+          writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
+            (short) varValue.charAt(count)));
+          count++;
+        }
+        length++;
+      }
+    }
+    // Do int storage
+    else
+    {
+      System.out.println("[" + varValue + "]");
+      short varIntValue = Short.parseShort(varValue);
+      writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
+        varIntValue));
+    }
+
+    //emit store a required pos
+    writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
+      length));
   }
 }

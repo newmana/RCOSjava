@@ -103,22 +103,27 @@ public class Pasm
    */
   public static void compile(String theFileName)
   {
+    String instructionLine = new String();
+
     try
     {
       BufferedReader inputStream = new BufferedReader(
         new InputStreamReader(new FileInputStream(theFileName)));
 
       byte pcodeInstruction[] = new byte[8];
-      String instructionLine;
       instructionLine = inputStream.readLine();
 
       while (instructionLine != null)
       {
-        instructionLine = instructionLine.substring(7);
         Instruction theInstruction = new Instruction(instructionLine);
         System.out.write(theInstruction.toByte(),0,8);
         instructionLine = inputStream.readLine();
       }
+    }
+    catch (java.lang.StringIndexOutOfBoundsException sioobe)
+    {
+      System.out.println("Line: " + instructionLine);
+      sioobe.printStackTrace();
     }
     catch (java.io.IOException ioe)
     {
