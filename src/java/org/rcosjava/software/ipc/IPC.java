@@ -630,15 +630,26 @@ public class IPC extends OSMessageHandler
   public void deallocateMemory(int pid)
   {
     Iterator tmpIter = getSemaphoreTable().iterator();
+    ArrayList semaphoresToRemove = new ArrayList();
 
+    // Close all semaphores with the given pid.  If the result is zero then
+    // add it for removal.
     while (tmpIter.hasNext())
     {
       Semaphore existingSemaphore = (Semaphore) tmpIter.next();
 
       if (existingSemaphore.close(pid) == 0)
       {
-        getSemaphoreTable().remove(existingSemaphore);
+        semaphoresToRemove.add(existingSemaphore);
       }
+    }
+
+    // Remove any semaphore that returned 0 when closed.
+    tmpIter = semaphoresToRemove.iterator();
+    while (tmpIter.hasNext())
+    {
+      Semaphore tmpSemaphore = (Semaphore) tmpIter.next();
+      getSemaphoreTable().remove(tmpSemaphore);
     }
   }
 
