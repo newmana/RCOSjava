@@ -125,7 +125,7 @@ public class IPCManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Calls semQueueAdd with a given process id.
+   *
    */
   public void semaphoreCreated(String semaphoreId, int processId, int value)
   {
@@ -150,6 +150,12 @@ public class IPCManagerAnimator extends RCOSAnimator
   public void semaphoreClosed(String semaphoreId, int processId, int value)
   {
     myFrame.semaphoreClosed(semaphoreId, processId, value);
+  }
+
+  public void sharedMemoryCreated(String sharedMemoryId, int processId,
+    int size)
+  {
+//    myFrame.semaphoreCreated(semaphoreId, processId, value);
   }
 
   public void sharedMemoryOpen()
