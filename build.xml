@@ -25,7 +25,9 @@
 
   <target name="compile" depends="prepare">
     <echo message="Compiling: ${src.dir} to ${dist.dir}"/>
-    <javac classpath="${lib.dir}/junit.jar" srcdir="${src.dir}" destdir="${dist.dir}"
+    <javac 
+      classpath="${lib.dir}/junit.jar;${lib.dir}/sablecc.jar;${lib.dir}/simplec.jar"
+      srcdir="${src.dir}" destdir="${dist.dir}"
       debug="off" optimize="on" deprecation="on"/>
 
     <!-- Move all the images and sounds too -->
