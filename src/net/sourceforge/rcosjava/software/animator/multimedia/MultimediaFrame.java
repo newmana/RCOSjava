@@ -45,7 +45,7 @@ public class MultimediaFrame extends RCOSFrame
     setSize(x,y);
   }
 
-  public synchronized void addNotify()
+  public void addNotify()
   {
     repaint();
     super.addNotify();
