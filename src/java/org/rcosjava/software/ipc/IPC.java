@@ -239,7 +239,8 @@ public class IPC extends OSMessageHandler
 
       // Let other components know that a signal has been issued.
       SemaphoreSignalled signalledMessage = new SemaphoreSignalled(this,
-          existingSemaphore.getName(), pid, existingSemaphore.getValue());
+          existingSemaphore.getName(), pid, existingSemaphore.getValue(),
+          processId);
       sendMessage(signalledMessage);
 
       // NOW - if process id wasn't -1, then we have to wake
@@ -254,7 +255,6 @@ public class IPC extends OSMessageHandler
     else
     {
       ReturnValue returnMessage = new ReturnValue(this, (short) -1);
-
       sendMessage(returnMessage);
     }
   }
