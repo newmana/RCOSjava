@@ -3,7 +3,7 @@ package net.sourceforge.rcosjava.hardware.disk.cpm14;
 import net.sourceforge.rcosjava.hardware.disk.SimpleDisk;
 
 /**
- * A sumulated CPM14 hard disk drive.
+ * A simulated CPM14 hard disk drive.
  * <P>
  * @see net.sourceforge.rcosjava.hardware.disk.SimpleDisk
  * @see net.sourceforge.rcosjava.hardware.disk.Disk
