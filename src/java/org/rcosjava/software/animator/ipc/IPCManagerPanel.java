@@ -492,12 +492,17 @@ public class IPCManagerPanel extends RCOSPanel
    * @param memory the memory object being shared.
    */
   void sharedMemoryCreated(final String sharedMemoryId,
-      MemoryReturn memoryReturn, Memory memory)
+      final MemoryReturn memoryReturn, final Memory memory)
   {
     SwingUtilities.invokeLater(new Runnable()
     {
       public void run()
       {
+        SemaphoreSharedMemoryGraphic tmpGraphic = new SemaphoreSharedMemoryGraphic(
+          memoryReturn.getPID(), memory.toString());
+
+        sharedMemoryMap.put(sharedMemoryId, tmpGraphic);
+
         if (shmOption.getItemCount() == 1)
         {
           shmOption.removeAllItems();
