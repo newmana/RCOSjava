@@ -33,14 +33,19 @@ public class RCOSQueue extends Canvas
     queueMembers = new LIFOQueue(iNoBoxes,0);
   }
 
-  public void addToQueue (String newMember)
+  public void addToQueue(String newMember)
   {
     queueMembers.insert(newMember);
   }
 
-  public void removeFromQueue ()
+  public void removeFromQueue()
   {
     queueMembers.retrieve();
+  }
+
+  public void removeAllFromQueue()
+  {
+    queueMembers.removeAllElements();
   }
 
   public Dimension getMinimumSize()
