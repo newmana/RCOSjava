@@ -1,7 +1,9 @@
 package org.rcosjava.messaging.messages.universal;
 
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
+import org.rcosjava.software.animator.cpu.CPUAnimator;
 import org.rcosjava.software.animator.process.ProcessSchedulerAnimator;
+import org.rcosjava.software.kernel.Kernel;
 import org.rcosjava.software.process.ProcessScheduler;
 import org.rcosjava.software.process.RCOSProcess;
 
@@ -44,6 +46,17 @@ public class RunningToReady extends UniversalMessageAdapter
   public void doMessage(ProcessScheduler theElement)
   {
     theElement.runningToReady(process);
+  }
+
+  /**
+   * Calls screenReset on the CPU Animator. Resets all the pointers, stack and
+   * code execution to their default values.
+   *
+   * @param theElement the CPU Animator to do the work on.
+   */
+  public void doMessage(CPUAnimator theElement)
+  {
+    theElement.screenReset();
   }
 
   /**
