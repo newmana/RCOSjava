@@ -2,8 +2,8 @@ package org.rcosjava.software.filesystem.msdos;
 
 import java.util.HashMap;
 
-class MSDOSDeviceTableEntry{
-
+class MSDOSDeviceTableEntry
+{
   // public int DeviceNumber // Device number is the key of the table.
   public String deviceName;
   public byte[] directoryTable;
