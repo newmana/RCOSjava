@@ -315,7 +315,6 @@ public class ProcessSchedulerTest extends TestCase
 
       // Kill the executing process
       scheduler.killProcess(new RCOSProcess(1, ""));
-      scheduler.processFinished(new RCOSProcess(1, ""));
 
       assertTrue("Ready queue should be empty",
           scheduler.getReadyQueue().size() == 0);
