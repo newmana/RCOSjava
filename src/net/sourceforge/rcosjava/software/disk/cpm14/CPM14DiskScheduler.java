@@ -30,6 +30,8 @@ public class CPM14DiskScheduler implements DiskScheduler
   private DiskQueueItem currentRequest;
   private boolean busy;
   private Disk disk;
+  private static int blockSize = 1;
+  private static int size = 1;
 
   // Constructor. Sets up variables and registers with the post office.
   public CPM14DiskScheduler(String myID, MessageHandler mhPostOffice)
@@ -105,20 +107,20 @@ public class CPM14DiskScheduler implements DiskScheduler
   {
     byte[] mvReturnData;
 
-    if (currentRequest.getDiskRequest().Data == null)
+    if (currentRequest.getDiskRequest().getData() == null)
     {
-      mvReturnData = readBlock(currentRequest.getDiskRequest().DiskBlock);
+      mvReturnData = readBlock(currentRequest.getDiskRequest().getDiskBlock());
     }
     else
     {
       mvReturnData = null;
-      writeBlock (currentRequest.getDiskRequest().DiskBlock,
-                         currentRequest.getDiskRequest().Data);
+      writeBlock (currentRequest.getDiskRequest().getDiskBlock(),
+                         currentRequest.getDiskRequest().getData());
     }
     DiskRequest mvTheReturnData = new DiskRequest (
-                                     currentRequest.getDiskRequest().FSRequestID,
-                                     currentRequest.getDiskRequest().DiskBlock,
-			             mvReturnData);
+      currentRequest.getDiskRequest().getRequestId(),
+      currentRequest.getDiskRequest().getDiskBlock(),
+      mvReturnData);
 //    Message mvTheMessage = new Message( id,
 //					currentRequest.cvSource,
 //					"DiskRequestComplete",
