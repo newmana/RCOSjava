@@ -1,13 +1,13 @@
 package org.rcosjava.software.animator.process;
-import java.applet.*;
 
+import java.applet.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.event.*;
 import java.net.*;
 import java.util.*;
 import org.rcosjava.software.animator.RCOSFrame;
-import org.rcosjava.software.animator.support.NewLabel;
 import org.rcosjava.software.util.FIFOQueue;
 
 /**
@@ -36,34 +36,44 @@ public class ProgramManagerFrame extends RCOSFrame
   private ProgramManagerAnimator myProgramManager;
 
   /**
+   * Filename and directories that's currently selected.
+   */
+  private JTextField fileNameTextField = new JTextField(20);
+
+  /**
    * Description of the Field
    */
   private Image myImages[];
 
   /**
-   * Description of the Field
+   * List of directories.
    */
-  private java.awt.List directoryListBox;
+  private JList directoryListBox;
 
   /**
-   * Description of the Field
+   * Model for the list of directories.
    */
-  private java.awt.List fileListBox;
+  private DefaultListModel directoryListModel;
 
   /**
-   * Description of the Field
+   * List of files.
    */
-  private TextField fileNameTextField = new TextField(30);
+  private JList fileListBox;
 
   /**
-   * Description of the Field
+   * Model for the list of files.
+   */
+  private DefaultListModel fileListModel;
+
+  /**
+   * Whether to start a new terminal with each process or not.
    */
   private boolean startTerminal = true;
 
   /**
    * Description of the Field
    */
-  private Checkbox startTerminalCheckbox = new Checkbox();
+  private JCheckBox startTerminalCheckbox = new JCheckBox();
 
   /**
    * Constructor for the ProgramManagerFrame object
@@ -112,12 +122,14 @@ public class ProgramManagerFrame extends RCOSFrame
    */
   public void setupLayout(Component c)
   {
-    super.setupLayout(c);
+    setBackground(defaultBgColour);
+    setForeground(defaultFgColour);
+    this.getContentPane().setLayout(new BorderLayout());
 
-    Panel mainPanel = new Panel();
-    Panel fileNamePanel = new Panel();
-    Panel terminOptionPanel = new Panel();
-    Panel buttonPanel = new Panel();
+    JPanel mainPanel = new JPanel();
+    JPanel fileNamePanel = new JPanel();
+    JPanel terminOptionPanel = new JPanel();
+    JPanel buttonPanel = new JPanel();
 
     GridBagConstraints constraints = new GridBagConstraints();
     GridBagLayout gridBag = new GridBagLayout();
@@ -129,39 +141,52 @@ public class ProgramManagerFrame extends RCOSFrame
     constraints.weightx = 1;
     constraints.insets = new Insets(1, 15, 1, 15);
 
-    NewLabel tmpLabel;
+    JLabel tmpLabel;
 
     constraints.gridwidth = 1;
     constraints.anchor = GridBagConstraints.CENTER;
-    tmpLabel = new NewLabel("Directories", titleFont);
+    tmpLabel = new JLabel("Directories");
+    tmpLabel.setFont(titleFont);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
     gridBag.setConstraints(tmpLabel, constraints);
     mainPanel.add(tmpLabel);
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
-    tmpLabel = new NewLabel("Files", titleFont);
+    tmpLabel = new JLabel("Files");
+    tmpLabel.setFont(titleFont);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
     gridBag.setConstraints(tmpLabel, constraints);
     mainPanel.add(tmpLabel);
 
     constraints.gridwidth = 1;
     constraints.anchor = GridBagConstraints.CENTER;
-    directoryListBox = new java.awt.List(8, false);
+    directoryListBox = new JList();
+    directoryListModel = new DefaultListModel();
+    directoryListBox.setVisibleRowCount(8);
+    directoryListBox.setModel(directoryListModel);
     directoryListBox.setBackground(listColour);
     directoryListBox.setForeground(defaultFgColour);
+
     gridBag.setConstraints(directoryListBox, constraints);
     mainPanel.add(directoryListBox);
-    directoryListBox.addMouseListener(new directoryListBoxListener());
+    directoryListBox.addMouseListener(new DirectoryListBoxListener());
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
-    fileListBox = new java.awt.List(8, false);
+    fileListBox = new JList();
+    fileListModel = new DefaultListModel();
+    fileListBox.setVisibleRowCount(8);
+    fileListBox.setModel(fileListModel);
     fileListBox.setBackground(listColour);
     fileListBox.setForeground(defaultFgColour);
     gridBag.setConstraints(fileListBox, constraints);
     mainPanel.add(fileListBox);
-    fileListBox.addMouseListener(new fileListBoxListener());
+    fileListBox.addMouseListener(new FileListBoxListener());
 
-    fileNamePanel.add(new NewLabel("Filename: ", titleFont));
+    fileNamePanel.add(new JLabel("Filename: "));
     fileNameTextField.setFont(defaultFont);
     fileNameTextField.setBackground(textBoxColour);
     fileNameTextField.setForeground(defaultFgColour);
@@ -172,29 +197,29 @@ public class ProgramManagerFrame extends RCOSFrame
     gridBag.setConstraints(fileNamePanel, constraints);
     mainPanel.add(fileNamePanel);
 
-    startTerminalCheckbox.setState(startTerminal);
+    startTerminalCheckbox.setSelected(startTerminal);
     terminOptionPanel.add(startTerminalCheckbox);
-    startTerminalCheckbox.addItemListener(new startTerminalListener());
-    terminOptionPanel.add(new NewLabel("Automatically start terminal.", defaultFont));
+    startTerminalCheckbox.addItemListener(new StartTerminalListener());
+    terminOptionPanel.add(new JLabel("Automatically start terminal."));
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
     gridBag.setConstraints(terminOptionPanel, constraints);
     mainPanel.add(terminOptionPanel);
 
-    JButton tmpOpenAWTButton = new JButton("Open");
+    JButton openButton = new JButton("Open");
 
-    buttonPanel.add(tmpOpenAWTButton);
+    buttonPanel.add(openButton);
     buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-    tmpOpenAWTButton.addMouseListener(new okayButtonListener());
+    openButton.addMouseListener(new OkayButtonListener());
 
-    Button tmpAWTButton = new Button("Close");
+    JButton closeButton = new JButton("Close");
 
-    buttonPanel.add(tmpAWTButton);
-    tmpAWTButton.addMouseListener(new RCOSFrame.CloseAnimator());
+    buttonPanel.add(closeButton);
+    closeButton.addMouseListener(new RCOSFrame.CloseAnimator());
 
-    add("Center", mainPanel);
-    add("South", buttonPanel);
+    getContentPane().add("Center", mainPanel);
+    getContentPane().add("South", buttonPanel);
   }
 
   /**
@@ -207,11 +232,11 @@ public class ProgramManagerFrame extends RCOSFrame
     fileListBox.removeAll();
 
     startTerminal = true;
-    startTerminalCheckbox.setState(true);
+    startTerminalCheckbox.setSelected(true);
 
     while (data.peek() != null)
     {
-      fileListBox.add((String) data.retrieve());
+      fileListModel.addElement((String) data.retrieve());
     }
     updateSelected();
   }
@@ -226,7 +251,7 @@ public class ProgramManagerFrame extends RCOSFrame
     directoryListBox.removeAll();
     while (data.peek() != null)
     {
-      directoryListBox.add((String) data.retrieve());
+      directoryListModel.addElement((String) data.retrieve());
     }
   }
 
@@ -245,7 +270,7 @@ public class ProgramManagerFrame extends RCOSFrame
    * @author administrator
    * @created 28 April 2002
    */
-  public class okayButtonListener extends MouseAdapter
+  public class OkayButtonListener extends MouseAdapter
   {
     /**
      * Description of the Method
@@ -256,7 +281,7 @@ public class ProgramManagerFrame extends RCOSFrame
     {
       setVisible(false);
       fileNameTextField.setText("");
-      fileListBox.deselect(fileListBox.getSelectedIndex());
+      fileListBox.clearSelection();
       myProgramManager.newProcess(startTerminal);
     }
   }
@@ -267,7 +292,7 @@ public class ProgramManagerFrame extends RCOSFrame
    * @author administrator
    * @created 28 April 2002
    */
-  class startTerminalListener implements ItemListener
+  class StartTerminalListener implements ItemListener
   {
     /**
      * Description of the Method
@@ -276,10 +301,7 @@ public class ProgramManagerFrame extends RCOSFrame
      */
     public void itemStateChanged(ItemEvent e)
     {
-      if (e.getSource().equals(startTerminalCheckbox))
-      {
-        startTerminal = !startTerminal;
-      }
+      startTerminal = e.getStateChange() == ItemEvent.SELECTED;
     }
   }
 
@@ -289,7 +311,7 @@ public class ProgramManagerFrame extends RCOSFrame
    * @author administrator
    * @created 28 April 2002
    */
-  class fileListBoxListener extends MouseAdapter
+  class FileListBoxListener extends MouseAdapter
   {
     /**
      * Description of the Method
@@ -300,19 +322,21 @@ public class ProgramManagerFrame extends RCOSFrame
     {
       switch (e.getClickCount())
       {
-          case 1:
-            //File name has been selected.
-            myProgramManager.setCurrentFile(fileListBox.getSelectedItem());
-            updateSelected();
-            break;
-          case 2:
-            //File has been double clicked on.
-            myProgramManager.setCurrentFile(fileListBox.getSelectedItem());
-            fileNameTextField.setText("");
-            fileListBox.deselect(fileListBox.getSelectedIndex());
-            myProgramManager.newProcess(startTerminal);
-            setVisible(false);
-            break;
+        case 1:
+          //File name has been selected.
+          myProgramManager.setCurrentFile((String) fileListModel.getElementAt(
+              fileListBox.getSelectedIndex()));
+          updateSelected();
+          break;
+        case 2:
+          //File has been double clicked on.
+          myProgramManager.setCurrentFile((String) fileListModel.getElementAt(
+              fileListBox.getSelectedIndex()));
+          fileNameTextField.setText("");
+          fileListBox.clearSelection();
+          myProgramManager.newProcess(startTerminal);
+          setVisible(false);
+          break;
       }
     }
   }
@@ -323,7 +347,7 @@ public class ProgramManagerFrame extends RCOSFrame
    * @author administrator
    * @created 28 April 2002
    */
-  class directoryListBoxListener extends MouseAdapter
+  class DirectoryListBoxListener extends MouseAdapter
   {
     /**
      * Description of the Method
@@ -336,7 +360,8 @@ public class ProgramManagerFrame extends RCOSFrame
       {
         //A double click was detected.
 
-        String selected = directoryListBox.getSelectedItem();
+        String selected = (String) directoryListModel.getElementAt(
+            directoryListBox.getSelectedIndex());
 
         if (selected.compareTo(".") == 0)
         {
@@ -357,5 +382,4 @@ public class ProgramManagerFrame extends RCOSFrame
       }
     }
   }
-
 }
