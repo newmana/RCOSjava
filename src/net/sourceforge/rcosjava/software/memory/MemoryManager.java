@@ -1,14 +1,3 @@
-//****************************************************************/
-// FILE     : MemoryManager.java
-// PURPOSE  : Specific way to provide memory using pages.  Needs
-//            to be made more generic for other memory managers
-//            (see FileSystem for an example).
-// AUTHOR   : Bruce Jamieson
-// MODIFIED : Andrew Newman
-// HISTORY  : 27/03/96  (Last Modified)
-//
-//****************************************************************/
-
 package net.sourceforge.rcosjava.software.memory;
 
 import java.lang.Integer;
@@ -26,19 +15,38 @@ import net.sourceforge.rcosjava.messaging.messages.universal.FinishedMemoryRead;
 import net.sourceforge.rcosjava.messaging.messages.universal.FinishedMemoryWrite;
 import net.sourceforge.rcosjava.hardware.memory.Memory;
 
+/**
+ * Specific way to provide memory using pages.  Needs to be made more generic
+ * for other memory managers (see FileSystem for an example).
+ * <P>
+ * @author Andrew Newman.
+ * @author Bruce Jamieson.
+ * @version 1.00 $Date$
+ * @created 27th March 1996
+ */
 public class MemoryManager extends OSMessageHandler
 {
-  //Defines the number and size (in bytes) of
-  //pages;
+
+  /**
+   * Defines the number and size (in bytes) of pages
+   */
   public final static int MAX_PAGES = 20;
-  // Currently the page size is the same as the hardware memory.
-  // This is for simplicity sake.  To increase or decreate this
-  // value more coding would be required.
+
+  /**
+   * Currently the page size is the same as the hardware memory.  This is for
+   * simplicity sake.  To increase or decreate this value more coding would be
+   * required.
+   */
   public final static int PAGE_SIZE = 1024;
-  // Defines two types of memory.
-  //CODE_SEGMENTS hold compiled executables.
+
+  /**
+   * CODE_SEGMENTS hold compiled executables code (read only).
+   */
   public final static byte CODE_SEGMENT = 1;
-  //STACK_SEGMENT hold working space.
+
+  /**
+   * STACK_SEGMENT hold working space (read/write).
+   */
   public final static byte STACK_SEGMENT = 2;
   private static final String MESSENGING_ID = "MemoryManager";
 
@@ -80,22 +88,22 @@ public class MemoryManager extends OSMessageHandler
     }
   }
 
-  public Memory readPage(int iPID, int iType, int iOffset)
+  public Memory readPage(int iPID, byte iType, int iOffset)
   {
     return(thePageHandler.readPage(iPID, iType, iOffset));
   }
 
-  public Memory readBytes(int iPID, int iType, int iSize, int iOffset)
+  public Memory readBytes(int iPID, byte iType, int iSize, int iOffset)
   {
     return(thePageHandler.readBytes(iPID, iType, iSize, iOffset));
   }
 
-  public void writePage(int iPID, int iType, int iOffset, Memory newMemory)
+  public void writePage(int iPID, byte iType, int iOffset, Memory newMemory)
   {
     thePageHandler.writePage(iPID, iType, iOffset, newMemory);
   }
 
-  public void writeBytes(int iPID, int iType, int iSize, int iOffset, Memory newMemory)
+  public void writeBytes(int iPID, byte iType, int iSize, int iOffset, Memory newMemory)
   {
     thePageHandler.writeBytes(iPID, iType, iSize, iOffset, newMemory);
   }
