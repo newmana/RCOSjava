@@ -92,7 +92,7 @@ public class RCOS extends java.applet.Applet implements Runnable
   public final int screenY = 480;
   private final int maxTerminalCols = 4;
   private final int maxTerminalRows = 2;
-  private final int maxTerminals = (maxTerminalCols * maxTerminalRows) + 1;
+  private final int maxTerminals = (maxTerminalCols * maxTerminalRows);
   private static final String menu1 = "System";
   private static final String menu2 = "Animators";
   private static final String menu3 = "System";
@@ -573,7 +573,7 @@ public class RCOS extends java.applet.Applet implements Runnable
           }
         }
         theKernel.performInstructionExecutionCycle();
-        kernelThread.sleep(100);
+        kernelThread.sleep(10);
       }
       catch (InterruptedException exc)
       {
