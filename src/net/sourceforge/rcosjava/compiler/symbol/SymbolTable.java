@@ -33,9 +33,9 @@ public class SymbolTable
   private static SymbolTable instance = null;
 
   /**
-   * The size in memory required to store all variables.
+   * Location offset of variable in memory.
    */
-  private short size;
+  private short symbolIndex;
 
   /**
    * Create the hashmap.
@@ -61,7 +61,9 @@ public class SymbolTable
   }
 
   /**
-   * Gets the name of the symbol and saves it to
+   * Adds a new symbolto the symbol table.
+   *
+   * @param newSymbol the symbol to add.
    */
   public void addSymbol(Symbol newSymbol)
     throws ParserException, IOException, LexerException
@@ -69,11 +71,15 @@ public class SymbolTable
     if (symbols.containsKey(newSymbol.getName()))
     {
       HashMap symbolMap = (HashMap) symbols.get(newSymbol.getName());
+
+      // Create a new symbol if the current level doesn't have the required
+      // variable.
       if (null == symbolMap.get(new Short(newSymbol.getLevel())))
       {
-        short newOffset = (short) (size + symbolMap.size() + 3);
+        short newOffset = (short) (symbolIndex + symbolMap.size() + 3);
         newSymbol.setOffset(newOffset);
         symbolMap.put(new Short(newSymbol.getLevel()), newSymbol);
+        symbolIndex += newSymbol.getSize();
       }
       else
       {
@@ -86,11 +92,11 @@ public class SymbolTable
     else
     {
       HashMap symbolMap = new HashMap();
-      newSymbol.setOffset(((short) (size + 3)));
+      newSymbol.setOffset(((short) (symbolIndex + 3)));
       symbolMap.put(new Short(newSymbol.getLevel()), newSymbol);
       symbols.put(newSymbol.getName(), symbolMap);
+      symbolIndex += newSymbol.getSize();
     }
-    size += newSymbol.getSize();
   }
 
   /**
@@ -98,7 +104,10 @@ public class SymbolTable
    */
   public Array getArray(String name, short level) throws Exception
   {
-    return (Array) getSymbol(name, level);
+    // Assume array is left of left square bracket.
+
+    String arrayName = name.substring(0, name.indexOf("[")).trim();
+    return (Array) getSymbol(arrayName, level);
   }
 
   /**
@@ -164,7 +173,7 @@ public class SymbolTable
 
     if (symbol == null)
     {
-      throw new Exception("Symbol not found");
+      throw new Exception("Symbol not found: " + name);
     }
     return symbol;
   }
@@ -176,6 +185,6 @@ public class SymbolTable
    */
   public short getVariableSize()
   {
-    return size;
+    return symbolIndex;
   }
 }
