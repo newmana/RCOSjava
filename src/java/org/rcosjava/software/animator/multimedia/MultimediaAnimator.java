@@ -54,16 +54,6 @@ public class MultimediaAnimator extends RCOSAnimator
   private UniversalMessagePlayer player;
 
   /**
-   * Description of the Field
-   */
-  private String currentFile;
-
-  /**
-   * Description of the Field
-   */
-  private FileClient myClient;
-
-  /**
    * Constructor for the MultimediaAnimator object
    *
    * @param aPostOffice Description of Parameter

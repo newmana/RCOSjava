@@ -31,6 +31,11 @@ import org.rcosjava.software.util.FIFOQueue;
 public class MultimediaRecordFrame extends RCOSFrame
 {
   /**
+   * Serial id.
+   */
+  private static final long serialVersionUID = 3448568503550229412L;
+
+  /**
    * Description of the Field
    */
   private MultimediaAnimator myMultimediaAnimator;
