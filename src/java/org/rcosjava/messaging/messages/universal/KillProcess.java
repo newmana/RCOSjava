@@ -4,6 +4,7 @@ import org.rcosjava.hardware.cpu.Interrupt;
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.software.animator.process.ProcessManagerAnimator;
 import org.rcosjava.software.animator.process.ProcessSchedulerAnimator;
+import org.rcosjava.software.interrupt.ProcessFinishedInterruptHandler;
 import org.rcosjava.software.kernel.Kernel;
 import org.rcosjava.software.process.ProcessScheduler;
 import org.rcosjava.software.process.RCOSProcess;
@@ -87,7 +88,7 @@ public class KillProcess extends UniversalMessageAdapter
     if (theElement.getCurrentProcessPID() == process.getPID())
     {
       Interrupt processFinishedInterrupt = new Interrupt(-1,
-          "CodeFinished");
+          ProcessFinishedInterruptHandler.myType);
 
       theElement.handleInterrupt(processFinishedInterrupt);
       //theElement.killProcess();

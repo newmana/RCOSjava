@@ -153,12 +153,12 @@ public class Kernel extends OSMessageHandler
 
     // Register timer interrupt.
     RegisterInterruptHandler msg = new RegisterInterruptHandler(this,
-      new TimerInterruptHandler(this, "TimerInterrupt"));
+      new TimerInterruptHandler(this));
     sendMessage(msg);
 
     // Register process finished interrupt.
     msg = new RegisterInterruptHandler(this,
-      new ProcessFinishedInterruptHandler(this, "CodeFinished"));
+      new ProcessFinishedInterruptHandler(this));
     sendMessage(msg);
   }
 
@@ -464,6 +464,17 @@ public class Kernel extends OSMessageHandler
         newProcess.getStackPages() * MemoryManager.PAGE_SIZE);
     msg = new ReadBytes(this, memRead);
     sendMessage(msg);
+  }
+
+  /**
+   * Called by device drivers and other sources of interrupts passed an
+   * Interrupt which is added to the InterruptQueue
+   *
+   * @param newInterrupt the new interrupt to add to be processed.
+   */
+  public void addInterrupt(Interrupt newInterrupt)
+  {
+    myCPU.addInterrupt(newInterrupt);
   }
 
   /**
@@ -807,8 +818,7 @@ public class Kernel extends OSMessageHandler
       sendMessage(msg);
 
       //Set the current process to nothing
-      NullProcess nullMsg = new NullProcess(this);
-      sendMessage(nullMsg);
+      nullProcess();
     }
   }
 

@@ -1,1 +1,64 @@
-package org.rcosjava.messaging.messages.os;import org.rcosjava.hardware.cpu.Interrupt;import org.rcosjava.messaging.postoffices.os.OSMessageHandler;import org.rcosjava.software.kernel.Kernel;/** * Description of the Class * * @author administrator * @created 28 April 2002 */public class HandleInterrupt extends OSMessageAdapter{  /**   * Description of the Field   */  private Interrupt intInterrupt;  /**   * Constructor for the HandleInterrupt object   *   * @param theSource Description of Parameter   * @param intNewInterrupt Description of Parameter   */  public HandleInterrupt(OSMessageHandler theSource,      Interrupt intNewInterrupt)  {    super(theSource);    intInterrupt = intNewInterrupt;  }  /**   * Description of the Method   *   * @param theElement Description of Parameter   */  public void doMessage(Kernel theElement)  {    theElement.handleInterrupt(intInterrupt);  }  /**   * Description of the Method   *   * @return Description of the Returned Value   */  public boolean undoableMessage()  {    if (intInterrupt.getType().equals("NewProcess"))    {      return false;    }    else    {      return true;    }  }  /**   * Sets the Interrupt attribute of the HandleInterrupt object   *   * @param intNewInterrupt The new Interrupt value   */  private void setInterrupt(Interrupt intNewInterrupt)  {    intInterrupt = intNewInterrupt;  }}
+package org.rcosjava.messaging.messages.os;
+
+import org.rcosjava.hardware.cpu.Interrupt;
+import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
+import org.rcosjava.software.interrupt.ProgManInterruptHandler;
+import org.rcosjava.software.kernel.Kernel;
+
+/**
+ * Handle an interrupt.
+ *
+ * @author Andrew Newman
+ * @created 28 April 2002
+ */
+public class HandleInterrupt extends OSMessageAdapter
+{
+  /**
+   * The interrupt to process.
+   */
+  private Interrupt interrupt;
+
+  /**
+   * Create a new handle interrupt message.
+   *
+   * @param theSource the sender of the message.
+   * @param newInterrupt the interrupt to send.
+   */
+  public HandleInterrupt(OSMessageHandler theSource,
+      Interrupt newInterrupt)
+  {
+    super(theSource);
+    interrupt = newInterrupt;
+  }
+
+  /**
+   * Call handleInterrupt on the Kernel.
+   *
+   * @param theElement the kernel object to call.
+   */
+  public void doMessage(Kernel theElement)
+  {
+    theElement.handleInterrupt(interrupt);
+  }
+
+  /**
+   * Determines if the message is undoable.
+   *
+   * @return true if message can be undone.
+   */
+  public boolean undoableMessage()
+  {
+    return true;
+  }
+
+  /**
+   * Sets a new interrupt.
+   *
+   * @param newInterrupt the new Interrupt value
+   */
+  private void setInterrupt(Interrupt newInterrupt)
+  {
+    interrupt = newInterrupt;
+  }
+}
+

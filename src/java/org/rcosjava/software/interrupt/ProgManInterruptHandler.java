@@ -18,14 +18,18 @@ import org.rcosjava.messaging.postoffices.os.OSOffice;
 public class ProgManInterruptHandler extends InterruptHandler
 {
   /**
+   * The identifier of this interrupt.
+   */
+  public static final String myType = "NewProcess";
+
+  /**
    * Create a new interrupt handler.
    *
    * @param newHandler the handler.
-   * @param newType the type of the interrupt (unique).
    */
-  public ProgManInterruptHandler(Object newHandler, String newType)
+  public ProgManInterruptHandler(Object newHandler)
   {
-    super(newType);
+    super(myType);
   }
 
   /**

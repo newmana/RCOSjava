@@ -54,11 +54,6 @@ public class SoftwareTerminal extends OSMessageHandler
   private HardwareTerminal hardwareTerminal;
 
   /**
-   * The handler which handles interrupts generated.
-   */
-  private TerminalInterruptHandler terminalIH;
-
-  /**
    * Holds all key pressed events.
    */
   private LIFOQueue softwareBuffer;
@@ -94,9 +89,8 @@ public class SoftwareTerminal extends OSMessageHandler
     softwareBuffer = new LIFOQueue(10, 10);
 
     // create and register a terminal Interrupt handler
-    terminalIH = new TerminalInterruptHandler(this, getId() + "KeyPress");
-    RegisterInterruptHandler msg = new
-        RegisterInterruptHandler(this, terminalIH);
+    RegisterInterruptHandler msg = new RegisterInterruptHandler(this,
+      new TerminalInterruptHandler(this));
     sendMessage(msg);
   }
 
@@ -239,6 +233,7 @@ public class SoftwareTerminal extends OSMessageHandler
   {
     if (log.isInfoEnabled())
     {
+      log.info("Terminal: " + id);
       log.info("Keypress is buffer empty: " + hardwareTerminal.bufferEmpty());
     }
 

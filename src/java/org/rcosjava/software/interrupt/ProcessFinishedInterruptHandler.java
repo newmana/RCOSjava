@@ -12,6 +12,11 @@ import org.rcosjava.software.kernel.Kernel;
 public class ProcessFinishedInterruptHandler extends InterruptHandler
 {
   /**
+   * The identifier of this interrupt.
+   */
+  public static final String myType = "CodeFinished";
+
+  /**
    * The handler.
    */
   private Kernel handler;
@@ -20,11 +25,10 @@ public class ProcessFinishedInterruptHandler extends InterruptHandler
    * Create a new interrupt handler.
    *
    * @param newHandler the handler.
-   * @param newType the type of the interrupt (unique).
    */
-  public ProcessFinishedInterruptHandler(Kernel newHandler, String newType)
+  public ProcessFinishedInterruptHandler(Kernel newHandler)
   {
-    super(newType);
+    super(myType);
     handler = newHandler;
   }
 

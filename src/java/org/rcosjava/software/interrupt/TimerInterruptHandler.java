@@ -14,6 +14,11 @@ import org.rcosjava.software.kernel.Kernel;
 public class TimerInterruptHandler extends InterruptHandler
 {
   /**
+   * The identifier of this interrupt.
+   */
+  public static final String myType = "TimerInterrupt";
+
+  /**
    * Handler object.
    */
   private Kernel handler;
@@ -24,9 +29,9 @@ public class TimerInterruptHandler extends InterruptHandler
    * @param newHandler the handler.
    * @param newType the type of the interrupt (unique).
    */
-  public TimerInterruptHandler(Kernel newHandler, String newType)
+  public TimerInterruptHandler(Kernel newHandler)
   {
-    super(newType);
+    super(myType);
     handler = newHandler;
   }
 

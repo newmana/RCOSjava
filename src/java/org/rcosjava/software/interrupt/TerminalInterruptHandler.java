@@ -16,6 +16,11 @@ import org.rcosjava.software.terminal.SoftwareTerminal;
 public class TerminalInterruptHandler extends InterruptHandler
 {
   /**
+   * The identifier of this interrupt.
+   */
+  public static final String myType = "KeyPress";
+
+  /**
    * The handler.
    */
   private SoftwareTerminal handler;
@@ -24,11 +29,10 @@ public class TerminalInterruptHandler extends InterruptHandler
    * Create a new interrupt handler.
    *
    * @param newHandler the handler.
-   * @param newType the type of the interrupt (unique).
    */
-  public TerminalInterruptHandler(SoftwareTerminal newHandler, String newType)
+  public TerminalInterruptHandler(SoftwareTerminal newHandler)
   {
-    super(newType);
+    super(myType);
     handler = newHandler;
   }
 
