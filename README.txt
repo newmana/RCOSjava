@@ -58,6 +58,9 @@ If you already have a web server set-up copy the entire contents of the
 You should then be able to start the system by going to:
 http://localhost/RCOS.html
 
+You can view the web site by going to:
+http://localhost/index.html
+
 The executables guaranteed to work are "sem.pcd", "sem2.pcd", "third.pcd"
 and "numbers.pcd".  Some of the others will work but they haven't been 
 tested fully.
