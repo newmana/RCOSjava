@@ -281,27 +281,24 @@ public class AnimatorOffice extends PostOffice
 
               Iterator tmpIter = AnimatorOffice.this.getHandlers().values().iterator();
 
-              synchronized (AnimatorOffice.this.getHandlers())
+              while (tmpIter.hasNext())
               {
-                while (tmpIter.hasNext())
+                AnimatorMessageHandler theDestination = (AnimatorMessageHandler)
+                    tmpIter.next();
+
+                //Send the message to the destination
+                try
                 {
-                  AnimatorMessageHandler theDestination = (AnimatorMessageHandler)
-                      tmpIter.next();
+                  Class[] classes = {message.getClass().getSuperclass()};
+                  Method method = theDestination.getClass().getMethod(
+                      "processMessage", classes);
 
-                  //Send the message to the destination
-                  try
-                  {
-                    Class[] classes = {message.getClass().getSuperclass()};
-                    Method method = theDestination.getClass().getMethod(
-                        "processMessage", classes);
-
-                    Object[] args = {message};
-                    method.invoke(theDestination, args);
-                  }
-                  catch (Exception e)
-                  {
-                    log.error("An error occurred: " + e);
-                  }
+                  Object[] args = {message};
+                  method.invoke(theDestination, args);
+                }
+                catch (Exception e)
+                {
+                  log.error("An error occurred: " + e);
                 }
               }
             }
