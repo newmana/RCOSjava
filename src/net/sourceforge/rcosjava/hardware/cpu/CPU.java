@@ -55,9 +55,10 @@ import net.sourceforge.rcosjava.hardware.cpu.Instruction;
  * 10/10/98 Finished removal of String based opcodes. AN
  * </DD></DT>
  * <P>
- * @see Software.kernel.Kernel
- * @see Hardware.cpu.Context
- * @see Hardware.memory.Memory * @author David Jones
+ * @see java.net.rcosjava.software.kernel.Kernel
+ * @see java.net.rcosjava.hardware.cpu.Context
+ * @see java.net.rcosjava.hardware.memory.Memory
+ * @author David Jones
  * @author Andrew Newman
  * @version 1.00 $Date$
  * @created 14th January 1996

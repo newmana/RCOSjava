@@ -14,8 +14,8 @@ import java.io.Serializable;
  * Creates a new context with the Instruction Register, Program Counter, Stack
  * Pointer and Base Pointer all at 0.
  * <P>
- * @see Hardware.cpu.CPU
- * @see Software.kernel.Kernel
+ * @see net.sourceforge.rcosjava.hardware.cpu.CPU
+ * @see net.sourceforge.rcosjava.software.kernel.Kernel
  * @author Andrew Newman.
  * @author David Jones
  * @version 1.00 $Date$

@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Used by CPU to maintain a queue of Interrupts and when they should occur.
  * <P>
- * @see Hardware.cpu.CPU
+ * @see net.sourceforge.rcosjava.hardware.cpu.CPU
  * @author Andrew Newman.
  * @author David Jones.
  * @version 1.00 $Date$
