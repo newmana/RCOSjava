@@ -27,16 +27,24 @@ public class UpdateList extends UniversalMessageAdapter
   private String directory;
 
   /**
+   * The list to retrieve (1 for EXE, 2 for REC)
+   */
+  private int directoryType;
+
+  /**
    * Constructs a update list request.
    *
    * @param theSource of that the request comes from.
    * @param newDirectory string representation of a directory.
+   * @param directoryType determines whether the get a list of files from the
+   * recorded (2) or the executable (1) directory.
    */
   public UpdateList(AnimatorMessageHandler theSource,
-    String newDirectory)
+    String newDirectory, int newDirectoryType)
   {
     super(theSource);
     directory = newDirectory;
+    directoryType = newDirectoryType;
   }
 
   /**
@@ -56,13 +64,14 @@ public class UpdateList extends UniversalMessageAdapter
    */
   public void doMessage(ProgramManager theElement)
   {
-    theElement.updateList(directory);
+    theElement.updateList(directory, directoryType);
   }
 
+  /**
+   * This message returns false, not a message to be recorded or played back.
+   */
   public boolean undoableMessage()
   {
     return false;
   }
-
 }
-

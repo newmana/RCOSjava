@@ -1,6 +1,7 @@
 package MessageSystem.Messages.Universal;
 
 import Software.Animator.Process.ProgramManagerAnimator;
+import Software.Animator.Multimedia.MultimediaAnimator;
 import Software.Process.ProgramManager;
 import Software.Util.FIFOQueue;
 import MessageSystem.PostOffices.OS.OSMessageHandler;
@@ -32,6 +33,11 @@ import java.io.Serializable;
   private FIFOQueue directoryList;
 
   /**
+   * The list to retrieve (1 for EXE, 2 for REC)
+   */
+  private int directoryType;
+
+  /**
    * Creates a new file list from a given source.
    *
    * @param theSource the sender of the message
@@ -39,11 +45,12 @@ import java.io.Serializable;
    * @param newDirectoryList the list of subdirs.
    */
   public UpdateFileList(OSMessageHandler theSource,
-    FIFOQueue newFileList, FIFOQueue newDirectoryList)
+    FIFOQueue newFileList, FIFOQueue newDirectoryList, int newDirectoryType)
   {
     super(theSource);
     fileList = newFileList;
     directoryList = newDirectoryList;
+    directoryType = newDirectoryType;
   }
 
   /**
@@ -54,10 +61,24 @@ import java.io.Serializable;
    */
   public void doMessage(ProgramManagerAnimator theElement)
   {
-    theElement.updateFileList(fileList);
-    theElement.updateDirectoryList(directoryList);
+    if (directoryType == 1)
+    {
+      theElement.updateFileList(fileList);
+      theElement.updateDirectoryList(directoryList);
+    }
   }
 
+  public void doMessage(MultimediaAnimator theElement)
+  {
+    if (directoryType == 2)
+    {
+      theElement.updateDirectoryList(directoryList);
+    }
+  }
+
+  /**
+   * This message returns false, not a message to be recorded or played back.
+   */
   public boolean undoableMessage()
   {
     return false;
