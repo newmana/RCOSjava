@@ -1,9 +1,10 @@
-RCOS.java Version 1.0
+RCOSjava Version 1.0
 =====================
 
 
 ** Where is it? **
 ==================
+
 URL: http://www.rcosjava.org/
 
 
@@ -81,7 +82,8 @@ program.
 Just go to the root directory of the source code, and execute "ant".
 
 After compilation the directories "dist" and "javadoc" will have 
-been generated.  Follow the instruction above to run it.
+been generated.  Follow the instructions above, after compilation, to run
+it.
 
 
 ** Programs in RCOSjava **
@@ -113,9 +115,16 @@ change the port in the "soma.conf" file.
 =================
 
 The host where RCOSjava tries to make the connection is configurable from 
-inside "RCOS.html".  This is found in the create "dist" directory.  Using 
-the "baseDomain" parameter you can change the host it expects to use and the 
-port number is also configurable using the "port" parameter.  
+inside "RCOS.html".  This is found "dist" directory.  If you are compiling
+it, the file that is copied to the "dist" directory is found in the "web" 
+directory.  
+
+Using the "baseDomain" parameter you can change the host it expects to use.  
+
+The port number used by the RCOSjava server is also configurable using 
+the "port" parameter.  You will also have to change it in the relevant 
+"runme" script.
+
 
 ** Known bugs **
 =================
