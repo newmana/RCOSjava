@@ -25,7 +25,7 @@ public class Array extends Symbol
   private String varValue;
 
   public Array(String newName, short newLevel, short newOffset,
-     short newArraySize)
+      short newArraySize)
   {
     name = newName;
     level = newLevel;
@@ -36,8 +36,7 @@ public class Array extends Symbol
     size = arraySize;
   }
 
-  public void handleIntLiteral(StatementCompiler compiler,
-    String varValue)
+  public void handleIntLiteral(StatementCompiler compiler, String varValue)
   {
     short varIntValue = Short.parseShort(varValue.trim());
     compiler.writePCode(OpCode.LITERAL.getValue(), (byte) 0, varIntValue);
@@ -96,13 +95,31 @@ public class Array extends Symbol
   public void handleLoad(StatementCompiler compiler, int index)
   {
     compiler.writePCode(OpCode.LITERAL.getValue(), (byte) 0, (short) index);
-    compiler.writePCode(OpCode.LOAD_INDEXED.getValue(), (byte) 0, getOffset());
+    if (Compiler.getLevel() == getLevel())
+    {
+      compiler.writePCode(OpCode.LOAD_INDEXED.getValue(), (byte) 0,
+        getOffset());
+    }
+    else
+    {
+      compiler.writePCode(OpCode.LOAD_INDEXED.getValue(),
+        (byte) (Compiler.getLevel() - getLevel()), getOffset());
+    }
   }
 
   public void handleLoad(StatementCompiler compiler, Symbol index)
   {
     index.handleLoad(compiler);
-    compiler.writePCode(OpCode.LOAD_INDEXED.getValue(), (byte) 0, getOffset());
+    if (Compiler.getLevel() == getLevel())
+    {
+      compiler.writePCode(OpCode.LOAD_INDEXED.getValue(), (byte) 0,
+        getOffset());
+    }
+    else
+    {
+      compiler.writePCode(OpCode.LOAD_INDEXED.getValue(),
+        (byte) (Compiler.getLevel() - getLevel()), getOffset());
+    }
   }
 
   public void handleStore(StatementCompiler compiler, Symbol index,
@@ -110,7 +127,17 @@ public class Array extends Symbol
   {
     index.handleLoad(compiler);
     compiler.writePCode(instruction, byteParam, wordParam);
-    compiler.writePCode(OpCode.STORE_INDEXED.getValue(), (byte) 0, getOffset());
+
+    if (Compiler.getLevel() == getLevel())
+    {
+      compiler.writePCode(OpCode.STORE_INDEXED.getValue(), (byte) 0,
+        getOffset());
+    }
+    else
+    {
+      compiler.writePCode(OpCode.STORE_INDEXED.getValue(),
+        (byte) (Compiler.getLevel() - getLevel()), getOffset());
+    }
   }
 
   public void handleStore(StatementCompiler compiler, int index,
@@ -118,6 +145,15 @@ public class Array extends Symbol
   {
     compiler.writePCode(OpCode.LITERAL.getValue(), (byte) 0, (short) index);
     compiler.writePCode(instruction, byteParam, wordParam);
-    compiler.writePCode(OpCode.STORE_INDEXED.getValue(), (byte) 0, getOffset());
+    if (Compiler.getLevel() == getLevel())
+    {
+      compiler.writePCode(OpCode.STORE_INDEXED.getValue(), (byte) 0,
+        getOffset());
+    }
+    else
+    {
+      compiler.writePCode(OpCode.STORE_INDEXED.getValue(),
+        (byte) (Compiler.getLevel() - getLevel()), getOffset());
+    }
   }
 }
