@@ -1,4 +1,5 @@
 package org.rcosjava.messaging.messages.universal;
+
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.software.animator.process.ProcessManagerAnimator;
 import org.rcosjava.software.animator.process.ProcessSchedulerAnimator;
@@ -72,7 +73,7 @@ public class ProcessFinished extends UniversalMessageAdapter
    */
   public void doMessage(ProcessManagerAnimator theElement)
   {
-    theElement.deleteProcess(new Integer(finishedProcess.getPID()));
+    theElement.deleteProcess(finishedProcess.getPID());
   }
 }
 

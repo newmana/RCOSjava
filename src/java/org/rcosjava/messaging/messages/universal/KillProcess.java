@@ -1,4 +1,5 @@
 package org.rcosjava.messaging.messages.universal;
+
 import org.rcosjava.hardware.cpu.Interrupt;
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.software.animator.process.ProcessManagerAnimator;
@@ -71,7 +72,7 @@ public class KillProcess extends UniversalMessageAdapter
    */
   public void doMessage(ProcessManagerAnimator theElement)
   {
-    theElement.deleteProcess(new Integer(pid));
+    theElement.deleteProcess(pid);
   }
 
   /**
