@@ -190,10 +190,8 @@ public class ProcessScheduler extends OSMessageHandler
         MemoryManager.PAGE_SIZE) + 1;
     newMemoryRequest = new MemoryRequest(newPID, MemoryManager.CODE_SEGMENT,
         numberOfPages);
-
     AllocatePages tmpAllocatePagesMessage = new AllocatePages(this,
         newMemoryRequest);
-
     sendMessage(tmpAllocatePagesMessage);
 
     // Write code to allocated bytes - should check for successful
@@ -777,7 +775,7 @@ public class ProcessScheduler extends OSMessageHandler
         oldProcess.getPID());
     sendMessage(deallocateMsg);
 
-    // Remove from all process hash map
+    // Remove process from hash map
     allProcesses.remove(new Integer(oldProcess.getPID()));
   }
 

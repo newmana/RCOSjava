@@ -14,7 +14,7 @@ import org.rcosjava.software.memory.MemoryManager;
 public class DeallocateMemory extends OSMessageAdapter
 {
   /**
-   * Description of the Field
+   * The process id to remove the memory from.
    */
   private int pid;
 

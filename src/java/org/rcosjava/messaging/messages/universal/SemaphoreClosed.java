@@ -12,15 +12,17 @@ import org.rcosjava.software.animator.ipc.IPCManagerAnimator;
 public class SemaphoreClosed extends UniversalMessageAdapter
 {
   /**
-   * Description of the Field
+   * The unique id of the semaphore.
    */
   private String semaphoreId;
+
   /**
-   * Description of the Field
+   * The process id of the process closing the semaphore.
    */
   private int pid;
+
   /**
-   * Description of the Field
+   * The value to set the semaphore.
    */
   private int value;
 
@@ -42,9 +44,9 @@ public class SemaphoreClosed extends UniversalMessageAdapter
   }
 
   /**
-   * Description of the Method
+   * Call semaphoreClosed on the IPCManagerAnimator.
    *
-   * @param theElement Description of Parameter
+   * @param theElement the IPCManagerAnimator to call.
    */
   public void doMessage(IPCManagerAnimator theElement)
   {

@@ -166,7 +166,6 @@ public class MemoryManager extends OSMessageHandler
     if (returnedMemory.getSize() > 0)
     {
       DeallocatedPages msg = new DeallocatedPages(this, returnedMemory);
-
       sendMessage(msg);
     }
   }
