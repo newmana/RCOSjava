@@ -5,21 +5,14 @@ import java.net.*;
 import java.lang.Thread;
 
 import net.sourceforge.rcosjava.messaging.*;
-import net.sourceforge.rcosjava.messaging.messages.os.OSMessageAdapter;
-import net.sourceforge.rcosjava.messaging.messages.os.RegisterInterruptHandler;
-import net.sourceforge.rcosjava.messaging.messages.universal.UpdateFileList;
-import net.sourceforge.rcosjava.messaging.messages.universal.KillProcess;
-import net.sourceforge.rcosjava.messaging.postoffices.os.OSMessageHandler;
-import net.sourceforge.rcosjava.messaging.postoffices.os.OSOffice;
-import net.sourceforge.rcosjava.messaging.messages.os.HandleInterrupt;
-import net.sourceforge.rcosjava.messaging.postoffices.MessageHandler;
-import net.sourceforge.rcosjava.messaging.messages.MessageAdapter;
-import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
-import net.sourceforge.rcosjava.messaging.messages.universal.NewProcess;
+import net.sourceforge.rcosjava.messaging.messages.os.*;
+import net.sourceforge.rcosjava.messaging.messages.universal.*;
+import net.sourceforge.rcosjava.messaging.postoffices.os.*;
+import net.sourceforge.rcosjava.messaging.postoffices.*;
+import net.sourceforge.rcosjava.messaging.messages.*;
 import net.sourceforge.rcosjava.hardware.cpu.Interrupt;
 import net.sourceforge.rcosjava.pll2.FileClient;
-import net.sourceforge.rcosjava.software.interrupt.InterruptHandler;
-import net.sourceforge.rcosjava.software.interrupt.ProgManInterruptHandler;
+import net.sourceforge.rcosjava.software.interrupt.*;
 import net.sourceforge.rcosjava.software.kernel.Kernel;
 import net.sourceforge.rcosjava.hardware.memory.*;
 import net.sourceforge.rcosjava.software.memory.*;
@@ -164,6 +157,7 @@ public class ProgramManager extends OSMessageHandler
   public void stopThread()
   {
     myKernel.pause();
+    //myKernel.processStep();
   }
 
   /**

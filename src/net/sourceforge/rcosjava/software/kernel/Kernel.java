@@ -3,38 +3,14 @@ package net.sourceforge.rcosjava.software.kernel;
 import java.io.*;
 import java.util.*;
 
-import net.sourceforge.rcosjava.hardware.cpu.CPU;
-import net.sourceforge.rcosjava.hardware.cpu.Context;
-import net.sourceforge.rcosjava.hardware.cpu.Interrupt;
-import net.sourceforge.rcosjava.hardware.cpu.Instruction;
+import net.sourceforge.rcosjava.hardware.cpu.*;
 import net.sourceforge.rcosjava.hardware.memory.Memory;
 import net.sourceforge.rcosjava.software.interrupt.InterruptHandler;
-import net.sourceforge.rcosjava.messaging.postoffices.os.OSMessageHandler;
-import net.sourceforge.rcosjava.messaging.postoffices.os.OSOffice;
-import net.sourceforge.rcosjava.messaging.messages.os.OSMessageAdapter;
-import net.sourceforge.rcosjava.messaging.messages.os.ChIn;
-import net.sourceforge.rcosjava.messaging.messages.os.ChOut;
-import net.sourceforge.rcosjava.messaging.messages.os.NumIn;
-import net.sourceforge.rcosjava.messaging.messages.os.NumOut;
-import net.sourceforge.rcosjava.messaging.messages.os.OSMessageAdapter;
-import net.sourceforge.rcosjava.messaging.messages.os.Schedule;
-import net.sourceforge.rcosjava.messaging.messages.os.SemaphoreClose;
-import net.sourceforge.rcosjava.messaging.messages.os.SemaphoreCreate;
-import net.sourceforge.rcosjava.messaging.messages.os.SemaphoreOpen;
-import net.sourceforge.rcosjava.messaging.messages.os.SemaphoreSignal;
-import net.sourceforge.rcosjava.messaging.messages.os.SemaphoreWait;
-import net.sourceforge.rcosjava.messaging.messages.universal.NullProcess;
-import net.sourceforge.rcosjava.messaging.messages.universal.RunningToBlocked;
-import net.sourceforge.rcosjava.messaging.messages.universal.RunningToReady;
-import net.sourceforge.rcosjava.messaging.messages.universal.ProcessFinished;
-import net.sourceforge.rcosjava.messaging.messages.universal.ReadBytes;
-import net.sourceforge.rcosjava.messaging.messages.universal.WriteBytes;
-import net.sourceforge.rcosjava.messaging.messages.universal.SetContext;
-import net.sourceforge.rcosjava.messaging.messages.universal.InstructionExecution;
-import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
+import net.sourceforge.rcosjava.messaging.postoffices.os.*;
+import net.sourceforge.rcosjava.messaging.messages.os.*;
+import net.sourceforge.rcosjava.messaging.messages.universal.*;
 import net.sourceforge.rcosjava.software.process.RCOSProcess;
-import net.sourceforge.rcosjava.software.memory.MemoryManager;
-import net.sourceforge.rcosjava.software.memory.MemoryRequest;
+import net.sourceforge.rcosjava.software.memory.*;
 
 /**
  * This is  a simple kernel implementation for RCOS.java.  It is a microkernel
@@ -166,6 +142,15 @@ public class Kernel extends OSMessageHandler
   public void processStopped()
   {
     runningProcess = false;
+  }
+
+  public void processStep()
+  {
+    if (myCPU.hasCodeToExecute())
+    {
+      myCPU.executeCode();
+      myCPU.checkProcess();
+    }
   }
 
   public void pause()
