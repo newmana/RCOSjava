@@ -629,7 +629,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     list.add(theTerminalManager);
     list.add(theProcessScheduler);
     list.add(theIPC);
-    list.add(theMemoryManager);
+//    list.add(theMemoryManager);
 
     return list;
   }
@@ -657,9 +657,9 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     theTerminalManager = (TerminalManager) rcosComponents.get(4);
     theProcessScheduler = (ProcessScheduler) rcosComponents.get(5);
     theIPC = (IPC) rcosComponents.get(6);
-    theMemoryManager = (MemoryManager) rcosComponents.get(7);
-    theProgramManager = new ProgramManager(osPostOffice, baseDomain, port,
-        theKernel);
+//    theMemoryManager = (MemoryManager) rcosComponents.get(7);
+//    theProgramManager = new ProgramManager(osPostOffice, baseDomain, port,
+//        theKernel);
   }
 
   /**
@@ -700,6 +700,16 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   public static ProcessSchedulerAnimator getProcessSchedulerAnimator()
   {
     return psAnimator;
+  }
+
+  /**
+   * Returns the memory manager animator.
+   *
+   * @return the memory manager animator.
+   */
+  public static MemoryManagerAnimator getMemoryManagerAnimator()
+  {
+    return memoryAnimator;
   }
 
   /**
