@@ -23,7 +23,7 @@ public class CPUPanel extends RCOSPanel
   /**
    * Titles for the various sections of the CPU.
    */
-  private JLabel cpuTitle, irTitle, pcTitle, spTitle, bpTitle;
+  private JLabel irTitle, pcTitle, spTitle, bpTitle;
 
   /**
    * Values for the various sections of the CPU.
@@ -217,12 +217,10 @@ public class CPUPanel extends RCOSPanel
   void setContext()
   {
     irValue.setText(cpuAnimator.getContext().getInstructionRegister().toString());
-    pcValue.setText((new String()).valueOf(cpuAnimator.getContext().
+    pcValue.setText(String.valueOf(cpuAnimator.getContext().
         getProgramCounter()));
-    spValue.setText((new String()).valueOf(cpuAnimator.getContext().
-        getStackPointer()));
-    bpValue.setText((new String()).valueOf(cpuAnimator.getContext().
-        getBasePointer()));
+    spValue.setText(String.valueOf(cpuAnimator.getContext().getStackPointer()));
+    bpValue.setText(String.valueOf(cpuAnimator.getContext().getBasePointer()));
   }
 
   /**
@@ -345,9 +343,10 @@ public class CPUPanel extends RCOSPanel
           }
           else
           {
-            for (count = cpuAnimator.getContext().getStackPointer(); count != 0; count--)
+            for (count = cpuAnimator.getContext().getStackPointer();
+                count != 0; count--)
             {
-              stackListModel.addElement((new String()).valueOf(theStack.read(count)));
+              stackListModel.addElement(String.valueOf(theStack.read(count)));
             }
           }
         }
