@@ -89,11 +89,6 @@ public class ProcessSchedulerPanel extends RCOSPanel
   private MTGO cpuPic;
 
   /**
-   * Holds which processes are the the queue.
-   */
-  private LIFOQueue zombieQueue, readyQueue, blockedQueue;
-
-  /**
    * Holds the movement of the queue.
    */
   private Movement zombieMovement, blockedMovement, readyMovement;
@@ -173,10 +168,6 @@ public class ProcessSchedulerPanel extends RCOSPanel
     {
       myImages[index] = images[index].getImage();
     }
-    zombieQueue = new LIFOQueue(10, 0);
-    blockedQueue = new LIFOQueue(10, 0);
-    readyQueue = new LIFOQueue(10, 0);
-
     delay = 1;
     myProcessScheduler = newProcessScheduler;
   }
@@ -563,12 +554,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
   synchronized void killProcess(int pid)
   {
     // Remove it from any queues.
-
-    removeQueue(ProcessScheduler.READYQ, pid);
-    removeQueue(ProcessScheduler.BLOCKEDQ, pid);
-    removeQueue(ProcessScheduler.ZOMBIEQ, pid);
     processFinished(pid);
-
     syncPaint(delay);
   }
 
@@ -715,20 +701,21 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid Description of Parameter
    */
-  synchronized void moveReadyQueue(int pid)
+  synchronized void moveReadyQueue(int pid, int itemCount)
   {
-    MTGO tmpMTGO = engine.returnMTGO("P" + pid);
-
-    readyMovement.start();
-
-    int iPos = noBoxes - readyQueue.itemCount();
-
-    while (!readyMovement.finished(iPos))
+    if (movementSetup)
     {
-      readyMovement.step();
-      tmpMTGO.setXPosition(readyMovement.getCurrentX());
-      tmpMTGO.setYPosition(readyMovement.getCurrentY());
-      syncPaint(delay);
+      MTGO tmpMTGO = engine.returnMTGO("P" + pid);
+      readyMovement.start();
+      int pos = noBoxes - itemCount;
+
+      while (!readyMovement.finished(pos))
+      {
+        readyMovement.step();
+        tmpMTGO.setXPosition(readyMovement.getCurrentX());
+        tmpMTGO.setYPosition(readyMovement.getCurrentY());
+        syncPaint(delay);
+      }
     }
   }
 
@@ -737,20 +724,21 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid Description of Parameter
    */
-  synchronized void moveBlockedQueue(int pid)
+  synchronized void moveBlockedQueue(int pid, int itemCount)
   {
-    MTGO tmpMTGO = engine.returnMTGO("P" + pid);
-
-    blockedMovement.start();
-
-    int iPos = noBoxes - blockedQueue.itemCount();
-
-    while (!blockedMovement.finished(iPos))
+    if (movementSetup)
     {
-      blockedMovement.step();
-      tmpMTGO.setXPosition(blockedMovement.getCurrentX());
-      tmpMTGO.setYPosition(blockedMovement.getCurrentY());
-      syncPaint(delay);
+      MTGO tmpMTGO = engine.returnMTGO("P" + pid);
+      blockedMovement.start();
+      int pos = noBoxes - itemCount;
+
+      while (!blockedMovement.finished(pos))
+      {
+        blockedMovement.step();
+        tmpMTGO.setXPosition(blockedMovement.getCurrentX());
+        tmpMTGO.setYPosition(blockedMovement.getCurrentY());
+        syncPaint(delay);
+      }
     }
   }
 
@@ -759,104 +747,21 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param pid process id to move.
    */
-  synchronized void moveZombieQueue(int pid)
+  synchronized void moveZombieQueue(int pid, int itemCount)
   {
-    MTGO tmpMTGO = engine.returnMTGO("P" + pid);
-
-    zombieMovement.start();
-
-    int pos = noBoxes - zombieQueue.itemCount();
-
-    while (!zombieMovement.finished(pos))
+    if (movementSetup)
     {
-      zombieMovement.step();
-      tmpMTGO.setXPosition(zombieMovement.getCurrentX());
-      tmpMTGO.setYPosition(zombieMovement.getCurrentY());
-      syncPaint(delay);
-    }
-  }
+      MTGO tmpMTGO = engine.returnMTGO("P" + pid);
+      zombieMovement.start();
+      int pos = noBoxes - itemCount;
 
-  /**
-   * Adds a feature to the Queue attribute of the ProcessSchedulerFrame object
-   *
-   * @param queueType The feature to be added to the Queue attribute
-   * @param pid The feature to be added to the Queue attribute
-   */
-  synchronized void addQueue(int queueType, int pid)
-  {
-    String processId = "P" + pid;
-
-    switch (queueType)
-    {
-      case ProcessScheduler.READYQ:
-        readyQueue.insert(processId);
-        if (movementSetup)
-        {
-          moveReadyQueue(pid);
-        }
-      break;
-      case ProcessScheduler.BLOCKEDQ:
-        blockedQueue.insert(processId);
-        if (movementSetup)
-        {
-          moveBlockedQueue(pid);
-        }
-      break;
-      case ProcessScheduler.ZOMBIEQ:
-        zombieQueue.insert(processId);
-        if (movementSetup)
-        {
-          moveZombieQueue(pid);
-        }
-      break;
-    }
-    refreshQueue(queueType);
-  }
-
-  /**
-   * Remove a process from the given queue type.
-   *
-   * @param queueType the specific queue to remove ready, blocked or zombie.
-   * @param pid the process id to remove from the queue.
-   */
-  synchronized void removeQueue(int queueType, int pid)
-  {
-    switch (queueType)
-    {
-      case ProcessScheduler.READYQ:
-        removeProcId(pid, readyQueue);
-      break;
-      case ProcessScheduler.BLOCKEDQ:
-        removeProcId(pid, blockedQueue);
-      break;
-      case ProcessScheduler.ZOMBIEQ:
-        removeProcId(pid, zombieQueue);
-      break;
-    }
-    refreshQueue(queueType);
-  }
-
-  /**
-   * Remove a process from a given queue.
-   *
-   * @param pid the process id to remove from the queue.
-   * @param tmpQueue the queue to remove the pid from.
-   */
-  synchronized void removeProcId(int pid, LIFOQueue tmpQueue)
-  {
-    String tmpId;
-    String processId = "P" + pid;
-
-    tmpQueue.goToHead();
-    while (!tmpQueue.atTail())
-    {
-      tmpId = (String) tmpQueue.peek();
-      if (tmpId.compareTo(processId) == 0)
+      while (!zombieMovement.finished(pos))
       {
-        tmpQueue.retrieveCurrent();
-        break;
+        zombieMovement.step();
+        tmpMTGO.setXPosition(zombieMovement.getCurrentX());
+        tmpMTGO.setYPosition(zombieMovement.getCurrentY());
+        syncPaint(delay);
       }
-      tmpQueue.goToNext();
     }
   }
 
@@ -942,34 +847,21 @@ public class ProcessSchedulerPanel extends RCOSPanel
    *
    * @param queueType the type of the queue ready, blocked or zombie.
    */
-  private synchronized void refreshQueue(int queueType)
+  synchronized void refreshQueue(int queueType, LIFOQueue queue)
   {
-    LIFOQueue tmpQ = new LIFOQueue();
     int xPosition = engine.getCenterX() - ((noBoxes / 2) * boxWidth);
     int yPosition = (queueType * height) + fm.getHeight() + 5;
 
-    switch (queueType)
+    queue.goToHead();
+    while (!queue.atTail())
     {
-      case ProcessScheduler.READYQ:
-        tmpQ = readyQueue;
-      break;
-      case ProcessScheduler.BLOCKEDQ:
-        tmpQ = blockedQueue;
-      break;
-      case ProcessScheduler.ZOMBIEQ:
-        tmpQ = zombieQueue;
-      break;
-    }
-    tmpQ.goToHead();
-    while (!tmpQ.atTail())
-    {
-      String procID = (String) tmpQ.peek();
+      String procID = (String) queue.peek();
       MTGO tmpMTGO = engine.returnMTGO(procID);
 
       tmpMTGO.setXPosition(xPosition);
       tmpMTGO.setYPosition(yPosition);
       xPosition = xPosition + boxWidth;
-      tmpQ.goToNext();
+      queue.goToNext();
     }
     syncPaint(delay);
   }

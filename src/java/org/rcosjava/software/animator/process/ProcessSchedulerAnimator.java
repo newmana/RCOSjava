@@ -4,7 +4,9 @@ import java.applet.*;
 import java.awt.*;
 import java.net.*;
 import javax.swing.*;
+import java.io.*;
 import java.util.*;
+import org.rcosjava.RCOS;
 import org.rcosjava.software.animator.RCOSPanel;
 import org.rcosjava.messaging.messages.animator.ShowCPU;
 import org.rcosjava.messaging.messages.universal.Quantum;
@@ -17,6 +19,7 @@ import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.software.animator.RCOSAnimator;
 import org.rcosjava.software.process.ProcessScheduler;
 import org.rcosjava.software.process.RCOSProcess;
+import org.rcosjava.software.util.LIFOQueue;
 
 /**
  * Receives messages from Process Scheduler and manipulates processScheduler
@@ -39,6 +42,11 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    * The panel in which to display all the details to.
    */
   private static ProcessSchedulerPanel panel;
+
+  /**
+   * Holds which processes are the the queue.
+   */
+  private LIFOQueue zombieQueue, readyQueue, blockedQueue;
 
   /**
    * Process Control Block frame to display.
@@ -66,6 +74,10 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   public ProcessSchedulerAnimator(AnimatorOffice postOffice, ImageIcon[] images)
   {
     super(MESSENGING_ID, postOffice);
+
+    zombieQueue = new LIFOQueue(10, 0);
+    blockedQueue = new LIFOQueue(10, 0);
+    readyQueue = new LIFOQueue(10, 0);
 
     panel = new ProcessSchedulerPanel(images, this);
     panel.repaint();
@@ -178,6 +190,10 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   public void killProcess(RCOSProcess process)
   {
+    removeQueue(ProcessScheduler.READYQ, process.getPID());
+    removeQueue(ProcessScheduler.BLOCKEDQ, process.getPID());
+    removeQueue(ProcessScheduler.ZOMBIEQ, process.getPID());
+
     panel.killProcess(process.getPID());
 
     // Remove the process from the list of current processes
@@ -204,7 +220,9 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
     currentProcesses.put(new Integer(process.getPID()), process);
 
     panel.cpuToBlocked(process.getPID());
-    addQueue(ProcessScheduler.BLOCKEDQ, process.getPID());
+    String pid = "P" + process.getPID();
+    blockedQueue.insert(pid);
+    addQueue(ProcessScheduler.BLOCKEDQ, blockedQueue.itemCount());
 
     if (process.getPID() == pcbSelectedProcess)
     {
@@ -286,6 +304,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
     {
       pcbFrame.updateDisplay(process);
     }
+
     // Start the execution of the OS
     sendMessage(new Run(this));
   }
@@ -361,19 +380,24 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    */
   private void addQueue(int queueType, int pid)
   {
-    panel.addQueue(queueType, pid);
-  }
-
-  /**
-   * Each of the three queues have a numeric value. This simply calls the
-   * removeQueue on the Frame. Exposed for Animator Messages.
-   *
-   * @param queueType the numeric representation of the queue.
-   * @param pid the process id to add to the queue.
-   */
-  private void removeQueue(int queueType, int pid)
-  {
-    panel.removeQueue(queueType, pid);
+    switch (queueType)
+    {
+      case ProcessScheduler.READYQ:
+        readyQueue.insert(("P" + pid));
+        panel.moveReadyQueue(pid, readyQueue.itemCount());
+        panel.refreshQueue(ProcessScheduler.READYQ, readyQueue);
+      break;
+      case ProcessScheduler.BLOCKEDQ:
+        blockedQueue.insert(("P" + pid));
+        panel.moveBlockedQueue(pid, blockedQueue.itemCount());
+        panel.refreshQueue(ProcessScheduler.BLOCKEDQ, blockedQueue);
+      break;
+      case ProcessScheduler.ZOMBIEQ:
+        zombieQueue.insert(("P" + pid));
+        panel.moveZombieQueue(pid, zombieQueue.itemCount());
+        panel.refreshQueue(ProcessScheduler.ZOMBIEQ, zombieQueue);
+      break;
+    }
   }
 
   /**
@@ -392,5 +416,75 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
       pcbSelectedProcess = processId;
       pcbFrame.updateDisplay((RCOSProcess) currentProcesses.get(tmpProcessId));
     }
+  }
+
+  /**
+   * Each of the three queues have a numeric value. This simply calls the
+   * removeQueue on the Frame. Exposed for Animator Messages.
+   *
+   * @param queueType the numeric representation of the queue.
+   * @param pid the process id to add to the queue.
+   */
+  public void removeQueue(int queueType, int pid)
+  {
+    switch (queueType)
+    {
+      case ProcessScheduler.READYQ:
+        removeProcId(pid, readyQueue);
+        panel.refreshQueue(queueType, readyQueue);
+      break;
+      case ProcessScheduler.BLOCKEDQ:
+        removeProcId(pid, blockedQueue);
+        panel.refreshQueue(queueType, blockedQueue);
+      break;
+      case ProcessScheduler.ZOMBIEQ:
+        removeProcId(pid, zombieQueue);
+        panel.refreshQueue(queueType, zombieQueue);
+      break;
+    }
+  }
+
+  /**
+   * Remove a process from a given queue.
+   *
+   * @param pid the process id to remove from the queue.
+   * @param tmpQueue the queue to remove the pid from.
+   */
+  private synchronized void removeProcId(int pid, LIFOQueue tmpQueue)
+  {
+    String tmpId;
+    String processId = "P" + pid;
+
+    tmpQueue.goToHead();
+    while (!tmpQueue.atTail())
+    {
+      tmpId = (String) tmpQueue.peek();
+      if (tmpId.compareTo(processId) == 0)
+      {
+        tmpQueue.retrieveCurrent();
+        break;
+      }
+      tmpQueue.goToNext();
+    }
+  }
+
+  /**
+   * Handle the serialization of the contents.
+   */
+  private void writeObject(ObjectOutputStream os) throws IOException
+  {
+
+  }
+
+  /**
+   * Handle deserialization of the contents.  Ensures non-serializable
+   * components correctly created.
+   *
+   * @param is stream that is being read.
+   */
+  private void readObject(ObjectInputStream is) throws IOException,
+      ClassNotFoundException
+  {
+    register(MESSENGING_ID, RCOS.getAnimatorPostOffice());
   }
 }
