@@ -1,7 +1,16 @@
 package org.rcosjava.software.animator.cpu;
 
-import java.awt.*;
-import javax.swing.ImageIcon;
+import java.awt.Font;
+import java.awt.Insets;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Image;
+import javax.swing.*;
 import org.rcosjava.hardware.cpu.*;
 import org.rcosjava.hardware.cpu.Instruction;
 import org.rcosjava.hardware.memory.Memory;
@@ -24,23 +33,42 @@ import org.rcosjava.software.animator.support.NewLabel;
 public class CPUFrame extends RCOSFrame
 {
   /**
-   * Description of the Field
+   * My peer animator.
    */
   private CPUAnimator myCPUAnimator;
+
   /**
    * Description of the Field
    */
   private NewLabel CPUtitle, IRtitle, PCtitle, SPtitle, BPtitle;
+
   /**
    * Description of the Field
    */
   private NewLabel IRvalue, PCvalue, SPvalue, BPvalue;
+
   /**
-   * Description of the Field
+   * The process stack.
    */
-  private List stackList, codeList;
+  private JList stackList;
+
   /**
-   * Description of the Field
+   * List model for the stack.
+   */
+  private DefaultListModel stackListModel;
+
+  /**
+   * The code stack.
+   */
+  private JList codeList;
+
+  /**
+   * List model for the code.
+   */
+  private DefaultListModel codeListModel;
+
+  /**
+   * Images used by the frame.
    */
   private Image myImages[];
 
@@ -83,15 +111,22 @@ public class CPUFrame extends RCOSFrame
 
     setLayout(new BorderLayout());
 
-    Panel pMain = new Panel();
-    Panel pCPU = new Panel();
-    Panel pClose = new Panel();
-    NewLabel lTmpLabel;
+    JPanel main = new JPanel();
+    main.setBackground(Color.black);
+    main.setForeground(Color.white);
+    JPanel cpu = new JPanel();
+    cpu.setBackground(Color.black);
+    cpu.setForeground(Color.white);
+    JPanel close = new JPanel();
+    close.setBackground(Color.black);
+    close.setForeground(Color.white);
+
+    JLabel tmpLabel;
 
     GridBagConstraints constraints = new GridBagConstraints();
     GridBagLayout gridBag = new GridBagLayout();
 
-    pMain.setLayout(gridBag);
+    main.setLayout(gridBag);
     constraints.gridwidth = 1;
     constraints.gridheight = 1;
     constraints.weighty = 1;
@@ -100,29 +135,41 @@ public class CPUFrame extends RCOSFrame
     constraints.anchor = GridBagConstraints.CENTER;
 
     // Headings
-    lTmpLabel = new NewLabel("Stack", titleFont);
-    gridBag.setConstraints(lTmpLabel, constraints);
-    pMain.add(lTmpLabel);
+    tmpLabel = new JLabel("Stack");
+    tmpLabel.setForeground(Color.white);
+    tmpLabel.setBackground(Color.black);
+    tmpLabel.setFont(titleFont);
+    gridBag.setConstraints(tmpLabel, constraints);
+    main.add(tmpLabel);
 
     constraints.gridwidth = 2;
-    lTmpLabel = new NewLabel("CPU", titleFont);
-    gridBag.setConstraints(lTmpLabel, constraints);
-    pMain.add(lTmpLabel);
+    tmpLabel = new JLabel("CPU");
+    tmpLabel.setForeground(Color.white);
+    tmpLabel.setBackground(Color.black);
+    tmpLabel.setFont(titleFont);
+    gridBag.setConstraints(tmpLabel, constraints);
+    main.add(tmpLabel);
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
-    lTmpLabel = new NewLabel("Code", titleFont);
-    gridBag.setConstraints(lTmpLabel, constraints);
-    pMain.add(lTmpLabel);
+    tmpLabel = new JLabel("Code");
+    tmpLabel.setForeground(Color.white);
+    tmpLabel.setBackground(Color.black);
+    tmpLabel.setFont(titleFont);
+    gridBag.setConstraints(tmpLabel, constraints);
+    main.add(tmpLabel);
 
     // Left box
     constraints.gridwidth = 1;
-    stackList = new List(10, false);
+    stackList = new JList();
+    stackListModel = new DefaultListModel();
+    stackList.setVisibleRowCount(10);
+    stackList.setModel(stackListModel);
     stackList.setBackground(listColour);
     gridBag.setConstraints(stackList, constraints);
-    pMain.add(stackList);
+    main.add(stackList);
 
     // Middle/CPU section
-    pCPU.setLayout(new GridLayout(8, 2));
+    cpu.setLayout(new GridLayout(8, 2));
 
     titleFont = new Font("TimesRoman", Font.BOLD, 14);
 
@@ -138,38 +185,41 @@ public class CPUFrame extends RCOSFrame
     BPtitle = new NewLabel("Base Pointer", titleFont);
     BPvalue = new NewLabel("0", defaultFont);
 
-    pCPU.add(IRtitle);
-    pCPU.add(IRvalue);
+    cpu.add(IRtitle);
+    cpu.add(IRvalue);
 
-    pCPU.add(PCtitle);
-    pCPU.add(PCvalue);
+    cpu.add(PCtitle);
+    cpu.add(PCvalue);
 
-    pCPU.add(SPtitle);
-    pCPU.add(SPvalue);
+    cpu.add(SPtitle);
+    cpu.add(SPvalue);
 
-    pCPU.add(BPtitle);
-    pCPU.add(BPvalue);
+    cpu.add(BPtitle);
+    cpu.add(BPvalue);
 
     constraints.gridwidth = 2;
-    gridBag.setConstraints(pCPU, constraints);
-    pMain.add(pCPU);
+    gridBag.setConstraints(cpu, constraints);
+    main.add(cpu);
 
     // Right box
     constraints.gridwidth = GridBagConstraints.REMAINDER;
-    codeList = new List(10, false);
+    codeList = new JList();
+    codeListModel = new DefaultListModel();
+    codeList.setModel(codeListModel);
+    codeList.setVisibleRowCount(10);
     codeList.setBackground(listColour);
     gridBag.setConstraints(codeList, constraints);
-    pMain.add(codeList);
+    main.add(codeList);
 
     // Close section
-    pClose.setLayout(new FlowLayout(FlowLayout.RIGHT));
-    tmpButton = new Button("Close");
-    pClose.add(tmpButton);
+    close.setLayout(new FlowLayout(FlowLayout.RIGHT));
+    tmpButton = new JButton("Close");
+    close.add(tmpButton);
     tmpButton.addMouseListener(new RCOSFrame.CloseAnimator());
 
     // Add the two panels to the frame.
-    add("Center", pMain);
-    add("South", pClose);
+    add("Center", main);
+    add("South", close);
   }
 
   /**
@@ -207,9 +257,9 @@ public class CPUFrame extends RCOSFrame
     int count;
     int linesOfCode;
 
-    if (codeList.getItemCount() != 0)
+    if (codeListModel.size() != 0)
     {
-      codeList.removeAll();
+      codeListModel.removeAllElements();
     }
 
     // test to see if the memory is not null
@@ -229,10 +279,10 @@ public class CPUFrame extends RCOSFrame
             (processMemory.getOneMemorySegment(count * 8) & 0xff),
             ((byte) processMemory.getOneMemorySegment(count * 8 + 4)), loc);
 
-        codeList.add(theInstruction.toString());
+        codeListModel.addElement(theInstruction.toString());
       }
       // make the selected instruction the ProgramCounter
-      codeList.select(0);
+      codeList.setSelectedIndex(0);
     }
   }
 
@@ -242,23 +292,39 @@ public class CPUFrame extends RCOSFrame
   void updateCode()
   {
     int count;
-    int programSize = codeList.getItemCount();
-    int listSize = codeList.getRows();
+    int listSize = codeList.getVisibleRowCount();
     int visible = myCPUAnimator.getContext().getProgramCounter() + listSize / 2;
 
     //int listSize = codeList.getRows();
     //getRows doesn't seem to be reliable
 
-    if (programSize > myCPUAnimator.getContext().getProgramCounter())
+    if (codeListModel.size() > myCPUAnimator.getContext().getProgramCounter())
     {
-      codeList.makeVisible(myCPUAnimator.getContext().getProgramCounter());
+//      codeList.makeVisible(myCPUAnimator.getContext().getProgramCounter());
+//      codeList.setSelectedIndex(myCPUAnimator.getContext().getProgramCounter());
+      SwingUtilities.invokeLater(new Runnable()
+      {
+        public void run()
+        {
+          codeList.ensureIndexIsVisible(myCPUAnimator.getContext().getProgramCounter());
+        }
+      });
     }
     else
     {
-      codeList.makeVisible(programSize - 1);
+//      codeList.makeVisible(programSize - 1);
+//      codeList.setSelectedIndex(programSize - 1);
+      SwingUtilities.invokeLater(new Runnable()
+      {
+        public void run()
+        {
+          codeList.ensureIndexIsVisible(codeListModel.size() - 1);
+        }
+      });
     }
     // make the selected instruction the ProgramCounter
-    codeList.select(myCPUAnimator.getContext().getProgramCounter());
+//    codeList.select(myCPUAnimator.getContext().getProgramCounter());
+    codeList.setSelectedIndex(myCPUAnimator.getContext().getProgramCounter());
   }
 
   /**
@@ -270,7 +336,7 @@ public class CPUFrame extends RCOSFrame
     stackList.removeAll();
     for (int count = 0; count < 5; count++)
     {
-      stackList.add("Empty Stack");
+      stackListModel.addElement("Empty Stack");
     }
     IRvalue.setText("None");
     PCvalue.setText("0");
@@ -295,14 +361,14 @@ public class CPUFrame extends RCOSFrame
       {
         for (count = 0; count < 5; count++)
         {
-          stackList.add("Empty Stack");
+          stackListModel.addElement("Empty Stack");
         }
       }
       else
       {
         for (count = myCPUAnimator.getContext().getStackPointer(); count != 0; count--)
         {
-          stackList.add((new String()).valueOf(theStack.read(count)));
+          stackListModel.addElement((new String()).valueOf(theStack.read(count)));
         }
       }
     }
