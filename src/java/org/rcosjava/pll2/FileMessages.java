@@ -17,6 +17,7 @@ public class FileMessages
    * Description of the Field
    */
   public final static char spacer = ' ';
+
   /**
    * Description of the Field
    */
