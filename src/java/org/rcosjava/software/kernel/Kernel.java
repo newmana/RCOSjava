@@ -38,6 +38,7 @@ import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.messaging.postoffices.os.OSOffice;
 import org.rcosjava.software.interrupt.InterruptHandler;
 import org.rcosjava.software.interrupt.ProcessFinishedInterruptHandler;
+import org.rcosjava.software.interrupt.TerminalInterruptHandler;
 import org.rcosjava.software.interrupt.TimerInterruptHandler;
 import org.rcosjava.software.memory.MemoryManager;
 import org.rcosjava.software.memory.MemoryRequest;
@@ -933,7 +934,21 @@ public class Kernel extends OSMessageHandler
     os.writeInt(timerInterrupts);
     os.writeInt(timeProcessOn);
     os.writeObject(myCPU);
-    os.writeObject(interruptHandlers);
+
+    // Write out interrupts except for terminal keypress ones.
+    os.writeInt(interruptHandlers.size());
+
+    Iterator iter = interruptHandlers.keySet().iterator();
+    while (iter.hasNext()) {
+
+      String str = (String) iter.next();
+      if (!str.startsWith(TerminalInterruptHandler.myType)) {
+
+        os.writeUTF(str);
+        os.writeObject(interruptHandlers.get(str));
+      }
+    }
+
     os.writeObject(currentProcess);
     os.writeBoolean(runningProcess);
     os.writeBoolean(stepExecution);
@@ -957,7 +972,14 @@ public class Kernel extends OSMessageHandler
     myCPU = (CPU) is.readObject();
     myCPU.setKernel(this);
 
-    interruptHandlers = (HashMap) is.readObject();
+    // Read in interrupt handlers
+    int noInterruptHandlers = is.readInt();
+
+    for (int index = 0; index < noInterruptHandlers; index++) {
+
+      interruptHandlers.put(is.readUTF(), is.readObject());
+    }
+
     currentProcess = (RCOSProcess) is.readObject();
     runningProcess = is.readBoolean();
     stepExecution = is.readBoolean();
