@@ -112,9 +112,12 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void semaphoreOpened(String semaphoreId, int processId, int value)
   {
-    Semaphore tmpSemaphore = (Semaphore) semaphoreMap.get(semaphoreId);
-    tmpSemaphore.attachProcess(processId);
-    panel.semaphoreOpened(tmpSemaphore, processId);
+    if (semaphoreMap.containsKey(semaphoreId))
+    {
+      Semaphore tmpSemaphore = (Semaphore) semaphoreMap.get(semaphoreId);
+      tmpSemaphore.attachProcess(processId);
+      panel.semaphoreOpened(tmpSemaphore, processId);
+    }
   }
 
   /**
@@ -126,9 +129,12 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void semaphoreWaiting(String semaphoreId, int processId, int value)
   {
-    Semaphore tmpSemaphore = (Semaphore) semaphoreMap.get(semaphoreId);
-    tmpSemaphore.addWaitingProcess(processId);
-    panel.semaphoreWaiting(tmpSemaphore, processId);
+    if (semaphoreMap.containsKey(semaphoreId))
+    {
+      Semaphore tmpSemaphore = (Semaphore) semaphoreMap.get(semaphoreId);
+      tmpSemaphore.addWaitingProcess(processId);
+      panel.semaphoreWaiting(tmpSemaphore, processId);
+    }
   }
 
   /**
@@ -143,10 +149,13 @@ public class IPCManagerAnimator extends RCOSAnimator
   public void semaphoreSignalled(String semaphoreId, int processId, int value,
       int signalledId)
   {
-    Semaphore tmpSemaphore = (Semaphore) semaphoreMap.get(semaphoreId);
-    tmpSemaphore.setValue(value);
-    tmpSemaphore.removeWaitingProcess(value);
-    panel.semaphoreSignalled(tmpSemaphore, signalledId);
+    if (semaphoreMap.containsKey(semaphoreId))
+    {
+      Semaphore tmpSemaphore = (Semaphore) semaphoreMap.get(semaphoreId);
+      tmpSemaphore.setValue(value);
+      tmpSemaphore.removeWaitingProcess(signalledId);
+      panel.semaphoreSignalled(tmpSemaphore, signalledId);
+    }
   }
 
   /**
@@ -159,8 +168,18 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void semaphoreClosed(String semaphoreId, int processId, int value)
   {
-    Semaphore tmpSemaphore = (Semaphore) semaphoreMap.remove(semaphoreId);
-    panel.semaphoreClosed(tmpSemaphore);
+    if (semaphoreMap.containsKey(semaphoreId))
+    {
+      Semaphore tmpSemaphore = (Semaphore) semaphoreMap.get(semaphoreId);
+      tmpSemaphore.removeProcess(processId);
+      panel.semaphoreClosed(tmpSemaphore);
+
+      // Remove process if this is the last one
+      if (tmpSemaphore.getAttachedProcesses().size() == 0)
+      {
+        semaphoreMap.remove(semaphoreId);
+      }
+    }
   }
 
   /**
@@ -264,5 +283,25 @@ public class IPCManagerAnimator extends RCOSAnimator
   void setSelectedSharedMemoryName(String newSelectedSharedMemoryName)
   {
     selectedSharedMemoryName = newSelectedSharedMemoryName;
+  }
+
+  /**
+   * Returns the semaphore map.
+   *
+   * @return the semaphore map.
+   */
+  public HashMap getSemaphoreMap()
+  {
+    return semaphoreMap;
+  }
+
+  /**
+   * Returns the shared memory map.
+   *
+   * @return the shared memory map.
+   */
+  public HashMap getSharedMemoryMap()
+  {
+    return sharedMemoryMap;
   }
 }
