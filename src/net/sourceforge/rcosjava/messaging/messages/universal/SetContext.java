@@ -33,4 +33,3 @@ public class SetContext extends UniversalMessageAdapter
     theElement.setContext(myContext);
   }
 }
-
