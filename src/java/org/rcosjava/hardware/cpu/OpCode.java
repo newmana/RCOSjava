@@ -88,6 +88,11 @@ public class OpCode implements Serializable
   public final static OpCode ILLEGAL = new OpCode(0x14, "ILLEGAL_OPCODE_ERROR");
 
   /**
+   * Constant for maximum number of op codes.
+   */
+  public final static int MAX_OP_CODES = 20;
+
+  /**
    * Internal integer value of the op-code (currently valid from 0-8 and 18, 19
    * and 20).
    */
@@ -99,10 +104,10 @@ public class OpCode implements Serializable
   private String opCodeName;
 
   /**
-   * Default constructor creates opCode
+   * Default constructor creates new opcode.
    *
-   * @param newOpCodeValue Description of Parameter
-   * @param newOpCodeName Description of Parameter
+   * @param newOpCodeValue simple integer representation of opcode.
+   * @param newOpCodeName simple string represetation of opcode.
    */
   protected OpCode(int newOpCodeValue, String newOpCodeName)
   {
@@ -114,29 +119,39 @@ public class OpCode implements Serializable
   }
 
   /**
-   * @param opCodeValue Description of Parameter
-   * @return the constant collection of opcodes stored by value
+   * Returns the opcode from the given integer value.  Null if not found.
+   *
+   * @param opCodeValue the integer value to get the opcode.
+   * @return the opcode from the given integer value.
    */
   public static OpCode getOpCodesByValue(int opCodeValue)
   {
-    OpCode tmpOpCode = (OpCode) allOpCodesByValue.get(new Integer(opCodeValue));
-
-    return tmpOpCode;
+    if (allOpCodesByValue.containsKey(new Integer(opCodeValue)))
+    {
+      return (OpCode) allOpCodesByValue.get(new Integer(opCodeValue));
+    }
+    return null;
   }
 
   /**
-   * @param opcodeString Description of Parameter
-   * @return the constant collection of opcodes stored by name
+   * Returns the opcode based on the given name.  Null if not found.
+   *
+   * @param opcodeString the string of the opcode.
+   * @return the opcode based on the given name.
    */
-  public static OpCode getOpCodesByName(String opcodeString)
+  public static OpCode getOpCodesByName(String opCodeString)
   {
-    OpCode tmpOpCode = (OpCode) allOpCodesByName.get(opcodeString);
-
-    return tmpOpCode;
+    if (allOpCodesByName.containsKey(opCodeString))
+    {
+      return (OpCode) allOpCodesByName.get(opCodeString);
+    }
+    return null;
   }
 
   /**
-   * @return ordinal value of opcode
+   * Returns the ordinal value of the opcode.
+   *
+   * @return the ordinal value of the opcode.
    */
   public int getValue()
   {
@@ -144,7 +159,9 @@ public class OpCode implements Serializable
   }
 
   /**
-   * @return opcode string value
+   * Returns the string value of the opcode.
+   *
+   * @return the string value of the opcode.
    */
   public String getName()
   {
@@ -152,7 +169,9 @@ public class OpCode implements Serializable
   }
 
   /**
-   * @return the string value of the op-code.
+   * Returns the string value of the opcode.
+   *
+   * @return the string value of the opcode.
    */
   public String toString()
   {
