@@ -21,10 +21,12 @@ public class NewProcess extends UniversalMessageAdapter
    * Description of the Field
    */
   private String fileName;
+
   /**
    * Description of the Field
    */
   private Memory processMemory;
+
   /**
    * Description of the Field
    */
@@ -82,7 +84,7 @@ public class NewProcess extends UniversalMessageAdapter
    *
    * @return The Filename value
    */
-  public String getFilename()
+  public String getFileName()
   {
     return fileName;
   }
