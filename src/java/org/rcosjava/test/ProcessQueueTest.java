@@ -8,10 +8,9 @@ import org.rcosjava.software.process.RCOSProcess;
 import org.rcosjava.software.util.FIFOQueue;
 
 /**
- * Description of the Class
+ * Tests the correct insertion and removal of processes.
  *
- * @author administrator
- * @created 28 April 2002
+ * @author Andrew Newman (created 28 April 2002)
  */
 public class ProcessQueueTest extends TestCase
 {

@@ -16,8 +16,7 @@ import org.rcosjava.software.util.FIFOQueue;
 /**
  * Test the use of the process scheduler
  *
- * @author administrator
- * @created 28 April 2002
+ * @author Andrew Newman (created 28 April 2002)
  */
 public class ProcessSchedulerTest extends TestCase
 {

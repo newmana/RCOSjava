@@ -9,8 +9,7 @@ import org.rcosjava.software.ipc.Semaphore;
 /**
  * Test the use of the IPC's semaphore class.
  *
- * @author administrator
- * @created 28 April 2002
+ * @author Andrew Newman (created 28 April 2002)
  */
 public class IPCSemaphoreTest extends TestCase
 {

@@ -15,8 +15,7 @@ import org.rcosjava.software.animator.ipc.*;
 /**
  * Test the use of the IPC Manager Animator Test.
  *
- * @author administrator
- * @created 28 April 2002
+ * @author Andrew Newman (created 28 April 2002)
  */
 public class IPCManagerAnimatorTest extends TestCase
 {

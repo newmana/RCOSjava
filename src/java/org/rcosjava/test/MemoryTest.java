@@ -9,10 +9,9 @@ import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.hardware.memory.NoFreeMemoryException;
 
 /**
- * Description of the Class
+ * Tests reading and writing of memory blocks.
  *
- * @author administrator
- * @created 28 April 2002
+ * @author Andrew Newman (created 28 April 2002).
  */
 public class MemoryTest extends TestCase
 {

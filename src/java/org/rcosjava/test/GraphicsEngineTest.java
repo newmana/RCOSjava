@@ -9,10 +9,9 @@ import org.rcosjava.software.animator.support.mtgos.GraphicsEngine;
 import org.rcosjava.software.animator.support.mtgos.MTGO;
 
 /**
- * Description of the Class
+ * Tests some of the functionality of the graphics engine.
  *
- * @author administrator
- * @created 28 April 2002
+ * @author Andrew Newman (created 28 April 2002)
  */
 public class GraphicsEngineTest extends TestCase
 {

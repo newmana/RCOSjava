@@ -11,10 +11,10 @@ import org.rcosjava.hardware.cpu.Interrupt;
 import org.rcosjava.hardware.cpu.OpCode;
 
 /**
- * Description of the Class
+ * Tests creating different instructions for the CPU as well as exercising the
+ * CPU class and interrupts (to be done).
  *
- * @author administrator
- * @created 28 April 2002
+ * @author Andrew Newman (created 28 April 2002)
  */
 public class CPUTest extends TestCase
 {

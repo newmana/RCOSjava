@@ -6,10 +6,9 @@ import junit.framework.TestSuite;
 import org.rcosjava.pll2.FileClient;
 
 /**
- * Description of the Class
+ * Tests the functionality of the file client in reading/writing various files.
  *
- * @author administrator
- * @created 28 April 2002
+ * @author Andrew Newman (created 28 April 2002)
  */
 public class FileClientTest extends TestCase
 {
