@@ -84,6 +84,16 @@ public class TerminalManagerPanel extends RCOSPanel
   }
 
   /**
+   * Sets a new terminal manager animator.
+   *
+   * @param newTerminalAnimator the new terminal manager animator.
+   */
+  void setManager(TerminalManagerAnimator newTerminalAnimator)
+  {
+    terminalManager = newTerminalAnimator;
+  }
+
+  /**
    * Description of the Method
    *
    * @param c Description of Parameter

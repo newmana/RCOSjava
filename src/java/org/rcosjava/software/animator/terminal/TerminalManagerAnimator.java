@@ -38,11 +38,6 @@ public class TerminalManagerAnimator extends RCOSAnimator
   private final static String MESSENGING_ID = "TerminalManagerAnimator";
 
   /**
-   * Images to display.
-   */
-  private ImageIcon[] images;
-
-  /**
    * Total number of terminal columns.
    */
   private int noTerminalColumns;
@@ -91,17 +86,15 @@ public class TerminalManagerAnimator extends RCOSAnimator
   {
     super(MESSENGING_ID, postOffice);
 
-    images = newImages;
+    panel = new TerminalManagerPanel(newImages, newNoTerminals,
+        newNoTerminalColumns, newNoTerminalRows, this);
 
-    noTerminals = newNoTerminals;
+    noTerminals = newNoTerminals + 1;
     noTerminalColumns = newNoTerminalColumns;
     noTerminalRows = newNoTerminalRows;
 
     terminalsFront = new boolean[noTerminals];
     terminalsOn = new boolean[noTerminals];
-
-    panel = new TerminalManagerPanel(images, noTerminals, noTerminalColumns,
-        noTerminalRows, this);
   }
 
   /**
@@ -152,6 +145,7 @@ public class TerminalManagerAnimator extends RCOSAnimator
   void setTerminalOn(int terminalNo)
   {
     terminalsOn[terminalNo] = true;
+    terminalsFront[terminalNo] = true;
   }
 
   /**
@@ -250,13 +244,13 @@ public class TerminalManagerAnimator extends RCOSAnimator
     os.writeInt(noTerminals);
 
     // Terminal On
-    for (int index = 0; index < noTerminals; index++)
+    for (int index = 1; index < noTerminals; index++)
     {
       os.writeBoolean(terminalsOn[index]);
     }
 
     // Terminal Front
-    for (int index = 0; index < noTerminals; index++)
+    for (int index = 1; index < noTerminals; index++)
     {
       os.writeBoolean(terminalsFront[index]);
     }
@@ -279,15 +273,14 @@ public class TerminalManagerAnimator extends RCOSAnimator
     terminalsFront = new boolean[noTerminals];
     terminalsOn = new boolean[noTerminals];
 
-    images = RCOS.getTerminalImages();
-    panel = new TerminalManagerPanel(images, noTerminals, noTerminalColumns,
-        noTerminalRows, this);
-    panel.setupLayout(new JPanel());
+    panel = (TerminalManagerPanel) RCOS.getTerminalAnimator().getPanel();
+    panel.setManager(this);
 
     // Terminal On
     for (int index = 1; index < noTerminals; index++)
     {
       terminalsOn[index] = is.readBoolean();
+      terminalsFront[index] = is.readBoolean();
 
       if (terminalsOn[index])
       {
@@ -302,15 +295,17 @@ public class TerminalManagerAnimator extends RCOSAnimator
     // Terminal Front
     for (int index = 1; index < noTerminals; index++)
     {
-      terminalsFront[index] = is.readBoolean();
-
-      if (terminalsFront[index])
+      // Only set on if terminal on.
+      if (terminalsOn[index])
       {
-        terminalFront(index);
-      }
-      else
-      {
-        terminalBack(index);
+        if (terminalsFront[index])
+        {
+          terminalFront(index);
+        }
+        else
+        {
+          terminalBack(index);
+        }
       }
     }
   }
