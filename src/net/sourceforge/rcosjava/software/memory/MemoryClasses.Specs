@@ -1,0 +1,54 @@
+
+Specification for MemoryClasses
+-------------------------------
+
+
+MMU
+~~~
+
+Incomming:
+
+        - MMUOpen              (Get a page for a process OR device???)
+        - MMUClose             (Give up/disconnect {shared pages} a page)
+        - MMUConnect           (Share a page)
+
+Outgoing:
+
+	Acknowledgement type messages???
+
+        - MMUOpenedPage       (Return the page allocated else null)
+        - MMUConnectedPage    (Return bool status connect)
+
+IPC
+~~~
+
+(Do we want to break this into two units SHRM and SEM???)
+
+Incomming (Shrm):
+
+        - SHRMCreate           (Create a shared memory segment)
+        - SHRMConnect          (Connect to a shared memory segment)
+        - SHRMClose            (Close conection/delete segment)
+        - SHRMWrite            (Write to segment)
+        - SHRMRead             (Read from segment)
+        - SHRMLength           (Length of segment)
+
+Outgoing (Shrm):
+
+        - SHRMCreated          (Return segment number/id)
+        - SHRMLengthSeg        (Return length of segment)
+        - SHRMFromRead         (Return memory block read)
+	
+Incomming (Sem):
+
+        - SEMCreate            (Create semaphore)
+        - SEMOpen              (Connect to semaphore)
+        - SEMClose             (Close/delete semaphore)
+        - SEMSignal            (Signal a semaphore)
+        - SEMWait              (Wait on semaphore)
+
+Outgoing (Sem):
+
+        - SEMCreated           (Return semaphore id)
+        - SEMUnblock           (Wake up a blocked process on a semaphore)
+

@@ -1,0 +1,59 @@
+public class IPC_PageHandler extends MemoryManager
+{
+  
+  int TotalPages;
+  int FreePages;
+ 
+  IPC_PageHandler(int MaxPages)
+  {
+    PageTable = new int[MaxPages];
+    TotalPages = MaxPages;
+    FreePages = MaxPages;
+    // clear table
+    for(int count = 0; count < TotalPages; count++)
+    {
+      PageTable[count] = -1;
+    }  
+
+  }
+
+  int FindFirst()
+  {
+    for(int count = 0; count < TotalPages; count++)
+    {
+      if (PageTable[count] < 0 )
+      {
+        return count;
+      }
+    }
+    return -1;
+  } 
+
+  public int Open(int PID)
+  {
+    if (FreePages != 0)
+    {
+      int aFreePage = FindFirst();
+      if (aFreePage >= 0)
+      {
+        PageTable[aFreePage] = PID;
+        return aFreePage;
+      }
+    }
+    return -1;
+  }
+
+  public int Close(int PageID)
+  {
+    PageTable[PageID] = -1;
+    FreePages++;
+    return 1;
+  }
+
+  public int Connect(int PageID)
+  {
+    // NOT IMPLEMENTED...
+    return -1;
+  }
+
+}

@@ -1,0 +1,22 @@
+PROGRAM Primes (OUTPUT);
+
+{--------------------------------------------------------------------}
+{ fifth program run by rcos.java		     }
+{ - testing of CALL and return
+{--------------------------------------------------------------------}
+
+VAR
+  ch, ch1, ch2, ch3 : INTEGER;
+
+PROCEDURE Hello;
+
+BEGIN
+  Writeln( 'Hello world from a procedure' );
+END;
+
+BEGIN
+
+  Writeln( 'Hello world in main' );
+
+  Hello;
+END.

@@ -1,0 +1,5 @@
+PRINT "What is your number"
+READ I
+PRINT I
+PRINT " * 3 = "
+PRINT I * 3
