@@ -24,7 +24,7 @@ import net.sourceforge.rcosjava.software.process.RCOSProcess;
  * </DD><DD>
  * 23/11/98 Converted to Java 1.1. AN
  * </DD></DT>
- *
+ * <P>
  * @author Andrew Newman
  * @version 1.00 $Date$
  * @created 14th January 1996
@@ -34,25 +34,25 @@ public class ProcessManagerFrame extends RCOSFrame
   private ProcessManagerAnimator myProcessManager;
   private Image myImages[];
   private Message msg;
-  private RCOSList rProcesses;
+  private RCOSList processList;
 
-  public ProcessManagerFrame (int x, int y, Image[] pmImages,
+  public ProcessManagerFrame (int x, int y, Image[] images,
     ProcessManagerAnimator thisProcessManager)
   {
     setTitle("Process Manager");
-    myImages = pmImages;
+    myImages = images;
     myProcessManager = thisProcessManager;
     setSize(x,y);
   }
 
   void clearProcesses()
   {
-    this.rProcesses.removeAll();
+    this.processList.removeAll();
   }
 
   void addProcess(String sNewProcess)
   {
-    this.rProcesses.add(sNewProcess);
+    this.processList.add(sNewProcess);
   }
 
   public synchronized void addNotify()
@@ -65,13 +65,13 @@ public class ProcessManagerFrame extends RCOSFrame
   {
     super.setupLayout(c);
 
-    Panel pMain = new Panel();
-    Panel pClose = new Panel();
-    NewLabel lTmpLabel;
+    Panel mainPanel = new Panel();
+    Panel closePanel = new Panel();
+    NewLabel tmpLabel;
 
     GridBagConstraints constraints = new GridBagConstraints();
     GridBagLayout gridBag = new GridBagLayout();
-    pMain.setLayout(gridBag);
+    mainPanel.setLayout(gridBag);
     constraints.gridwidth=1;
     constraints.gridheight=1;
     constraints.weighty=1;
@@ -82,36 +82,36 @@ public class ProcessManagerFrame extends RCOSFrame
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
-    lTmpLabel = new NewLabel("Process to Kill", titleFont);
-    gridBag.setConstraints(lTmpLabel,constraints);
-    pMain.add(lTmpLabel);
+    tmpLabel = new NewLabel("Process to Kill", titleFont);
+    gridBag.setConstraints(tmpLabel,constraints);
+    mainPanel.add(tmpLabel);
 
     constraints.gridwidth=1;
     constraints.anchor = GridBagConstraints.CENTER;
-    rProcesses = new RCOSList(this,3,false);
-    gridBag.setConstraints(rProcesses,constraints);
-    pMain.add(rProcesses);
+    processList = new RCOSList(this,3,false);
+    gridBag.setConstraints(processList,constraints);
+    mainPanel.add(processList);
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
     tmpGButton = new GraphicButton (myImages[0], myImages[1],
       "Kill", defaultFont, buttonColour, true);
     gridBag.setConstraints(tmpGButton,constraints);
-    pMain.add(tmpGButton);
+    mainPanel.add(tmpGButton);
     tmpGButton.addMouseListener(new KillProcess());
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
-    lTmpLabel = new NewLabel("Command", titleFont);
-    gridBag.setConstraints(lTmpLabel,constraints);
-    pMain.add(lTmpLabel);
+    tmpLabel = new NewLabel("Command", titleFont);
+    gridBag.setConstraints(tmpLabel,constraints);
+    mainPanel.add(tmpLabel);
 
     constraints.gridwidth=1;
     constraints.anchor = GridBagConstraints.CENTER;
     tmpGButton = new GraphicButton (myImages[0], myImages[1],
       "Step", defaultFont, buttonColour, true);
     gridBag.setConstraints(tmpGButton,constraints);
-    pMain.add(tmpGButton);
+    mainPanel.add(tmpGButton);
     tmpGButton.addMouseListener(new StepProcess());
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
@@ -119,26 +119,26 @@ public class ProcessManagerFrame extends RCOSFrame
     tmpGButton = new GraphicButton (myImages[0], myImages[1],
       "Run", defaultFont, buttonColour, true);
     gridBag.setConstraints(tmpGButton,constraints);
-    pMain.add(tmpGButton);
+    mainPanel.add(tmpGButton);
     tmpGButton.addMouseListener(new RunProcess());
 
-    pClose.setLayout(new FlowLayout(FlowLayout.RIGHT));
+    closePanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
     tmpButton = new Button("Close");
-    pClose.add(tmpButton);
+    closePanel.add(tmpButton);
     tmpButton.addMouseListener(new CloseAnimator());
 
-    add("Center",pMain);
-    add("South",pClose);
+    add("Center",mainPanel);
+    add("South",closePanel);
   }
 
   class KillProcess extends MouseAdapter
   {
     public void mouseClicked(MouseEvent e)
     {
-      if (rProcesses.getSelectedItem() != null)
+      if (processList.getSelectedItem() != null)
       {
-        int iProcess = Integer.parseInt(rProcesses.getSelectedItem());
-        myProcessManager.kill(iProcess);
+        int process = Integer.parseInt(processList.getSelectedItem());
+        myProcessManager.kill(process);
       }
     }
   }

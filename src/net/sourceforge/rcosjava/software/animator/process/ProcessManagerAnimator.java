@@ -1,16 +1,3 @@
-//***************************************************************************
-// FILE     : ProcessManagerAnimator.java
-// PACKAGE  : Animator
-// PURPOSE  : Interface which sends messages to the Process Manager to
-//            execute a command given by the user.  Receives messages
-//            from the Process Manager about which processes are currently
-//            being run.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 10/1/97  Created.
-//
-//***************************************************************************/
-
 package net.sourceforge.rcosjava.software.animator.process;
 
 import java.awt.*;
@@ -33,75 +20,98 @@ import net.sourceforge.rcosjava.messaging.messages.universal.Kill;
 import net.sourceforge.rcosjava.software.process.RCOSProcess;
 import net.sourceforge.rcosjava.software.util.LIFOQueue;
 
+/**
+ * Interface which sends messages to the Process Manager to execute a command
+ * given by the user.  Receives messages from the Process Manager about which
+ * processes are currently being run.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 10th of January 1997
+ */
 public class ProcessManagerAnimator extends RCOSAnimator
 {
   private LIFOQueue currentProcesses;
-  private MessageAdapter maMsg;
-  private ProcessManagerFrame pmFrame;
-	private static final String MESSENGING_ID = "ProcessManagerAnimator";
+  private ProcessManagerFrame myFrame;
+  private static final String MESSENGING_ID = "ProcessManagerAnimator";
 
-  public ProcessManagerAnimator (AnimatorOffice aPostOffice,
-                                 int x, int y, Image[] pmImages)
+  /**
+   * Create an animator office, register with the animator office, set the size
+   * of the frame and the images to use to represent the processes and the
+   * buttons.
+   *
+   * @param postOffice the post office to register to.
+   * @param x width of frame
+   * @param y height of frame
+   * @param images the images to use for process and buttons.
+   */
+  public ProcessManagerAnimator (AnimatorOffice postOffice, int x, int y,
+    Image[] images)
   {
-    super(MESSENGING_ID, aPostOffice);
-    currentProcesses = new LIFOQueue(5,5);
-    pmFrame = new ProcessManagerFrame(x, y, pmImages, this);
-    pmFrame.pack();
-    pmFrame.setSize(x,y);
+    super(MESSENGING_ID, postOffice);
+    currentProcesses = new LIFOQueue(5,1);
+    myFrame = new ProcessManagerFrame(x, y, images, this);
+    myFrame.pack();
+    myFrame.setSize(x,y);
   }
 
+  /**
+   * Setup the layout of the frame (menus, etc).
+   *
+   * @param c the parent component.
+   */
   public void setupLayout(Component c)
   {
-    pmFrame.setupLayout(c);
+    myFrame.setupLayout(c);
   }
 
+  /**
+   * Remove the frame (called when closing the applet).
+   */
   public void disposeFrame()
   {
-    pmFrame.dispose();
+    myFrame.dispose();
   }
 
+  /**
+   * Display the frame (setVisible to true)
+   */
   public void showFrame()
   {
-    pmFrame.setVisible(true);
+    myFrame.setVisible(true);
   }
 
+  /**
+   * Hide the frame (setVisible to false)
+   */
   public void hideFrame()
   {
-    pmFrame.setVisible(false);
+    myFrame.setVisible(false);
   }
 
-  public void processMessage(AnimatorMessageAdapter aMsg)
-	{
-  }
-
-	public void processMessage(UniversalMessageAdapter aMsg)
+  /**
+   * Add new process to list.
+   *
+   * @param process the process id of the process to remove
+   */
+  public void newProcess(Integer process)
   {
-    try
-    {
-      aMsg.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing: "+e);
-      e.printStackTrace();
-    }
-  }
-
-  //add new process to list
-  public void newProcess(Integer iProcess)
-  {
-    currentProcesses.insert(iProcess);
+    currentProcesses.insert(process);
     updateProcessList();
   }
 
-  //delete process from list
-  public void deleteProcess(Integer iProcess)
+  /**
+   * Delete process from list.
+   *
+   * @param process the process id of the process to add
+   */
+  public void deleteProcess(Integer process)
   {
     currentProcesses.goToHead();
     while (!currentProcesses.atTail())
     {
       if (((Integer) currentProcesses.peek()).intValue() ==
-        (iProcess).intValue())
+        (process).intValue())
       {
         int tmp = ((Integer) currentProcesses.retrieveCurrent()).intValue();
       }
@@ -110,9 +120,13 @@ public class ProcessManagerAnimator extends RCOSAnimator
     updateProcessList();
   }
 
+  /**
+   * Removes all the processes in the Process Manager's Frame and goes through
+   * the entire list of process and add thems back.
+   */
   public void updateProcessList()
   {
-    ((ProcessManagerFrame) pmFrame).clearProcesses();
+    ((ProcessManagerFrame) myFrame).clearProcesses();
     if (!currentProcesses.queueEmpty())
     {
       currentProcesses.goToHead();
@@ -121,7 +135,7 @@ public class ProcessManagerAnimator extends RCOSAnimator
         Integer tmp = (Integer) currentProcesses.peek();
         try
         {
-          ((ProcessManagerFrame) pmFrame).addProcess(
+          ((ProcessManagerFrame) myFrame).addProcess(
             String.valueOf(tmp.intValue()));
         }
         catch (Exception e)
@@ -133,21 +147,52 @@ public class ProcessManagerAnimator extends RCOSAnimator
     }
   }
 
+  /**
+   * Send a run message to the kernel.  Called by the Process Manager Frame to
+   * start the kernel running again.
+   */
   public void run()
   {
     Run newMsg = new Run(this);
     sendMessage(newMsg);
   }
 
+  /**
+   * Send a step message to the kernel.  Called by the Process Manager Frame to
+   * step the execution of a process by one command.
+   */
   public void step()
   {
     Step newMsg = new Step(this);
     sendMessage(newMsg);
   }
 
-  public void kill(int iProcessID)
+  /**
+   * Send a new kill message to the kernel.  Called by the Process Manager Frame
+   * to halt the execution of the process if it is running or remove it from one
+   * of the queues.
+   */
+  public void kill(int processId)
   {
-    Kill newMsg = new Kill(this, iProcessID);
+    Kill newMsg = new Kill(this, processId);
     sendMessage(newMsg);
   }
+
+  public void processMessage(AnimatorMessageAdapter message)
+  {
+  }
+
+  public void processMessage(UniversalMessageAdapter message)
+  {
+    try
+    {
+      message.doMessage(this);
+    }
+    catch (Exception e)
+    {
+      System.err.println("Error processing: "+e);
+      e.printStackTrace();
+    }
+  }
+
 }

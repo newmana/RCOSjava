@@ -64,7 +64,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
   private RCOSBox rBox;
 
   public ProcessSchedulerFrame(int x, int y, Image[] psImages,
-                               ProcessSchedulerAnimator thisProcessScheduler)
+    ProcessSchedulerAnimator thisProcessScheduler)
   {
     setTitle("Process Scheduler Animator");
     myImages = psImages;

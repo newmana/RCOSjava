@@ -60,7 +60,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    * @param images the images to use for process and buttons.
    */
   public ProcessSchedulerAnimator (AnimatorOffice postOffice,
-                                  int x, int y, Image[] images)
+    int x, int y, Image[] images)
   {
     super(MESSENGING_ID, postOffice);
     myFrame = new ProcessSchedulerFrame(x, y, images, this);

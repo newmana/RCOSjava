@@ -36,7 +36,7 @@ public class ProgramManagerAnimator extends RCOSAnimator
   private static final String MESSENGING_ID = "ProgramManagerAnimator";
 
   public ProgramManagerAnimator (AnimatorOffice postOffice,
-                                 int x, int y, Image[] pmImages)
+    int x, int y, Image[] pmImages)
   {
     super(MESSENGING_ID, postOffice);
     pmFrame = new ProgramManagerFrame(x, y, pmImages, this);
