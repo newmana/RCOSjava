@@ -22,11 +22,16 @@ public class MainMemory
   private int freeUnits;
   private Memory[] myMemory;
 
-  public MainMemory(int iMaxUnits)
+  /**
+   * Create a new set of memory blocks with the given size.
+   *
+   * @param newMaxUnits the maximum number of memory units to create.
+   */
+  public MainMemory(int newMaxUnits)
   {
-    totalUnits = iMaxUnits;
-    freeUnits = iMaxUnits;
-    myMemory = new Memory[iMaxUnits];
+    totalUnits = newMaxUnits;
+    freeUnits = newMaxUnits;
+    myMemory = new Memory[newMaxUnits];
 
     for(int count = 0; count < totalUnits; count++)
     {
@@ -34,16 +39,34 @@ public class MainMemory
     }
   }
 
-  public Memory getMemory(int iLocation)
+  /**
+   * Given the index return the current (cloned) value of the memory.  This will
+   * not return a reference to the memory just incase.  To modify it you then
+   * have to call set.
+   *
+   * @param location the index to the memory location.
+   * @return a copy of the memory located in the given location.
+   */
+  public Memory getMemory(int location)
   {
-    return (Memory) myMemory[iLocation].clone();
+    return (Memory) myMemory[location].clone();
   }
 
-  public void setMemory(int iLocation, Memory mNewMemory)
+  /**
+   * With the given location it sets the value of the memory to that current
+   * value.
+   *
+   * @param location the location of the memory block.
+   * @param newMemory the memory value to set.
+   */
+  public void setMemory(int location, Memory newMemory)
   {
-    myMemory[iLocation] = mNewMemory;
+    myMemory[location] = newMemory;
   }
 
+  /**
+   * @return the first index to a free memory block.
+   */
   public int findFirstFree()
     throws NoFreeMemoryException
   {
@@ -58,25 +81,39 @@ public class MainMemory
     throw new NoFreeMemoryException();
   }
 
+  /**
+   * @return the number of free units available to be allocated.
+   */
   public int getFreeUnits()
   {
     return freeUnits;
   }
 
-  public void allocateMemory(int iLocation)
+  /**
+   * Allocates memory location if it is free.
+   *
+   * @param location the index to the memory location.
+   */
+  public void allocateMemory(int location)
   {
-    if (myMemory[iLocation].isFree())
+    if (myMemory[location].isFree())
     {
-      myMemory[iLocation].setAllocated();
+      myMemory[location].setAllocated();
       freeUnits--;
     }
   }
 
-  public void freeMemory(int iLocation)
+  /**
+   * The tracking of a memory location is now freed up.  Sets the memory
+   * to a null/unallocated value.
+   *
+   * @param newLocation the index to the location to free.
+   */
+  public void freeMemory(int location)
   {
-    if (!myMemory[iLocation].isFree())
+    if (!myMemory[location].isFree())
     {
-      myMemory[iLocation].setFree();
+      myMemory[location].setFree();
       freeUnits++;
     }
   }
