@@ -17,7 +17,7 @@ Helpers
     sign = '+' | '-';
     exponent_part = ('e' | 'E') sign? digit_sequence;
     floating_suffix = 'f' | 'F' | 'l' | 'L';
-    simple_escape_sequence = '\' ''' | '\"' | '\?' | '\\' | 
+    simple_escape_sequence = '\' ''' | '\"' | '\?' | '\\' |
         '\a' | '\b' | '\f' | '\n' | '\r' | '\t' | '\v';
     octal_digit = ['0' .. '7'];
     octal_escape_sequence = '\' octal_digit octal_digit? octal_digit?;
@@ -89,7 +89,7 @@ Tokens
     ampersand_equal = '&=';
     caret_equal = '^=';
     bar_equal = '|=';
-    
+
     case = 'case';
     default = 'default';
     if = 'if';
@@ -156,20 +156,22 @@ Tokens
     shrread = 'shrread';
     shrwrite = 'shrwrite';
     shrsize = 'shrsize';
+    fork = 'fork';
+    exec = 'exec';
 
     identifier = nondigit (digit | nondigit)*;
     floating_constant = fractional_constant exponent_part? floating_suffix? |
         digit_sequence exponent_part floating_suffix?;
     string_litteral = 'L'? '"' s_char_sequence? '"';
-    integer_constant = decimal_constant integer_suffix? | octal_constant integer_suffix? | 
+    integer_constant = decimal_constant integer_suffix? | octal_constant integer_suffix? |
         hexadecimal_constant integer_suffix?;
     character_constant = 'L'? ''' c_char_sequence ''';
     blank = (cr | lf | tab | ' ')+;
     comment = '/*' not_star* '*'+ (not_star_slash not_star* '*'+)* '/';
 
 Ignored Tokens
-    
-    blank, 
+
+    blank,
     comment,
     extern,
     static,
@@ -180,7 +182,7 @@ Ignored Tokens
 
 Productions
 
-    translation_unit = 
+    translation_unit =
         declaration_or_definition*;
 
     declaration_or_definition =
@@ -224,10 +226,10 @@ Productions
 
     char_specifier =
         char;
-        
+
     signed_char_specifier =
         signed char;
-    
+
     signed_short_specifier =
         {short}            short |
         {signed_short}     signed short |
@@ -247,7 +249,7 @@ Productions
 
     unsigned_char_specifier =
         unsigned char;
-        
+
     unsigned_short_specifier =
         {unsigned_short}     unsigned short |
         {unsigned_short_int} unsigned short int;
@@ -271,7 +273,7 @@ Productions
 
     struct_specifier =
         struct identifier;
-        
+
     union_specifier =
         union identifier;
 
@@ -398,24 +400,24 @@ Productions
         {switch}       switch l_par value r_par case_statements |
         {rcos_stmt}    rcos_statement;
 
-    rcos_statement = 
+    rcos_statement =
         {printf1}      printf l_par string_litteral r_par semicolon |
         {printf2}      printf l_par [control]:printf_control_strings comma value r_par semicolon |
         {printf3}      printf l_par [control]:printf_control_strings comma arrayref r_par semicolon |
-        {scanf}        scanf l_par [control]:scanf_control_strings comma value r_par semicolon |
+        {scanf1}       scanf l_par [control]:scanf_control_strings comma value r_par semicolon |
         {scanf2}       scanf l_par [control]:scanf_control_strings comma arrayref r_par semicolon |
-        {getc}         getc l_par [file_stream]:value r_par semicolon |
+        {getc1}        getc l_par [file_stream]:value r_par semicolon |
         {getc2}        getc l_par [file_stream]:arrayref r_par semicolon |
-        {putc}         putc l_par [ch_in]:value comma [file_stream]:value r_par semicolon |
+        {putc1}        putc l_par [ch_in]:value comma [file_stream]:value r_par semicolon |
         {putc2}        putc l_par [ch_in]:arrayref comma [file_stream]:value r_par semicolon |
         {fclose}       fclose l_par [file_stream]:value r_par semicolon |
         {feof}         feof l_par [file_stream]:value r_par semicolon |
         {fputs}        fputs l_par [string_in]:value comma [file_stream]:value r_par semicolon |
         {fgets}        fgets l_par [string_out]:value [c1]:comma [length]:value [c2]:comma [file_stream]:value r_par semicolon |
         {fseek}        fseek l_par [file_stream]:value [c1]:comma [no_bytes]:value [c2]:comma origin_value r_par semicolon |
-        {fprintf}      fprintf l_par [file_stream]:value [c1]:comma [control]:printf_control_strings [c2]:comma value r_par semicolon |
+        {fprintf1}     fprintf l_par [file_stream]:value [c1]:comma [control]:printf_control_strings [c2]:comma value r_par semicolon |
         {fprintf2}     fprintf l_par [file_stream]:value [c1]:comma [control]:printf_control_strings [c2]:comma arrayref r_par semicolon |
-        {fscanf}       fscanf l_par [file_stream]:value [c1]:comma [control]:value [c2]:comma value r_par semicolon |
+        {fscanf1}      fscanf l_par [file_stream]:value [c1]:comma [control]:value [c2]:comma value r_par semicolon |
         {fscanf2}      fscanf l_par [file_stream]:value [c1]:comma [control]:value [c2]:comma arrayref r_par semicolon |
         {semclose}     semclose l_par [handle]:identifier r_par semicolon |
         {semcreate1}   semcreate l_par [handle]:value r_par semicolon |
@@ -428,21 +430,24 @@ Productions
         {shropen}      shropen l_par [id]:value r_par semicolon |
         {shrread}      shrread l_par [handle]:identifier comma [size]:value r_par semicolon |
         {shrwrite}     shrwrite l_par [handle]:identifier [c1]:comma [offset]:value [c2]:comma [variable]:identifier [c3]:comma r_par semicolon |
-        {shrsize}      shrsize l_par [handle]:identifier r_par semicolon;
+        {shrsize}      shrsize l_par [handle]:identifier r_par semicolon |
+        {fork}         fork l_par r_par semicolon |
+        {exec1}        exec l_par [file_name]:value r_par semicolon |
+        {exec2}        exec l_par [file_name]:arrayref r_par semicolon;
 
     printf_control_strings =
-        {str_control}  string_control_string | 
-        {chr_control}  character_control_string | 
+        {str_control}  string_control_string |
+        {chr_control}  character_control_string |
         {int_control}  integer_control_string;
 
     scanf_control_strings =
-        {chr_control}  character_control_string | 
+        {chr_control}  character_control_string |
         {int_control}  integer_control_string;
 
     origin_value =
-        {set}          origin_seek_set | 
-        {cur}          origin_seek_cur | 
-        {end}          origin_seek_end;    
+        {set}          origin_seek_set |
+        {cur}          origin_seek_cur |
+        {end}          origin_seek_end;
 
     basic_statement =
         {call_expression}   call_expression |
@@ -455,10 +460,10 @@ Productions
         {dead6} l_par type_name r_par varname |
         {dead7} l_par type_name r_par constant;
 
-    rhs = 
+    rhs =
         {binary} binary_expression |
         {unary}  unary_expression;
- 
+
     binary_expression =
         {identifier}       l_par identifier binop value r_par |    // will be removed from AST
         {constant}         l_par constant binop value r_par |      // will be removed from AST
@@ -499,7 +504,7 @@ Productions
         {lteq} lteq |
         {gt}   gt |
         {gteq} gteq;
-        
+
     unary_expression =
         {simple}     simple_expression |
         {reference}  l_par star identifier r_par |
@@ -509,7 +514,7 @@ Productions
         {par_unop}   l_par unop identifier r_par |
         {cast}       l_par type_name r_par varname |
         {cast_const} l_par type_name r_par constant;
-        
+
     simple_expression =
         {varname} varname |
         {constant} constant;
@@ -554,7 +559,7 @@ Productions
     modify_expression =
         {direct}   varname equal rhs |
         {indirect} l_par star identifier r_par equal rhs;
-    
+
     conditional_expression =
         {rel}   l_par [left]:value relop [right]:value r_par |
         {value} value;
@@ -563,7 +568,7 @@ Productions
         l_brace case_statement+ default_statement r_brace;
 
     case_statement =
-        {body}  case constant colon l_brace statement* stop_statement r_brace | 
+        {body}  case constant colon l_brace statement* stop_statement r_brace |
         {empty} case constant colon;
 
     stop_statement =
