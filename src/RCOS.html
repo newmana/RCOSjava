@@ -8,15 +8,13 @@
 <BODY BGCOLOR="#000000" TEXT="#ffffff" LINK="FF0000" VLINK="0000FF">
 <!-- The following code is specified at the beginning of the <BODY> tag. -->
 <SCRIPT LANGUAGE="JavaScript"><!--
-    var _info = navigator.userAgent; var _ns = false;
+    var _info = navigator.userAgent; 
+    var _ns = false;
     var _ie = (_info.indexOf("MSIE") > 0 && _info.indexOf("Win") > 0
         && _info.indexOf("Windows 3.1") < 0);
 //--></SCRIPT>
 <COMMENT><SCRIPT LANGUAGE="JavaScript1.1"><!--
-    var _ns = (navigator.appName.indexOf("Netscape") >= 0
-        && (_info.indexOf("Win16") < 0
-        && java.lang.System.getProperty("os.version").indexOf("3.5") < 0)
-        || _info.indexOf("Sun") > 0));
+    var _ns = navigator.appName.indexOf("Netscape") >= 0;
 //--></SCRIPT></COMMENT>
 <H1 ALIGN=CENTER>
   RCOS.java
@@ -28,6 +26,7 @@ background="#000000">
 <TD>
 <!-- The following code is repeated for each APPLET tag -->
 <SCRIPT LANGUAGE="JavaScript"><!--
+	alert("Hi" + _ns==true);
   if (_ie == true) 
   {
     document.write('<OBJECT classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93"');
