@@ -279,14 +279,9 @@ public class Instruction implements Cloneable, Serializable
    */
   public Object clone()
   {
-    try
-    {
-      return super.clone();
-    }
-    catch (java.lang.CloneNotSupportedException e)
-    {
-    }
-    return null;
+    Instruction newInstruction = new Instruction(this.opCode, this.byteParam,
+      this.wordParam);
+    return newInstruction;
   }
 
   /**
