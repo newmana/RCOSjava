@@ -54,7 +54,7 @@
     </uptodate>
   </target>
 
-  <target name="sablecc" depends="prepare"
+  <target name="sablecc" depends="clean, prepare"
    if="sablecc.required"
    description="Creates SimpleC jar file to process C files">
 
