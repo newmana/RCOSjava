@@ -420,11 +420,12 @@ public class Kernel extends OSMessageHandler
 
       SetContext contextMsg = new SetContext(this, myCPU.getContext());
       sendMessage(contextMsg);
-      postOffice.deliverMessages();
 
       InstructionExecution executionMsg = new InstructionExecution(this,
           myCPU.getStack());
       sendMessage(executionMsg);
+
+      // Ensure all messages are delivered.
       postOffice.deliverMessages();
     }
 
