@@ -41,7 +41,7 @@ import net.sourceforge.rcosjava.messaging.postoffices.universal.UniversalMessage
 import net.sourceforge.rcosjava.messaging.postoffices.universal.UniversalMessagePlayer;
 
 /**
- * Main startup file for RCOSjava Version 1.00
+ * Main startup file for RCOSjava Version 0.4
  * <P>
  * <DT><B>History:</B>
  * <DD>
@@ -53,12 +53,12 @@ import net.sourceforge.rcosjava.messaging.postoffices.universal.UniversalMessage
  * 01/01/97  Problem with loading images in Netscape fixed. All files are case
  * sensitive even in Windows 95/NT.
  * </DD><DD>
- * 13/10/98  Started converting to Java 1.1.  Version set to 1.00
+ * 13/10/98  Started converting to Java 1.1.  Version set to 0.4
  * </DD></DT>
  *
  * @author Andrew Newman
  * @created 21st January 1996
- * @version 1.00 $Date$
+ * @version 0.4 $Date$
  */
 public class RCOS extends java.applet.Applet implements Runnable
 {
@@ -101,8 +101,8 @@ public class RCOS extends java.applet.Applet implements Runnable
   public String baseDomain;
   public String defaultDomain = new String("localhost");
   public int port;
-  private static final String welcome = "Welcome to RCOSjava Version 1.00";
-  private static final String info = "Copyright 1995-2001.\nVersion 1.00.\n" +
+  private static final String welcome = "Welcome to RCOSjava Version 0.4";
+  private static final String info = "Copyright 1995-2001.\nVersion 0.4.\n" +
     "Authors: David Jones, Brett Carter, Bruce Jamieson, and Andrew Newman";
 
   // Images and sounds.
