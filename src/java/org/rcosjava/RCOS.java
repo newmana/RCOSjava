@@ -618,7 +618,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     list.add(tmAnimator);
     list.add(psAnimator);
     list.add(memoryAnimator);
-//    list.add(ipcAnimator);
+    list.add(ipcAnimator);
 //    list.add(cpuAnimator);
 //    list.add(pmAnimator);
 //    list.add(pcmAnimator);
@@ -628,8 +628,8 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     list.add(theKernel);
     list.add(theTerminalManager);
     list.add(theProcessScheduler);
+    list.add(theMemoryManager);
     list.add(theIPC);
-//    list.add(theMemoryManager);
 
     return list;
   }
@@ -646,20 +646,20 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     tmAnimator = (TerminalManagerAnimator) rcosComponents.get(0);
     psAnimator = (ProcessSchedulerAnimator) rcosComponents.get(1);
     memoryAnimator = (MemoryManagerAnimator) rcosComponents.get(2);
-//    ipcAnimator = (IPCManagerAnimator) rcosComponents.get(3);
+    ipcAnimator = (IPCManagerAnimator) rcosComponents.get(3);
 //    cpuAnimator = (CPUAnimator) rcosComponents.get(4);
 //    pmAnimator = (ProgramManagerAnimator) rcosComponents.get(5);
 //    pcmAnimator = (ProcessManagerAnimator) rcosComponents.get(6);
 //    mmAnimator = (MultimediaAnimator) rcosComponents.get(7);
 
     // Load OS.
-    theKernel = (Kernel) rcosComponents.get(3);
-    theTerminalManager = (TerminalManager) rcosComponents.get(4);
-    theProcessScheduler = (ProcessScheduler) rcosComponents.get(5);
-    theIPC = (IPC) rcosComponents.get(6);
-//    theMemoryManager = (MemoryManager) rcosComponents.get(7);
-//    theProgramManager = new ProgramManager(osPostOffice, baseDomain, port,
-//        theKernel);
+    theKernel = (Kernel) rcosComponents.get(4);
+    theTerminalManager = (TerminalManager) rcosComponents.get(5);
+    theProcessScheduler = (ProcessScheduler) rcosComponents.get(6);
+    theMemoryManager = (MemoryManager) rcosComponents.get(7);
+    theIPC = (IPC) rcosComponents.get(8);
+    theProgramManager = new ProgramManager(osPostOffice, baseDomain, port,
+        theKernel);
   }
 
   /**
