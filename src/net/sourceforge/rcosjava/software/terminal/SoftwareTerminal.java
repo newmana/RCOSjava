@@ -46,27 +46,27 @@ public class SoftwareTerminal extends OSMessageHandler
   /**
    * The physical hardware terminal screen to receive and display input/output.
    */
-  HardwareTerminal hardwareTerminal;
+  private HardwareTerminal hardwareTerminal;
 
   /**
    * The handler which handles interrupts generated.
    */
-  TerminalInterruptHandler terminalIH;
+  private TerminalInterruptHandler terminalIH;
 
   /**
    * Holds all key pressed events.
    */
-  public LIFOQueue softwareBuffer;
+  private LIFOQueue softwareBuffer;
 
   /**
-   * PID of process that is blocked waiting for input
+   * If the process using this terminal is blocked waiting for input.
    */
-  public int blockedProcess;
+  private boolean processBlocked;
 
   /**
-   * The PID of the process that is currently using this terminal
+   * PID of the process that is currently using this terminal.
    */
-  public int currentProcess;
+  private int currentProcess;
 
   /**
    * Creates a new software terminal ready to be allocated a process.  Set all
@@ -84,7 +84,7 @@ public class SoftwareTerminal extends OSMessageHandler
     super(myId, aPostOffice);
 
     hardwareTerminal = terminal;
-    blockedProcess = -1;
+    processBlocked = false;
     currentProcess = -1;
     softwareBuffer = new LIFOQueue(10, 10);
 
@@ -140,6 +140,7 @@ public class SoftwareTerminal extends OSMessageHandler
     }
     else
     {
+      processBlocked = true;
       BlockCurrentProcess msg = new BlockCurrentProcess(this);
       sendMessage(msg);
     }
@@ -184,8 +185,8 @@ public class SoftwareTerminal extends OSMessageHandler
     }
     else
     {
-      BlockCurrentProcess msg = new
-        BlockCurrentProcess(this);
+      processBlocked = true;
+      BlockCurrentProcess msg = new BlockCurrentProcess(this);
       sendMessage(msg);
     }
   }
@@ -215,15 +216,16 @@ public class SoftwareTerminal extends OSMessageHandler
         }
       }
       else
-        softwareBuffer.insert(theEvent);
-
-      if (blockedProcess != - 1)
       {
-        BlockedToReady msg = new BlockedToReady(this,
-          blockedProcess);
+        softwareBuffer.insert(theEvent);
+      }
+
+      if (processBlocked)
+      {
+        BlockedToReady msg = new BlockedToReady(this, currentProcess);
         sendMessage(msg);
         // process is no longer blocked
-        blockedProcess = -1;
+        processBlocked = false;
       }
     }
   }
@@ -250,11 +252,33 @@ public class SoftwareTerminal extends OSMessageHandler
   }
 
   /**
+   * Returns the current process using the terminal or -1 if it's not being
+   * used.
+   *
+   * @return the current process using the terminal or -1 if it's not being
+   *  used.
+   */
+  public int getCurrentProcess()
+  {
+    return currentProcess;
+  }
+
+  /**
+   * Set the current process being used by the terminal.
+   *
+   * @param newProcessId set the current process being used by the terminal.
+   */
+  public void setCurrentProcess(int newProcessId)
+  {
+    currentProcess = newProcessId;
+  }
+
+  /**
    * Check to see if the key that was pressed was a numeric key
    *
    * @return true if ASCII value is between 48 & 57 inclusive
    */
-  boolean isNumber(KeyEvent evt)
+  private boolean isNumber(KeyEvent evt)
   {
     return ((evt.getKeyChar() > 47) && (evt.getKeyChar() < 58));
   }
@@ -262,7 +286,7 @@ public class SoftwareTerminal extends OSMessageHandler
   /**
    * Take KeyEvent (keypress) and return Integer value
    */
-  int toNumber(KeyEvent evt)
+  private int toNumber(KeyEvent evt)
   {
     return (evt.getKeyChar() - 48);
   }
