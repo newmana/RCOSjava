@@ -13,7 +13,7 @@ import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.software.ipc.SharedMemory;
 import org.rcosjava.software.memory.MemoryManager;
 import org.rcosjava.software.memory.MemoryReturn;
-import org.rcosjava.software.util.LIFOQueue;
+import org.rcosjava.software.util.FIFOQueue;
 
 /**
  * Based on the commands sent and received to the IPC and displays graphically
@@ -582,7 +582,7 @@ public class IPCManagerPanel extends RCOSPanel
 
       semValue.setText(((Integer) tmpGraphic.getValue()).toString());
 
-      LIFOQueue queue = tmpGraphic.getAttachedProcesses();
+      FIFOQueue queue = tmpGraphic.getAttachedProcesses();
 
       for (int index = 0; index < queue.size(); index++)
       {
@@ -610,7 +610,7 @@ public class IPCManagerPanel extends RCOSPanel
 
       String tmpValue = (String) tmpGraphic.getValue();
       shmList.setText(tmpValue);
-      LIFOQueue queue = tmpGraphic.getAttachedProcesses();
+      FIFOQueue queue = tmpGraphic.getAttachedProcesses();
 
       for (int index = 0; index < queue.size(); index++)
       {
