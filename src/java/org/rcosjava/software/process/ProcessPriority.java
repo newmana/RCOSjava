@@ -88,4 +88,14 @@ public class ProcessPriority implements Serializable, Comparable
 
     return result;
   }
+
+  /**
+   * Returns the literal value of the process priority.
+   *
+   * @return the literal value of the process priority.
+   */
+  public String toString()
+  {
+    return Integer.toString(priorityValue);
+  }
 }
