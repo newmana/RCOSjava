@@ -1,10 +1,11 @@
 package org.rcosjava.software.animator.ipc;
 
 import java.awt.Component;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.io.*;
+import java.util.*;
 import javax.swing.ImageIcon;
 
+import org.rcosjava.RCOS;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.software.animator.RCOSAnimator;
@@ -129,6 +130,7 @@ public class IPCManagerAnimator extends RCOSAnimator
 
   /**
    * Wait on the semaphore.  Requires that the semaphore be opened and created.
+   * Displays only the processes that are blocked.
    *
    * @param semaphoreId the unique id of the semaphore to wait on.
    * @param processId the process id that is waiting on the semaphore.
@@ -139,8 +141,16 @@ public class IPCManagerAnimator extends RCOSAnimator
     if (semaphoreMap.containsKey(semaphoreId))
     {
       Semaphore tmpSemaphore = (Semaphore) semaphoreMap.get(semaphoreId);
-      tmpSemaphore.addWaitingProcess(processId);
-      panel.semaphoreWaiting(tmpSemaphore, value);
+      panel.semaphoreWaiting(tmpSemaphore, processId, value);
+
+      if (value == -1)
+      {
+        tmpSemaphore.addWaitingProcess(processId);
+      }
+      else
+      {
+        tmpSemaphore.setValue(value);
+      }
     }
   }
 
@@ -160,8 +170,12 @@ public class IPCManagerAnimator extends RCOSAnimator
     {
       Semaphore tmpSemaphore = (Semaphore) semaphoreMap.get(semaphoreId);
       tmpSemaphore.setValue(value);
-      tmpSemaphore.removeWaitingProcess(signalledId);
-      panel.semaphoreSignalled(tmpSemaphore, signalledId);
+      panel.semaphoreSignalled(tmpSemaphore, signalledId, value);
+
+      if (processId != -1)
+      {
+        tmpSemaphore.removeWaitingProcess(signalledId);
+      }
     }
   }
 
@@ -319,5 +333,71 @@ public class IPCManagerAnimator extends RCOSAnimator
   public HashMap getSharedMemoryMap()
   {
     return sharedMemoryMap;
+  }
+
+  /**
+   * Handle the serialization of the contents.
+   */
+  private void writeObject(ObjectOutputStream os) throws IOException
+  {
+    // Semaphore state
+    os.writeUTF(selectedSemaphoreName);
+    os.writeObject(semaphoreMap);
+
+    // Shared memory state
+    os.writeUTF(selectedSharedMemoryName);
+    os.writeObject(sharedMemoryMap);
+  }
+
+  /**
+   * Handle deserialization of the contents.  Ensures non-serializable
+   * components correctly created.
+   *
+   * @param is stream that is being read.
+   */
+  private void readObject(ObjectInputStream is) throws IOException,
+      ClassNotFoundException
+  {
+    register(MESSENGING_ID, RCOS.getAnimatorPostOffice());
+
+    // Semaphore state
+    selectedSemaphoreName = is.readUTF();
+    semaphoreMap = (HashMap) is.readObject();
+
+    // Shared memory state
+    selectedSharedMemoryName = is.readUTF();
+    sharedMemoryMap = (HashMap) is.readObject();
+
+    // Get the panel and PCB Frame.
+    panel = (IPCManagerPanel) RCOS.getIPCManagerAnimator().getPanel();
+    panel.setManager(this);
+
+    // Set semaphore state in IPC Manager Panel
+    Semaphore tmpSemaphore;
+    Iterator semIter = semaphoreMap.keySet().iterator();
+    while (semIter.hasNext())
+    {
+      tmpSemaphore = (Semaphore) semIter.next();
+
+      // Sets current value and creator id.
+      panel.semaphoreCreated(tmpSemaphore);
+
+      // Sets the attached processes.
+      List attachedProcesses = tmpSemaphore.getAttachedProcesses();
+      for (int index = 0; index < attachedProcesses.size(); index++)
+      {
+        panel.semaphoreOpened(tmpSemaphore,
+          ((Integer) attachedProcesses.get(index)).intValue());
+      }
+
+      // Sets the waiting processes.
+      List waitingProcesses = tmpSemaphore.getWaitingProcesses();
+      for (int index = 0; index < waitingProcesses.size(); index++)
+      {
+        panel.semaphoreWaiting(tmpSemaphore,
+          ((Integer) waitingProcesses.get(index)).intValue(),
+          tmpSemaphore.getValue());
+      }
+    }
   }
 }
