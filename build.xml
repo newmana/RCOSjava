@@ -5,52 +5,53 @@
   <property name=""/>
   <property name="src.dir" value="src"/>
   <property name="lib.dir" value="lib"/>
-  <property name="deploy.dir" value="deploy"/>
+  <property name="dist.dir" value="dist"/>
   <property name="javadoc.dir" value="javadoc"/>
-  <property name="deploy.jar" value="${deploy.dir}/${app.name}.jar"/>
+  <property name="dist.jar" value="${app.name}.jar"/>
   <property name="build.compiler" value="classic"/>
 
   <target name="all" depends="clean,prepare,compile,dist,javadoc"/>
 
    <target name="clean">
-     <delete dir="${deploy.dir}"/>
+     <delete dir="${dist.dir}"/>
      <delete dir="${javadoc.dir}"/>
    </target>
 
   <target name="prepare">
-    <echo message="Creating deployment directory in current dir called: ${deploy.dir}"/>
-    <mkdir dir="${deploy.dir}"/>
+    <echo message="Creating distribution directory in current dir called: ${dist.dir}"/>
+    <mkdir dir="${dist.dir}"/>
     <mkdir dir="${javadoc.dir}"/>
   </target>
 
   <target name="compile" depends="prepare">
-    <echo message="Compiling: ${src.dir} to ${deploy.dir}"/>
-    <javac classpath="${lib.dir}/junit.jar" srcdir="${src.dir}" destdir="${deploy.dir}"
+    <echo message="Compiling: ${src.dir} to ${dist.dir}"/>
+    <javac classpath="${lib.dir}/junit.jar" srcdir="${src.dir}" destdir="${dist.dir}"
       debug="off" optimize="on" deprecation="on"/>
 
     <!-- Move all the images and sounds too -->
-    <copy todir="${deploy.dir}/net/sourceforge/rcosjava/software/animator/images">
+    <copy todir="${dist.dir}/net/sourceforge/rcosjava/software/animator/images">
       <fileset dir="${src.dir}/net/sourceforge/rcosjava/software/animator/images"/>
     </copy>
-    <copy todir="${deploy.dir}/net/sourceforge/rcosjava/software/animator/audio">
+    <copy todir="${dist.dir}/net/sourceforge/rcosjava/software/animator/audio">
       <fileset dir="${src.dir}/net/sourceforge/rcosjava/software/animator/audio"/>
     </copy>
   </target>
 
   <target name="dist" depends="compile">
-    <!-- Server side deployment -->
-    <copy todir="${deploy.dir}/pll2">
+    <!-- Server side distribution -->
+    <copy todir="${dist.dir}/pll2">
       <fileset dir="${src.dir}/pll2"/>
     </copy>
 
-    <!-- Client Deployment -->
-    <jar jarfile="${deploy.jar}" basedir="${deploy.dir}"/>
-    <copy file="${src.dir}/RCOS.html" tofile="${deploy.dir}/RCOS.html"/>
+    <!-- Client distribution -->
+    <jar jarfile="${dist.jar}" basedir="${dist.dir}"/>
+    <move file="${dist.jar}" todir="${dist.dir}"/>
+    <copy file="${src.dir}/RCOS.html" tofile="${dist.dir}/RCOS.html"/>
   </target>
 
   <target name="javadoc" depends="dist">
     <javadoc packagenames="net.sourceforge.rcosjava.*, pll2.*" sourcepath="${src.dir}"
-      classpath="${lib.dir}/junit.jar" private="true"
+      classpath="${lib.dir}/junit.jar"
       destdir="${javadoc.dir}" author="true" version="true" use="true"/>
   </target>
 </project>
