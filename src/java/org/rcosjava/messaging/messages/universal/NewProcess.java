@@ -138,9 +138,9 @@ public class NewProcess extends UniversalMessageAdapter
   }
 
   /**
-   * Set to false so it is not recorded.
+   * Returns false so this is not recorded.
    *
-   * @return Description of the Returned Value
+   * @return false so this is not recorded.
    */
   public boolean undoableMessage()
   {
