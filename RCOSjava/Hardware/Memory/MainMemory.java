@@ -39,6 +39,7 @@ public class MainMemory
   }
 
   public int findFirstFree()
+    throws NoFreeMemoryException
   {
     // Find first deallocated page.
     int count;
@@ -49,7 +50,7 @@ public class MainMemory
         return count;
       }
     }
-    return -1;
+    throw new NoFreeMemoryException();
   }
 
   public int getFreeUnits()

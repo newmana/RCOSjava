@@ -9,7 +9,7 @@
 //
 // *************************************************************************
 
-package PLL2;
+package pll2;
 
 import java.io.*;
 import java.net.*;

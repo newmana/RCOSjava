@@ -17,7 +17,8 @@ import Hardware.Memory.Memory;
 public interface MemoryManagement
 {
   // Allocate pages to a Process ID (PID), with a given type, and a given size.
-  public MemoryReturn open(int PID, int Type, int iSize);
+  public MemoryReturn open(int PID, int Type, int iSize)
+    throws MemoryOpenFailedException;
   // Deallocate page that were allocated to a Process ID (PID)
   public MemoryReturn close(int PID);
   // Get all memory of a specific PID, Type and given maximum size.

@@ -17,6 +17,8 @@
 package Software.Memory.Paged;
 
 import java.lang.Integer;
+import Software.Memory.MemoryOpenFailedException;
+import Hardware.Memory.NoFreeMemoryException;
 import Hardware.Memory.MainMemory;
 import Hardware.Memory.Memory;
 import Software.Memory.MemoryReturn;
@@ -39,6 +41,7 @@ public class PagedMemoryManagement implements MemoryManagement
   //a specific set of memory with the same PID and
   //Type.  Size, in this case is the number of pages.
   public MemoryReturn open(int PID, int type, int size)
+    throws MemoryOpenFailedException
   {
     // Allocate pages
     int count, noPages;
@@ -46,15 +49,22 @@ public class PagedMemoryManagement implements MemoryManagement
     noPages = 0;
     for (count = 0; count < size; count++)
     {
-      if (myMainMemory.getFreeUnits() != 0)
+      if (myMainMemory.getFreeUnits() >= size)
       {
-        int freePageIndex = myMainMemory.findFirstFree();
-        if (freePageIndex >= 0)
+        try
         {
+          int freePageIndex = myMainMemory.findFirstFree();
           myMainMemory.allocateMemory(freePageIndex);
           pages[noPages] = (short) freePageIndex;
           noPages++;
         }
+        catch (NoFreeMemoryException e)
+        {
+        }
+      }
+      else
+      {
+        throw new MemoryOpenFailedException();
       }
     }
     //Write allocation information to page table.

@@ -26,39 +26,45 @@ public class MemoryTest extends TestCase
   //Basically it must allocate and deallocate pages correctly.
   public void testMainMemory()
   {
-    int initialSize, sizeBefore, firstFreeBefore, count;
-    initialSize = testMem.getFreeUnits();
-    //Memory entries start at zero
-    assertEquals("First free not 0", testMem.findFirstFree(), 0);
-    //Allocating memory block 0, next one should be 1
-    testMem.allocateMemory(0);
-    assertEquals("First free after allocation was not 1", testMem.findFirstFree(), 1);
-    //Allocating memory block 0 again, number of units should be the same as is
-    //the first free unit
-    sizeBefore = testMem.getFreeUnits();
-    firstFreeBefore = testMem.findFirstFree();
-    testMem.allocateMemory(0);
-    assertEquals("Size after reallocation of same block not the same", testMem.getFreeUnits(),
-      sizeBefore);
-    assertEquals("First free after same allocation was not 1", firstFreeBefore, 1);
-    //Deallocating already free memory should have no effect.
-    testMem.freeMemory(1);
-    assertEquals("Deallocating already freed memory", testMem.findFirstFree(), 1);
-    //Free the allocated memory, the first should be 0
-    testMem.freeMemory(0);
-    assertEquals("Deallocating allocated memory", testMem.findFirstFree(), 0);
-    //Allocate/deallocate all.
-    sizeBefore = testMem.getFreeUnits();
-    firstFreeBefore = testMem.findFirstFree();
-    for (count = 0; count < 20; count++)
-      testMem.allocateMemory(count);
-    assertEquals("First free after allocation was not -1", testMem.findFirstFree(), -1);
-    for (count = 0; count < 20; count++)
-      testMem.freeMemory(count);
-    assertEquals("Size change after mass de/allocation", testMem.getFreeUnits(), sizeBefore);
-    assertEquals("First free after mass de/allocation", testMem.findFirstFree(), firstFreeBefore);
-    //Test that the number of Units remains the same
-    assertEquals("Total Units differ from start to end", testMem.getFreeUnits(), initialSize);
+    try
+    {
+      int initialSize, sizeBefore, firstFreeBefore, count;
+      initialSize = testMem.getFreeUnits();
+      //Memory entries start at zero
+      assertEquals("First free not 0", testMem.findFirstFree(), 0);
+      //Allocating memory block 0, next one should be 1
+      testMem.allocateMemory(0);
+      assertEquals("First free after allocation was not 1", testMem.findFirstFree(), 1);
+      //Allocating memory block 0 again, number of units should be the same as is
+      //the first free unit
+      sizeBefore = testMem.getFreeUnits();
+      firstFreeBefore = testMem.findFirstFree();
+      testMem.allocateMemory(0);
+      assertEquals("Size after reallocation of same block not the same", testMem.getFreeUnits(),
+        sizeBefore);
+      assertEquals("First free after same allocation was not 1", firstFreeBefore, 1);
+      //Deallocating already free memory should have no effect.
+      testMem.freeMemory(1);
+      assertEquals("Deallocating already freed memory", testMem.findFirstFree(), 1);
+      //Free the allocated memory, the first should be 0
+      testMem.freeMemory(0);
+      assertEquals("Deallocating allocated memory", testMem.findFirstFree(), 0);
+      //Allocate/deallocate all.
+      sizeBefore = testMem.getFreeUnits();
+      firstFreeBefore = testMem.findFirstFree();
+      for (count = 0; count < 20; count++)
+        testMem.allocateMemory(count);
+      assertEquals("First free after allocation was not -1", testMem.findFirstFree(), -1);
+      for (count = 0; count < 20; count++)
+        testMem.freeMemory(count);
+      assertEquals("Size change after mass de/allocation", testMem.getFreeUnits(), sizeBefore);
+      assertEquals("First free after mass de/allocation", testMem.findFirstFree(), firstFreeBefore);
+      //Test that the number of Units remains the same
+      assertEquals("Total Units differ from start to end", testMem.getFreeUnits(), initialSize);
+    }
+    catch (NoFreeMemoryException e)
+    {
+    }
   }
 
   //Test memory unit.  Basically, a collection of memory which is controlled

@@ -12,7 +12,7 @@
 //            10/1/98 Rewritten for JDK 1.1. AN
 // *************************************************************************
 
-package PLL2;
+package pll2;
 
 import java.io.*;
 import java.net.*;
