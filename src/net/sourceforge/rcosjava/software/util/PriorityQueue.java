@@ -1,5 +1,7 @@
 package net.sourceforge.rcosjava.software.util;
 
+import java.util.Iterator;
+
 /**
  * Implements priority queue (based on compareTo value).
  * <P>
@@ -7,14 +9,17 @@ package net.sourceforge.rcosjava.software.util;
  * @version 1.00 $Date$
  * @created 2nd February 1996
  */
-public class PriorityQueue extends Queue
+public class PriorityQueue extends BaseQueue
 {
-  /**
-   * Class constructor.
-   */
   public PriorityQueue(int initialCapacity, int capacityIncrement)
   {
     super(initialCapacity, capacityIncrement);
+  }
+
+  public PriorityQueue(int initialCapacity, int capacityIncrement,
+    Iterator newObjects)
+  {
+    super(initialCapacity, capacityIncrement, newObjects);
   }
 
   /**

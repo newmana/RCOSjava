@@ -1,38 +1,34 @@
-//**************************************************************************
-//FILE    : LIFOQueue.java
-//PACKAGE : Util
-//PURPOSE : Implements Last In First Out type of queue.
-//AUTHOR  : Andrew Newman
-//MODIFIED:
-//HISTORY : 02/02/96  First created.
-//
-//**************************************************************************
-
 package net.sourceforge.rcosjava.software.util;
 
 import java.util.*;
 
-public class LIFOQueue extends Queue
+/**
+ * Implements Last In First Out type of queue.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 2nd February 1996
+ */
+public class LIFOQueue extends BaseQueue
 {
-  //Class constructor.
-
   public LIFOQueue()
   {
     super();
   }
-
-  //Class constructor.
 
   public LIFOQueue(int initialCapacity, int capacityIncrement)
   {
     super(initialCapacity, capacityIncrement);
   }
 
-  // LIFO Queue Insert.
-
   public void insert(Object theObject)
   {
     insertElementAt(theObject, itemCount());
   }
-}
 
+  public LIFOQueue(int initialCapacity, int capacityIncrement,
+    Iterator newObjects)
+  {
+    super(initialCapacity, capacityIncrement, newObjects);
+  }
+}
