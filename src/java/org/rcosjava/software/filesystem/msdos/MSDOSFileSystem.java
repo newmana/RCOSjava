@@ -1395,6 +1395,7 @@ public class MSDOSFileSystem implements FileSystem
   {
 
   }
+
   // Coordinating this in the one synchronised function means that the
   // allocation of the resources will be safe.
   /**
