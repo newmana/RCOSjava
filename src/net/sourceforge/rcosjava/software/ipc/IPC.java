@@ -19,7 +19,11 @@ import net.sourceforge.rcosjava.messaging.messages.universal.SemaphoreCreated;
 import net.sourceforge.rcosjava.messaging.messages.universal.SemaphoreOpened;
 import net.sourceforge.rcosjava.messaging.messages.universal.SemaphoreWaiting;
 import net.sourceforge.rcosjava.messaging.messages.universal.SemaphoreSignalled;
+import net.sourceforge.rcosjava.messaging.messages.universal.SharedMemoryClosed;
 import net.sourceforge.rcosjava.messaging.messages.universal.SharedMemoryCreated;
+import net.sourceforge.rcosjava.messaging.messages.universal.SharedMemoryOpened;
+import net.sourceforge.rcosjava.messaging.messages.universal.SharedMemoryRead;
+import net.sourceforge.rcosjava.messaging.messages.universal.SharedMemoryWrote;
 import net.sourceforge.rcosjava.messaging.messages.universal.BlockedToReady;
 import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import net.sourceforge.rcosjava.hardware.memory.Memory;
@@ -277,7 +281,7 @@ public class IPC extends OSMessageHandler
 
       //Inform other components that the shared memory was created.
       SharedMemoryCreated createdMessage = new SharedMemoryCreated(this,
-        shmName, pid, size);
+        shmName, pid, shShrm);
       sendMessage(createdMessage);
     }
   }
@@ -296,8 +300,8 @@ public class IPC extends OSMessageHandler
       ReturnValue returnMessage = new ReturnValue(this, (short) sharedMemId);
       sendMessage(returnMessage);
 
-      //message = new SharedMemoryOpenedMessage(this, iSharedMemID, pid);
-      //sendMessage(message);
+      SharedMemoryOpened message = new SharedMemoryOpened(this, shmName, pid);
+      sendMessage(message);
     }
     else
     {
@@ -308,19 +312,15 @@ public class IPC extends OSMessageHandler
     }
   }
 
-  public void sharedMemoryRead(int currentShmId, int offset)
+  public void sharedMemoryRead(int currentShmId, int offset, int pid)
   {
     Integer shrmId = new Integer(currentShmId);
-    System.out.println("Reading ShmId: " + currentShmId);
 
     if (sharedMemoryIdTable.containsKey(shrmId))
     {
       // Check that the shrm exists - it does
       SharedMemory shShrm = (SharedMemory) sharedMemoryIdTable.get(shrmId);
       short data = shShrm.read(offset);
-
-      System.out.println("Reading Offset: " + offset);
-      System.out.println("Reading Read Data: " + data);
 
       // Return result to Kernel
       ReturnValue message = new ReturnValue(this, data);
@@ -343,22 +343,16 @@ public class IPC extends OSMessageHandler
     }
   }
 
-  public void sharedMemoryWrite(int currentShmId, int offset, short newValue)
+  public void sharedMemoryWrite(int currentShmId, int offset, short newValue,
+    int pid)
   {
     Integer shrmId = new Integer(currentShmId);
-    System.out.println("Writing ShmId: " + currentShmId);
-    System.out.println("Id in: " + sharedMemoryIdTable.containsKey(shrmId));
 
     if (sharedMemoryIdTable.containsKey(shrmId))
     {
       // Check that the shrm exists - it does
       SharedMemory shShrm = (SharedMemory) sharedMemoryIdTable.get(shrmId);
       short result = shShrm.write(offset, newValue);
-
-      System.out.println("Writing ShmId: " + currentShmId);
-      System.out.println("Writing got Value: " + newValue);
-      System.out.println("Writing offset: " + offset);
-      System.out.println("Writing got Result: " + result);
 
       // Let kernel know the result
       ReturnValue message = new ReturnValue(this, result);
@@ -368,8 +362,9 @@ public class IPC extends OSMessageHandler
       if (result != -1)
       {
         // Then let others know
-        //message = new MessageAdapter(this, shmId);
-        //sendMessage(message);
+        SharedMemoryWrote wroteMessage = new SharedMemoryWrote(this,
+          shShrm.getName(), pid, shShrm);
+        sendMessage(wroteMessage);
       }
     }
     else
@@ -405,9 +400,9 @@ public class IPC extends OSMessageHandler
       sendMessage(returnMessage);
 
       // Let everyone else know.
-      //message = new SharedMemoryClosedMessage(this,
-      //  shmId, pid);
-      //sendMessage(message);
+      SharedMemoryClosed message= new SharedMemoryClosed(this, shShrm.getName(),
+        pid);
+      sendMessage(message);
     }
     else
     {
