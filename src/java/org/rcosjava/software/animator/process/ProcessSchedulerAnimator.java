@@ -576,9 +576,9 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
 
     // Process state
     currentProcesses = (HashMap) is.readObject();
-    readyQueue = (LIFOQueue) is.readObject();
-    blockedQueue = (LIFOQueue) is.readObject();
-    zombieQueue = (LIFOQueue) is.readObject();
+    readyQueue = (Queue) is.readObject();
+    blockedQueue = (Queue) is.readObject();
+    zombieQueue = (Queue) is.readObject();
 
     // Panel state
     delay = is.readLong();
