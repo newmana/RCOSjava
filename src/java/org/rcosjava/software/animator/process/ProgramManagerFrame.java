@@ -255,7 +255,7 @@ public class ProgramManagerFrame extends RCOSFrame
    */
   void updateFileList(FIFOQueue data)
   {
-    fileListBox.removeAll();
+    fileListModel.removeAllElements();
 
     startTerminal = true;
     startTerminalCheckbox.setSelected(true);
@@ -274,7 +274,7 @@ public class ProgramManagerFrame extends RCOSFrame
    */
   void updateDirectoryList(FIFOQueue data)
   {
-    directoryListBox.removeAll();
+    directoryListModel.removeAllElements();
     while (data.peek() != null)
     {
       directoryListModel.addElement((String) data.retrieve());
