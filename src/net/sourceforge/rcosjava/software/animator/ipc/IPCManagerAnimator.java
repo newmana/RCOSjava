@@ -129,20 +129,25 @@ public class IPCManagerAnimator extends RCOSAnimator
    */
   public void semaphoreCreated(String semaphoreId, int processId, int value)
   {
-    myFrame.semQueueAdd(semaphoreId, processId, value);
-  }
-
-  public void semaphoreClosed()
-  {
-   myFrame.semQueueRemove();
+    System.out.println("Semaphore added!");
+    myFrame.semaphoreCreated(semaphoreId, processId, value);
   }
 
   public void semaphoreWaiting(String semaphoreId, int processId, int value)
   {
+    System.out.println("Semaphore waiting!");
+    myFrame.semaphoreWaiting(semaphoreId, processId, value);
   }
 
   public void sempahoreSignalled()
   {
+    System.out.println("Semaphore Signalled");
+  }
+
+  public void semaphoreClosed()
+  {
+    System.out.println("Semaphore closed");
+    myFrame.semaphoreClosed();
   }
 
   public void sharedMemoryOpen()

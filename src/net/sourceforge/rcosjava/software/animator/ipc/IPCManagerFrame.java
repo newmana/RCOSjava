@@ -2,6 +2,7 @@ package net.sourceforge.rcosjava.software.animator.ipc;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
 import net.sourceforge.rcosjava.software.animator.RCOSFrame;
 import net.sourceforge.rcosjava.software.animator.support.GraphicButton;
 import net.sourceforge.rcosjava.software.animator.support.mtgos.MTGO;
@@ -39,6 +40,7 @@ public class IPCManagerFrame extends RCOSFrame
   private Component myComponent;
   private int iX, iY;
   private MemoryGraphic[] memoryGraphics = new MemoryGraphic[20];
+  private Hashtable semaphoreList;
   private Choice shmOption;
   private RCOSList shmList, semList;
   private Choice semOption;
@@ -52,6 +54,7 @@ public class IPCManagerFrame extends RCOSFrame
     iX = x;
     iY = y;
     myIPCManagerAnimator = thisIPCManager;
+    semaphoreList = new Hashtable(5);
   }
 
   public synchronized void addNotify()
@@ -74,14 +77,15 @@ public class IPCManagerFrame extends RCOSFrame
     notify();
   }
 
-  public synchronized void syncPaint(long lTime)
+  public synchronized void syncPaint(long time)
   {
     this.repaint();
     // do nothing
     try
     {
-      wait(lTime);
-    } catch(Exception v)
+      wait(time);
+    }
+    catch(Exception v)
     {
     }
   }
@@ -102,15 +106,30 @@ public class IPCManagerFrame extends RCOSFrame
     }
   }
 
+  void semaphoreCreated(String semaphoreId, int pid, int value)
+  {
+    System.out.println("Semaphore added!");
+    //semQueue.addToQueue(Integer.toString(pid));
+    if (semOption.getItemCount() == 1)
+    {
+      semOption.removeAll();
+      semOption.add("Select");
+    }
+    semOption.add(semaphoreId);
+    semaphoreList.put(semaphoreId, new SemaphoreGraphic(pid, value));
+  }
+
+  void semaphoreWaiting(String semaphoreId, int pid, int value)
+  {
+  }
+
+  void semaphoreClosed()
+  {
+  }
+
   void shmQueueAdd(String processId)
   {
     shmQueue.addToQueue(processId);
-  }
-
-  void semQueueAdd(String semaphoreId, int pid, int value)
-  {
-    //semQueue.addToQueue(processId);
-    semOption.add(semaphoreId);
   }
 
   void shmQueueRemove()
@@ -118,29 +137,24 @@ public class IPCManagerFrame extends RCOSFrame
     shmQueue.removeFromQueue();
   }
 
-  void semQueueRemove()
-  {
-    semQueue.removeFromQueue();
-  }
-
   void readingMemory(int iID, byte bType)
   {
-    colourMemory(MemoryGraphic.cReading, iID, bType);
+    colourMemory(MemoryGraphic.readingColour, iID, bType);
   }
 
   void writingMemory(int iID, byte bType)
   {
-    colourMemory(MemoryGraphic.cWriting, iID, bType);
+    colourMemory(MemoryGraphic.writingColour, iID, bType);
   }
 
   void finishedReadingMemory(int iID, byte bType)
   {
-    colourMemory(MemoryGraphic.cAllocated, iID, bType);
+    colourMemory(MemoryGraphic.allocatedColour, iID, bType);
   }
 
   void finishedWritingMemory(int iID, byte bType)
   {
-    colourMemory(MemoryGraphic.cAllocated, iID, bType);
+    colourMemory(MemoryGraphic.allocatedColour, iID, bType);
   }
 
   private void colourMemory(Color cColor, int iID, byte bMemoryType)
@@ -202,10 +216,10 @@ public class IPCManagerFrame extends RCOSFrame
     pTemp = new Panel();
     pTemp.setLayout(gridBag);
 
-    allocBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.cAllocated, Color.white);
-    unallocBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.cUnallocated, Color.white);
-    readBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.cReading, Color.white);
-    writeBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.cWriting, Color.white);
+    allocBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.allocatedColour, Color.white);
+    unallocBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.unallocatedColour, Color.white);
+    readBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.readingColour, Color.white);
+    writeBox = new RCOSRectangle(0, 0, 20, 20, MemoryGraphic.writingColour, Color.white);
 
     constraints.fill = GridBagConstraints.BOTH;
     constraints.anchor = GridBagConstraints.NORTH;
@@ -338,6 +352,8 @@ public class IPCManagerFrame extends RCOSFrame
     tmpConstraints.gridwidth=1;
     tmpConstraints.anchor = GridBagConstraints.CENTER;
     tmpGridBag.setConstraints(semOption,tmpConstraints);
+    semOption.addItemListener(new SemaphoreSelection());
+
     pSem.add(semOption);
 
     tmpConstraints.insets=new Insets(1,1,1,1);
@@ -375,5 +391,16 @@ public class IPCManagerFrame extends RCOSFrame
 
     add("Center",mainPanel);
     add("South",closePanel);
+  }
+
+  /**
+   * Change the quatum based on the option selected.
+   */
+  class SemaphoreSelection implements ItemListener
+  {
+    public void itemStateChanged(ItemEvent e)
+    {
+      System.out.println("Selected: " + (String) e.getItem());
+    }
   }
 }
