@@ -164,22 +164,22 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   /**
    * Base domain of location of applet.
    */
-  public static String baseDomain;
+  private static String baseDomain;
 
   /**
    * Default domain of the applet.
    */
-  public static String defaultDomain = new String("localhost");
+  private static String defaultDomain = "localhost";
 
   /**
    * Port to connect to to send/receive messages from the server.
    */
-  public static int port;
+  private static int port;
 
   /**
    * Main panels.
    */
-  public JPanel mainPanel, systemAnimatorsPanel, systemAnimatorsTitlePanel1,
+  private JPanel mainPanel, systemAnimatorsPanel, systemAnimatorsTitlePanel1,
       systemAnimatorsTitlePanel2, systemInterfacePanel, systemInterfaceTitlePanel,
       systemInterfaceTitlePanel1, systemInterfaceTitlePanel2, informationPanel,
       informationTitlePanel;
@@ -262,7 +262,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   /**
    * Pause/Run menu item.
    */
-  private JMenuItem pauseRunMenuItem;
+  private static JMenuItem pauseRunMenuItem;
 
   /**
    * Gets the Running attribute of the RCOS class
@@ -408,6 +408,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     //Start the animator PostOffice (animator messaging system).
     animatorPostOffice = new AnimatorOffice(ANIMATOR_POST_OFFICE_ID,
         osPostOffice);
+    animatorPostOffice.startSending();
 
     //Start the recording subsystem
     recorder = new UniversalMessageRecorder(animatorPostOffice, osPostOffice,
@@ -523,8 +524,8 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     menu.add(menuItem);
 
     Container contentPane = getContentPane();
-    contentPane.setBackground(RCOSFrame.defaultBgColour);
-    contentPane.setForeground(RCOSFrame.defaultFgColour);
+    contentPane.setBackground(RCOSFrame.DEFAULT_BG_COLOUR);
+    contentPane.setForeground(RCOSFrame.DEFAULT_FG_COLOUR);
 
     JTabbedPane tabbedPane = new JTabbedPane();
 
@@ -563,7 +564,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     if (!running)
     {
       running = true;
-      notify();
+      notifyAll();
     }
   }
 
@@ -715,7 +716,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   /**
    * Start a new process by displaying the program manager frame.
    */
-  private class NewProcessListener implements ActionListener
+  private static class NewProcessListener implements ActionListener
   {
     public void actionPerformed(ActionEvent e)
     {
@@ -723,10 +724,15 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     }
   }
 
+  public KillProcessListener createNewKillListener(ProcessManagerAnimator existingAnimator)
+  {
+    return new KillProcessListener(existingAnimator);
+  }
+
   /**
    * Listener to kill a selected process.
    */
-  public class KillProcessListener implements ActionListener
+  private static class KillProcessListener implements ActionListener
   {
     /**
      * Animator to use to send the kill message.
@@ -755,10 +761,16 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     }
   }
 
+  public ChangePriorityListener createChangePriorityListener(
+      ProcessManagerAnimator existingAnimator)
+  {
+    return new ChangePriorityListener(existingAnimator);
+  }
+
   /**
    * Listener to change the priority of a selected process.
    */
-  public class ChangePriorityListener implements ActionListener
+  private static class ChangePriorityListener implements ActionListener
   {
     /**
      * Animator to use to send the change in priority.
@@ -791,7 +803,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   /**
    * Listener to step through the execution of the process.
    */
-  private class StepCPUListener implements ActionListener
+  private static class StepCPUListener implements ActionListener
   {
     public void actionPerformed(ActionEvent e)
     {
@@ -808,7 +820,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
    * Listens for a change in whether RCOS is running or paused.  Toggles it from
    * one state to the other.
    */
-  private class PauseRunCPUListener implements ActionListener
+  private static class PauseRunCPUListener implements ActionListener
   {
     /**
      * The item has been selected.
@@ -833,7 +845,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   /**
    * Listens for when a user selects to play a multimedia tour.
    */
-  private class PlayTourListener implements ActionListener
+  private static class PlayTourListener implements ActionListener
   {
     /**
      * The item has been selected.
@@ -849,7 +861,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   /**
    * Listens for when a user selects to play a multimedia tour.
    */
-  private class RecordNewListener implements ActionListener
+  private static class RecordNewListener implements ActionListener
   {
     /**
      * The item has been selected.
@@ -865,7 +877,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   /**
    * Listens for a change to show about information.
    */
-  private class AboutListener implements ActionListener
+  private static class AboutListener implements ActionListener
   {
     /**
      * The item has been selected.
@@ -882,7 +894,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
    * A mouse adapter which attachs itself to the buttons displayed by the main
    * screen. It accepts the animator to call show on when the button is pressed.
    */
-  private class ShowAnimator extends MouseAdapter
+  private static class ShowAnimator extends MouseAdapter
   {
     /**
      * The object that contains the frame to show.
