@@ -136,12 +136,12 @@ public class FileMessages
   /**
    * Description of the Field
    */
-  private BufferedWriter writer;
+  private BufferedOutputStream writer;
 
   /**
    * Description of the Field
    */
-  private BufferedReader reader;
+  private BufferedInputStream reader;
 
   /**
    * Description of the Field
@@ -161,8 +161,8 @@ public class FileMessages
    */
   public FileMessages(InputStream newInputStream, OutputStream newOutputStream)
   {
-    reader = new BufferedReader(new InputStreamReader(newInputStream));
-    writer = new BufferedWriter(new OutputStreamWriter(newOutputStream));
+    reader = new BufferedInputStream(newInputStream);
+    writer = new BufferedOutputStream(newOutputStream);
   }
 
   /**
@@ -210,17 +210,21 @@ public class FileMessages
     try
     {
       boolean end = false;
-      StringBuffer tmpMessage = new StringBuffer();
-      String strTmpMessage;
+      byte[] buffer = new byte[1];
+      String strTmpMessage = new String();
+      int result;
 
-      while (!end)
+      do
       {
-        strTmpMessage = reader.readLine();
-        end = strTmpMessage.endsWith(EOF);
-        tmpMessage.append(strTmpMessage);
-      }
-      tmpMessage.setLength(tmpMessage.length() - EOF.length());
-      message = tmpMessage.toString();
+        result = reader.read(buffer);
+        if (result != -1)
+        {
+          strTmpMessage += new String(buffer);
+          end = strTmpMessage.endsWith(EOF);
+        }
+      } while (!end || result == -1);
+      message = strTmpMessage.substring(0, strTmpMessage.length() -
+          EOF.length());
 
       if (message != null)
       {
@@ -233,6 +237,7 @@ public class FileMessages
           messageData = messageData.substring(messageData.indexOf(spacer) + 1, messageData.length());
         }
 //        System.out.println("Message Type: " + messageType);
+//        System.out.println("Message Data: " + messageData);
 //        System.out.println("Valid Message Type: " + validMessageType(messageType));
         if (validMessageType(messageType))
         {
@@ -604,15 +609,7 @@ public class FileMessages
    */
   private boolean writeMessage(byte[] message, boolean flush)
   {
-    try
-    {
-      return (writeMessage(new String(message, "UTF-8"), flush));
-    }
-    catch (IOException ioe)
-    {
-      ioe.printStackTrace();
-      return false;
-    }
+    return (writeMessage(new String(message), flush));
   }
 
   /**
@@ -627,8 +624,7 @@ public class FileMessages
     try
     {
       previousRequestMessage = message;
-      writer.write(message);
-      writer.newLine();
+      writer.write(message.getBytes());
       if (flush)
       {
         flushOutStream();
@@ -650,8 +646,7 @@ public class FileMessages
   {
     try
     {
-      writer.write(EOF);
-      writer.newLine();
+      writer.write(EOF.getBytes());
       writer.flush();
     }
     catch (IOException ioe)
