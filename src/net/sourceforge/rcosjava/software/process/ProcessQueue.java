@@ -118,22 +118,6 @@ public class ProcessQueue
     return processes.size();
   }
 
-  /**
-   * In Process Queue order is based on the time the Process is scheduled
-   * to occur.
-   * @return return -1, 0, 1 if first object is less than, equal to or greater than
-   * second object
-   */
-  public int compare(RCOSProcess firstProcess, RCOSProcess secondProcess)
-  {
-    if (firstProcess.getPriority() == secondProcess.getPriority())
-      return 0;
-    else if (firstProcess.getPriority() < secondProcess.getPriority())
-      return -1;
-    else
-      return 1;
-  }
-
   public RCOSProcess getProcess(int pid)
   {
     return findProcess(pid);
