@@ -162,7 +162,7 @@ public class ProcessManagerAnimator extends RCOSAnimator
    * Send a run message to the kernel.  Called by the Process Manager Frame to
    * start the kernel running again.
    */
-  public void run()
+  public void sendRunMessage()
   {
     Run newMsg = new Run(this);
     sendMessage(newMsg);
@@ -172,7 +172,7 @@ public class ProcessManagerAnimator extends RCOSAnimator
    * Send a step message to the kernel.  Called by the Process Manager Frame to
    * step the execution of a process by one command.
    */
-  public void step()
+  public void sendStepMessage()
   {
     Step newMsg = new Step(this);
     sendMessage(newMsg);
@@ -183,7 +183,7 @@ public class ProcessManagerAnimator extends RCOSAnimator
    * to halt the execution of the process if it is running or remove it from one
    * of the queues.
    */
-  public void kill(int processId)
+  public void sendKillMessage(int processId)
   {
     Kill newMsg = new Kill(this, processId);
     sendMessage(newMsg);
@@ -193,7 +193,7 @@ public class ProcessManagerAnimator extends RCOSAnimator
    * Request the priority values of the process so that they can be displayed
    * and modified by the user.
    */
-  public void getProcessPriority(int processId)
+  public void sendRequestProcessPriority(int processId)
   {
     currentProcessId = processId;
     RequestProcessPriority newMsg = new RequestProcessPriority(this, processId);
@@ -209,7 +209,7 @@ public class ProcessManagerAnimator extends RCOSAnimator
     myFrame.promptProcessPriority(processId, processPriority);
   }
 
-  public void setProcessPriority(int processPriority)
+  public void sendSetProcessPriority(int processPriority)
   {
     SetProcessPriority tmpMessage = new SetProcessPriority(this,
       currentProcessId, processPriority);

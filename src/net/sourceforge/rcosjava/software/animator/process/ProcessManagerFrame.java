@@ -180,7 +180,7 @@ public class ProcessManagerFrame extends RCOSFrame
       if (processList.getSelectedItem() != null)
       {
         int process = Integer.parseInt(processList.getSelectedItem());
-        myProcessManager.kill(process);
+        myProcessManager.sendKillMessage(process);
       }
     }
   }
@@ -192,7 +192,7 @@ public class ProcessManagerFrame extends RCOSFrame
       if (processList.getSelectedItem() != null)
       {
         int process = Integer.parseInt(processList.getSelectedItem());
-        myProcessManager.getProcessPriority(process);
+        myProcessManager.sendRequestProcessPriority(process);
       }
     }
   }
@@ -202,7 +202,7 @@ public class ProcessManagerFrame extends RCOSFrame
   {
     public void mouseClicked(MouseEvent e)
     {
-      myProcessManager.step();
+      myProcessManager.sendStepMessage();
     }
   }
 
@@ -210,7 +210,7 @@ public class ProcessManagerFrame extends RCOSFrame
   {
     public void mouseClicked(MouseEvent e)
     {
-      myProcessManager.run();
+      myProcessManager.sendRunMessage();
     }
   }
 
@@ -218,7 +218,7 @@ public class ProcessManagerFrame extends RCOSFrame
   {
     public void mouseClicked(MouseEvent e)
     {
-      myProcessManager.setProcessPriority(
+      myProcessManager.sendSetProcessPriority(
         Integer.parseInt(priorityTextField.getText()));
       changePriorityDialog.setVisible(false);
     }
