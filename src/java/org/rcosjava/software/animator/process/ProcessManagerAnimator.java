@@ -161,7 +161,6 @@ public class ProcessManagerAnimator extends RCOSAnimator
   public void sendRunMessage()
   {
     Run newMsg = new Run(this);
-
     sendMessage(newMsg);
   }
 
@@ -172,7 +171,6 @@ public class ProcessManagerAnimator extends RCOSAnimator
   public void sendStopMessage()
   {
     Stop newMsg = new Stop(this);
-
     sendMessage(newMsg);
   }
 
