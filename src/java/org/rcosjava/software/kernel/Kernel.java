@@ -495,6 +495,7 @@ public class Kernel extends OSMessageHandler
       log.debug("Handling interrupt type: " + anInterrupt.getType());
       log.debug("Handling interrupt time: " + anInterrupt.getTime());
     }
+
     if (anInterrupt.getType().compareTo("TimerInterrupt") == 0)
     {
       handleTimerInterrupt();
