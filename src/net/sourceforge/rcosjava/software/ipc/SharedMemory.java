@@ -6,7 +6,8 @@ import net.sourceforge.rcosjava.hardware.memory.Memory;
 import net.sourceforge.rcosjava.software.memory.*;
 
 /**
- * Uses Memory class as the storage type.
+ * A basic shared memory class allowing the IPC manager to handle processes
+ * reading and writing the same block of memory.
  * <P>
  * <DT><B>History:</B>
  * <DD>
@@ -22,56 +23,110 @@ import net.sourceforge.rcosjava.software.memory.*;
  */
 public class SharedMemory
 {
-  private int theSize = -1;
-  private Hashtable theConnections = new Hashtable();
-  private Memory ShrmBlock;
-  private int numConnected = 0;
-  private int ShrmID;
-  private String StrID;
+  /**
+   * The size in bytes of the shared memory block.
+   */
+  private int memorySize = -1;
 
-  public SharedMemory(String aStrID,int aShrmID,int CreatorID, int aSize)
+  /**
+   * A list of all the processes with open connections to this memory block.
+   */
+  private List processConnections = new ArrayList();
+
+  /**
+   * The numerical identifier of this block.
+   */
+  private int sharedMemoryId;
+
+  /**
+   * The shared memory block.
+   */
+  private Memory sharedMemoryBlock;
+
+  /**
+   * The string identifier of this block.
+   */
+  private String name;
+
+  /**
+   * Create a new shared memory object.
+   *
+   * @param newName the unique name of the shared memory block.
+   * @param newSharedMemoryId the unique numerical identifier.
+   * @param newOriginalProcessId the process that created this block.
+   * @param newSize the size of the shared memory block.
+   */
+  public SharedMemory(String newName, int newSharedMemoryId,
+      int newOriginalProcessId, int newSize)
   {
-    ShrmBlock = new Memory(aSize);
-    open(CreatorID);
-    theSize = aSize;
-    ShrmID = aShrmID;
-    StrID = aStrID;
+    name = newName;
+    sharedMemoryId = newSharedMemoryId;
+
+    // Connect the creating process to this memory block
+    open(newOriginalProcessId);
+    memorySize =  newSize;
+    sharedMemoryBlock = new Memory(memorySize);
+
     // Assume Higher level will detect duplicate Shrm Segs
     // (aID) and return error - not to be done here?
   }
 
-  public int getShrmID()
+  /**
+   * Returns the id of the shared memory.
+   *
+   * @return the id of the shared memory.
+   */
+  public int getSharedMemoryId()
   {
-    return ShrmID;
+    return sharedMemoryId;
   }
 
-  public String getStrID()
+  /**
+   * Returns the name of the shared memory.
+   *
+   * @return the name of the shared memory.
+   */
+  public String getName()
   {
-    return StrID;
+    return name;
   }
 
-  public void open(int anID)
+  /**
+   * Open a connection from a process to the shared memory.
+   *
+   * @param newPID the new process id to connect.
+   */
+  public void open(int newPID)
   {
-    Integer aInt = new Integer(anID);
-    theConnections.put(aInt,"A Shrm");
-    numConnected++;
+    Integer pid = new Integer(newPID);
+    processConnections.add(pid);
   }
 
-  public int close(int anID)
+  /**
+   * Close a connection to a process to the shared memory.
+   *
+   * @param existingPID the process to disconnect from.
+   */
+  public int close(int existingPID)
   {
-    Integer aInt = new Integer(anID);
-    theConnections.remove(aInt);
-    numConnected--;
+    Integer pid = new Integer(existingPID);
+    processConnections.remove(pid);
+
     // IF there are no connections open to the sem, then the
     // sem should die..
     // Do this by returning the number connected
     // (Let someone else deal with the problem..)
-    return numConnected;
+    return processConnections.size();
   }
 
-  public short read(int aOffset)
+  /**
+   * Read one byte of memory from the given offset.
+   *
+   * @param offset the number of bytes offset to start reading from.
+   */
+  public short read(int offset)
   {
-    if (aOffset >= theSize)
+    if (offset >= memorySize)
     {
       // A read past the end of the block - not on!
       return -1;
@@ -79,32 +134,40 @@ public class SharedMemory
     else
     {
       // Do a read
-      short aByte = ShrmBlock.read(aOffset);
-      return aByte;
+      short returnedByte = sharedMemoryBlock.read(offset);
+      return returnedByte;
     }
   }
 
-  public short write(int aOffset, short aByte)
+  /**
+   * Write one byte of memory from the given offset.
+   *
+   * @param offset the number of bytes offset to write to.
+   * @param newValue the value to write to the memory.
+   */
+  public short write(int offset, short newValue)
   {
-    if (aOffset >= theSize)
+    if (offset >= memorySize)
     {
       // A write past the end of the block - not on!
       return -1;
     }
     else
     {
-      // Save old value
-      // short sOldValue = ShrmBlock.read(aOffset,1);
       // Do a write
-      ShrmBlock.write(aOffset, aByte);
-      //return sOldValue;
-      //return ShrmBlock.read(aOffset,1);
+      sharedMemoryBlock.write(offset, newValue);
+      System.out.println("SM wrote from: " + offset + " value: " + newValue);
       return 0;
     }
   }
 
+  /**
+   * Returns the number of bytes that the memory segment is.
+   *
+   * @return the number of bytes that the memory segment is.
+   */
   public int size()
   {
-    return theSize;
+    return memorySize;
   }
 }
