@@ -266,8 +266,6 @@ public class Kernel extends OSMessageHandler
     return currentProcess.getPID();
   }
 
-  // getName
-
   /**
    * Take a name off the stack from current StackPointer - fixed a bug where it
    * was missing it by one ie. my_sem became amy_se.
@@ -317,7 +315,7 @@ public class Kernel extends OSMessageHandler
   }
 
   /**
-   * Set that a process is running.
+   * Indicate that a process is running.
    */
   public void processRunning()
   {
@@ -325,7 +323,7 @@ public class Kernel extends OSMessageHandler
   }
 
   /**
-   * Description of the Method
+   * Indicate that a process has stopped running.
    */
   public void processStopped()
   {
@@ -351,7 +349,7 @@ public class Kernel extends OSMessageHandler
   }
 
   /**
-   * Description of the Method
+   * Pauses the execution of a process on the CPU.
    */
   public void pause()
   {
@@ -359,7 +357,7 @@ public class Kernel extends OSMessageHandler
   }
 
   /**
-   * Description of the Method
+   * Continues the execution of a process on the CPU.
    */
   public void unpause()
   {
@@ -797,8 +795,11 @@ public class Kernel extends OSMessageHandler
    * When an I/O event or other block event occurs the current process is
    * removed from the CPU and a RunningToBlocked message is sent with the
    * oldCurrent process.
+   *
+   * @param decrementProgramCounter before the program blocks decrement the
+   *     program counter so that it executes the same command again.
    */
-  public void blockCurrentProcess()
+  public void blockCurrentProcess(boolean decrementProgramCounter)
   {
     if (log.isDebugEnabled())
     {
@@ -817,7 +818,10 @@ public class Kernel extends OSMessageHandler
       // decrement program counter to force the blocking
       // instruction to be re-executed when the process is woken up
       // BUT only do it if the body of the message is null
-      //oldCurrent.getContext().decProgramCounter();
+      if (decrementProgramCounter)
+      {
+        oldCurrent.getContext().decProgramCounter();
+      }
 
       // no need to get a copy of the code as it won't change
       // Send a message to the ProcessScheduler to update old current
