@@ -24,7 +24,7 @@ you to compile RCOS using a build tool called Ant
 (http://java.sun.com/j2se/1.3/).
 
 The default process of installing RCOSjava is to use the Jakarta Ant build
-program.  The current support version of Ant is 1.3.
+program.  The current supported version of Ant is 1.3.
 
 Just go to the root directory of the source code, and execute "ant".
 
