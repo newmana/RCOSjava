@@ -95,7 +95,7 @@ public class SemaphoreQueue extends FIFOQueue
    */
   public synchronized boolean remove(Object object)
   {
-    return remove(object);
+    return super.remove(object);
   }
 
   /**
