@@ -435,7 +435,7 @@ Productions
         {fork}         fork l_par r_par semicolon |
         {exec1}        exec l_par [file_name]:value r_par semicolon |
         {exec2}        exec l_par [file_name]:arrayref r_par semicolon |
-        {rand}         varname equal rand l_par [id]:value r_par semicolon |
+        {rand}         varname equal rand l_par [id]:value r_par semicolon;
 
     printf_control_strings =
         {str_control}  string_control_string |
