@@ -194,9 +194,9 @@ public class ProcessSchedulerPanel extends RCOSPanel
     setForeground(defaultFgColour);
     setLayout(new BorderLayout());
 
-    Choice speedOption = new Choice();
-    Choice quantumOption = new Choice();
-    Choice schedulerOption = new Choice();
+    JComboBox speedOption = new JComboBox();
+    JComboBox quantumOption = new JComboBox();
+    JComboBox schedulerOption = new JComboBox();
 
     // Setup the panel with a border around it.
     optionsPanel.setBackground(defaultBgColour);
@@ -225,7 +225,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     speedOption.addItem("Slowest");
     speedOption.setForeground(choiceColour);
     speedOption.setBackground(defaultBgColour);
-    speedOption.select("Fastest");
+    speedOption.setSelectedItem("Fastest");
 
     // Set-up the options for the choice of quantum ie.
     // time spent on the CPU.
@@ -237,7 +237,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     quantumOption.addItem("1");
     quantumOption.setForeground(choiceColour);
     quantumOption.setBackground(defaultBgColour);
-    quantumOption.select("2");
+    quantumOption.setSelectedItem("2");
 
     // Set-up the options for the choice of queue
     schedulerOption.addItem("FIFO");
@@ -245,7 +245,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     schedulerOption.addItem("Priority");
     schedulerOption.setForeground(choiceColour);
     schedulerOption.setBackground(defaultBgColour);
-    schedulerOption.select("FIFO");
+    schedulerOption.setSelectedItem("FIFO");
 
     // Create speed label and add the drop down.
     JLabel tmpLabel = new JLabel();
@@ -1001,27 +1001,30 @@ public class ProcessSchedulerPanel extends RCOSPanel
      */
     public void itemStateChanged(ItemEvent e)
     {
-      String whichObject = (String) e.getItem();
+      if (e.getStateChange() == e.SELECTED)
+      {
+        String whichObject = (String) e.getItem();
 
-      if (whichObject.compareTo("Fastest") == 0)
-      {
-        delay = 1;
-      }
-      else if (whichObject.compareTo("Fast") == 0)
-      {
-        delay = 3;
-      }
-      else if (whichObject.compareTo("Normal") == 0)
-      {
-        delay = 6;
-      }
-      else if (whichObject.compareTo("Slow") == 0)
-      {
-        delay = 12;
-      }
-      else if (whichObject.compareTo("Slowest") == 0)
-      {
-        delay = 24;
+        if (whichObject.compareTo("Fastest") == 0)
+        {
+          delay = 1;
+        }
+        else if (whichObject.compareTo("Fast") == 0)
+        {
+          delay = 3;
+        }
+        else if (whichObject.compareTo("Normal") == 0)
+        {
+          delay = 6;
+        }
+        else if (whichObject.compareTo("Slow") == 0)
+        {
+          delay = 12;
+        }
+        else if (whichObject.compareTo("Slowest") == 0)
+        {
+          delay = 24;
+        }
       }
     }
   }
@@ -1039,19 +1042,22 @@ public class ProcessSchedulerPanel extends RCOSPanel
      */
     public void itemStateChanged(ItemEvent e)
     {
-      String whichObject = (String) e.getItem();
+      if (e.getStateChange() == e.SELECTED)
+      {
+        String whichObject = (String) e.getItem();
 
-      if (whichObject.compareTo("FIFO") == 0)
-      {
-        myProcessScheduler.sendSwitchFIFO();
-      }
-      else if (whichObject.compareTo("LIFO") == 0)
-      {
-        myProcessScheduler.sendSwitchLIFO();
-      }
-      else if (whichObject.compareTo("Priority") == 0)
-      {
-        myProcessScheduler.sendSwitchPriority();
+        if (whichObject.compareTo("FIFO") == 0)
+        {
+          myProcessScheduler.sendSwitchFIFO();
+        }
+        else if (whichObject.compareTo("LIFO") == 0)
+        {
+          myProcessScheduler.sendSwitchLIFO();
+        }
+        else if (whichObject.compareTo("Priority") == 0)
+        {
+          myProcessScheduler.sendSwitchPriority();
+        }
       }
     }
   }
@@ -1068,8 +1074,11 @@ public class ProcessSchedulerPanel extends RCOSPanel
      */
     public void itemStateChanged(ItemEvent e)
     {
-      myProcessScheduler.sendQuantum(
-          new Integer((String) e.getItem()));
+      if (e.getStateChange() == e.SELECTED)
+      {
+        myProcessScheduler.sendQuantum(
+            new Integer((String) e.getItem()));
+      }
     }
   }
 }
