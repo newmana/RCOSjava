@@ -13,8 +13,7 @@
 
 package net.sourceforge.rcosjava.software.filesystem.cpm14;
 
-import java.util.Hashtable;
-import java.util.StringTokenizer;
+import java.util.*;
 import net.sourceforge.rcosjava.messaging.postoffices.SimpleMessageHandler;
 import net.sourceforge.rcosjava.messaging.postoffices.MessageHandler;
 import net.sourceforge.rcosjava.software.disk.DiskRequest;
@@ -60,7 +59,7 @@ public class CPM14FileSystem implements FileSystem
   private final static int SVB2I = 255;
 
   private IndexedList cvRequestTable;
-  private Hashtable cvMountTable;
+  private HashMap cvMountTable;
   private IndexedList cvDeviceTable;
   private IndexedList cvFIDTable;
 
@@ -68,7 +67,7 @@ public class CPM14FileSystem implements FileSystem
   {
     //super(myID, myPO);
     cvRequestTable = new IndexedList(100, 10);
-    cvMountTable = new Hashtable();
+    cvMountTable = new HashMap();
     cvDeviceTable = new IndexedList(100,10);
     cvFIDTable = new IndexedList(100, 10);
   }
@@ -80,36 +79,36 @@ public class CPM14FileSystem implements FileSystem
     // Note, in the simulation, the disks are initialized each
     // time the program is run. For a disk structure that
     // remained between runs, the mount would be very different.
-    mvDevice.DeviceName = sDeviceName;
-    mvDevice.DirectoryTable = new byte[BLOCK_SIZE * TOTAL_DIR_BLOCKS];
-    mvDevice.OpenFileNames = new Hashtable();
-    mvDevice.Status = 0;
-    mvDevice.BlockList = new boolean[TOTAL_DISK_BLOCKS];
-    mvDevice.NumberOfFreeBlocks = TOTAL_DISK_BLOCKS;
-    mvDevice.DirEntList = new boolean[TOTAL_DIR_ENTRIES];
-    mvDevice.NumberOfFreeEntries = TOTAL_DIR_ENTRIES;
+    mvDevice.deviceName = sDeviceName;
+    mvDevice.directoryTable = new byte[BLOCK_SIZE * TOTAL_DIR_BLOCKS];
+    mvDevice.openFileNames = new HashMap();
+    mvDevice.status = 0;
+    mvDevice.blockList = new boolean[TOTAL_DISK_BLOCKS];
+    mvDevice.numberOfFreeBlocks = TOTAL_DISK_BLOCKS;
+    mvDevice.dirEntList = new boolean[TOTAL_DIR_ENTRIES];
+    mvDevice.numberOfFreeEntries = TOTAL_DIR_ENTRIES;
     // This section would start the read operations to retrieve the
     // directory blocks from the disk.  As it is, it simply sets the
     // status on all files to deleted so the system knows it can write
     // to them.
     for (int mvCounter = 0; mvCounter < TOTAL_DIR_ENTRIES; mvCounter++)
     {
-      mvDevice.DirectoryTable[(DIR_ENTRY_SIZE * mvCounter) + STATUS] =
+      mvDevice.directoryTable[(DIR_ENTRY_SIZE * mvCounter) + STATUS] =
         (byte) 0xE5;
-      mvDevice.DirEntList[mvCounter] = false;
+      mvDevice.dirEntList[mvCounter] = false;
     }
 
     // Setup the free dir entry and disk block arrays.
     for (int mvCounter = 0; mvCounter < TOTAL_DISK_BLOCKS; mvCounter++)
     {
-      mvDevice.BlockList[mvCounter] = false;
+      mvDevice.blockList[mvCounter] = false;
     }
 
     // Add device to the device table and the Mount table.
     int mvDeviceNumber = cvDeviceTable.add(mvDevice);
     cvMountTable.put(sMountPoint, new Integer(mvDeviceNumber));
-    // Set Status to mounted.
-    mvDevice.Status = 1;
+    // Set status to mounted.
+    mvDevice.status = 1;
   }
 
   // Perfoms an allocation of the file. Creats an entry in the FID table
@@ -125,12 +124,12 @@ public class CPM14FileSystem implements FileSystem
         (CPM14DeviceTableEntry) cvDeviceTable.getItem(mvDeviceNumber);
 
     // Check if file is already open
-    if (mvDevice.OpenFileNames.containsKey(sFileName))
+    if (mvDevice.openFileNames.containsKey(sFileName))
     {
       return(new FileSystemReturnData(iRequestID, -1));
     }
 
-    mvDevice.OpenFileNames.put(sFileName, new Boolean(true));
+    mvDevice.openFileNames.put(sFileName, new Boolean(true));
     // create the entry and init it.
     CPM14FIDTableEntry mvFIDEntry = new CPM14FIDTableEntry();
     mvFIDEntry.Device = mvDeviceNumber;
@@ -171,7 +170,7 @@ public class CPM14FileSystem implements FileSystem
                                                DATA_BLOCKS;
 
         if ( mvFIDEntry.CurrentDiskBlock !=
-          (SVB2I&mvDevice.DirectoryTable[(mvFIDEntry.FileNumber * DIR_ENTRY_SIZE) +
+          (SVB2I&mvDevice.directoryTable[(mvFIDEntry.FileNumber * DIR_ENTRY_SIZE) +
                                     DATA_BLOCKS + 16 ]))
         {
           // We are not in the last one.
@@ -179,7 +178,7 @@ public class CPM14FileSystem implements FileSystem
 
           // Check if the next block in the list == 0. If it is, this is the
           // end of the file.
-          if ( (SVB2I & mvDevice.DirectoryTable[
+          if ( (SVB2I & mvDevice.directoryTable[
                         mvDiskBlockOffset+mvCurrentBlockPosition+1])  == 0)
           {
             mvReturnValue = EOF;
@@ -270,24 +269,24 @@ public class CPM14FileSystem implements FileSystem
 
     // Setup the entry
     int mvOffset = mvDirEntry * DIR_ENTRY_SIZE;
-    mvDevice.DirectoryTable[mvOffset + STATUS] = 0;
+    mvDevice.directoryTable[mvOffset + STATUS] = 0;
 
     byte[] mvByteFilename = convertFilename(mvFIDEntry.Filename);
     int mvCounter;
     for (mvCounter = 0; mvCounter < 11; mvCounter++)
     {
-      mvDevice.DirectoryTable[mvOffset + FILENAME + mvCounter] =
+      mvDevice.directoryTable[mvOffset + FILENAME + mvCounter] =
                      mvByteFilename[mvCounter];
     }
 
-    mvDevice.DirectoryTable[mvOffset + EXTENT] = 0;
-    mvDevice.DirectoryTable[mvOffset + RESERVED] = 0;
-    mvDevice.DirectoryTable[mvOffset + RESERVED + 1] = 0;
-    mvDevice.DirectoryTable[mvOffset + RECORDS] = 0;
+    mvDevice.directoryTable[mvOffset + EXTENT] = 0;
+    mvDevice.directoryTable[mvOffset + RESERVED] = 0;
+    mvDevice.directoryTable[mvOffset + RESERVED + 1] = 0;
+    mvDevice.directoryTable[mvOffset + RECORDS] = 0;
 
     for (mvCounter = 0; mvCounter < 16; mvCounter++)
     {
-      mvDevice.DirectoryTable[mvOffset + DATA_BLOCKS + mvCounter] = 0;
+      mvDevice.directoryTable[mvOffset + DATA_BLOCKS + mvCounter] = 0;
     }
 
     // Setup the initial data.
@@ -320,15 +319,15 @@ public class CPM14FileSystem implements FileSystem
         mvFIDEntry.Buffer[(mvFIDEntry.CurrentPosition%1024)] = 0x1A;
       }
 
-      diskRequest(mvDevice.DeviceName,"FS_CLOSE::WRITE_BUFFER", "WRITING",
+      diskRequest(mvDevice.deviceName,"FS_CLOSE::WRITE_BUFFER", "WRITING",
         iFSFileNumber, iRequestID, -1,
         mvFIDEntry.CurrentDiskBlock, mvFIDEntry.Buffer);
     }
     else
     {
-      if (mvDevice.OpenFileNames.containsKey(mvFIDEntry.Filename))
+      if (mvDevice.openFileNames.containsKey(mvFIDEntry.Filename))
       {
-        mvDevice.OpenFileNames.remove(mvFIDEntry.Filename);
+        mvDevice.openFileNames.remove(mvFIDEntry.Filename);
       }
       cvFIDTable.remove(iFSFileNumber);
       // Clean up entries in FID table.
@@ -386,7 +385,7 @@ public class CPM14FileSystem implements FileSystem
       if (((mvFIDEntry.CurrentPosition) % BLOCK_SIZE) == 0)
       {
         // check for end of dirent. Use disk blocks.
-        if (mvFIDEntry.CurrentDiskBlock == mvDevice.DirectoryTable
+        if (mvFIDEntry.CurrentDiskBlock == mvDevice.directoryTable
 						[(mvFIDEntry.FileNumber*DIR_ENTRY_SIZE) + DATA_BLOCKS + 15])
         {
           //this.dumpToScreen("DIR",0,mvFIDEntry.FileNumber);
@@ -396,13 +395,13 @@ public class CPM14FileSystem implements FileSystem
             return(new FileSystemReturnData(iRequestID, -1));
           }
           mvFIDEntry.FileNumber = mvNewEntry;
-          mvFIDEntry.CurrentDiskBlock = SVB2I&mvDevice.DirectoryTable
+          mvFIDEntry.CurrentDiskBlock = SVB2I&mvDevice.directoryTable
                       [ (mvNewEntry * DIR_ENTRY_SIZE) + DATA_BLOCKS];
         }
         else
         {
           int mvNewBlock;
-          mvNewBlock = SVB2I&mvDevice.DirectoryTable[
+          mvNewBlock = SVB2I&mvDevice.directoryTable[
                (mvFIDEntry.FileNumber * DIR_ENTRY_SIZE) + DATA_BLOCKS +
                (mvFIDEntry.CurrentPosition/BLOCK_SIZE) % 16 ];
           if (mvNewBlock == 0) // 0 is used as it is a directory block
@@ -415,11 +414,8 @@ public class CPM14FileSystem implements FileSystem
           }
         }
 
-        diskRequest(mvDevice.DeviceName, "FS_READ::GETBLOCK", "GETBLOCK",
-                    iFSFileNumber, iRequestID, -1,
-                    mvFIDEntry.CurrentDiskBlock, null);
-
-
+        diskRequest(mvDevice.deviceName, "FS_READ::GETBLOCK", "GETBLOCK",
+          iFSFileNumber, iRequestID, -1, mvFIDEntry.CurrentDiskBlock, null);
       }
       else
       {
@@ -433,14 +429,14 @@ public class CPM14FileSystem implements FileSystem
           mvFIDEntry.CurrentPosition--;
         }
 
-				return(new FileSystemReturnData(iRequestID, mvDataItem));
+        return(new FileSystemReturnData(iRequestID, mvDataItem));
       }
     }
     else
     {
       return(new FileSystemReturnData(iRequestID, -1));
     }
-		return null;
+    return null;
   }
 
   // If the mode is correct, this starts or contines writing a
@@ -461,7 +457,7 @@ public class CPM14FileSystem implements FileSystem
            && ( mvFIDEntry.CurrentPosition != 0))
       {
 
-/*        diskRequest ( mvDevice.DeviceName, "FS_WRITE::FLUSH", "WRITE",
+/*        diskRequest ( mvDevicedeviceName, "FS_WRITE::FLUSH", "WRITE",
                       iFSFileNo, iRequestID,
                       mvRequestData.getData(), mvFIDEntry.CurrentDiskBlock,
                       mvFIDEntry.Buffer);
@@ -474,7 +470,7 @@ public class CPM14FileSystem implements FileSystem
           // Setup the buffer.
           int mvNextBlock = getFreeBlock ( mvFIDEntry.Device );
           mvFIDEntry.CurrentDiskBlock = (byte)mvNextBlock;
-          mvDevice.DirectoryTable[ (mvFIDEntry.FileNumber * DIR_ENTRY_SIZE)
+          mvDevice.directoryTable[ (mvFIDEntry.FileNumber * DIR_ENTRY_SIZE)
                                 + DATA_BLOCKS ] = (byte)mvNextBlock;
         }
 
@@ -484,7 +480,7 @@ public class CPM14FileSystem implements FileSystem
 
         if ( ((mvFIDEntry.CurrentPosition + 1)% 128) == 0)
         {
-          mvDevice.DirectoryTable[ (mvFIDEntry.FileNumber * DIR_ENTRY_SIZE)
+          mvDevice.directoryTable[ (mvFIDEntry.FileNumber * DIR_ENTRY_SIZE)
                       + RECORDS] =
                   (byte)(((mvFIDEntry.CurrentPosition + 1)% (16*BLOCK_SIZE)) / 128);
         }
@@ -496,7 +492,7 @@ public class CPM14FileSystem implements FileSystem
     {
       return(new FileSystemReturnData(iRequestID, -1));
     }
-		return null;
+    return null;
   }
 
   // Handle the DiskRequestComplete messages and perform the
@@ -508,12 +504,12 @@ public class CPM14FileSystem implements FileSystem
     int mvRequestID = mvMessageData.FSRequestID;
 
     CPM14RequestTableEntry mvRequestData =
-              (CPM14RequestTableEntry)cvRequestTable.getItem( mvRequestID );
+      (CPM14RequestTableEntry)cvRequestTable.getItem( mvRequestID );
 
     int mvFID = mvRequestData.FSFileNum;
 
     CPM14FIDTableEntry mvFIDEntry =
-               (CPM14FIDTableEntry)cvFIDTable.getItem( mvFID );
+      (CPM14FIDTableEntry)cvFIDTable.getItem( mvFID );
 
     CPM14DeviceTableEntry mvDevice =
         (CPM14DeviceTableEntry) cvDeviceTable.getItem (mvFIDEntry.Device);
@@ -527,12 +523,12 @@ public class CPM14FileSystem implements FileSystem
       int mvCounter;
       for ( mvCounter = 0; mvCounter < 1024; mvCounter++)
       {
-        mvToWrite[mvCounter] = mvDevice.DirectoryTable[mvCounter];
+        mvToWrite[mvCounter] = mvDevice.directoryTable[mvCounter];
       }
 
       DiskRequest mvNewReq = new DiskRequest(mvRequestID, 0, mvToWrite);
 
-      //Message mvNewMessage = new Message ( id, mvDevice.DeviceName,
+      //Message mvNewMessage = new Message ( id, mvDevicedeviceName,
       //                                      "DISKREQUEST", mvNewReq);
       //SendMessage( mvNewMessage );
     }
@@ -545,13 +541,13 @@ public class CPM14FileSystem implements FileSystem
       int mvCounter;
       for ( mvCounter = 0; mvCounter < 1024; mvCounter++)
       {
-        mvToWrite[mvCounter] = mvDevice.DirectoryTable[mvCounter+1024];
+        mvToWrite[mvCounter] = mvDevice.directoryTable[mvCounter+1024];
       }
 
 
       DiskRequest mvNewReq = new DiskRequest(mvRequestID, 1, mvToWrite);
 
-      //Message mvNewMessage = new Message ( id, mvDevice.DeviceName,
+      //Message mvNewMessage = new Message ( id, mvDevicedeviceName,
       //                                      "DISKREQUEST", mvNewReq);
       //SendMessage( mvNewMessage );
     }
@@ -560,9 +556,9 @@ public class CPM14FileSystem implements FileSystem
 //      System.out.println("Handle Write dir2 return."); // DEBUG
 //      System.out.println("About to remove FID "+mvFID); // DEBUG
       //return(new FileSystemReturnData(iRequestID, 0));
-      if ( mvDevice.OpenFileNames.containsKey( mvFIDEntry.Filename ))
+      if ( mvDevice.openFileNames.containsKey( mvFIDEntry.Filename ))
       {
-        mvDevice.OpenFileNames.remove(mvFIDEntry.Filename);
+        mvDevice.openFileNames.remove(mvFIDEntry.Filename);
       }
       cvFIDTable.remove(mvFID);
       cvRequestTable.remove(mvRequestID);
@@ -603,7 +599,7 @@ public class CPM14FileSystem implements FileSystem
       if ( mvMessageData.DiskBlock >= 0)
       {
         System.out.println("Interupt reveived.bout to write"); // DEBUG
-        int mvLastBlock = SVB2I&mvDevice.DirectoryTable
+        int mvLastBlock = SVB2I&mvDevice.directoryTable
                [(mvFIDEntry.FileNumber*DIR_ENTRY_SIZE) + DATA_BLOCKS + 15];
         //System.out.print("Cmp: "+mvLastBlock+" - "); // DEBUG
         //System.out.println("Entry :"+mvFIDEntry.FileNumber); // DEBUG
@@ -628,13 +624,13 @@ public class CPM14FileSystem implements FileSystem
           int X;
           for (X=1; X<=11; X++)
           {
-            mvDevice.DirectoryTable[ mvNewOffset + X] =
-                 mvDevice.DirectoryTable[ mvCurOffset + X];
+            mvDevice.directoryTable[ mvNewOffset + X] =
+                 mvDevice.directoryTable[ mvCurOffset + X];
           }
-          mvDevice.DirectoryTable[ mvNewOffset + 0] = 0;
-          mvDevice.DirectoryTable[ mvNewOffset + EXTENT] =
-                (byte)(mvDevice.DirectoryTable[ mvCurOffset + EXTENT] + (byte)1);
-          mvDevice.DirectoryTable[mvCurOffset + RECORDS] = (byte)0x80;
+          mvDevice.directoryTable[ mvNewOffset + 0] = 0;
+          mvDevice.directoryTable[ mvNewOffset + EXTENT] =
+                (byte)(mvDevice.directoryTable[ mvCurOffset + EXTENT] + (byte)1);
+          mvDevice.directoryTable[mvCurOffset + RECORDS] = (byte)0x80;
 
           mvFIDEntry.FileNumber = mvNewEntry;
           System.out.println("Setup dirent :"+mvNewEntry); // DEBUG
@@ -646,7 +642,7 @@ public class CPM14FileSystem implements FileSystem
           int mvOffset = (mvFIDEntry.FileNumber*DIR_ENTRY_SIZE) + DATA_BLOCKS;
           int mvBlockLocation = mvOffset +
                  ( (mvFIDEntry.CurrentPosition / BLOCK_SIZE) % 16 );
-          mvDevice.DirectoryTable[ mvBlockLocation] = (byte) mvNewBlock;
+          mvDevice.directoryTable[ mvBlockLocation] = (byte) mvNewBlock;
           mvFIDEntry.CurrentDiskBlock = (byte)mvNewBlock;
           mvFIDEntry.Buffer[ mvFIDEntry.CurrentPosition % BLOCK_SIZE] =
                          (byte)mvRequestData.Data;
@@ -724,14 +720,14 @@ public class CPM14FileSystem implements FileSystem
       mvIndex = 0;
       mvOffset = (mvCounter * DIR_ENTRY_SIZE) + FILENAME;
       while((mvIndex < 11) &&
-        (mvByteFilename[mvIndex] == mvDevice.DirectoryTable[mvOffset + mvIndex]))
+        (mvByteFilename[mvIndex] == mvDevice.directoryTable[mvOffset + mvIndex]))
       {
         mvIndex++;
       }
       mvFound = (mvIndex == 11);
       if (mvFound)
       {
-        mvFound = ( mvDevice.DirectoryTable[ mvOffset - FILENAME + EXTENT]
+        mvFound = ( mvDevice.directoryTable[ mvOffset - FILENAME + EXTENT]
                        == 0);
       }
       mvCounter++;
@@ -757,8 +753,8 @@ public class CPM14FileSystem implements FileSystem
   {
     CPM14DeviceTableEntry mvDevice =
         (CPM14DeviceTableEntry) cvDeviceTable.getItem(mvDeviceNumber);
-    return ((mvDevice.NumberOfFreeBlocks == 0)
-        ||  (mvDevice.NumberOfFreeEntries == 0));
+    return ((mvDevice.numberOfFreeBlocks == 0)
+        ||  (mvDevice.numberOfFreeEntries == 0));
   }
 
   // Coordinating this in the one synchronised function means that the
@@ -774,7 +770,7 @@ public class CPM14FileSystem implements FileSystem
       int mvCounter;
       for ( mvCounter = 0;
             (( mvCounter < TOTAL_DIR_ENTRIES) &&
-             ( mvDevice.DirEntList[mvCounter]));
+             ( mvDevice.dirEntList[mvCounter]));
             mvCounter++);
       if ( mvCounter == TOTAL_DIR_ENTRIES)
       {
@@ -782,8 +778,8 @@ public class CPM14FileSystem implements FileSystem
       }
       else
       {
-        mvDevice.DirEntList[mvCounter] = true;
-        mvDevice.NumberOfFreeEntries--;
+        mvDevice.dirEntList[mvCounter] = true;
+        mvDevice.numberOfFreeEntries--;
         return mvCounter;
       }
     }
@@ -792,7 +788,7 @@ public class CPM14FileSystem implements FileSystem
       int mvCounter;
       for ( mvCounter = 0;
             (( mvCounter < TOTAL_DISK_BLOCKS) &&
-             ( mvDevice.BlockList[mvCounter]));
+             ( mvDevice.blockList[mvCounter]));
             mvCounter++);
       if ( mvCounter == TOTAL_DISK_BLOCKS)
       {
@@ -800,8 +796,8 @@ public class CPM14FileSystem implements FileSystem
       }
       else
       {
-        mvDevice.BlockList[mvCounter] = true;
-        mvDevice.NumberOfFreeBlocks--;
+        mvDevice.blockList[mvCounter] = true;
+        mvDevice.numberOfFreeBlocks--;
         return mvCounter + DISK_BLOCK_OFFSET;
       }
 
@@ -813,30 +809,30 @@ public class CPM14FileSystem implements FileSystem
       int mvCounter = 0;
       int mvBlockNum;
 
-      mvBlockNum = SVB2I&mvDevice.DirectoryTable
+      mvBlockNum = SVB2I&mvDevice.directoryTable
                                [ mvEntryOffset + DATA_BLOCKS + mvCounter ];
 
       while ((mvCounter < 16) && (mvBlockNum > 0 ))
       {
         System.out.println("Freeing block :"+mvBlockNum);
-        mvDevice.BlockList[mvBlockNum - DISK_BLOCK_OFFSET] = false;
-        mvDevice.DirectoryTable[ mvEntryOffset + DATA_BLOCKS + mvCounter ] = 0;
+        mvDevice.blockList[mvBlockNum - DISK_BLOCK_OFFSET] = false;
+        mvDevice.directoryTable[ mvEntryOffset + DATA_BLOCKS + mvCounter ] = 0;
 
-        mvDevice.NumberOfFreeBlocks++;
+        mvDevice.numberOfFreeBlocks++;
         mvCounter++;
-        mvBlockNum = SVB2I&mvDevice.DirectoryTable
+        mvBlockNum = SVB2I&mvDevice.directoryTable
                              [ mvEntryOffset + DATA_BLOCKS + mvCounter ];
       }
-      mvDevice.DirectoryTable[ mvEntryOffset + STATUS ] = (byte)0xE5;
-      mvDevice.DirEntList[ Item ] = false;
-      mvDevice.NumberOfFreeEntries++;
+      mvDevice.directoryTable[ mvEntryOffset + STATUS ] = (byte)0xE5;
+      mvDevice.dirEntList[ Item ] = false;
+      mvDevice.numberOfFreeEntries++;
       return 1;
     }
     else if ( type.equalsIgnoreCase("CLEARBLOCK"))
     {
 
-      mvDevice.BlockList[Item] = false;
-      mvDevice.NumberOfFreeBlocks++;
+      mvDevice.blockList[Item] = false;
+      mvDevice.numberOfFreeBlocks++;
 
       return 1;
     }
@@ -868,7 +864,7 @@ public class CPM14FileSystem implements FileSystem
 
     // First check if this entry is totally used. If so, look for next,
     // otherwise exit.
-    if ( (SVB2I&mvDevice.DirectoryTable[mvCurrentOffset+RECORDS]) != 0x80)
+    if ( (SVB2I&mvDevice.directoryTable[mvCurrentOffset+RECORDS]) != 0x80)
     {
       return -1;
     }
@@ -876,13 +872,13 @@ public class CPM14FileSystem implements FileSystem
     // Get the filename to a byte[] for the search.
     byte[] mvByteFilename = new byte[11];
 
-    byte mvCurrentExtent = mvDevice.DirectoryTable
+    byte mvCurrentExtent = mvDevice.directoryTable
                              [mvCurrentOffset + EXTENT];
 
     int mvCounter;
     for ( mvCounter = 0; mvCounter < 11; mvCounter++)
     {
-      mvByteFilename[mvCounter] = mvDevice.DirectoryTable
+      mvByteFilename[mvCounter] = mvDevice.directoryTable
                       [ mvCurrentOffset + FILENAME + mvCounter];
     }
 
@@ -897,7 +893,7 @@ public class CPM14FileSystem implements FileSystem
       mvIndex = 0;
       mvOffset = (mvCounter * DIR_ENTRY_SIZE) + FILENAME;
       while ( (mvIndex < 11) &&
-              (mvByteFilename[mvIndex] == mvDevice.DirectoryTable[
+              (mvByteFilename[mvIndex] == mvDevice.directoryTable[
                                                      mvOffset + mvIndex]))
       {
         mvIndex++;
@@ -905,7 +901,7 @@ public class CPM14FileSystem implements FileSystem
       mvFound = (mvIndex == 11);
       if ( mvFound )
       {
-        mvFound = ( mvDevice.DirectoryTable[ mvOffset - FILENAME + EXTENT]
+        mvFound = ( mvDevice.directoryTable[ mvOffset - FILENAME + EXTENT]
                        == mvCurrentExtent + 1);
       }
       mvCounter++;
@@ -997,12 +993,12 @@ public class CPM14FileSystem implements FileSystem
       {
         if ( X >0 && X < 12)
         {
-          System.out.print( (char)mvDevice.DirectoryTable[ Offset + X ]
+          System.out.print( (char)mvDevice.directoryTable[ Offset + X ]
                                 +" ");
         }
         else
         {
-          System.out.print ((SVB2I&mvDevice.DirectoryTable[ Offset + X])+" ");
+          System.out.print ((SVB2I&mvDevice.directoryTable[ Offset + X])+" ");
         }
         if ( X == 15 )
         {
