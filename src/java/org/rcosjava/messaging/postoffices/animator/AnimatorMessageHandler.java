@@ -37,12 +37,21 @@ public class AnimatorMessageHandler extends SimpleMessageHandler
   public AnimatorMessageHandler(String newId, AnimatorOffice newPostOffice)
   {
     super(newId);
+    register(newId, newPostOffice);
+  }
 
+  /**
+   * Register with the animator office.
+   *
+   * @param newId the unique string identifier for the handler.
+   * @param newPostOffice the post office to register to.
+   */
+  protected void register(String newId, AnimatorOffice newPostOffice)
+  {
     postOffice = newPostOffice;
 
     // Tell the PostOffice that I'm alive
     AddHandler newMessage = new AddHandler(this, newId, this);
-
     newPostOffice.processMessage(newMessage);
   }
 

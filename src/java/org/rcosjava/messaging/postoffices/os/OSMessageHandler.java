@@ -37,13 +37,22 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
   public OSMessageHandler(String newId, OSOffice newPostOffice)
   {
     super(newId);
+    register(newId, newPostOffice);
+  }
 
+  /**
+   * Register with the OS office.
+   *
+   * @param newId the unique string identifier for the handler.
+   * @param newPostOffice the post office to register to.
+   */
+  protected void register(String newId, OSOffice newPostOffice)
+  {
     // Set the current post office
     postOffice = newPostOffice;
 
     // Tell the PostOffice that I'm alive
     AddHandler newMessage = new AddHandler(this, newId, this);
-
     newPostOffice.processMessage(newMessage);
   }
 
