@@ -1,0 +1,44 @@
+PROGRAM Semtx9 (INPUT, OUTPUT);
+
+{-----------------------------------------------------------}
+{ PURPOSE: Test of counting semaphores and initialisation.  }
+{          Create (or open) two semaphores, one binary and  }
+{          the other "counting" with an initial count set   }
+{          at ZERO. The version of the program that runs    }
+{          first (and so creates the semaphores) then waits }
+{          on the one with the zero count - causing a block }
+{          while the second instance, when started, SIGNALS }
+{          on this semaphore, releasing the first instance. }
+{          They then run in lock-step.                      }
+{                                                           }
+{ AUTHOR:  Ron Chernich                                     }
+{ DATE:    13-APR-94                                        }
+{-----------------------------------------------------------}
+
+VAR
+  s1, s2, count, dummy : INTEGER;
+
+BEGIN {main}
+  s1 := SYSTEM(SEM_OPEN, 'binary_one');
+  IF (s1 > 0) THEN BEGIN
+    count := 2;
+    s2 := SYSTEM(SEM_OPEN, 'binary_zero');
+    dummy := SYSTEM(SEM_SIGNAL, s2)
+  END ELSE BEGIN
+    count := 1;
+    s1 := SYSTEM(SEM_CREATE, 'binary_one');
+    s2 := SYSTEM(SEM_CREATE, 'binary_zero', 0);
+    dummy := SYSTEM(SEM_WAIT, s2)
+  END;
+  REPEAT
+    dummy := SYSTEM(SEM_WAIT, s1);
+    FOR dummy := 1 TO 8 DO
+      Write('~~');
+    WriteLn;
+    WriteLn(count#);
+    count := count + 2;
+    dummy := SYSTEM(SEM_SIGNAL, s1)
+  UNTIL count > 200;
+  s1 := SYSTEM(SEM_CLOSE, s1);
+  s2 := SYSTEM(SEM_CLOSE, s2)
+END.

@@ -1,0 +1,32 @@
+//***************************************************************************
+// FILE     : MessageHandler.java
+// PACKAGE  : MessageSystem
+// PURPOSE  : Abstract class to provide base class for message 
+//            handlers.
+// AUTHOR   : Bruce Jamieson
+// MODIFIED : Andrew Newman
+// HISTORY  : 24/01/96 Created
+//            17/03/96 Modified to include LocalSendMessage to allow
+//                     broadcasting of messages to just local post office.
+//
+//***************************************************************************/
+
+package MessageSystem.PostOffices;
+
+import java.util.*;
+import MessageSystem.Messages.MessageAdapter;
+
+public interface MessageHandler
+{
+  public void setID(String sNewID);
+  public String getID();
+  public void localSendMessage(MessageAdapter maMessage);
+  public void sendMessage(MessageAdapter aMessage);
+  public void addHandler(String sNewID, MessageHandler mhNewHandler);
+  public MessageHandler getHandler(String sHandlerToGet);
+  public Hashtable getHandlers();
+  public Enumeration getKeysHandlers();
+  public void removeHandler(String sOldID);
+  public void clearHandlers();
+	public void processMessage(MessageAdapter maMessage);
+}

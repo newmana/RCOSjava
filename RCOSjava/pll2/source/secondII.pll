@@ -1,0 +1,24 @@
+PROGRAM Primes (OUTPUT);
+
+{--------------------------------------------------------------------}
+{ third program run by rcos.java		     }
+{--------------------------------------------------------------------}
+
+VAR
+  ch, ch1, ch2, ch3 : INTEGER;
+
+BEGIN
+  Writeln( 'Hello World');
+
+  ch1 := 5;
+  ch2 := 4;
+
+  Writeln( 'ch 1 = ', ch1#, ' ch 2 = ', ch2# );
+
+  ch := ch1;
+  ch1 := ch2;
+  ch2 := ch;
+
+  Writeln( 'ch 1 = ', ch1#, ' ch 2 = ', ch2# );
+  
+END.

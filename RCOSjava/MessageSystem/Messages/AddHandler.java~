@@ -1,0 +1,31 @@
+//******************************************************/
+// FILE     : AddHandlerMessage.java
+// PURPOSE  : Register Message sent to Animators.
+// AUTHOR   : Andrew Newman
+// MODIFIED : 
+// HISTORY  : 01/07/96   Created
+//******************************************************/
+
+package MessageSystem.Messages;
+
+import MessageSystem.PostOffices.SimpleMessageHandler;
+import MessageSystem.PostOffices.PostOffice;
+
+public class AddHandler extends MessageAdapter
+{
+  private String sDeviceID;
+  private SimpleMessageHandler mhToRegisterTo;
+
+  public AddHandler(SimpleMessageHandler theSource, String sNewDeviceID,
+    SimpleMessageHandler mhNewToRegisterTo)
+  {
+    super(theSource);
+    sDeviceID = sNewDeviceID;
+    mhToRegisterTo = mhNewToRegisterTo;
+  }
+
+  public void doMessage(PostOffice theElement)
+  {
+		theElement.addHandler(sDeviceID, mhToRegisterTo);
+  }
+}

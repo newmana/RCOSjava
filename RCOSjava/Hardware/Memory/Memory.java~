@@ -1,0 +1,190 @@
+// *************************************************************************/
+// FILE    : Memory.java
+// PURPOSE : Basic Memory type - basically an array of
+//           short.  Provides utils for block/single byte
+//           read/write.
+// AUTHOR  : Bruce Jamieson
+// MODIFIED: Andrew Newman
+// HISTORY : ??/02/96 Completed.
+//           10/08/99 Added segment status as a separate property.
+/***************************************************************************/
+
+package Hardware.Memory;
+
+import java.io.Serializable;
+
+public class Memory implements Serializable
+{
+  // Defines a segment of memory
+  public final static short DEFAULT_SEGMENT = 1024;
+
+  private short sMemorySegment[];
+  //Segment status is either allocated or free.
+  private boolean bAllocated;
+  private int iSegmentSize;
+
+   //Constructors
+  public Memory()
+  {
+    sMemorySegment = new short[DEFAULT_SEGMENT];
+    iSegmentSize = DEFAULT_SEGMENT;
+    setFree();
+  }
+
+  public Memory(int iNewSegmentSize)
+  {
+    sMemorySegment = new short[iNewSegmentSize];
+    iSegmentSize = iNewSegmentSize;
+    setFree();
+  }
+
+  public Memory(Memory mOld)
+  {
+    iSegmentSize = mOld.getSegmentSize();
+    sMemorySegment = mOld.getMemorySegment();
+  }
+
+  public Memory(String sMemory)
+  {
+    this(sMemory.length());
+    this.write(sMemory.getBytes());
+  }
+
+  //Operations
+  public void setFree()
+  {
+    bAllocated = false;
+  }
+
+  public boolean isFree()
+  {
+   return(!bAllocated);
+  }
+
+  public boolean isAllocated()
+  {
+   return(bAllocated);
+  }
+
+  public void setAllocated()
+  {
+   bAllocated = true;
+  }
+
+  public int getSegmentSize()
+  {
+   return iSegmentSize;
+  }
+
+  public short[] getMemorySegment()
+  {
+   return sMemorySegment;
+  }
+
+  public short getOneMemorySegment(int iLocation)
+  {
+   return sMemorySegment[iLocation];
+  }
+
+  // Assumes Memory segments are the same size.
+
+  public static Memory combineMemory(Memory firstMem, Memory secondMem)
+  {
+   Memory newMemory = new Memory (firstMem.getSegmentSize() +
+     secondMem.getSegmentSize());
+
+   for (int count = 0; count < firstMem.getSegmentSize(); count++)
+   {
+     newMemory.sMemorySegment[count] = firstMem.sMemorySegment[count];
+   }
+
+   for (int count = 0; count < secondMem.getSegmentSize(); count++)
+   {
+     newMemory.sMemorySegment[count+firstMem.getSegmentSize()] =
+       secondMem.sMemorySegment[count];
+   }
+
+   return (newMemory);
+  }
+
+  // Return a segment of memory
+
+  public Memory segmentMemory(int start, int size, boolean isAllocated)
+  {
+    Memory newMemory = new Memory(size);
+    for (int count = 0; count < size; count++)
+    {
+      newMemory.sMemorySegment[count] = sMemorySegment[count+start];
+      if (isAllocated)
+        newMemory.setAllocated();
+    }
+    return (newMemory);
+  }
+
+  public short read(int Offset)
+  {
+    // Read a short from the segment at Offset;
+    return sMemorySegment[Offset];
+  }
+
+  public Memory read(int Offset, int ByteCount)
+  {
+    // Read a block
+
+    Memory MemBlock = new Memory(ByteCount);
+
+    for(int count = 0; count < ByteCount; count++)
+    {
+      MemBlock.write(count,sMemorySegment[Offset+count]);
+    }
+    // No exception handling - Bounds exceptions???
+
+    return MemBlock;
+  }
+
+  public void write(int Offset, short Instruction)
+  {
+    // Write an Instruction to location Offset
+    sMemorySegment[Offset] = Instruction;
+  }
+
+  public void write(int Offset, int Instruction)
+  {
+    // Write an Instruction to location Offset
+    sMemorySegment[Offset] = (short) Instruction;
+  }
+
+  public void write(byte[] bMemory)
+  {
+    for (int count = 0; count < iSegmentSize; count++)
+    {
+      sMemorySegment[count] = (short) bMemory[count];
+    }
+  }
+
+  public void write(int Offset, Memory SomeMemory)
+  {
+    // Write a block
+    int BlockSize = SomeMemory.getSegmentSize();
+
+    for(int count = 0; count < BlockSize; count++)
+    {
+    sMemorySegment[Offset+count] = SomeMemory.read(count);
+    }
+    // No exception handling
+  }
+
+  public String toString()
+  {
+    StringBuffer toReturn = null;
+    if (sMemorySegment != null)
+    {
+      toReturn = new StringBuffer();
+      for (int i = 0; i < iSegmentSize; i++)
+      {
+        toReturn.append(sMemorySegment[i]);
+      }
+    }
+    return toReturn.toString();
+  }
+}

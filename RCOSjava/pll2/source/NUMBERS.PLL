@@ -1,0 +1,19 @@
+PROGRAM Numbers (OUTPUT);
+
+{--------------------------------------------------------------------}
+{ Test rcos.java's ability to output numbers		     }
+{--------------------------------------------------------------------}
+
+VAR
+  ch, ch1, ch2 : INTEGER;
+
+BEGIN
+
+  while ch < 11 do
+  begin
+    Writeln( '--> ', ch# );
+    Writeln( ch#, ' <--' );
+    ch := ch + 1
+  end
+
+END.
