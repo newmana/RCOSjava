@@ -1,5 +1,6 @@
 package net.sourceforge.rcosjava.messaging.messages.universal;
 
+import net.sourceforge.rcosjava.software.animator.about.AboutAnimator;
 import net.sourceforge.rcosjava.software.animator.cpu.CPUAnimator;
 import net.sourceforge.rcosjava.software.animator.disk.DiskSchedulerAnimator;
 import net.sourceforge.rcosjava.software.animator.filesystem.FileSystemAnimator;
@@ -113,6 +114,10 @@ public class UniversalMessageAdapter extends MessageAdapter
   }
 
   public void doMessage(TerminalManager theElement)
+  {
+  }
+
+  public void doMessage(AboutAnimator theElement)
   {
   }
 
