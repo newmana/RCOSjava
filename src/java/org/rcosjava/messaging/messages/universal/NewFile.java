@@ -53,7 +53,7 @@ public class NewFile extends UniversalMessageAdapter
    *
    * @param newFilename The new Filename value
    */
-  private void setFilename(String newFilename)
+  private void setFileName(String newFilename)
   {
     filename = newFilename;
   }

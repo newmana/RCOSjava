@@ -52,7 +52,7 @@ public class NewProcess extends UniversalMessageAdapter
    *
    * @param newFileName The new Filename value
    */
-  public void setFilename(String newFileName)
+  public void setFileName(String newFileName)
   {
     fileName = newFileName;
   }
