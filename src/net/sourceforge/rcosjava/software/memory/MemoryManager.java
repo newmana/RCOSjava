@@ -48,32 +48,51 @@ public class MemoryManager extends OSMessageHandler
    * STACK_SEGMENT hold working space (read/write).
    */
   public final static byte STACK_SEGMENT = 2;
+
+  /**
+   * The name of the manager to register with the post office.
+   */
   private static final String MESSENGING_ID = "MemoryManager";
 
+  /**
+   * The page memory manager to use for memory management.
+   */
   private PagedMemoryManagement thePageHandler;
 
-  public MemoryManager(OSOffice aPostOffice)
+  /**
+   * Register the memory manager with the given post office and create the
+   * page handler with the default number of pages.
+   */
+  public MemoryManager(OSOffice postOffice)
   {
-    super(MESSENGING_ID, aPostOffice);
+    super(MESSENGING_ID, postOffice);
     thePageHandler = new PagedMemoryManagement(MemoryManager.MAX_PAGES);
   }
 
+  /**
+   * @return the page handler.
+   */
   public PagedMemoryManagement getPagedMemoryManager()
   {
     return thePageHandler;
   }
 
-  public void allocatePages(MemoryRequest mrRequest)
+  /**
+   * Called by the allocatePages message from the process scheduler.  A new
+   * process  has started and requires memory pages allocated to it.
+   */
+  public void allocatePages(MemoryRequest request)
   {
     try
     {
-      MemoryReturn mrReturn = thePageHandler.open(mrRequest.getPID(),
-        mrRequest.getMemoryType(), mrRequest.getSize());
-      AllocatedPages msg = new AllocatedPages(this, mrReturn);
+      MemoryReturn returnedMsg = thePageHandler.open(request.getPID(),
+        request.getMemoryType(), request.getSize());
+      AllocatedPages msg = new AllocatedPages(this, returnedMsg);
       sendMessage(msg);
     }
     catch (MemoryOpenFailedException e)
     {
+      //To do : Handle exception correctly.
     }
   }
 
@@ -93,24 +112,45 @@ public class MemoryManager extends OSMessageHandler
     }
   }
 
-  public Memory readPage(int pid, byte iType, int iOffset)
+  /**
+   * Read all pages for a particular process, type and offset and return all of
+   * them as a single memory block.
+   *
+   * @param pid the process id that own the memory
+   * @param type whether stack or program code memory to read
+   * @param offset the offset within the contiguous block of memory to start
+   * from
+   * @return the total contiguous memory block found with the given parameters.
+   */
+  public Memory readPage(int pid, byte type, int offset)
   {
-    return(thePageHandler.readPage(pid, iType, iOffset));
+    return(thePageHandler.readPage(pid, type, offset));
   }
 
-  public Memory readBytes(int pid, byte iType, int iSize, int iOffset)
+  public Memory readBytes(int pid, byte type, int size, int offset)
   {
-    return(thePageHandler.readBytes(pid, iType, iSize, iOffset));
+    return(thePageHandler.readBytes(pid, type, size, offset));
   }
 
-  public void writePage(int pid, byte iType, int iOffset, Memory newMemory)
+  /**
+   * Write a section of memory of a particular process, type and offset and
+   * set it to the contents of the given block of memory.
+   *
+   * @param pid the process id that own the memory
+   * @param type whether stack or program code memory to read
+   * @param offset the offset within the contiguous block of memory to start
+   * from
+   * @param newMemory the memory to set the block of memory to
+   */
+  public void writePage(int pid, byte type, int offset, Memory newMemory)
   {
-    thePageHandler.writePage(pid, iType, iOffset, newMemory);
+    thePageHandler.writePage(pid, type, offset, newMemory);
   }
 
-  public void writeBytes(int pid, byte iType, int iSize, int iOffset, Memory newMemory)
+  public void writeBytes(int pid, byte type, int size, int offset,
+    Memory newMemory)
   {
-    thePageHandler.writeBytes(pid, iType, iSize, iOffset, newMemory);
+    thePageHandler.writeBytes(pid, type, size, offset, newMemory);
   }
 
   public void writeBytes(MemoryRequest request)

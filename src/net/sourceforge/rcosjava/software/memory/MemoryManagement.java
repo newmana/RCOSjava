@@ -36,14 +36,28 @@ public interface MemoryManagement
   public Memory getAllMemory(int pid, byte type);
 
   /**
-   * Read a section of memory given a pid, type, maximum size and offset.
+   * Read all pages for a particular process, type, size and offset and return
+   * it as a single memory block.
+   *
+   * @param pid the process id that own the memory
+   * @param type whether stack or program code memory to read
+   * @param the number of bytes to read
+   * @param the offset to start in memory to begin reading
+   * @return the total contiguous memory block found with the given parameters.
    */
-  public Memory readBytes(int pid, byte type, int Size, int Offset);
+  public Memory readBytes(int pid, byte type, int size, int offset);
 
   /**
    * Write a section of memory given a new section of Memory (Mem) that has a
-   * pid, type,maximum size and offset.
+   * pid, type, maximum size and offset.
+   *
+   * @param pid the process id that own the memory
+   * @param type whether stack or program code memory to read
+   * @param size the number of bytes to read
+   * @param offset the offset to start in memory to begin reading
+   * @param the block of memory to set the values to
    */
-  public void writeBytes(int pid, byte type, int Size, int Offset, Memory Mem);
+  public void writeBytes(int pid, byte type, int size, int offset,
+    Memory memory);
 }
 
