@@ -54,6 +54,8 @@ import Software.Terminal.TerminalManager;
 //Messaging System Components.
 import MessageSystem.PostOffices.Animator.AnimatorOffice;
 import MessageSystem.PostOffices.OS.OSOffice;
+import MessageSystem.PostOffices.Animator.AnimatorMessageRecorder;
+import MessageSystem.PostOffices.OS.OSMessageRecorder;
 
 public class RCOS extends java.applet.Applet implements Runnable
 {
@@ -63,6 +65,8 @@ public class RCOS extends java.applet.Applet implements Runnable
   public final static String sAnimatorPostOfficeID = "ANIMATORPOSTOFFICE";
   private AnimatorOffice animatorOffice;
   private OSOffice postOffice;
+  private AnimatorMessageRecorder animatorRecorder;
+  private OSMessageRecorder osRecorder;
 
   //OS Objects.
 
@@ -258,6 +262,8 @@ public class RCOS extends java.applet.Applet implements Runnable
     //Start the Animator PostOffice (animator messaging system).
     postOffice = new OSOffice(sOSPostOfficeID);
 
+    osRecorder = new OSMessageRecorder("osRecorder", postOffice);
+
     // Start the Kernel and rest of os.
     theKernel = new Kernel(postOffice);
     theTerminalManager = new TerminalManager(postOffice, MaxTerminals);
@@ -271,6 +277,9 @@ public class RCOS extends java.applet.Applet implements Runnable
   public void initialiseAnimators()
   {
     animatorOffice = new AnimatorOffice(sAnimatorPostOfficeID, postOffice);
+
+    animatorRecorder = new AnimatorMessageRecorder("animatorRecorder", animatorOffice);
+
     tmAnimator = new TerminalManagerAnimator(animatorOffice, defX,
 			defY, imgTerminal, MaxTerminals, MaxTerminalCols, MaxTerminalRows);
     psAnimator = new ProcessSchedulerAnimator(animatorOffice, defX, defY,
@@ -408,7 +417,7 @@ public class RCOS extends java.applet.Applet implements Runnable
     tempButton.addMouseListener(new ShowAnimator(pcmAnimator));
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
-    tempButton = new GraphicButton(imgUpButtons[1], imgDownButtons[1],
+      tempButton = new GraphicButton(imgUpButtons[1], imgDownButtons[1],
       "Multimedia Tour", RCOSFrame.fDefaultFont, RCOSFrame.cButtonColour, true);
     gridBag.setConstraints(tempButton,constraints);
     pMain.add(tempButton);
