@@ -307,8 +307,8 @@ public class RCOS extends java.applet.Applet implements Runnable
    */
   public void initialiseRecorder()
   {
-    recorder = new UniversalMessageRecorder("Recorder", this.osPostOffice,
-      this.animatorPostOffice);
+    recorder = new UniversalMessageRecorder(this.defaultDomain, this.port,
+      "Recorder", this.osPostOffice, this.animatorPostOffice);
   }
 
   /**
