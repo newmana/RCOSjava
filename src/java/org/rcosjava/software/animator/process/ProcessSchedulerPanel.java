@@ -125,6 +125,11 @@ public class ProcessSchedulerPanel extends RCOSPanel
   private int width, height;
 
   /**
+   * The number of processes in a single queue.
+   */
+   private int noBoxes;
+
+  /**
    * The dimensions of the box.
    */
   private int boxHeight, boxWidth;
@@ -390,8 +395,9 @@ public class ProcessSchedulerPanel extends RCOSPanel
     int increment = 0;
     int arrayIndex = 0;
 
-    int noBoxes = ((engine.getWidth() - (leftIndent * 2)) / boxWidth);
+    noBoxes = ((engine.getWidth() - (leftIndent * 2)) / boxWidth);
     int halfNoBoxes =  noBoxes / 2;
+    int firstHalfNoBoxes = halfNoBoxes + (noBoxes % 2);
 
     readyPositions = new Position[noBoxes];
     blockedPositions = new Position[noBoxes];
@@ -406,23 +412,25 @@ public class ProcessSchedulerPanel extends RCOSPanel
       arrayIndex = noBoxes - 1;
       increment = -2;
 
-      for (int count2 = -(halfNoBoxes + noBoxes % 2); count2 < halfNoBoxes;
-          count2++)
+      for (int count2 = -firstHalfNoBoxes; count2 < halfNoBoxes; count2++)
       {
         if (count == 1)
         {
-          readyPositions[arrayIndex] = new Position(((count2 * boxWidth) + engine.getCenterX()),
-              topOfBox, increment, 0);
+          readyPositions[arrayIndex] = new Position(
+              ((count2 * boxWidth) + engine.getCenterX()), topOfBox, increment,
+              0);
         }
         if (count == 2)
         {
-          blockedPositions[arrayIndex] = new Position(((count2 * boxWidth) + engine.getCenterX()),
-              topOfBox, increment, 0);
+          blockedPositions[arrayIndex] = new Position(
+              ((count2 * boxWidth) + engine.getCenterX()), topOfBox, increment,
+              0);
         }
         if (count == 3)
         {
-          zombiePositions[arrayIndex] = new Position(((count2 * boxWidth) + engine.getCenterX()),
-              topOfBox, increment, 0);
+          zombiePositions[arrayIndex] = new Position(
+              ((count2 * boxWidth) + engine.getCenterX()), topOfBox, increment,
+              0);
         }
         arrayIndex--;
       }
@@ -431,26 +439,42 @@ public class ProcessSchedulerPanel extends RCOSPanel
     // Process going through line out of CPI.
     int cpuLine = (cpuPic.imageHeight / 2) - (boxWidth / 2);
     int middleOfReady = height + fm.getHeight() + 5;
+    int middleOfBlocked = (height * 2) + fm.getHeight() + 5;
+    int middleOfZombie = (height * 3) + fm.getHeight() + 5;
 
     // Movement of process from Zombie to Ready
-    zombieToReadyPositions[0] = new Position(engine.getCenterX() - 180, (3 * height) + boxHeight, -2, 0);
-    zombieToReadyPositions[1] = new Position(leftIndent - (boxWidth / 2), (3 * height) + boxHeight, 0, -2);
-    zombieToReadyPositions[2] = new Position(leftIndent - (boxWidth / 2), (2 * height) + 45 + (boxHeight / 2), 2, 0);
-    zombieToReadyPositions[3] = new Position(rightIndent - (boxWidth / 2), (2 * height) + 45 + (boxHeight / 2), 0, -2);
-    zombieToReadyPositions[4] = new Position(rightIndent - (boxWidth / 2), height + boxHeight, -2, 0);
-    zombieToReadyPositions[5] = new Position(engine.getCenterX() + 150, height + boxHeight, 0, 0);
+    zombieToReadyPositions[0] = new Position(engine.getCenterX() -
+        (firstHalfNoBoxes * boxWidth), middleOfZombie, -2, 0);
+    zombieToReadyPositions[1] = new Position(leftIndent - (boxWidth / 2),
+        middleOfZombie, 0, -2);
+    zombieToReadyPositions[2] = new Position(leftIndent - (boxWidth / 2),
+        (height * 3) - 5 - (boxHeight / 2), 2, 0);
+    zombieToReadyPositions[3] = new Position(rightIndent - (boxWidth / 2),
+        (height * 3) - 5 - (boxHeight / 2), 0, -2);
+    zombieToReadyPositions[4] = new Position(rightIndent - (boxWidth / 2),
+        middleOfReady, -2, 0);
+    zombieToReadyPositions[5] = new Position(engine.getCenterX() +
+        (boxWidth * noBoxes / 2), middleOfReady, 0, 0);
 
     // Movement of process from Blocked to Ready
-    blockedToReadyPositions[0] = new Position(engine.getCenterX() - 180, (2 * height) + boxHeight, -2, 0);
-    blockedToReadyPositions[1] = new Position(leftIndent - (boxWidth / 2), (2 * height) + boxHeight, 0, -2);
-    blockedToReadyPositions[2] = new Position(leftIndent - (boxWidth / 2), height + 45 + (boxHeight / 2), 2, 0);
-    blockedToReadyPositions[3] = new Position(rightIndent - (boxWidth / 2), height + 45 + (boxHeight / 2), 0, -2);
-    blockedToReadyPositions[4] = new Position(rightIndent - (boxWidth / 2), height + boxHeight, -2, 0);
-    blockedToReadyPositions[5] = new Position(engine.getCenterX() + 150, height + boxHeight, 0, 0);
+    blockedToReadyPositions[0] = new Position(engine.getCenterX() -
+        (firstHalfNoBoxes * boxWidth), middleOfBlocked, -2, 0);
+    blockedToReadyPositions[1] = new Position(leftIndent - (boxWidth / 2),
+        middleOfBlocked, 0, -2);
+    blockedToReadyPositions[2] = new Position(leftIndent - (boxWidth / 2),
+        (height * 2) - 5 - (boxHeight / 2), 2, 0);
+    blockedToReadyPositions[3] = new Position(rightIndent - (boxWidth / 2),
+        (height * 2) - 5 - (boxHeight / 2), 0, -2);
+    blockedToReadyPositions[4] = new Position(rightIndent - (boxWidth / 2),
+        middleOfReady, -2, 0);
+    blockedToReadyPositions[5] = new Position(engine.getCenterX() + 125,
+        middleOfReady, 0, 0);
 
     // Movement of process from Ready to CPU
-    readyToCPUPositions[0] = new Position(engine.getCenterX() - 180, middleOfReady, -2, 0);
-    readyToCPUPositions[1] = new Position(leftIndent - (boxWidth / 2), middleOfReady, 0, -2);
+    readyToCPUPositions[0] = new Position(engine.getCenterX() -
+        (firstHalfNoBoxes * boxWidth), middleOfReady, -2, 0);
+    readyToCPUPositions[1] = new Position(leftIndent - (boxWidth / 2),
+        middleOfReady, 0, -2);
     readyToCPUPositions[2] = new Position(leftIndent - (boxWidth / 2), cpuLine,
         2, 0);
     readyToCPUPositions[3] = new Position(engine.centerX(tmpPic), cpuLine,
@@ -461,10 +485,10 @@ public class ProcessSchedulerPanel extends RCOSPanel
         2, 0);
     cpuToReadyPositions[1] = new Position(rightIndent - (boxWidth / 2),
         cpuLine, 0, 2);
-    cpuToReadyPositions[2] = new Position(rightIndent - (boxWidth / 2), middleOfReady,
-        -2, 0);
-    cpuToReadyPositions[3] = new Position(engine.getCenterX() + 125, middleOfReady,
-        0, 0);
+    cpuToReadyPositions[2] = new Position(rightIndent - (boxWidth / 2),
+        middleOfReady, -2, 0);
+    cpuToReadyPositions[3] = new Position(engine.getCenterX() + 125,
+        middleOfReady, 0, 0);
 
     // Movement of process from CPU to Blocked
     cpuToBlockedPositions[0] = new Position(engine.centerX(tmpPic), cpuLine,
@@ -472,7 +496,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
     cpuToBlockedPositions[1] = new Position(rightIndent - (boxWidth / 2),
         cpuLine, 0, 2);
     cpuToBlockedPositions[2] = new Position(rightIndent - (boxWidth / 2),
-        cpuLine, -2, 0);
+        middleOfBlocked, -2, 0);
     cpuToBlockedPositions[3] = new Position(engine.getCenterX() + 150, cpuLine,
         0, 0);
 
@@ -678,7 +702,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
     readyMovement.start();
 
-    int iPos = 10 - ReadyQ.itemCount();
+    int iPos = noBoxes - ReadyQ.itemCount();
 
     while (!readyMovement.finished(iPos))
     {
@@ -700,7 +724,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
     blockedMovement.start();
 
-    int iPos = 10 - ReadyQ.itemCount();
+    int iPos = noBoxes - BlockedQ.itemCount();
 
     while (!blockedMovement.finished(iPos))
     {
@@ -722,7 +746,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
     zombieMovement.start();
 
-    int pos = 10 - ReadyQ.itemCount();
+    int pos = noBoxes - ZombieQ.itemCount();
 
     while (!zombieMovement.finished(pos))
     {
@@ -862,12 +886,16 @@ public class ProcessSchedulerPanel extends RCOSPanel
     }
 
     //Horizontal lines for zombie and blocked
-    engine.getPad().drawLine(leftIndent, 2 * (height) - 5, rightIndent, 2 * (height) - 5);
-    engine.getPad().drawLine(leftIndent, 3 * (height) - 5, rightIndent, 3 * (height) - 5);
+    engine.getPad().drawLine(leftIndent, 2 * (height) - 5, rightIndent,
+        2 * (height) - 5);
+    engine.getPad().drawLine(leftIndent, 3 * (height) - 5, rightIndent,
+        3 * (height) - 5);
 
     //Horizontal lines off CPU
-    engine.getPad().drawLine(leftIndent, cpuPic.imageHeight / 2, engine.centerX(cpuPic), cpuPic.imageHeight / 2);
-    engine.getPad().drawLine(engine.centerX(cpuPic) + cpuPic.imageWidth / 2, cpuPic.imageHeight / 2, rightIndent, cpuPic.imageHeight / 2);
+    engine.getPad().drawLine(leftIndent, cpuPic.imageHeight / 2,
+        engine.centerX(cpuPic), cpuPic.imageHeight / 2);
+    engine.getPad().drawLine(engine.centerX(cpuPic) + cpuPic.imageWidth / 2,
+        cpuPic.imageHeight / 2, rightIndent, cpuPic.imageHeight / 2);
 
     //2 Vertical lines
     engine.getPad().drawLine(leftIndent, cpuPic.imageHeight / 2, leftIndent,
@@ -885,8 +913,8 @@ public class ProcessSchedulerPanel extends RCOSPanel
   private synchronized void refreshQueue(int queueType)
   {
     LIFOQueue tmpQ = new LIFOQueue();
-    int XPosition = engine.getCenterX() - 150;
-    int YPosition = queueType * height + boxHeight;
+    int XPosition = engine.getCenterX() - ((noBoxes / 2) * boxWidth);
+    int YPosition = (queueType * height) + fm.getHeight() + 5;
 
     switch (queueType)
     {
