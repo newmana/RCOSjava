@@ -58,7 +58,7 @@ public class KillProcess extends UniversalMessageAdapter
       Interrupt processFinishedInterrupt = new Interrupt(-1,
         "ProcessFinished");
       theElement.generateInterrupt(processFinishedInterrupt);
-      theElement.killProcess();
+      //theElement.killProcess();
     }
   }
 }
