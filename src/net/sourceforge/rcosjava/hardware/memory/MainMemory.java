@@ -18,8 +18,19 @@ package net.sourceforge.rcosjava.hardware.memory;
  */
 public class MainMemory
 {
+  /**
+   * Total number of units of memory to be allocated.
+   */
   private int totalUnits;
+
+  /**
+   * Free number of memory able to be allocated.
+   */
   private int freeUnits;
+
+  /**
+   * The array of memory that is of size total units.
+   */
   private Memory[] myMemory;
 
   /**
