@@ -364,26 +364,26 @@ public class FileClient
    * Retrieve the specified file from the server.
    *
    * @param directoryType Description of Parameter
-   * @param sFileName Description of Parameter
+   * @param fileName Description of Parameter
    * @return An array of bytes containing the file contents.
    */
-  private String getFile(int directoryType, String sFileName)
+  private String getFile(int directoryType, String fileName)
   {
-    String mFileData = new String();
+    String fileData = "";
 
-    if (messages.askReadFileData(directoryType, sFileName))
+    if (messages.askReadFileData(directoryType, fileName))
     {
       //Read result
       if (messages.readMessage())
       {
         if (messages.getLastMessageType().equals(messages.A_READ_FILE_DATA))
         {
-          mFileData = messages.getLastMessageData();
+          fileData = messages.getLastMessageData();
         }
       }
     }
     // Return the lines read in.
-    return mFileData;
+    return fileData;
   }
 
   /**
