@@ -135,7 +135,7 @@ public class HardwareTerminal extends RCOSFrame
     setFont(defaultFont);
 
     SymWindow2 aSymWindow2 = new SymWindow2();
-	  this.addWindowListener(aSymWindow2);
+      this.addWindowListener(aSymWindow2);
     this.addKeyListener(new KeyHandler());
 
     setLayout(new BorderLayout(5,5));
@@ -156,7 +156,7 @@ public class HardwareTerminal extends RCOSFrame
    *
    * @param ch the character to display in the screen.
    */
-  public void printChr (char ch)
+  public void printChr(char ch)
   {
     myScreen.printChr(ch);
   }
