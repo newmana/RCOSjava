@@ -15,10 +15,10 @@ import org.rcosjava.software.filesystem.*;
 import org.rcosjava.software.filesystem.cpm14.*;
 
 /**
- * Description of the Class
+ * Tests reading, writing, deleting and renaming of files at the file system
+ * level for both CPM14 and MSDOS implementations.
  *
- * @author administrator
- * @created 28 April 2002
+ * @author Andrew Newman (created 28 April 2002)
  */
 public class FileSystemTest extends TestCase
 {
@@ -133,6 +133,10 @@ public class FileSystemTest extends TestCase
         postOffice.deliverMessages();
       }
 
+      FileSystemReturnData returnData = fs.read(requestId, fileId);
+      assertEquals("Reading should fail as not closed after writing", -1,
+          returnData.getReturnValue());
+
       // Check the entry now has the correct number of records and data blocks
       // allocated.
       dump = fs.dumpDirectoryEntry(0, 0);
@@ -165,6 +169,14 @@ public class FileSystemTest extends TestCase
       dump = fs.dumpFIDEntry(fileId);
       assertEquals("The current file id entry should have the correct " +
         "filename and mode", "C:test.pas," + CPM14Mode.ALLOCATED, dump);
+
+      // Increment the requestId each call.
+      requestId++;
+
+      // Open the existing file
+      System.out.println("Got: " + fileId);
+      data = fs.open(requestId, fileId);
+      System.out.println("Got: " + data.getReturnValue());
     }
     catch (Exception e)
     {
