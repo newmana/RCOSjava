@@ -42,6 +42,7 @@ import org.rcosjava.software.interrupt.TimerInterruptHandler;
 import org.rcosjava.software.memory.MemoryManager;
 import org.rcosjava.software.memory.MemoryRequest;
 import org.rcosjava.software.process.RCOSProcess;
+import org.rcosjava.software.process.ProcessState;
 
 import org.apache.log4j.*;
 
@@ -375,6 +376,11 @@ public class Kernel extends OSMessageHandler
     {
       log.debug("Null process");
     }
+
+    // Make sure that the messages are processed before stopping and removing
+    // the current process.
+    postOffice.deliverMessages();
+
     processStopped();
     myCPU.setContext(new Context());
     myCPU.setCode(null);
@@ -806,6 +812,7 @@ public class Kernel extends OSMessageHandler
       //Save current process and process context
       RCOSProcess oldCurrent = getCurrentProcess();
       oldCurrent.addToCPUTicks(getCurrentProcessTicks());
+      oldCurrent.setStatus(ProcessState.BLOCKED);
 
       // decrement program counter to force the blocking
       // instruction to be re-executed when the process is woken up
@@ -863,11 +870,16 @@ public class Kernel extends OSMessageHandler
 
         nullProcess();
 
-        // no need to get a copy of the code as it won't change
         // Send a message to the ProcessScheduler to update old current
-        // processes data structures
-        RunningToReady tmpMsg = new RunningToReady(this, oldProcess);
-        sendMessage(tmpMsg);
+        // processes data structures.  But only if the current process is still
+        // running.  The above null process may take the process from Read to
+        // Blocked - if that is the case don't send this.
+
+        if (oldProcess.getState() == ProcessState.RUNNING)
+        {
+          RunningToReady tmpMsg = new RunningToReady(this, oldProcess);
+          sendMessage(tmpMsg);
+        }
       }
     }
   }
