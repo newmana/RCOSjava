@@ -1,23 +1,21 @@
-//**************************************************************************/
-// FILE     : Chain.java
-// PACKAGE  : Animator.MTGOS
-// PURPOSE  : This is the basic engine which uses the MTGO objects.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 01/01/97  First created.
-//
-//**************************************************************************/
-
 package net.sourceforge.rcosjava.software.animator.support.mtgos;
 
+/**
+ * A chain is a simple linked list which contains an MTGO object and another
+ * chain.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 1st January 1997
+ */
 public class Chain
 {
-  public MTGO mob;
-  public Chain rest;
+  public MTGO object;
+  public Chain nextChain;
 
-  public Chain (MTGO mob, Chain rest)
+  public Chain (MTGO newObject, Chain newNextChain)
   {
-    this.mob = mob;
-    this.rest = rest;
+    object = newObject;
+    nextChain = newNextChain;
   }
 }
