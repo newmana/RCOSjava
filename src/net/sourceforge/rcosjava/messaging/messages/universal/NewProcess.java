@@ -74,7 +74,6 @@ public class NewProcess extends UniversalMessageAdapter
     return 1;
   }
 
-
   /**
    * Calculates the number of pages based on the memory block size.
    *

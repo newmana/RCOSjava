@@ -42,11 +42,6 @@ import java.io.Serializable;
 public class UniversalMessageAdapter extends MessageAdapter
   implements OSMessage, AnimatorMessage, Serializable
 {
-  public UniversalMessageAdapter()
-  {
-    super();
-  }
-
   public UniversalMessageAdapter(OSMessageHandler theSource)
   {
     super(theSource);
