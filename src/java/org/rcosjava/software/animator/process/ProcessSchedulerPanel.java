@@ -214,7 +214,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
     // Set-up green process
     process = new BufferedImage(boxWidth, boxHeight,
-                                BufferedImage.TYPE_INT_ARGB);
+        BufferedImage.TYPE_INT_ARGB);
     processGraphics = process.createGraphics();
     processGraphics.setColor(new Color(51, 255, 153));
     processGraphics.fillOval(0, 0, boxWidth, boxHeight);
@@ -222,7 +222,7 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
     // Set-up blue process
     process = new BufferedImage(boxWidth, boxHeight,
-                                BufferedImage.TYPE_INT_ARGB);
+        BufferedImage.TYPE_INT_ARGB);
     processGraphics = process.createGraphics();
     processGraphics.setColor(new Color(153, 153, 255));
     processGraphics.fillOval(0, 0, boxWidth, boxHeight);
