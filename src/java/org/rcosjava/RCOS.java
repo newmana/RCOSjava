@@ -20,6 +20,7 @@ import org.rcosjava.software.animator.cpu.CPUAnimator;
 import org.rcosjava.software.animator.disk.DiskSchedulerAnimator;
 import org.rcosjava.software.animator.filesystem.FileSystemAnimator;
 import org.rcosjava.software.animator.ipc.IPCManagerAnimator;
+import org.rcosjava.software.animator.memory.MemoryManagerAnimator;
 import org.rcosjava.software.animator.multimedia.MultimediaAnimator;
 import org.rcosjava.software.animator.process.ProcessManagerAnimator;
 import org.rcosjava.software.animator.process.ProcessSchedulerAnimator;
@@ -134,6 +135,11 @@ public class RCOS extends javax.swing.JApplet implements Runnable
    * CPU animator object.
    */
   private static CPUAnimator cpuAnimator;
+
+  /**
+   * Memory manager animator object.
+   */
+  private static MemoryManagerAnimator memoryAnimator;
 
   /**
    * IPC animator object.
@@ -317,6 +323,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   {
     tmAnimator.setupLayout(this);
     psAnimator.setupLayout(this);
+    memoryAnimator.setupLayout(this);
     ipcAnimator.setupLayout(this);
     cpuAnimator.setupLayout(this);
     pmAnimator.setupLayout(this);
@@ -486,6 +493,8 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     psAnimator = new ProcessSchedulerAnimator(animatorPostOffice,
         processImages);
 
+    memoryAnimator = new MemoryManagerAnimator(animatorPostOffice, ipcImages);
+
     ipcAnimator = new IPCManagerAnimator(animatorPostOffice, ipcImages);
 
     cpuAnimator = new CPUAnimator(animatorPostOffice, null);
@@ -558,15 +567,16 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     menu.add(menuItem);
 
     Container contentPane = getContentPane();
-//    contentPane.setBackground(RCOSFrame.defaultBgColour);
-//    contentPane.setForeground(RCOSFrame.defaultFgColour);
+    contentPane.setBackground(RCOSFrame.defaultBgColour);
+    contentPane.setForeground(RCOSFrame.defaultFgColour);
 
     JTabbedPane tabbedPane = new JTabbedPane();
 
     tabbedPane.add(tmAnimator.getPanel(), "Terminals");
     tabbedPane.add(psAnimator.getPanel(), "Process Scheduler");
     tabbedPane.add(cpuAnimator.getPanel(), "CPU");
-//    tabbedPane.add(ipcAnimator.getPanel(), "IPC Manager");
+    tabbedPane.add(memoryAnimator.getPanel(), "Memory");
+//    tabbedPane.add(ipcAnimator.getPanel(), "IPC");
     tabbedPane.add(new JPanel(), "Disk Scheduler");
     tabbedPane.add(new JPanel(), "File System");
 
