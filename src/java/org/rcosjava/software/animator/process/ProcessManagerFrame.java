@@ -92,6 +92,7 @@ public class ProcessManagerFrame extends RCOSFrame
     priorityPanel.add(priorityTextField);
 
     JPanel okCancelPanel = new JPanel();
+    okCancelPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
     okCancelPanel.setBackground(defaultBgColour);
     okCancelPanel.setForeground(defaultFgColour);
     JButton tmpOkayButton = new JButton("Ok");
@@ -99,7 +100,7 @@ public class ProcessManagerFrame extends RCOSFrame
     okCancelPanel.add(tmpOkayButton);
     JButton tmpCancelButton = new JButton("Cancel");
     tmpCancelButton.addMouseListener(new CancelPriorityDialog());
-    okCancelPanel.add(tmpCancelButton, BorderLayout.SOUTH);
+    okCancelPanel.add(tmpCancelButton);
 
     dialogContainer.add(priorityPanel, BorderLayout.CENTER);
     dialogContainer.add(okCancelPanel, BorderLayout.SOUTH);
