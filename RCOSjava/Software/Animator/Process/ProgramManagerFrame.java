@@ -17,12 +17,17 @@ import Software.Util.FIFOQueue;
  * other components. It's functions are to set up and comunicate with a
  * remote server for the loading of programs.
  * <P>
- * HISTORY: 31/03/96 DJ Added fifoQueue for filenames.<BR>
- *          30/12/96 Rewritten with frame moved to Animators.<BR>
- *          01/01/97 Section from Program Manager moved here.<BR>
- *          02/01/97 New layout (GridBagLayout). Option to automatically
- *                   start terminal added.<BR>
- * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 31/03/96 DJ Added fifoQueue for filenames.
+ * </DD><DD>
+ * 30/12/96 Rewritten with frame moved to Animators.
+ * </DD><DD>
+ * 01/01/97 Section from Program Manager moved here.
+ * </DD><DD>
+ * 02/01/97 New layout (GridBagLayout). Option to automatically start terminal
+ * added.
+ * </DD></DT>
  * @author Andrew Newman.
  * @author Brett Carter.
  * @author David Jones.
@@ -129,12 +134,12 @@ import Software.Util.FIFOQueue;
     gridBag.setConstraints(pTerminalOption,constraints);
     pMain.add(pTerminalOption);
 
-		Button tmpOpenAWTButton = new Button("Open");
+    Button tmpOpenAWTButton = new Button("Open");
     pButtons.add(tmpOpenAWTButton);
     pButtons.setLayout(new FlowLayout(FlowLayout.RIGHT));
     tmpOpenAWTButton.addMouseListener(new okayButtonListener());
 
-		Button tmpAWTButton = new Button("Close");
+    Button tmpAWTButton = new Button("Close");
     pButtons.add(tmpAWTButton);
     tmpAWTButton.addMouseListener(new RCOSFrame.CloseAnimator());
 
@@ -175,7 +180,7 @@ import Software.Util.FIFOQueue;
   {
     public void mouseClicked(MouseEvent e)
     {
-			setVisible(false);
+      setVisible(false);
       tfFilename.setText("");
       fileListBox.deselect(fileListBox.getSelectedIndex());
       myProgramManager.newProcess(bStartTerminal);
@@ -193,27 +198,27 @@ import Software.Util.FIFOQueue;
     }
   }
 
-  class fileListBoxListener	extends MouseAdapter
+  class fileListBoxListener extends MouseAdapter
   {
     public void mouseClicked(MouseEvent e)
-  	{
-	    switch(e.getClickCount())
-	    {
-	      case 1:
-           //File name has been selected.
+    {
+      switch(e.getClickCount())
+      {
+        case 1:
+          //File name has been selected.
           myProgramManager.setCurrentFile(fileListBox.getSelectedItem());
           updateSelected();
-		    break;
-	      case 2:
+	break;
+        case 2:
           //File has been double clicked on.
           myProgramManager.setCurrentFile(fileListBox.getSelectedItem());
           tfFilename.setText("");
           fileListBox.deselect(fileListBox.getSelectedIndex());
           myProgramManager.newProcess(bStartTerminal);
           setVisible(false);
-		    break;
-	    }
-	  }
+        break;
+      }
+    }
   }
 
   class directoryListBoxListener extends MouseAdapter

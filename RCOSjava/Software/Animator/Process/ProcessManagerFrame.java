@@ -1,16 +1,3 @@
-//***************************************************************************
-// FILE     : ProcessManagerFrame.java
-// PACKAGE  : Animator
-// PURPOSE  : It is the interface which allows users to manipulate
-//            running processes.  It allows them to be killed, to stop
-//            the CPU or to execute one instruction at a time.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 10/1/97  Created. AN
-//            23/11/98 Converted to Java 1.1. AN
-//
-//***************************************************************************/
-
 package Software.Animator.Process;
 
 import java.awt.*;
@@ -26,6 +13,22 @@ import MessageSystem.Messages.Message;
 import MessageSystem.PostOffices.MessageHandler;
 import Software.Process.RCOSProcess;
 
+/**
+ * It is the interface which allows users to manipulate running processes.
+ * It allows them to be killed, to stop the CPU or to execute one instruction
+ * at a time.
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 10/1/97  Created. AN
+ * </DD><DD>
+ * 23/11/98 Converted to Java 1.1. AN
+ * </DD></DT>
+ *
+ * @author Andrew Newman
+ * @version 1.00 $Date$
+ * @created 14th January 1996
+ */
 public class ProcessManagerFrame extends RCOSFrame
 {
   private ProcessManagerAnimator myProcessManager;
@@ -34,7 +37,7 @@ public class ProcessManagerFrame extends RCOSFrame
   private RCOSList rProcesses;
 
   public ProcessManagerFrame (int x, int y, Image[] pmImages,
-                              ProcessManagerAnimator thisProcessManager)
+    ProcessManagerAnimator thisProcessManager)
   {
     setTitle("Process Manager");
     myImages = pmImages;
