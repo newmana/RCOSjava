@@ -18,6 +18,7 @@ import org.rcosjava.software.animator.support.GraphicButton;
 import org.rcosjava.software.animator.support.NewLabel;
 import org.rcosjava.software.animator.support.RCOSList;
 import org.rcosjava.software.process.ProcessPriority;
+import org.rcosjava.software.process.RCOSProcess;
 
 /**
  * It is the interface which allows users to display the current process control
@@ -160,6 +161,16 @@ public class ProcessControlBlockFrame extends RCOSFrame
 
     getContentPane().add(treeView, BorderLayout.CENTER);
     getContentPane().add(okPanel, BorderLayout.SOUTH);
+  }
+
+  /**
+   * Updates the display of current values of the process.
+   *
+   * @param newProcess the new process details that have been updated.
+   */
+  public void updateDisplay(RCOSProcess newProcess)
+  {
+
   }
 
   /**
