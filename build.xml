@@ -40,15 +40,15 @@
   </target>
 
   <target name="dist" depends="compile">
-    <!-- Server side distribution -->
-    <copy todir="${dist.dir}/pll2">
-      <fileset dir="${src.dir}/pll2"/>
-    </copy>
-
     <!-- Client distribution -->
     <jar jarfile="${dist.jar}" basedir="${dist.dir}"/>
     <move file="${dist.jar}" todir="${dist.dir}"/>
     <copy file="${src.dir}/RCOS.html" tofile="${dist.dir}/RCOS.html"/>
+
+    <!-- Server side distribution -->
+    <copy todir="${dist.dir}/pll2">
+      <fileset dir="${src.dir}/pll2"/>
+    </copy>
 
     <!-- Clean up dist directory -->
     <delete dir="${dist.dir}/com"/>
