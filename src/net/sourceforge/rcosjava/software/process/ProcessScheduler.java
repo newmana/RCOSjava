@@ -238,7 +238,7 @@ public class ProcessScheduler extends OSMessageHandler
   /**
    * Removes all processes from the Executing Queue.
    */
-  public void setCurrentProcessNull()
+  public void nullProcess()
   {
     executingQ.removeAllProcesses();
   }
@@ -407,8 +407,6 @@ public class ProcessScheduler extends OSMessageHandler
   {
     removeExecutingProcess(oldProcess.getPID());
     cleanupResources(oldProcess);
-    NullProcess tmpMessage = new NullProcess(this);
-    sendMessage(tmpMessage);
   }
 
   /**
@@ -438,7 +436,7 @@ public class ProcessScheduler extends OSMessageHandler
       }
       if (tmpProcess != null)
       {
-       cleanupResources(tmpProcess);
+        cleanupResources(tmpProcess);
       }
     }
   }
