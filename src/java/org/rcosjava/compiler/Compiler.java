@@ -55,11 +55,8 @@ public class Compiler
 
       // Add header codes.
       addInstruction(0, new Instruction(OpCode.JUMP.getValue(), (byte) 0,
-          (short) 1));
-
-      // At the moment hard coded for 3+1 (magic offset plus global variables).
-      addInstruction(1, new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
-        stmtCompiler.getNumberOfVariables()));
+          stmtCompiler.mainPosition()));
+      System.out.println("Main pos: " + stmtCompiler.mainPosition());
 
       // Print out result to file
       Iterator tmpIter = instructions.iterator();
@@ -68,6 +65,8 @@ public class Compiler
       {
         tmpBuffer.append((Instruction) tmpIter.next() + "\n");
       }
+
+      System.out.println("Got: " + tmpBuffer.toString());
 
       ByteArrayInputStream input =
           new ByteArrayInputStream(tmpBuffer.toString().getBytes());
