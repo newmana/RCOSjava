@@ -3,14 +3,10 @@ package org.rcosjava.software.util;
 /**
  * To maintain an indexable list of data. Indexing done for quick lookup time.
  * <P>
- *
- *
  * <DT> <B>History:</B>
  * <DD> 8/5/2001 - Updated and made indexed list element an inner class. AN
- * </DD></DT> <P>
- *
- *
- *
+ * </DD></DT>
+ * <P>
  * @author Brett Carter.
  * @author Andrew Newman.
  * @created 9th March 1996
@@ -22,14 +18,17 @@ public class IndexedList
    * Description of the Field
    */
   private int freeListIndex, freeListSize, dataListSize;
+
   /**
    * Description of the Field
    */
   private int[] freeList;
+
   /**
    * Description of the Field
    */
   private IndexedListElement[] dataList;
+
   /**
    * Description of the Field
    */
