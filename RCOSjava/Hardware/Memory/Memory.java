@@ -1,8 +1,6 @@
 // *************************************************************************/
 // FILE    : Memory.java
-// PURPOSE : Basic Memory type - basically an array of
-//           short.  Provides utils for block/single byte
-//           read/write.
+// PURPOSE :
 // AUTHOR  : Bruce Jamieson
 // MODIFIED: Andrew Newman
 // HISTORY : ??/02/96 Completed.
@@ -13,6 +11,17 @@ package Hardware.Memory;
 
 import java.io.Serializable;
 
+/**
+ * Basic Memory type - basically an array of short.  Provides utils for
+ * block/single byte read/write.
+ * <P>
+ * HISTORY: 10/08/1999 Added segment status as a separate property.
+ * <P>
+ * @author Andrew Newman.
+ * @author Bruce Jamieson.
+ * @version 1.00 $Date$
+ * @created 1st February 1996
+ */
 public class Memory implements Serializable, Cloneable
 {
   // Defines a segment of memory
