@@ -43,33 +43,33 @@ To run the RCOSjava server, execute the "runme.sh" (for Unix) or
 "runme.bat" (for Windows) from within the "bin" directory.
 
 RCOSjava includes a small web server called Soma.  It runs on the web
-port 80 by default.  To run Soma, execute the "soma.sh" (for Unix) or 
+port 8080 by default.  To run Soma, execute the "soma.sh" (for Unix) or 
 "soma.bat" (for Windows) from within the "bin" directory.
 
 To run the applet you can use a Java 1.3 enabled browser.  
 
 The address to use is:
-http://localhost/RCOS.html
+http://localhost:8080/RCOS.html
 
 If this fails or if you prefer, you can use the appletviewer by executing: 
-appletviewer http://localhost/RCOS.html
+appletviewer http://localhost:8080/RCOS.html
 
 You can view the documentation by going to: 
-http://localhost/index.html
+http://localhost:8080/index.html
 
 If you already have a web server set-up copy the entire contents of the 
 "dist" directory to your web root directory and point your browser to the
 above addresses.
 
 
-** Creating Your Own PCode Files **
+** Creating Your Own P-Code Files **
 ===================================
 
-There are two basic ways of producing new PCode files:
+There are two basic ways of producing new P-Code files:
 * Using PASM or
 * Simple C compiler.
 
-PASM is the PCode assembler/dissambler.  To run it go into the bin directory
+PASM is the P-Code assembler/dissambler.  To run it go into the bin directory
 and run either pasm.bat (for Windows) or pasm.sh (for Unix).
 
 To decompile a file use:
@@ -79,24 +79,29 @@ To compile a file:
 ./pasm.bat -c filename
 
 The Simple C compiler is a compiler which takes a simplified C grammar (with
-RCOSjava specific extensions) and compiles it into PCode.  To run it execute 
+RCOSjava specific extensions) and compiles it into P-Code.  To run it execute 
 either compiler.bat (for Windows) or compile.sh (for Unix) from the bin
 directory.
 
 There are currently 10 examples that ship with RCOSjava:
 * mem.c, mem2.c - An example of semaphore use.
 * smem.c, smem2.c - An example of shared memory use.
-* test.c, test2.c, test3.c, test4.c test5.c, test6.c, test7.c, test8.c - These
-  are basically the test cases used against the compiler.  
+* phi1.c, phi2.c, phi3.c, phi4.c, phi5.c - A example of dining philosophers
+  problem.
+* roomphi1.c, roomphi2.c, roomphi3.c, roomphi4.c, roomphi5.c - A solution to
+  the dining philosophers problem.
+* test.c, test2.c, test3.c, test4.c test5.c, test6.c, test7.c, test8.c,
+  test9.c, test10.c  - These are basically the test cases used against the 
+  compiler.  
 
 Anything not in these files probably will not work and some that does.  See
 known bugs for any issues with the the compiler. 
 
 For more information on the extentions and limitations see the documentation 
 on the local web site at:
-http://localhost/Resources/compiler/index.html
+http://localhost:8080/Resources/compiler/index.html
 
-Once you have compiled the new PCode programs copy them into the
+Once you have compiled the new P-Code programs copy them into the
 dist/pll2/executable directory.  The next time you try to load a program it
 will appear in the files to load.
 
@@ -130,7 +135,7 @@ To recompile the Simple C SableCC grammar use the "sablecc" target.
 ** Windows Problems **
 ======================
 
-For 95/98 and NT users please ensure that 'hosts' file is set-up correctly.
+For Windows users please ensure that 'hosts' file is set-up correctly.
 The program can appear to hang if it can't resolve your computers name.
 Make sure you have a hosts file that at least resolves 'localhost'.  The
 simplest way to do this is go to your Windows directory and rename the
@@ -163,11 +168,9 @@ the "port" parameter.  You will also have to change it in the relevant
 =================
 
 The currently known bugs are:
-* OS X has problems associated with the graphics.  For example, with 
-Lists (such as in the file load and semaphore value boxes).  Resizing the 
-window fixes these problems.
 * The compiler is not complete it doesn't handle functions and many other
 things.
+* Doesn't work under Safari on OS X.
 
 Please submit any bugs (with OS, Java VM, Browser and any other details)
 to the email addresses below.
@@ -178,4 +181,4 @@ newmana@users.sourceforge.net
 David Jones
 d.jones@cqu.edu.au
 
-Last Update: 26th May 2002
+Last Update: 6th August 2003
