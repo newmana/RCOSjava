@@ -40,7 +40,7 @@ public class TerminalManagerPanel extends RCOSPanel
   /**
    * Buttons to display view/show.
    */
-  private GraphicButton[] views;
+  private JButton[] views;
 
   /**
    * Images to display in button.
@@ -80,7 +80,7 @@ public class TerminalManagerPanel extends RCOSPanel
     terminalManager = thisTerminalManager;
 
     terminals = new GraphicButton[maxTerminals];
-    views = new GraphicButton[maxTerminals];
+    views = new JButton[maxTerminals];
   }
 
   /**
@@ -151,12 +151,11 @@ public class TerminalManagerPanel extends RCOSPanel
         }
 
         currentTerminal++;
-        views[currentTerminal] = new GraphicButton(images[2],
-            images[3], "#" + currentTerminal + " off", defaultFont,
-            buttonColour, true, true);
+        views[currentTerminal] = new JButton("Terminal #" + currentTerminal);
+        views[currentTerminal].setFont(defaultFont);
         gridBag.setConstraints(views[currentTerminal], constraints);
         main.add(views[currentTerminal]);
-        views[currentTerminal].addMouseListener(new TerminalHandler());
+        views[currentTerminal].addActionListener(new TerminalButtonListener());
       }
     }
 
@@ -176,7 +175,7 @@ public class TerminalManagerPanel extends RCOSPanel
   {
     terminals[terminalNo].setButtonUpPic(images[0]);
     terminals[terminalNo].setButtonDownPic(images[0]);
-    views[terminalNo].setButtonText("Hide #" + terminalNo);
+    views[terminalNo].setText("Hide #" + terminalNo);
     terminals[terminalNo].repaint();
     views[terminalNo].repaint();
   }
@@ -192,7 +191,7 @@ public class TerminalManagerPanel extends RCOSPanel
   {
     terminals[terminalNo].setButtonUpPic(images[1]);
     terminals[terminalNo].setButtonDownPic(images[1]);
-    views[terminalNo].setButtonText("#" + terminalNo + " off");
+    views[terminalNo].setText("Terminal #" + terminalNo);
     terminals[terminalNo].repaint();
     views[terminalNo].repaint();
   }
@@ -206,7 +205,7 @@ public class TerminalManagerPanel extends RCOSPanel
    */
   void terminalFront(int terminalNo)
   {
-    views[terminalNo].setButtonText("Hide #" + terminalNo);
+    views[terminalNo].setText("Hide #" + terminalNo);
     views[terminalNo].repaint();
   }
 
@@ -219,7 +218,7 @@ public class TerminalManagerPanel extends RCOSPanel
    */
   void terminalBack(int terminalNo)
   {
-    views[terminalNo].setButtonText("View #" + terminalNo);
+    views[terminalNo].setText("View #" + terminalNo);
     views[terminalNo].repaint();
   }
 
@@ -227,11 +226,8 @@ public class TerminalManagerPanel extends RCOSPanel
    * Attached to each terminal screen and terminal button. If a terminal is
    * clicked on it will toggle the terminal off/on. If the button was view it
    * will bring it to the front and fouce and the hide will do the opposite.
-   *
-   * @author administrator
-   * @created 28 April 2002
    */
-  class TerminalHandler extends MouseAdapter
+  private class TerminalHandler extends MouseAdapter
   {
     /**
      * Description of the Method
@@ -240,26 +236,48 @@ public class TerminalManagerPanel extends RCOSPanel
      */
     public void mouseClicked(MouseEvent e)
     {
-      int iTerminalNumber;
       String whichObject = e.getSource().toString();
+      toggleButtons(whichObject);
+    }
+  }
 
-      if (whichObject.startsWith("Terminal #"))
-      {
-        iTerminalNumber = (Integer.parseInt(whichObject.substring(10)));
-        terminalManager.sendToggleTerminal(iTerminalNumber);
-      }
-      if (whichObject.startsWith("View #"))
-      {
-        iTerminalNumber = (Integer.parseInt(whichObject.substring(6)));
-        terminalManager.sendTerminalFront(iTerminalNumber);
-        terminalFront(iTerminalNumber);
-      }
-      if (whichObject.startsWith("Hide #"))
-      {
-        iTerminalNumber = (Integer.parseInt(whichObject.substring(6)));
-        terminalManager.sendTerminalBack(iTerminalNumber);
-        terminalBack(iTerminalNumber);
-      }
+  /**
+   * Records when a user clicks on a button.
+   */
+  private class TerminalButtonListener implements ActionListener
+  {
+    public void actionPerformed(ActionEvent e)
+    {
+      toggleButtons(e.getActionCommand());
+    }
+  }
+
+  /**
+   * Depending on the string passed (from a button or terminal) toggle the
+   * buttons and send any required messages.
+   *
+   * @param whichObject the object that was selected.
+   */
+  private void toggleButtons(String whichObject)
+  {
+    int terminalNumber;
+
+    if (whichObject.startsWith("Terminal #"))
+    {
+      terminalNumber = (Integer.parseInt(whichObject.substring(10)));
+      terminalManager.sendToggleTerminal(terminalNumber);
+    }
+    if (whichObject.startsWith("View #"))
+    {
+      terminalNumber = (Integer.parseInt(whichObject.substring(6)));
+      terminalManager.sendTerminalFront(terminalNumber);
+      terminalFront(terminalNumber);
+    }
+    if (whichObject.startsWith("Hide #"))
+    {
+      terminalNumber = (Integer.parseInt(whichObject.substring(6)));
+      terminalManager.sendTerminalBack(terminalNumber);
+      terminalBack(terminalNumber);
     }
   }
 }
