@@ -151,18 +151,30 @@ public class CPU
   /**
    * The new CPU context to set the CPU.  Currently, there is no protection
    * or error checking.  The kernel is assumed to know what it's doing.
+   * Overwrites the current process code.  Sets the code to exceute to true
+   * if the process code given is not null.  Again, the CPU has a variable
+   * storage system to hold all of the process code.  For simple implementation.
+   * Overwrites the current process stack.  The stack is a fixed size and the
+   * CPU holds this interally.  Not very realistic but easliy implemented.
+   *
+   * @param newContext the program's context.
+   * @param newProcessMemory the new memory value of the process code.
+   * @param newMemory the new memory value of the process stack.
    */
-  public void setContext(Context newContext)
+  public void setMemory(Context newContext, Memory newProcessMemory,
+    Memory newProcessStack)
   {
     myContext = newContext;
+    processStack = newProcessStack;
+    codeToExecute = !(newProcessMemory == null);
+    processCode = newProcessMemory;
   }
 
-  /**
-   * Creates a new instance of the internal context.
-   */
-  public void setNewContext()
+  public boolean isNewContext()
   {
-    myContext = new Context();
+    return (myContext.getProgramCounter() == -1 &&
+            myContext.getStackPointer() == -1 &&
+            myContext.getBasePointer() == -1);
   }
 
   /**
@@ -212,30 +224,6 @@ public class CPU
   public Memory getProcessCode()
   {
     return processCode;
-  }
-
-  /**
-   * Overwrites the current process stack.  The stack is a fixed size and the
-   * CPU holds this interally.  Not very realistic but easliy implemented.
-   *
-   * @param newMemory the new memory value of the process stack.
-   */
-  public void setProcessStack(Memory newMemory)
-  {
-    processStack = newMemory;
-  }
-
-  /**
-   * Overwrites the current process code.  Sets the code to exceute to true
-   * if the process code given is not null.  Again, the CPU has a variable
-   * storage system to hold all of the process code.  For simple implementation.
-   *
-   * @param newMemory the new memory value of the process code.
-   */
-  public void setProcessCode(Memory newMemory)
-  {
-    codeToExecute = !(newMemory == null);
-    processCode = newMemory;
   }
 
   /**
