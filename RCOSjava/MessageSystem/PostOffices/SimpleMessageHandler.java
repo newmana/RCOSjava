@@ -32,10 +32,20 @@ public abstract class SimpleMessageHandler
   protected String id;
   private Hashtable registeredHandlers = new Hashtable();
 
+  /**
+   * Null construct does nothing.
+   */
   public SimpleMessageHandler()
   {
   }
 
+  /**
+   * Creates a message handler with the given id and regsisters to the given
+   * post office.
+   *
+   * @param newId the id to register with the post office to.
+   * @param newPostOffice the created post office to send and receive messages.
+   */
   public SimpleMessageHandler(String newId, PostOffice newPostOffice)
   {
     // Save myId and a pointer the PostOffice
@@ -47,25 +57,54 @@ public abstract class SimpleMessageHandler
     newPostOffice.processMessage(newMessage);
   }
 
+  /**
+   * Create a simple message handler without adding it to a post office.
+   */
   public SimpleMessageHandler(String newId)
   {
     id = newId;
   }
 
+  /**
+   * Set the id of the message handler.
+   */
   public void setId(String newId)
   {
     id = newId;
   }
 
+  /**
+   * Returns the id of the message handler.
+   */
   public String getId()
   {
     return id;
   }
 
+  /**
+   * Send a message to all registered to the post office and forward it to
+   * other post offices.
+   */
   public abstract void sendMessage(MessageAdapter aMessage);
+
+  /**
+   * Send the messages only to the local post office.
+   */
   public abstract void localSendMessage(MessageAdapter maMessage);
+
+  /**
+   * Process the message that was sent to it.  Called by the post office it
+   * was registered with.
+   */
   public abstract void processMessage(MessageAdapter maMessage);
 
+  /**
+   * If the simple message handler is a post office you register message
+   * handlers with it.
+   *
+   * @param newId name of the message handler.
+   * @param newHandler the message handler to add.
+   */
   public void addHandler(String newId, MessageHandler newHandler)
   {
     registeredHandlers.put(newId, newHandler);

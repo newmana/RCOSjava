@@ -8,8 +8,8 @@ import MessageSystem.Messages.MessageAdapter;
  * Provide message handling centre of operations.
  * <P>
  * @author Andrew Newman.
- * @created    21 October 2000
  * @version 1.00 $Date$
+ * @created 21 October 2000
  */
 public abstract class PostOffice extends SimpleMessageHandler
 {

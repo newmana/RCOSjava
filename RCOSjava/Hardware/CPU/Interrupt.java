@@ -12,32 +12,59 @@ import java.io.Serializable;
  */
 public class Interrupt implements Serializable
 {
-  private int iTime;
-  private String sType;
+  /**
+   * The CPU tick at which the interupt occurred.
+   */
+  private int time;
 
-  public Interrupt(int aTime, String aType)
+  /**
+   * The string representation of the interrupt.
+   */
+  private String type;
+
+  /**
+   * Create a new interrupt based on the given tick and type.
+   *
+   * @param newTime the time in CPU ticks in which the interrupt is to occur or
+   *   ocurred.
+   * @param newType the string representation of the interrupt.
+   */
+  public Interrupt(int newTime, String newType)
   {
-    iTime = aTime;
-    sType = aType;
+    time = newTime;
+    type = newType;
   }
 
+  /**
+   * Return the time.  No checking is assumed about what the current tick of
+   * the CPU is.
+   */
   public int getTime()
   {
-    return iTime;
+    return time;
   }
 
+  /**
+   * Returned the stored string identication of the interrupt.
+   */
   public String getType()
   {
-    return sType;
+    return type;
   }
 
-  public void setTime(int aTime)
+  /**
+   * Simple set method to set the value of time.
+   */
+  public void setTime(int newTime)
   {
-    iTime = aTime;
+    time = newTime;
   }
 
-  public void setType(String aType)
+  /**
+   * Simple set method to set the value of type.
+   */
+  public void setType(String newType)
   {
-    sType = aType;
+    type = newType;
   }
 }

@@ -184,27 +184,6 @@ import Software.Util.FIFOQueue;
   }
 
   /**
-   *  Set the given terminal to on.  If the terminal number is 0 then it will
-   *  attempt to retrieve the next available terminal
-   *
-   * @param terminalNo the terminal to add.
-   */
-  public void setTerminalOn(int terminalNo)
-  {
-    if (terminalNo == 0)
-    {
-      //terminalNo = theElement.setNextTerminal(getSource().getId());
-    }
-    else
-    {
-      //theElement.addTerminal(terminalNo);
-    }
-    // Send message using the new value of terminal
-    //TerminalOn tmpMsg = new TerminalOn(this, terminalNo);
-    //this.sendMessage(tmpMsg);
-  }
-
-  /**
    * Called to bring the terminal into focus.  Called by @see TerminalBack and
    * @see TerminalFont messages.
    *
@@ -318,7 +297,7 @@ import Software.Util.FIFOQueue;
   private boolean addNextTerminal()
   {
     int count = 1;
-    if (unallocatedTerminals.size() > 0)
+    if (allocatedTerminals.size() != getMaxTerminals())
     {
       while (count < getMaxTerminals())
       {

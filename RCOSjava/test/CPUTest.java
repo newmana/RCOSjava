@@ -41,22 +41,22 @@ public class CPUTest extends TestCase
   {
     assertEquals("Equality of null created", instruction1, instruction2);
     assertEquals("Illegal OpCode of null created ", instruction1.getOpCode(), Instruction.OPCODE_ILLEGAL);
-    assertEquals("Illegal SysCall of null ", instruction1.getWParameter(), -1);
-    assertEquals("Illegal Operator of null ", instruction1.getWParameter(), -1);
+    assertEquals("Illegal SysCall of null ", instruction1.getWordParameter(), -1);
+    assertEquals("Illegal Operator of null ", instruction1.getWordParameter(), -1);
 
     instruction1 = new Instruction(Instruction.OPCODE_OPR, (byte) 1, (short) 0);
-    assertEquals("Legal Operation 0 ", 0, instruction1.getWParameter());
+    assertEquals("Legal Operation 0 ", 0, instruction1.getWordParameter());
     instruction1 = new Instruction(Instruction.OPCODE_OPR, (byte) 1, (short) 22);
-    assertEquals("Legal Operation 22 ", 22, instruction1.getWParameter());
+    assertEquals("Legal Operation 22 ", 22, instruction1.getWordParameter());
     instruction1 = new Instruction(Instruction.OPCODE_OPR, (byte) 1, (short) 27);
-    assertEquals("Illegal Operation 27 ", 23, instruction1.getWParameter());
+    assertEquals("Illegal Operation 27 ", 23, instruction1.getWordParameter());
 
     instruction1 = new Instruction(Instruction.OPCODE_CSP, (byte) 1, (short) 0);
-    assertEquals("Legal System Call 0 ", 0, instruction1.getWParameter());
+    assertEquals("Legal System Call 0 ", 0, instruction1.getWordParameter());
     instruction1 = new Instruction(Instruction.OPCODE_CSP, (byte) 1, (short) 27);
-    assertEquals("Legal Operation 27 ", 27, instruction1.getWParameter());
+    assertEquals("Legal Operation 27 ", 27, instruction1.getWordParameter());
     instruction1 = new Instruction(Instruction.OPCODE_CSP, (byte) 1, (short) 42);
-    assertEquals("Illegal Operation 42 ", 28, instruction1.getWParameter());
+    assertEquals("Illegal Operation 42 ", 28, instruction1.getWordParameter());
 
     instruction1 = new Instruction(Instruction.OPCODE_STO, (byte) 1, (short) 12);
     instruction2 = new Instruction(Instruction.OPCODE_STO, (byte) 1, (short) 12);

@@ -10,11 +10,10 @@ import java.io.Serializable;
  * 	Context newContext = new Context();
  * </CODE>
  *
- * @see Hardware.CPU.Instruction
- * @see Hardware.CPU.Interrupt
- * @version 1.00 $Date$
  * @author Andrew Newman.
  * @author David Jones
+ * @version 1.00 $Date$
+ * @created 21st January 1996
  */
 public class Context implements Cloneable, Serializable
 {

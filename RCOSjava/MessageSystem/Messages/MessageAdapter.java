@@ -6,10 +6,12 @@ import MessageSystem.PostOffices.SimpleMessageHandler;
 import MessageSystem.PostOffices.PostOffice;
 
 /**
- * Basic message class.
+ * An adapter (default implementation) of the message interface.  It prevents
+ * messages from having to implement methods that have exactly the same
+ * implementation.
  * <P>
- * HISTORY: 03/07/98 Used double dispatch<BR>
- *          05/05/98 Removed usage of destination<BR>
+ * HISTORY: 03/07/98 Used double dispatch.<BR>
+ *          05/05/98 Removed usage of destination.<BR>
  *          06/05/98 Removed usage of string based sender.<BR>
  * <P>
  * @author Andrew Newman

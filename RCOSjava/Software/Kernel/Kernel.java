@@ -291,7 +291,7 @@ public class Kernel extends OSMessageHandler
     throws java.io.IOException
   {
     int iCall = myCPU.getContext().
-      getInstructionRegister().getWParameter();
+      getInstructionRegister().getWordParameter();
     if (iCall == Instruction.SYS_CHIN)
     {
       ChIn aMessage = new

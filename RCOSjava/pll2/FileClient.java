@@ -14,7 +14,7 @@ import fr.dyade.koala.xml.sax.*;
  * <P>
  * HISTORY: 20/01/1996 Updated to break down to method calls.<BR>
  *          12/01/1997 Moved to Disk package and closed connection
- *                     gracefully. AN<BR>
+ *          gracefully. AN<BR>
  *          10/01/198  Rewritten for JDK 1.1. AN<BR>
  * <P>
  * @author Andrew Newman (based on code by Brett Carter).

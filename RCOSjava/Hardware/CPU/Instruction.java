@@ -176,30 +176,38 @@ public class Instruction implements Cloneable, Serializable
     "ILLEGAL_SYS_ERROR" };
 
   private int opCode;
-  private byte bParam;
-  private short wParam;
+  private byte byteParam;
+  private short wordParam;
 
   /**
-   * Default constructor creates opCode, bParam and wParam with values of -1.
+   * Default constructor creates opCode, byteParam and wordParam with values of -1.
    */
   public Instruction()
   {
     opCode = -1;
-    bParam = -1;
-    wParam = -1;
+    byteParam = -1;
+    wordParam = -1;
   }
 
   /**
-   * Construct an
+   * Construct an fully fledged Instruction.  Should throw an
+   * exception if the opCode and parameters are invalid.
+   *
+   * @param newOpCode the index to the thirteen opcodes available.
+   * @param newByteParam the 0, lexical offset or condition of the opCode.
+   * @param newWordParam the literal value of the opCode.
    */
-  public Instruction(int myOpCode, byte myBParam, short myWParam)
+  public Instruction(int newOpCode, byte newByteParam, short newWordParam)
   {
-    opCode = myOpCode;
-    bParam = myBParam;
-    wParam = myWParam;
+    opCode = newOpCode;
+    byteParam = newByteParam;
+    wordParam = newWordParam;
   }
 
-  //What opcode is it?
+  /**
+   * Returns the opCode stored in the instruction.  Returns an OPCODE_ILLEGAL
+   * if the opcode is wrong.
+   */
   public int getOpCode()
   {
     if ((opCode >= OPCODE_LIT) && (opCode <= OPCODE_STOX))
@@ -208,40 +216,54 @@ public class Instruction implements Cloneable, Serializable
       return OPCODE_ILLEGAL;
   }
 
-  //No error checking on Byte Parameter
-  public byte getBParameter()
+  /**
+   * Returns the byte parameters.  There is no checking.  It will always return
+   * a value.
+   */
+  public byte getByteParameter()
   {
-    return bParam;
+    return byteParam;
   }
 
-  //Return a valid Word Parameter based on current opcode.
-  public short getWParameter()
+  /**
+   * Returns a valid word parameter based on the current opcode.  Will return
+   * OPERATOR_ILLEGAL if the parameter is incorrect for the current opcode.
+   */
+  public short getWordParameter()
   {
-    //If the opcode is OPR then the wParam defines an operator (+,-, etc)
+    //If the opcode is OPR then the wordParam defines an operator (+,-, etc)
     if (getOpCode() == Instruction.OPCODE_OPR)
     {
-      if ((wParam >= OPERATOR_RET) && (wParam <= OPERATOR_CPY))
-        return wParam;
+      if ((wordParam >= OPERATOR_RET) && (wordParam <= OPERATOR_CPY))
+        return wordParam;
       else
         return OPERATOR_ILLEGAL;
     }
-    //If the opcode is CSP then the wParam defines a system call (cout, etc)
+    //If the opcode is CSP then the wordParam defines a system call (cout, etc)
     else if (getOpCode() == Instruction.OPCODE_CSP)
     {
-      if ((wParam >= SYS_CHIN) && (wParam <= SYS_F_WRITE))
-        return wParam;
+      if ((wordParam >= SYS_CHIN) && (wordParam <= SYS_F_WRITE))
+        return wordParam;
       else
         return SYS_ILLEGAL;
     }
     //If it's any other instruction then just send it back
-    return wParam;
+    return wordParam;
   }
 
-  public void setWParameter(short sNewParameter)
+  /**
+   * Sets the new word parameter.  There is no error checking performed.
+   *
+   * @param newWordParamter the new value to set.
+   */
+  public void setWordParameter(short newWordParameter)
   {
-    wParam = sNewParameter;
+    wordParam = newWordParameter;
   }
 
+  /**
+   * Makes a shallow copy of the instruction.
+   */
   public Object clone()
   {
     try
@@ -254,14 +276,20 @@ public class Instruction implements Cloneable, Serializable
     return null;
   }
 
+  /**
+   * Compares the object based on opCode, byteParam and wordParam.
+   *
+   * @param obj the object (has to be Instruction) to compare.
+   * @returns true if all values are equal.
+   */
   public boolean equals(Object obj)
   {
     if (obj != null && (obj.getClass().equals(this.getClass())))
     {
      Instruction instr = (Instruction) obj;
       if ((this.opCode == instr.opCode) &&
-          (this.bParam == instr.bParam) &&
-          (this.wParam == instr.wParam))
+          (this.byteParam == instr.byteParam) &&
+          (this.wordParam == instr.wordParam))
       {
         return true;
       }
@@ -269,7 +297,10 @@ public class Instruction implements Cloneable, Serializable
     return false;
   }
 
-  //Return String version of Current Instruction.
+  /**
+   * Returns the string value of the instruction dependant upon what the opCode
+   * that is currently stored.
+   */
   public String toString()
   {
     if (opCode != OPCODE_ILLEGAL)
@@ -278,15 +309,15 @@ public class Instruction implements Cloneable, Serializable
       if ((opCode != OPCODE_CSP) &&
           (opCode != OPCODE_OPR))
       {
-        return (command + " " + bParam + ", " + wParam);
+        return (command + " " + byteParam + ", " + wordParam);
       }
       else if (opCode == OPCODE_CSP)
       {
-        return (command + " " + bParam + ", " + systemCalls[wParam]);
+        return (command + " " + byteParam + ", " + systemCalls[wordParam]);
       }
       else if (opCode == OPCODE_OPR)
       {
-        return (command + " " + bParam + ", " + operators[wParam]);
+        return (command + " " + byteParam + ", " + operators[wordParam]);
       }
     }
     return ("ERROR");

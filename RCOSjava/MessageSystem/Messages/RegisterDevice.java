@@ -1,17 +1,17 @@
-//******************************************************/
-// FILE     : RegisterDeviceMessage.java
-// PURPOSE  : Register a device with the Post office
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 24/03/96   Created
-//******************************************************/
-
 package MessageSystem.Messages;
 
 import MessageSystem.PostOffices.PostOffice;
 
+/**
+ * A simple method that does not override any of the messages default
+ * properties.  Post offices receiving this message knows that the sender
+ * of the message wishes to register with it.
+ * <P>
+ * @author Andrew Newman
+ * @version 1.00 $Date$
+ * @created 24th March 1996
+ */
 public class RegisterDevice extends MessageAdapter
 {
-  private boolean isPostOffice;
 }
 
