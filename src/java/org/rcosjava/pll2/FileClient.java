@@ -230,10 +230,11 @@ public class FileClient
   {
     KOMLSerializer serializer = null;
     ByteArrayOutputStream tmpBuffer = new ByteArrayOutputStream();
+//    ObjectOutputStream tmpBuffer = new ObjectOutputStream(new ByteArrayOutputStream());
 
     try
     {
-      serializer = new KOMLSerializer(tmpBuffer, true);
+      serializer = new KOMLSerializer(tmpBuffer, false);
       serializer.addObject(object);
     }
     catch (Exception e)

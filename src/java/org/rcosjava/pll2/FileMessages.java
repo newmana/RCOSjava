@@ -22,37 +22,42 @@ public class FileMessages
    */
   public final static String EOF = "[EOF]";
 
-  //Possible requests
-  /**
-   * Description of the Field
-   */
+//Possible requests
+/**
+ * Description of the Field
+ */
   public final static String Q_HANGUP = "Q000";
+
   /**
    * Description of the Field
    */
   public final static String Q_DIRECTORY_LIST = "Q100";
+
   /**
    * Description of the Field
    */
   public final static String Q_DIRECTORY_CREATE = "Q101";
+
   /**
    * Description of the Field
    */
   public final static String Q_READ_FILE_DATA = "Q200";
+
   /**
    * Description of the Field
    */
   public final static String Q_WRITE_FILE_DATA = "Q300";
+
   /**
    * Description of the Field
    */
   public final static String Q_FILE_STATS = "Q400";
 
-  //Possible replies
-  //Errors
-  /**
-   * Description of the Field
-   */
+//Possible replies
+//Errors
+/**
+ * Description of the Field
+ */
   public final static String A_INVALID_COMMAND = "A001";
   /**
    * Description of the Field
@@ -103,10 +108,10 @@ public class FileMessages
    */
   public final static String A_DESC_CANNOT_CREATE_DIRECTORY = "Couldn't create directory";
 
-  //Success
-  /**
-   * Description of the Field
-   */
+//Success
+/**
+ * Description of the Field
+ */
   public final static String A_DIRECTORY_LIST = "A100";
   /**
    * Description of the Field
@@ -137,15 +142,17 @@ public class FileMessages
    * Description of the Field
    */
   private BufferedOutputStream writer;
+//  private DataOutputStream writer;
 
-  /**
-   * Description of the Field
-   */
+/**
+ * Description of the Field
+ */
   private BufferedInputStream reader;
+//  private DataInputStream reader;
 
-  /**
-   * Description of the Field
-   */
+/**
+ * Description of the Field
+ */
   private String message, messageData, messageType, previousRequestMessage;
 
   /**
@@ -163,6 +170,8 @@ public class FileMessages
   {
     reader = new BufferedInputStream(newInputStream);
     writer = new BufferedOutputStream(newOutputStream);
+//    reader = new DataInputStream(newInputStream);
+//    writer = new DataOutputStream(newOutputStream);
   }
 
   /**
@@ -211,8 +220,16 @@ public class FileMessages
     {
       boolean end = false;
       byte[] buffer = new byte[1];
+      StringBuffer tmpMessage = new StringBuffer();
       String strTmpMessage = new String();
       int result;
+
+//      while (!end)
+//      {
+//        strTmpMessage = reader.readUTF();
+//        end = strTmpMessage.endsWith(EOF);
+//        tmpMessage.append(strTmpMessage);
+//      }
 
       do
       {
@@ -223,8 +240,12 @@ public class FileMessages
           end = strTmpMessage.endsWith(EOF);
         }
       } while (!end || result == -1);
+
       message = strTmpMessage.substring(0, strTmpMessage.length() -
-          EOF.length());
+                                        EOF.length());
+//
+//      tmpMessage.setLength(tmpMessage.length() - EOF.length());
+//      message = tmpMessage.toString();
 
       if (message != null)
       {
@@ -281,12 +302,12 @@ public class FileMessages
    * @return Description of the Returned Value
    */
   public boolean askDirectoryListing(int directoryIndicator,
-      String directoryName)
+                                     String directoryName)
   {
     if (directoryName != null)
     {
       return (writeMessage(Q_DIRECTORY_LIST + spacer + directoryIndicator + spacer +
-          directoryName));
+                           directoryName));
     }
     else
     {
@@ -302,12 +323,12 @@ public class FileMessages
    * @return Description of the Returned Value
    */
   public boolean askDirectoryCreate(int directoryIndicator,
-      String directoryName)
+                                    String directoryName)
   {
     if (directoryName != null)
     {
       return (writeMessage(Q_DIRECTORY_CREATE + spacer + directoryIndicator + spacer +
-          directoryName));
+                           directoryName));
     }
     else
     {
@@ -327,7 +348,7 @@ public class FileMessages
     if (filename != null)
     {
       return (writeMessage(Q_READ_FILE_DATA + spacer + directoryIndicator + spacer +
-          filename));
+                           filename));
     }
     else
     {
@@ -344,12 +365,12 @@ public class FileMessages
    * @return Description of the Returned Value
    */
   public boolean askWriteFileData(int directoryIndicator, String filename,
-      String fileData)
+                                  String fileData)
   {
     if (filename != null)
     {
       return (writeMessage(Q_WRITE_FILE_DATA + spacer + directoryIndicator + spacer +
-          "1" + spacer + filename + spacer + fileData));
+                           "1" + spacer + filename + spacer + fileData));
     }
     else
     {
@@ -369,7 +390,7 @@ public class FileMessages
     if (filename != null)
     {
       return (writeMessage(Q_FILE_STATS + spacer + directoryIndicator + spacer +
-          filename));
+                           filename));
     }
     else
     {
@@ -395,7 +416,7 @@ public class FileMessages
   {
     previousRequestSize = directoryList.length;
     if (!writeMessage(A_DIRECTORY_LIST + spacer + "0" + spacer +
-        previousRequestSize, false))
+                      previousRequestSize, false))
     {
       return false;
     }
@@ -406,8 +427,8 @@ public class FileMessages
     {
       if (!writeMessage((spacer + directoryList[count]), false))
       {
-        return false;
-      }
+      return false;
+    }
     }
     flushOutStream();
     return true;
@@ -423,7 +444,7 @@ public class FileMessages
   {
     previousRequestSize = fileData.length;
     if (!writeMessage(A_READ_FILE_DATA + spacer + "0" + spacer +
-        previousRequestSize + spacer, false))
+                      previousRequestSize + spacer, false))
     {
       return false;
     }
@@ -494,7 +515,7 @@ public class FileMessages
   public boolean replyCannotAccessDirectoryMessage()
   {
     return (replyErrorMessage(A_CANNOT_ACCESS_DIRECTORY + padding +
-        A_DESC_CANNOT_ACCESS_DIRECTORY));
+                              A_DESC_CANNOT_ACCESS_DIRECTORY));
   }
 
   /**
@@ -506,7 +527,7 @@ public class FileMessages
   public boolean replyCannotAccessFileMessage(String filename)
   {
     return (replyErrorMessage(A_CANNOT_ACCESS_FILE + padding +
-        A_DESC_CANNOT_ACCESS_FILE + ": " + filename));
+                              A_DESC_CANNOT_ACCESS_FILE + ": " + filename));
   }
 
   /**
@@ -518,7 +539,7 @@ public class FileMessages
   public boolean replyDirectoryDoesNotExistMessage(String directory)
   {
     return (replyErrorMessage(A_DIRECTORY_DOES_NOT_EXIST + padding +
-        A_DESC_DIRECTORY_DOES_NOT_EXIST + ": " + directory));
+                              A_DESC_DIRECTORY_DOES_NOT_EXIST + ": " + directory));
   }
 
   /**
@@ -530,7 +551,7 @@ public class FileMessages
   public boolean replyFileDoesNotExistMessage(String filename)
   {
     return (replyErrorMessage(A_FILE_DOES_NOT_EXIST + padding +
-        A_DESC_FILE_DOES_NOT_EXIST + ": " + filename));
+                              A_DESC_FILE_DOES_NOT_EXIST + ": " + filename));
   }
 
   /**
@@ -542,7 +563,7 @@ public class FileMessages
   public boolean replyCannotCreateDirectory(String filename)
   {
     return (replyErrorMessage(A_CANNOT_CREATE_DIRECTORY + padding +
-        A_DESC_CANNOT_CREATE_DIRECTORY + ": " + filename));
+                              A_DESC_CANNOT_CREATE_DIRECTORY + ": " + filename));
   }
 
   /**
@@ -625,6 +646,8 @@ public class FileMessages
     {
       previousRequestMessage = message;
       writer.write(message.getBytes());
+//      writer.writeUTF(message);
+
       if (flush)
       {
         flushOutStream();
@@ -647,6 +670,7 @@ public class FileMessages
     try
     {
       writer.write(EOF.getBytes());
+//      writer.writeUTF(EOF);
       writer.flush();
     }
     catch (IOException ioe)
