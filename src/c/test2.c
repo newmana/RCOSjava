@@ -16,7 +16,6 @@ int main()
   if ((global > 0))
   {
     printf("Global greater than 0\n");
-
   }
   else
   {
