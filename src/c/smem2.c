@@ -27,16 +27,19 @@ int main()
     printf("\n");
     offset = 1;
 
+    printf("Which value do you want to read 1-9 (0 quits)? ");
+    scanf("%i", offset);
+
     while ((offset != 0))
     {
-      printf("Which value do you want to read 1-9 (0 quits)? ");
-      scanf("%i", offset);
       shrValue = shrread(shrId, offset);
       printf("\nThe value is: ");
       printf("%i", shrValue);
       printf("\nThe offset is: ");
       printf("%i", offset);
       printf("\n");
+      printf("Which value do you want to read 1-9 (0 quits)? ");
+      scanf("%i", offset);
     }
 
     shrValue = shrclose(shrId);
