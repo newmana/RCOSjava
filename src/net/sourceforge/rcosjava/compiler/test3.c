@@ -1,19 +1,23 @@
-char str[100];
-
+/**
+ * Tests if/else/elseif for >, ==, !=, <
+ **/
 void main()
 {
-  int count;
+  int local;
+  int local2;
 
-  count = 2;
-  str = "Hello World\n";
+  printf("Global variable test\n");
 
-  if ((count > 0))
-  {
-    printf("Local count is: ");
-    printf("%i", count);
-    printf("\n");
-    printf("Global str is: ");
-    printf("%s", str);
-  }
+  local = 3;
+  local2 = 6;
+  local = local2;
+  local2 = (local2 + local);
+
+  printf("local2 is: ");
+  printf(%i, local2);
+
+  local2 = (2 - local2);
+
+  printf("local2 is: ");
+  printf(%i, local2);
 }
-

@@ -132,42 +132,42 @@ public class StatementCompiler extends DepthFirstAdapter
 
   public void caseAGteqRelop(AGteqRelop node)
   {
-    System.out.println("GTE Node: " + node);
+//    System.out.println("GTE Node: " + node);
     writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
       Operator.GREATER_THAN_OR_EQUAL.getValue()));
   }
 
   public void inAGtRelop(AGtRelop node)
   {
-    System.out.println("GT Node: " + node);
+//    System.out.println("GT Node: " + node);
     writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
       Operator.GREATER_THAN.getValue()));
   }
 
   public void caseALteqRelop(ALteqRelop node)
   {
-    System.out.println("LTE Node: " + node);
+//    System.out.println("LTE Node: " + node);
     writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
       Operator.LESS_THAN_OR_EQUAL.getValue()));
   }
 
   public void caseALtRelop(ALtRelop node)
   {
-    System.out.println("LT Node: " + node);
+//    System.out.println("LT Node: " + node);
     writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
       Operator.LESS_THAN.getValue()));
   }
 
   public void caseANeqRelop(ANeqRelop node)
   {
-    System.out.println("NEQ Node: " + node);
+//    System.out.println("NEQ Node: " + node);
     writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
       Operator.NOT_EQUAL.getValue()));
   }
 
   public void caseAEqRelop(AEqRelop node)
   {
-    System.out.println("EQ Node: " + node);
+//    System.out.println("EQ Node: " + node);
     writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
       Operator.EQUAL.getValue()));
   }
@@ -179,7 +179,7 @@ public class StatementCompiler extends DepthFirstAdapter
   {
     String stringValue = node.getStringLitteral().getText();
     //String name = variableCompiler.allocateVariable(1, stringValue.length());
-    doLiteralLoading(stringValue);
+    handleLiteralLoading(stringValue);
 
     writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
       (byte) 0, SystemCall.STRING_OUT.getValue()));
@@ -194,22 +194,88 @@ public class StatementCompiler extends DepthFirstAdapter
   }
 
   /**
+   * Right hand side of a variable assignment with one statement.
+   */
+  public void caseAUnaryRhs(AUnaryRhs node)
+  {
+    node.getUnaryExpression().apply(this);
+  }
+
+  /**
+   * Right hand side of a variable assignment with two statements.
+   */
+  public void caseABinaryRhs(ABinaryRhs node)
+  {
+    node.getBinaryExpression().apply(this);
+  }
+
+  /**
+   * Right hand side of a variable assignment with one statement.
+   */
+  public void caseASimpleUnaryExpression(ASimpleUnaryExpression node)
+  {
+    String varValue = node.getSimpleExpression().toString().trim();
+    if (node.getSimpleExpression() instanceof AConstantSimpleExpression)
+    {
+      handleLiteralLoading(varValue);
+    }
+    else if (node.getSimpleExpression() instanceof AVarnameSimpleExpression)
+    {
+      handleIdentifierLoad(
+        ((AVarnameSimpleExpression) node.getSimpleExpression()).getVarname());
+    }
+  }
+
+  /**
+   * Right hand side of a variable assignment with two statements.
+   */
+  public void caseAIdentifierBinaryExpression(AIdentifierBinaryExpression node)
+  {
+    System.out.println("Node Value: " + node.getValue());
+    System.out.println("Identifier Value: " + node.getIdentifier());
+
+    handleIdentifierLoad(node.getValue());
+    handleIdentifierLoad(node.getIdentifier().toString().trim());
+    node.getBinop().apply(this);
+  }
+
+  /**
+   * Right hand side of a variable assignment with two statements.
+   */
+  public void caseAConstantBinaryExpression(AConstantBinaryExpression node)
+  {
+    handleLiteralLoading(node.getConstant().toString().trim());
+    handleIdentifierLoad(node.getValue().toString().trim());
+    node.getBinop().apply(this);
+  }
+
+  public void caseAPlusBinop(APlusBinop node)
+  {
+    System.out.println("Plus Node: " + node);
+    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
+      Operator.ADD.getValue()));
+  }
+
+  public void caseAMinusBinop(AMinusBinop node)
+  {
+    System.out.println("Minus Node: " + node);
+    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
+      Operator.SUBTRACT.getValue()));
+  }
+
+  /**
    * Simple assignment statements
    * e.g. i = 0;
    */
-  public void inAModifyExpressionBasicStatement(
-    AModifyExpressionBasicStatement node)
+  public void caseADirectModifyExpression(ADirectModifyExpression node)
   {
     try
     {
-      //Need to find the way of getting the =, lt and rh sides.
-      ADirectModifyExpression expr = (ADirectModifyExpression)
-        node.getModifyExpression();
-
-      String varName = expr.getVarname().toString().trim();
-      String varValue = expr.getRhs().toString().trim();
+      String varName = node.getVarname().toString().trim();
       Variable newVar = table.getVariable(varName, Compiler.getLevel());
-      doLiteralLoading(varValue);
+
+      PRhs rhs = node.getRhs();
+      rhs.apply(this);
 
       // Store variable at the variables location
       if (Compiler.getLevel() == newVar.getLevel())
@@ -247,14 +313,6 @@ public class StatementCompiler extends DepthFirstAdapter
   public void inAIdentifierValue(AIdentifierValue node)
   {
     //System.out.println("Here [" + node + "]");
-  }
-
-  /**
-   * Right hand side of a variable assignment.
-   */
-  public void caseAUnaryRhs(AUnaryRhs node)
-  {
-    //System.out.println("Here: " + node + "");
   }
 
   /**
@@ -393,11 +451,20 @@ public class StatementCompiler extends DepthFirstAdapter
     }
   }
 
+  private void handleIdentifierLoad(PVarname identifier)
+  {
+    handleIdentifierLoad(identifier.toString().trim());
+  }
+
   private void handleIdentifierLoad(AIdentifierValue identifier)
+  {
+    handleIdentifierLoad(identifier.toString().trim());
+  }
+
+  private void handleIdentifierLoad(String identifierName)
   {
     try
     {
-      String identifierName = identifier.toString().trim();
       Variable newVar = table.getVariable(identifierName, Compiler.getLevel());
 
       if (Compiler.getLevel() == newVar.getLevel())
@@ -419,10 +486,10 @@ public class StatementCompiler extends DepthFirstAdapter
 
   private void handleIdentifierLoad(AConstantValue constant)
   {
-    doLiteralLoading(constant.toString());
+    handleLiteralLoading(constant.toString());
   }
 
-  private void doLiteralLoading(String varValue)
+  private void handleLiteralLoading(String varValue)
   {
     short length = 0;
 
