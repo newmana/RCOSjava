@@ -7,6 +7,8 @@ import org.rcosjava.messaging.messages.os.OSMessageAdapter;
 import org.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import org.rcosjava.messaging.postoffices.SimpleMessageHandler;
 
+import org.apache.log4j.*;
+
 /**
  * Provide sending and receiving facilities for all classes.
  * <P>
@@ -20,8 +22,13 @@ import org.rcosjava.messaging.postoffices.SimpleMessageHandler;
  * @see org.rcosjava.messaging.postoffices.SimpleMessageHandler
  * @version 1.00 $Date$
  */
-public abstract class OSMessageHandler extends SimpleMessageHandler
+public class OSMessageHandler extends SimpleMessageHandler
 {
+  /**
+   * Logging class.
+   */
+  private final static Logger log = Logger.getLogger(OSMessageHandler.class);
+
   /**
    * The operating system post office that will handle all messages.
    */
@@ -114,13 +121,19 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
    */
   public void processMessage(MessageAdapter message)
   {
+    if (log.isDebugEnabled())
+    {
+      log.debug("Processing message type: " + message.getType());
+      log.debug("Processing message processing: " + this.getClass().getName());
+    }
+
     try
     {
       processMessage((UniversalMessageAdapter) message);
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      log.error("Error invoking doMessage on: " + this.getClass().getName());
     }
   }
 
@@ -132,6 +145,12 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
    */
   public void processMessage(OSMessageAdapter message)
   {
+    if (log.isDebugEnabled())
+    {
+      log.debug("Processing message type: " + message.getType());
+      log.debug("Processing message processing: " + this.getClass().getName());
+    }
+
     try
     {
       Class[] classes = {this.getClass()};
@@ -144,7 +163,7 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      log.error("Error invoking doMessage on: " + this.getClass().getName());
     }
   }
 
@@ -156,6 +175,12 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
    */
   public void processMessage(UniversalMessageAdapter message)
   {
+    if (log.isDebugEnabled())
+    {
+      log.debug("Processing message type: " + message.getType());
+      log.debug("Processing message processing: " + this.getClass().getName());
+    }
+
     try
     {
       Class[] classes = {this.getClass()};
@@ -169,7 +194,7 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      log.error("Error invoking doMessage on: " + this.getClass().getName());
     }
   }
 }
