@@ -28,7 +28,7 @@ public class NullProcess extends UniversalMessageAdapter
    */
   public void doMessage(Kernel theElement)
   {
-    theElement.processNull();
+    theElement.nullProcess();
   }
 
   /**
@@ -39,7 +39,7 @@ public class NullProcess extends UniversalMessageAdapter
    */
   public void doMessage(ProcessScheduler theElement)
   {
-    theElement.setCurrentProcessNull();
+    theElement.nullProcess();
   }
 
   /**
