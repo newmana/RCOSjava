@@ -7,7 +7,7 @@ import java.net.*;
 
 import org.rcosjava.hardware.cpu.Interrupt;
 import org.rcosjava.hardware.memory.Memory;
-import org.rcosjava.messaging.messages.os.HandleInterrupt;
+import org.rcosjava.messaging.messages.os.AddInterrupt;
 import org.rcosjava.messaging.messages.os.RegisterInterruptHandler;
 import org.rcosjava.messaging.messages.universal.KillProcess;
 import org.rcosjava.messaging.messages.universal.NewProcess;
@@ -107,14 +107,6 @@ public class ProgramManager extends OSMessageHandler
     // Create a new client to get files and directory
     // information from the server.
     theFileClient = new FileClient(host, port);
-
-    // create and register InterruptHandler
-    theIH = new ProgManInterruptHandler("ProgManInterruptHandler",
-        newPostOffice, "NewProcess");
-
-    RegisterInterruptHandler newMsg = new
-        RegisterInterruptHandler((InterruptHandler) theIH);
-    sendMessage(newMsg);
   }
 
   /**
@@ -181,8 +173,8 @@ public class ProgramManager extends OSMessageHandler
     NewProcess newMsg = new NewProcess(this, fileName, fileContents, fileSize);
     sendMessage(newMsg);
 
-    Interrupt intInterrupt = new Interrupt(-1, "NewProcess");
-    HandleInterrupt newMsg2 = new HandleInterrupt(this, intInterrupt);
+    Interrupt interrupt = new Interrupt(-1, "NewProcess");
+    AddInterrupt newMsg2 = new AddInterrupt(this, interrupt);
     sendMessage(newMsg2);
   }
 
