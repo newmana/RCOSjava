@@ -541,10 +541,13 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     menuBar.add(menu);
 
     menuItem = new JMenuItem("Pause");
+    menuItem.addActionListener(new PauseCPUListener());
     menu.add(menuItem);
     menuItem = new JMenuItem("Stop");
+    menuItem.addActionListener(new StopCPUListener());
     menu.add(menuItem);
     menuItem = new JMenuItem("Run");
+    menuItem.addActionListener(new RunCPUListener());
     menu.add(menuItem);
 
     menu = new JMenu("Tour");
@@ -669,6 +672,30 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     public void actionPerformed(ActionEvent e)
     {
       System.err.println("Change Process");
+    }
+  }
+
+  private class RunCPUListener implements ActionListener
+  {
+    public void actionPerformed(ActionEvent e)
+    {
+      System.err.println("Run CPU");
+    }
+  }
+
+  private class PauseCPUListener implements ActionListener
+  {
+    public void actionPerformed(ActionEvent e)
+    {
+      System.err.println("Pause CPU");
+    }
+  }
+
+  private class StopCPUListener implements ActionListener
+  {
+    public void actionPerformed(ActionEvent e)
+    {
+      System.err.println("Stop CPU");
     }
   }
 
