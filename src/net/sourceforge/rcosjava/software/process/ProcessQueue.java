@@ -134,18 +134,35 @@ public class ProcessQueue
       return 1;
   }
 
+  public RCOSProcess getProcess(int pid)
+  {
+    return findProcess(pid);
+  }
+
   /**
-   * Locate a process with a certain process id.
+   * Locate a process with a certain process id and remove it from the queue.
    *
    * @param pid the process identifier to find in the queue.
    * @return the process with the given PID or null if not found.
    */
-  public RCOSProcess getProcess(int pid)
+  public RCOSProcess removeProcess(int pid)
   {
-    RCOSProcess tmpProcess;
+    RCOSProcess tmpProcess = findProcess(pid);
 
-    if (processes.queueEmpty())
-      return null;
+    if (tmpProcess != null)
+      processes.retrieveCurrent();
+
+    return tmpProcess;
+  }
+
+  /**
+   * Locate a process without removing it from the current lot of processes.
+   *
+   * @param pid the process identifier to find in the queue.
+   */
+  private RCOSProcess findProcess(int pid)
+  {
+    RCOSProcess tmpProcess = null;
 
     processes.goToHead();
 
@@ -154,23 +171,17 @@ public class ProcessQueue
     // - or we reach the end of the Q
     // - or the PID of the Processs are greater than the PID we
     //   are looking for
-    do
+    while (!processes.atTail())
     {
       tmpProcess = (RCOSProcess) processes.peek();
       if (tmpProcess.getPID() == pid)
       {
-        tmpProcess = (RCOSProcess) processes.retrieveCurrent();
-        return tmpProcess;
+        break;
       }
+      tmpProcess = null;
       processes.goToNext();
-    } while (!processes.atTail());
-
-    tmpProcess = (RCOSProcess) processes.peek();
-    if (tmpProcess.getPID() == pid)
-    {
-      tmpProcess = (RCOSProcess) processes.retrieveCurrent();
-      return tmpProcess;
     }
-    return null;
+
+    return tmpProcess;
   }
 }

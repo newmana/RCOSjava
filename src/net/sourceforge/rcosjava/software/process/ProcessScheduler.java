@@ -10,6 +10,7 @@ import net.sourceforge.rcosjava.messaging.messages.universal.GetTerminal;
 import net.sourceforge.rcosjava.messaging.messages.universal.KillProcess;
 import net.sourceforge.rcosjava.messaging.messages.universal.NullProcess;
 import net.sourceforge.rcosjava.messaging.messages.universal.ProcessSwitch;
+import net.sourceforge.rcosjava.messaging.messages.universal.ReturnProcessPriority;
 import net.sourceforge.rcosjava.messaging.messages.universal.WriteBytes;
 import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.universal.ZombieCreated;
@@ -131,13 +132,24 @@ public class ProcessScheduler extends OSMessageHandler
   }
 
   /**
-   * Removes a given process from the Zombie Queue.
+   * Removes a given process from the Zombie Created Queue.
    *
    * @param pid the process to remove
    */
   private RCOSProcess removeFromZombieCreatedQ(int pid)
   {
     //System.out.println("Remove from zombie created q: " + pid);
+    return zombieCreatedQ.removeProcess(pid);
+  }
+
+  /**
+   * Finds a given process from the Zombie Created Queue without removing it
+   * from the queue.
+   *
+   * @param pid the process to remove
+   */
+  private RCOSProcess getFromZombieCreatedQ(int pid)
+  {
     return zombieCreatedQ.getProcess(pid);
   }
 
@@ -160,6 +172,17 @@ public class ProcessScheduler extends OSMessageHandler
   private RCOSProcess removeFromBlockedQ(int pid)
   {
     //System.out.println("Remove from blocked q: " + pid);
+    return blockedQ.removeProcess(pid);
+  }
+
+  /**
+   * Finds a given process from the Blocked Queue without removing it from the
+   * queue.
+   *
+   * @param pid the process to remove
+   */
+  private RCOSProcess getFromBlockedQ(int pid)
+  {
     return blockedQ.getProcess(pid);
   }
 
@@ -186,12 +209,23 @@ public class ProcessScheduler extends OSMessageHandler
   private RCOSProcess removeFromReadyQ(int pid)
   {
     //System.out.println("Remove from ready q: " + pid);
+    return readyQ.removeProcess(pid);
+  }
+
+  /**
+   * Finds a given process from the Ready Queue without removing it from the
+   * queue.
+   *
+   * @param pid the process to remove
+   */
+  private RCOSProcess getFromReadyQ(int pid)
+  {
     return readyQ.getProcess(pid);
   }
 
   /**
-   * For multiple CPU we could have an index here.  At the moment on CPU is
-   * assumed.
+   * Will find the first process currently on the executing queue.  Currently,
+   * one CPU is assumed.
    *
    * @return the currently executing process on the CPU - does not remove it
    * from being executed.
@@ -199,6 +233,18 @@ public class ProcessScheduler extends OSMessageHandler
   public RCOSProcess getExecutingProcess()
   {
     return executingQ.peekProcess();
+  }
+
+  /**
+   * Will find the specific process from the executing queue.
+   *
+   * @param pid the process id to find in the executing queue.
+   * @return the process that matched the process id or null.
+   */
+  public RCOSProcess getExecutingProcess(int pid)
+  {
+    RCOSProcess tmpProcess = executingQ.getProcess(pid);
+    return tmpProcess;
   }
 
   /**
@@ -226,7 +272,7 @@ public class ProcessScheduler extends OSMessageHandler
    */
   private RCOSProcess removeExecutingProcess(int pid)
   {
-    return executingQ.getProcess(pid);
+    return executingQ.removeProcess(pid);
   }
 
   /**
@@ -424,22 +470,39 @@ public class ProcessScheduler extends OSMessageHandler
   }
 
   /**
-   * Attempts to remove all resources currently used by a process.
+   * Finds a process and returns its current priority.  May be generalised to
+   * return all of the processes details in the future.
+   *
+   * @param pid the process id to locate in the list of currently available
+   * processes.
    */
-  private void cleanupResources(RCOSProcess oldProcess)
+  public void requestProcessPriority(int pid)
   {
-    //If it wasn't the executing program clear up resources
-    if (oldProcess.getTerminalId() != null)
+    RCOSProcess tmpProcess = locateProcess(pid);
+    if (tmpProcess != null)
     {
-      TerminalRelease msg = new TerminalRelease(this,
-        oldProcess.getTerminalId());
-      sendMessage(msg);
+      ReturnProcessPriority tmpMsg = new
+        ReturnProcessPriority(this, tmpProcess.getPID(),
+          tmpProcess.getPriority());
+      sendMessage(tmpMsg);
     }
+  }
 
-    // Deallocate Memory
-    DeallocateMemory deallocateMsg = new DeallocateMemory(this,
-      oldProcess.getPID());
-    sendMessage(deallocateMsg);
+  /**
+   * Sets a given process id to the new priority given.
+   *
+   * @param pid the process id to locate in the list of currently available
+   * processes.
+   * @param priority the new priority value to set to the process (between 1
+   * and 100).
+   */
+  public void setProcessPriority(int pid, int priority)
+  {
+    RCOSProcess tmpProcess = locateProcess(pid);
+    if (tmpProcess != null)
+    {
+      tmpProcess.setPriority(priority);
+    }
   }
 
   /**
@@ -573,6 +636,51 @@ public class ProcessScheduler extends OSMessageHandler
     //else
       //System.out.println("Already running!");
     //System.out.println("-----End Schuduling-----");
+  }
+
+  /**
+   * Attempts to remove all resources currently used by a process.
+   */
+  private void cleanupResources(RCOSProcess oldProcess)
+  {
+    //If it wasn't the executing program clear up resources
+    if (oldProcess.getTerminalId() != null)
+    {
+      TerminalRelease msg = new TerminalRelease(this,
+        oldProcess.getTerminalId());
+      sendMessage(msg);
+    }
+
+    // Deallocate Memory
+    DeallocateMemory deallocateMsg = new DeallocateMemory(this,
+      oldProcess.getPID());
+    sendMessage(deallocateMsg);
+  }
+
+  /**
+   * Locates a process from any of the queues without removing it from the
+   * queue.
+   */
+  private RCOSProcess locateProcess(int pid)
+  {
+    RCOSProcess tmpProcess = null;
+    tmpProcess = getExecutingProcess(pid);
+    if (tmpProcess == null)
+    {
+      // If it's in ready q.
+      tmpProcess = getFromReadyQ(pid);
+      if (tmpProcess == null)
+      {
+        // If it's in blocked q.
+        tmpProcess = getFromBlockedQ(pid);
+        if (tmpProcess == null)
+        {
+          // If it's in zombie q.
+          tmpProcess = getFromZombieCreatedQ(pid);
+        }
+      }
+    }
+    return tmpProcess;
   }
 
   public void processMessage(OSMessageAdapter aMsg)
