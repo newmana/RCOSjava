@@ -295,9 +295,9 @@ public class ProcessScheduler extends OSMessageHandler
     }
     try
     {
-      RCOSProcess rm = removeExecutingProcess(newProcess.getPID());
-      newProcess.setStatus(ProcessState.READY);
-      insertIntoReadyQueue(newProcess);
+      RCOSProcess tmpProcess = removeExecutingProcess(newProcess.getPID());
+      tmpProcess.setStatus(ProcessState.READY);
+      insertIntoReadyQueue(tmpProcess);
     }
     catch (ProcessNotFoundException pnfe)
     {
@@ -316,13 +316,14 @@ public class ProcessScheduler extends OSMessageHandler
   {
     if (log.isDebugEnabled())
     {
+      log.debug("Process: " + newProcess.getPID() + " runningToBlocked");
       log.debug("Acquiring executingQ and blockedQ in runningToBlocked");
     }
     try
     {
       RCOSProcess tmpProcess = removeExecutingProcess(newProcess.getPID());
-      newProcess.setStatus(ProcessState.BLOCKED);
-      insertIntoBlockedQ(newProcess);
+      tmpProcess.setStatus(ProcessState.BLOCKED);
+      insertIntoBlockedQ(tmpProcess);
     }
     catch (ProcessNotFoundException pnfe)
     {
@@ -342,6 +343,7 @@ public class ProcessScheduler extends OSMessageHandler
   {
     if (log.isDebugEnabled())
     {
+      log.debug("Process: " + process.getPID() + " blockedToReady");
       log.debug("Acquiring readyQ and blockedQ in blockedToReady");
     }
     try
