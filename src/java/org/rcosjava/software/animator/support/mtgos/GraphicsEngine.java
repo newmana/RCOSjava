@@ -322,24 +322,24 @@ public class GraphicsEngine extends JPanel
   /**
    * Returns the X position to place an object determined by its size.
    *
-   * @param mgto the object to center.
+   * @param imageWidth the width of the object to center.
    * @return the X position to place the object.
    */
-  public int centerX(MTGO mtgo)
+  public int centerImageWidth(int imageWidth)
   {
-    float temp = mtgo.getImageWidth() / 2;
+    float temp = imageWidth / 2;
     return ((int) (centerX - temp));
   }
 
   /**
    * Returns the Y position to place an object determined by its size.
    *
-   * @param mtgo the object to center.
+   * @param mtgo the height of the object to center.
    * @return the Y position to place the object.
    */
-  public int centerY(MTGO mtgo)
+  public int centerImageHeight(int imageHeight)
   {
-    float temp = mtgo.getImageHeight() / 2;
+    float temp = imageHeight / 2;
     return ((int) (centerY - temp));
   }
 
