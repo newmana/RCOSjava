@@ -1,7 +1,7 @@
 package net.sourceforge.rcosjava.hardware.cpu;
 
 import java.io.*;
-import java.util.Vector;
+import java.util.*;
 
 import net.sourceforge.rcosjava.hardware.memory.Memory;
 import net.sourceforge.rcosjava.software.memory.MemoryManager;
@@ -69,14 +69,58 @@ public class CPU
    * The number of periods (10) that the CPU is call the Timer Interrupt.
    */
   public final int TIMER_PERIOD = 10;
+
+  /**
+   * Internal flag to determine if the CPU has currently stopped execution
+   * (true).
+   */
   private boolean paused;
+
+  /**
+   * Internal flag which holds whether interrupts are handled.
+   */
   private boolean interruptsEnabled;
+
+  /**
+   * Internal flag which holds whether there is a process currently running
+   * with code to execute.
+   */
   private boolean codeToExecute;
+
+  /**
+   * Internal flag which holds whether the current process has finished
+   * execution.
+   */
   private boolean processFinished;
+
+  /**
+   * Keeps a track of the number of ticks (timer interrupts) have occurred.
+   */
   private int ticks = 0;
+
+  /**
+   * The context of the currently executing process (base pointer, etc).
+   */
   private Context myContext = new Context();
-  private Memory processStack, processCode;
+
+  /**
+   * The currently executing process stack.
+   */
+  private Memory processStack;
+
+  /**
+   * The currently executing process code.
+   */
+  private Memory processCode;
+
+  /**
+   * The queue of interrupts currently waiting to be handled.
+   */
   private InterruptQueue interruptsQueue;
+
+  /**
+   * A reference to the kernel that is currently using this CPU.
+   */
   private Kernel myKernel;
 
   /**
@@ -98,8 +142,8 @@ public class CPU
 
   public boolean setProcessFinished()
   {
-    Interrupt aInt = new Interrupt(-1, "ProcessFinished");
-    generateInterrupt(aInt);
+    Interrupt interrupt = new Interrupt(-1, "ProcessFinished");
+    generateInterrupt(interrupt);
     processFinished = false;
     return false;
   }
@@ -113,6 +157,9 @@ public class CPU
     myContext = newContext;
   }
 
+  /**
+   * Creates a new instance of the internal context.
+   */
   public void setNewContext()
   {
     myContext = new Context();

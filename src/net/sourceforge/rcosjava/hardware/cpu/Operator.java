@@ -69,7 +69,14 @@ public class Operator extends WordParameter
   /** Operation constant (for OPCODE_OPR) CoPY */
   public static final Operator COPY = new Operator((short) 22, "_CPY");
 
+  /**
+   * The internal value of the operator.  Current valid between 0 and 22.
+   */
   private short operatorValue;
+
+  /**
+   * The internal string represenation of the operator.
+   */
   private String operatorName;
 
   /**
@@ -118,6 +125,9 @@ public class Operator extends WordParameter
     return tmpOperator;
   }
 
+  /**
+   * @return the string value of the operator.
+   */
   public String toString()
   {
     return operatorName;

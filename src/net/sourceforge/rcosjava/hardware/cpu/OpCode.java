@@ -48,7 +48,15 @@ public class OpCode implements Serializable
   /** Constant for illegal call */
   public static final OpCode ILLEGAL = new OpCode(0x14, "ILLEGAL_OPCODE_ERROR");
 
+  /**
+   * Internal integer value of the op-code (currently valid from 0-8 and
+   * 18, 19 and 20).
+   */
   private int opCodeValue;
+
+  /**
+   * The internal string value of the op-code.
+   */
   private String opCodeName;
 
   /**
@@ -97,6 +105,9 @@ public class OpCode implements Serializable
     return tmpOpCode;
   }
 
+  /**
+   * @return the string value of the op-code.
+   */
   public String toString()
   {
     return opCodeName;

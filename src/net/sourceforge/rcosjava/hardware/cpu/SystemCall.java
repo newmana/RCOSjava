@@ -80,7 +80,14 @@ public class SystemCall extends WordParameter
   /** Operation constant for system call (OPCODE_CSP) File WRITE */
   public static final SystemCall FILE_WRITE = new SystemCall((short) 27, "F_WRITE");
 
+  /**
+   * The internal value of the system call.  Currently valid between 0 and 27.
+   */
   private short systemCallValue;
+
+  /**
+   * The internal string value of the system call.
+   */
   private String systemCallName;
 
   /**
@@ -130,6 +137,9 @@ public class SystemCall extends WordParameter
     return tmpSystemCall;
   }
 
+  /**
+   * @return the string value of the system call.
+   */
   public String toString()
   {
     return systemCallName;
