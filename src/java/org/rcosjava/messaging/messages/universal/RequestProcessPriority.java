@@ -1,4 +1,5 @@
 package org.rcosjava.messaging.messages.universal;
+
 import org.rcosjava.messaging.postoffices.animator.AnimatorMessageHandler;
 import org.rcosjava.software.process.ProcessScheduler;
 
@@ -12,15 +13,15 @@ import org.rcosjava.software.process.ProcessScheduler;
 public class RequestProcessPriority extends UniversalMessageAdapter
 {
   /**
-   * Description of the Field
+   * The process id to get the priority for.
    */
   private int processId;
 
   /**
    * Constructor for the RequestProcessPriority object
    *
-   * @param theSource Description of Parameter
-   * @param newProcessId Description of Parameter
+   * @param theSource who sent the message.
+   * @param newProcessId process id to get the priority for.
    */
   public RequestProcessPriority(AnimatorMessageHandler theSource,
       int newProcessId)
@@ -30,9 +31,9 @@ public class RequestProcessPriority extends UniversalMessageAdapter
   }
 
   /**
-   * Description of the Method
+   * Calls requestProcessPriority on Process Scheduler.
    *
-   * @param theElement Description of Parameter
+   * @param theElement the object to do work on.
    */
   public void doMessage(ProcessScheduler theElement)
   {

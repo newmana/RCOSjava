@@ -335,6 +335,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   {
     tmAnimator.setupLayout(this);
     psAnimator.setupLayout(this);
+    pcmAnimator.setupLayout(this);
     memoryAnimator.setupLayout(this);
     ipcAnimator.setupLayout(this);
     cpuAnimator.setupLayout(this);
@@ -661,6 +662,9 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     }
   }
 
+  /**
+   * Start a new process by displaying the program manager frame.
+   */
   private class NewProcessListener implements ActionListener
   {
     public void actionPerformed(ActionEvent e)
@@ -669,6 +673,9 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     }
   }
 
+  /**
+   * Listener to kill a selected process.
+   */
   public class KillProcessListener implements ActionListener
   {
     private ProcessManagerAnimator animator;
@@ -685,6 +692,9 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     }
   }
 
+  /**
+   * Listener to change the priority of a selected process.
+   */
   public class ChangePriorityListener implements ActionListener
   {
     private ProcessManagerAnimator animator;
@@ -696,12 +706,15 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 
     public void actionPerformed(ActionEvent e)
     {
-      System.err.println("Change Process");
+      System.err.println("Change Process " + e.getActionCommand());
       animator.sendRequestProcessPriority(
           Integer.parseInt(e.getActionCommand()));
     }
   }
 
+  /**
+   * Listener to step through the execution of the process.
+   */
   private class StepCPUListener implements ActionListener
   {
     public void actionPerformed(ActionEvent e)
@@ -712,7 +725,6 @@ public class RCOS extends javax.swing.JApplet implements Runnable
         pauseRunMenuItem.setText("Run");
         theKernel.pause();
       }
-
       theKernel.step();
     }
   }

@@ -37,30 +37,32 @@ import org.rcosjava.software.util.FIFOQueue;
 public class ProgramManagerAnimator extends RCOSAnimator
 {
   /**
-   * Description of the Field
+   * Uniquely identifies the program manager animator to the post office.
    */
   private final static String MESSENGING_ID = "ProgramManagerAnimator";
 
   /**
-   * Description of the Field
+   * Displays the view or user interface.
    */
   private ProgramManagerFrame pmFrame;
 
   /**
-   * Description of the Field
+   * Currently selected file name.
    */
   private String currentFile = "";
 
   /**
-   * Description of the Field
+   * Directory separator.
    */
   private String currentDirectory = java.io.File.separator;
 
   /**
-   * Constructor for the ProgramManagerAnimator object
+   * Create an animator office, register with the animator office, set the size
+   * of the frame and the images to use to represent the processes and the
+   * buttons.
    *
-   * @param postOffice Description of Parameter
-   * @param pmImages Description of Parameter
+   * @param postOffice the post office to register to.
+   * @param pmImages the images to use for process and buttons.
    */
   public ProgramManagerAnimator(AnimatorOffice postOffice,
       ImageIcon[] pmImages)
@@ -70,15 +72,18 @@ public class ProgramManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * Setup the layout of the frame (menus, etc).
    *
-   * @param c Description of Parameter
+   * @param c the parent component.
    */
   public void setupLayout(Component c)
   {
     pmFrame.setupLayout(c);
   }
 
+  /**
+   * Display the frame to the user.
+   */
   public void showFrame()
   {
     pmFrame.setVisible(true);
@@ -95,9 +100,9 @@ public class ProgramManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Sets the CurrentFile attribute of the ProgramManagerAnimator object
+   * Change the currently selected file to the given value.
    *
-   * @param newFile The new CurrentFile value
+   * @param newFile new value of the directory.
    */
   public void setCurrentFile(String newFile)
   {
@@ -105,9 +110,9 @@ public class ProgramManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Sets the CurrentDirectory attribute of the ProgramManagerAnimator object
+   * Change the currently selected directory to the given value.
    *
-   * @param newDirectory The new CurrentDirectory value
+   * @param newDirectory new value of the directory.
    */
   public void setCurrentDirectory(String newDirectory)
   {
@@ -115,9 +120,9 @@ public class ProgramManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Gets the CurrentFile attribute of the ProgramManagerAnimator object
+   * Returns the currently selected file.
    *
-   * @return The CurrentFile value
+   * @return the current selected file.
    */
   public String getCurrentFile()
   {
@@ -125,9 +130,9 @@ public class ProgramManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Gets the CurrentDirectory attribute of the ProgramManagerAnimator object
+   * Returns the currently selected directory.
    *
-   * @return The CurrentDirectory value
+   * @return the currently selected directory.
    */
   public String getCurrentDirectory()
   {
@@ -135,42 +140,40 @@ public class ProgramManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * New process has been selected by the user so create a new terminal if
+   * selected and send the new file message.
    *
-   * @param startTerminal Description of Parameter
+   * @param startTerminal whether a new terminal should be created before
+   *   creating the process.
    */
   public void newProcess(boolean startTerminal)
   {
     // If the box is checked start a terminal before the process
     // is loaded.
-//    StartProgram myStartProgram = new StartProgram(this, postOffice,
-//       getCurrentDirectory()+getCurrentFile(), startTerminal);
     if (startTerminal)
     {
       TerminalOn msg = new TerminalOn(this);
-
       sendMessage(msg);
     }
 
-    NewFile msg = new NewFile(this,
-        getCurrentDirectory() + getCurrentFile());
-
+    NewFile msg = new NewFile(this, getCurrentDirectory() + getCurrentFile());
     sendMessage(msg);
   }
 
   /**
-   * Description of the Method
+   * Change the current directory up one (to its parent).
    */
   public void upDirectory()
   {
     //Calculate the parent directory.
-
     if (currentDirectory != java.io.File.separator)
     {
       String tmp = currentDirectory;
       int location;
 
-      location = tmp.lastIndexOf(java.io.File.separatorChar, (tmp.length() - 2));
+      location = tmp.lastIndexOf(java.io.File.separatorChar,
+        (tmp.length() - 2));
+
       if (location == -1)
       {
         currentDirectory = java.io.File.separator;
@@ -185,9 +188,9 @@ public class ProgramManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * Updates the list of files that are selectable.
    *
-   * @param data Description of Parameter
+   * @param data queue containing string representing the files.
    */
   public void updateFileList(FIFOQueue data)
   {
@@ -195,9 +198,9 @@ public class ProgramManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Description of the Method
+   * Updates the list of directories that are selectable.
    *
-   * @param data Description of Parameter
+   * @param data queue containing strings representing the directories.
    */
   public void updateDirectoryList(FIFOQueue data)
   {
@@ -205,16 +208,14 @@ public class ProgramManagerAnimator extends RCOSAnimator
   }
 
   /**
-   * Handle updating the list. Send the
+   * Handle updating the list. Send the update list message.
    *
    * @see org.rcosjava.messaging.messages.universal.UpdateList
    *      message.
    */
   public void updateList()
   {
-    UpdateList newMsg = new UpdateList(this,
-        getCurrentDirectory(), 1);
-
+    UpdateList newMsg = new UpdateList(this, getCurrentDirectory(), 1);
     sendMessage(newMsg);
   }
 }

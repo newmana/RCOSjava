@@ -15,7 +15,7 @@ public class Run extends UniversalMessageAdapter
   /**
    * Constructor for the Run object
    *
-   * @param theSource Description of Parameter
+   * @param theSource who sent the message.
    */
   public Run(AnimatorMessageHandler theSource)
   {
@@ -23,13 +23,12 @@ public class Run extends UniversalMessageAdapter
   }
 
   /**
-   * Description of the Method
+   * Calls startThread on the Program Manager.
    *
-   * @param theElement Description of Parameter
+   * @param theElement the object to do work on.
    */
   public void doMessage(ProgramManager theElement)
   {
     theElement.startThread();
   }
 }
-

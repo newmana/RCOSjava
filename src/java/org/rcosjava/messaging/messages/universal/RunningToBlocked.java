@@ -5,7 +5,7 @@ import org.rcosjava.software.process.ProcessScheduler;
 import org.rcosjava.software.process.RCOSProcess;
 
 /**
- * Process is being moved from being executed (on the CPU) to blocked (usually
+ * Process is being moved from being executed on the CPU to blocked (usually
  * waiting for I/O).
  * <P>
  * <DT> <B>History:</B>
@@ -20,15 +20,15 @@ import org.rcosjava.software.process.RCOSProcess;
 public class RunningToBlocked extends UniversalMessageAdapter
 {
   /**
-   * Description of the Field
+   * The process moving from running to blocked.
    */
   private RCOSProcess myProcess;
 
   /**
    * Constructor for the RunningToBlocked object
    *
-   * @param theSource Description of Parameter
-   * @param newProcess Description of Parameter
+   * @param newSource who sent the message.
+   * @param newProcess the process moving from running to blocked.
    */
   public RunningToBlocked(OSMessageHandler theSource, RCOSProcess newProcess)
   {
@@ -37,9 +37,9 @@ public class RunningToBlocked extends UniversalMessageAdapter
   }
 
   /**
-   * Description of the Method
+   * Calls runningToBlocked on the Process Scheduler.
    *
-   * @param theElement Description of Parameter
+   * @param theElement the object to call.
    */
   public void doMessage(ProcessScheduler theElement)
   {
@@ -47,9 +47,9 @@ public class RunningToBlocked extends UniversalMessageAdapter
   }
 
   /**
-   * Description of the Method
+   * Calls cpuToBlocked on the ProcessSchedulerAnimator.
    *
-   * @param theElement Description of Parameter
+   * @param theElement the object to call.
    */
   public void doMessage(ProcessSchedulerAnimator theElement)
   {
