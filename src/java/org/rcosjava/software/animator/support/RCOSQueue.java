@@ -1,6 +1,7 @@
 package org.rcosjava.software.animator.support;
 
 import java.awt.*;
+import javax.swing.*;
 import org.rcosjava.software.util.LIFOQueue;
 
 /**
@@ -10,7 +11,7 @@ import org.rcosjava.software.util.LIFOQueue;
  * @created 1st July 1997
  * @version 1.00 $Date$
  */
-public class RCOSQueue extends Canvas
+public class RCOSQueue extends JComponent
 {
   /**
    * The list of processes as strings.
@@ -58,27 +59,35 @@ public class RCOSQueue extends Canvas
   private int padY = 5;
 
   /**
+   * The dimension of the queue.
+   */
+  private Dimension totalSize;
+
+  /**
    * Creates a new process queue.
    *
    * @param noBoxes the number of processes in the queue.
    * @param newFont the font used to create the size of the boxes.
    */
-  public RCOSQueue(int noBoxes, Font newFont)
+  public RCOSQueue(int newNoBoxes, Font newFont)
   {
     myFont = newFont;
-    this.noBoxes = noBoxes;
+    noBoxes = newNoBoxes;
 
     FontMetrics fm = getFontMetrics(myFont);
 
     boxWidth = fm.stringWidth("XXX");
     boxHeight = fm.getHeight();
     queueMembers = new LIFOQueue(noBoxes, 0);
+
+    totalSize = new Dimension((boxWidth * noBoxes) + (padX * 2),
+        boxHeight + (padY * 2));
   }
 
   /**
-   * Default size calls preferredSize.
+   * Returns the preferred size.
    *
-   * @return The MinimumSize value
+   * @return the preferred size.
    */
   public Dimension getMinimumSize()
   {
@@ -86,14 +95,13 @@ public class RCOSQueue extends Canvas
   }
 
   /**
-   * Calculates the size based on the number of boxes, height and width of
-   * boxes.
+   * Returns the total size of the boxes generated at creation time.
    *
-   * @return The PreferredSize value
+   * @return the total size of the boxes generated at creation time.
    */
   public Dimension getPreferredSize()
   {
-    return new Dimension((boxWidth * noBoxes) + (padX * 2), boxHeight + (padY * 2));
+    return totalSize;
   }
 
   /**
@@ -123,30 +131,11 @@ public class RCOSQueue extends Canvas
   }
 
   /**
-   * Calls repaint and then addNotify().
-   */
-  public void addNotify()
-  {
-    repaint();
-    super.addNotify();
-  }
-
-  /**
-   * Calls update.
+   * Draws the queues with any values in them.
    *
-   * @param g Description of Parameter
+   * @param g graphics object to paint to.
    */
-  public void paint(Graphics g)
-  {
-    update(g);
-  }
-
-  /**
-   * Draws the boxes.
-   *
-   * @param g the graphics object to paint to.
-   */
-  public void update(Graphics g)
+  public void paintComponent(Graphics g)
   {
     Dimension size = getSize();
     FontMetrics fm = getFontMetrics(myFont);
