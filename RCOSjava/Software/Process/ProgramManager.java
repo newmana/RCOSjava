@@ -49,7 +49,7 @@ public class ProgramManager extends OSMessageHandler
   private ProgManInterruptHandler theIH;
   private RCOS myRCOS;
   private String sNewFilename;
-	private static final String MESSENGING_ID = "ProgramManager";
+  private static final String MESSENGING_ID = "ProgramManager";
 
   // Parameters  : String myid - the ID of this object as registered with
   //                             the PO.
@@ -70,7 +70,7 @@ public class ProgramManager extends OSMessageHandler
 
     // create and register InterruptHandler
     theIH = new ProgManInterruptHandler("ProgManInterruptHandler", aPostOffice,
-              "NewProcess", getID());
+      "NewProcess", getId());
     RegisterInterruptHandler newMsg = new
       RegisterInterruptHandler(this, (InterruptHandler) theIH);
     sendMessage(newMsg);

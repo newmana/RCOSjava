@@ -81,21 +81,21 @@ public class ProgramManagerFrame extends RCOSFrame
 
     constraints.gridwidth=1;
     constraints.anchor = GridBagConstraints.CENTER;
-    lTmpLabel = new NewLabel("Directories", fTitleFont);
+    lTmpLabel = new NewLabel("Directories", titleFont);
     gridBag.setConstraints(lTmpLabel,constraints);
     pMain.add(lTmpLabel);
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
-    lTmpLabel = new NewLabel("Files", fTitleFont);
+    lTmpLabel = new NewLabel("Files", titleFont);
     gridBag.setConstraints(lTmpLabel,constraints);
     pMain.add(lTmpLabel);
 
     constraints.gridwidth=1;
     constraints.anchor = GridBagConstraints.CENTER;
     directoryListBox = new java.awt.List(8,false);
-    directoryListBox.setBackground(cListColour);
-    directoryListBox.setForeground(cDefaultFgColour);
+    directoryListBox.setBackground(listColour);
+    directoryListBox.setForeground(defaultFgColour);
     gridBag.setConstraints(directoryListBox,constraints);
     pMain.add(directoryListBox);
     directoryListBox.addMouseListener(new directoryListBoxListener());
@@ -103,16 +103,16 @@ public class ProgramManagerFrame extends RCOSFrame
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
     fileListBox = new java.awt.List(8,false);
-    fileListBox.setBackground(cListColour);
-    fileListBox.setForeground(cDefaultFgColour);
+    fileListBox.setBackground(listColour);
+    fileListBox.setForeground(defaultFgColour);
     gridBag.setConstraints(fileListBox,constraints);
     pMain.add(fileListBox);
     fileListBox.addMouseListener(new fileListBoxListener());
 
-    pFilename.add(new NewLabel("Filename: ", fTitleFont));
-    tfFilename.setFont(fDefaultFont);
-    tfFilename.setBackground(cTextBoxColour);
-    tfFilename.setForeground(cDefaultFgColour);
+    pFilename.add(new NewLabel("Filename: ", titleFont));
+    tfFilename.setFont(defaultFont);
+    tfFilename.setBackground(textBoxColour);
+    tfFilename.setForeground(defaultFgColour);
     pFilename.add(tfFilename);
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
@@ -123,7 +123,7 @@ public class ProgramManagerFrame extends RCOSFrame
     cbStartTerminal.setState(bStartTerminal);
     pTerminalOption.add(cbStartTerminal);
     cbStartTerminal.addItemListener(new startTerminalListener());
-    pTerminalOption.add(new NewLabel("Automatically start terminal.", fDefaultFont));
+    pTerminalOption.add(new NewLabel("Automatically start terminal.", defaultFont));
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;

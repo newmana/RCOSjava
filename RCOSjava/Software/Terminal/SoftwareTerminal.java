@@ -60,8 +60,8 @@ public class SoftwareTerminal extends OSMessageHandler
 
     // create and register a terminal Interrupt handler
 
-    terminalIH = new TerminalInterruptHandler(getID() , aPostOffice,
-                                getID() + "KeyPress", getID());
+    terminalIH = new TerminalInterruptHandler(getId() , aPostOffice,
+                                getId() + "KeyPress", getId());
     RegisterInterruptHandler msg = new
       RegisterInterruptHandler(this, (InterruptHandler) terminalIH);
     sendMessage(msg);

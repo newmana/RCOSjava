@@ -70,43 +70,43 @@ public class CPUFrame extends RCOSFrame
     constraints.anchor = GridBagConstraints.CENTER;
 
     // Headings
-    lTmpLabel = new NewLabel("Stack", fTitleFont);
+    lTmpLabel = new NewLabel("Stack", titleFont);
     gridBag.setConstraints(lTmpLabel,constraints);
     pMain.add(lTmpLabel);
 
     constraints.gridwidth = 2;
-    lTmpLabel = new NewLabel("CPU", fTitleFont);
+    lTmpLabel = new NewLabel("CPU", titleFont);
     gridBag.setConstraints(lTmpLabel,constraints);
     pMain.add(lTmpLabel);
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
-    lTmpLabel = new NewLabel("Code", fTitleFont);
+    lTmpLabel = new NewLabel("Code", titleFont);
     gridBag.setConstraints(lTmpLabel,constraints);
     pMain.add(lTmpLabel);
 
     // Left box
     constraints.gridwidth = 1;
     stackList = new List(10,false);
-    stackList.setBackground(cListColour);
+    stackList.setBackground(listColour);
     gridBag.setConstraints(stackList,constraints);
     pMain.add(stackList);
 
     // Middle/CPU section
     pCPU.setLayout(new GridLayout(8,2));
 
-    fTitleFont = new Font ("TimesRoman", Font.BOLD, 14);
+    titleFont = new Font ("TimesRoman", Font.BOLD, 14);
 
-    IRtitle = new NewLabel("Instruction Register",fTitleFont);
-    IRvalue = new NewLabel("None",fDefaultFont);
+    IRtitle = new NewLabel("Instruction Register",titleFont);
+    IRvalue = new NewLabel("None",defaultFont);
 
-    PCtitle = new NewLabel("Program Counter",fTitleFont);
-    PCvalue = new NewLabel("0",fDefaultFont);
+    PCtitle = new NewLabel("Program Counter",titleFont);
+    PCvalue = new NewLabel("0",defaultFont);
 
-    SPtitle = new NewLabel("Stack Pointer",fTitleFont);
-    SPvalue = new NewLabel("0",fDefaultFont);
+    SPtitle = new NewLabel("Stack Pointer",titleFont);
+    SPvalue = new NewLabel("0",defaultFont);
 
-    BPtitle = new NewLabel("Base Pointer",fTitleFont);
-    BPvalue = new NewLabel("0",fDefaultFont);
+    BPtitle = new NewLabel("Base Pointer",titleFont);
+    BPvalue = new NewLabel("0",defaultFont);
 
     pCPU.add(IRtitle);
     pCPU.add(IRvalue);
@@ -127,7 +127,7 @@ public class CPUFrame extends RCOSFrame
     // Right box
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     codeList = new List(10,false);
-    codeList.setBackground(cListColour);
+    codeList.setBackground(listColour);
     gridBag.setConstraints(codeList,constraints);
     pMain.add(codeList);
 

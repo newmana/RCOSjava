@@ -1,15 +1,3 @@
-//***************************************************************************
-// FILE     : RCOSFrame.java
-// PACKAGE  : Animator
-// PURPOSE  : Root class used for all animator frames.  Also contains
-//            default values for the colours and fonts used in all
-//            the UI.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 22/01/96  Original (RCOSFrame).
-//          : 20/11/98  New Version Created.
-//***************************************************************************//
-
 package Software.Animator;
 
 import java.lang.reflect.Method;
@@ -19,20 +7,30 @@ import Software.Animator.RCOSAnimator;
 import Software.Animator.Support.GraphicButton;
 import MessageSystem.Messages.MessageAdapter;
 
+/**
+ * Root class used for all animator frames.  Also contains default values for
+ * the colours and fonts used in all the UI.
+ * <P>
+ * HISTORY         : 20/11/98  New Version Created.
+ *
+ * @author Andrew Newman
+ * @created 22nd January 1996
+ * @version 1.00 $Date$
+ */
 public class RCOSFrame extends Frame
 {
-  public static Color cButtonColour = Color.yellow;
-  public static Color cChoiceColour = Color.darkGray;
-  public static Color cListColour = Color.darkGray;
-  public static Color cTextBoxColour = Color.darkGray;
-  public static Color cTerminalColour = Color.green;
-  public static Color cDefaultBgColour = Color.black;
-  public static Color cDefaultFgColour = Color.white;
-  public static Font fDefaultFont = new Font ("TimesRoman", Font.PLAIN, 12);
-  public static Font fLabelFont = new Font ("TimesRoman", Font.PLAIN, 14);
-  public static Font fButtonFont = new Font("Courier", Font.BOLD, 14);
-  public static Font fTerminlFont = new Font("Courier", Font.PLAIN, 10);
-  public static Font fTitleFont = new Font ("TimesRoman", Font.PLAIN, 18);
+  public static Color buttonColour = Color.yellow;
+  public static Color choiceColour = Color.darkGray;
+  public static Color listColour = Color.darkGray;
+  public static Color textBoxColour = Color.darkGray;
+  public static Color terminalColour = Color.green;
+  public static Color defaultBgColour = Color.black;
+  public static Color defaultFgColour = Color.white;
+  public static Font defaultFont = new Font ("TimesRoman", Font.PLAIN, 12);
+  public static Font labelFont = new Font ("TimesRoman", Font.PLAIN, 14);
+  public static Font buttonFont = new Font("Courier", Font.BOLD, 14);
+  public static Font terminlFont = new Font("Courier", Font.PLAIN, 10);
+  public static Font titleFont = new Font ("TimesRoman", Font.PLAIN, 18);
   private MessageAdapter msg;
   protected Button tmpButton;
   protected Component myComponent;
@@ -45,12 +43,12 @@ public class RCOSFrame extends Frame
   public void setupLayout(Component c)
   {
     myComponent = c;
-    SymWindow aSymWindow = new SymWindow();
-    this.addWindowListener(aSymWindow);
+    SymWindow theSymWindow = new SymWindow();
+    this.addWindowListener(theSymWindow);
     // Set default colours, fonts and layout manager.
-    setBackground(cDefaultBgColour);
-    setForeground(cDefaultFgColour);
-    setFont(fDefaultFont);
+    setBackground(defaultBgColour);
+    setForeground(defaultFgColour);
+    setFont(defaultFont);
     setLayout(new BorderLayout());
   }
 

@@ -84,8 +84,8 @@ public class TerminalManagerFrame extends RCOSFrame
 
         currentTerminal++;
         terminals[currentTerminal] = new GraphicButton (myImages[1],
-          myImages[1], "Terminal #" + currentTerminal, fDefaultFont,
-          cDefaultFgColour, true, false);
+          myImages[1], "Terminal #" + currentTerminal, defaultFont,
+          defaultFgColour, true, false);
         gridBag.setConstraints(terminals[currentTerminal], constraints);
         pMain.add(terminals[currentTerminal]);
         terminals[currentTerminal].addMouseListener(new TerminalHandler());
@@ -108,8 +108,8 @@ public class TerminalManagerFrame extends RCOSFrame
 
         currentTerminal++;
         views[currentTerminal] = new GraphicButton (myImages[2],
-          myImages[3], "#" + currentTerminal + " off", fDefaultFont,
-          cButtonColour, true, true);
+          myImages[3], "#" + currentTerminal + " off", defaultFont,
+          buttonColour, true, true);
         gridBag.setConstraints(views[currentTerminal], constraints);
         pMain.add(views[currentTerminal]);
         views[currentTerminal].addMouseListener(new TerminalHandler());

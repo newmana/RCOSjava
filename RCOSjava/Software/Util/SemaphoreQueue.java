@@ -23,7 +23,7 @@ public class SemaphoreQueue extends FIFOQueue
 
   // return String type of Process to occur at the specified time
   // return null it no interrupt
-  public Semaphore getSemaphore(int iSemaphoreID)
+  public Semaphore getSemaphore(int semaphoreId)
   {
     Semaphore tmp;
     String type;
@@ -41,7 +41,7 @@ public class SemaphoreQueue extends FIFOQueue
     do
     {
       tmp = (Semaphore) peek();
-      if ( tmp.getID() == iSemaphoreID )
+      if (tmp.getId() == semaphoreId)
       {
         tmp = (Semaphore) retrieveCurrent();
         return tmp;
@@ -50,7 +50,7 @@ public class SemaphoreQueue extends FIFOQueue
     } while (!atTail());
 
     tmp = (Semaphore) peek();
-    if (tmp.getID() == iSemaphoreID)
+    if (tmp.getId() == semaphoreId)
     {
       tmp = (Semaphore) retrieveCurrent();
       return tmp;
@@ -70,8 +70,12 @@ public class SemaphoreQueue extends FIFOQueue
     return (peek(sSempahoreID) != null);
   }
 
-  // peek by numeric id (inc int value)
-  public Object peek(int iSemaphoreID)
+  /**
+   * Peek by numeric id (inc int value)
+   *
+   * @param semaphoreId the id to look for
+   */
+  public Object peek(int semaphoreId)
   {
     Semaphore tmp;
 
@@ -83,9 +87,9 @@ public class SemaphoreQueue extends FIFOQueue
     do
     {
       tmp = (Semaphore) peek();
-      System.out.println("tmpSID = " + tmp.getID());
-      System.out.println("mySID = " + iSemaphoreID);
-      if (tmp.getID() == iSemaphoreID)
+      System.out.println("tmpSID = " + tmp.getId());
+      System.out.println("mySID = " + semaphoreId);
+      if (tmp.getId() == semaphoreId)
         return (Object) tmp;
       goToNext();
     } while (!atTail());
@@ -113,4 +117,3 @@ public class SemaphoreQueue extends FIFOQueue
     return null;
   }
 }
-   

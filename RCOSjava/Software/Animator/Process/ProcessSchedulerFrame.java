@@ -113,8 +113,8 @@ public class ProcessSchedulerFrame extends RCOSFrame
     int iIncrement;
 
     engine.pad.setColor(Color.lightGray);
-    engine.pad.setFont(fTitleFont);
-    FontMetrics fm = getFontMetrics(fTitleFont);
+    engine.pad.setFont(titleFont);
+    FontMetrics fm = getFontMetrics(titleFont);
 
     for (iCountY = 1; iCountY <= 3; iCountY++)
     {
@@ -168,7 +168,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
     super.setupLayout(c);
 
     engine = new GraphicsEngine(this, inX, inY);
-    engine.backgroundColour = cDefaultBgColour;
+    engine.backgroundColour = defaultBgColour;
 
     iWidth = engine.iWidth;
     iHeight = engine.iHeight / 5;
@@ -193,8 +193,8 @@ public class ProcessSchedulerFrame extends RCOSFrame
     speedOption.addItem("Normal");
     speedOption.addItem("Slow");
     speedOption.addItem("Slowest");
-    speedOption.setBackground(cChoiceColour);
-    speedOption.setForeground(cDefaultFgColour);
+    speedOption.setBackground(choiceColour);
+    speedOption.setForeground(defaultFgColour);
     speedOption.select("Fastest");
 
 // Set-up the options for the choice of quantum ie.
@@ -206,8 +206,8 @@ public class ProcessSchedulerFrame extends RCOSFrame
     quantumOption.addItem("3");
     quantumOption.addItem("2");
     quantumOption.addItem("1");
-    quantumOption.setBackground(cChoiceColour);
-    quantumOption.setForeground(cDefaultFgColour);
+    quantumOption.setBackground(choiceColour);
+    quantumOption.setForeground(defaultFgColour);
     quantumOption.select("2");
 
 // Set-up the options for the choice of queue
@@ -215,8 +215,8 @@ public class ProcessSchedulerFrame extends RCOSFrame
     schedulerOption.addItem("FIFO");
     schedulerOption.addItem("LIFO");
     schedulerOption.addItem("Priority");
-    schedulerOption.setBackground(cChoiceColour);
-    schedulerOption.setForeground(cDefaultFgColour);
+    schedulerOption.setBackground(choiceColour);
+    schedulerOption.setForeground(defaultFgColour);
     schedulerOption.select("FIFO");
 
 // Create a temporary gridbaglayout for the options portion
@@ -234,7 +234,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
     constraints.insets=new Insets(1,3,1,1);
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
-    lTmpLabel = new NewLabel("Speed:", fDefaultFont);
+    lTmpLabel = new NewLabel("Speed:", defaultFont);
     gridBag.setConstraints(lTmpLabel,constraints);
     pTemp.add(lTmpLabel);
 
@@ -248,7 +248,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
     constraints.insets=new Insets(1,3,1,1);
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
-    lTmpLabel = new NewLabel("Quantum:", fDefaultFont);
+    lTmpLabel = new NewLabel("Quantum:", defaultFont);
     gridBag.setConstraints(lTmpLabel,constraints);
     pTemp.add(lTmpLabel);
 
@@ -262,7 +262,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
     constraints.insets=new Insets(1,3,1,1);
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
-    lTmpLabel = new NewLabel("Type:", fDefaultFont);
+    lTmpLabel = new NewLabel("Type:", defaultFont);
     gridBag.setConstraints(lTmpLabel,constraints);
     pTemp.add(lTmpLabel);
 
@@ -274,7 +274,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
     pTemp.add(schedulerOption);
 //    quantumOption.addItemListener(new QuantumSelection());
 
-    rBox = new RCOSBox(pTemp,new NewLabel("Options", fTitleFont),3,
+    rBox = new RCOSBox(pTemp,new NewLabel("Options", titleFont),3,
                        3,3,3);
 
     pWest.setLayout(gridBag);

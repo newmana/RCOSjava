@@ -192,7 +192,7 @@ public class FileSystemManager extends OSMessageHandler
       {
         FIDTableData mvNewFID = new FIDTableData();
         mvNewFID.setPID(mvRequestData.getPID());
-        mvNewFID.setFSID(mvTheMessage.getSource().getID());
+        mvNewFID.setFSID(mvTheMessage.getSource().getId());
         mvNewFID.setFSFileNo(mvReturnData.getReturnValue());
         mvToReturn = cvFIDTable.add(mvNewFID);
       }

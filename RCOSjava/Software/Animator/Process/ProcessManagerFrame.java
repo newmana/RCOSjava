@@ -79,7 +79,7 @@ public class ProcessManagerFrame extends RCOSFrame
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
-    lTmpLabel = new NewLabel("Process to Kill", fTitleFont);
+    lTmpLabel = new NewLabel("Process to Kill", titleFont);
     gridBag.setConstraints(lTmpLabel,constraints);
     pMain.add(lTmpLabel);
 
@@ -92,21 +92,21 @@ public class ProcessManagerFrame extends RCOSFrame
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
     tmpGButton = new GraphicButton (myImages[0], myImages[1],
-      "Kill", fDefaultFont, cButtonColour, true);
+      "Kill", defaultFont, buttonColour, true);
     gridBag.setConstraints(tmpGButton,constraints);
     pMain.add(tmpGButton);
     tmpGButton.addMouseListener(new KillProcess());
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
-    lTmpLabel = new NewLabel("Command", fTitleFont);
+    lTmpLabel = new NewLabel("Command", titleFont);
     gridBag.setConstraints(lTmpLabel,constraints);
     pMain.add(lTmpLabel);
 
     constraints.gridwidth=1;
     constraints.anchor = GridBagConstraints.CENTER;
     tmpGButton = new GraphicButton (myImages[0], myImages[1],
-      "Step", fDefaultFont, cButtonColour, true);
+      "Step", defaultFont, buttonColour, true);
     gridBag.setConstraints(tmpGButton,constraints);
     pMain.add(tmpGButton);
     tmpGButton.addMouseListener(new StepProcess());
@@ -114,7 +114,7 @@ public class ProcessManagerFrame extends RCOSFrame
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
     tmpGButton = new GraphicButton (myImages[0], myImages[1],
-      "Run", fDefaultFont, cButtonColour, true);
+      "Run", defaultFont, buttonColour, true);
     gridBag.setConstraints(tmpGButton,constraints);
     pMain.add(tmpGButton);
     tmpGButton.addMouseListener(new RunProcess());

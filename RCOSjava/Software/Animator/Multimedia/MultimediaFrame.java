@@ -68,7 +68,7 @@ public class MultimediaFrame extends RCOSFrame
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
-    lTmpLabel = new NewLabel("Existing Recordings", fTitleFont);
+    lTmpLabel = new NewLabel("Existing Recordings", titleFont);
     gridBag.setConstraints(lTmpLabel,constraints);
     pMain.add(lTmpLabel);
 
@@ -81,21 +81,21 @@ public class MultimediaFrame extends RCOSFrame
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
     tmpGButton = new GraphicButton (myImages[0], myImages[1],
-      "Load", fDefaultFont, cButtonColour, true);
+      "Load", defaultFont, buttonColour, true);
     gridBag.setConstraints(tmpGButton,constraints);
     pMain.add(tmpGButton);
     //tmpButton.addMouseListener(new KillProcess());
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
-    lTmpLabel = new NewLabel("Commands", fTitleFont);
+    lTmpLabel = new NewLabel("Commands", titleFont);
     gridBag.setConstraints(lTmpLabel,constraints);
     pMain.add(lTmpLabel);
 
     constraints.gridwidth=1;
     constraints.anchor = GridBagConstraints.CENTER;
     tmpGButton = new GraphicButton (myImages[0], myImages[1],
-      "Play", fDefaultFont, cButtonColour, true);
+      "Play", defaultFont, buttonColour, true);
     gridBag.setConstraints(tmpGButton,constraints);
     pMain.add(tmpGButton);
 		//tmpButton.addMouseListener(new StepProcess());
@@ -103,7 +103,7 @@ public class MultimediaFrame extends RCOSFrame
 		constraints.gridwidth=1;
     constraints.anchor = GridBagConstraints.CENTER;
     tmpGButton = new GraphicButton (myImages[0], myImages[1],
-      "Pause", fDefaultFont, cButtonColour, true);
+      "Pause", defaultFont, buttonColour, true);
     gridBag.setConstraints(tmpGButton,constraints);
     pMain.add(tmpGButton);
     //tmpButton.addMouseListener(new StepProcess());
@@ -111,7 +111,7 @@ public class MultimediaFrame extends RCOSFrame
     constraints.gridwidth=GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.CENTER;
     tmpGButton = new GraphicButton (myImages[0], myImages[1],
-      "Record", fDefaultFont, cButtonColour, true);
+      "Record", defaultFont, buttonColour, true);
     gridBag.setConstraints(tmpGButton,constraints);
     pMain.add(tmpGButton);
     //tmpButton.addMouseListener(new RunProcess());

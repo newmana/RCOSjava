@@ -48,30 +48,30 @@ public class AboutFrame extends RCOSFrame
     pMain.setLayout(gridBag);
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
-    lTmpLabel = new NewLabel("RCOS.java Team.", fTitleFont);
+    lTmpLabel = new NewLabel("RCOS.java Team.", titleFont);
     gridBag.setConstraints(lTmpLabel,constraints);
     pMain.add(lTmpLabel);
 
     constraints.gridwidth = 1;
     tmpGButton = new GraphicButton(myImages[0], myImages[0], "David Jones",
-                   fDefaultFont, cDefaultFgColour, false, false);
+                   defaultFont, defaultFgColour, false, false);
     gridBag.setConstraints(tmpGButton,constraints);
     pMain.add(tmpGButton);
 
     Panel panel1 = new Panel();
     panel1.setLayout(new GridLayout(5,1));
 
-    panel1.add(new NewLabel("Name: David Jones.   ", fDefaultFont, false));
-    panel1.add(new NewLabel("Responsible for:     ", fDefaultFont, false));
-    panel1.add(new NewLabel("- Kernel,            ", fDefaultFont, false));
-    panel1.add(new NewLabel("- CPU, and           ", fDefaultFont, false));
-    panel1.add(new NewLabel("- Hardware Terminals.", fDefaultFont, false));
+    panel1.add(new NewLabel("Name: David Jones.   ", defaultFont, false));
+    panel1.add(new NewLabel("Responsible for:     ", defaultFont, false));
+    panel1.add(new NewLabel("- Kernel,            ", defaultFont, false));
+    panel1.add(new NewLabel("- CPU, and           ", defaultFont, false));
+    panel1.add(new NewLabel("- Hardware Terminals.", defaultFont, false));
 
     gridBag.setConstraints(panel1,constraints);
     pMain.add(panel1);
 
     tmpGButton = new GraphicButton(myImages[1], myImages[1], "Brett Carter",
-                   fDefaultFont, cButtonColour, false, false);
+                   defaultFont, buttonColour, false, false);
 
     gridBag.setConstraints(tmpGButton,constraints);
     pMain.add(tmpGButton);
@@ -79,18 +79,18 @@ public class AboutFrame extends RCOSFrame
     Panel panel2 = new Panel();
     panel2.setLayout(new GridLayout(5,1));
 
-    panel2.add(new NewLabel("Name: Brett Carter.  ", fDefaultFont, false));
-    panel2.add(new NewLabel("Responsible for:     ", fDefaultFont, false));
-    panel2.add(new NewLabel("- Disk Schedular,    ", fDefaultFont, false));
-    panel2.add(new NewLabel("- File System, and   ", fDefaultFont, false));
-    panel2.add(new NewLabel("- File Server.       ", fDefaultFont, false));
+    panel2.add(new NewLabel("Name: Brett Carter.  ", defaultFont, false));
+    panel2.add(new NewLabel("Responsible for:     ", defaultFont, false));
+    panel2.add(new NewLabel("- Disk Schedular,    ", defaultFont, false));
+    panel2.add(new NewLabel("- File System, and   ", defaultFont, false));
+    panel2.add(new NewLabel("- File Server.       ", defaultFont, false));
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBag.setConstraints(panel2,constraints);
     pMain.add(panel2);
 
     tmpGButton = new GraphicButton(myImages[2], myImages[2], "Bruce Jamieson",
-                   fDefaultFont, cButtonColour, false, false);
+                   defaultFont, buttonColour, false, false);
 
     constraints.gridwidth = 1;
     gridBag.setConstraints(tmpGButton,constraints);
@@ -99,29 +99,29 @@ public class AboutFrame extends RCOSFrame
     Panel panel3 = new Panel();
     panel3.setLayout(new GridLayout(5,1));
 
-    panel3.add(new NewLabel("Name: Bruce Jamieson.", fDefaultFont, false));
-    panel3.add(new NewLabel("Responsible for:     ", fDefaultFont, false));
-    panel3.add(new NewLabel("- Memory Manager,    ", fDefaultFont, false));
-    panel3.add(new NewLabel("- IPC Manager, and   ", fDefaultFont, false));
-    panel3.add(new NewLabel("- Post Office.       ", fDefaultFont, false));
+    panel3.add(new NewLabel("Name: Bruce Jamieson.", defaultFont, false));
+    panel3.add(new NewLabel("Responsible for:     ", defaultFont, false));
+    panel3.add(new NewLabel("- Memory Manager,    ", defaultFont, false));
+    panel3.add(new NewLabel("- IPC Manager, and   ", defaultFont, false));
+    panel3.add(new NewLabel("- Post Office.       ", defaultFont, false));
 
     gridBag.setConstraints(panel3,constraints);
     pMain.add(panel3);
 
     tmpGButton = new GraphicButton(myImages[3], myImages[3], "Andrew Newman",
-                   fDefaultFont, cButtonColour, false, false);
+                   defaultFont, buttonColour, false, false);
 
     gridBag.setConstraints(tmpGButton,constraints);
     pMain.add(tmpGButton);
 
     Panel panel4 = new Panel();
     panel4.setLayout(new GridLayout(6,1));
-    panel4.add(new NewLabel("Name: Andrew Newman. ", fDefaultFont, false));
-    panel4.add(new NewLabel("Responsible for:     ", fDefaultFont, false));
-    panel4.add(new NewLabel("- User Interface,    ", fDefaultFont, false));
-    panel4.add(new NewLabel("- Combinig RCOS elements,", fDefaultFont, false));
-    panel4.add(new NewLabel("- Fixing bugs, and", fDefaultFont, false));
-    panel4.add(new NewLabel("- Utility Objects.    ", fDefaultFont, false));
+    panel4.add(new NewLabel("Name: Andrew Newman. ", defaultFont, false));
+    panel4.add(new NewLabel("Responsible for:     ", defaultFont, false));
+    panel4.add(new NewLabel("- User Interface,    ", defaultFont, false));
+    panel4.add(new NewLabel("- Combinig RCOS elements,", defaultFont, false));
+    panel4.add(new NewLabel("- Fixing bugs, and", defaultFont, false));
+    panel4.add(new NewLabel("- Utility Objects.    ", defaultFont, false));
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBag.setConstraints(panel4,constraints);

@@ -1,7 +1,7 @@
 //*************************************************************************//
 // FILENAME : CPM14DiskInterruptHandler.java
 // PACKAGE  : Interrupt
-// PURPOSE  : 
+// PURPOSE  :
 // AUTHOR   : Brett Carter
 // HISTORY  : 25/3/96 Created.
 //*************************************************************************//
@@ -25,7 +25,7 @@ public class CPM14DiskInterruptHandler extends InterruptHandler
     // Clean up for next interupt??
 
     // Send message.
-//    MessageAdapter aMessage = new MessageAdapter(getID(), theDestination, "DiskRequestComplete",
+//    MessageAdapter aMessage = new MessageAdapter(getId(), theDestination, "DiskRequestComplete",
 //                                     null);
 //    SendMessage(aMessage);
   }

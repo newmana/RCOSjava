@@ -215,7 +215,7 @@ public class IPCManagerFrame extends RCOSFrame
     pTemp.add(allocBox);
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
-    lTmpLabel = new NewLabel(" Allocated ", fDefaultFont);
+    lTmpLabel = new NewLabel(" Allocated ", defaultFont);
     gridBag.setConstraints(lTmpLabel,constraints);
     pTemp.add(lTmpLabel);
 
@@ -224,7 +224,7 @@ public class IPCManagerFrame extends RCOSFrame
     pTemp.add(unallocBox);
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
-    lTmpLabel = new NewLabel(" Unallocated ", fDefaultFont);
+    lTmpLabel = new NewLabel(" Unallocated ", defaultFont);
     gridBag.setConstraints(lTmpLabel,constraints);
     pTemp.add(lTmpLabel);
 
@@ -233,7 +233,7 @@ public class IPCManagerFrame extends RCOSFrame
     pTemp.add(readBox);
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
-    lTmpLabel = new NewLabel(" Being Read ", fDefaultFont);
+    lTmpLabel = new NewLabel(" Being Read ", defaultFont);
     gridBag.setConstraints(lTmpLabel,constraints);
     pTemp.add(lTmpLabel);
 
@@ -242,12 +242,12 @@ public class IPCManagerFrame extends RCOSFrame
     pTemp.add(writeBox);
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
-    lTmpLabel = new NewLabel(" Being Written ", fDefaultFont);
+    lTmpLabel = new NewLabel(" Being Written ", defaultFont);
     gridBag.setConstraints(lTmpLabel,constraints);
     pTemp.add(lTmpLabel);
 
-    iBox = new RCOSBox(pTemp,new NewLabel("Key", fLabelFont),0,
-                       2,2,2);
+    iBox = new RCOSBox(pTemp,new NewLabel("Key", labelFont),0,
+      2,2,2);
 
     Panel pSMem, pSem;
     cSMemOption = new Choice();
@@ -277,16 +277,16 @@ public class IPCManagerFrame extends RCOSFrame
     tmpConstraints.anchor = GridBagConstraints.CENTER;
 
     tmpConstraints.anchor = GridBagConstraints.CENTER;
-    lTmpLabel = new NewLabel("ID:", fDefaultFont);
+    lTmpLabel = new NewLabel("ID:", defaultFont);
     tmpGridBag.setConstraints(lTmpLabel,tmpConstraints);
     pSMem.add(lTmpLabel);
 
-    lTmpLabel = new NewLabel("Process Queue:", fDefaultFont);
+    lTmpLabel = new NewLabel("Process Queue:", defaultFont);
     tmpGridBag.setConstraints(lTmpLabel,tmpConstraints);
     pSMem.add(lTmpLabel);
 
     tmpConstraints.gridwidth=GridBagConstraints.REMAINDER;
-    lTmpLabel = new NewLabel("Value:", fDefaultFont);
+    lTmpLabel = new NewLabel("Value:", defaultFont);
     tmpGridBag.setConstraints(lTmpLabel,tmpConstraints);
     pSMem.add(lTmpLabel);
 
@@ -294,7 +294,7 @@ public class IPCManagerFrame extends RCOSFrame
     tmpGridBag.setConstraints(cSMemOption,tmpConstraints);
     pSMem.add(cSMemOption);
 
-    shmQueue = new RCOSQueue(5, fDefaultFont);
+    shmQueue = new RCOSQueue(5, defaultFont);
     tmpGridBag.setConstraints(shmQueue,tmpConstraints);
     pSMem.add(shmQueue);
 
@@ -316,19 +316,19 @@ public class IPCManagerFrame extends RCOSFrame
 
     tmpConstraints.insets=new Insets(1,1,1,1);
     tmpConstraints.gridwidth=1;
-    lTmpLabel = new NewLabel("ID:", fDefaultFont);
+    lTmpLabel = new NewLabel("ID:", defaultFont);
     tmpGridBag.setConstraints(lTmpLabel,tmpConstraints);
     pSem.add(lTmpLabel);
 
     tmpConstraints.insets=new Insets(1,1,1,1);
-    lTmpLabel = new NewLabel("Process Queue:", fDefaultFont);
+    lTmpLabel = new NewLabel("Process Queue:", defaultFont);
     tmpGridBag.setConstraints(lTmpLabel,tmpConstraints);
     pSem.add(lTmpLabel);
 
     tmpConstraints.insets=new Insets(1,1,1,1);
     tmpConstraints.gridwidth=GridBagConstraints.REMAINDER;
     tmpConstraints.anchor = GridBagConstraints.CENTER;
-    lTmpLabel = new NewLabel("Value:", fDefaultFont);
+    lTmpLabel = new NewLabel("Value:", defaultFont);
     tmpGridBag.setConstraints(lTmpLabel,tmpConstraints);
     pSem.add(lTmpLabel);
 
@@ -340,7 +340,7 @@ public class IPCManagerFrame extends RCOSFrame
 
     tmpConstraints.insets=new Insets(1,1,1,1);
     tmpConstraints.anchor = GridBagConstraints.CENTER;
-    semQueue = new RCOSQueue(5, fDefaultFont);
+    semQueue = new RCOSQueue(5, defaultFont);
     tmpGridBag.setConstraints(semQueue,tmpConstraints);
     pSem.add(semQueue);
 
@@ -356,14 +356,14 @@ public class IPCManagerFrame extends RCOSFrame
     pMain.add(iBox);
 
     constraints.gridheight = 1;
-    rBox = new RCOSBox(pSem,new NewLabel("Semaphores", fTitleFont),1,
-                       1,1,1);
+    rBox = new RCOSBox(pSem,new NewLabel("Semaphores", titleFont),1,
+      1,1,1);
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBag.setConstraints(rBox,constraints);
     pMain.add(rBox);
 
-    rBox = new RCOSBox(pSMem,new NewLabel("Shared Memory", fTitleFont),1,
-                       1,1,1);
+    rBox = new RCOSBox(pSMem,new NewLabel("Shared Memory", titleFont),1,
+      1,1,1);
     constraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBag.setConstraints(rBox,constraints);
     pMain.add(rBox);
