@@ -64,10 +64,10 @@ public class SymbolTable
     System.out.println("Adding symbol: " + newSymbol.getName());
     if (symbols.containsKey(newSymbol.getName()))
     {
-      ArrayList list = (ArrayList) symbols.get(newSymbol.getName());
-      if (null == list.get(newSymbol.getLevel()))
+      HashMap symbolMap = (HashMap) symbols.get(newSymbol.getName());
+      if (null == symbolMap.get(new Short(newSymbol.getLevel())))
       {
-        list.add(newSymbol.getLevel(), newSymbol);
+        symbolMap.put(new Short(newSymbol.getLevel()), newSymbol);
       }
       else
       {
@@ -79,16 +79,16 @@ public class SymbolTable
     }
     else
     {
-      ArrayList list = new ArrayList();
-      list.add(newSymbol.getLevel(), newSymbol);
-      symbols.put(newSymbol.getName(), list);
+      HashMap symbolMap = new HashMap();
+      symbolMap.put(new Short(newSymbol.getLevel()), newSymbol);
+      symbols.put(newSymbol.getName(), symbolMap);
     }
   }
 
   /**
    * Get an Array.  Pull the item out of the given level.
    */
-  public Array getArray(String name, int level) throws Exception
+  public Array getArray(String name, short level) throws Exception
   {
     return (Array) getSymbol(name, level);
   }
@@ -96,7 +96,7 @@ public class SymbolTable
   /**
    * Get a Constant.
    */
-  public Constant getConstant(String name, int level) throws Exception
+  public Constant getConstant(String name, short level) throws Exception
   {
     return (Constant) getSymbol(name, level);
   }
@@ -104,7 +104,7 @@ public class SymbolTable
   /**
    * Get a File.
    */
-  public File getFile(String name, int level) throws Exception
+  public File getFile(String name, short level) throws Exception
   {
     return (File) getSymbol(name, level);
   }
@@ -112,7 +112,7 @@ public class SymbolTable
   /**
    * Get a Return.
    */
-  public Return getReturn(String name, int level) throws Exception
+  public Return getReturn(String name, short level) throws Exception
   {
     return (Return) getSymbol(name, level);
   }
@@ -120,7 +120,7 @@ public class SymbolTable
   /**
    * Get a Variable.
    */
-  public Variable getVariable(String name, int level) throws Exception
+  public Variable getVariable(String name, short level) throws Exception
   {
     return (Variable) getSymbol(name, level);
   }
@@ -133,18 +133,26 @@ public class SymbolTable
    * @param level the level to find the symbol at.
    * @exception Exception if the symbol is not found.
    */
-  private Symbol getSymbol(String name, int level) throws Exception
+  private Symbol getSymbol(String name, short level) throws Exception
   {
     System.out.println("Getting symbol: " + name);
+    System.out.println("Getting symbol: " + level);
     Symbol symbol = null;
 
     if (symbols.containsKey(name))
     {
-      ArrayList list = (ArrayList) symbols.get(name);
+      HashMap symbolMap = (HashMap) symbols.get(name);
 
-      if (null != list.get(level))
+      // Search from the highest to the lowest level for it in the symbol table.
+      short counter = level;
+      while (counter >= 0)
       {
-        symbol = (Symbol) list.get(level);
+        if (null != symbolMap.get(new Short(counter)))
+        {
+          symbol = (Symbol) symbolMap.get(new Short(counter));
+          break;
+        }
+        counter--;
       }
     }
 
