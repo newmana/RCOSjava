@@ -1,6 +1,7 @@
 package org.rcosjava.software.terminal;
 
 import java.io.*;
+
 import org.rcosjava.RCOS;
 import org.rcosjava.hardware.terminal.HardwareTerminal;
 import org.rcosjava.messaging.messages.os.AllocateTerminal;
