@@ -19,17 +19,14 @@ import net.sourceforge.rcosjava.messaging.postoffices.os.OSMessageHandler;
  * @version 1.00 $Date$
  * @created 24th of March 1996
  */
-public class KillProcess  extends UniversalMessageAdapter
+public class KillProcess extends UniversalMessageAdapter
 {
   private int pid;
-  private boolean handleInterrupt = false;
 
-  public KillProcess(OSMessageHandler theSource, int newPID,
-    boolean newHandleInterrupt)
+  public KillProcess(OSMessageHandler theSource, int newPID)
   {
     super(theSource);
     pid = newPID;
-    handleInterrupt = newHandleInterrupt;
   }
 
   public void setProcessID(int newPID)
@@ -39,6 +36,7 @@ public class KillProcess  extends UniversalMessageAdapter
 
   public void doMessage(ProcessScheduler theElement)
   {
+    theElement.killProcess(pid);
   }
 
   public void doMessage(ProcessSchedulerAnimator theElement)
@@ -53,7 +51,7 @@ public class KillProcess  extends UniversalMessageAdapter
 
   public void doMessage(Kernel theElement)
   {
-    if (handleInterrupt)
+    if (theElement.runningProcess() && theElement.getCurrentProcess().getPID() == pid)
       theElement.handleProcessFinishedInterrupt();
   }
 }

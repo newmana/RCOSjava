@@ -32,7 +32,7 @@ public class DeallocatedPages extends UniversalMessageAdapter
    */
   public void doMessage(IPCManagerAnimator theElement)
   {
-    theElement.deallocatedPages(this.returnedMemory);
+    theElement.deallocatedPages(returnedMemory);
   }
 }
 

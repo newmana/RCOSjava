@@ -4,6 +4,7 @@ import net.sourceforge.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import net.sourceforge.rcosjava.software.process.RCOSProcess;
 import net.sourceforge.rcosjava.software.process.ProcessScheduler;
 import net.sourceforge.rcosjava.software.animator.process.ProcessSchedulerAnimator;
+import net.sourceforge.rcosjava.software.animator.process.ProcessManagerAnimator;
 
 /**
  * Send when the a process is first created and doesn't have a terminal
@@ -41,6 +42,16 @@ public class ZombieCreated extends UniversalMessageAdapter
   public void doMessage(ProcessScheduler theElement)
   {
     theElement.zombieCreated(zombieProcess);
+  }
+
+  /**
+   * Executes newProcess method on process manager animator.
+   *
+   * @param theElement the process manager animator to do the work on.
+   */
+  public void doMessage(ProcessManagerAnimator theElement)
+  {
+    theElement.newProcess(zombieProcess.getPID());
   }
 
   /**

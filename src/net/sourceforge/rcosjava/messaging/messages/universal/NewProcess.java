@@ -1,11 +1,3 @@
-//******************************************************/
-// FILE     : NewProcessMessage.java
-// PURPOSE  :
-// AUTHOR   : David Jones
-// MODIFIED : Andrew Newman
-// HISTORY  :    Created
-//******************************************************/
-
 package net.sourceforge.rcosjava.messaging.messages.universal;
 
 
@@ -22,58 +14,59 @@ import net.sourceforge.rcosjava.messaging.postoffices.os.OSMessageHandler;
  * <P>
  * <DT><B>History:</B>
  * <DD>
- * 01/07/1997   Uses Memory
+ * 01/07/1997 Uses Memory
  * </DD><DD>
- * 03/08/97   Moved to message system
+ * 03/08/97 Moved to message system
  * </DD></DT>
  * <P>
  * @author Andrew Newman.
+ * @author David Jones.
  * @version 1.00 $Date$
  * @created 24th of March 1997
  */
 public class NewProcess extends UniversalMessageAdapter
 {
-  private String sFilename;
-  private Memory mProcessMemory;
-  private int iFileSize;
+  private String fileName;
+  private Memory processMemory;
+  private int fileSize;
 
-  public NewProcess(OSMessageHandler theSource, String sNewFilename,
-    Memory mNewProcessMemory, int iNewFileSize)
+  public NewProcess(OSMessageHandler theSource, String newFileName,
+    Memory newProcessMemory, int newFileSize)
   {
     super(theSource);
-    sFilename = sNewFilename;
-    mProcessMemory = mNewProcessMemory;
-    iFileSize = iNewFileSize;
+    fileName = newFileName;
+    processMemory = newProcessMemory;
+    fileSize = newFileSize;
   }
 
-  public void setFilename(String sNewFilename)
+  public void setFilename(String newFileName)
   {
-    sFilename = sNewFilename;
+    fileName = newFileName;
   }
 
   public String getFilename()
   {
-    return sFilename;
+    return fileName;
   }
 
-  public void setMemory(Memory mNewMemory)
+  public void setMemory(Memory newMemory)
   {
-    mProcessMemory = mNewMemory;
+    processMemory = newMemory;
   }
 
   public Memory getMemory()
   {
-    return mProcessMemory;
+    return processMemory;
   }
 
   public int getFileSize()
   {
-    return iFileSize;
+    return fileSize;
   }
 
-  public void setFileSize(int iNewFileSize)
+  public void setFileSize(int newFileSize)
   {
-    iFileSize = iNewFileSize;
+    fileSize = newFileSize;
   }
 
   public int getStackPages()
@@ -89,7 +82,7 @@ public class NewProcess extends UniversalMessageAdapter
    */
   public int getCodePages()
   {
-    return ((int) (iFileSize / Memory.DEFAULT_SEGMENT)+1);
+    return ((int) (fileSize / Memory.DEFAULT_SEGMENT)+1);
   }
 
   /**
