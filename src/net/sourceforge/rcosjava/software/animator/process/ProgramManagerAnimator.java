@@ -147,7 +147,7 @@ public class ProgramManagerAnimator extends RCOSAnimator
 
   /**
    * Handle updating the list.  Send the
-   * @see MessageSystem.messages.universal.UpdateList message.
+   * @see net.sourceforge.rcosjava.messaging.messages.universal.UpdateList message.
    */
   public void updateList()
   {
