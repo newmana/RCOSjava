@@ -49,6 +49,7 @@ public class ProcessSchedulerTest extends TestCase
 
     suite.addTest(new ProcessSchedulerTest("testBasicProcessScheduling"));
     suite.addTest(new ProcessSchedulerTest("testBlockingProcessScheduling"));
+    suite.addTest(new ProcessSchedulerTest("testKillingProcesses"));
     return suite;
   }
 
@@ -89,7 +90,7 @@ public class ProcessSchedulerTest extends TestCase
           scheduler.getZombieCreatedQueue().getProcess(1).equals(tmpProcess1));
 
       // Zombie process allocated a terminal
-      scheduler.processAllocatedTerminal(tmpProcess1, "Termainl1");
+      scheduler.processAllocatedTerminal(tmpProcess1, "Terminal1");
 
       // Zombie process moved to read queue
       scheduler.zombieToReady(tmpProcess1);
@@ -263,6 +264,61 @@ public class ProcessSchedulerTest extends TestCase
           scheduler.getBlockedQueue().size() == 0);
       assertTrue("Zombie Created queue should be empty",
           scheduler.getZombieCreatedQueue().size() == 0);
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Test killing the processes from various parts of their life cycle.
+   */
+  public void testKillingProcesses()
+  {
+    try
+    {
+      scheduler = new ProcessScheduler(new OSOffice("test"));
+      tmpProcess1 = new RCOSProcess(1, "test.pll", 123, 1, 1);
+
+      // Schedule any processes running
+      scheduler.schedule();
+
+      // Zombie process created.
+      scheduler.zombieCreated(tmpProcess1);
+
+      assertTrue("Should have process in zombie created queue",
+          scheduler.getZombieCreatedQueue().getProcess(1).equals(tmpProcess1));
+
+      // Zombie process allocated a terminal
+      scheduler.processAllocatedTerminal(tmpProcess1, "Terminal1");
+
+      // Zombie process moved to read queue
+      scheduler.zombieToReady(tmpProcess1);
+
+      assertTrue("Should have process in ready queue",
+          scheduler.getReadyQueue().getProcess(1).equals(tmpProcess1));
+      assertTrue("Zombie queue should be 0",
+          scheduler.getZombieCreatedQueue().size() == 0);
+
+      // Schedule any processes running
+      scheduler.schedule();
+
+      // Should've moved it to the executing queue
+      assertTrue("Ready queue should be empty",
+          scheduler.getReadyQueue().size() == 0);
+      assertTrue("Process should be executing",
+          scheduler.getExecutingProcess().equals(tmpProcess1));
+
+      // Process has finished executing (quantum expired)
+      scheduler.runningToReady(tmpProcess1);
+
+      // Kill the executing process
+      scheduler.killProcess(new RCOSProcess(1, ""));
+      scheduler.processFinished(new RCOSProcess(1, ""));
+
+      assertTrue("Ready queue should be empty",
+          scheduler.getReadyQueue().size() == 0);
     }
     catch (Exception e)
     {
