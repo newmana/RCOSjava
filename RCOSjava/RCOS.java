@@ -321,7 +321,7 @@ public class RCOS extends java.applet.Applet implements Runnable
     pcmAnimator = new ProcessManagerAnimator(animatorPostOffice, 250, 250,
       imgProcessMan);
 
-    mmAnimator = new MultimediaAnimator(animatorPostOffice, smallX, smallY,
+    mmAnimator = new MultimediaAnimator(animatorPostOffice, 250, 250,
       imgProcessMan, recorder, player);
 
     aboutAnimator = new AboutAnimator(animatorPostOffice, largeX, largeY, imgAbout);
