@@ -23,8 +23,8 @@ public class InterruptHandler extends OSMessageHandler implements Serializable
   /**
    * Description of the Field
    */
-  public static String IH_IDENTIFIER = "IH";
-//  public static final String IH_IDENTIFIER = "IH";
+  public static final String IH_IDENTIFIER = "IH";
+
   /**
    * Description of the Field
    */
