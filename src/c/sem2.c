@@ -23,5 +23,5 @@ int main()
   }
 
   printf("Closing semaphore\n");
-  semResult = semclose("sem1");
+  semResult = semclose(semValue);
 }
