@@ -287,8 +287,8 @@ public class ProcessScheduler extends OSMessageHandler
       MemoryManager.PAGE_SIZE) + 1;
     newMemoryRequest = new MemoryRequest(newPID, MemoryManager.CODE_SEGMENT,
       numberOfPages);
-    AllocatePages tmpAllocatePagesMessage = new
-      AllocatePages(this, newMemoryRequest);
+    AllocatePages tmpAllocatePagesMessage = new AllocatePages(this,
+      newMemoryRequest);
     sendMessage(tmpAllocatePagesMessage);
 
     // Write code to allocated bytes - should check for successful
