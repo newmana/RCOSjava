@@ -139,10 +139,10 @@ public class MainMemory implements Serializable
     os.writeInt(totalUnits);
     os.writeInt(freeUnits);
 
-//    for (int count = 0; count < totalUnits; count++)
-//    {
-//      os.writeObject(myMemory[count]);
-//    }
+    for (int count = 0; count < totalUnits; count++)
+    {
+      os.writeObject(myMemory[count]);
+    }
   }
 
   /**
@@ -160,8 +160,8 @@ public class MainMemory implements Serializable
     myMemory = new Memory[totalUnits];
     for (int count = 0; count < totalUnits; count++)
     {
-      myMemory[count] = new Memory();
-//      myMemory[count] = (Memory) is.readObject();
+//      myMemory[count] = new Memory();
+      myMemory[count] = (Memory) is.readObject();
     }
   }
 }

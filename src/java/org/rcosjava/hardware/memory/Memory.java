@@ -1,6 +1,6 @@
 package org.rcosjava.hardware.memory;
 
-import java.io.Serializable;
+import java.io.*;
 
 /**
  * Basic Memory type - basically an array of short. Provides utils for
@@ -366,5 +366,37 @@ public class Memory implements Serializable, Cloneable
       }
     }
     return toReturn.toString();
+  }
+  /**
+   * Handle the serialization of the contents.
+   */
+  private void writeObject(ObjectOutputStream os) throws IOException
+  {
+    os.writeInt(segmentSize);
+    os.writeBoolean(allocated);
+    for (int index = 0; index < memorySegment.length; index++)
+    {
+      os.writeShort(memorySegment[index]);
+    }
+  }
+
+  /**
+   * Handle deserialization of the contents.  Ensures non-serializable
+   * components correctly created.
+   *
+   * @param is stream that is being read.
+   */
+  private void readObject(ObjectInputStream is) throws IOException,
+      ClassNotFoundException
+  {
+    segmentSize = is.readInt();
+    allocated = is.readBoolean();
+
+    memorySegment = new short[segmentSize];
+
+    for (int index = 0; index < segmentSize; index++)
+    {
+      memorySegment[index] = is.readShort();
+    }
   }
 }
