@@ -49,7 +49,7 @@ public class AboutAnimator extends RCOSAnimator
    */
   public void setupLayout(Component c)
   {
-    //myFrame.setupLayout(c);
+    myFrame.setupLayout(c);
   }
 
   public RCOSPanel getPanel()

@@ -49,9 +49,8 @@ public class AboutFrame extends RCOSFrame
    *
    * @param c the parent component.
    */
-  public void setupLayout(JComponent c)
+  public void setupLayout(Component c)
   {
-    super.setupLayout(c);
     JPanel titlePanel = new JPanel();
     titlePanel.setBackground(defaultBgColour);
     titlePanel.setForeground(defaultFgColour);
