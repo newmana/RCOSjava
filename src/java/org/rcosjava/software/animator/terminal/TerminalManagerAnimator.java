@@ -265,6 +265,8 @@ public class TerminalManagerAnimator extends RCOSAnimator
   private void readObject(ObjectInputStream is) throws IOException,
       ClassNotFoundException
   {
+    register(MESSENGING_ID, RCOS.getAnimatorPostOffice());
+
     // Columns
     noTerminalColumns = is.readInt();
     noTerminalRows = is.readInt();
@@ -273,31 +275,26 @@ public class TerminalManagerAnimator extends RCOSAnimator
     terminalsFront = new boolean[noTerminals];
     terminalsOn = new boolean[noTerminals];
 
-    panel = (TerminalManagerPanel) RCOS.getTerminalAnimator().getPanel();
-    panel.setManager(this);
-
-    // Terminal On
+    // Read Terminal On and Terminal Front
     for (int index = 1; index < noTerminals; index++)
     {
       terminalsOn[index] = is.readBoolean();
+    }
+    for (int index = 1; index < noTerminals; index++)
+    {
       terminalsFront[index] = is.readBoolean();
+    }
 
+    panel = (TerminalManagerPanel) RCOS.getTerminalAnimator().getPanel();
+    panel.setManager(this);
+
+    // Set the restored values.
+    for (int index = 1; index < noTerminals; index++)
+    {
       if (terminalsOn[index])
       {
         terminalOn(index);
-      }
-      else
-      {
-        terminalOff(index);
-      }
-    }
 
-    // Terminal Front
-    for (int index = 1; index < noTerminals; index++)
-    {
-      // Only set on if terminal on.
-      if (terminalsOn[index])
-      {
         if (terminalsFront[index])
         {
           terminalFront(index);
@@ -306,6 +303,10 @@ public class TerminalManagerAnimator extends RCOSAnimator
         {
           terminalBack(index);
         }
+      }
+      else
+      {
+        terminalOff(index);
       }
     }
   }
