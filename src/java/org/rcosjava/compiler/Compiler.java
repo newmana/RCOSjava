@@ -54,8 +54,8 @@ public class Compiler
       table = SymbolTable.getInstance();
 
       // Add header codes.
-      addInstruction(0, new Instruction(OpCode.JUMP.getValue(), (byte) 0,
-          stmtCompiler.mainPosition()));
+      addInstruction(0, OpCode.JUMP.getValue(), (byte) 0,
+          stmtCompiler.mainPosition());
       System.out.println("Main pos: " + stmtCompiler.mainPosition());
 
       // Print out result to file
@@ -63,7 +63,7 @@ public class Compiler
       StringBuffer tmpBuffer = new StringBuffer();
       while (tmpIter.hasNext())
       {
-        tmpBuffer.append((Instruction) tmpIter.next() + "\n");
+        tmpBuffer.append((String) tmpIter.next() + "\n");
       }
 
       System.out.println("Got: " + tmpBuffer.toString());
@@ -84,21 +84,33 @@ public class Compiler
    * Add an instruction at the given location into the FIFO array instructions.
    *
    * @param index the position to put it in.
-   * @param instruction the instruction to add.
+   * @param instruction the index to the instruction to add.
+   * @param byteParam the byte value of the instruction.
+   * @param wordParam the word value of the instruction.
    */
-  protected static void addInstruction(int index, Instruction instruction)
+  protected static void addInstruction(int index, int instruction,
+      byte byteParam, short wordParam)
   {
-    instructions.add(index, instruction);
+    Instruction tmpInstruction = Instruction.INSTRUCTIONS[instruction];
+    tmpInstruction.setByteParameter(byteParam);
+    tmpInstruction.setWordParameter(wordParam);
+    instructions.add(index, tmpInstruction.toString());
   }
 
   /**
    * Add an instruction into the FIFO array of instructions.
    *
    * @oaram instruction the instruction to add.
+   * @param byteParam the byte value of the instruction.
+   * @param wordParam the word value of the instruction.
    */
-  public static void addInstruction(Instruction instruction)
+  public static void addInstruction(int instruction, byte byteParam,
+      short wordParam)
   {
-    instructions.add(instruction);
+    Instruction tmpInstruction = Instruction.INSTRUCTIONS[instruction];
+    tmpInstruction.setByteParameter(byteParam);
+    tmpInstruction.setWordParameter(wordParam);
+    instructions.add(tmpInstruction.toString());
   }
 
   /**
@@ -108,7 +120,7 @@ public class Compiler
    * @return the current level (how many nested statements i.e. curly braces)
    * we are currently in.
    */
-  public static  short getLevel()
+  public static short getLevel()
   {
     return level;
   }

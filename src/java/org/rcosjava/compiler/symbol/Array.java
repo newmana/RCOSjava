@@ -40,8 +40,7 @@ public class Array extends Symbol
     String varValue)
   {
     short varIntValue = Short.parseShort(varValue.trim());
-    compiler.writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-      varIntValue));
+    compiler.writePCode(OpCode.LITERAL.getValue(), (byte) 0, varIntValue);
   }
 
   public void handleCharLiteral(StatementCompiler compiler, String newVarValue)
@@ -64,8 +63,7 @@ public class Array extends Symbol
       handleLoad(compiler, count);
       count++;
     }
-    compiler.writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-      (short) (count)));
+    compiler.writePCode(OpCode.LITERAL.getValue(), (byte) 0, (short) (count));
   }
 
   public void handleStore(StatementCompiler compiler)
@@ -80,19 +78,16 @@ public class Array extends Symbol
       if ((varValue.charAt(count) == '\\') &&
           (varValue.charAt(count + 1) == 'n'))
       {
-        tmpInst = new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
+        handleStore(compiler, count, OpCode.LITERAL.getValue(), (byte) 0,
           (short) 13);
-        handleStore(compiler, count, tmpInst);
-        tmpInst = new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
+        handleStore(compiler, count, OpCode.LITERAL.getValue(), (byte) 0,
           (short) 10);
-        handleStore(compiler, count, tmpInst);
         count = count + 2;
       }
       else
       {
-        tmpInst = new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
+        handleStore(compiler, count, OpCode.LITERAL.getValue(), (byte) 0,
           (short) varValue.charAt(count));
-        handleStore(compiler, count, tmpInst);
         count++;
       }
     }
@@ -100,35 +95,29 @@ public class Array extends Symbol
 
   public void handleLoad(StatementCompiler compiler, int index)
   {
-    compiler.writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-      (short) index));
-    compiler.writePCode(new Instruction(OpCode.LOAD_INDEXED.getValue(),
-      (byte) 0, getOffset()));
+    compiler.writePCode(OpCode.LITERAL.getValue(), (byte) 0, (short) index);
+    compiler.writePCode(OpCode.LOAD_INDEXED.getValue(), (byte) 0, getOffset());
   }
 
   public void handleLoad(StatementCompiler compiler, Symbol index)
   {
     index.handleLoad(compiler);
-    compiler.writePCode(new Instruction(OpCode.LOAD_INDEXED.getValue(),
-      (byte) 0, getOffset()));
+    compiler.writePCode(OpCode.LOAD_INDEXED.getValue(), (byte) 0, getOffset());
   }
 
   public void handleStore(StatementCompiler compiler, Symbol index,
-    Instruction newInstruction)
+    int instruction, byte byteParam, short wordParam)
   {
     index.handleLoad(compiler);
-    compiler.writePCode(newInstruction);
-    compiler.writePCode(new Instruction(OpCode.STORE_INDEXED.getValue(),
-      (byte) 0, getOffset()));
+    compiler.writePCode(instruction, byteParam, wordParam);
+    compiler.writePCode(OpCode.STORE_INDEXED.getValue(), (byte) 0, getOffset());
   }
 
   public void handleStore(StatementCompiler compiler, int index,
-    Instruction newInstruction)
+    int instruction, byte byteParam, short wordParam)
   {
-    compiler.writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-      (short) index));
-    compiler.writePCode(newInstruction);
-    compiler.writePCode(new Instruction(OpCode.STORE_INDEXED.getValue(),
-      (byte) 0, getOffset()));
+    compiler.writePCode(OpCode.LITERAL.getValue(), (byte) 0, (short) index);
+    compiler.writePCode(instruction, byteParam, wordParam);
+    compiler.writePCode(OpCode.STORE_INDEXED.getValue(), (byte) 0, getOffset());
   }
 }

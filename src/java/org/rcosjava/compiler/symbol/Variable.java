@@ -35,13 +35,12 @@ public class Variable extends Symbol
     // Store variable at the variables location
     if (Compiler.getLevel() == getLevel())
     {
-      compiler.writePCode(new Instruction(storeOpCode.getValue(), (byte) 0,
-        getOffset()));
+      compiler.writePCode(storeOpCode.getValue(), (byte) 0, getOffset());
     }
     else
     {
-      compiler.writePCode(new Instruction(storeOpCode.getValue(),
-        (byte) (Compiler.getLevel() - getLevel()), getOffset()));
+      compiler.writePCode(storeOpCode.getValue(),
+          (byte) (Compiler.getLevel() - getLevel()), getOffset());
     }
   }
 
@@ -55,20 +54,19 @@ public class Variable extends Symbol
 
     if (Compiler.getLevel() == getLevel())
     {
-      compiler.writePCode(new Instruction(loadOpCode.getValue(), (byte) 0,
-        getOffset()));
+      compiler.writePCode(loadOpCode.getValue(), (byte) 0, getOffset());
     }
     else
     {
-      compiler.writePCode(new Instruction(loadOpCode.getValue(),
-        (byte) (Compiler.getLevel() - getLevel()), getOffset()));
+      compiler.writePCode(loadOpCode.getValue(),
+          (byte) (Compiler.getLevel() - getLevel()), getOffset());
     }
   }
 
   public void handleCharLiteral(StatementCompiler compiler, String varValue)
   {
-    compiler.writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-      (short) varValue.charAt(1)));
+    compiler.writePCode(OpCode.LITERAL.getValue(), (byte) 0,
+      (short) varValue.charAt(1));
   }
 
   public void handleStringLiteral(StatementCompiler compiler, String varValue)
@@ -84,29 +82,26 @@ public class Variable extends Symbol
       if ((varValue.charAt(count) == '\\') &&
           (varValue.charAt(count + 1) == 'n'))
       {
-        compiler.writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-          (short) 13));
-        compiler.writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-          (short) 10));
+        compiler.writePCode(OpCode.LITERAL.getValue(), (byte) 0, (short) 13);
+        compiler.writePCode(OpCode.LITERAL.getValue(), (byte) 0, (short) 10);
         count = count + 2;
       }
       else
       {
-        compiler.writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-          (short) varValue.charAt(count)));
+        compiler.writePCode(OpCode.LITERAL.getValue(), (byte) 0,
+            (short) varValue.charAt(count));
         count++;
       }
     }
     //emit store a required pos
-    compiler.writePCode(new Instruction(OpCode.LITERAL.getValue(), byteParam,
-      (short) (count-1)));
+    compiler.writePCode(OpCode.LITERAL.getValue(), byteParam,
+        (short) (count-1));
   }
 
   public void handleIntLiteral(StatementCompiler compiler,
     String varValue)
   {
     short varIntValue = Short.parseShort(varValue.trim());
-    compiler.writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-      varIntValue));
+    compiler.writePCode(OpCode.LITERAL.getValue(), (byte) 0, varIntValue);
   }
 }

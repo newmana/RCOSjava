@@ -157,8 +157,8 @@ public class StatementCompiler extends DepthFirstAdapter
   {
     byte byteParam = 0;
 
-    writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
-      byteParam, semType.getValue()));
+    writePCode(OpCode.CALL_SYSTEM_PROCEDURE.getValue(), byteParam,
+        semType.getValue());
 
     String varName = var.toString().trim();
 
@@ -218,9 +218,8 @@ public class StatementCompiler extends DepthFirstAdapter
     short startPosition = Compiler.getInstructionIndex();
     node.getCompoundStatement().apply(this);
     short finishPosition = Compiler.getInstructionIndex();
-    writePCode(startPosition,
-      new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
-      (short) (finishPosition+2+noLoops)));
+    writePCode(startPosition, OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
+      (short) (finishPosition+2+noLoops));
 
     noLoops--;
     outAIfStatement(node);
@@ -249,16 +248,14 @@ public class StatementCompiler extends DepthFirstAdapter
     short startPosition = Compiler.getInstructionIndex();
     node.getThenCompStmt().apply(this);
     short finishPosition = Compiler.getInstructionIndex();
-    writePCode(startPosition,
-      new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
-      (short) (finishPosition+2+(noLoops*2))));
+    writePCode(startPosition, OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
+        (short) (finishPosition+2+(noLoops*2)));
 
     startPosition = Compiler.getInstructionIndex();
     node.getElseCompStmt().apply(this);
     finishPosition = Compiler.getInstructionIndex();
-    writePCode(startPosition,
-      new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
-      (short) (finishPosition+1+(noLoops*2))));
+    writePCode(startPosition, OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
+        (short) (finishPosition+1+(noLoops*2)));
 
     noLoops--;
     outAIfThenElseStatement(node);
@@ -319,13 +316,11 @@ public class StatementCompiler extends DepthFirstAdapter
 
     short finishPosition = Compiler.getInstructionIndex();
 
-    writePCode(afterCond,
-      new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
-      (short) (finishPosition+3+noLoops)));
+    writePCode(afterCond, OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
+        (short) (finishPosition+3+noLoops));
 
-    writePCode(
-      new Instruction(OpCode.JUMP.getValue(), (byte) 0,
-      (short) (beforeIter+1+noLoops)));
+    writePCode(OpCode.JUMP.getValue(), (byte) 0,
+        (short) (beforeIter+1+noLoops));
 
     noLoops--;
     outAForStatement(node);
@@ -356,8 +351,8 @@ public class StatementCompiler extends DepthFirstAdapter
 
     expr.apply(this);
 
-    writePCode(new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 1,
-      (short) (startStatement+1+noLoops)));
+    writePCode(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 1,
+       (short) (startStatement+1+noLoops));
 
     noLoops--;
     outADoStatement(node);
@@ -391,15 +386,13 @@ public class StatementCompiler extends DepthFirstAdapter
     node.getCompoundStatement().apply(this);
 
     // Start position -1 because we are inserting the JPC.
-    writePCode(
-      new Instruction(OpCode.JUMP.getValue(), (byte) 0,
-      (short) (beforeCondPosition+1+noLoops)));
+    writePCode(OpCode.JUMP.getValue(), (byte) 0,
+      (short) (beforeCondPosition+1+noLoops));
 
     short finishPosition = Compiler.getInstructionIndex();
 
-    writePCode(startPosition,
-      new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
-      (short) (finishPosition+2+noLoops)));
+    writePCode(startPosition, OpCode.JUMP_ON_CONDITION.getValue(), (byte) 0,
+      (short) (finishPosition+2+noLoops));
 
     noLoops--;
     outAWhileStatement(node);
@@ -408,43 +401,43 @@ public class StatementCompiler extends DepthFirstAdapter
   public void caseAGteqRelop(AGteqRelop node)
   {
 //    System.out.println("GTE Node: " + node);
-    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
-      Operator.GREATER_THAN_OR_EQUAL.getValue()));
+    writePCode(OpCode.OPERATION.getValue(), (byte) 0,
+        Operator.GREATER_THAN_OR_EQUAL.getValue());
   }
 
   public void inAGtRelop(AGtRelop node)
   {
 //    System.out.println("GT Node: " + node);
-    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
-      Operator.GREATER_THAN.getValue()));
+    writePCode(OpCode.OPERATION.getValue(), (byte) 0,
+      Operator.GREATER_THAN.getValue());
   }
 
   public void caseALteqRelop(ALteqRelop node)
   {
 //    System.out.println("LTE Node: " + node);
-    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
-      Operator.LESS_THAN_OR_EQUAL.getValue()));
+    writePCode(OpCode.OPERATION.getValue(), (byte) 0,
+        Operator.LESS_THAN_OR_EQUAL.getValue());
   }
 
   public void caseALtRelop(ALtRelop node)
   {
 //    System.out.println("LT Node: " + node);
-    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
-      Operator.LESS_THAN.getValue()));
+    writePCode(OpCode.OPERATION.getValue(), (byte) 0,
+        Operator.LESS_THAN.getValue());
   }
 
   public void caseANeqRelop(ANeqRelop node)
   {
 //    System.out.println("NEQ Node: " + node);
-    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
-      Operator.NOT_EQUAL.getValue()));
+    writePCode(OpCode.OPERATION.getValue(), (byte) 0,
+        Operator.NOT_EQUAL.getValue());
   }
 
   public void caseAEqRelop(AEqRelop node)
   {
 //    System.out.println("EQ Node: " + node);
-    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
-      Operator.EQUAL.getValue()));
+    writePCode(OpCode.OPERATION.getValue(), (byte) 0,
+      Operator.EQUAL.getValue());
   }
 
   public void caseAScanf1RcosStatement(AScanf1RcosStatement node)
@@ -462,8 +455,8 @@ public class StatementCompiler extends DepthFirstAdapter
     currentSymbol = new Variable("const", (short) 0, (short) 0);
     handleLiteralLoad(node.getStringLitteral());
 
-    writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
-      (byte) 0, SystemCall.STRING_OUT.getValue()));
+    writePCode(OpCode.CALL_SYSTEM_PROCEDURE.getValue(), (byte) 0,
+        SystemCall.STRING_OUT.getValue());
   }
 
   /**
@@ -534,27 +527,27 @@ public class StatementCompiler extends DepthFirstAdapter
   public void caseAPlusBinop(APlusBinop node)
   {
 //    System.out.println("Plus Node: " + node);
-    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
-      Operator.ADD.getValue()));
+    writePCode(OpCode.OPERATION.getValue(), (byte) 0,
+        Operator.ADD.getValue());
   }
 
   public void caseAMinusBinop(AMinusBinop node)
   {
 //    System.out.println("Minus Node: " + node);
-    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
-      Operator.SUBTRACT.getValue()));
+    writePCode(OpCode.OPERATION.getValue(), (byte) 0,
+        Operator.SUBTRACT.getValue());
   }
 
   public void caseADivBinop(ADivBinop node)
   {
-    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
-      Operator.DIVIDE.getValue()));
+    writePCode(OpCode.OPERATION.getValue(), (byte) 0,
+        Operator.DIVIDE.getValue());
   }
 
   public void caseAStarBinop(AStarBinop node)
   {
-    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
-      Operator.MULTIPLY.getValue()));
+    writePCode(OpCode.OPERATION.getValue(), (byte) 0,
+        Operator.MULTIPLY.getValue());
   }
 
   /**
@@ -580,8 +573,7 @@ public class StatementCompiler extends DepthFirstAdapter
         {
           index = getArraySize(varName);
 
-          writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
-            (short) index));
+          writePCode(OpCode.LITERAL.getValue(), (byte) 0, (short) index);
         }
         catch (NumberFormatException nfe)
         {
@@ -603,8 +595,8 @@ public class StatementCompiler extends DepthFirstAdapter
 
       if (isArray(varName))
       {
-        writePCode(new Instruction(OpCode.STORE_INDEXED.getValue(),
-          (byte) 0, tmpSymbol.getOffset()));
+        writePCode(OpCode.STORE_INDEXED.getValue(), (byte) 0,
+            tmpSymbol.getOffset());
       }
       else
       {
@@ -623,7 +615,7 @@ public class StatementCompiler extends DepthFirstAdapter
     System.out.println(node.toString().substring(0, node.toString().indexOf(" (")));
     short pos = methodPosition(node.toString().substring(0, node.toString().indexOf(" (")));
     System.out.println("Pos: " + pos);
-    writePCode(new Instruction(OpCode.CALL.getValue(), (byte) 0, pos));
+    writePCode(OpCode.CALL.getValue(), (byte) 0, pos);
   }
 
   /**
@@ -668,13 +660,13 @@ public class StatementCompiler extends DepthFirstAdapter
     // Set the number of declared variables
     if (mainBlock)
     {
-      writePCode(new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
-        ((short) (this.globalVariables))));
+      writePCode(OpCode.INTERVAL.getValue(), (byte) 0,
+        ((short) (this.globalVariables)));
     }
     else
     {
-      writePCode(new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
-        ((short) (this.localVariables))));
+      writePCode(OpCode.INTERVAL.getValue(), (byte) 0,
+        ((short) (this.localVariables)));
     }
 
     Object temp2[] = node.getStatement().toArray();
@@ -693,8 +685,8 @@ public class StatementCompiler extends DepthFirstAdapter
       node.getRBrace().apply(this);
     }
 
-    writePCode(new Instruction(OpCode.OPERATION.getValue(), (byte) 0,
-      Operator.RETURN.getValue()));
+    writePCode(OpCode.OPERATION.getValue(), (byte) 0,
+        Operator.RETURN.getValue());
 
     outAFunctionBody(node);
   }
@@ -848,15 +840,16 @@ public class StatementCompiler extends DepthFirstAdapter
     return tmpSymbol;
   }
 
-  public void writePCode(Instruction newInstruction)
+  public void writePCode(int instruction, byte byteParam, short wordParam)
   {
-    Compiler.addInstruction(newInstruction);
+    Compiler.addInstruction(instruction, byteParam, wordParam);
     Compiler.incInstructionIndex();
   }
 
-  public void writePCode(int index, Instruction newInstruction)
+  public void writePCode(int index, int instruction, byte byteParam,
+      short wordParam)
   {
-    Compiler.addInstruction(index, newInstruction);
+    Compiler.addInstruction(index, instruction, byteParam, wordParam);
     Compiler.incInstructionIndex();
   }
 
@@ -1000,18 +993,18 @@ public class StatementCompiler extends DepthFirstAdapter
   {
     if (control instanceof AIntControlPrintfControlStrings)
     {
-      writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
-        (byte) 0, SystemCall.NUMBER_OUT.getValue()));
+      writePCode(OpCode.CALL_SYSTEM_PROCEDURE.getValue(), (byte) 0,
+          SystemCall.NUMBER_OUT.getValue());
     }
     else if (control instanceof AChrControlPrintfControlStrings)
     {
-      writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
-        (byte) 0, SystemCall.CHARACTER_OUT.getValue()));
+      writePCode(OpCode.CALL_SYSTEM_PROCEDURE.getValue(), (byte) 0,
+          SystemCall.CHARACTER_OUT.getValue());
     }
     else if (control instanceof AStrControlPrintfControlStrings)
     {
-      writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
-        (byte) 0, SystemCall.STRING_OUT.getValue()));
+      writePCode(OpCode.CALL_SYSTEM_PROCEDURE.getValue(), (byte) 0,
+          SystemCall.STRING_OUT.getValue());
     }
   }
 
@@ -1019,13 +1012,13 @@ public class StatementCompiler extends DepthFirstAdapter
   {
     if (control instanceof AIntControlScanfControlStrings)
     {
-      writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
-        (byte) 0, SystemCall.NUMBER_IN.getValue()));
+      writePCode(OpCode.CALL_SYSTEM_PROCEDURE.getValue(), (byte) 0,
+          SystemCall.NUMBER_IN.getValue());
     }
     else if (control instanceof AChrControlScanfControlStrings)
     {
-      writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
-        (byte) 0, SystemCall.CHARACTER_IN.getValue()));
+      writePCode(OpCode.CALL_SYSTEM_PROCEDURE.getValue(), (byte) 0,
+          SystemCall.CHARACTER_IN.getValue());
     }
 
     try

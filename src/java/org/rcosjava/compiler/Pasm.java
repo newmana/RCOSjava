@@ -97,8 +97,10 @@ public class Pasm
         byte instr1 = pcodeInstruction[5];
         byte instr2 = pcodeInstruction[6];
         short loc = (short) ((256*(instr1 & 255)) + (instr2 & 255));
-        Instruction theInstruction = new Instruction((
-          pcodeInstruction[0] & 0xff), (pcodeInstruction[4]), loc);
+        Instruction theInstruction =
+            Instruction.INSTRUCTIONS[pcodeInstruction[0] & 0xff];
+        theInstruction.setByteParameter(pcodeInstruction[4]);
+        theInstruction.setWordParameter(loc);
 
         if (printOffset)
         {
