@@ -253,13 +253,6 @@ public class StatementCompiler extends DepthFirstAdapter
 
     short beforeIter = Compiler.getInstructionIndex();
 
-    // Set-up the iterator
-    PBasicStatement iter = node.getIter();
-    if (iter != null)
-    {
-      iter.apply(this);
-    }
-
     PConditionalExpression cond = node.getConditionalExpression();
 
     if (cond != null)
@@ -290,6 +283,13 @@ public class StatementCompiler extends DepthFirstAdapter
     // Do what is inside the for statement.
     node.getCompoundStatement().apply(this);
 
+    // Set-up the iterator
+    PBasicStatement iter = node.getIter();
+    if (iter != null)
+    {
+      iter.apply(this);
+    }
+
     short finishPosition = Compiler.getInstructionIndex();
 
     writePCode(afterCond,
@@ -302,6 +302,38 @@ public class StatementCompiler extends DepthFirstAdapter
 
     noLoops--;
     outAForStatement(node);
+  }
+
+  /**
+   * Do statement
+   */
+  public void caseADoStatement(ADoStatement node)
+  {
+    this.inADoStatement(node);
+    noLoops++;
+
+    short startStatement = Compiler.getInstructionIndex();
+
+    node.getCompoundStatement().apply(this);
+
+    ARelConditionalExpression expr = (ARelConditionalExpression)
+      node.getConditionalExpression();
+    PValue expression1 = expr.getLeft();
+    PValue expression2 = expr.getRight();
+
+    // With the left hand load the variable or literal
+    handlePValueLoad(expression1);
+
+    // With the right hand load the variable or literal
+    handlePValueLoad(expression2);
+
+    expr.apply(this);
+
+    writePCode(new Instruction(OpCode.JUMP_ON_CONDITION.getValue(), (byte) 1,
+      (short) (startStatement+1+noLoops)));
+
+    noLoops--;
+    outADoStatement(node);
   }
 
   /**
@@ -430,22 +462,6 @@ public class StatementCompiler extends DepthFirstAdapter
   /**
    * Right hand side of a variable assignment with one statement.
    */
-  public void caseAUnaryRhs(AUnaryRhs node)
-  {
-    node.getUnaryExpression().apply(this);
-  }
-
-  /**
-   * Right hand side of a variable assignment with two statements.
-   */
-  public void caseABinaryRhs(ABinaryRhs node)
-  {
-    node.getBinaryExpression().apply(this);
-  }
-
-  /**
-   * Right hand side of a variable assignment with one statement.
-   */
   public void caseASimpleUnaryExpression(ASimpleUnaryExpression node)
   {
     if (node.getSimpleExpression() instanceof AConstantSimpleExpression)
@@ -473,8 +489,8 @@ public class StatementCompiler extends DepthFirstAdapter
    */
   public void caseAIdentifierBinaryExpression(AIdentifierBinaryExpression node)
   {
-    handlePValueLoad(node.getValue());
     handleIdentifierLoad(node.getIdentifier());
+    handlePValueLoad(node.getValue());
     node.getBinop().apply(this);
   }
 
@@ -483,8 +499,8 @@ public class StatementCompiler extends DepthFirstAdapter
    */
   public void caseAConstantBinaryExpression(AConstantBinaryExpression node)
   {
-    handleLiteralLoad(node.getConstant());
     handlePValueLoad(node.getValue());
+    handleLiteralLoad(node.getConstant());
     node.getBinop().apply(this);
   }
 
@@ -512,13 +528,8 @@ public class StatementCompiler extends DepthFirstAdapter
     {
       String varName = node.getVarname().toString().trim();
       short index;
+      Symbol tmpSymbol;
 
-//      PRhs rhs = node.getRhs();
-//      rhs.apply(this);
-
-//      System.err.println("Var name: " + varName);
-//      System.err.println("Var name: " + isArray(varName));
-//      System.err.println("Current symbole: " + currentSymbol);
       if (isArray(varName))
       {
         String identifierName = varName.substring(0, varName.indexOf("[")).
@@ -529,8 +540,6 @@ public class StatementCompiler extends DepthFirstAdapter
         try
         {
           index = getArraySize(varName);
-          System.out.println("Array index: " + index);
-          System.out.println("Id name: [" + identifierName + "]");
 
           writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
             (short) index));
@@ -538,16 +547,17 @@ public class StatementCompiler extends DepthFirstAdapter
         catch (NumberFormatException nfe)
         {
           // If it's not a number then try and load it.
-          Symbol tmpSymbol = getArraySymbol(varName);
+          tmpSymbol = getArraySymbol(varName);
           tmpSymbol.handleLoad(this);
         }
 
-        currentSymbol = table.getSymbol(identifierName, Compiler.getLevel());
+        tmpSymbol = table.getSymbol(identifierName, Compiler.getLevel());
       }
       else
       {
-        currentSymbol = table.getSymbol(varName, Compiler.getLevel());
+        tmpSymbol = table.getSymbol(varName, Compiler.getLevel());
       }
+      currentSymbol = tmpSymbol;
 
       PRhs rhs = node.getRhs();
       rhs.apply(this);
@@ -555,11 +565,11 @@ public class StatementCompiler extends DepthFirstAdapter
       if (isArray(varName))
       {
         writePCode(new Instruction(OpCode.STORE_INDEXED.getValue(),
-          (byte) 0, currentSymbol.getOffset()));
+          (byte) 0, tmpSymbol.getOffset()));
       }
       else
       {
-        currentSymbol.handleStore(this);
+        tmpSymbol.handleStore(this);
       }
     }
     catch (Exception e)
@@ -745,8 +755,6 @@ public class StatementCompiler extends DepthFirstAdapter
 
   private Symbol getArraySymbol(String declarator)
   {
-//    System.err.println("Get array symbol got: " + declarator);
-
     int arrayStartIndex = declarator.indexOf("[");
     int arrayFinishedIndex = 0;
     Symbol tmpSymbol = null;
@@ -759,7 +767,6 @@ public class StatementCompiler extends DepthFirstAdapter
         arrayFinishedIndex = declarator.indexOf("]");
         String declaratorStr = declarator.substring(arrayStartIndex+1,
             arrayFinishedIndex).trim();
-//        System.err.println("Trying to get symbol: " + declaratorStr);
         tmpSymbol = table.getSymbol(declaratorStr, Compiler.getLevel());
       }
     }
@@ -831,8 +838,6 @@ public class StatementCompiler extends DepthFirstAdapter
         try
         {
           short index = getArraySize(fullName);
-          System.out.println("Array index: " + index);
-          System.out.println("Id name: [" + identifierName + "]");
           array.handleLoad(this, index);
         }
         catch (NumberFormatException nfe)
@@ -853,7 +858,6 @@ public class StatementCompiler extends DepthFirstAdapter
   {
     try
     {
-      System.out.println("Id name: " + identifierName);
       currentSymbol = table.getSymbol(identifierName, Compiler.getLevel());
       currentSymbol.handleLoad(this);
     }
