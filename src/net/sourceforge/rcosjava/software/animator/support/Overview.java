@@ -243,7 +243,7 @@ public class Overview extends Frame implements Runnable
       }
       catch (Exception e)
       {
-        System.out.println("error processing: "+s);
+        System.err.println("error processing: "+s);
         e.printStackTrace();
         break;
       }

@@ -117,7 +117,6 @@ public abstract class SimpleMessageHandler
 
   public MessageHandler getHandler(String handlerToGet)
   {
-    //System.out.println("Attempting to get handler " + sHandlerToGet + ":" + htHandlers.get(sHandlerToGet));
     return ((MessageHandler) registeredHandlers.get(handlerToGet));
   }
 

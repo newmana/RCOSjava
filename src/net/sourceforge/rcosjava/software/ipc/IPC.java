@@ -444,7 +444,7 @@ public class IPC extends OSMessageHandler
     }
     catch (Exception e)
     {
-      System.out.println("Error processing message: "+e);
+      System.err.println("Error processing message: "+e);
       e.printStackTrace();
     }
   }
@@ -457,7 +457,7 @@ public class IPC extends OSMessageHandler
     }
     catch (Exception e)
     {
-      System.out.println("Error processing message: "+e);
+      System.err.println("Error processing message: "+e);
       e.printStackTrace();
     }
   }
