@@ -1,10 +1,12 @@
 package org.rcosjava.messaging.postoffices.universal;
+
 import org.rcosjava.messaging.messages.RemoveHandler;
 import org.rcosjava.messaging.messages.animator.AnimatorMessageAdapter;
 import org.rcosjava.messaging.messages.os.OSMessageAdapter;
 import org.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import org.rcosjava.messaging.postoffices.animator.AnimatorMessageRecorder;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
+import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.messaging.postoffices.os.OSMessageRecorder;
 import org.rcosjava.messaging.postoffices.os.OSOffice;
 import org.rcosjava.pll2.FileClient;
@@ -27,7 +29,7 @@ import org.rcosjava.pll2.FileClient;
  * @see org.rcosjava.messaging.postoffices.animator.AnimatorMessageRecorder
  * @version 1.00 $Date$
  */
-public class UniversalMessageRecorder
+public class UniversalMessageRecorder extends OSMessageHandler
 {
   /**
    * Current message being recorded.
@@ -75,78 +77,97 @@ public class UniversalMessageRecorder
   private AnimatorOffice animatorPostOffice;
 
   /**
-   * File name to use to write the messages.
+   * The name to use to store all messages under.
    */
-  private String fileName;
+  private String recordingName;
+
+  /**
+   * Whether it is currently recording.
+   */
+  private boolean recordingOn;
+
+  /**
+   * The identifier of the scheduler to the post office.
+   */
+  private final static String MESSENGING_ID = "UniversalMessageRecorder";
 
   /**
    * Creates file client with default RCOS properties. Requires the hostname and
    * port to connect to in order to save/load the recordings.
    *
+   * @param postOffice the post office to register the universal message player
+   *     to and the one that sends messages to it.
    * @param newHost the host to connect to.
    * @param newPort the host's port to connect to.
    */
-  public UniversalMessageRecorder(String newHost, int newPort)
+  public UniversalMessageRecorder(OSOffice postOffice, String newHost,
+      int newPort)
   {
+    super(MESSENGING_ID, postOffice);
     host = newHost;
     port = newPort;
+    recordingOn = false;
   }
 
   /**
    * Creates the Universal Message Recorder. It does not automatically listen to
    * the messages. You must call recordOn to start recording the messages.
    *
+   * @param newAnimatorPostOffice the new animator post office to register to.
+   * @param newOSPostOffice the new operating system post office to register to.
    * @param newHost the local host to connect to.
    * @param newPort the host's port to connect to.
    * @param newId the unique id to register to the post offices with.
-   * @param newOSPostOffice the new operating system post office to register to.
-   * @param newAnimatorPostOffice the new animator post office to register to.
    */
-  public UniversalMessageRecorder(String newHost, int newPort, String newId,
-      OSOffice newOSPostOffice, AnimatorOffice newAnimatorPostOffice)
+  public UniversalMessageRecorder(AnimatorOffice newAnimatorPostOffice,
+      OSOffice newOSPostOffice, String newHost, int newPort, String newId)
   {
-    this(newHost, newPort);
+    this(newOSPostOffice, newHost, newPort);
     animatorPostOffice = newAnimatorPostOffice;
     osPostOffice = newOSPostOffice;
     id = newId;
   }
 
   /**
-   * Start recording all the messages received. The file name has a numeric
-   * counter added to the end of it for each message. What happens can simply
-   * start at 0 and continue till there are none left.
+   * Toggles the recording of messages on or off.  Assumes that the current
+   * directory to write to is already set.
+   */
+  public void toggleRecording()
+  {
+    if (!recordingOn)
+    {
+      recordOn();
+    }
+    else
+    {
+      recordOff();
+    }
+  }
+
+  /**
+   * Sets the name of the recording.
    *
-   * @param newFileName the base file name to save all the messages to.
+   * @param newRecordingName the name to set the recording to.
    */
-  public void recordOn(String newFileName)
+  public void setRecordingName(String newRecordingName)
   {
-    fileName = newFileName;
-    osRecorder = new OSMessageRecorder(id, osPostOffice, this);
-    animatorRecorder = new AnimatorMessageRecorder(id, animatorPostOffice,
-        this);
+    recordingName = newRecordingName;
+    System.err.println("Recording name: " + recordingName);
   }
 
   /**
-   * Remove the OS and Animator recorders from their relevant post offices. As
-   * we don't want to process the messages anymore.
-   */
-  public void recordOff()
-  {
-    osRecorder.localSendMessage(new RemoveHandler(osRecorder));
-    animatorRecorder.localSendMessage(new RemoveHandler(animatorRecorder));
-  }
-
-  /**
-   * Create a new connection, create the directory with the given name and
-   * close the connection.
+   * Create a new connection, create the recording area with the previously
+   * given name, reset the message count and close the connection.  Assumes
+   * a recording name is set.
    *
    * @param directory name of the directory to create.
    */
-  public void createDirectory(String directory)
+  public void createNewRecording()
   {
     myClient = new FileClient(host, port);
     myClient.openConnection();
-    myClient.createRecDir(directory);
+    myClient.createRecDir(java.io.File.separatorChar + recordingName);
+    messagesRecorded = 0;
     myClient.closeConnection();
   }
 
@@ -181,6 +202,32 @@ public class UniversalMessageRecorder
   }
 
   /**
+   * Start recording all the messages received. The file name has a numeric
+   * counter added to the end of it for each message. What happens can simply
+   * start at 0 and continue till there are none left.
+   *
+   * @param newFileName the base file name to save all the messages to.
+   */
+  private void recordOn()
+  {
+    recordingOn = true;
+    osRecorder = new OSMessageRecorder(id, osPostOffice, this);
+    animatorRecorder = new AnimatorMessageRecorder(id, animatorPostOffice,
+        this);
+  }
+
+  /**
+   * Remove the OS and Animator recorders from their relevant post offices. As
+   * we don't want to process the messages anymore.
+   */
+  private void recordOff()
+  {
+    osRecorder.localSendMessage(new RemoveHandler(osRecorder));
+    animatorRecorder.localSendMessage(new RemoveHandler(animatorRecorder));
+    recordingOn = false;
+  }
+
+  /**
    * Saves all the messages in a consistent. Called by all 3 process methods.
    * Increments the record counter by one.
    *
@@ -192,7 +239,7 @@ public class UniversalMessageRecorder
     myClient.openConnection();
     try
     {
-      myClient.writeRecFile(java.io.File.separatorChar + fileName +
+      myClient.writeRecFile(java.io.File.separatorChar + recordingName +
           java.io.File.separatorChar + messagesRecorded + ".xml", newMessage);
       messagesRecorded++;
     }

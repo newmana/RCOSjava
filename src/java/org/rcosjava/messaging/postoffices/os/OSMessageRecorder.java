@@ -1,4 +1,5 @@
 package org.rcosjava.messaging.postoffices.os;
+
 import org.rcosjava.messaging.messages.os.OSMessageAdapter;
 import org.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import org.rcosjava.messaging.postoffices.universal.UniversalMessageRecorder;

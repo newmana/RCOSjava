@@ -1,9 +1,11 @@
 package org.rcosjava.messaging.postoffices.universal;
+
 import org.rcosjava.messaging.messages.MessageAdapter;
 import org.rcosjava.messaging.messages.animator.AnimatorMessageAdapter;
 import org.rcosjava.messaging.messages.os.OSMessageAdapter;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.messaging.postoffices.os.OSOffice;
+import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.pll2.FileClient;
 
 /**
@@ -15,7 +17,7 @@ import org.rcosjava.pll2.FileClient;
  * @see org.rcosjava.messaging.postoffices.animator.AnimatorMessageRecorder
  * @version 1.00 $Date$
  */
-public class UniversalMessagePlayer
+public class UniversalMessagePlayer extends OSMessageHandler
 {
   /**
    * Current message being playbacked.
@@ -53,19 +55,28 @@ public class UniversalMessagePlayer
   private AnimatorOffice animatorPostOffice;
 
   /**
-   * File name to use to read the messages.
+   * The name of the recording to playback.
    */
-  private String fileName;
+  private String recordingName;
+
+  /**
+   * The identifier of the scheduler to the post office.
+   */
+  private final static String MESSENGING_ID = "UniversalMessagePlayer";
 
   /**
    * Creates file client with default RCOS properties. Requires the hostname and
    * port to connect to in order to save/load the recordings.
    *
+   * @param postOffice the post office to register the universal message player
+   *     to and the one that sends messages to it.
    * @param newHost the local host to connect to.
    * @param newPort the local hosts port to connect to.
    */
-  public UniversalMessagePlayer(String newHost, int newPort)
+  public UniversalMessagePlayer(OSOffice postOffice, String newHost,
+      int newPort)
   {
+    super(MESSENGING_ID, postOffice);
     host = newHost;
     port = newPort;
   }
@@ -74,19 +85,30 @@ public class UniversalMessagePlayer
   * Creates the Universal Message Player. Call sendNextMessage to go through the
   * messages.
   *
+  * @param newAnimatorPostOffice the new animator post office to register to.
+  * @param newOSPostOffice the post office to register the universal message player
+  *     to and the one that sends messages to it.
   * @param newHost the local host to connect to.
   * @param newPort the host's port to connect to.
   * @param newId the unique id to register to the post offices with.
-  * @param newOSPostOffice the new operating system post office to register to.
-  * @param newAnimatorPostOffice the new animator post office to register to.
   */
-  public UniversalMessagePlayer(String newHost, int newPort, String newId,
-      OSOffice newOSPostOffice, AnimatorOffice newAnimatorPostOffice)
+  public UniversalMessagePlayer(AnimatorOffice newAnimatorPostOffice,
+      OSOffice newOSPostOffice, String newHost, int newPort, String newId)
   {
-    this(newHost, newPort);
+    this(newOSPostOffice, newHost, newPort);
     animatorPostOffice = newAnimatorPostOffice;
     osPostOffice = newOSPostOffice;
     id = newId;
+  }
+
+  /**
+   * Sets the name of the recording.
+   *
+   * @param newRecordingName the name to set the recording to.
+   */
+  public void setRecordingName(String newRecordingName)
+  {
+    recordingName = newRecordingName;
   }
 
   /**
@@ -95,10 +117,8 @@ public class UniversalMessagePlayer
    *
    * @param newFileName the base file name to read.
    */
-  public void sendNextMessage(String newFileName)
+  public void playNextMessage()
   {
-    fileName = newFileName;
-
     // If the object is null then we can assume we're at the end.
     if (!endOfMessages())
     {
@@ -128,18 +148,24 @@ public class UniversalMessagePlayer
    */
   private boolean endOfMessages()
   {
+    myClient = new FileClient(host, port);
+    myClient.openConnection();
+
     Object tmpObject;
     boolean endOfMessages = false;
 
     try
     {
-      tmpObject = myClient.getRecFile(java.io.File.separatorChar
-           + fileName + java.io.File.separatorChar + (messageCounter) + ".xml");
+      tmpObject = myClient.getRecFile(java.io.File.separatorChar +
+          recordingName + java.io.File.separatorChar + messageCounter +
+          ".xml");
     }
     catch (Exception e)
     {
       endOfMessages = true;
     }
+
+    myClient.closeConnection();
     return endOfMessages;
   }
 
@@ -158,8 +184,9 @@ public class UniversalMessagePlayer
 
     try
     {
-      tmpObject = myClient.getRecFile(java.io.File.separatorChar
-           + fileName + java.io.File.separatorChar + (messageCounter) + ".xml");
+      tmpObject = myClient.getRecFile(java.io.File.separatorChar +
+          recordingName + java.io.File.separatorChar + (messageCounter) +
+          ".xml");
       messageCounter++;
     }
     catch (Exception e)

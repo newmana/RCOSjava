@@ -107,7 +107,6 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
 
     //Create and send Quantum message
     Quantum msg = new Quantum(this, quantumValue.intValue());
-
     sendMessage(msg);
     sendMessage(new Run(this));
   }
