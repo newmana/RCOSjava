@@ -145,7 +145,7 @@ public class Semaphore implements Serializable
    * is free. Will increment its value to indicate its availability.
    *
    * @return will return the process id that was blocked or it will return -1 if
-   *      not process was blocked.
+   *      no process was blocked.
    */
   public int signal()
   {
