@@ -221,7 +221,7 @@ public class FileMessages
       boolean end = false;
       byte[] buffer = new byte[1];
       StringBuffer tmpMessage = new StringBuffer();
-      String strTmpMessage = new String();
+      String strTmpMessage = "";
       int result;
 
 //      while (!end)
