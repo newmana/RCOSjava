@@ -1,8 +1,9 @@
 package org.rcosjava.software.animator.ipc;
 
 import java.awt.*;
-import javax.swing.*;
 import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.util.*;
 
 import org.rcosjava.software.animator.RCOSPanel;
@@ -131,18 +132,25 @@ public class IPCManagerPanel extends RCOSPanel
   {
     super.setupLayout(c);
 
+    // Label and constraints used by all the following code for layout.
+    JLabel tmpLabel;
+    JComponent tmpPanel;
+    GridBagConstraints tmpConstraints = new GridBagConstraints();
+    GridBagLayout tmpGridBag = new GridBagLayout();
+
+    // Setup the default colours and layout.
     setBackground(defaultBgColour);
     setForeground(defaultFgColour);
     setLayout(new BorderLayout());
 
+    // The main panel will have two other panels (semaphores and shared memory)
+    // added to it
     JPanel mainPanel = new JPanel();
     mainPanel.setBackground(defaultBgColour);
     mainPanel.setForeground(defaultFgColour);
 
-    JLabel tmpLabel;
-
+    // Setup the shared memory and semaphore widgets
     shmOption = new JComboBox();
-
     shmList = new JTextArea();
     shmList.setBackground(defaultBgColour);
     shmList.setForeground(textBoxColour);
@@ -150,77 +158,29 @@ public class IPCManagerPanel extends RCOSPanel
     JScrollPane shmListPane = new JScrollPane(shmList);
     shmListPane.setVerticalScrollBarPolicy(
       JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-    shmListPane.setPreferredSize(new Dimension(450,100));
-
-    semOption = new JComboBox();
-    semValue = new JTextField(2);
+    shmListPane.setPreferredSize(new Dimension(500, 90));
 
     shmOption.addItem(NONE);
     shmOption.setForeground(choiceColour);
     shmOption.setBackground(defaultBgColour);
     shmOption.setSelectedIndex(0);
 
+    semOption = new JComboBox();
+    semValue = new JTextField(2);
     semOption.addItem(NONE);
     semOption.setForeground(choiceColour);
     semOption.setBackground(defaultBgColour);
     semOption.setSelectedIndex(0);
     selectedSemaphoreName = NONE;
 
-    JPanel sharedMemPanel = new JPanel();
-    sharedMemPanel.setBackground(defaultBgColour);
-    sharedMemPanel.setForeground(textBoxColour);
-
-    GridBagConstraints tmpConstraints = new GridBagConstraints();
-    GridBagLayout tmpGridBag = new GridBagLayout();
-
-    sharedMemPanel.setLayout(tmpGridBag);
-
-    tmpConstraints.weightx = 1;
-    tmpConstraints.gridwidth = 1;
-    tmpConstraints.insets = new Insets(1, 1, 1, 1);
-    tmpConstraints.anchor = GridBagConstraints.CENTER;
-
-    tmpConstraints.anchor = GridBagConstraints.CENTER;
-    tmpLabel = new JLabel("ID:");
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(textBoxColour);
-    tmpLabel.setFont(defaultFont);
-    tmpGridBag.setConstraints(tmpLabel, tmpConstraints);
-    sharedMemPanel.add(tmpLabel);
-
-    tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
-    tmpLabel = new JLabel("Process Queue:");
-    tmpLabel.setFont(defaultFont);
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(textBoxColour);
-    tmpGridBag.setConstraints(tmpLabel, tmpConstraints);
-    sharedMemPanel.add(tmpLabel);
-
-    tmpConstraints.gridwidth = 1;
-    tmpGridBag.setConstraints(shmOption, tmpConstraints);
-    shmOption.addItemListener(new SharedMemorySelection());
-    sharedMemPanel.add(shmOption);
-
-    tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
-    shmQueue = new RCOSQueue(5, defaultFont);
-    tmpGridBag.setConstraints(shmQueue, tmpConstraints);
-    sharedMemPanel.add(shmQueue);
-
-    tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
-    tmpLabel = new JLabel("Value:");
-    tmpLabel.setFont(defaultFont);
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(textBoxColour);
-    tmpGridBag.setConstraints(tmpLabel, tmpConstraints);
-    sharedMemPanel.add(tmpLabel);
-
-    tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
-    tmpGridBag.setConstraints(shmListPane, tmpConstraints);
-    sharedMemPanel.add(shmListPane);
-
+    // Setup the semaphore panel with a panel and border with title.
     JPanel semPanel = new JPanel();
     semPanel.setBackground(defaultBgColour);
     semPanel.setForeground(textBoxColour);
+    TitledBorder semTitle = BorderFactory.createTitledBorder("Semaphores");
+    semTitle.setTitleColor(defaultFgColour);
+    semPanel.setBorder(BorderFactory.createCompoundBorder(semTitle,
+        BorderFactory.createEmptyBorder(3,3,3,3)));
 
     tmpConstraints = new GridBagConstraints();
     tmpGridBag = new GridBagLayout();
@@ -230,60 +190,159 @@ public class IPCManagerPanel extends RCOSPanel
     tmpConstraints.gridheight = 1;
     tmpConstraints.weighty = 1;
     tmpConstraints.weightx = 1;
-    tmpConstraints.anchor = GridBagConstraints.CENTER;
-
+    tmpConstraints.anchor = GridBagConstraints.WEST;
+    tmpConstraints.fill = GridBagConstraints.BOTH;
     tmpConstraints.insets = new Insets(1, 1, 1, 1);
-    tmpConstraints.gridwidth = 1;
-    tmpLabel = new JLabel("ID:");
+
+    //Default panel size for all tmpPanels
+    Dimension panelSize = new Dimension(100, 30);
+
+    //Setup temporary component to be used to group items together.
+    tmpPanel = new JPanel();
+    tmpPanel.setBackground(defaultBgColour);
+    tmpPanel.setForeground(defaultFgColour);
+    tmpPanel.setPreferredSize(panelSize);
+
+    // Id label and value
+    tmpLabel = new JLabel(" ID: ");
     tmpLabel.setFont(defaultFont);
     tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(textBoxColour);
-    tmpGridBag.setConstraints(tmpLabel, tmpConstraints);
-    semPanel.add(tmpLabel);
+    tmpLabel.setForeground(defaultFgColour);
+    tmpPanel.add(tmpLabel);
 
-    tmpConstraints.insets = new Insets(1, 1, 1, 1);
-    tmpLabel = new JLabel("Process Queue:");
-    tmpLabel.setFont(defaultFont);
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(textBoxColour);
-    tmpGridBag.setConstraints(tmpLabel, tmpConstraints);
-    semPanel.add(tmpLabel);
-
-    tmpConstraints.insets = new Insets(1, 1, 1, 1);
-    tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
-    tmpConstraints.anchor = GridBagConstraints.CENTER;
-    tmpLabel = new JLabel("Value:");
-    tmpLabel.setFont(defaultFont);
-    tmpLabel.setBackground(defaultBgColour);
-    tmpLabel.setForeground(textBoxColour);
-    tmpGridBag.setConstraints(tmpLabel, tmpConstraints);
-    semPanel.add(tmpLabel);
-
-    tmpConstraints.insets = new Insets(1, 1, 1, 1);
-    tmpConstraints.gridwidth = 1;
-    tmpConstraints.anchor = GridBagConstraints.CENTER;
-    tmpGridBag.setConstraints(semOption, tmpConstraints);
     semOption.addItemListener(new SemaphoreSelection());
-    semPanel.add(semOption);
+    tmpPanel.add(semOption);
 
-    tmpConstraints.insets = new Insets(1, 1, 1, 1);
-    tmpConstraints.anchor = GridBagConstraints.CENTER;
+    tmpGridBag.setConstraints(tmpPanel, tmpConstraints);
+    semPanel.add(tmpPanel);
+
+    // Reset tmpPanel
+    tmpPanel = new JPanel();
+    tmpPanel.setBackground(defaultBgColour);
+    tmpPanel.setForeground(defaultFgColour);
+    tmpPanel.setPreferredSize(new Dimension(200, 30));
+
+    // Process queue label and queue value.
+    tmpLabel = new JLabel(" Process Queue: ");
+    tmpLabel.setFont(defaultFont);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
+    tmpPanel.add(tmpLabel);
+
     semQueue = new RCOSQueue(5, defaultFont);
-    tmpGridBag.setConstraints(semQueue, tmpConstraints);
-    semPanel.add(semQueue);
+    tmpPanel.add(semQueue);
 
-    tmpConstraints.insets = new Insets(1, 1, 1, 1);
-    tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
-    tmpConstraints.anchor = GridBagConstraints.CENTER;
+    tmpGridBag.setConstraints(tmpPanel, tmpConstraints);
+    semPanel.add(tmpPanel);
+
+    // Reset tmpPanel
+    tmpPanel = new JPanel();
+    tmpPanel.setBackground(defaultBgColour);
+    tmpPanel.setForeground(defaultFgColour);
+    tmpPanel.setPreferredSize(panelSize);
+
+    // Value label and value.
+    tmpLabel = new JLabel(" Value: ");
+    tmpLabel.setFont(defaultFont);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
+    tmpPanel.add(tmpLabel);
+
     semValue.setFont(defaultFont);
     semValue.setBackground(textBoxColour);
     semValue.setForeground(defaultFgColour);
     semValue.setBackground(defaultBgColour);
-    tmpGridBag.setConstraints(semValue, tmpConstraints);
-    semPanel.add(semValue);
+    tmpPanel.add(semValue);
 
-    add(sharedMemPanel, BorderLayout.NORTH);
-    add(semPanel, BorderLayout.SOUTH);
+    tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
+    tmpGridBag.setConstraints(tmpPanel, tmpConstraints);
+    semPanel.add(tmpPanel);
+
+    // Setup the shared memory panel with a border and title.
+    JPanel sharedMemPanel = new JPanel();
+    sharedMemPanel.setBackground(defaultBgColour);
+    sharedMemPanel.setForeground(textBoxColour);
+    TitledBorder sharedMemTitle = BorderFactory.createTitledBorder(
+        "Shared Memory");
+    sharedMemTitle.setTitleColor(defaultFgColour);
+    sharedMemPanel.setBorder(BorderFactory.createCompoundBorder(
+        sharedMemTitle, BorderFactory.createEmptyBorder(3,3,3,3)));
+
+    sharedMemPanel.setLayout(tmpGridBag);
+
+    tmpConstraints.gridwidth = 1;
+    tmpConstraints.gridheight = 1;
+    tmpConstraints.weighty = 1;
+    tmpConstraints.weightx = 1;
+    tmpConstraints.anchor = GridBagConstraints.WEST;
+    tmpConstraints.fill = GridBagConstraints.BOTH;
+    tmpConstraints.insets = new Insets(1, 1, 1, 1);
+
+    // Reset tmpPanel
+    tmpPanel = new JPanel();
+    tmpPanel.setBackground(defaultBgColour);
+    tmpPanel.setForeground(defaultFgColour);
+    tmpPanel.setPreferredSize(panelSize);
+
+    // Setup id label and drop down box
+    tmpLabel = new JLabel(" ID: ");
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
+    tmpLabel.setFont(defaultFont);
+    tmpPanel.add(tmpLabel);
+
+    shmOption.addItemListener(new SharedMemorySelection());
+    tmpPanel.add(shmOption);
+
+    tmpGridBag.setConstraints(tmpPanel, tmpConstraints);
+    sharedMemPanel.add(tmpPanel);
+
+    // Reset tmpPanel
+    tmpPanel = new JPanel();
+    tmpPanel.setBackground(defaultBgColour);
+    tmpPanel.setForeground(defaultFgColour);
+    tmpPanel.setPreferredSize(new Dimension(200, 30));
+
+    // Setup the process queue label and process queue.
+    tmpLabel = new JLabel(" Process Queue: ");
+    tmpLabel.setFont(defaultFont);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
+    tmpPanel.add(tmpLabel);
+
+    shmQueue = new RCOSQueue(5, defaultFont);
+    tmpPanel.add(shmQueue);
+
+    tmpGridBag.setConstraints(tmpPanel, tmpConstraints);
+    sharedMemPanel.add(tmpPanel);
+
+    // Reset tmpPanel
+    tmpPanel = new JPanel();
+    tmpPanel.setBackground(defaultBgColour);
+    tmpPanel.setForeground(defaultFgColour);
+    tmpPanel.setPreferredSize(panelSize);
+
+    // Add an empty panel
+    tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
+    tmpGridBag.setConstraints(tmpPanel, tmpConstraints);
+    sharedMemPanel.add(tmpPanel);
+
+    // Setup the value of the shared memory and it's value
+    tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
+    tmpLabel = new JLabel(" Value: ");
+    tmpLabel.setFont(defaultFont);
+    tmpLabel.setBackground(defaultBgColour);
+    tmpLabel.setForeground(defaultFgColour);
+    tmpGridBag.setConstraints(tmpLabel, tmpConstraints);
+    sharedMemPanel.add(tmpLabel);
+
+    tmpConstraints.gridwidth = GridBagConstraints.REMAINDER;
+    tmpConstraints.anchor = GridBagConstraints.CENTER;
+    tmpGridBag.setConstraints(shmListPane, tmpConstraints);
+    sharedMemPanel.add(shmListPane);
+
+    add(semPanel, BorderLayout.NORTH);
+    add(sharedMemPanel, BorderLayout.SOUTH);
   }
 
   /**
