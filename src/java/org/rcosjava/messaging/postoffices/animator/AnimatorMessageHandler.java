@@ -2,11 +2,14 @@ package org.rcosjava.messaging.postoffices.animator;
 
 import java.io.Serializable;
 import java.lang.reflect.*;
+
 import org.rcosjava.messaging.messages.AddHandler;
 import org.rcosjava.messaging.messages.MessageAdapter;
 import org.rcosjava.messaging.messages.animator.AnimatorMessageAdapter;
 import org.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import org.rcosjava.messaging.postoffices.SimpleMessageHandler;
+
+import org.apache.log4j.*;
 
 /**
  * Provide sending and receiving facilities for all classes.
@@ -27,6 +30,11 @@ public class AnimatorMessageHandler extends SimpleMessageHandler
    * The animator post office that all message are sent to.
    */
   protected AnimatorOffice postOffice;
+
+  /**
+   * Logging class.
+   */
+  private final static Logger log = Logger.getLogger(AnimatorMessageHandler.class);
 
   /**
    * Constructor for the AnimatorMessageHandler object
@@ -70,7 +78,7 @@ public class AnimatorMessageHandler extends SimpleMessageHandler
    */
   public void sendMessage(AnimatorMessageAdapter message)
   {
-    localSendMessage(message);
+    postOffice.sendMessage(message);
   }
 
   /**
@@ -127,16 +135,14 @@ public class AnimatorMessageHandler extends SimpleMessageHandler
     try
     {
       Class[] classes = {this.getClass()};
-      Method method = message.getClass().getMethod(
-          "doMessage", classes);
-
+      Method method = message.getClass().getMethod("doMessage", classes);
       Object[] args = {this};
-
       method.invoke(message, args);
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      log.error("Error processing OS Message, invoking doMessage on: " +
+          this.getClass().getName(), e);
     }
   }
 
@@ -151,17 +157,15 @@ public class AnimatorMessageHandler extends SimpleMessageHandler
     try
     {
       Class[] classes = {this.getClass()};
-
       Method method = message.getClass().getSuperclass().getMethod(
           "doMessage", classes);
-
       Object[] args = {this};
-
       method.invoke(message, args);
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      log.error("Error processing Universal Message, invoking doMessage on: " +
+          this.getClass().getName(), e);
     }
   }
 }
