@@ -161,7 +161,7 @@ public class Kernel extends OSMessageHandler
 
   public void insertInterruptHandler(InterruptHandler newIH)
   {
-    InterruptHandlers.put(newIH.sType, newIH);
+    InterruptHandlers.put(newIH.getType(), newIH);
   }
 
   public void setCurrentContext(RCOSProcess newProcess)

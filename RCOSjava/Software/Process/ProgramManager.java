@@ -75,9 +75,9 @@ import RCOS;
 
     // create and register InterruptHandler
     theIH = new ProgManInterruptHandler("ProgManInterruptHandler",
-      newPostOffice, "NewProcess", getId());
+      newPostOffice, "NewProcess");
     RegisterInterruptHandler newMsg = new
-      RegisterInterruptHandler(this, (InterruptHandler) theIH);
+      RegisterInterruptHandler((InterruptHandler) theIH);
     sendMessage(newMsg);
   }
 

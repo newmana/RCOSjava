@@ -19,18 +19,21 @@ import MessageSystem.Messages.OS.OSMessageAdapter;
 import MessageSystem.Messages.Universal.UniversalMessageAdapter;
 import java.io.Serializable;
 
-public class InterruptHandler implements Serializable
+public class InterruptHandler extends OSMessageHandler implements Serializable
 {
-  public String sType, sDestination;
 //  public static final String IH_IDENTIFIER = "IH";
+  public String type;
   public static String IH_IDENTIFIER = "IH";
 
-  public InterruptHandler(String sID, OSOffice mhPostOffice,
-    String sType, String sDestination)
+  public InterruptHandler(String sID, OSOffice mhPostOffice, String newType)
   {
-    //super((sID+IH_IDENTIFIER), mhPostOffice);
-    this.sType = sType;
-    this.sDestination = sDestination;
+    super((sID+IH_IDENTIFIER), mhPostOffice);
+    type = newType;
+  }
+
+  public String getType()
+  {
+    return type;
   }
 
   // Had to change this from an abstract method because of crashing.

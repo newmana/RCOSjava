@@ -14,12 +14,11 @@ import MessageSystem.PostOffices.OS.OSOffice;
 import java.io.Serializable;
 
 public class TerminalInterruptHandler extends InterruptHandler
-  implements Serializable
 {
-  public TerminalInterruptHandler(String sID, OSOffice mhPostOffice,
-    String sType, String sDestination )
+  public TerminalInterruptHandler(String sID, OSOffice postOffice,
+    String newType)
   {
-    super(sID, mhPostOffice, sType, sDestination);
+    super(sID, postOffice, newType);
   }
 
   public void handleInterrupt()

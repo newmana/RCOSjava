@@ -15,10 +15,10 @@ import java.io.Serializable;
 public class CPM14DiskInterruptHandler extends InterruptHandler
   implements Serializable
 {
-  public CPM14DiskInterruptHandler( String id, OSOffice PO, String type,
-                           String destination)
+  public CPM14DiskInterruptHandler(String id, OSOffice postOffice,
+    String newType)
   {
-    super(id, PO, type, destination);
+    super(id, postOffice, newType);
   }
 
 

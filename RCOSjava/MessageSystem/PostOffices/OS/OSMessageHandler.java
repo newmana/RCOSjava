@@ -30,10 +30,10 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
   }
 
   /**
-   *  Constructor for the OSMessageHandler object
+   * Constructor for the OSMessageHandler object
    *
-   * @param  newID            Description of Parameter
-   * @param  mhNewPostOffice  Description of Parameter
+   * @param newID
+   * @param mhNewPostOffice
    */
   public OSMessageHandler(String newID, OSOffice mhNewPostOffice)
   {

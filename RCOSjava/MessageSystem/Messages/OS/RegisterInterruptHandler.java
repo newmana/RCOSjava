@@ -1,11 +1,11 @@
 //***************************************************************************
 // FILE    : RegisterInterruptHandlerMessage.java
 // PACKAGE : MessageSystem.OS
-// PURPOSE : 
+// PURPOSE :
 // AUTHOR  : Andrew Newman
-// MODIFIED: 
+// MODIFIED:
 // HISTORY : 28/03/96  Created
-//           
+//
 //
 //***************************************************************************
 
@@ -16,23 +16,23 @@ import Software.Kernel.Kernel;
 import Software.Process.ProgramManager;
 import Software.Terminal.SoftwareTerminal;
 import MessageSystem.PostOffices.OS.OSMessageHandler;
+import java.io.Serializable;
 
 public class RegisterInterruptHandler extends OSMessageAdapter
 {
   private InterruptHandler ihHandler;
 
-  public RegisterInterruptHandler(OSMessageHandler theSource, 
-    InterruptHandler ihNewHandler)
+  public RegisterInterruptHandler(InterruptHandler theSource)
   {
     super(theSource);
-    ihHandler = ihNewHandler;
+    ihHandler = theSource;
   }
 
   public void setInterruptHandler(InterruptHandler ihNewHandler)
   {
     ihHandler = ihNewHandler;
   }
-  
+
   public void doMessage(Kernel theElement)
   {
     theElement.insertInterruptHandler(ihHandler);

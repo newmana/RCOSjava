@@ -60,10 +60,10 @@ public class SoftwareTerminal extends OSMessageHandler
     softwareBuffer = new LIFOQueue(10, 10);
 
     // create and register a terminal Interrupt handler
-    terminalIH = new TerminalInterruptHandler(getId() , aPostOffice,
-      getId() + "KeyPress", getId());
+    terminalIH = new TerminalInterruptHandler(getId(), aPostOffice,
+      getId() + "KeyPress");
     RegisterInterruptHandler msg = new
-      RegisterInterruptHandler(this, (InterruptHandler) terminalIH);
+      RegisterInterruptHandler((InterruptHandler) terminalIH);
     sendMessage(msg);
   }
 

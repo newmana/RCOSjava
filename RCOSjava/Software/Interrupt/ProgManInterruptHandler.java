@@ -17,12 +17,11 @@ import MessageSystem.Messages.OS.GetNewFile;
 import java.io.Serializable;
 
 public class ProgManInterruptHandler extends InterruptHandler
-  implements Serializable
 {
-  public ProgManInterruptHandler(String myId, OSOffice PostOffice,
-                                 String type, String destination)
+  public ProgManInterruptHandler(String myId, OSOffice postOffice,
+    String newType)
   {
-    super(myId, PostOffice, type, destination);
+    super(myId, postOffice, newType);
   }
 
   public void handleInterrupt()
