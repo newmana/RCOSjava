@@ -37,7 +37,7 @@ public class UniversalMessageRecorder
 {
   private OSMessageRecorder osRecorder;
   private AnimatorMessageRecorder animatorRecorder;
-  private static int counter =0;
+  private static int counter = 0;
   private FileClient myClient;
   private String host;
   private int port;
@@ -87,6 +87,7 @@ public class UniversalMessageRecorder
   public void recordOn(String newFileName)
   {
     fileName = newFileName;
+    System.out.println("Set filename: " + fileName);
     osRecorder = new OSMessageRecorder(id, osPostOffice, this);
     animatorRecorder = new AnimatorMessageRecorder(id, animatorPostOffice,
       this);
@@ -100,6 +101,14 @@ public class UniversalMessageRecorder
   {
     osRecorder.localSendMessage(new RemoveHandler(osRecorder.getId()));
     animatorRecorder.localSendMessage(new RemoveHandler(animatorRecorder.getId()));
+  }
+
+  public void createDirectory(String directory)
+  {
+    myClient = new FileClient(host, port);
+    myClient.openConnection();
+    myClient.createRecDir(directory);
+    myClient.closeConnection();
   }
 
   /**
@@ -151,10 +160,10 @@ public class UniversalMessageRecorder
   {
     myClient = new FileClient(host, port);
     myClient.openConnection();
-    //System.out.println("Recording: " + newMessage.getClass().getName());
     try
     {
-      myClient.writeRecFile("/" + fileName + counter + ".xml", newMessage);
+      myClient.writeRecFile(java.io.File.separatorChar + fileName +
+        java.io.File.separatorChar + counter + ".xml", newMessage);
       counter++;
     }
     catch (Exception e)

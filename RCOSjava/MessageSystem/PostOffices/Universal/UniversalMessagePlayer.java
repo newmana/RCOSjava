@@ -95,7 +95,8 @@ public class UniversalMessagePlayer
     Object tmpObject;
     try
     {
-      tmpObject = myClient.getRecFile("/" + fileName + (counter) + ".xml");
+      tmpObject = myClient.getRecFile(java.io.File.separatorChar
+        + fileName + java.io.File.separatorChar + (counter) + ".xml");
       counter++;
     }
     catch (Exception e)
