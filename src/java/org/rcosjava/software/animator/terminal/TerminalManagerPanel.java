@@ -105,7 +105,7 @@ public class TerminalManagerPanel extends RCOSPanel
    */
   public void setupLayout(Component c)
   {
-    Panel main = new Panel();
+    JPanel main = new JPanel();
     main.setBackground(defaultBgColour);
     main.setForeground(defaultFgColour);
 
