@@ -101,8 +101,8 @@ public class HardwareTerminal extends RCOSFrame
   public void setupLayout()
   {
     setTitle(theTitle);
-    getContentPane().setBackground(defaultBgColour);
-    getContentPane().setForeground(defaultFgColour);
+    getContentPane().setBackground(DEFAULT_BG_COLOUR);
+    getContentPane().setForeground(DEFAULT_FG_COLOUR);
     getContentPane().setFont(defaultFont);
 
     SymWindow2 symWindow2 = new SymWindow2();
@@ -138,7 +138,10 @@ public class HardwareTerminal extends RCOSFrame
    */
   public KeyEvent getKeyFromBuffer()
   {
-    return ((KeyEvent) hardwareBuffer.retrieve());
+    synchronized (hardwareBuffer)
+    {
+      return ((KeyEvent) hardwareBuffer.retrieve());
+    }
   }
 
   /**
@@ -148,7 +151,10 @@ public class HardwareTerminal extends RCOSFrame
    */
   public boolean bufferEmpty()
   {
-    return hardwareBuffer.queueEmpty();
+    synchronized (hardwareBuffer)
+    {
+      return hardwareBuffer.queueEmpty();
+    }
   }
 
   /**
@@ -191,20 +197,22 @@ public class HardwareTerminal extends RCOSFrame
      */
     public void keyTyped(KeyEvent e)
     {
-      // if buffer is full, take one event off and discard
-      if (numChars == 10)
-      {
-        KeyEvent tmp = (KeyEvent) hardwareBuffer.retrieve();
+      synchronized (hardwareBuffer) {
+
+        // if buffer is full, take one event off and discard
+        if (numChars == 10)
+        {
+          KeyEvent tmp = (KeyEvent) hardwareBuffer.retrieve();
+        }
+
+        // insert the new key press into the buffer
+        numChars++;
+        hardwareBuffer.insert(e);
+
+        // Send msg to CPU to generate Interrupt
+        Interrupt theInt = new Interrupt(-1, theTitle + "KeyPress");
+        softwareTerminal.sendInterrupt(theInt);
       }
-
-      // insert the new key press into the buffer
-      numChars++;
-      hardwareBuffer.insert(e);
-
-      // Send msg to CPU to generate Interrupt
-      Interrupt theInt = new Interrupt(-1, theTitle + "KeyPress");
-
-      softwareTerminal.sendInterrupt(theInt);
     }
   }
 

@@ -29,6 +29,16 @@ import org.rcosjava.software.animator.RCOSFrame;
 public class HardwareTerminalScreen extends Canvas
 {
   /**
+   * Default terminal font size (Courier, Plain, 10).
+   */
+  private static final Font TERMINAL_FONT = new Font("Courier", Font.PLAIN, 10);
+
+  /**
+   * Default text colour of all terminals (Green).
+   */
+  private static final Color TERMINAL_COLOUR = Color.green;
+
+  /**
    * The maximum number of screen rows to display.
    */
   public final static int MAXROWS = 15;
@@ -95,7 +105,7 @@ public class HardwareTerminalScreen extends Canvas
     super();
     contents = new char[MAXROWS * MAXCOLS];
 
-    FontMetrics fm = getFontMetrics(RCOSFrame.terminlFont);
+    FontMetrics fm = getFontMetrics(TERMINAL_FONT);
 
     textHeight = fm.getHeight();
     textWidth = fm.charWidth(' ');
@@ -181,7 +191,7 @@ public class HardwareTerminalScreen extends Canvas
   public void printNum(short num)
   {
     StringBuffer tmpString = new
-        StringBuffer((new String()).valueOf(num));
+        StringBuffer(String.valueOf(num));
     int length = tmpString.length();
     int count;
 
@@ -246,11 +256,11 @@ public class HardwareTerminalScreen extends Canvas
     {
       //Should use getFontMetrics but this is easier (and faster).
 
-      graphicsBuffer.setFont(RCOSFrame.terminlFont);
-      graphicsBuffer.setColor(RCOSFrame.defaultBgColour);
+      graphicsBuffer.setFont(TERMINAL_FONT);
+      graphicsBuffer.setColor(RCOSFrame.DEFAULT_BG_COLOUR);
       graphicsBuffer.fillRect(0, 0, imageBuffer.getWidth(this),
           imageBuffer.getHeight(this));
-      graphicsBuffer.setColor(RCOSFrame.terminalColour);
+      graphicsBuffer.setColor(TERMINAL_COLOUR);
 
       // Prints out each line row by row.
 
