@@ -4,7 +4,7 @@ import net.sourceforge.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import net.sourceforge.rcosjava.software.animator.ipc.IPCManagerAnimator;
 
 /**
- * Message sent to IPC manager for verification of opened semaphore.
+ * Message sent to IPC manager animator for verification of opened semaphore.
  * <P>
  * @author Andrew Newman.
  * @version 1.00 $Date$

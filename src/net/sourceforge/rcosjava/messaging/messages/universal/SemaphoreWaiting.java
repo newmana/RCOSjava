@@ -4,8 +4,8 @@ import net.sourceforge.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import net.sourceforge.rcosjava.software.animator.ipc.IPCManagerAnimator;
 
 /**
- * Message sent by the Kernel to IPC manager to indicate a process is waiting
- * on a semaphore.
+ * Message to IPC manager animator to indicate a process is waiting on a
+ * semaphore.
  * <P>
  * @author Andrew Newman.
  * @version 1.00 $Date$
