@@ -1,6 +1,7 @@
 package org.rcosjava.messaging.messages.universal;
 
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
+import org.rcosjava.software.animator.cpu.CPUAnimator;
 import org.rcosjava.software.animator.process.ProcessManagerAnimator;
 import org.rcosjava.software.animator.process.ProcessSchedulerAnimator;
 import org.rcosjava.software.process.ProcessScheduler;
@@ -63,6 +64,17 @@ public class ProcessFinished extends UniversalMessageAdapter
   public void doMessage(ProcessSchedulerAnimator theElement)
   {
     theElement.processFinished(finishedProcess);
+  }
+
+  /**
+   * Calls screenReset on the CPU Animator. Resets all the pointers, stack and
+   * code execution to their default values.
+   *
+   * @param theElement the CPU Animator to do the work on.
+   */
+  public void doMessage(CPUAnimator theElement)
+  {
+    theElement.screenReset();
   }
 
   /**
