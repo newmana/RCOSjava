@@ -11,19 +11,20 @@ import fr.dyade.koala.serialization.*;
 /**
  * Enables the XML serialization of the <code>java.util.Hashtable</code> class.
  *
- * @author Thierry.Kormann@sophia.inria.fr 
+ * @author Thierry.Kormann@sophia.inria.fr
  */
 public class HashtableSerializer {
-    
-    public static void readObject(GeneratorInputStream s) 
-	    throws ClassNotFoundException, IOException {
-	s.defaultReadObject();
-	int origlength = s.readInt();
-	int elements = s.readInt();
-	
-	for (; elements > 0; elements--) {
-	    s.readObject();
-	    s.readObject();
-	}
+
+  public static void readObject(GeneratorInputStream s)
+      throws ClassNotFoundException, IOException {
+
+    s.defaultReadObject();
+    int origlength = s.readInt();
+    int elements = s.readInt();
+
+    for (; elements > 0; elements--) {
+      s.readObject();
+      s.readObject();
     }
+  }
 }

@@ -11,16 +11,16 @@ import fr.dyade.koala.serialization.*;
  * Enables the XML serialization of the <code>java.util.SimpleTimeZone</code>
  * class.
  *
- * @author Thierry.Kormann@sophia.inria.fr 
+ * @author Thierry.Kormann@sophia.inria.fr
  */
 public class SimpleTimeZoneSerializer {
 
-    public static void readObject(GeneratorInputStream s) 
-	    throws ClassNotFoundException, IOException {
-	s.defaultReadObject();
+  public static void readObject(GeneratorInputStream s)
+      throws ClassNotFoundException, IOException {
+    s.defaultReadObject();
 
-	int length = s.readInt();
-	byte[] rules = new byte[length];
-	s.readFully(rules);
-    }
+    int length = s.readInt();
+    byte[] rules = new byte[length];
+    s.readFully(rules);
+  }
 }

@@ -12,13 +12,13 @@ import fr.dyade.koala.serialization.*;
  * <code>defaultReadObject</code> and the <code>defaultWriteObject</code>
  * methods for the java serialization.
  *
- * @author Thierry.Kormann@sophia.inria.fr 
+ * @author Thierry.Kormann@sophia.inria.fr
  */
 public class DefaultSerializer {
 
-    public static void readObject(GeneratorInputStream s) 
-	    throws ClassNotFoundException, IOException {
-	s.defaultReadObject();
-    }
+  public static void readObject(GeneratorInputStream s)
+      throws ClassNotFoundException, IOException {
 
+    s.defaultReadObject();
+  }
 }
