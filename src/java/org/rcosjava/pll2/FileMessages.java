@@ -136,15 +136,18 @@ public class FileMessages
   /**
    * Description of the Field
    */
-  private DataOutputStream outputStream;
+  private BufferedWriter writer;
+
   /**
    * Description of the Field
    */
-  private DataInputStream inputStream;
+  private BufferedReader reader;
+
   /**
    * Description of the Field
    */
   private String message, messageData, messageType, previousRequestMessage;
+
   /**
    * Description of the Field
    */
@@ -156,11 +159,10 @@ public class FileMessages
    * @param newInputStream Description of Parameter
    * @param newOutputStream Description of Parameter
    */
-  public FileMessages(DataInputStream newInputStream,
-      DataOutputStream newOutputStream)
+  public FileMessages(InputStream newInputStream, OutputStream newOutputStream)
   {
-    inputStream = newInputStream;
-    outputStream = newOutputStream;
+    reader = new BufferedReader(new InputStreamReader(newInputStream));
+    writer = new BufferedWriter(new OutputStreamWriter(newOutputStream));
   }
 
   /**
@@ -213,11 +215,10 @@ public class FileMessages
 
       while (!end)
       {
-        strTmpMessage = inputStream.readUTF();
+        strTmpMessage = reader.readLine();
         end = strTmpMessage.endsWith(EOF);
         tmpMessage.append(strTmpMessage);
       }
-//      System.out.println("Raw message: " + tmpMessage);
       tmpMessage.setLength(tmpMessage.length() - EOF.length());
       message = tmpMessage.toString();
 
@@ -603,7 +604,15 @@ public class FileMessages
    */
   private boolean writeMessage(byte[] message, boolean flush)
   {
-    return (writeMessage(new String(message), flush));
+    try
+    {
+      return (writeMessage(new String(message, "UTF-8"), flush));
+    }
+    catch (IOException ioe)
+    {
+      ioe.printStackTrace();
+      return false;
+    }
   }
 
   /**
@@ -618,7 +627,8 @@ public class FileMessages
     try
     {
       previousRequestMessage = message;
-      outputStream.writeUTF(message);
+      writer.write(message);
+      writer.newLine();
       if (flush)
       {
         flushOutStream();
@@ -626,6 +636,7 @@ public class FileMessages
     }
     catch (IOException ioe)
     {
+      ioe.printStackTrace();
       System.err.println(ioe + " Error when trying to write: " + message);
       return false;
     }
@@ -639,8 +650,9 @@ public class FileMessages
   {
     try
     {
-      outputStream.writeUTF(EOF);
-      outputStream.flush();
+      writer.write(EOF);
+      writer.newLine();
+      writer.flush();
     }
     catch (IOException ioe)
     {

@@ -32,12 +32,12 @@ public class FileClient
   /**
    * Input stream to read from.
    */
-  private DataInputStream dataInStream;
+  private InputStream inStream;
 
   /**
    * Output stream to write to.
    */
-  private DataOutputStream dataOutStream;
+  private OutputStream outStream;
 
   /**
    * A list of standard message utility.
@@ -182,9 +182,9 @@ public class FileClient
     try
     {
       socketConnection = new Socket(host, port);
-      dataInStream = new DataInputStream(socketConnection.getInputStream());
-      dataOutStream = new DataOutputStream(socketConnection.getOutputStream());
-      messages = new FileMessages(dataInStream, dataOutStream);
+      inStream = socketConnection.getInputStream();
+      outStream = socketConnection.getOutputStream();
+      messages = new FileMessages(inStream, outStream);
       return true;
     }
     catch (IOException exception)
@@ -228,13 +228,12 @@ public class FileClient
   public void writeRecFile(String sFileName, Object object)
     throws Exception
   {
-//    System.out.println("Serializing: " + object.getClass());
     KOMLSerializer serializer = null;
     ByteArrayOutputStream tmpBuffer = new ByteArrayOutputStream();
 
     try
     {
-      serializer = new KOMLSerializer(tmpBuffer, false);
+      serializer = new KOMLSerializer(tmpBuffer, true);
       serializer.addObject(object);
     }
     catch (Exception e)
