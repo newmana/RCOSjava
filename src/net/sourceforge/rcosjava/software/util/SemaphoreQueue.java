@@ -21,7 +21,7 @@ public class SemaphoreQueue extends FIFOQueue
    * @return String type of Process to occur at the specified time or null if
    * no interrupt
    */
-  public Semaphore getSemaphore(int semaphoreId)
+  public synchronized Semaphore getSemaphore(int semaphoreId)
   {
     Semaphore tmp;
     String type;
@@ -64,6 +64,11 @@ public class SemaphoreQueue extends FIFOQueue
     return (peek(iSempahoreID) != null);
   }
 
+  public synchronized boolean remove(Object object)
+  {
+    return super.remove(object);
+  }
+
   /**
    * isMember by string id (defined in program)
    */
@@ -77,7 +82,7 @@ public class SemaphoreQueue extends FIFOQueue
    *
    * @param semaphoreId the id to look for
    */
-  public Object peek(int semaphoreId)
+  public synchronized Object peek(int semaphoreId)
   {
     Semaphore tmp;
 
@@ -102,7 +107,7 @@ public class SemaphoreQueue extends FIFOQueue
   /**
    * peek by string id (defined in program)
    */
-  public Semaphore peek(String sSempahoreID)
+  public synchronized Semaphore peek(String sSempahoreID)
   {
     Semaphore tmp;
 
