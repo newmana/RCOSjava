@@ -1,13 +1,3 @@
-//***************************************************************************
-// FILE     : AboutAnimator.java
-// PACKAGE  : Software.animator.About
-// PURPOSE  : Class used for showing authors.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 24/02/99 Created
-//
-//***************************************************************************/
-
 package net.sourceforge.rcosjava.software.animator.about;
 
 import java.awt.*;
@@ -17,45 +7,52 @@ import net.sourceforge.rcosjava.messaging.messages.animator.AnimatorMessageAdapt
 import net.sourceforge.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 
+/**
+ * Class used for showing authors.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 24th of February 1999
+ */
 public class AboutAnimator extends RCOSAnimator
 {
-  private AboutFrame aFrame;
-	private static final String MESSENGING_ID = "About";
+  private AboutFrame myFrame;
+  private static final String MESSENGING_ID = "About";
 
-  public AboutAnimator(AnimatorOffice aPostOffice, int x, int y,
-                     Image[] cpuImages)
+  public AboutAnimator(AnimatorOffice postOffice, int x, int y,
+    Image[] images)
   {
-    super(MESSENGING_ID, aPostOffice);
-    aFrame = new AboutFrame(x, y, cpuImages);
-    aFrame.pack();
-    aFrame.setSize(x,y);
+    super(MESSENGING_ID, postOffice);
+    myFrame = new AboutFrame(x, y, images);
+    myFrame.pack();
+    myFrame.setSize(x,y);
   }
 
   public void setupLayout(Component c)
   {
-    aFrame.setupLayout(c);
+    myFrame.setupLayout(c);
   }
 
   public void disposeFrame()
   {
-    aFrame.dispose();
+    myFrame.dispose();
   }
 
   public void showFrame()
   {
-    aFrame.setVisible(true);
+    myFrame.setVisible(true);
   }
 
   public void hideFrame()
   {
-    aFrame.setVisible(false);
+    myFrame.setVisible(false);
   }
 
-	public void processMessage(AnimatorMessageAdapter aMessage)
-	{
-	}
+  public void processMessage(AnimatorMessageAdapter aMessage)
+  {
+  }
 
-	public void processMessage(UniversalMessageAdapter aMessage)
-	{
-	}
+  public void processMessage(UniversalMessageAdapter aMessage)
+  {
+  }
 }

@@ -1,14 +1,3 @@
-//**************************************************************************/
-// FILE     : AboutFrame.java
-// PACKAGE  : Animator.About
-// PURPOSE  : To display the authors in all their glory.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 01/02/96  First created.
-//          : 12/01/97  Updated it.
-//          : 13/10/98  Converted to Java 1.1
-//**************************************************************************/
-
 package net.sourceforge.rcosjava.software.animator.about;
 
 import java.awt.*;
@@ -18,6 +7,20 @@ import net.sourceforge.rcosjava.software.animator.RCOSFrame;
 import net.sourceforge.rcosjava.software.animator.support.GraphicButton;
 import net.sourceforge.rcosjava.software.animator.support.NewLabel;
 
+/**
+ * To display the authors in all their glory.
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 12/01/97  Updated it.
+ * </DD><DD>
+ * 13/10/98  Converted to Java 1.1
+ * </DD></DT>
+ * <P>
+ * @author Andrew Newman
+ * @version 1.00 $Date$
+ * @created 1st February 1996
+ */
 public class AboutFrame extends RCOSFrame
 {
   private Image[] myImages = new Image[RCOS.numberPeople];
