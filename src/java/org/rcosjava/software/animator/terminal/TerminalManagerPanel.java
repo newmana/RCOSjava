@@ -90,8 +90,6 @@ public class TerminalManagerPanel extends RCOSPanel
    */
   public void setupLayout(Component c)
   {
-    super.setupLayout(c);
-
     Panel main = new Panel();
     main.setBackground(defaultBgColour);
     main.setForeground(defaultFgColour);
@@ -125,8 +123,6 @@ public class TerminalManagerPanel extends RCOSPanel
         }
 
         currentTerminal++;
-        Icon upIcon = new ImageIcon(images[1]);
-        Icon downIcon = new ImageIcon(images[2]);
         terminals[currentTerminal] = new GraphicButton(images[1],
             images[1], "Terminal #" + currentTerminal, defaultFont,
             defaultFgColour, true, false);
@@ -173,6 +169,7 @@ public class TerminalManagerPanel extends RCOSPanel
    */
   void terminalOn(int terminalNo)
   {
+    terminalManager.setTerminalOn(terminalNo);
     terminals[terminalNo].setButtonUpPic(images[0]);
     terminals[terminalNo].setButtonDownPic(images[0]);
     views[terminalNo].setText("Hide #" + terminalNo);
@@ -189,6 +186,7 @@ public class TerminalManagerPanel extends RCOSPanel
    */
   void terminalOff(int terminalNo)
   {
+    terminalManager.setTerminalOff(terminalNo);
     terminals[terminalNo].setButtonUpPic(images[1]);
     terminals[terminalNo].setButtonDownPic(images[1]);
     views[terminalNo].setText("Terminal #" + terminalNo);
@@ -205,6 +203,7 @@ public class TerminalManagerPanel extends RCOSPanel
    */
   void terminalFront(int terminalNo)
   {
+    terminalManager.setTerminalFront(terminalNo);
     views[terminalNo].setText("Hide #" + terminalNo);
     views[terminalNo].repaint();
   }
@@ -218,6 +217,7 @@ public class TerminalManagerPanel extends RCOSPanel
    */
   void terminalBack(int terminalNo)
   {
+    terminalManager.setTerminalBack(terminalNo);
     views[terminalNo].setText("View #" + terminalNo);
     views[terminalNo].repaint();
   }

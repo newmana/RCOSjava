@@ -3,6 +3,7 @@ package org.rcosjava.software.animator.terminal;
 import java.applet.*;
 import java.awt.*;
 import javax.swing.ImageIcon;
+import java.io.*;
 import java.net.*;
 import java.util.*;
 import org.rcosjava.messaging.messages.universal.TerminalBack;
@@ -34,9 +35,39 @@ public class TerminalManagerAnimator extends RCOSAnimator
   private final static String MESSENGING_ID = "TerminalManagerAnimator";
 
   /**
+   * Images to display.
+   */
+  private ImageIcon[] images;
+
+  /**
+   * Total number of terminal columns.
+   */
+  private int noTerminalColumns;
+
+  /**
+   * Total number of terminal rows.
+   */
+  private int noTerminalRows;
+
+  /**
+   * Total number of terminals.
+   */
+  private int noTerminals;
+
+  /**
+   * Terminals and if they are on or not.
+   */
+  private boolean[] terminalsOn;
+
+  /**
+   * Terminals and if they are in front or not.
+   */
+  private boolean[] terminalsFront;
+
+  /**
    * Panel to display the results.
    */
-  private TerminalManagerPanel panel;
+  private transient TerminalManagerPanel panel;
 
   /**
    * Create an animator office, register with the animator office, set the size
@@ -52,9 +83,17 @@ public class TerminalManagerAnimator extends RCOSAnimator
    * @param images the images to use for process and buttons.
    */
   public TerminalManagerAnimator(AnimatorOffice postOffice, ImageIcon[] images,
-      int noTerminals, int noTerminalColumns, int noTerminalRows)
+      int newNoTerminals, int newNoTerminalColumns, int newNoTerminalRows)
   {
     super(MESSENGING_ID, postOffice);
+
+    noTerminals = newNoTerminals + 1;
+    noTerminalColumns = newNoTerminalColumns;
+    noTerminalRows = newNoTerminalRows;
+
+    terminalsFront = new boolean[noTerminals];
+    terminalsOn = new boolean[noTerminals];
+
     panel = new TerminalManagerPanel(images, noTerminals, noTerminalColumns,
         noTerminalRows, this);
   }
@@ -77,6 +116,46 @@ public class TerminalManagerAnimator extends RCOSAnimator
   public RCOSPanel getPanel()
   {
     return panel;
+  }
+
+  /**
+   * Terminal is front.
+   *
+   * @param terminalNo the number of the terminal.
+   */
+  void setTerminalFront(int terminalNo)
+  {
+    terminalsFront[terminalNo] = true;
+  }
+
+  /**
+   * Terminal is back.
+   *
+   * @param terminalNo the number of the terminal.
+   */
+  void setTerminalBack(int terminalNo)
+  {
+    terminalsFront[terminalNo] = false;
+  }
+
+  /**
+   * Terminal is on.
+   *
+   * @param terminalNo the number of the terminal.
+   */
+  void setTerminalOn(int terminalNo)
+  {
+    terminalsOn[terminalNo] = true;
+  }
+
+  /**
+   * Terminal is off.
+   *
+   * @param terminalNo the number of the terminal.
+   */
+  void setTerminalOff(int terminalNo)
+  {
+    terminalsOn[terminalNo] = false;
   }
 
   /**
@@ -109,7 +188,6 @@ public class TerminalManagerAnimator extends RCOSAnimator
   public void sendToggleTerminal(int terminalNo)
   {
     TerminalToggle message = new TerminalToggle(this, terminalNo);
-
     sendMessage(message);
   }
 
@@ -131,7 +209,6 @@ public class TerminalManagerAnimator extends RCOSAnimator
   public void sendTerminalFront(int terminalNo)
   {
     TerminalFront message = new TerminalFront(this, terminalNo);
-
     sendMessage(message);
   }
 
@@ -153,7 +230,46 @@ public class TerminalManagerAnimator extends RCOSAnimator
   public void sendTerminalBack(int terminalNo)
   {
     TerminalBack message = new TerminalBack(this, terminalNo);
-
     sendMessage(message);
+  }
+
+  /**
+   * Handle the creation of non-serializable components.
+   *
+   * @param is stream that is being read.
+   */
+  private void readObject(ObjectInputStream is) throws IOException,
+      ClassNotFoundException
+  {
+    // Deserialize the document
+    is.defaultReadObject();
+
+    // Create new connection
+    panel = new TerminalManagerPanel(images, noTerminals, noTerminalColumns,
+        noTerminalRows, this);
+
+    // Restore the state of the terminals
+    for (int terminals = 0; terminals < noTerminals; terminals++)
+    {
+      // Restore terminals on state
+      if (terminalsFront[terminals])
+      {
+        panel.terminalOn(terminals);
+      }
+      else
+      {
+        panel.terminalOff(terminals);
+      }
+
+      // Restore terminal front state.
+      if (terminalsFront[terminals])
+      {
+        panel.terminalFront(terminals);
+      }
+      else
+      {
+        panel.terminalBack(terminals);
+      }
+    }
   }
 }
