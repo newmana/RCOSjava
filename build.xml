@@ -24,7 +24,7 @@
     <classpath refid="jars"/>
   </taskdef>
 
-  <target name="all" depends="prepare,compile,dist,javadoc"
+  <target name="all" depends="clean,prepare,compile,dist,javadoc"
    description="Call all the targets"/>
 
    <target name="clean"
