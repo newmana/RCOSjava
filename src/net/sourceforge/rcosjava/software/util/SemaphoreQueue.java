@@ -97,8 +97,6 @@ public class SemaphoreQueue extends FIFOQueue
     do
     {
       tmp = (Semaphore) peek();
-      //System.out.println("tmpSID = " + tmp.getId());
-      //System.out.println("mySID = " + semaphoreId);
       if (tmp.getId() == semaphoreId)
         return (Object) tmp;
       goToNext();
