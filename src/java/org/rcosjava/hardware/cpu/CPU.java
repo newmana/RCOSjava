@@ -48,7 +48,7 @@ import org.rcosjava.software.kernel.Kernel;
  * @see org.rcosjava.hardware.memory.Memory
  * @version 1.00 $Date$
  */
-public class CPU
+public class CPU implements Serializable
 {
   /**
    * The number of periods (10) that the CPU is call the Timer Interrupt.
