@@ -9,10 +9,10 @@ import java.util.*;
 import org.rcosjava.software.animator.RCOSPanel;
 import org.rcosjava.software.animator.support.RCOSRectangle;
 import org.rcosjava.software.filesystem.FileSystemManager;
-import org.rcosjava.software.filesystem.FileSystemData;
-import org.rcosjava.software.filesystem.msdos.MSDOSFile;
-import org.rcosjava.software.filesystem.msdos.exception.MSDOSFATException;
-import org.rcosjava.software.filesystem.msdos.exception.MSDOSDirectoryException;
+import org.rcosjava.software.filesystem.FileSystemReturnData;
+import org.rcosjava.software.filesystem.FileSystemFile;
+import org.rcosjava.software.filesystem.AllocationTableException;
+import org.rcosjava.software.filesystem.DirectoryException;
 import org.rcosjava.software.util.Data;
 import org.rcosjava.software.util.DataInvalidaException;
 import org.rcosjava.software.util.HorarioInvalidoException;
@@ -38,27 +38,30 @@ public class FileSystemPanel extends RCOSPanel
   private JTextField textFieldExtensionName = new JTextField(3);
 
   private FileSystemManager fileSystemManager;
-  private JTextArea textArea = new JTextArea(15,30);
-  private JTextArea textAreaDir = new JTextArea(1,7);
+  private JTextArea textArea = new JTextArea(15, 30);
+  private JTextArea textAreaDir = new JTextArea(1, 7);
 
   private ArrayList blocks = new ArrayList();
   private int blockIndex = 1;
 
-  private static final Color UNALLOCATED_COLOUR = Color.gray;
-  private static final Color READ_COLOUR  = Color.blue;
-  private static final Color WRITTEN_COLOUR = Color.red;
-  private static final Color DELETED_COLOUR = Color.green;
+  private final static Color UNALLOCATED_COLOUR = Color.gray;
+  private final static Color READ_COLOUR = Color.blue;
+  private final static Color WRITTEN_COLOUR = Color.red;
+  private final static Color DELETED_COLOUR = Color.green;
 
   /**
    * Default block font size (Courier, Plain, 11).
+   *
+   * @author andrew
+   * @since July 27, 2003
    */
-  protected transient static final Font blockFont = new Font("Courier",
+  protected final static transient Font blockFont = new Font("Courier",
       Font.PLAIN, 11);
 
   /**
    * Constructor for the FileSystemFrame object
    *
-   * @param images Description of Parameter
+   * @param theFileSystemManager Description of the Parameter
    */
   public FileSystemPanel(FileSystemManager theFileSystemManager)
   {
@@ -68,6 +71,8 @@ public class FileSystemPanel extends RCOSPanel
 
   /**
    * Description of the Method
+   *
+   * @param c Description of the Parameter
    */
   public void setupLayout(Component c)
   {
@@ -224,7 +229,7 @@ public class FileSystemPanel extends RCOSPanel
         "File System Browser");
     browserTitle.setTitleColor(defaultFgColour);
     browserPanel.setBorder(BorderFactory.createCompoundBorder(
-        browserTitle, BorderFactory.createEmptyBorder(3,3,3,3)));
+        browserTitle, BorderFactory.createEmptyBorder(3, 3, 3, 3)));
 
     browserPanel.add(new JLabel("Hellooooooooooooooooooooooo"));
 
@@ -244,7 +249,7 @@ public class FileSystemPanel extends RCOSPanel
     TitledBorder blocksTitle = BorderFactory.createTitledBorder("Blocks");
     blocksTitle.setTitleColor(defaultFgColour);
     blockPanel.setBorder(BorderFactory.createCompoundBorder(
-        blocksTitle, BorderFactory.createEmptyBorder(3,3,3,3)));
+        blocksTitle, BorderFactory.createEmptyBorder(3, 3, 3, 3)));
 
     // Create the 100 blocks.
     for (int i = 0; i < 100; i++)
@@ -252,7 +257,7 @@ public class FileSystemPanel extends RCOSPanel
       // Create new label for block
       JPanel tmpPanel = new JPanel(new BorderLayout());
       tmpPanel.setBackground(UNALLOCATED_COLOUR);
-      JLabel label = new JLabel("" + (i+1));
+      JLabel label = new JLabel("" + (i + 1));
       label.setBackground(UNALLOCATED_COLOUR);
       label.setForeground(Color.white);
       label.setFont(blockFont);
@@ -302,7 +307,7 @@ public class FileSystemPanel extends RCOSPanel
     TitledBorder optionsTitle = BorderFactory.createTitledBorder("Key");
     optionsTitle.setTitleColor(defaultFgColour);
     keyPanel.setBorder(BorderFactory.createCompoundBorder(
-        optionsTitle, BorderFactory.createEmptyBorder(3,3,3,3)));
+        optionsTitle, BorderFactory.createEmptyBorder(3, 3, 3, 3)));
     keyPanel.setLayout(gridBag);
 
     gridBag.setConstraints(unallocBox, constraints);
@@ -354,6 +359,12 @@ public class FileSystemPanel extends RCOSPanel
     repaint();
   }
 
+  /**
+   * Description of the Class
+   *
+   * @author andrew
+   * @created July 27, 2003
+   */
   class CloseFileSystem extends MouseAdapter
   {
     /**
@@ -368,111 +379,148 @@ public class FileSystemPanel extends RCOSPanel
     }
   }
 
-  class DirFileSystem extends MouseAdapter{
-
+  /**
+   * Description of the Class
+   *
+   * @author andrew
+   * @created July 27, 2003
+   */
+  class DirFileSystem extends MouseAdapter
+  {
     /**
      * Description of the Method
      *
      * @param e Description of Parameter
      */
-    public void mouseClicked(MouseEvent e){
-        // pegar o path e o nome do diretorio
+    public void mouseClicked(MouseEvent e)
+    {
+      // pegar o path e o nome do diretorio
 
-        System.out.println("dentro do evento q trata do click");
-        String path = textFieldPath.getText().toUpperCase();
-        System.out.println("path: "+path);
-        String directoryName = textFieldDirectoryName.getText().toUpperCase();
-        System.out.println("directoryName: "+directoryName);
+      System.out.println("dentro do evento q trata do click");
+      String path = textFieldPath.getText().toUpperCase();
+      System.out.println("path: " + path);
+      String directoryName = textFieldDirectoryName.getText().toUpperCase();
+      System.out.println("directoryName: " + directoryName);
 
-        MSDOSFile msdosFile = null;
-        String retorno = "";
+      FileSystemFile msdosFile = null;
+//      String retorno = "";
+      int retorno = 0;
 
-        try{
-           msdosFile = getNewMSDOSFile(directoryName,"", false);
-        }catch(HorarioInvalidoException hiex){
-           System.out.println("hiex: "+hiex.getMessage());
-           retorno = hiex.getMessage();
-        }catch(DataInvalidaException diex){
-           System.out.println("diex: "+diex.getMessage());
-           retorno = diex.getMessage();
-        }
+      try
+      {
+        msdosFile = getNewFile(directoryName, "", false);
+      }
+      catch (HorarioInvalidoException hiex)
+      {
+        System.out.println("hiex: " + hiex.getMessage());
+//        retorno = hiex.getMessage();
+      }
+      catch (DataInvalidaException diex)
+      {
+        System.out.println("diex: " + diex.getMessage());
+//        retorno = diex.getMessage();
+      }
 
-        FileSystemData fileSystemData = null;
-        try{
-           fileSystemData = fileSystemManager.read(1, msdosFile, path);
-        }catch(MSDOSFATException fatex){
-           System.out.println("fatex: "+fatex.getMessage());
-           retorno = fatex.getMessage();
-        }catch(MSDOSDirectoryException direx){
-           System.out.println("direx: "+direx.getMessage());
-           retorno = direx.getMessage();
-        }
-        if(fileSystemData!=null){
-          retorno = fileSystemData.getReturnValue();
-        }
+      FileSystemReturnData fileSystemData = null;
+      try
+      {
+        fileSystemData = fileSystemManager.read(1, msdosFile, path);
+      }
+      catch (AllocationTableException fatex)
+      {
+        System.out.println("fatex: " + fatex.getMessage());
+//        retorno = fatex.getMessage();
+      }
+      catch (DirectoryException direx)
+      {
+        System.out.println("direx: " + direx.getMessage());
+//        retorno = direx.getMessage();
+      }
+      if (fileSystemData != null)
+      {
+        retorno = fileSystemData.getReturnValue();
+      }
 
+      if (fileSystemData != null)
+      {
+        retorno = fileSystemData.getReturnValue();
+        // Seta blocos
+        setBlocks(fileSystemData, Color.blue);
+      }
 
-        if(fileSystemData!=null){
-           retorno = fileSystemData.getReturnValue();
-           // Seta blocos
-           setBlocks(fileSystemData, Color.blue);
-        }
-
-        System.out.println("retorno: "+retorno);
-        textAreaDir.setText(retorno);
+      System.out.println("retorno: " + retorno);
+      textAreaDir.setText("" + retorno);
 
 //      myProcessManager.sendRunMessage();
     }
 
   }
 
-  class ReadFileSystem extends MouseAdapter{
-
+  /**
+   * Description of the Class
+   *
+   * @author andrew
+   * @created July 27, 2003
+   */
+  class ReadFileSystem extends MouseAdapter
+  {
     /**
      * Description of the Method
      *
      * @param e Description of Parameter
      */
-    public void mouseClicked(MouseEvent e){
-        // pegar o path e o nome do diretorio
+    public void mouseClicked(MouseEvent e)
+    {
+      // pegar o path e o nome do diretorio
+      System.out.println("dentro do evento de ler arquivo");
+      String path = textFieldPath.getText().toUpperCase();
+      System.out.println("path: " + path);
+      String fileName = textFieldFileName.getText().toUpperCase();
+      System.out.println("fileName: " + fileName);
 
-        System.out.println("dentro do evento de ler arquivo");
-        String path = textFieldPath.getText().toUpperCase();
-        System.out.println("path: "+path);
-        String fileName = textFieldFileName.getText().toUpperCase();
-        System.out.println("fileName: "+fileName);
+      String extensionName = textFieldExtensionName.getText().toUpperCase();
+      System.out.println("extensionName: " + extensionName);
 
-        String extensionName = textFieldExtensionName.getText().toUpperCase();
-        System.out.println("extensionName: "+extensionName);
+      FileSystemFile msdosFile = null;
+//      String retorno = "";
+      int retorno = 0;
 
-        MSDOSFile msdosFile = null;
-        String retorno = "";
+      try
+      {
+        msdosFile = getNewFile(fileName, extensionName, true);
+      }
+      catch (HorarioInvalidoException hiex)
+      {
+        System.out.println("hiex: " + hiex.getMessage());
+//        retorno = hiex.getMessage();
+      }
+      catch (DataInvalidaException diex)
+      {
+        System.out.println("diex: " + diex.getMessage());
+//        retorno = diex.getMessage();
+      }
 
-        try{
-           msdosFile = getNewMSDOSFile(fileName,extensionName, true);
-        }catch(HorarioInvalidoException hiex){
-           System.out.println("hiex: "+hiex.getMessage());
-           retorno = hiex.getMessage();
-        }catch(DataInvalidaException diex){
-           System.out.println("diex: "+diex.getMessage());
-           retorno = diex.getMessage();
-        }
-
-        FileSystemData fileSystemData = null;
-        try{
-           fileSystemData = fileSystemManager.read(1, msdosFile, path);
-        }catch(MSDOSFATException fatex){
-           System.out.println("fatex: "+fatex.getMessage());
-           retorno = fatex.getMessage();
-        }catch(MSDOSDirectoryException direx){
-           System.out.println("direx: "+direx.getMessage());
-           retorno = direx.getMessage();
-        }
+      FileSystemReturnData fileSystemData = null;
+      try
+      {
+        fileSystemData = fileSystemManager.read(1, msdosFile, path);
+      }
+      catch (AllocationTableException fatex)
+      {
+        System.out.println("fatex: " + fatex.getMessage());
+//        retorno = fatex.getMessage();
+      }
+      catch (DirectoryException direx)
+      {
+        System.out.println("direx: " + direx.getMessage());
+//        retorno = direx.getMessage();
+      }
 
 //        Button button;
-        if(fileSystemData!=null){
-           retorno = fileSystemData.getReturnValue();
-           setBlocks(fileSystemData, Color.blue);
+      if (fileSystemData != null)
+      {
+        retorno = fileSystemData.getReturnValue();
+        setBlocks(fileSystemData, Color.blue);
 //           int[] entries = fileSystemData.getEntriesFileFromFAT();
 //           int aux = 0;
 //           System.out.println("entries.length: "+entries.length);
@@ -486,120 +534,160 @@ public class FileSystemPanel extends RCOSPanel
 //               System.out.println("button: "+button.getLabel());
 //             }
 //           }
-        }
-        System.out.println("retorno: "+retorno);
-        textArea.setText(retorno);
+      }
+      System.out.println("retorno: " + retorno);
+      textArea.setText("" + retorno);
 
 //      myProcessManager.sendRunMessage();
     }
   }
 
-  class DeleteDirSystem extends MouseAdapter{
+  /**
+   * Description of the Class
+   *
+   * @author andrew
+   * @created July 27, 2003
+   */
+  class DeleteDirSystem extends MouseAdapter
+  {
 
     /**
      * Description of the Method
      *
      * @param e Description of Parameter
      */
-    public void mouseClicked(MouseEvent e){
-        // pegar o path e o nome do diretorio
+    public void mouseClicked(MouseEvent e)
+    {
+      // pegar o path e o nome do diretorio
 
-        System.out.println("dentro do evento q trata do click");
-        String path = textFieldPath.getText().toUpperCase();
-        System.out.println("path: "+path);
-        String directoryName = textFieldDirectoryName.getText().toUpperCase();
-        System.out.println("directoryName: "+directoryName);
+      System.out.println("dentro do evento q trata do click");
+      String path = textFieldPath.getText().toUpperCase();
+      System.out.println("path: " + path);
+      String directoryName = textFieldDirectoryName.getText().toUpperCase();
+      System.out.println("directoryName: " + directoryName);
 
-        MSDOSFile msdosFile = null;
-        String retorno = "";
+      FileSystemFile msdosFile = null;
+//      String retorno = "";
+      int retorno = 0;
 
-        try{
-           msdosFile = getNewMSDOSFile(directoryName,"", false);
-        }catch(HorarioInvalidoException hiex){
-           System.out.println("hiex: "+hiex.getMessage());
-           retorno = hiex.getMessage();
-        }catch(DataInvalidaException diex){
-           System.out.println("diex: "+diex.getMessage());
-           retorno = diex.getMessage();
-        }
+      try
+      {
+        msdosFile = getNewFile(directoryName, "", false);
+      }
+      catch (HorarioInvalidoException hiex)
+      {
+        System.out.println("hiex: " + hiex.getMessage());
+//        retorno = hiex.getMessage();
+      }
+      catch (DataInvalidaException diex)
+      {
+        System.out.println("diex: " + diex.getMessage());
+//        retorno = diex.getMessage();
+      }
 
-        FileSystemData fileSystemData = null;
-        try{
-           fileSystemData = fileSystemManager.delete(1, msdosFile, path);
-        }catch(MSDOSFATException fatex){
-           System.out.println("fatex: "+fatex.getMessage());
-           retorno = fatex.getMessage();
-        }catch(MSDOSDirectoryException direx){
-           System.out.println("direx: "+direx.getMessage());
-           retorno = direx.getMessage();
-        }
-        if(fileSystemData!=null){
-          retorno = fileSystemData.getReturnValue();
-        }
+      FileSystemReturnData fileSystemData = null;
+      try
+      {
+        fileSystemData = fileSystemManager.delete(1, msdosFile, path);
+      }
+      catch (AllocationTableException fatex)
+      {
+        System.out.println("fatex: " + fatex.getMessage());
+//        retorno = fatex.getMessage();
+      }
+      catch (DirectoryException direx)
+      {
+        System.out.println("direx: " + direx.getMessage());
+//        retorno = direx.getMessage();
+      }
+      if (fileSystemData != null)
+      {
+        retorno = fileSystemData.getReturnValue();
+      }
 
+      if (fileSystemData != null)
+      {
+        retorno = fileSystemData.getReturnValue();
+        // Seta blocos
+        setBlocks(fileSystemData, Color.green);
+      }
 
-        if(fileSystemData!=null){
-           retorno = fileSystemData.getReturnValue();
-           // Seta blocos
-           setBlocks(fileSystemData, Color.green);
-        }
-
-        System.out.println("retorno: "+retorno);
-        textAreaDir.setText(retorno);
-        textAreaDir.setText("Directory "+msdosFile.getNameFile()+" deleted with success");
+      System.out.println("retorno: " + retorno);
+      textAreaDir.setText("" + retorno);
+      textAreaDir.setText("Directory " + msdosFile.getNameFile() + " deleted with success");
 
 //      myProcessManager.sendRunMessage();
     }
 
   }
 
-  class DeleteFileSystem extends MouseAdapter{
+  /**
+   * Description of the Class
+   *
+   * @author andrew
+   * @created July 27, 2003
+   */
+  class DeleteFileSystem extends MouseAdapter
+  {
 
     /**
      * Description of the Method
      *
      * @param e Description of Parameter
      */
-    public void mouseClicked(MouseEvent e){
-        // pegar o path e o nome do diretorio
+    public void mouseClicked(MouseEvent e)
+    {
+      // pegar o path e o nome do diretorio
 
-        System.out.println("dentro do evento de ler arquivo");
-        String path = textFieldPath.getText().toUpperCase();
-        System.out.println("path: "+path);
-        String fileName = textFieldFileName.getText().toUpperCase();
-        System.out.println("fileName: "+fileName);
+      System.out.println("dentro do evento de ler arquivo");
+      String path = textFieldPath.getText().toUpperCase();
+      System.out.println("path: " + path);
+      String fileName = textFieldFileName.getText().toUpperCase();
+      System.out.println("fileName: " + fileName);
 
-        String extensionName = textFieldExtensionName.getText().toUpperCase();
-        System.out.println("extensionName: "+extensionName);
+      String extensionName = textFieldExtensionName.getText().toUpperCase();
+      System.out.println("extensionName: " + extensionName);
 
-        MSDOSFile msdosFile = null;
-        String retorno = "";
+      FileSystemFile msdosFile = null;
+//      String retorno = "";
+      int retorno = 0;
 
-        try{
-           msdosFile = getNewMSDOSFile(fileName,extensionName, true);
-        }catch(HorarioInvalidoException hiex){
-           System.out.println("hiex: "+hiex.getMessage());
-           retorno = hiex.getMessage();
-        }catch(DataInvalidaException diex){
-           System.out.println("diex: "+diex.getMessage());
-           retorno = diex.getMessage();
-        }
+      try
+      {
+        msdosFile = getNewFile(fileName, extensionName, true);
+      }
+      catch (HorarioInvalidoException hiex)
+      {
+        System.out.println("hiex: " + hiex.getMessage());
+//        retorno = hiex.getMessage();
+      }
+      catch (DataInvalidaException diex)
+      {
+        System.out.println("diex: " + diex.getMessage());
+//        retorno = diex.getMessage();
+      }
 
-        FileSystemData fileSystemData = null;
-        try{
-           fileSystemData = fileSystemManager.delete(1, msdosFile, path);
-        }catch(MSDOSFATException fatex){
-           System.out.println("fatex: "+fatex.getMessage());
-           retorno = fatex.getMessage();
-        }catch(MSDOSDirectoryException direx){
-           System.out.println("direx: "+direx.getMessage());
-           retorno = direx.getMessage();
-        }
+      FileSystemReturnData fileSystemData = null;
+      try
+      {
+        fileSystemData = fileSystemManager.delete(1, msdosFile, path);
+      }
+      catch (AllocationTableException fatex)
+      {
+        System.out.println("fatex: " + fatex.getMessage());
+//        retorno = fatex.getMessage();
+      }
+      catch (DirectoryException direx)
+      {
+        System.out.println("direx: " + direx.getMessage());
+//        retorno = direx.getMessage();
+      }
 
 //        Button button;
-        if(fileSystemData!=null){
-           retorno = fileSystemData.getReturnValue();
-           setBlocks(fileSystemData, Color.green);
+      if (fileSystemData != null)
+      {
+        retorno = fileSystemData.getReturnValue();
+        setBlocks(fileSystemData, Color.green);
 //           int[] entries = fileSystemData.getEntriesFileFromFAT();
 //           int aux = 0;
 //           System.out.println("entries.length: "+entries.length);
@@ -613,59 +701,78 @@ public class FileSystemPanel extends RCOSPanel
 //               System.out.println("button: "+button.getLabel());
 //             }
 //           }
-        }
-        System.out.println("retorno: "+retorno);
-        textArea.setText(retorno);
-        textAreaDir.setText("File "+msdosFile.getNameFile()+" deleted with success");
+      }
+      System.out.println("retorno: " + retorno);
+      textArea.setText("" + retorno);
+      textAreaDir.setText("File " + msdosFile.getNameFile() + " deleted with success");
 
 //      myProcessManager.sendRunMessage();
     }
   }
 
-  class WriteDirSystem extends MouseAdapter{
+  /**
+   * Description of the Class
+   *
+   * @author andrew
+   * @created July 27, 2003
+   */
+  class WriteDirSystem extends MouseAdapter
+  {
 
     /**
      * Description of the Method
      *
      * @param e Description of Parameter
      */
-    public void mouseClicked(MouseEvent e){
-        // pegar o path e o nome do diretorio
+    public void mouseClicked(MouseEvent e)
+    {
+      // pegar o path e o nome do diretorio
 
-        System.out.println("dentro do evento de escrever diretorio");
-        String path = textFieldPath.getText().toUpperCase();
-        System.out.println("path: "+path);
-        String directoryName = textFieldDirectoryName.getText().toUpperCase();
-        System.out.println("directoryName: "+directoryName);
+      System.out.println("dentro do evento de escrever diretorio");
+      String path = textFieldPath.getText().toUpperCase();
+      System.out.println("path: " + path);
+      String directoryName = textFieldDirectoryName.getText().toUpperCase();
+      System.out.println("directoryName: " + directoryName);
 
-        MSDOSFile msdosFile = null;
-        String retorno = "";
+      FileSystemFile msdosFile = null;
+//      String retorno = "";
 
-        try{
-           msdosFile = getNewMSDOSFile(directoryName,"", false);
-        }catch(HorarioInvalidoException hiex){
-           System.out.println("hiex: "+hiex.getMessage());
-           retorno = hiex.getMessage();
-        }catch(DataInvalidaException diex){
-           System.out.println("diex: "+diex.getMessage());
-           retorno = diex.getMessage();
-        }
+      try
+      {
+        msdosFile = getNewFile(directoryName, "", false);
+      }
+      catch (HorarioInvalidoException hiex)
+      {
+        System.out.println("hiex: " + hiex.getMessage());
+//        retorno = hiex.getMessage();
+      }
+      catch (DataInvalidaException diex)
+      {
+        System.out.println("diex: " + diex.getMessage());
+//        retorno = diex.getMessage();
+      }
 
-        FileSystemData fileSystemData = null;
-        try{
-           fileSystemData = fileSystemManager.write(1, msdosFile, null, path);
-        }catch(MSDOSFATException fatex){
-           System.out.println("fatex: "+fatex.getMessage());
-           retorno = fatex.getMessage();
-        }catch(MSDOSDirectoryException direx){
-           System.out.println("direx: "+direx.getMessage());
-           retorno = direx.getMessage();
-        }
+      FileSystemReturnData fileSystemData = null;
+      try
+      {
+        fileSystemData = fileSystemManager.write(1, msdosFile, null, path);
+      }
+      catch (AllocationTableException fatex)
+      {
+        System.out.println("fatex: " + fatex.getMessage());
+//        retorno = fatex.getMessage();
+      }
+      catch (DirectoryException direx)
+      {
+        System.out.println("direx: " + direx.getMessage());
+//        retorno = direx.getMessage();
+      }
 
 //        Button button;
-        if(fileSystemData!=null){
-           retorno = fileSystemData.getReturnValue();
-           setBlocks(fileSystemData, Color.red);
+      if (fileSystemData != null)
+      {
+//        retorno = fileSystemData.getReturnValue();
+        setBlocks(fileSystemData, Color.red);
 //           int[] entries = fileSystemData.getEntriesFileFromFAT();
 //           int aux = 0;
 //           System.out.println("entries.length: "+entries.length);
@@ -679,67 +786,87 @@ public class FileSystemPanel extends RCOSPanel
 //               System.out.println("button: "+button.getLabel());
 //             }
 //           }
-        }
+      }
 
-        retorno = "Directory "+msdosFile.getNameFile()+" written with success";
-        System.out.println("retorno: "+retorno);
+//      retorno = "Directory " + msdosFile.getNameFile() + " written with success";
+//      System.out.println("retorno: " + retorno);
 //        System.out.println("Day of Date from the file: "+msdosFile.getLastModificationDate().getDay());
 //        System.out.println("Month of Date from the file: "+msdosFile.getLastModificationDate().getMonth());
 //        System.out.println("Year of Date from the file: "+msdosFile.getLastModificationDate().getYear());
-        textArea.setText(retorno);
+//      textArea.setText(retorno);
 
 //      myProcessManager.sendRunMessage();
     }
   }
 
-  class WriteFileSystem extends MouseAdapter{
+  /**
+   * Description of the Class
+   *
+   * @author andrew
+   * @created July 27, 2003
+   */
+  class WriteFileSystem extends MouseAdapter
+  {
 
     /**
      * Description of the Method
      *
      * @param e Description of Parameter
      */
-    public void mouseClicked(MouseEvent e){
-        // pegar o path e o nome do diretorio
+    public void mouseClicked(MouseEvent e)
+    {
+      // pegar o path e o nome do diretorio
 
-        System.out.println("dentro do evento de ler arquivo");
-        String path = textFieldPath.getText().toUpperCase();
-        System.out.println("path: "+path);
-        String fileName = textFieldFileName.getText().toUpperCase();
-        System.out.println("directoryName: "+fileName);
+      System.out.println("dentro do evento de ler arquivo");
+      String path = textFieldPath.getText().toUpperCase();
+      System.out.println("path: " + path);
+      String fileName = textFieldFileName.getText().toUpperCase();
+      System.out.println("directoryName: " + fileName);
 
-        String extensionName = textFieldExtensionName.getText().toUpperCase();
-        System.out.println("extensionName: "+extensionName);
+      String extensionName = textFieldExtensionName.getText().toUpperCase();
+      System.out.println("extensionName: " + extensionName);
 
-        MSDOSFile msdosFile = null;
-        String retorno = "";
+      FileSystemFile msdosFile = null;
+//      String retorno = "";
+      int retorno = 0;
 
-        try{
-           msdosFile = getNewMSDOSFile(fileName,extensionName, true);
-        }catch(HorarioInvalidoException hiex){
-           System.out.println("hiex: "+hiex.getMessage());
-           retorno = hiex.getMessage();
-        }catch(DataInvalidaException diex){
-           System.out.println("diex: "+diex.getMessage());
-           retorno = diex.getMessage();
-        }
+      try
+      {
+        msdosFile = getNewFile(fileName, extensionName, true);
+      }
+      catch (HorarioInvalidoException hiex)
+      {
+        System.out.println("hiex: " + hiex.getMessage());
+//        retorno = hiex.getMessage();
+      }
+      catch (DataInvalidaException diex)
+      {
+        System.out.println("diex: " + diex.getMessage());
+//        retorno = diex.getMessage();
+      }
 
-        String data = textArea.getText();
-        FileSystemData fileSystemData = null;
-        try{
-           fileSystemData = fileSystemManager.write(1, msdosFile, data, path);
-        }catch(MSDOSFATException fatex){
-           System.out.println("fatex: "+fatex.getMessage());
-           retorno = fatex.getMessage();
-        }catch(MSDOSDirectoryException direx){
-           System.out.println("direx: "+direx.getMessage());
-           retorno = direx.getMessage();
-        }
+      String data = textArea.getText();
+      FileSystemReturnData fileSystemData = null;
+      try
+      {
+        fileSystemData = fileSystemManager.write(1, msdosFile, data, path);
+      }
+      catch (AllocationTableException fatex)
+      {
+        System.out.println("fatex: " + fatex.getMessage());
+//        retorno = fatex.getMessage();
+      }
+      catch (DirectoryException direx)
+      {
+        System.out.println("direx: " + direx.getMessage());
+//        retorno = direx.getMessage();
+      }
 
 //        Button button;
-        if(fileSystemData!=null){
-           retorno = fileSystemData.getReturnValue();
-           setBlocks(fileSystemData, Color.red);
+      if (fileSystemData != null)
+      {
+        retorno = fileSystemData.getReturnValue();
+        setBlocks(fileSystemData, Color.red);
 //           int[] entries = fileSystemData.getEntriesFileFromFAT();
 //           int aux = 0;
 //           System.out.println("entries.length: "+entries.length);
@@ -753,68 +880,85 @@ public class FileSystemPanel extends RCOSPanel
 //               System.out.println("button: "+button.getLabel());
 //             }
 //           }
-        }
+      }
 
-        retorno = "File "+msdosFile.getNameFile()+" written with success";
-        System.out.println("retorno: "+retorno);
+//      retorno = "File " + msdosFile.getNameFile() + " written with success";
+      System.out.println("retorno: " + retorno);
 //        System.out.println("Date do file: "+msdosFile.getLastModificationDate().getDay());
-        textArea.setText(retorno);
+      textArea.setText("" + retorno);
 
 //      myProcessManager.sendRunMessage();
     }
   }
 
-  public MSDOSFile getNewMSDOSFile(String nomeArquivo, String extensao, boolean arquivo)
-     throws HorarioInvalidoException, DataInvalidaException{
-            java.util.Date dt = new java.util.Date(System.currentTimeMillis());
-            Calendar calendario = new GregorianCalendar();
-            calendario.setTime(dt);
-            int ano = calendario.get(calendario.YEAR);
-            int mes = calendario.get(calendario.MONTH);
-            int dia = calendario.get(calendario.DAY_OF_MONTH);
-            String dataAtual = Data.format(new Data( dia, mes+1, ano),1);
+  /**
+   * Gets the newMSDOSFile attribute of the FileSystemPanel object
+   *
+   * @param nomeArquivo Description of the Parameter
+   * @param extensao Description of the Parameter
+   * @param arquivo Description of the Parameter
+   * @return The newMSDOSFile value
+   * @throws HorarioInvalidoException Description of the Exception
+   * @throws DataInvalidaException Description of the Exception
+   */
+  public FileSystemFile getNewFile(String nomeArquivo, String extensao, boolean arquivo)
+       throws HorarioInvalidoException, DataInvalidaException
+  {
+    java.util.Date dt = new java.util.Date(System.currentTimeMillis());
+    Calendar calendario = new GregorianCalendar();
+    calendario.setTime(dt);
+    int ano = calendario.get(calendario.YEAR);
+    int mes = calendario.get(calendario.MONTH);
+    int dia = calendario.get(calendario.DAY_OF_MONTH);
+    String dataAtual = Data.format(new Data(dia, mes + 1, ano), 1);
 
-     MSDOSFile msdosFile = new MSDOSFile(nomeArquivo,extensao, arquivo, false, false,
-                               false, false, dataAtual,
-                               new Horario("00","37","18"), -1, -1, -1);
-     return msdosFile;
+    FileSystemFile file = fileSystemManager.create(nomeArquivo, extensao,
+        arquivo, false, false, false, false, dataAtual,
+        new Horario("00", "37", "18"), -1, -1, -1);
+    return file;
   }
 
-  public void setBlocks(FileSystemData fileSystemData, Color color)
+  /**
+   * Sets the blocks attribute of the FileSystemPanel object
+   *
+   * @param fileSystemData The new blocks value
+   * @param color The new blocks value
+   */
+  public void setBlocks(FileSystemReturnData fileSystemData, Color color)
   {
     boolean flag = false;
     JLabel label = null;
-    int[] entries = fileSystemData.getEntriesFileFromFAT();
-    int aux = 0;
-    System.out.println("entries.length: "+entries.length);
-    aux = entries[0];
-    if (aux!=-1)
-    {
-      // significa lendo algo diferente da raiz, q estah no diretory
-      // e nao nos blocos do disco
-      for (int i = 1; i <= 100; i++)
-      {
-        System.out.println("i: "+i);
-        System.out.println("aux: "+aux);
-        flag = false;
-
-        for(int j=0; j<entries.length; j++)
-        {
-          if (i==entries[j])
-          {
-          flag = true;
-        }
-        }
-        label = (JLabel) blocks.get(i);
-        if(flag)
-        {
-          label.setBackground(color);
-        }
-        else
-        {
-          label.setBackground(Color.lightGray);
-        }
-      }
-    }
+//    int[] entries = fileSystemData.getEntriesFileFromFAT();
+//    int aux = 0;
+//    System.out.println("entries.length: " + entries.length);
+//    aux = entries[0];
+//    if (aux != -1)
+//    {
+//      // significa lendo algo diferente da raiz, q estah no diretory
+//      // e nao nos blocos do disco
+//      for (int i = 1; i <= 100; i++)
+//      {
+//        System.out.println("i: " + i);
+//        System.out.println("aux: " + aux);
+//        flag = false;
+//
+//        for (int j = 0; j < entries.length; j++)
+//        {
+//          if (i == entries[j])
+//          {
+//            flag = true;
+//          }
+//        }
+//        label = (JLabel) blocks.get(i);
+//        if (flag)
+//        {
+//          label.setBackground(color);
+//        }
+//        else
+//        {
+//          label.setBackground(Color.lightGray);
+//        }
+//      }
+//    }
   }
 }

@@ -9,8 +9,8 @@ import org.rcosjava.software.animator.RCOSPanel;
 
 import org.rcosjava.software.filesystem.FileSystemManager;
 import org.rcosjava.software.filesystem.msdos.MSDOSFile;
-import org.rcosjava.software.filesystem.msdos.exception.MSDOSFATException;
-import org.rcosjava.software.filesystem.msdos.exception.MSDOSDirectoryException;
+import org.rcosjava.software.filesystem.msdos.MSDOSFATException;
+import org.rcosjava.software.filesystem.msdos.MSDOSDirectoryException;
 import org.rcosjava.software.util.HorarioInvalidoException;
 
 /**
