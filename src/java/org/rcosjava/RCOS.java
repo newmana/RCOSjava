@@ -187,12 +187,12 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   /**
    * Animator post office.
    */
-  private AnimatorOffice animatorPostOffice;
+  private static AnimatorOffice animatorPostOffice;
 
   /**
    * Operating system post office.
    */
-  private OSOffice osPostOffice;
+  private static OSOffice osPostOffice;
 
   /**
    * Recorder of all messages.
@@ -626,7 +626,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 
     // Add operating system
 //    list.add(theKernel);
-//    list.add(theTerminalManager);
+    list.add(theTerminalManager);
 //    list.add(theProcessScheduler);
 //    list.add(theIPC);
 //    list.add(theMemoryManager);
@@ -654,12 +654,32 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 //    mmAnimator = (MultimediaAnimator) rcosComponents.get(7);
 
     // Load OS.
-//    theKernel = (Kernel) rcosComponents.get(8);
-//    theTerminalManager = (TerminalManager) rcosComponents.get(9);
+//    theKernel = (Kernel) rcosComponents.get(1);
+    theTerminalManager = (TerminalManager) rcosComponents.get(1);
 //    theProcessScheduler = (ProcessScheduler) rcosComponents.get(10);
 //    theIPC = (IPC) rcosComponents.get(11);
 //    theMemoryManager = (MemoryManager) rcosComponents.get(12);
 //    theProgramManager = (ProgramManager) rcosComponents.get(13);
+  }
+
+  /**
+   * Returns the Animator PO.
+   *
+   * @return the Animator PO.
+   */
+  public static AnimatorOffice getAnimatorPostOffice()
+  {
+    return animatorPostOffice;
+  }
+
+  /**
+   * Returns the OS PO.
+   *
+   * @return the OS PO.
+   */
+  public static OSOffice getOSPostOffice()
+  {
+    return osPostOffice;
   }
 
   /**
