@@ -34,16 +34,6 @@ public class RCOSQueue extends JComponent
   private int noBoxes;
 
   /**
-   * Default background colour of the queue.
-   */
-  private Color bgColour = Color.black;
-
-  /**
-   * Default foreground colour of the queue.
-   */
-  private Color fgColour = Color.white;
-
-  /**
    * Font size of text to calculate the size of the boxes.
    */
   private Font myFont;

@@ -26,7 +26,7 @@ public class RCOSBox extends JPanel
   /**
    * Description of the Field
    */
-  private int iTop, iLeft, iBottom, iRight, iTitleTop;
+  private int iTop, iLeft, iBottom, iRight;
   /**
    * Description of the Field
    */
@@ -77,7 +77,6 @@ public class RCOSBox extends JPanel
     iLeft = 1;
     iBottom = 1;
     iRight = 1;
-    iTitleTop = 0;
 
     setBackground(bgColour);
     setForeground(fgColour);
