@@ -172,7 +172,6 @@ public class ProcessSchedulerFrame extends RCOSFrame
     myImages = new Image[images.length];
     for (int index = 0; index < images.length-1; index++)
     {
-      System.err.println("Getting: " + index);
       myImages[index] = images[index].getImage();
     }
     ZombieQ = new LIFOQueue(10, 0);
