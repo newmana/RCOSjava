@@ -252,7 +252,6 @@ public class ProcessManagerFrame extends RCOSFrame
       if (processList.getSelectedItem() != null)
       {
         int process = Integer.parseInt(processList.getSelectedItem());
-
         myProcessManager.sendKillMessage(process);
       }
     }
@@ -298,7 +297,7 @@ public class ProcessManagerFrame extends RCOSFrame
      */
     public void mouseClicked(MouseEvent e)
     {
-      myProcessManager.sendStopMessage();
+      //myProcessManager.sendStopMessage();
     }
   }
 
@@ -317,7 +316,7 @@ public class ProcessManagerFrame extends RCOSFrame
      */
     public void mouseClicked(MouseEvent e)
     {
-      myProcessManager.sendRunMessage();
+      //myProcessManager.sendRunMessage();
     }
   }
 

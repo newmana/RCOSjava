@@ -2,17 +2,18 @@ package org.rcosjava.software.animator.process;
 import java.applet.*;
 
 import java.awt.*;
-import javax.swing.ImageIcon;
+import javax.swing.*;
 import java.net.*;
 import java.util.*;
+
+import org.rcosjava.RCOS;
 import org.rcosjava.messaging.messages.universal.Kill;
 import org.rcosjava.messaging.messages.universal.RequestProcessPriority;
 import org.rcosjava.messaging.messages.universal.Run;
 import org.rcosjava.messaging.messages.universal.SetProcessPriority;
 import org.rcosjava.messaging.messages.universal.Stop;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
-import org.rcosjava.software.animator.RCOSAnimator;
-import org.rcosjava.software.animator.RCOSPanel;
+import org.rcosjava.messaging.postoffices.animator.AnimatorMessageHandler;
 import org.rcosjava.software.util.LIFOQueue;
 
 /**
@@ -24,7 +25,7 @@ import org.rcosjava.software.util.LIFOQueue;
  * @created 10th of January 1997
  * @version 1.00 $Date$
  */
-public class ProcessManagerAnimator extends RCOSAnimator
+public class ProcessManagerAnimator extends AnimatorMessageHandler
 {
   /**
    * The id to register with the animator office.
@@ -39,12 +40,18 @@ public class ProcessManagerAnimator extends RCOSAnimator
   /**
    * Description of the Field
    */
-  private ProcessManagerFrame myFrame;
+  private int currentProcessId;
 
   /**
-   * Description of the Field
+   * Reference to the main applet.
    */
-  private int currentProcessId;
+  private RCOS rcos;
+
+  /**
+   * Menu items to add and delete process ids from.
+   */
+  private JMenuItem processMenuItem, killMenuItem, changeMenuItem;
+  private JMenu menu;
 
   /**
    * Create an animator office, register with the animator office, set the size
@@ -54,35 +61,20 @@ public class ProcessManagerAnimator extends RCOSAnimator
    * @param postOffice the post office to register to.
    * @param images the images to use for process and buttons.
    */
-  public ProcessManagerAnimator(AnimatorOffice postOffice, ImageIcon[] images)
+  public ProcessManagerAnimator(AnimatorOffice postOffice, RCOS newRCOS)
   {
     super(MESSENGING_ID, postOffice);
+    rcos = newRCOS;
     currentProcesses = new LIFOQueue(5, 1);
-    int x = 200;
-    int y = 200;
-    myFrame = new ProcessManagerFrame(x, y, images, this);
-    myFrame.pack();
-    myFrame.setSize(x, y);
   }
 
-  /**
-   * Setup the layout of the frame (menus, etc).
-   *
-   * @param c the parent component.
-   */
-  public void setupLayout(Component c)
+  public void addMenuItems(JMenu newMenu, JMenuItem newProcessMenuItem,
+      JMenuItem newKillMenuItem, JMenuItem newChangeMenuItem)
   {
-    myFrame.setupLayout(c);
-  }
-
-  /**
-   * Returns the panel of this component.
-   *
-   * @return the panel of this component.
-   */
-  public RCOSPanel getPanel()
-  {
-    return null;
+    menu = newMenu;
+    processMenuItem = newProcessMenuItem;
+    killMenuItem = newKillMenuItem;
+    changeMenuItem = newChangeMenuItem;
   }
 
   /**
@@ -101,13 +93,12 @@ public class ProcessManagerAnimator extends RCOSAnimator
    *
    * @param process the process id of the process to add
    */
-  public void deleteProcess(Integer process)
+  public void deleteProcess(int process)
   {
     currentProcesses.goToHead();
     while (!currentProcesses.atTail())
     {
-      if (((Integer) currentProcesses.peek()).intValue() ==
-          (process).intValue())
+      if (((Integer) currentProcesses.peek()).intValue() == process)
       {
         int tmp = ((Integer) currentProcesses.retrieveCurrent()).intValue();
       }
@@ -122,56 +113,41 @@ public class ProcessManagerAnimator extends RCOSAnimator
    */
   public void updateProcessList()
   {
-    ((ProcessManagerFrame) myFrame).clearProcesses();
+    menu.remove(killMenuItem);
+    menu.remove(changeMenuItem);
+
     if (!currentProcesses.queueEmpty())
     {
+      killMenuItem = new JMenu(killMenuItem.getText());
+      changeMenuItem = new JMenu(changeMenuItem.getText());
+
+      JMenuItem killTmpItem;
+      JMenuItem priorityTmpItem;
+
       currentProcesses.goToHead();
       while (!currentProcesses.atTail())
       {
         Integer tmp = (Integer) currentProcesses.peek();
+        killTmpItem = new JMenuItem(tmp.toString());
+        priorityTmpItem = new JMenuItem(tmp.toString());
 
-        try
-        {
-          ((ProcessManagerFrame) myFrame).addProcess(
-              String.valueOf(tmp.intValue()));
-        }
-        catch (Exception e)
-        {
-          System.err.println(this + "- exception: " + e);
-        }
+        killTmpItem.addActionListener(rcos.new KillProcessListener(this));
+        priorityTmpItem.addActionListener(rcos.new ChangePriorityListener(this));
+
+        killMenuItem.add(killTmpItem);
+        changeMenuItem.add(priorityTmpItem);
+
         currentProcesses.goToNext();
       }
     }
-  }
+    else
+    {
+      killMenuItem = new JMenuItem(killMenuItem.getText());
+      changeMenuItem = new JMenuItem(changeMenuItem.getText());
+    }
 
-  /**
-   * When the animator requests a priority of a certain process it returns it
-   * here to be displayed to the user to change.
-   *
-   * @param priority Description of Parameter
-   */
-  public void returnProcessPriority(int priority)
-  {
-  }
-
-  /**
-   * Send a run message to the kernel. Called by the Process Manager Frame to
-   * start the kernel running again.
-   */
-  public void sendRunMessage()
-  {
-    Run newMsg = new Run(this);
-    sendMessage(newMsg);
-  }
-
-  /**
-   * Send a step message to the kernel. Called by the Process Manager Frame to
-   * step the execution of a process by one command.
-   */
-  public void sendStopMessage()
-  {
-    Stop newMsg = new Stop(this);
-    sendMessage(newMsg);
+    menu.add(killMenuItem);
+    menu.add(changeMenuItem);
   }
 
   /**
@@ -184,7 +160,6 @@ public class ProcessManagerAnimator extends RCOSAnimator
   public void sendKillMessage(int processId)
   {
     Kill newMsg = new Kill(this, processId);
-
     sendMessage(newMsg);
   }
 
@@ -197,9 +172,7 @@ public class ProcessManagerAnimator extends RCOSAnimator
   public void sendRequestProcessPriority(int processId)
   {
     currentProcessId = processId;
-
     RequestProcessPriority newMsg = new RequestProcessPriority(this, processId);
-
     sendMessage(newMsg);
   }
 
@@ -212,7 +185,7 @@ public class ProcessManagerAnimator extends RCOSAnimator
    */
   public void returnProcessPriority(int processId, int processPriority)
   {
-    myFrame.promptProcessPriority(processId, processPriority);
+//    myFrame.promptProcessPriority(processId, processPriority);
   }
 
   /**
@@ -224,7 +197,6 @@ public class ProcessManagerAnimator extends RCOSAnimator
   {
     SetProcessPriority tmpMessage = new SetProcessPriority(this,
         currentProcessId, processPriority);
-
     sendMessage(tmpMessage);
   }
 }

@@ -339,7 +339,6 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     ipcAnimator.setupLayout(this);
     cpuAnimator.setupLayout(this);
     pmAnimator.setupLayout(this);
-    pcmAnimator.setupLayout(this);
     mmAnimator.setupLayout(this);
     aboutAnimator.setupLayout(this);
   }
@@ -513,8 +512,7 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 
     pmAnimator = new ProgramManagerAnimator(animatorPostOffice, null);
 
-    pcmAnimator = new ProcessManagerAnimator(animatorPostOffice,
-        processManagerImages);
+    pcmAnimator = new ProcessManagerAnimator(animatorPostOffice, this);
 
     mmAnimator = new MultimediaAnimator(animatorPostOffice, 250, 250,
         processManagerImages, recorder, player);
@@ -538,15 +536,16 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     menu.setMnemonic(KeyEvent.VK_F);
     menuBar.add(menu);
 
-    menuItem = new JMenuItem("New Process");
-    menuItem.addActionListener(new NewProcessListener());
-    menu.add(menuItem);
-    menuItem = new JMenuItem("Kill Process");
-    menu.add(menuItem);
-    menuItem.addActionListener(new KillProcessListener());
-    menuItem = new JMenuItem("Change Priority");
-    menu.add(menuItem);
-    menuItem.addActionListener(new ChangePriorityListener());
+    JMenuItem processMenuItem = new JMenuItem("New Process");
+    processMenuItem.addActionListener(new NewProcessListener());
+    menu.add(processMenuItem);
+    JMenuItem killMenuItem = new JMenuItem("Kill Process");
+    menu.add(killMenuItem);
+    JMenuItem changeMenuItem = new JMenuItem("Change Priority");
+    menu.add(changeMenuItem);
+
+    pcmAnimator.addMenuItems(menu, processMenuItem, killMenuItem,
+      changeMenuItem);
 
     menu = new JMenu("CPU");
     menu.setMnemonic(KeyEvent.VK_C);
@@ -670,19 +669,36 @@ public class RCOS extends javax.swing.JApplet implements Runnable
     }
   }
 
-  private class KillProcessListener implements ActionListener
+  public class KillProcessListener implements ActionListener
   {
+    private ProcessManagerAnimator animator;
+
+    public KillProcessListener(ProcessManagerAnimator newAnimator)
+    {
+      animator = newAnimator;
+    }
+
     public void actionPerformed(ActionEvent e)
     {
-      System.err.println("Kill Process");
+      System.err.println("Kill Process" + e.getActionCommand());
+      animator.sendKillMessage(Integer.parseInt(e.getActionCommand()));
     }
   }
 
-  private class ChangePriorityListener implements ActionListener
+  public class ChangePriorityListener implements ActionListener
   {
+    private ProcessManagerAnimator animator;
+
+    public ChangePriorityListener(ProcessManagerAnimator newAnimator)
+    {
+      animator = newAnimator;
+    }
+
     public void actionPerformed(ActionEvent e)
     {
       System.err.println("Change Process");
+      animator.sendRequestProcessPriority(
+          Integer.parseInt(e.getActionCommand()));
     }
   }
 
