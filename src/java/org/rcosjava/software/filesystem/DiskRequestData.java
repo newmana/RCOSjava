@@ -14,18 +14,22 @@ public class DiskRequestData implements Cloneable
    * Description of the Field
    */
   private int processId;
+
   /**
    * Description of the Field
    */
   private int fileId;
+
   /**
    * Description of the Field
    */
   private String fileName;
+
   /**
    * Description of the Field
    */
   private String type;
+
   /**
    * Description of the Field
    */
