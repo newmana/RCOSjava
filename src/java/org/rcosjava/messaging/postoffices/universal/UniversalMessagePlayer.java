@@ -1,5 +1,6 @@
 package org.rcosjava.messaging.postoffices.universal;
 
+import org.rcosjava.RCOS;
 import org.rcosjava.messaging.messages.MessageAdapter;
 import org.rcosjava.messaging.messages.animator.AnimatorMessageAdapter;
 import org.rcosjava.messaging.messages.os.OSMessageAdapter;
@@ -111,13 +112,6 @@ public class UniversalMessagePlayer extends OSMessageHandler
   public void setRecordingName(String newRecordingName)
   {
     recordingName = newRecordingName;
-
-    // Playback first message.  Assume first message is list of RCOS components.
-    ArrayList components = (ArrayList) readMessage();
-    for (int i = 0; i < components.size(); i++)
-    {
-      System.err.println("Got: " + components.get(0));
-    }
   }
 
   /**
@@ -131,21 +125,31 @@ public class UniversalMessagePlayer extends OSMessageHandler
     // If the object is null then we can assume we're at the end.
     if (!endOfMessages())
     {
-      MessageAdapter tmpMessage = (MessageAdapter) readMessage();
+      if (messageCounter == 0)
+      {
+        // Playback first message.  Assume first message is list of RCOS
+        // components.
+        List components = (List) readMessage();
+        RCOS.setRCOSComponents(components);
+      }
+      else
+      {
+        MessageAdapter tmpMessage = (MessageAdapter) readMessage();
 
-      if (tmpMessage.forPostOffice(osPostOffice) &&
-          tmpMessage.forPostOffice(animatorPostOffice))
-      {
-        osPostOffice.localSendMessage((MessageAdapter) tmpMessage);
-        animatorPostOffice.localSendMessage((MessageAdapter) tmpMessage);
-      }
-      else if (tmpMessage.forPostOffice(osPostOffice))
-      {
-        osPostOffice.localSendMessage((OSMessageAdapter) tmpMessage);
-      }
-      else if (tmpMessage.forPostOffice(animatorPostOffice))
-      {
-        animatorPostOffice.localSendMessage((AnimatorMessageAdapter) tmpMessage);
+        if (tmpMessage.forPostOffice(osPostOffice) &&
+            tmpMessage.forPostOffice(animatorPostOffice))
+        {
+          osPostOffice.localSendMessage((MessageAdapter) tmpMessage);
+          animatorPostOffice.localSendMessage((MessageAdapter) tmpMessage);
+        }
+        else if (tmpMessage.forPostOffice(osPostOffice))
+        {
+          osPostOffice.localSendMessage((OSMessageAdapter) tmpMessage);
+        }
+        else if (tmpMessage.forPostOffice(animatorPostOffice))
+        {
+          animatorPostOffice.localSendMessage((AnimatorMessageAdapter) tmpMessage);
+        }
       }
     }
   }
