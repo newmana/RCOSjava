@@ -5,6 +5,8 @@ import java.util.*;
 
 import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.software.interrupt.InterruptQueue;
+import org.rcosjava.software.interrupt.ProcessFinishedInterruptHandler;
+import org.rcosjava.software.interrupt.TimerInterruptHandler;
 import org.rcosjava.software.kernel.Kernel;
 
 /**
@@ -139,7 +141,7 @@ public class CPU implements Serializable
    * Called by device drivers and other sources of interrupts passed an
    * Interrupt which is added to the InterruptQueue
    *
-   * @param newInterrupt Description of Parameter
+   * @param newInterrupt the new interrupt to add to be processed
    */
   public void addInterrupt(Interrupt newInterrupt)
   {
@@ -157,7 +159,8 @@ public class CPU implements Serializable
    */
   public void setCodeFinished()
   {
-    Interrupt interrupt = new Interrupt(-1, "CodeFinished");
+    Interrupt interrupt = new Interrupt(-1,
+        ProcessFinishedInterruptHandler.myType);
     addInterrupt(interrupt);
     codeFinished = false;
   }
@@ -312,7 +315,7 @@ public class CPU implements Serializable
 
     if (ticks % TIMER_PERIOD == 0)
     {
-      addInterrupt(new Interrupt(ticks, "TimerInterrupt"));
+      addInterrupt(new Interrupt(ticks, TimerInterruptHandler.myType));
     }
   }
 
