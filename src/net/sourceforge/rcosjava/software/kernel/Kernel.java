@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.Vector;
 import java.util.Hashtable;
 import net.sourceforge.rcosjava.hardware.cpu.CPU;
+import net.sourceforge.rcosjava.hardware.cpu.Context;
 import net.sourceforge.rcosjava.hardware.cpu.Interrupt;
 import net.sourceforge.rcosjava.hardware.cpu.Instruction;
 import net.sourceforge.rcosjava.hardware.memory.Memory;
@@ -80,8 +81,9 @@ public class Kernel extends OSMessageHandler
   private int timeProcessOn;
   private CPU myCPU;
   private Hashtable interruptHandlers = new Hashtable();
-  private RCOSProcess currentProcess;
+  boolean runningProcess;
   private Schedule scheduleMessage = new Schedule(this);
+  private RCOSProcess currentProcess;
 
   /**
    * Initialise Kernel
@@ -91,6 +93,7 @@ public class Kernel extends OSMessageHandler
   {
     super(MESSENGING_ID, postOffice);
     myCPU = new CPU(this);
+    runningProcess = false;
   }
 
   /**
@@ -130,45 +133,36 @@ public class Kernel extends OSMessageHandler
    */
   public boolean runningProcess()
   {
-    return (currentProcess != null);
+    return runningProcess;
   }
 
   /**
-   * @return the current process being used.  Copies the current process and
-   * context to be returned.
-   */
-  public RCOSProcess getCurrentProcess()
-  {
-    RCOSProcess tmpProcess = new RCOSProcess(currentProcess);
-    tmpProcess.setContext(myCPU.getContext());
-    return tmpProcess;
-  }
-
-  /**
-   * Sets the current process and context (from within the RCOSProcess data
-   * structure).  The current process should usually be set to null first
-   * although this is not enforced.
+   * Set that a process is running.
    *
-   * @param newCurrentProcess the new process to overwrite the current one
-   * with.
    */
-  public void setCurrentProcess(RCOSProcess newCurrentProcess)
+  public void processRunning()
   {
-    currentProcess = newCurrentProcess;
-    setCurrentContext(newCurrentProcess);
+    runningProcess = true;
+  }
+
+  /**
+   * Private method to give access to the current running process.
+   */
+  private RCOSProcess getCurrentProcess()
+  {
+    return currentProcess;
   }
 
   /**
    * Sets the current process and context as well as the code and stack segments
-   * of the CPU to null.
+   * of the CPU to null.  That there is no currently running process.
    */
-  public void setCurrentProcessNull()
+  public void processNull()
   {
-    setCurrentProcess(null);
+    runningProcess = false;
+    myCPU.setNewContext();
     myCPU.setProcessCode(null);
     myCPU.setProcessStack(null);
-//    System.out.println("CPU Code to execute: " + myCPU.hasCodeToExecute());
-//    System.out.println("Kernel Code to execute: " + this.runningProcess());
   }
 
   /**
@@ -179,14 +173,16 @@ public class Kernel extends OSMessageHandler
   {
     sendMessage(this.scheduleMessage);
     myCPU.performInstructionExecutionCycle();
-    //Sends context and current instruction to the kernel.
+
+    //Sends context and current instruction.
     if (runningProcess())
     {
-      SetContext msg = new SetContext(this, myCPU.getContext());
-      sendMessage(msg);
-      InstructionExecution iMsg = new
-        InstructionExecution(this, myCPU.getProcessStack());
-      sendMessage(iMsg);
+      SetContext contextMsg = new SetContext(this,
+        (Context) myCPU.getContext().clone());
+      sendMessage(contextMsg);
+//      InstructionExecution executionMsg = new
+//        InstructionExecution(this, myCPU.getProcessStack());
+//      sendMessage(executionMsg);
     }
   }
 
@@ -196,12 +192,9 @@ public class Kernel extends OSMessageHandler
    * @param newProcess the process contains a contex that is accessed using
    * getContext.
    */
-  public void setCurrentContext(RCOSProcess newProcess)
+  public void setCurrentContext(Context newContext)
   {
-    if (newProcess != null)
-      myCPU.setContext(newProcess.getContext());
-    else
-      myCPU.setContext(null);
+    myCPU.setContext(newContext);
   }
 
   /**
@@ -239,8 +232,6 @@ public class Kernel extends OSMessageHandler
    */
   public void switchProcess(RCOSProcess newProcess)
   {
-//    System.out.println("-----Start Switch Process-----");
-//    System.out.println("New Process: " + newProcess.getPID());
     //Save memory if program hasn't terminated.
     if (myCPU.hasCodeToExecute())
     {
@@ -256,9 +247,7 @@ public class Kernel extends OSMessageHandler
       WriteBytes msg = new WriteBytes(this, memSave);
       sendMessage(msg);
     }
-
-    setCurrentProcess(newProcess);
-//    System.out.println("New Current Process: " + newProcess.getPID());
+    currentProcess = newProcess;
 
     //Get new memory
     MemoryRequest memRead = new MemoryRequest(newProcess.getPID(),
@@ -266,11 +255,10 @@ public class Kernel extends OSMessageHandler
     ReadBytes msg = new ReadBytes(this, memRead);
     sendMessage(msg);
 
-    memRead.setMemoryType(MemoryManager.STACK_SEGMENT);
-    memRead.setSize(newProcess.getStackPages()*MemoryManager.PAGE_SIZE);
+    memRead = new MemoryRequest(newProcess.getPID(), MemoryManager.STACK_SEGMENT,
+      newProcess.getStackPages()*MemoryManager.PAGE_SIZE);
     msg = new ReadBytes(this, memRead);
     sendMessage(msg);
-//    System.out.println("-----End Switch Process-----");
   }
 
   /**
@@ -576,12 +564,10 @@ public class Kernel extends OSMessageHandler
   */
   public void handleTimerInterrupt()
   {
-    //System.out.println("-----Start Handling Timer Interrupt-----");
     timerInterrupts++;
 
     if (timerInterrupts >= quantum)
     {
-      //System.out.println("Quantum Expired");
       timerInterrupts = 0;
 
       if (myCPU.hasCodeToExecute())
@@ -593,12 +579,9 @@ public class Kernel extends OSMessageHandler
         // processes data structures
         RunningToReady tmpMsg = new RunningToReady(this,
           oldProcess);
-        //System.out.println("Running to Ready: " + oldProcess.getPID());
         sendMessage(tmpMsg);
-        //System.out.println("Sent Running to Ready: " + oldProcess.getPID());
       }
     }
-    //System.out.println("-----Finish Handling Timer Interrupt-----");
   }
 
   /**
@@ -608,13 +591,10 @@ public class Kernel extends OSMessageHandler
    */
   public void handleProcessFinishedInterrupt()
   {
-    //System.out.println("-----Start Handling Process Finished-----");
-    RCOSProcess oldCurrent = new RCOSProcess(getCurrentProcess());
-    //System.out.println("Got process: " + oldCurrent.getPID());
+    RCOSProcess oldCurrent = getCurrentProcess();
     oldCurrent.addToCPUTicks(getCurrentProcessTicks());
     ProcessFinished tmpMsg = new ProcessFinished(this, oldCurrent);
     sendMessage(tmpMsg);
-    //System.out.println("-----End Handling Process Finished-----");
   }
 
   public void processMessage(OSMessageAdapter message)
