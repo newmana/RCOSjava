@@ -109,13 +109,13 @@ public class RCOS extends java.applet.Applet implements Runnable
   public final static int numberPeople = 4;
   public final static int numberButtons = 3;
   private AudioClip clips[] = new AudioClip[1];
-  private Image imgUpButtons[] = new Image[numberButtons];
-  private Image imgDownButtons[] = new Image[numberButtons];
-  private Image imgTerminal[] = new Image[4];
-  private Image imgProcess[] = new Image[4];
-  private Image imgProcessMan[] = new Image[2];
-  private Image imgAbout[] = new Image[4];
-  private Image imgIPC[] = new Image[1];
+  private Image upButtons[] = new Image[numberButtons];
+  private Image downButtons[] = new Image[numberButtons];
+  private Image terminalImages[] = new Image[4];
+  private Image processImages[] = new Image[4];
+  private Image processManagerImages[] = new Image[2];
+  private Image aboutImages[] = new Image[4];
+  private Image ipcImages[] = new Image[1];
 
   // Help Variables.
   private static String helpURLStr;
@@ -133,7 +133,7 @@ public class RCOS extends java.applet.Applet implements Runnable
   private static AboutAnimator aboutAnimator;
   private static ProgramManagerAnimator pmAnimator;
   private static ProcessManagerAnimator pcmAnimator;
-  private static TextArea tsStatusBar;
+  private static TextArea statusBar;
 
   // Main panels
   public Panel mainPanel, systemAnimatorsPanel, systemAnimatorsTitlePanel1,
@@ -155,7 +155,6 @@ public class RCOS extends java.applet.Applet implements Runnable
     initialiseOperatingSystem();
     initialiseAnimators();
     initialiseScreen();
-    startThread();
   }
 
   /**
@@ -201,34 +200,34 @@ public class RCOS extends java.applet.Applet implements Runnable
 
     for (int count = 0; count < numberPeople; count++)
     {
-      imgAbout[count] = getImage(getClass().getResource(rootDir + "/images/p" +
+      aboutImages[count] = getImage(getClass().getResource(rootDir + "/images/p" +
         count + ".jpg"));
-      tracker.addImage(imgAbout[count],0);
+      tracker.addImage(aboutImages[count],0);
     }
 
     for (int count = 0; count < numberButtons; count++)
     {
-      imgUpButtons[count] = getImage(getClass().getResource(rootDir + "/images/b"
+      upButtons[count] = getImage(getClass().getResource(rootDir + "/images/b"
         + count + "up.jpg"));
-      imgDownButtons[count] = getImage(getClass().getResource(rootDir + "/images/b"
+      downButtons[count] = getImage(getClass().getResource(rootDir + "/images/b"
         + count + "down.jpg"));
-      tracker.addImage(imgUpButtons[count],1);
-      tracker.addImage(imgDownButtons[count],2);
+      tracker.addImage(upButtons[count],1);
+      tracker.addImage(downButtons[count],2);
     }
 
-    imgTerminal[0] = getImage(getClass().getResource(rootDir + "/images/termon.jpg"));
-    imgTerminal[1] = getImage(getClass().getResource( rootDir + "/images/termoff.jpg"));
-    imgProcess[0] = getImage(getClass().getResource(rootDir + "/images/process1.gif"));
-    imgProcess[1] = getImage(getClass().getResource(rootDir + "/images/process2.gif"));
-    imgProcess[2] = getImage(getClass().getResource(rootDir + "/images/rcoscpu.jpg"));
-    imgIPC[0] = getImage(getClass().getResource(rootDir + "/images/memory.jpg"));
+    terminalImages[0] = getImage(getClass().getResource(rootDir + "/images/termon.jpg"));
+    terminalImages[1] = getImage(getClass().getResource( rootDir + "/images/termoff.jpg"));
+    processImages[0] = getImage(getClass().getResource(rootDir + "/images/process1.gif"));
+    processImages[1] = getImage(getClass().getResource(rootDir + "/images/process2.gif"));
+    processImages[2] = getImage(getClass().getResource(rootDir + "/images/rcoscpu.jpg"));
+    ipcImages[0] = getImage(getClass().getResource(rootDir + "/images/memory.jpg"));
 
-    tracker.addImage(imgTerminal[0],3);
-    tracker.addImage(imgTerminal[1],3);
-    tracker.addImage(imgProcess[0],3);
-    tracker.addImage(imgProcess[1],3);
-    tracker.addImage(imgProcess[2],3);
-    tracker.addImage(imgIPC[0],3);
+    tracker.addImage(terminalImages[0],3);
+    tracker.addImage(terminalImages[1],3);
+    tracker.addImage(processImages[0],3);
+    tracker.addImage(processImages[1],3);
+    tracker.addImage(processImages[2],3);
+    tracker.addImage(ipcImages[0],3);
 
     try
     {
@@ -239,10 +238,10 @@ public class RCOS extends java.applet.Applet implements Runnable
       System.err.println("Image Loading Failed!");
       updateStatusBar("Images failed to load.");
     }
-    imgTerminal[2] = imgUpButtons[1];
-    imgTerminal[3] = imgDownButtons[1];
-    imgProcessMan[0] = imgUpButtons[1];
-    imgProcessMan[1] = imgDownButtons[1];
+    terminalImages[2] = upButtons[1];
+    terminalImages[3] = downButtons[1];
+    processManagerImages[0] = upButtons[1];
+    processManagerImages[1] = downButtons[1];
   }
 
   /**
@@ -303,12 +302,12 @@ public class RCOS extends java.applet.Applet implements Runnable
   public void initialiseAnimators()
   {
     tmAnimator = new TerminalManagerAnimator(animatorPostOffice, defX,
-      defY, imgTerminal, maxTerminals, maxTerminalCols, maxTerminalRows);
+      defY, terminalImages, maxTerminals, maxTerminalCols, maxTerminalRows);
 
     psAnimator = new ProcessSchedulerAnimator(animatorPostOffice, defX, defY,
-      imgProcess);
+      processImages);
 
-    ipcAnimator = new IPCManagerAnimator(animatorPostOffice, defX, defY, imgIPC);
+    ipcAnimator = new IPCManagerAnimator(animatorPostOffice, defX, defY, ipcImages);
 
     cpuAnimator = new CPUAnimator(animatorPostOffice, smallX, smallY, null);
 
@@ -316,12 +315,12 @@ public class RCOS extends java.applet.Applet implements Runnable
       null);
 
     pcmAnimator = new ProcessManagerAnimator(animatorPostOffice, 250, 250,
-      imgProcessMan);
+      processManagerImages);
 
     mmAnimator = new MultimediaAnimator(animatorPostOffice, 250, 250,
-      imgProcessMan, recorder, player);
+      processManagerImages, recorder, player);
 
-    aboutAnimator = new AboutAnimator(animatorPostOffice, largeX, largeY, imgAbout);
+    aboutAnimator = new AboutAnimator(animatorPostOffice, largeX, largeY, aboutImages);
 //    overviewanimator = new Overview("Overviewanimator", animatorPostOffice, defX,
 //      defY, );
   }
@@ -374,21 +373,21 @@ public class RCOS extends java.applet.Applet implements Runnable
     gridBag.setConstraints(systemAnimatorsTitlePanel1,constraints);
     mainPanel.add(systemAnimatorsTitlePanel1);
 
-    tempButton = new GraphicButton(imgUpButtons[0], imgDownButtons[0],
+    tempButton = new GraphicButton(upButtons[0], downButtons[0],
       "Terminal Manager", RCOSFrame.defaultFont, RCOSFrame.buttonColour, true);
     gridBag.setConstraints(tempButton,constraints);
     mainPanel.add(tempButton);
     tempButton.addMouseListener(new ShowAnimator(tmAnimator));
 
     constraints.gridwidth=GridBagConstraints.RELATIVE;
-    tempButton = new GraphicButton(imgUpButtons[0], imgDownButtons[0],
+    tempButton = new GraphicButton(upButtons[0], downButtons[0],
       "Process Scheduler", RCOSFrame.defaultFont, RCOSFrame.buttonColour, true);
     gridBag.setConstraints(tempButton,constraints);
     mainPanel.add(tempButton);
     tempButton.addMouseListener(new ShowAnimator(psAnimator));
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
-    tempButton = new GraphicButton(imgUpButtons[0], imgDownButtons[0],
+    tempButton = new GraphicButton(upButtons[0], downButtons[0],
       "IPC Manager", RCOSFrame.defaultFont, RCOSFrame.buttonColour, true);
     gridBag.setConstraints(tempButton,constraints);
     mainPanel.add(tempButton);
@@ -398,21 +397,21 @@ public class RCOS extends java.applet.Applet implements Runnable
     gridBag.setConstraints(systemAnimatorsTitlePanel2,constraints);
     mainPanel.add(systemAnimatorsTitlePanel2);
 
-    tempButton = new GraphicButton(imgUpButtons[0], imgDownButtons[0],
+    tempButton = new GraphicButton(upButtons[0], downButtons[0],
       "File System", RCOSFrame.defaultFont, RCOSFrame.buttonColour, true);
     gridBag.setConstraints(tempButton,constraints);
     mainPanel.add(tempButton);
     //tempButton.addMouseListener(new ShowAnimator(null));
 
     constraints.gridwidth=GridBagConstraints.RELATIVE;
-    tempButton = new GraphicButton(imgUpButtons[0], imgDownButtons[0],
+    tempButton = new GraphicButton(upButtons[0], downButtons[0],
       "Disk Scheduler", RCOSFrame.defaultFont, RCOSFrame.buttonColour, true);
     gridBag.setConstraints(tempButton,constraints);
     mainPanel.add(tempButton);
     //tempButton.addMouseListener(new ShowAnimator(null));
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
-    tempButton = new GraphicButton(imgUpButtons[0], imgDownButtons[0],
+    tempButton = new GraphicButton(upButtons[0], downButtons[0],
       "CPU", RCOSFrame.defaultFont, RCOSFrame.buttonColour, true);
     gridBag.setConstraints(tempButton,constraints);
     mainPanel.add(tempButton);
@@ -431,21 +430,21 @@ public class RCOS extends java.applet.Applet implements Runnable
     gridBag.setConstraints(systemInterfaceTitlePanel,constraints);
     mainPanel.add(systemInterfaceTitlePanel);
 
-    tempButton = new GraphicButton(imgUpButtons[1], imgDownButtons[1],
+    tempButton = new GraphicButton(upButtons[1], downButtons[1],
       "New Process", RCOSFrame.defaultFont, RCOSFrame.buttonColour, true);
     gridBag.setConstraints(tempButton,constraints);
     mainPanel.add(tempButton);
     tempButton.addMouseListener(new ShowAnimator(pmAnimator));
 
     constraints.gridwidth=GridBagConstraints.RELATIVE;
-    tempButton = new GraphicButton(imgUpButtons[1], imgDownButtons[1],
+    tempButton = new GraphicButton(upButtons[1], downButtons[1],
       "Process Manager", RCOSFrame.defaultFont, RCOSFrame.buttonColour, true);
     gridBag.setConstraints(tempButton,constraints);
     mainPanel.add(tempButton);
     tempButton.addMouseListener(new ShowAnimator(pcmAnimator));
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
-      tempButton = new GraphicButton(imgUpButtons[1], imgDownButtons[1],
+      tempButton = new GraphicButton(upButtons[1], downButtons[1],
       "Multimedia Tour", RCOSFrame.defaultFont, RCOSFrame.buttonColour, true);
     gridBag.setConstraints(tempButton,constraints);
     mainPanel.add(tempButton);
@@ -459,29 +458,29 @@ public class RCOS extends java.applet.Applet implements Runnable
     gridBag.setConstraints(informationTitlePanel,constraints);
     mainPanel.add(informationTitlePanel);
 
-    tempButton = new GraphicButton(imgUpButtons[2], imgDownButtons[2],
+    tempButton = new GraphicButton(upButtons[2], downButtons[2],
       "About", RCOSFrame.defaultFont, RCOSFrame.buttonColour, true);
     gridBag.setConstraints(tempButton,constraints);
     mainPanel.add(tempButton);
     tempButton.addMouseListener(new ShowAnimator(aboutAnimator));
 
     constraints.gridwidth=GridBagConstraints.RELATIVE;
-    tempButton = new GraphicButton(imgUpButtons[2], imgDownButtons[2],
+    tempButton = new GraphicButton(upButtons[2], downButtons[2],
       "Overview", RCOSFrame.defaultFont, RCOSFrame.buttonColour, true);
     gridBag.setConstraints(tempButton,constraints);
     mainPanel.add(tempButton);
 
     constraints.gridwidth=GridBagConstraints.REMAINDER;
-    tempButton = new GraphicButton(imgUpButtons[2], imgDownButtons[2],
+    tempButton = new GraphicButton(upButtons[2], downButtons[2],
       "Help", RCOSFrame.defaultFont, RCOSFrame.buttonColour, true);
     gridBag.setConstraints(tempButton,constraints);
     mainPanel.add(tempButton);
 
     setFont(RCOSFrame.defaultFont);
-    tsStatusBar = new TextArea(3,70);
-    tsStatusBar.setEditable(false);
-    tsStatusBar.setBackground(RCOSFrame.defaultBgColour);
-    add("South",tsStatusBar);
+    statusBar = new TextArea(3,70);
+    statusBar.setEditable(false);
+    statusBar.setBackground(RCOSFrame.defaultBgColour);
+    add("South",  statusBar);
 
     add("Center",mainPanel);
 
@@ -495,6 +494,7 @@ public class RCOS extends java.applet.Applet implements Runnable
   public void start()
   {
     setupAnimatorLayouts();
+    startThread();
     if (kernelThread == null)
     {
       kernelThread = new Thread(this, "RCOS");
@@ -566,11 +566,20 @@ public class RCOS extends java.applet.Applet implements Runnable
     return running;
   }
 
-  public static void updateStatusBar (String statusBar)
+  /**
+   * The GUI contains a status bar that shows any system messages.  This adds
+   * a new message to it.
+   *
+   * @param newMessage new message to add to the status bar.
+   */
+  public static void updateStatusBar (String newMessage)
   {
-    tsStatusBar.insert((statusBar.trim()) + "\n",0);
+    statusBar.insert(newMessage + "\n", 0);
   }
 
+  /**
+   *
+   */
   public void stop()
   {
     theProgramManager.close();
@@ -589,24 +598,39 @@ public class RCOS extends java.applet.Applet implements Runnable
     }
   }
 
-  class ShowAnimator extends MouseAdapter
+  /**
+   * A mouse adapter which attachs itself to the buttons displayed by the main
+   * screen.  It accepts the animator to call show on when the button is
+   * pressed.
+   */
+  private class ShowAnimator extends MouseAdapter
   {
-    private Object oParent;
+    private Object parent;
 
-    public ShowAnimator(Object parent)
+    /**
+     * Create a new show animator.
+     *
+     * @param newParent the object to call showFrame on.
+     */
+    public ShowAnimator(Object newParent)
     {
-      this.oParent = parent;
+      parent = newParent;
     }
 
+    /**
+     * Display the animator now that the button has been pressed on.
+     *
+     * @param me mouse event being pressed.
+     */
     public void mouseClicked(MouseEvent me)
     {
-      Class cAnimator = oParent.getClass();
-      Method mShow = null;
+      Class animator = parent.getClass();
+      Method show = null;
 
       try
       {
-        mShow = cAnimator.getMethod("showFrame",null);
-        mShow.invoke(oParent,null);
+        show = animator.getMethod("showFrame",null);
+        show.invoke(parent,null);
       }
       catch (Exception e)
       {

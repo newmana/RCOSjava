@@ -64,7 +64,8 @@ public class Compiler
       }
 
       System.out.println("Got " + tmpBuffer);
-      ByteArrayInputStream input = new ByteArrayInputStream(tmpBuffer.toString().getBytes());
+      ByteArrayInputStream input =
+          new ByteArrayInputStream(tmpBuffer.toString().getBytes());
       FileOutputStream output = new FileOutputStream(args[1]);
       Pasm.compile(input, output, 0);
       output.close();
