@@ -65,16 +65,6 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   public final static String ANIMATOR_POST_OFFICE_ID = "ANIMATORPOSTOFFICE";
 
   /**
-   * Number of images of people.
-   */
-  public final static int NUMBER_OF_PEOPLE = 4;
-
-  /**
-   * Number of images for buttons.
-   */
-  public final static int NUMBER_OF_BUTTONS = 3;
-
-  /**
    * Welcome message to be displayed.
    */
   private final static String WELCOME = "Welcome to RCOSjava Version 0.5";
@@ -267,34 +257,14 @@ public class RCOS extends javax.swing.JApplet implements Runnable
   private AudioClip clips[] = new AudioClip[1];
 
   /**
-   * Up button images.
-   */
-  private ImageIcon upButtons[] = new ImageIcon[NUMBER_OF_BUTTONS];
-
-  /**
-   * Down button images.
-   */
-  private ImageIcon downButtons[] = new ImageIcon[NUMBER_OF_BUTTONS];
-
-  /**
    * Images for terminal animator.
    */
-  private ImageIcon terminalImages[] = new ImageIcon[4];
+  private ImageIcon terminalImages[] = new ImageIcon[2];
 
   /**
    * Images for process scheduler.
    */
-  private ImageIcon processImages[] = new ImageIcon[4];
-
-  /**
-   * Images for process manager.
-   */
-  private ImageIcon processManagerImages[] = new ImageIcon[2];
-
-  /**
-   * Images for about animator.
-   */
-  private ImageIcon aboutImages[] = new ImageIcon[4];
+  private ImageIcon processImages[] = new ImageIcon[1];
 
   /**
    * Images for IPC manager.
@@ -396,49 +366,23 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 
     try
     {
-      for (int count = 0; count < NUMBER_OF_PEOPLE; count++)
-      {
-        tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-          "/images/p" + count + ".jpg");
-
-        // TODO Check for null before calling this
-        aboutImages[count] = new ImageIcon(tmpURL);
-      }
-
-      for (int count = 0; count < NUMBER_OF_BUTTONS; count++)
-      {
-        tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-          "/images/b" + count + "up.jpg");
-        upButtons[count] = new ImageIcon(tmpURL);
-
-        tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-          "/images/b" + count + "down.jpg");
-        downButtons[count] = new ImageIcon(tmpURL);
-      }
-
+      // Get Terminal Manager images.
       tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
         "/images/termon.jpg");
       terminalImages[0] = new ImageIcon(tmpURL);
       tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
         "/images/termoff.jpg");
       terminalImages[1] = new ImageIcon(tmpURL);
-      tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-        "/images/process1.gif");
-      processImages[0] = new ImageIcon(tmpURL);
-      tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
-        "/images/process2.gif");
-      processImages[1] = new ImageIcon(tmpURL);
+
+      // Get Process Scheduler images.
       tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
         "/images/rcoscpu.jpg");
-      processImages[2] = new ImageIcon(tmpURL);
+      processImages[0] = new ImageIcon(tmpURL);
+
+      // Get Memory Manager images.
       tmpURL = RCOS.class.getClassLoader().getSystemResource(rootDir +
         "/images/memory.jpg");
       ipcImages[0] = new ImageIcon(tmpURL);
-
-      terminalImages[2] = upButtons[1];
-      terminalImages[3] = downButtons[1];
-      processManagerImages[0] = upButtons[1];
-      processManagerImages[1] = downButtons[1];
     }
     catch (NullPointerException npe)
     {
@@ -530,11 +474,10 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 
     pcmAnimator = new ProcessManagerAnimator(animatorPostOffice, this);
 
-    mmAnimator = new MultimediaAnimator(animatorPostOffice, 250, 250,
-        processManagerImages, recorder, player);
+    mmAnimator = new MultimediaAnimator(animatorPostOffice, 250, 250, recorder,
+        player);
 
-    aboutAnimator = new AboutAnimator(animatorPostOffice, 300, 300,
-        aboutImages);
+    aboutAnimator = new AboutAnimator(animatorPostOffice, 300, 300);
   }
 
   /**
