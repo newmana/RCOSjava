@@ -1,0 +1,1 @@
+package org.rcosjava.software.memory;/** * The exception thrown when the allocation of memory fails. * * @author administrator * @created 28 April 2002 */public class MemoryOpenFailedException extends Exception{}
