@@ -45,9 +45,11 @@ public class OSOffice extends PostOffice
   {
     id = newId;
 
-    LocalMessageSender internalSender = new LocalMessageSender();
-    internalSender.start();
+//    LocalMessageSender internalSender = new LocalMessageSender();
+//    internalSender.setName("OSOfficeLocalThread");
+//    internalSender.start();
     PostOfficeMessageSender poSender = new PostOfficeMessageSender();
+    poSender.setName("OSOfficePOThread");
     poSender.start();
   }
 
@@ -58,7 +60,7 @@ public class OSOffice extends PostOffice
     postOfficeMessages.add(message);
 
     //Send to locally registered components by adding it to the list
-    localMessages.add(message);
+    localSendMessage(message);
   }
 
   /**
@@ -84,7 +86,39 @@ public class OSOffice extends PostOffice
 
   public void localSendMessage(MessageAdapter message)
   {
-    localMessages.add(message);
+//    localMessages.add(message);
+    if (message.forPostOffice(OSOffice.this))
+    {
+      //Go through the hashtable returning all the handlers
+      //registered.  Send the message to all of them.
+
+      Iterator tmpIter = OSOffice.this.getHandlers().values().iterator();
+
+      synchronized (OSOffice.this.getHandlers())
+      {
+        while(tmpIter.hasNext())
+        {
+          OSMessageHandler theDestination = (OSMessageHandler)
+            tmpIter.next();
+
+          //Send the message to the destination
+          try
+          {
+            Class[] classes = {message.getClass().getSuperclass()};
+            Method method = theDestination.getClass().getMethod(
+              "processMessage", classes);
+
+            Object[] args = {message};
+            method.invoke(theDestination, args);
+          }
+          catch (Exception e)
+          {
+            e.printStackTrace();
+          }
+        }
+      }
+    }
+  }
 
 /*    if (message.forPostOffice(this))
     {
@@ -103,7 +137,6 @@ public class OSOffice extends PostOffice
         }
       }
     }*/
-  }
 
   /**
    * To be done
@@ -114,7 +147,7 @@ public class OSOffice extends PostOffice
   {
     localSendMessage((MessageAdapter) message);
 
-  /*    if (message.forPostOffice(this))
+/*    if (message.forPostOffice(this))
     {
       //Go through the hashtable returning all the handlers
       //registered.  Send the message to all of them.
