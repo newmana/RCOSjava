@@ -3,20 +3,24 @@ package net.sourceforge.rcosjava.software.animator;
 import java.lang.reflect.Method;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
+
 import net.sourceforge.rcosjava.software.animator.RCOSAnimator;
 import net.sourceforge.rcosjava.software.animator.support.GraphicButton;
 import net.sourceforge.rcosjava.messaging.messages.MessageAdapter;
-//Serialization support
+
 import fr.dyade.koala.serialization.GeneratorInputStream;
-import java.io.IOException;
-import java.io.Serializable;
 
 /**
  * Root class used for all animator frames.  Also contains default values for
  * the colours and fonts used in all the UI.
  * <P>
- * HISTORY : 20/11/1998 New Version Created.<BR>
- *           25/02/2001 Added serialization support.<BR>
+ * <DT><B>History:</B>
+ * <DD>
+ * 20/11/1998 New Version Created.<BR>
+ * </DD><DD>
+ * 25/02/2001 Added serialization support.<BR>
+ * </DD></DT>
  * <P>
  * @author Andrew Newman
  * @created 22nd January 1996
@@ -83,7 +87,6 @@ public class RCOSFrame extends Frame implements Serializable
    * Default title font size (TimesRoman, Plain, 18).
    */
   public static Font titleFont = new Font ("TimesRoman", Font.PLAIN, 18);
-  private MessageAdapter msg;
   protected Button tmpButton;
   protected Component myComponent;
 
