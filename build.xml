@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <project name="RCOS.java" default="all" basedir=".">
   <property name="app.name" value="RCOSjava"/>
-  <property name="app.version" value="0.5-pr1"/>
+  <property name="app.version" value="0.5"/>
   <property name="src.dir" value="src"/>
   <property name="gen.dir" value="gen"/>
   <property name="lib.dir" value="lib"/>
