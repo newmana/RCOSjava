@@ -17,7 +17,7 @@ import org.rcosjava.software.animator.support.positions.Movement;
 import org.rcosjava.software.animator.support.positions.Position;
 import org.rcosjava.software.process.ProcessScheduler;
 import org.rcosjava.software.process.RCOSProcess;
-import org.rcosjava.software.util.LIFOQueue;
+import org.rcosjava.software.util.Queue;
 
 /**
  * Based on the commands given by processSchedulerAnimator displays graphically
@@ -395,17 +395,17 @@ public class ProcessSchedulerPanel extends RCOSPanel
     if (newQueueType == 1)
     {
       schedulerOption.setSelectedItem("FIFO");
-      myProcessScheduler.sendSwitchFIFO();
+      myProcessScheduler.switchToFIFO();
     }
     else if (newQueueType == 2)
     {
       schedulerOption.setSelectedItem("LIFO");
-      myProcessScheduler.sendSwitchLIFO();
+      myProcessScheduler.switchToLIFO();
     }
     else if (newQueueType == 3)
     {
       schedulerOption.setSelectedItem("Priority");
-      myProcessScheduler.sendSwitchPriority();
+      myProcessScheduler.switchToPriority();
     }
   }
 
@@ -801,9 +801,10 @@ public class ProcessSchedulerPanel extends RCOSPanel
   }
 
   /**
-   * Move
+   * Move the given process through the blocked queue to its place.
    *
-   * @param pid Description of Parameter
+   * @param pid the process id to move.
+   * @param itemCount the number of items in the queue.
    */
   void moveBlockedQueue(int pid, int itemCount)
   {
@@ -824,9 +825,10 @@ public class ProcessSchedulerPanel extends RCOSPanel
   }
 
   /**
-   * Move across the zombie queue.
+   * Move the given process through the zombie queue to its place.
    *
    * @param pid process id to move.
+   * @param itemCount the number of items in the queue.
    */
   void moveZombieQueue(int pid, int itemCount)
   {
@@ -927,8 +929,9 @@ public class ProcessSchedulerPanel extends RCOSPanel
    * redisplay all the processes that are in that queue.
    *
    * @param queueType the type of the queue ready, blocked or zombie.
+   * @param queue the queue to refresh.
    */
-  void refreshQueue(int queueType, LIFOQueue queue)
+  void refreshQueue(int queueType, Queue queue)
   {
     int xPosition = engine.getCenterX() - ((noBoxes / 2) * boxWidth);
     int yPosition = (queueType * height) + fm.getHeight() + 5;
@@ -1055,15 +1058,15 @@ public class ProcessSchedulerPanel extends RCOSPanel
 
         if (whichObject.compareTo("FIFO") == 0)
         {
-          myProcessScheduler.sendSwitchFIFO();
+          myProcessScheduler.switchToFIFO();
         }
         else if (whichObject.compareTo("LIFO") == 0)
         {
-          myProcessScheduler.sendSwitchLIFO();
+          myProcessScheduler.switchToLIFO();
         }
         else if (whichObject.compareTo("Priority") == 0)
         {
-          myProcessScheduler.sendSwitchPriority();
+          myProcessScheduler.switchToPriority();
         }
       }
     }
