@@ -152,6 +152,10 @@ public class OSOffice extends PostOffice
    */
   public void deliverMessages()
   {
+    if (log.isInfoEnabled())
+    {
+      log.info("Delivering message");
+    }
     synchronized (postOfficeMessages)
     {
       while (postOfficeMessages.size() > 0)
@@ -211,6 +215,10 @@ public class OSOffice extends PostOffice
       {
         //Retrieve first message off the blocks
         MessageAdapter message = (MessageAdapter) localMessages.retrieveCurrent();
+        if (log.isInfoEnabled())
+        {
+          log.info("Local Delivering message:" + message.getClass());
+        }
 
         //System.out.println("OS got message: " + message);
         if (message.forPostOffice(OSOffice.this))

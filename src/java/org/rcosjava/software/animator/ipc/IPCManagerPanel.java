@@ -15,6 +15,8 @@ import org.rcosjava.software.memory.MemoryManager;
 import org.rcosjava.software.memory.MemoryReturn;
 import org.rcosjava.software.util.FIFOQueue;
 
+import org.apache.log4j.*;
+
 /**
  * Based on the commands sent and received to the IPC and displays graphically
  * what is happening to shared memory and semaphores.
@@ -29,6 +31,11 @@ public class IPCManagerPanel extends RCOSPanel
    * Serial id.
    */
   private static final long serialVersionUID = 1389081753585298701L;
+
+  /**
+   * Logging class.
+   */
+  private final static Logger log = Logger.getLogger(IPCManagerPanel.class);
 
   /**
    * Default display when there is no semaphore or shared memory segments to
@@ -419,6 +426,12 @@ public class IPCManagerPanel extends RCOSPanel
     if (tmpGraphic != null)
     {
       tmpGraphic.removeFirstProcess();
+    }
+
+    if (log.isDebugEnabled())
+    {
+      log.debug("Number of attached process after removal: " +
+          tmpGraphic.attachedProcesses());
     }
 
     // Remove semaphore from all data structures if there are no attached
