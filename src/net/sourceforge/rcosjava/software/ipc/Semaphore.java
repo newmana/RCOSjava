@@ -102,7 +102,7 @@ public class Semaphore
    */
   public void open(int pid)
   {
-    connectedProcesses.get(pid);
+    connectedProcesses.add(new Integer(pid));
   }
 
   /**

@@ -89,13 +89,13 @@ public class IPC extends OSMessageHandler
       semaphoreCount++;
 
       // We give this nice process a semaphore
-      Semaphore newSemaphore = new Semaphore(semaphoreName,
-        semaphoreCount, pid, initValue);
+      Semaphore newSemaphore = new Semaphore(semaphoreName, semaphoreCount, pid,
+        initValue);
       getSemaphoreTable().insert(newSemaphore);
 
       //Return the integer value (SemID) of the semaphore created.
-      ReturnValue returnMessage = new ReturnValue(this, (short)
-        newSemaphore.getId());
+      ReturnValue returnMessage = new ReturnValue(this,
+        (short) newSemaphore.getId());
       sendMessage(returnMessage);
 
       //Inform other components that the semaphore was created.
