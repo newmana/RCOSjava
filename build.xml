@@ -43,6 +43,11 @@
     <mkdir dir="${gen.dir}/src"/>
     <mkdir dir="${gen.dir}/classes"/>
 
+    <!-- Test whether to recompile files-->
+    <uptodate property="compile.required" targetfile="${src.dir}">
+      <srcfiles dir="${dist.dir}"/>
+    </uptodate>
+
     <!-- Test whether to generate javadoc file-->
     <uptodate property="javadoc.required" targetfile="${src.dir}">
       <srcfiles dir="${javadoc.dir}"/>
@@ -71,6 +76,7 @@
   </target>
 
   <target name="compile" depends="sablecc"
+   if="compile.required"
    description="Compiles RCOSjava">
     <echo message="Compiling: ${src.dir} to ${dist.dir}"/>
     <javac 
