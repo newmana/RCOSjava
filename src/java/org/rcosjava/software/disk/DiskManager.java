@@ -2,6 +2,7 @@ package org.rcosjava.software.disk;
 
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import org.rcosjava.messaging.postoffices.os.OSOffice;
+import org.rcosjava.software.util.FIFOQueue;
 
 /**
  * Handles the creation and deletion of physical disks, their scheduler and
@@ -19,6 +20,8 @@ public class DiskManager extends OSMessageHandler
    */
   private final static String MESSENGING_ID = "DiskManager";
 
+  private FIFOQueue requestQueue = new FIFOQueue(10, 5);
+
   /**
    * Constructor for the DiskManager object
    *
@@ -33,6 +36,12 @@ public class DiskManager extends OSMessageHandler
     //                                     id+":INT", id);
     //Message mvIHReg = new Message ( id, "KERNEL", "RegisterInterruptHandler",
     //                                  cvIntHandler);
+  }
+
+  public void addDiskRequest(String source, DiskRequest newRequest)
+  {
+    queueRequest(source, newRequest);
+    processQueue();
   }
 
 //    if ( mvTheMessage.getType().equalsIgnoreCase("DiskRequestComplete"))
@@ -56,13 +65,13 @@ public class DiskManager extends OSMessageHandler
    * @param mvSource Description of Parameter
    * @param mvTheRequest Description of Parameter
    */
-  public void queueRequest(String mvSource, DiskRequest mvTheRequest)
+  public void queueRequest(String source, DiskRequest newRequest)
   {
 //    System.out.println("Inserting Item in queue."); // DEBUG
 //    System.out.println("  From      : "+mvSource); // DEBUG
 //    System.out.println("  DiskBlock : "+mvTheRequest.DiskBlock); // DEBUG
-    DiskQueueItem mvTheQueueItem = new DiskQueueItem(mvSource, mvTheRequest);
-    //cvRequestQueue.insert(mvTheQueueItem);
+    DiskQueueItem item = new DiskQueueItem(source, newRequest);
+    requestQueue.insert(item);
   }
 
   /**
