@@ -49,7 +49,8 @@
   </target>
 
   <target name="javadoc" depends="dist">
-    <javadoc packagenames="net.sourceforge.rcosjava.*, pll2.*" sourcepath="${src.dir}" 
+    <javadoc packagenames="net.sourceforge.rcosjava.*, pll2.*" sourcepath="${src.dir}"
+      classpath="${lib.dir}/junit.jar"
       destdir="${javadoc.dir}" author="true" version="true" use="true"/>
   </target>
 </project>
