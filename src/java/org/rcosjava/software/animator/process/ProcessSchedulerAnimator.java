@@ -19,7 +19,10 @@ import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.software.animator.RCOSAnimator;
 import org.rcosjava.software.process.ProcessScheduler;
 import org.rcosjava.software.process.RCOSProcess;
+import org.rcosjava.software.util.Queue;
 import org.rcosjava.software.util.LIFOQueue;
+import org.rcosjava.software.util.FIFOQueue;
+import org.rcosjava.software.util.PriorityQueue;
 
 /**
  * Receives messages from Process Scheduler and manipulates processScheduler
@@ -46,7 +49,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   /**
    * Holds which processes are the the queue.
    */
-  private LIFOQueue zombieQueue, readyQueue, blockedQueue;
+  private Queue zombieQueue, readyQueue, blockedQueue;
 
   /**
    * Process Control Block frame to display.
@@ -175,39 +178,72 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   /**
    * Called by the frame to change the priority queue to FIFO.
    */
-  public void sendSwitchFIFO()
+  public void switchToFIFO()
   {
+    // Set to queue type FIFO
     queueType = 1;
 
+    // Stop processing
     sendMessage(new Stop(this));
+
+    // Switch to FIFO
+    zombieQueue = new FIFOQueue(10, 0, zombieQueue.iterator());
+    blockedQueue = new LIFOQueue(10, 0, blockedQueue.iterator());
+    readyQueue = new LIFOQueue(10, 0, readyQueue.iterator());
+
+    // Send switch message
     SwitchToFIFO msg = new SwitchToFIFO(this);
     sendMessage(msg);
+
+    // Start processing
     sendMessage(new Run(this));
   }
 
   /**
    * Called by the frame to change the priority queue to LIFO.
    */
-  public void sendSwitchLIFO()
+  public void switchToLIFO()
   {
+    // Set to queue type LIFO
     queueType = 2;
 
+    // Stop processing
     sendMessage(new Stop(this));
+
+    // Switch to LIFO
+    zombieQueue = new LIFOQueue(10, 0, zombieQueue.iterator());
+    blockedQueue = new LIFOQueue(10, 0, blockedQueue.iterator());
+    readyQueue = new LIFOQueue(10, 0, readyQueue.iterator());
+
+    // Send switch message
     SwitchToLIFO msg = new SwitchToLIFO(this);
     sendMessage(msg);
+
+    // Start processing
     sendMessage(new Run(this));
   }
 
   /**
    * Called by the frame to change the priority queue to Priority.
    */
-  public void sendSwitchPriority()
+  public void switchToPriority()
   {
+    // Set to queue type Priority
     queueType = 3;
 
+    // Stop processing
     sendMessage(new Stop(this));
+
+    // Switch to Priority
+    zombieQueue = new PriorityQueue(10, 0, zombieQueue.iterator());
+    blockedQueue = new PriorityQueue(10, 0, blockedQueue.iterator());
+    readyQueue = new PriorityQueue(10, 0, readyQueue.iterator());
+
+    // Send switch message
     SwitchToPriority msg = new SwitchToPriority(this);
     sendMessage(msg);
+
+    // Start processing
     sendMessage(new Run(this));
   }
 
@@ -501,8 +537,7 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
    * @param PID the process to remove from the queue.
    * @param tmpQueue the queue to remove the pid from.
    */
-  private synchronized void removeProcess(Integer PID,
-      LIFOQueue tmpQueue)
+  private synchronized void removeProcess(Integer PID, Queue tmpQueue)
   {
     tmpQueue.remove(PID);
   }
