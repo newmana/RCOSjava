@@ -33,7 +33,6 @@ public class SemaphoreSharedMemoryGraphic
   public SemaphoreSharedMemoryGraphic(int newProcess, Object newValue)
   {
     attachedProcesses = new FIFOQueue(10, 1);
-    addProcess(newProcess);
     value = newValue;
   }
 
