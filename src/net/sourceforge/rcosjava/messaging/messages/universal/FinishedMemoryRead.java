@@ -16,46 +16,69 @@ import net.sourceforge.rcosjava.software.memory.MemoryManager;
  */
 public class FinishedMemoryRead extends UniversalMessageAdapter
 {
-  private MemoryRequest mrRequest;
+  private MemoryRequest memoryRequest;
 
-  public FinishedMemoryRead(OSMessageHandler theSource, MemoryRequest newRequest)
+  public FinishedMemoryRead(OSMessageHandler theSource,
+    MemoryRequest newRequest)
   {
     super(theSource);
-    mrRequest = newRequest;
+    memoryRequest = newRequest;
   }
 
+  /**
+   * If the request is of process code type it will call the Kernel's
+   * setProcessCode.  If it is a stack segment then it will call
+   * setProcessStack.
+   *
+   * @param theElement the Kernel to do the work on.
+   */
   public void doMessage(Kernel theElement)
   {
-    if (mrRequest.getMemoryType() == MemoryManager.CODE_SEGMENT)
+    if (memoryRequest.getMemoryType() == MemoryManager.CODE_SEGMENT)
     {
-      theElement.setProcessCode(mrRequest.getMemory());
+      theElement.setProcessCode(memoryRequest.getMemory());
     }
-    else if (mrRequest.getMemoryType() == MemoryManager.STACK_SEGMENT)
+    else if (memoryRequest.getMemoryType() == MemoryManager.STACK_SEGMENT)
     {
-      theElement.setProcessStack(mrRequest.getMemory());
+      theElement.setProcessStack(memoryRequest.getMemory());
     }
   }
 
+  /**
+   * Depends on the type of memory but will call the appropriate method based
+   * on the type of memory that was requested.
+   *
+   * @param theElement the CPU Animator to do the work on.
+   */
   public void doMessage(CPUAnimator theElement)
   {
-    if (mrRequest.getMemoryType() == MemoryManager.CODE_SEGMENT)
+    if (memoryRequest.getMemoryType() == MemoryManager.CODE_SEGMENT)
     {
-      theElement.loadCode(mrRequest.getMemory());
+      theElement.loadCode(memoryRequest.getMemory());
     }
-    else if (mrRequest.getMemoryType() == MemoryManager.STACK_SEGMENT)
+    else if (memoryRequest.getMemoryType() == MemoryManager.STACK_SEGMENT)
     {
-      theElement.updateStack(mrRequest.getMemory());
+      theElement.updateStack(memoryRequest.getMemory());
     }
   }
 
+  /**
+   * Calls teh finishedReadingMemory on the IPC Manager Animator.  Indicates
+   * that the memory has been successfully read.  The animator currently does
+   * not differentiate between code and stack memory.
+   *
+   * @param theElement the IPC Manager Animator to do the work on.
+   */
   public void doMessage(IPCManagerAnimator theElement)
   {
-    theElement.finishedReadingMemory(this.mrRequest);
+    theElement.finishedReadingMemory(this.memoryRequest);
   }
 
+  /**
+   * This message is spawned by others and is not marked for passivation.
+   */
   public boolean undoableMessage()
   {
     return false;
   }
 }
-

@@ -1,13 +1,3 @@
-//******************************************************/
-// FILE     : ProcessFinishedMessage.java
-// PURPOSE  : What to do when the process finishes.
-// AUTHOR   : David Jones
-// MODIFIED : Andrew Newman
-// HISTORY  : 24/03/96   Created
-//          : 01/07/96   Uses Memory
-//          : 03/08/97   Moved to message system
-//******************************************************/
-
 package net.sourceforge.rcosjava.messaging.messages.universal;
 
 import net.sourceforge.rcosjava.software.animator.process.ProcessSchedulerAnimator;
@@ -18,34 +8,60 @@ import net.sourceforge.rcosjava.messaging.postoffices.os.OSMessageHandler;
 import net.sourceforge.rcosjava.software.process.ProcessScheduler;
 import net.sourceforge.rcosjava.software.process.RCOSProcess;
 
+/**
+ * What to do when the process finishes.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 1st January 1998
+ */
 public class ProcessFinished extends UniversalMessageAdapter
 {
-  private RCOSProcess rpOldCurrent;
+  private RCOSProcess finishedProcess;
 
-  public ProcessFinished(OSMessageHandler theSource, RCOSProcess oldProcess)
+  public ProcessFinished(OSMessageHandler theSource,
+    RCOSProcess newFinishedProcess)
   {
     super(theSource);
-    setProcess(oldProcess);
+    finishedProcess = newFinishedProcess;
   }
 
-  public void setProcess(RCOSProcess rpNewProcess)
+  public void setProcess(RCOSProcess newFinishedProcess)
   {
-    rpOldCurrent = rpNewProcess;
+    finishedProcess = newFinishedProcess;
   }
 
+  /**
+   * Calls finished process on the Process Scheduler releasing the terminal
+   * and deallocating the memory.
+   *
+   * @param theElement the Process Scheduler to do the work on.
+   */
   public void doMessage(ProcessScheduler theElement)
   {
-    theElement.processFinished(rpOldCurrent);
+    theElement.processFinished(finishedProcess);
   }
 
+  /**
+   * Indicate to the Animator that the process is finished.  Calls
+   * processFinished on the Process Scheduler Animator.
+   *
+   * @param theElement the Process Scheduler Animator to do the work on.
+   */
   public void doMessage(ProcessSchedulerAnimator theElement)
   {
-    theElement.processFinished(rpOldCurrent.getPID());
+    theElement.processFinished(finishedProcess.getPID());
   }
 
+  /**
+   * Indicate to the Animator that the process is finished and that it shouldn't
+   * be displayed any more as running.  Calls deleteProcess on the Animator.
+   *
+   * @param theElement the Process Manager Animator to do the work on.
+   */
   public void doMessage(ProcessManagerAnimator theElement)
   {
-    theElement.deleteProcess(new Integer(rpOldCurrent.getPID()));
+    theElement.deleteProcess(new Integer(finishedProcess.getPID()));
   }
 }
 

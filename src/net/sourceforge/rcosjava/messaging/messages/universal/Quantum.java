@@ -1,37 +1,44 @@
-//******************************************************/
-// FILE     : QuantumMessage.java
-// PURPOSE  : Process moves from blocked to ready.
-// AUTHOR   : David Jones
-// MODIFIED : Andrew Newman
-// HISTORY  : 24/03/96   Created
-//          : 01/07/96   Uses Memory
-//          : 03/08/97   Moved to message system
-//******************************************************/
-
 package net.sourceforge.rcosjava.messaging.messages.universal;
 
 import net.sourceforge.rcosjava.software.kernel.Kernel;
 import net.sourceforge.rcosjava.software.animator.process.ProcessSchedulerAnimator;
 import net.sourceforge.rcosjava.messaging.postoffices.animator.AnimatorMessageHandler;
 
+/**
+ * Set the quantum that process has to execute on the CPU.
+ * <P>
+ * @author David Jones.
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 24th March 1996
+ */
 public class Quantum extends UniversalMessageAdapter
 {
-  private int iQuantum;
+  /**
+   * The number of cycles for a CPU to execute.
+   */
+  private int quantum;
 
-  public Quantum(AnimatorMessageHandler theSource, int iNewQuantum)
+  /**
+   * Create a quantum message from the Animator with the given quantum value.
+   *
+   * @param theSource the sender of the message
+   * @param newQuantum the new value to set the kernel to when received.
+   */
+  public Quantum(AnimatorMessageHandler theSource, int newQuantum)
   {
     super(theSource);
-    iQuantum = iNewQuantum;
+    quantum = newQuantum;
   }
 
-  public void setQuantum(int iNewQuantum)
+  public void setQuantum(int newQuantum)
   {
-    iQuantum = iNewQuantum;
+    quantum = newQuantum;
   }
 
   public void doMessage(Kernel theElement)
   {
-    theElement.setQuantum(iQuantum);
+    theElement.setQuantum(quantum);
   }
 }
 

@@ -28,11 +28,20 @@ public class AllocatedPages extends UniversalMessageAdapter
     memoryReturn = newMemoryReturn;
   }
 
+  /**
+   * Calls allocatedPages on the IPC Manager Animator to indicate that certain
+   * pages have been allocated.
+   *
+   * @param theElement the IPC Manager Animator to do the work on.
+   */
   public void doMessage(IPCManagerAnimator theElement)
   {
     theElement.allocatedPages(memoryReturn);
   }
 
+  /**
+   * This message is spawned by others and is not marked for passivation.
+   */
   public boolean undoableMessage()
   {
     return false;

@@ -1,11 +1,3 @@
-//******************************************************/
-// FILE     : InstructionExecutionMessage.java
-// PURPOSE  : Currently executing code inside CPU.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 01/01/1998  Created
-//******************************************************/
-
 package net.sourceforge.rcosjava.messaging.messages.universal;
 
 import net.sourceforge.rcosjava.software.animator.cpu.CPUAnimator;
@@ -15,6 +7,13 @@ import java.io.IOException;
 import java.io.Serializable;
 import fr.dyade.koala.serialization.GeneratorInputStream;
 
+/**
+ * Message indicating the currently executing code inside CPU.
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 1st January 1998
+ */
 public class InstructionExecution extends UniversalMessageAdapter
 {
   private Memory stack;
@@ -26,13 +25,18 @@ public class InstructionExecution extends UniversalMessageAdapter
     stack = (Memory) theStack.clone();
   }
 
+  /**
+   * Calls the updateStack on the CPU Animator.
+   *
+   * @param theElement the CPU Animator to do the work on.
+   */
   public void doMessage(CPUAnimator theElement)
   {
     theElement.updateStack(stack);
   }
 
   private void writeObject(java.io.ObjectOutputStream out)
-		throws IOException
+    throws IOException
   {
     out.writeObject(stack);
   }
@@ -50,4 +54,3 @@ public class InstructionExecution extends UniversalMessageAdapter
     in.readObject();
   }
 }
-
