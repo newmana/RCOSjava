@@ -57,22 +57,22 @@ public class RCOSFrame extends JFrame implements Serializable
   /**
    * Default font size (TimesRoman, Plain, 12).
    */
-  protected transient static final Font defaultFont = new Font("TimesRoman", Font.PLAIN, 11);
+  public transient static final Font defaultFont = new Font("TimesRoman", Font.PLAIN, 11);
 
   /**
    * Default label font size (TimesRoman, Plain, 14).
    */
-  protected transient static final Font labelFont = new Font("TimesRoman", Font.PLAIN, 11);
+  public transient static final Font labelFont = new Font("TimesRoman", Font.PLAIN, 11);
 
   /**
    * Default button font size (Courier, Bold, 14).
    */
-  protected transient static final Font buttonFont = new Font("Courier", Font.BOLD, 11);
+  public transient static final Font buttonFont = new Font("Courier", Font.BOLD, 11);
 
   /**
    * Default title font size (TimesRoman, Plain, 18).
    */
-  protected transient static final Font titleFont = new Font("TimesRoman", Font.PLAIN, 16);
+  public transient static final Font titleFont = new Font("TimesRoman", Font.PLAIN, 16);
 
   /**
    * Description of the Field
