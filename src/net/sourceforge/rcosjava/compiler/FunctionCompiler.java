@@ -60,6 +60,11 @@ public class FunctionCompiler extends DepthFirstAdapter
     writePCode(new Instruction(OpCode.JUMP.getValue(), (byte) 0, (short) 1));
 
     // Write out stack pointer size for allocated variables
+    int stackPointer = variableCompiler.getVariableStackPointer();
+    if (stackPointer == 0)
+    {
+      stackPointer = 1;
+    }
     writePCode(new Instruction(OpCode.INTERVAL.getValue(), (byte) 0,
         variableCompiler.getVariableStackPointer()));
 
