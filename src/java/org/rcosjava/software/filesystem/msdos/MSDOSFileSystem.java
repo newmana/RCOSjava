@@ -1469,6 +1469,17 @@ public class MSDOSFileSystem implements FileSystem
 //    resourceAllocator("CLEARDIR", mvDeviceNumber, mvEntryNumber);
   }
 
+  /**
+   * A successful flush of data to disk.
+   *
+   * @param request the request from the disk manager.
+   */
+  public void flush(DiskRequest request)
+  {
+
+  }
+
+
   // Will display the specified data to the screen.
   // Operation can be "DIR" or "BUFFER". For DIR, item1 will indicate
   // the entry to dump, item2 will indicate the device. For Buffer,
@@ -1894,4 +1905,16 @@ public class MSDOSFileSystem implements FileSystem
   {
     return null;
   }
+
+  /**
+   * Returns a file's entry id entry file.
+   *
+   * @param fsFileNumber unique identifier of the file.
+   * @return a string representation of the file's id entry.
+   */
+  public String dumpFIDEntry(int fsFileNumber)
+  {
+    return null;
+  }
+
 }

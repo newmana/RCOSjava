@@ -1,5 +1,7 @@
 package org.rcosjava.software.filesystem;
 
+import org.rcosjava.software.disk.DiskRequest;
+
 /**
  * An interface in which all file system implementations must implement. This
  * includes allocating, deallocating, deleting and writing.
@@ -151,6 +153,13 @@ public interface FileSystem
   public boolean diskFull(int deviceNumber);
 
   /**
+   * A successful flush of data to disk.
+   *
+   * @param request the request from the disk manager.
+   */
+  public void flush(DiskRequest request);
+
+  /**
    * Store the current file system's state.
    */
   public void recordSystemFile();
@@ -181,10 +190,19 @@ public interface FileSystem
   public String dumpDirectoryEntry(int deviceNumber, int fsFileNumber);
 
   /**
-   * Displays a file's entry on a devices directory as a string.
+   * Displays a file's buffer as a string.
    *
    * @param fsFileNumber unique identifier of the file.
-   * @return a string representation of the file's directory entry.
+   * @return a string representation of the file's buffer.
    */
   public String dumpBuffer(int fsFileNumber);
+
+  /**
+   * Returns a file's entry id entry file.
+   *
+   * @param fsFileNumber unique identifier of the file.
+   * @return a string representation of the file's id entry.
+   */
+  public String dumpFIDEntry(int fsFileNumber);
+
 }
