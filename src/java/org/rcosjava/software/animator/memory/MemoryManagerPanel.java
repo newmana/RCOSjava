@@ -43,11 +43,6 @@ public class MemoryManagerPanel extends RCOSPanel
   private MemoryManagerAnimator myAnimator;
 
   /**
-   * Window dimensions.
-   */
-  private int windowWidth, windowHeight;
-
-  /**
    * Memory images to display.
    */
   private MemoryGraphic[] memoryGraphics =

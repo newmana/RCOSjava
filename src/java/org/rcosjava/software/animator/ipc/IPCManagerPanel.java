@@ -49,11 +49,6 @@ public class IPCManagerPanel extends RCOSPanel
   private IPCManagerAnimator myAnimator;
 
   /**
-   * Window dimensions.
-   */
-  private int windowWidth, windowHeight;
-
-  /**
    * Combo boxes for shared memory and semaphores.
    */
   private JComboBox shmOption, semOption;
@@ -102,8 +97,6 @@ public class IPCManagerPanel extends RCOSPanel
     {
       myImages[index] = images[index].getImage();
     }
-    windowWidth = getWidth();
-    windowHeight = getHeight();
     myAnimator = newIPCManager;
   }
 
