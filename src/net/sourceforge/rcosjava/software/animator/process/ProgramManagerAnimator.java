@@ -15,6 +15,9 @@ import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAda
 import net.sourceforge.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import net.sourceforge.rcosjava.messaging.messages.universal.UpdateList;
 
+import net.sourceforge.rcosjava.messaging.messages.universal.TerminalOn;
+import net.sourceforge.rcosjava.messaging.messages.universal.NewFile;
+
 /**
  * Communicates via messages and via awt Events with the main RCOS frame and
  * other components. It's functions are to set up and comunicate with a
@@ -87,11 +90,11 @@ public class ProgramManagerAnimator extends RCOSAnimator
     return pmFrame;
   }
 
-  public synchronized void processMessage(AnimatorMessageAdapter message)
+  public void processMessage(AnimatorMessageAdapter message)
   {
   }
 
-  public synchronized void processMessage(UniversalMessageAdapter message)
+  public void processMessage(UniversalMessageAdapter message)
   {
     try
     {
@@ -109,7 +112,7 @@ public class ProgramManagerAnimator extends RCOSAnimator
     // If the box is checked start a terminal before the process
     // is loaded.
     StartProgram myStartProgram = new StartProgram(this, postOffice,
-      getCurrentDirectory()+getCurrentFile(), startTerminal);
+       getCurrentDirectory()+getCurrentFile(), startTerminal);
   }
 
   public void upDirectory()

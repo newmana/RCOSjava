@@ -110,7 +110,7 @@ public class RCOSBox extends Panel
     add(surrounded);
   }
 
-  public synchronized void addNotify()
+  public void addNotify()
   {
     repaint();
     super.addNotify();

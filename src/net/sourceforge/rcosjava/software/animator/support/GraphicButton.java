@@ -153,7 +153,7 @@ public class GraphicButton extends Canvas
     return new Dimension (iImageWidth, iImageHeight);
   }
 
-  public synchronized void addNotify()
+  public void addNotify()
   {
     super.addNotify();
     if (gblMouse == null)

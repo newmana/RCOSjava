@@ -65,7 +65,7 @@ public class DiskManager extends OSMessageHandler
     }
   }
 
-  public synchronized void queueRequest(String mvSource, DiskRequest mvTheRequest)
+  public void queueRequest(String mvSource, DiskRequest mvTheRequest)
   {
 //    System.out.println("Inserting Item in queue."); // DEBUG
 //    System.out.println("  From      : "+mvSource); // DEBUG
@@ -74,7 +74,7 @@ public class DiskManager extends OSMessageHandler
     //cvRequestQueue.insert(mvTheQueueItem);
   }
 
-  public synchronized void processQueue()
+  public void processQueue()
   {
 //    System.out.println("CPM14Disk: ProcessQueue - Starting"); // DEBUG
     /*if (!cvBusy)
@@ -103,7 +103,7 @@ public class DiskManager extends OSMessageHandler
   }
 
   // Complete request.
-  public synchronized void currentRequestComplete()
+  public void currentRequestComplete()
   {
 //    System.out.println("CPM14Disk: ReqComp - Starting"); // DEBUG
     byte[] mvReturnData;

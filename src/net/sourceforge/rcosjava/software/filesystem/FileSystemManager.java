@@ -174,7 +174,7 @@ public class FileSystemManager extends OSMessageHandler
   }
 
   // Handles the return value from requests sent to the file systems.
-  synchronized void handleReturnValue(OSMessageAdapter mvTheMessage)
+  void handleReturnValue(OSMessageAdapter mvTheMessage)
   {
     FileSystemReturnData mvReturnData =
       (FileSystemReturnData) mvTheMessage.getBody();

@@ -61,7 +61,7 @@ public class NewLabel extends Canvas
     return new Dimension ((fm.stringWidth(sMyString)+5), (fm.getHeight()+5));
   }
 
-  public synchronized void addNotify()
+  public void addNotify()
   {
     repaint();
     super.addNotify();

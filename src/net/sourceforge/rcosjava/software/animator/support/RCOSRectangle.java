@@ -42,7 +42,7 @@ public class RCOSRectangle extends Canvas
                           Math.abs(iLeftR - iRightR));
   }
 
-  public synchronized void addNotify()
+  public void addNotify()
   {
     repaint();
     super.addNotify();

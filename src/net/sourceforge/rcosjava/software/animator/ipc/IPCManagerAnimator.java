@@ -166,11 +166,11 @@ public class IPCManagerAnimator extends RCOSAnimator
   {
   }
 
-  public synchronized void processMessage (AnimatorMessageAdapter aMsg)
+  public void processMessage (AnimatorMessageAdapter aMsg)
   {
   }
 
-  public synchronized void processMessage(UniversalMessageAdapter aMsg)
+  public void processMessage(UniversalMessageAdapter aMsg)
   {
     try
     {

@@ -68,7 +68,7 @@ public class RCOSList extends List
     setFont(myFont);
   }
 
-  public synchronized void addNotify()
+  public void addNotify()
   {
     repaint();
     super.addNotify();

@@ -79,13 +79,13 @@ public class CPM14DiskScheduler implements DiskScheduler
     }
   }
 
-  public synchronized void queueRequest(String mvSource, DiskRequest mvTheRequest)
+  public void queueRequest(String mvSource, DiskRequest mvTheRequest)
   {
     DiskQueueItem mvTheQueueItem = new DiskQueueItem(mvSource, mvTheRequest);
     cvRequestQueue.insert(mvTheQueueItem);
   }
 
-  public synchronized void processQueue()
+  public void processQueue()
   {
     if (!cvBusy)
     {
@@ -107,7 +107,7 @@ public class CPM14DiskScheduler implements DiskScheduler
   }
 
   // Complete request.
-  public synchronized void currentRequestComplete()
+  public void currentRequestComplete()
   {
     byte[] mvReturnData;
 

@@ -136,7 +136,7 @@ public class HardwareTerminalScreen extends Canvas
     return width;
   }
 
-  public synchronized void addNotify()
+  public void addNotify()
   {
     repaint();
     super.addNotify();

@@ -55,7 +55,7 @@ public class ProcessManagerFrame extends RCOSFrame
     this.processList.add(sNewProcess);
   }
 
-  public synchronized void addNotify()
+  public void addNotify()
   {
     repaint();
     super.addNotify();

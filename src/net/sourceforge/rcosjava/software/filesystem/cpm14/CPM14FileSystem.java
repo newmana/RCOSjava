@@ -74,7 +74,7 @@ public class CPM14FileSystem implements FileSystem
   }
 
   //Handle a mount request
-  public synchronized void mount(String sMountPoint, String sDeviceName)
+  public void mount(String sMountPoint, String sDeviceName)
   {
     CPM14DeviceTableEntry mvDevice = new CPM14DeviceTableEntry();
     // Note, in the simulation, the disks are initialized each
@@ -114,7 +114,7 @@ public class CPM14FileSystem implements FileSystem
 
   // Perfoms an allocation of the file. Creats an entry in the FID table
   // and inits it.
-  public synchronized FileSystemReturnData allocate(int iRequestID, String sFileName)
+  public FileSystemReturnData allocate(int iRequestID, String sFileName)
   {
     String mvMountPoint = getMountPoint(sFileName);
 
@@ -763,7 +763,7 @@ public class CPM14FileSystem implements FileSystem
 
   // Coordinating this in the one synchronised function means that the
   // allocation of the resources will be safe.
-  public synchronized int resourceAllocator( String type, int mvDeviceNumber, int Item)
+  public int resourceAllocator( String type, int mvDeviceNumber, int Item)
   {
      CPM14DeviceTableEntry mvDevice =
         (CPM14DeviceTableEntry) cvDeviceTable.getItem(mvDeviceNumber);

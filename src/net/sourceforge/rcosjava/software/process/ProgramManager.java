@@ -111,32 +111,6 @@ import net.sourceforge.rcosjava.software.util.*;
     this.sNewFilename = sFilename;
   }
 
-  public synchronized void processMessage(OSMessageAdapter aMsg )
-  {
-    try
-    {
-      aMsg.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.out.println("Error processing: "+e.getMessage());
-      e.printStackTrace();
-    }
-  }
-
-  public synchronized void processMessage(UniversalMessageAdapter aMsg )
-  {
-    try
-    {
-      aMsg.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.out.println("Error processing: "+e.getMessage());
-      e.printStackTrace();
-    }
-  }
-
   public void startThread()
   {
     myRCOS.startThread();
@@ -147,14 +121,14 @@ import net.sourceforge.rcosjava.software.util.*;
     myRCOS.stepThread();
   }
 
-  public void killProgram(int iProcess)
+  public void kill(int pid)
   {
     // send message to Kernel with Process number
-    KillProcess newMsg = new KillProcess(this,iProcess,false);
+    KillProcess newMsg = new KillProcess(this,pid);
     sendMessage(newMsg);
   }
 
-  public synchronized boolean open()
+  public boolean open()
   {
     return theFileClient.openConnection();
   }
@@ -162,7 +136,7 @@ import net.sourceforge.rcosjava.software.util.*;
   /**
    * Returns the file size. This method will return -1 if no file was selected.
    */
-  public synchronized int getFileSize(String theFileName)
+  public int getFileSize(String theFileName)
   {
     return theFileClient.statExeFile(theFileName);
   }
@@ -170,17 +144,17 @@ import net.sourceforge.rcosjava.software.util.*;
   /**
    * This function returns a Memory object containing the file data.
    */
-  public synchronized Memory getFileContents(String theFileName)
+  public Memory getFileContents(String theFileName)
   {
     return theFileClient.getExeFile(theFileName);
   }
 
-  public synchronized void close()
+  public void close()
   {
     theFileClient.closeConnection();
   }
 
-  public synchronized void updateList(String directoryName, int directoryType)
+  public void updateList(String directoryName, int directoryType)
   {
     String[] dataArray;
     directoryList = new FIFOQueue(10,1);
@@ -224,6 +198,32 @@ import net.sourceforge.rcosjava.software.util.*;
     else
     {
       RCOS.updateStatusBar("Error! Unable to connect to server.");
+    }
+  }
+
+  public void processMessage(OSMessageAdapter aMsg )
+  {
+    try
+    {
+      aMsg.doMessage(this);
+    }
+    catch (Exception e)
+    {
+      System.out.println("Error processing: "+e.getMessage());
+      e.printStackTrace();
+    }
+  }
+
+  public void processMessage(UniversalMessageAdapter aMsg )
+  {
+    try
+    {
+      aMsg.doMessage(this);
+    }
+    catch (Exception e)
+    {
+      System.out.println("Error processing: "+e.getMessage());
+      e.printStackTrace();
     }
   }
 }

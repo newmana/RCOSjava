@@ -175,15 +175,14 @@ public class Kernel extends OSMessageHandler
    * Performs one execution cycle on the CPU if there is a running process.
    * Handles the interrupts and increments the CPU tick.
    */
-  public void performInstructionExecutionCycle()
+  public synchronized void performInstructionExecutionCycle()
   {
     sendMessage(this.scheduleMessage);
     myCPU.performInstructionExecutionCycle();
     //Sends context and current instruction to the kernel.
     if (runningProcess())
     {
-      SetContext msg = new
-        SetContext(this, myCPU.getContext());
+      SetContext msg = new SetContext(this, myCPU.getContext());
       sendMessage(msg);
       InstructionExecution iMsg = new
         InstructionExecution(this, myCPU.getProcessStack());
@@ -619,7 +618,7 @@ public class Kernel extends OSMessageHandler
     //System.out.println("-----End Handling Process Finished-----");
   }
 
-  public synchronized void processMessage(OSMessageAdapter message)
+  public void processMessage(OSMessageAdapter message)
   {
     try
     {
@@ -632,7 +631,7 @@ public class Kernel extends OSMessageHandler
     }
   }
 
-  public synchronized void processMessage(UniversalMessageAdapter message)
+  public void processMessage(UniversalMessageAdapter message)
   {
     try
     {

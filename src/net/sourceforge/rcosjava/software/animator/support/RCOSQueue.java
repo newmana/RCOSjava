@@ -53,7 +53,7 @@ public class RCOSQueue extends Canvas
     return new Dimension ((iBoxWidth*iNoBoxes)+(iPadX*2), iBoxHeight+(iPadY*2));
   }
 
-  public synchronized void addNotify()
+  public void addNotify()
   {
     repaint();
     super.addNotify();
