@@ -442,7 +442,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
     MTGO tmpMTGO = engine.returnMTGO("P" + pid);
     tmpMTGO.isVisible = false;
     engine.removeMTGO("P" + pid);
-    //syncPaint(delay);
+    syncPaint(delay);
   }
 
   /**
@@ -451,12 +451,7 @@ public class ProcessSchedulerFrame extends RCOSFrame
    */
   synchronized void killProcess(int pid)
   {
-    MTGO tmpMTGO = engine.returnMTGO("P" + pid);
-    tmpMTGO.isVisible = false;
-    engine.removeMTGO("P" + pid);
-
     // Remove it from any queues.
-
     removeQueue(ProcessScheduler.READYQ, pid);
     removeQueue(ProcessScheduler.BLOCKEDQ, pid);
     removeQueue(ProcessScheduler.ZOMBIEQ, pid);
