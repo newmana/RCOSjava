@@ -49,12 +49,4 @@ public class FileSystemAnimator extends RCOSAnimator
   {
     fsFrame.setVisible(false);
   }
-
-	public void processMessage(AnimatorMessageAdapter aMessage)
-	{
-	}
-
-	public void processMessage(UniversalMessageAdapter aMessage)
-	{
-	}
 }

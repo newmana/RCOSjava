@@ -33,12 +33,6 @@ public class DiskManager extends OSMessageHandler
     //                                  cvIntHandler);
   }
 
-	public void processMessage(UniversalMessageAdapter aMsg)
-	{
-	}
-
-	public void processMessage(OSMessageAdapter aMsg)
-  {
 //    if ( mvTheMessage.getType().equalsIgnoreCase("DiskRequestComplete"))
     //{
 //      System.out.println("Handleing a DiskRequestComplete"); // DEBUG
@@ -53,17 +47,6 @@ public class DiskManager extends OSMessageHandler
 //      ProcessQueue();
     //}
 //    System.out.println("CPM14Disk: ProcessMessage - Finish"); // DEBUG
-
-    try
-    {
-      aMsg.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.out.println("Error processing message: "+e);
-      e.printStackTrace();
-    }
-  }
 
   public void queueRequest(String mvSource, DiskRequest mvTheRequest)
   {

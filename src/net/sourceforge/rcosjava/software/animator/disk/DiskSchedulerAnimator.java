@@ -49,12 +49,4 @@ public class DiskSchedulerAnimator extends RCOSAnimator
   {
     dsFrame.setVisible(false);
   }
-
-	public void processMessage(AnimatorMessageAdapter aMessage)
-	{
-	}
-
-	public void processMessage(UniversalMessageAdapter aMessage)
-	{
-	}
 }

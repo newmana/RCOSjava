@@ -103,29 +103,6 @@ public class ProcessSchedulerAnimator extends RCOSAnimator
   }
 
   /**
-   * Process the animator message received (currently none).
-   */
-  public void processMessage(AnimatorMessageAdapter message)
-  {
-  }
-
-  /**
-   * Process the universal message received (currently none).
-   */
-  public void processMessage(UniversalMessageAdapter message)
-  {
-    try
-    {
-      message.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing: "+e);
-      e.printStackTrace();
-    }
-  }
-
-  /**
    * Called by the frame to set the quantum in the kernel.  Sends a new
    * quantum message.
    *

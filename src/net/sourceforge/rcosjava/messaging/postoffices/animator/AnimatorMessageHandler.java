@@ -5,7 +5,9 @@ import net.sourceforge.rcosjava.messaging.messages.MessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.animator.AnimatorMessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import net.sourceforge.rcosjava.messaging.postoffices.SimpleMessageHandler;
+
 import java.io.Serializable;
+import java.lang.reflect.*;
 
 /**
  * Provide sending and receiving facilities for all classes.
@@ -111,7 +113,22 @@ public abstract class AnimatorMessageHandler extends SimpleMessageHandler
    *
    * @param message the message to execute and call.
    */
-  public abstract void processMessage(AnimatorMessageAdapter message);
+  public void processMessage(AnimatorMessageAdapter message)
+  {
+    try
+    {
+      Class[] classes = {this.getClass()};
+      Method method = message.getClass().getMethod(
+        "doMessage", classes);
+
+      Object[] args = {this};
+      method.invoke(message, args);
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+  }
 
   /**
    * The method that is called by the post office to a registered handler.  This
@@ -119,5 +136,21 @@ public abstract class AnimatorMessageHandler extends SimpleMessageHandler
    *
    * @param message the message to execute and call.
    */
-  public abstract void processMessage(UniversalMessageAdapter message);
+  public void processMessage(UniversalMessageAdapter message)
+  {
+    try
+    {
+      Class[] classes = {this.getClass()};
+
+      Method method = message.getClass().getSuperclass().getMethod(
+        "doMessage", classes);
+
+      Object[] args = {this};
+      method.invoke(message, args);
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+  }
 }

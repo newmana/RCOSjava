@@ -122,30 +122,4 @@ public class MultimediaAnimator extends RCOSAnimator
   {
     this.player.sendNextMessage(currentFile);
   }
-
-  public void processMessage(AnimatorMessageAdapter message)
-  {
-    try
-    {
-      message.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing: "+e);
-      e.printStackTrace();
-    }
-  }
-
-  public void processMessage(UniversalMessageAdapter message)
-  {
-    try
-    {
-      message.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing: "+e);
-      e.printStackTrace();
-    }
-  }
 }

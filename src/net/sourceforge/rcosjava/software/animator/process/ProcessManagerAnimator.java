@@ -215,22 +215,4 @@ public class ProcessManagerAnimator extends RCOSAnimator
       currentProcessId, processPriority);
     sendMessage(tmpMessage);
   }
-
-  public void processMessage(AnimatorMessageAdapter message)
-  {
-  }
-
-  public void processMessage(UniversalMessageAdapter message)
-  {
-    try
-    {
-      message.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing: "+e);
-      e.printStackTrace();
-    }
-  }
-
 }

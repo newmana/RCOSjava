@@ -81,23 +81,6 @@ public class TerminalManagerAnimator extends RCOSAnimator
     myFrame.setVisible(false);
   }
 
-  public void processMessage(AnimatorMessageAdapter message)
-  {
-  }
-
-  public void processMessage(UniversalMessageAdapter message)
-  {
-    try
-    {
-      message.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing: "+e);
-      e.printStackTrace();
-    }
-  }
-
   /**
    * Indicate that a terminal is off (show the off terminal image).  Calls
    * the frame's terminal off.

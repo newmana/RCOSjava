@@ -90,29 +90,20 @@ public class ProgramManagerAnimator extends RCOSAnimator
     return pmFrame;
   }
 
-  public void processMessage(AnimatorMessageAdapter message)
-  {
-  }
-
-  public void processMessage(UniversalMessageAdapter message)
-  {
-    try
-    {
-      message.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing: "+e);
-      e.printStackTrace();
-    }
-  }
-
   public void newProcess(boolean startTerminal)
   {
     // If the box is checked start a terminal before the process
     // is loaded.
-    StartProgram myStartProgram = new StartProgram(this, postOffice,
-       getCurrentDirectory()+getCurrentFile(), startTerminal);
+//    StartProgram myStartProgram = new StartProgram(this, postOffice,
+//       getCurrentDirectory()+getCurrentFile(), startTerminal);
+    if(startTerminal)
+    {
+      TerminalOn msg = new TerminalOn(this);
+      sendMessage(msg);
+    }
+    NewFile msg = new NewFile(this,
+        getCurrentDirectory()+getCurrentFile());
+    sendMessage(msg);
   }
 
   public void upDirectory()

@@ -7,6 +7,8 @@ import net.sourceforge.rcosjava.messaging.messages.MessageAdapter;
 import net.sourceforge.rcosjava.messaging.postoffices.PostOffice;
 import net.sourceforge.rcosjava.messaging.messages.AddHandler;
 
+import java.lang.reflect.*;
+
 /**
  * Provide sending and receiving facilities for all classes.
  * <P>
@@ -110,11 +112,44 @@ public abstract class OSMessageHandler extends SimpleMessageHandler
    * The method that is called by the post office of a registered handler of
    * the message.  This is for only OS Messages.
    */
-  public abstract void processMessage(OSMessageAdapter message);
+  public void processMessage(OSMessageAdapter message)
+  {
+    try
+    {
+      System.out.println("Class: " + this.getClass());
+      System.out.println("Message: " + message.getClass());
+      Class[] classes = {this.getClass()};
+      Method method = message.getClass().getMethod(
+        "doMessage", classes);
+
+      Object[] args = {this};
+      method.invoke(message, args);
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+  }
 
   /**
    * The method that is called by the post office of a registered handler of
    * the message.  This is for only Universal Messages.
    */
-  public abstract void processMessage(UniversalMessageAdapter message);
+  public void processMessage(UniversalMessageAdapter message)
+  {
+    try
+    {
+      Class[] classes = {this.getClass()};
+
+      Method method = message.getClass().getSuperclass().getMethod(
+        "doMessage", classes);
+
+      Object[] args = {this};
+      method.invoke(message, args);
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+  }
 }

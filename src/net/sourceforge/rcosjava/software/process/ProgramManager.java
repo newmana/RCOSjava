@@ -259,30 +259,4 @@ public class ProgramManager extends OSMessageHandler
       RCOS.updateStatusBar("Error! Unable to connect to server.");
     }
   }
-
-  public void processMessage(OSMessageAdapter aMsg )
-  {
-    try
-    {
-      aMsg.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing: "+e.getMessage());
-      e.printStackTrace();
-    }
-  }
-
-  public void processMessage(UniversalMessageAdapter aMsg )
-  {
-    try
-    {
-      aMsg.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing: "+e.getMessage());
-      e.printStackTrace();
-    }
-  }
 }

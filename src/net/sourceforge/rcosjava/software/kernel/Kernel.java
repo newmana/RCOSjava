@@ -650,30 +650,4 @@ public class Kernel extends OSMessageHandler
     NullProcess tmpMessage = new NullProcess(this);
     sendMessage(tmpMessage);
   }
-
-  public void processMessage(OSMessageAdapter message)
-  {
-    try
-    {
-      message.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing message: "+e);
-      e.printStackTrace();
-    }
-  }
-
-  public void processMessage(UniversalMessageAdapter message)
-  {
-    try
-    {
-      message.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing message: "+e);
-      e.printStackTrace();
-    }
-  }
 }

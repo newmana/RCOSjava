@@ -51,34 +51,6 @@ public class FileSystemManager extends OSMessageHandler
     cvMountTable = new Hashtable(20);
   }
 
-
-  public void processMessage(OSMessageAdapter aMsg)
-  {
-    try
-    {
-      aMsg.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing message: "+e);
-      e.printStackTrace();
-    }
-  }
-
-  public void processMessage(UniversalMessageAdapter aMsg)
-  {
-    try
-    {
-      aMsg.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing message: "+e);
-      e.printStackTrace();
-    }
-  }
-
-
   // Registers and dynamically creates a file system with the specified FS type.
   // File System type is the class name of the file system.
   // e.g. FileSystem.CPM14.CPM14FileSystem

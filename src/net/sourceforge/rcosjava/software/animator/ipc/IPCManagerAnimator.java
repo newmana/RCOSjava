@@ -167,21 +167,5 @@ public class IPCManagerAnimator extends RCOSAnimator
   public void sharedMemoryWrite()
   {
   }
-
-  public void processMessage (AnimatorMessageAdapter aMsg)
-  {
-  }
-
-  public void processMessage(UniversalMessageAdapter aMsg)
-  {
-    try
-    {
-      aMsg.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println(this + "- exception: "+e);
-    }
-  }
 }
 

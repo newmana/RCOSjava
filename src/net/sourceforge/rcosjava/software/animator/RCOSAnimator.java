@@ -47,6 +47,4 @@ public abstract class RCOSAnimator extends AnimatorMessageHandler
    * Calls hide frame on the internal frame object.
    */
   public abstract void hideFrame();
-  public abstract void processMessage(AnimatorMessageAdapter message);
-  public abstract void processMessage(UniversalMessageAdapter message);
 }

@@ -10,6 +10,8 @@ import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAda
 import net.sourceforge.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import net.sourceforge.rcosjava.software.memory.MemoryRequest;
 
+import net.sourceforge.rcosjava.messaging.messages.universal.UpdateList;
+
 /**
  * Sends and receives messages for the graphical representation of the P-Code
  * CPU.
@@ -36,10 +38,10 @@ public class CPUAnimator extends RCOSAnimator
   private CPUFrame cpuFrame;
   private static final String MESSENGING_ID = "CPUAnimator";
 
-  public CPUAnimator(AnimatorOffice aPostOffice, int x, int y,
+  public CPUAnimator(AnimatorOffice postOffice, int x, int y,
     Image[] cpuImages)
   {
-    super(MESSENGING_ID, aPostOffice);
+    super(MESSENGING_ID, postOffice);
     theContext = new Context();
     cpuFrame = new CPUFrame(x, y, cpuImages, this);
     cpuFrame.pack();
@@ -103,29 +105,5 @@ public class CPUAnimator extends RCOSAnimator
   public void screenReset()
   {
     cpuFrame.screenReset();
-  }
-
-  public void processMessage(AnimatorMessageAdapter aMsg)
-  {
-    try
-    {
-      aMsg.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println(this + "- exception: "+e);
-    }
-  }
-
-  public void processMessage(UniversalMessageAdapter aMsg)
-  {
-    try
-    {
-      aMsg.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println(this + "- exception: "+e);
-    }
   }
 }

@@ -6,6 +6,8 @@ import net.sourceforge.rcosjava.messaging.messages.os.OSMessageAdapter;
 import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAdapter;
 import net.sourceforge.rcosjava.messaging.postoffices.MessageHandler;
 import net.sourceforge.rcosjava.software.util.FIFOQueue;
+
+import java.lang.reflect.*;
 import java.util.*;
 
 /**
@@ -240,13 +242,21 @@ public class OSOffice extends PostOffice
                 {
                   OSMessageHandler theDestination = (OSMessageHandler)
                     tmpIter.next();
+
                   //Send the message to the destination
-                  if (message instanceof OSMessageAdapter)
-                    theDestination.processMessage((OSMessageAdapter) message);
-                  else if (message instanceof UniversalMessageAdapter)
-                    theDestination.processMessage((UniversalMessageAdapter) message);
-                  else
-                    theDestination.processMessage(message);
+                  try
+                  {
+                    Class[] classes = {message.getClass().getSuperclass()};
+                    Method method = theDestination.getClass().getMethod(
+                      "processMessage", classes);
+
+                    Object[] args = {message};
+                    method.invoke(theDestination, args);
+                  }
+                  catch (Exception e)
+                  {
+                    e.printStackTrace();
+                  }
                 }
               }
             }

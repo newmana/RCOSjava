@@ -47,12 +47,4 @@ public class AboutAnimator extends RCOSAnimator
   {
     myFrame.setVisible(false);
   }
-
-  public void processMessage(AnimatorMessageAdapter aMessage)
-  {
-  }
-
-  public void processMessage(UniversalMessageAdapter aMessage)
-  {
-  }
 }

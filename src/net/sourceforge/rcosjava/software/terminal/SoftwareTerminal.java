@@ -249,32 +249,6 @@ public class SoftwareTerminal extends OSMessageHandler
     sendMessage(msg);
   }
 
-  public void processMessage(OSMessageAdapter aMsg)
-  {
-    try
-    {
-      aMsg.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing message: "+e);
-      e.printStackTrace();
-    }
-  }
-
-  public void processMessage(UniversalMessageAdapter aMsg)
-  {
-    try
-    {
-      aMsg.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing message: "+e);
-      e.printStackTrace();
-    }
-  }
-
   /**
    * Check to see if the key that was pressed was a numeric key
    *

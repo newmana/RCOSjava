@@ -650,30 +650,4 @@ public class ProcessScheduler extends OSMessageHandler
     }
     return tmpProcess;
   }
-
-  public void processMessage(OSMessageAdapter aMsg)
-  {
-    try
-    {
-      aMsg.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing message: "+e);
-      e.printStackTrace();
-    }
-  }
-
-  public void processMessage(UniversalMessageAdapter aMsg)
-  {
-    try
-    {
-      aMsg.doMessage(this);
-    }
-    catch (Exception e)
-    {
-      System.err.println("Error processing message: "+e);
-      e.printStackTrace();
-    }
-  }
 }
