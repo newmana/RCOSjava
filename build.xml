@@ -42,9 +42,24 @@
     <mkdir dir="${gen.dir}"/>
     <mkdir dir="${gen.dir}/src"/>
     <mkdir dir="${gen.dir}/classes"/>
+
+    <!-- Test whether to generate javadoc file-->
+    <uptodate property="javadoc.required" targetfile="${src.dir}">
+      <srcfiles dir="${javadoc.dir}"/>
+    </uptodate>
+
+    <!-- Test whether to generate simple c grammar file-->
+    <uptodate property="sablecc.required" targetfile="${src.dir}/net/sourceforge/rcosjava/compiler/grammar">
+      <srcfiles dir="${lib.dir}" includes="${grammar.jar}"/>
+    </uptodate>
   </target>
 
-  <target name="sablecc" description="Creates SimpleC jar file to process C files">
+  <target name="sablecc" depends="prepare"
+   if="sablecc.required"
+   description="Creates SimpleC jar file to process C files">
+
+    <echo message="Got: ${sablecc.required}"/>
+
     <sablecc src="${src.dir}/net/sourceforge/rcosjava/compiler/grammar" outputDirectory="${gen.dir}/src"/>
 
     <javac 
@@ -55,7 +70,7 @@
     <jar jarfile="${lib.dir}/${grammar.jar}" basedir="${gen.dir}/classes"/>
   </target>
 
-  <target name="compile" depends="prepare, sablecc"
+  <target name="compile" depends="sablecc"
    description="Compiles RCOSjava">
     <echo message="Compiling: ${src.dir} to ${dist.dir}"/>
     <javac 
@@ -95,6 +110,7 @@
   </target>
 
   <target name="javadoc" depends="dist"
+   if="javadoc.required"
    description="Create Javadoc in javadoc directory">
     <javadoc packagenames="net.sourceforge.rcosjava.*, pll2.*" sourcepath="${src.dir}"
       classpathref="jars"      
