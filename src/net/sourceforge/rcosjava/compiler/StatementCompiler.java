@@ -10,7 +10,6 @@ import org.sablecc.simplec.analysis.*;
 import org.sablecc.simplec.node.*;
 import org.sablecc.simplec.lexer.*;
 import org.sablecc.simplec.parser.*;
-import org.sablecc.simplec.tool.Version;
 
 /**
  * Provides a compiler of a simple C like grammar with certain extensions..
@@ -30,6 +29,14 @@ public class StatementCompiler extends DepthFirstAdapter
   {
     table = SymbolTable.getInstance();
     statementPosition = new Stack();
+  }
+
+  /**
+   * Forward variable declarations to appropriate object.
+   */
+  public void inAVariableDeclaration(AVariableDeclaration node)
+  {
+    node.apply(variableCompiler);
   }
 
   /**
@@ -104,6 +111,9 @@ public class StatementCompiler extends DepthFirstAdapter
       Operator.EQUAL.getValue()));
   }
 
+  /**
+   * Process simple printf literal statement.
+   */
   public void inAPrintf1RcosStatement(APrintf1RcosStatement node)
   {
     String stringValue = node.getStringLitteral().getText();
@@ -112,6 +122,15 @@ public class StatementCompiler extends DepthFirstAdapter
 
     writePCode(new Instruction(OpCode.CALL_SYSTEM_PROCEDURE.getValue(),
       (byte) 0, SystemCall.STRING_OUT.getValue()));
+  }
+
+  /**
+   * Process non-literal printf statement.
+   */
+  public void inAPrintf2RcosStatement(APrintf2RcosStatement node)
+  {
+    PPrintfControlStrings control = node.getControl();
+    System.out.println("Control: " + control);
   }
 
   /**

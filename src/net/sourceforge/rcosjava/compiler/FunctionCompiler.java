@@ -9,7 +9,6 @@ import org.sablecc.simplec.analysis.*;
 import org.sablecc.simplec.node.*;
 import org.sablecc.simplec.lexer.*;
 import org.sablecc.simplec.parser.*;
-import org.sablecc.simplec.tool.Version;
 
 /**
  * Provides a compiler of a simple C like grammar with certain extensions..
@@ -29,7 +28,7 @@ public class FunctionCompiler extends DepthFirstAdapter
   }
 
   /**
-   * Any variable declaration such as:
+   * Any global variable declaration such as:
    * int global;
    * char test;
    */
@@ -39,7 +38,8 @@ public class FunctionCompiler extends DepthFirstAdapter
   }
 
   /**
-   * When the compiler enters a function block/body.
+   * When the compiler enters a function block/body send it to statement
+   * compiler.
    */
   public void inAFunctionBody(AFunctionBody node)
   {

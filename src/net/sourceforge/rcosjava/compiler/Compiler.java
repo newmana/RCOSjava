@@ -10,7 +10,6 @@ import org.sablecc.simplec.analysis.*;
 import org.sablecc.simplec.node.*;
 import org.sablecc.simplec.lexer.*;
 import org.sablecc.simplec.parser.*;
-import org.sablecc.simplec.tool.Version;
 
 /**
  * Provides a compiler of a simple C like grammar with certain extensions..
@@ -25,11 +24,11 @@ public class Compiler
   private static short level;
   private static short instructionIndex;
   private static SymbolTable table;
+  private static Lexer lexer;
+  private static Parser parser;
 
   public static void main(String args[])
   {
-    System.out.println(Version.banner());
-
     if(args.length != 2)
     {
       System.out.println("usage:");
@@ -39,10 +38,12 @@ public class Compiler
 
     try
     {
-      Lexer lexer = new Lexer(new PushbackReader(new BufferedReader(
-        new FileReader(args[0])), 1024));
+      java.io.File tmpFile = new java.io.File(args[0]);
 
-      Parser parser = new Parser(lexer);
+      lexer = new Lexer(new PushbackReader(new BufferedReader(
+          new FileReader(args[0])), 1024));
+
+      parser = new Parser(lexer);
       Start tree = parser.parse();
       tree.apply(new FunctionCompiler());
 
@@ -109,5 +110,10 @@ public class Compiler
   protected static short getInstructionIndex()
   {
     return instructionIndex;
+  }
+
+  public static Lexer getLexer()
+  {
+    return lexer;
   }
 }
