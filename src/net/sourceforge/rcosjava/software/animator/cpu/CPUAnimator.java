@@ -1,17 +1,3 @@
-//***************************************************************************
-// FILE     : CPUAnimator.java
-// PACKAGE  : Animator.CPU
-// PURPOSE  : Class used to animate CPU
-// AUTHOR   : David Jones
-// MODIFIED : Andrew Newman
-// HISTORY  : 24/01/96  Created
-//            28/01/96  Modifying to become CPUAnimator
-//            23/03/96  Moved into CPU package
-//            02/02/97  Moved to Animator Package
-//            03/02/97  Seperated between Message Handler and Frame.
-//
-//***************************************************************************/
-
 package net.sourceforge.rcosjava.software.animator.cpu;
 
 import java.awt.*;
@@ -24,14 +10,34 @@ import net.sourceforge.rcosjava.messaging.messages.universal.UniversalMessageAda
 import net.sourceforge.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import net.sourceforge.rcosjava.software.memory.MemoryRequest;
 
+/**
+ * Sends and receives messages for the graphical representation of the P-Code
+ * CPU.
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 28/01/96  Modifying to become CPUAnimator
+ * </DD><DD>
+ * 23/03/96  Moved into CPU package
+ * </DD><DD>
+ * 02/02/97  Moved to Animator Package
+ * </DD><DD>
+ * 03/02/97  Seperated between Message Handler and Frame.
+ * </DD></DT>
+ * <P>
+ * @author Andrew Newman.
+ * @author David Jones.
+ * @version 1.00 $Date$
+ * @created 24th January 1996
+ */
 public class CPUAnimator extends RCOSAnimator
 {
   private static Context theContext;
   private CPUFrame cpuFrame;
-	private static final String MESSENGING_ID = "CPUAnimator";
+  private static final String MESSENGING_ID = "CPUAnimator";
 
   public CPUAnimator(AnimatorOffice aPostOffice, int x, int y,
-                     Image[] cpuImages)
+    Image[] cpuImages)
   {
     super(MESSENGING_ID, aPostOffice);
     theContext = new Context();
@@ -76,17 +82,17 @@ public class CPUAnimator extends RCOSAnimator
     cpuFrame.showCPU();
   }
 
-  public void updateStack(Memory mNewStack)
+  public void updateStack(Memory newStack)
   {
-    cpuFrame.updateStack(mNewStack);
+    cpuFrame.updateStack(newStack);
     cpuFrame.updateCode();
   }
 
-  public void loadCode(Memory mCode)
+  public void loadCode(Memory newCode)
   {
     try
     {
-      cpuFrame.loadCode(mCode);
+      cpuFrame.loadCode(newCode);
     }
     catch (Exception e)
     {

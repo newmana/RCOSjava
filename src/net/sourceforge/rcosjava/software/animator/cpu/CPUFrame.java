@@ -1,16 +1,3 @@
-//***************************************************************************
-// FILE     : CPUFrame.java
-// PACKAGE  : Animator.CPU
-// PURPOSE  : Class used to animate CPU
-// AUTHOR   : Andrew Newman (original by David Jones)
-// MODIFIED :
-// HISTORY  : 03/02/96  Created.
-//            01/01/97  Move to Animator.
-//            03/01/97  Changed Panel types to GridBagLayout.
-//            04/01/97  Got BasePointer and Code to work again.
-//            13/10/98  Converted to Java 1.1.
-//***************************************************************************/
-
 package net.sourceforge.rcosjava.software.animator.cpu;
 
 import java.awt.*;
@@ -23,6 +10,24 @@ import net.sourceforge.rcosjava.hardware.cpu.CPU;
 import net.sourceforge.rcosjava.hardware.cpu.Instruction;
 import net.sourceforge.rcosjava.hardware.memory.Memory;
 
+/**
+ * The actual graphical representation of the P-Code CPU.
+ * <P>
+ * <DT><B>History:</B>
+ * <DD>
+ * 01/01/97  Move to Animator.
+ * </DD><DD>
+ * 03/01/97  Changed Panel types to GridBagLayout.
+ * </DD><DD>
+ * 04/01/97  Got BasePointer and Code to work again.
+ * </DD><DD>
+ * 13/10/98  Converted to Java 1.1.
+ * </DD></DT>
+ * <P>
+ * @author Andrew Newman.
+ * @version 1.00 $Date$
+ * @created 3rd February 1996
+ */
 public class CPUFrame extends RCOSFrame
 {
   private CPUAnimator myCPUAnimator;
@@ -31,8 +36,7 @@ public class CPUFrame extends RCOSFrame
   private List stackList, codeList;
   private Image myImages[];
 
-  public CPUFrame(int x, int y, Image[] cpuImages,
-                  CPUAnimator thisCPUAnimator)
+  public CPUFrame(int x, int y, Image[] cpuImages, CPUAnimator thisCPUAnimator)
   {
     super();
     setTitle("CPU Animator");
@@ -153,7 +157,9 @@ public class CPUFrame extends RCOSFrame
       getBasePointer()));
   }
 
-  // load codeList with new code
+  /**
+   * load codeList with new code
+   */
   void loadCode(Memory ProcMemory)
   {
     int count, linesOfCode;
@@ -191,9 +197,9 @@ public class CPUFrame extends RCOSFrame
     }
   }
 
-  // make ProgramCounter instruction be in the middle
-  // of the code list
-
+  /**
+   * make ProgramCounter instruction be in the middle of the code list
+   */
   void updateCode()
   {
     int count;
@@ -232,9 +238,9 @@ public class CPUFrame extends RCOSFrame
     BPvalue.setText("0");
   }
 
-  // modify the stack List so that it represents the current state
-  // of the stack
-
+  /**
+   * Modify the stack List so that it represents the current state of the stack
+   */
   void updateStack(Memory theStack)
   {
     int count;
