@@ -82,11 +82,8 @@ public class Kernel extends OSMessageHandler
   private int timeProcessOn;
   private CPU myCPU;
   private Hashtable interruptHandlers = new Hashtable();
-  boolean runningProcess;
   private Schedule scheduleMessage = new Schedule(this);
   private RCOSProcess currentProcess;
-  private Object waitObj = new Object();
-  private boolean isWaiting = true;
 
   /**
    * Initialise Kernel
@@ -96,7 +93,6 @@ public class Kernel extends OSMessageHandler
   {
     super(MESSENGING_ID, postOffice);
     myCPU = new CPU(this);
-    runningProcess = false;
   }
 
   /**
@@ -136,16 +132,8 @@ public class Kernel extends OSMessageHandler
    */
   public boolean runningProcess()
   {
-    return runningProcess;
-  }
-
-  /**
-   * Set that a process is running.
-   *
-   */
-  public void processRunning()
-  {
-    runningProcess = true;
+    return (myCPU.isNewContext()) && (myCPU.getProcessCode() != null) &&
+      (myCPU.getProcessStack() != null);
   }
 
   /**
@@ -171,7 +159,6 @@ public class Kernel extends OSMessageHandler
    */
   public void nullProcess()
   {
-    runningProcess = false;
     myCPU.setNewContext();
     myCPU.setProcessCode(null);
     myCPU.setProcessStack(null);
@@ -195,22 +182,6 @@ public class Kernel extends OSMessageHandler
     //Sends context and current instruction.
     if (runningProcess())
     {
-      try
-      {
-        synchronized(waitObj)
-        {
-          if (isWaiting)
-          {
-            waitObj.wait();
-            isWaiting = false;
-          }
-        }
-      }
-      catch (InterruptedException ie)
-      {
-        ie.printStackTrace();
-      }
-
       SetContext contextMsg = new SetContext(this, myCPU.getContext());
       sendMessage(contextMsg);
       InstructionExecution executionMsg = new
@@ -240,8 +211,6 @@ public class Kernel extends OSMessageHandler
   {
     currentProcess = newProcess;
     myCPU.setContext(currentProcess.getContext());
-    runningProcess = true;
-    isWaiting = true;
 
     //Get new memory
     MemoryRequest memRead = new MemoryRequest(newProcess.getPID(),
@@ -275,11 +244,6 @@ public class Kernel extends OSMessageHandler
   public void setProcessStack(Memory newMemory)
   {
     myCPU.setProcessStack(newMemory);
-    synchronized(waitObj)
-    {
-      if (isWaiting)
-        waitObj.notify();
-    }
   }
 
   /**
