@@ -165,18 +165,10 @@ public class UniversalMessagePlayer extends OSMessageHandler
     myClient.openConnection();
 
     Object tmpObject;
-    boolean endOfMessages = false;
-
-    try
-    {
-      tmpObject = myClient.getRecFile(java.io.File.separatorChar +
+    int size = myClient.statRecFile(java.io.File.separatorChar +
           recordingName + java.io.File.separatorChar + messageCounter +
           ".xml");
-    }
-    catch (Exception e)
-    {
-      endOfMessages = true;
-    }
+    boolean endOfMessages = (size == 0);
 
     myClient.closeConnection();
     return endOfMessages;
