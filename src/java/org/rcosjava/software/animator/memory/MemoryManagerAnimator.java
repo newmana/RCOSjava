@@ -30,7 +30,7 @@ public class MemoryManagerAnimator extends RCOSAnimator
   private static MemoryManagerPanel panel;
 
   /**
-   * Constructor for the IPCManagerAnimator object
+   * Constructor for the MemoryManagerAnimator object
    *
    * @param postOffice Description of Parameter
    * @param images Description of Parameter

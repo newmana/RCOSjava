@@ -9,7 +9,6 @@ import java.util.*;
 import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.software.animator.RCOSPanel;
 import org.rcosjava.software.animator.support.RCOSBox;
-import org.rcosjava.software.animator.support.RCOSQueue;
 import org.rcosjava.software.animator.support.RCOSRectangle;
 import org.rcosjava.software.ipc.SharedMemory;
 import org.rcosjava.software.memory.MemoryManager;
@@ -17,7 +16,7 @@ import org.rcosjava.software.memory.MemoryReturn;
 
 /**
  * Based on the commands sent and received to the MMU and displays graphically
- * what is happening.
+ * what is happening to the raw memory storage.
  * <P>
  * @author Andrew Newman
  * @created 22nd July 2002
@@ -25,18 +24,6 @@ import org.rcosjava.software.memory.MemoryReturn;
  */
 public class MemoryManagerPanel extends RCOSPanel
 {
-  /**
-   * Default display when there is no semaphore or shared memory segments to
-   * display.
-   */
-  private static String NONE = " None      ";
-
-  /**
-   * Default display when there are semaphores or shared memory segments to
-   * display.
-   */
-  private static String SOME = " Select";
-
   /**
    * Images used to display UI.
    */
