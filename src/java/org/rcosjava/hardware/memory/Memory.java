@@ -147,7 +147,10 @@ public class Memory implements Serializable, Cloneable
    */
   public short[] getMemorySegment()
   {
-    return memorySegment;
+    short[] memorySegmentCopy = new short[memorySegment.length];
+    System.arraycopy(memorySegment, 0, memorySegmentCopy, 0,
+        memorySegment.length);
+    return memorySegmentCopy;
   }
 
   /**
