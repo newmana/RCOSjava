@@ -9,6 +9,8 @@ import org.rcosjava.messaging.postoffices.PostOffice;
 import org.rcosjava.messaging.postoffices.SimpleMessageHandler;
 import org.rcosjava.messaging.postoffices.animator.AnimatorMessageHandler;
 import org.rcosjava.messaging.postoffices.os.OSMessageHandler;
+import org.rcosjava.messaging.postoffices.universal.UniversalMessagePlayer;
+import org.rcosjava.messaging.postoffices.universal.UniversalMessageRecorder;
 import org.rcosjava.software.animator.about.AboutAnimator;
 import org.rcosjava.software.animator.cpu.CPUAnimator;
 import org.rcosjava.software.animator.disk.DiskSchedulerAnimator;
@@ -21,6 +23,7 @@ import org.rcosjava.software.animator.process.ProcessSchedulerAnimator;
 import org.rcosjava.software.animator.process.ProgramManagerAnimator;
 import org.rcosjava.software.animator.terminal.TerminalManagerAnimator;
 import org.rcosjava.software.disk.DiskScheduler;
+import org.rcosjava.software.disk.DiskManager;
 import org.rcosjava.software.filesystem.FileSystemManager;
 import org.rcosjava.software.ipc.IPC;
 import org.rcosjava.software.kernel.Kernel;
@@ -187,6 +190,33 @@ public class UniversalMessageAdapter extends MessageAdapter
    * @param theElement Description of Parameter
    */
   public void doMessage(TerminalManager theElement)
+  {
+  }
+
+  /**
+   * Description of the Method
+   *
+   * @param theElement Description of Parameter
+   */
+  public void doMessage(DiskManager theElement)
+  {
+  }
+
+  /**
+   * Description of the Method
+   *
+   * @param theElement Description of Parameter
+   */
+  public void doMessage(UniversalMessagePlayer theElement)
+  {
+  }
+
+  /**
+   * Description of the Method
+   *
+   * @param theElement Description of Parameter
+   */
+  public void doMessage(UniversalMessageRecorder theElement)
   {
   }
 
