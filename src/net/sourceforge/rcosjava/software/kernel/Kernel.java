@@ -20,7 +20,8 @@ import net.sourceforge.rcosjava.software.memory.*;
  * <P>
  * <DT><B>History:</B>
  * <DD>
- * 13/02/96 Created version to handle simple interaction between CPU and Terminal. DJ
+ * 13/02/96 Created version to handle simple interaction between CPU and
+ * Terminal. DJ
  * </DD><DD>
  * 23/03/96  Modified to use packages. DJ
  * </DD><DD>
@@ -40,7 +41,10 @@ import net.sourceforge.rcosjava.software.memory.*;
  * </DD><DD>
  * 13/08/98  Fixed incomplete/buggy Semaphore and Shared memory. AN
  * </DD><DD>
- * 02/04/2001 Added schedule message call.
+ * 02/04/2001 Added schedule message call. AN
+ * </DD><DD>
+ * 31/12/2001 Again fiddled with CHOUT dec was not correct after changes to CPU
+ * AN.
  * </DD></DT>
  * <P>
  * @see net.sourceforge.rcosjava.hardware.cpu.CPU
@@ -51,19 +55,55 @@ import net.sourceforge.rcosjava.software.memory.*;
  */
 public class Kernel extends OSMessageHandler
 {
+  /**
+   * The name of the Kernel registered to the post office.
+   */
   private static final String MESSENGING_ID = "Kernel";
 
+  /**
+   * Number of ticks before a process is pre-empted.
+   */
   private int quantum = 2;
+
+  /**
+   * Total number of timer interrupts.
+   */
   private int timerInterrupts = 0;
+
+  /**
+   * The number of ticks a process has been on.
+   */
   private int timeProcessOn;
+
+  /**
+   * CPU accessed by the Kernel.
+   */
   private CPU myCPU;
+
+  /**
+   * Stores the interrupts.
+   */
   private HashMap interruptHandlers = new HashMap();
+
+  /**
+   * This is the schedule message to send to the process scheduler.  A global
+   * so that it's not reinitialized.
+   */
   private Schedule scheduleMessage = new Schedule(this);
+
+  /**
+   * Currently executing RCOS process.
+   */
   private RCOSProcess currentProcess;
+
+  /**
+   * Whether the kernel is currently executing a process or not.
+   */
   private boolean runningProcess;
 
   /**
    * Initialise Kernel
+   *
    * @param postOffice	central post office for messaging system
    */
   public Kernel(OSOffice postOffice)
@@ -356,8 +396,6 @@ public class Kernel extends OSMessageHandler
     }
     else if (call.isChOut())
     {
-      //Decrement of stack pointer before getting value. Bug fix.
-      myCPU.getContext().decStackPointer();
       ChOut message = new
         ChOut(this, getCurrentProcess().getTerminalId(),
         (char)
