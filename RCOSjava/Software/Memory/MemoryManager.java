@@ -55,13 +55,15 @@ public class MemoryManager extends OSMessageHandler
 
   public void allocatePages(MemoryRequest mrRequest)
   {
-    MemoryReturn mrReturn = thePageHandler.open(mrRequest.getPID(),
-      mrRequest.getMemoryType(), mrRequest.getSize());
-    // Return message.
-    if (mrReturn.getSize() > 0)
+    try
     {
+      MemoryReturn mrReturn = thePageHandler.open(mrRequest.getPID(),
+        mrRequest.getMemoryType(), mrRequest.getSize());
       AllocatedPages msg = new AllocatedPages(this, mrReturn);
       sendMessage(msg);
+    }
+    catch (MemoryOpenFailedException e)
+    {
     }
   }
 
