@@ -66,9 +66,9 @@ public class CPUAnimator extends RCOSAnimator
     cpuFrame.setVisible(false);
   }
 
-  public void setContext(Context cNewContext)
+  public void setContext(Context newContext)
   {
-    theContext = cNewContext;
+    theContext = newContext;
     cpuFrame.setContext();
   }
 
