@@ -397,7 +397,8 @@ Productions
         {while}        while l_par conditional_expression r_par compound_statement |
         {do}           do compound_statement while l_par conditional_expression r_par semicolon |
         {for}          for l_par [start]:basic_statement? [sc_one]:semicolon conditional_expression? [sc_two]:semicolon [iter]:basic_statement? r_par compound_statement |
-        {switch}       switch l_par value r_par case_statements;
+        {switch}       switch l_par value r_par case_statements |
+        {rcos_stmt}    rcos_statement;
 
     rcos_statement =
         {printf1}      printf l_par string_litteral r_par semicolon |
@@ -418,18 +419,18 @@ Productions
         {fprintf2}     fprintf l_par [file_stream]:value [c1]:comma [control]:printf_control_strings [c2]:comma arrayref r_par semicolon |
         {fscanf1}      fscanf l_par [file_stream]:value [c1]:comma [control]:value [c2]:comma value r_par semicolon |
         {fscanf2}      fscanf l_par [file_stream]:value [c1]:comma [control]:value [c2]:comma arrayref r_par semicolon |
-        {semclose}     semclose l_par [handle]:identifier r_par semicolon |
-        {semcreate1}   semcreate l_par [handle]:value r_par semicolon |
-        {semcreate2}   semcreate l_par [handle]:value comma [init_value]:value r_par semicolon |
-        {semopen}      semopen l_par [id]:value r_par semicolon |
-        {semsignal}    semsignal l_par [handle]:identifier r_par semicolon |
-        {semwait}      semwait l_par [handle]:identifier r_par semicolon |
-        {shrclose}     shrclose l_par [handle]:identifier r_par semicolon |
-        {shrcreate}    shrcreate l_par [id]:value comma [size]:value r_par semicolon |
-        {shropen}      shropen l_par [id]:value r_par semicolon |
-        {shrread}      shrread l_par [handle]:identifier comma [size]:value r_par semicolon |
-        {shrwrite}     shrwrite l_par [handle]:identifier [c1]:comma [offset]:value [c2]:comma [variable]:identifier [c3]:comma r_par semicolon |
-        {shrsize}      shrsize l_par [handle]:identifier r_par semicolon |
+        {semclose}     varname equal semclose l_par [handle]:value r_par semicolon |
+        {semcreate1}   varname equal semcreate l_par [handle]:value r_par semicolon |
+        {semcreate2}   varname equal semcreate l_par [handle]:value comma [init_value]:value r_par semicolon |
+        {semopen}      varname equal semopen l_par [id]:value r_par semicolon |
+        {semsignal}    varname equal semsignal l_par [handle]:value r_par semicolon |
+        {semwait}      varname equal semwait l_par [handle]:value r_par semicolon |
+        {shrclose}     varname equal shrclose l_par [handle]:value r_par semicolon |
+        {shrcreate}    varname equal shrcreate l_par [id]:value comma [size]:value r_par semicolon |
+        {shropen}      varname equal shropen l_par [id]:value r_par semicolon |
+        {shrread}      varname equal shrread l_par [handle]:value comma [size]:value r_par semicolon |
+        {shrwrite}     varname equal shrwrite l_par [handle]:value [c1]:comma [offset]:value [c2]:comma [variable]:identifier [c3]:comma r_par semicolon |
+        {shrsize}      varname equal shrsize l_par [handle]:value r_par semicolon |
         {fork}         fork l_par r_par semicolon |
         {exec1}        exec l_par [file_name]:value r_par semicolon |
         {exec2}        exec l_par [file_name]:arrayref r_par semicolon;
@@ -512,8 +513,7 @@ Productions
         {unop}       unop identifier |
         {par_unop}   l_par unop identifier r_par |
         {cast}       l_par type_name r_par varname |
-        {cast_const} l_par type_name r_par constant |
-        {rcos_statement} rcos_statement;
+        {cast_const} l_par type_name r_par constant;
 
     simple_expression =
         {varname} varname |
