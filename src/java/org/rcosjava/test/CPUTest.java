@@ -146,17 +146,17 @@ public class CPUTest extends TestCase
     instruction2 = (Instruction) Instruction.CAL_INSTRUCTION.clone();
     instruction2.setByteParameter((byte) 1);
     instruction2.setWordParameter((short) 12);
-    assert("Two instructions should be equal (2)",
+    assertTrue("Two instructions should be equal (2)",
         !instruction1.equals(instruction2));
     instruction2 = (Instruction) Instruction.STO_INSTRUCTION.clone();
     instruction2.setByteParameter((byte) 2);
     instruction2.setWordParameter((short) 12);
-    assert("Two instructions should be unequal",
+    assertTrue("Two instructions should be unequal",
         !instruction1.equals(instruction2));
     instruction2 = (Instruction) Instruction.STO_INSTRUCTION.clone();
     instruction2.setByteParameter((byte) 1);
     instruction2.setWordParameter((short) 42);
-    assert("Two instructions should be uneqal (2)",
+    assertTrue("Two instructions should be uneqal (2)",
         !instruction1.equals(instruction2));
   }
 

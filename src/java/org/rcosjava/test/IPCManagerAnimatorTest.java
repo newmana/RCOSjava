@@ -90,9 +90,9 @@ public class IPCManagerAnimatorTest extends TestCase
       animator.semaphoreCreated("test", 1, 1);
       semaphoreMap = animator.getSemaphoreMap();
       semaphore = (Semaphore) semaphoreMap.get("test");
-      assert("Creator PID is 1", semaphore.getCreatorId() == 1);
-      assert("Name is 'test'", semaphore.getName().equals("test"));
-      assert("Value is 1", semaphore.getValue() == 1);
+      assertTrue("Creator PID is 1", semaphore.getCreatorId() == 1);
+      assertTrue("Name is 'test'", semaphore.getName().equals("test"));
+      assertTrue("Value is 1", semaphore.getValue() == 1);
 
       // Test waiting
       animator.semaphoreWaiting("test", 1, 1);
@@ -101,12 +101,12 @@ public class IPCManagerAnimatorTest extends TestCase
       semaphore = (Semaphore) semaphoreMap.get("test");
       attached = semaphore.getAttachedProcesses();
       waiting = semaphore.getWaitingProcesses();
-      assert("Creator PID is 1", semaphore.getCreatorId() == 1);
-      assert("Name is 'test'", semaphore.getName().equals("test"));
-      assert("Value expected was 1 but got " + semaphore.getValue(),
+      assertTrue("Creator PID is 1", semaphore.getCreatorId() == 1);
+      assertTrue("Name is 'test'", semaphore.getName().equals("test"));
+      assertTrue("Value expected was 1 but got " + semaphore.getValue(),
           semaphore.getValue() == 1);
-      assert("Attached processes should be one ", attached.size() == 1);
-      assert("Waiting process should be one was " + waiting.size(),
+      assertTrue("Attached processes should be one ", attached.size() == 1);
+      assertTrue("Waiting process should be one was " + waiting.size(),
           waiting.size() == 1);
 
       // Test open
@@ -116,12 +116,12 @@ public class IPCManagerAnimatorTest extends TestCase
       semaphore = (Semaphore) semaphoreMap.get("test");
       attached = semaphore.getAttachedProcesses();
       waiting = semaphore.getWaitingProcesses();
-      assert("Creator PID is 1", semaphore.getCreatorId() == 1);
-      assert("Name is 'test'", semaphore.getName().equals("test"));
-      assert("Value expected was 1 but got " + semaphore.getValue(),
+      assertTrue("Creator PID is 1", semaphore.getCreatorId() == 1);
+      assertTrue("Name is 'test'", semaphore.getName().equals("test"));
+      assertTrue("Value expected was 1 but got " + semaphore.getValue(),
           semaphore.getValue() == 1);
-      assert("Attached processes should be two ", attached.size() == 2);
-      assert("Waiting process should be one was " + waiting.size(),
+      assertTrue("Attached processes should be two ", attached.size() == 2);
+      assertTrue("Waiting process should be one was " + waiting.size(),
           waiting.size() == 1);
 
       // Test signal
@@ -131,12 +131,12 @@ public class IPCManagerAnimatorTest extends TestCase
       semaphore = (Semaphore) semaphoreMap.get("test");
       attached = semaphore.getAttachedProcesses();
       waiting = semaphore.getWaitingProcesses();
-      assert("Creator PID is 1", semaphore.getCreatorId() == 1);
-      assert("Name is 'test'", semaphore.getName().equals("test"));
-      assert("Value expected was 0 but got " + semaphore.getValue(),
+      assertTrue("Creator PID is 1", semaphore.getCreatorId() == 1);
+      assertTrue("Name is 'test'", semaphore.getName().equals("test"));
+      assertTrue("Value expected was 0 but got " + semaphore.getValue(),
           semaphore.getValue() == 0);
-      assert("Attached processes should be two", attached.size() == 2);
-      assert("Waiting process should be zero was " + waiting.size(),
+      assertTrue("Attached processes should be two", attached.size() == 2);
+      assertTrue("Waiting process should be zero was " + waiting.size(),
           waiting.size() == 0);
 
       // Test close
@@ -144,7 +144,7 @@ public class IPCManagerAnimatorTest extends TestCase
       semaphoreMap = animator.getSemaphoreMap();
       semaphore = (Semaphore) semaphoreMap.get("test");
       attached = semaphore.getAttachedProcesses();
-      assert("Attached processes should be one", attached.size() == 1);
+      assertTrue("Attached processes should be one", attached.size() == 1);
 
       animator.semaphoreClosed("test", 1, 1);
       semaphoreMap = animator.getSemaphoreMap();

@@ -133,14 +133,14 @@ public class ProcessQueueTest extends TestCase
       tmpProcess1 = new RCOSProcess(1, "test.pll", 123, 1, 1);
       testQueue.insertProcess(tmpProcess1);
       testQueue.removeProcess(1);
-      assert("No processes after insertion and removal", testQueue.size() == 0);
+      assertTrue("No processes after insertion and removal", testQueue.size() == 0);
 
       testQueue.insertProcess(tmpProcess1);
       testQueue.insertProcess(tmpProcess1);
-      assert("Should only be one process", testQueue.size() == 1);
+      assertTrue("Should only be one process", testQueue.size() == 1);
 
       testQueue.removeProcess(1);
-      assert("No processes left after removal", testQueue.size() == 0);
+      assertTrue("No processes left after removal", testQueue.size() == 0);
     }
     catch (Exception e)
     {

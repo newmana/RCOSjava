@@ -85,7 +85,7 @@ public class ProcessSchedulerTest extends TestCase
       // Zombie process created.
       scheduler.zombieCreated(tmpProcess1);
 
-      assert("Should have process in zombie created queue",
+      assertTrue("Should have process in zombie created queue",
           scheduler.getZombieCreatedQueue().getProcess(1).equals(tmpProcess1));
 
       // Zombie process allocated a terminal
@@ -94,53 +94,53 @@ public class ProcessSchedulerTest extends TestCase
       // Zombie process moved to read queue
       scheduler.zombieToReady(tmpProcess1);
 
-      assert("Should have process in ready queue",
+      assertTrue("Should have process in ready queue",
           scheduler.getReadyQueue().getProcess(1).equals(tmpProcess1));
-      assert("Zombie queue should be 0",
+      assertTrue("Zombie queue should be 0",
           scheduler.getZombieCreatedQueue().size() == 0);
 
       // Schedule any processes running
       scheduler.schedule();
 
       // Should've moved it to the executing queue
-      assert("Ready queue should be empty",
+      assertTrue("Ready queue should be empty",
           scheduler.getReadyQueue().size() == 0);
-      assert("Process should be executing",
+      assertTrue("Process should be executing",
           scheduler.getExecutingProcess().equals(tmpProcess1));
 
       // Process has finished executing (quantum expired)
       scheduler.runningToReady(tmpProcess1);
-      assert("Executing queue should be empty",
+      assertTrue("Executing queue should be empty",
           !scheduler.runningProcess());
-      assert("Executing queue should be empty",
+      assertTrue("Executing queue should be empty",
           scheduler.getExecutingProcess() == null);
-      assert("Process should be in ready queue",
+      assertTrue("Process should be in ready queue",
           scheduler.getReadyQueue().getProcess(1).equals(tmpProcess1));
 
       // Null process
       scheduler.nullProcess();
-      assert("Executing queue should be empty",
+      assertTrue("Executing queue should be empty",
           scheduler.getExecutingProcess() == null);
-      assert("Executing queue should be empty",
+      assertTrue("Executing queue should be empty",
           scheduler.getExecutingQueue().size() == 0);
 
       // Schedule
       scheduler.schedule();
       scheduler.schedule();
-      assert("Ready queue should be empty",
+      assertTrue("Ready queue should be empty",
           scheduler.getReadyQueue().size() == 0);
-      assert("Process should be executing",
+      assertTrue("Process should be executing",
           scheduler.getExecutingProcess().equals(tmpProcess1));
 
       // Process finished
       scheduler.processFinished(tmpProcess1);
-      assert("Executing queue should be empty",
+      assertTrue("Executing queue should be empty",
           scheduler.getExecutingProcess() == null);
-      assert("Ready queue should be empty",
+      assertTrue("Ready queue should be empty",
           scheduler.getReadyQueue().size() == 0);
-      assert("Blocked queue should be empty",
+      assertTrue("Blocked queue should be empty",
           scheduler.getBlockedQueue().size() == 0);
-      assert("Zombie Created queue should be empty",
+      assertTrue("Zombie Created queue should be empty",
           scheduler.getZombieCreatedQueue().size() == 0);
     }
     catch (Exception e)
@@ -165,7 +165,7 @@ public class ProcessSchedulerTest extends TestCase
       // Zombie process created.
       scheduler.zombieCreated(tmpProcess1);
 
-      assert("Should have process in zombie created queue",
+      assertTrue("Should have process in zombie created queue",
           scheduler.getZombieCreatedQueue().getProcess(1).equals(tmpProcess1));
 
       // Zombie process allocated a terminal
@@ -174,94 +174,94 @@ public class ProcessSchedulerTest extends TestCase
       // Zombie process moved to read queue
       scheduler.zombieToReady(tmpProcess1);
 
-      assert("Should have process in ready queue",
+      assertTrue("Should have process in ready queue",
           scheduler.getReadyQueue().getProcess(1).equals(tmpProcess1));
-      assert("Zombie queue should be 0",
+      assertTrue("Zombie queue should be 0",
           scheduler.getZombieCreatedQueue().size() == 0);
 
       // Schedule any processes running
       scheduler.schedule();
 
       // Should've moved it to the executing queue
-      assert("Ready queue should be empty",
+      assertTrue("Ready queue should be empty",
           scheduler.getReadyQueue().size() == 0);
-      assert("Process should be executing",
+      assertTrue("Process should be executing",
           scheduler.getExecutingProcess().equals(tmpProcess1));
 
       // Process has finished executing (quantum expired)
       scheduler.runningToReady(tmpProcess1);
-      assert("Executing queue should be empty",
+      assertTrue("Executing queue should be empty",
           !scheduler.runningProcess());
-      assert("Executing queue should be empty",
+      assertTrue("Executing queue should be empty",
           scheduler.getExecutingProcess() == null);
-      assert("Process should be in ready queue",
+      assertTrue("Process should be in ready queue",
           scheduler.getReadyQueue().getProcess(1).equals(tmpProcess1));
 
       // Null process
       scheduler.nullProcess();
-      assert("Executing queue should be empty",
+      assertTrue("Executing queue should be empty",
           scheduler.getExecutingProcess() == null);
-      assert("Executing queue should be empty",
+      assertTrue("Executing queue should be empty",
           scheduler.getExecutingQueue().size() == 0);
 
       // Schedule
       scheduler.schedule();
       scheduler.schedule();
-      assert("Ready queue should be empty",
+      assertTrue("Ready queue should be empty",
           scheduler.getReadyQueue().size() == 0);
-      assert("Process should be executing",
+      assertTrue("Process should be executing",
           scheduler.getExecutingProcess().equals(tmpProcess1));
 
       // Running to blocked
       scheduler.runningToBlocked(tmpProcess1);
-      assert("Executing queue should be empty",
+      assertTrue("Executing queue should be empty",
           scheduler.getExecutingProcess() == null);
-      assert("Executing queue should be 0 in size",
+      assertTrue("Executing queue should be 0 in size",
           scheduler.getExecutingQueue().size() == 0);
-      assert("Ready queue should be empty",
+      assertTrue("Ready queue should be empty",
           scheduler.getReadyQueue().size() == 0);
-      assert("Blocked queue size should be 1",
+      assertTrue("Blocked queue size should be 1",
           scheduler.getBlockedQueue().size() == 1);
-      assert("Process should be in blocked queue",
+      assertTrue("Process should be in blocked queue",
           scheduler.getBlockedQueue().getProcess(1).equals(tmpProcess1));
 
       // Null process
       scheduler.nullProcess();
-      assert("Executing queue should be empty",
+      assertTrue("Executing queue should be empty",
           scheduler.getExecutingProcess() == null);
-      assert("Executing queue should be empty",
+      assertTrue("Executing queue should be empty",
           scheduler.getExecutingQueue().size() == 0);
 
       // Blocked to Ready
       scheduler.blockedToReady(tmpProcess1);
-      assert("Executing queue should be empty",
+      assertTrue("Executing queue should be empty",
           scheduler.getExecutingProcess() == null);
-      assert("Executing queue should be 0 in size",
+      assertTrue("Executing queue should be 0 in size",
           scheduler.getExecutingQueue().size() == 0);
-      assert("Ready queue should be be 1",
+      assertTrue("Ready queue should be be 1",
           scheduler.getReadyQueue().size() == 1);
-      assert("Process should be in ready queue",
+      assertTrue("Process should be in ready queue",
           scheduler.getReadyQueue().getProcess(1).equals(tmpProcess1));
-      assert("Blocked queue size should be empty",
+      assertTrue("Blocked queue size should be empty",
           scheduler.getBlockedQueue().size() == 0);
 
       // Schedule
       scheduler.schedule();
       scheduler.schedule();
-      assert("Ready queue should be empty",
+      assertTrue("Ready queue should be empty",
           scheduler.getReadyQueue().size() == 0);
-      assert("Process should be executing",
+      assertTrue("Process should be executing",
           scheduler.getExecutingProcess().equals(tmpProcess1));
 
       // Process finished
       scheduler.processFinished(tmpProcess1);
-      assert("Executing queue should be empty",
+      assertTrue("Executing queue should be empty",
           scheduler.getExecutingProcess() == null);
-      assert("Ready queue should be empty",
+      assertTrue("Ready queue should be empty",
           scheduler.getReadyQueue().size() == 0);
-      assert("Blocked queue should be empty",
+      assertTrue("Blocked queue should be empty",
           scheduler.getBlockedQueue().size() == 0);
-      assert("Zombie Created queue should be empty",
+      assertTrue("Zombie Created queue should be empty",
           scheduler.getZombieCreatedQueue().size() == 0);
     }
     catch (Exception e)
