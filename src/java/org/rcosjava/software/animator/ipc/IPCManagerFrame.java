@@ -558,11 +558,6 @@ public class IPCManagerFrame extends RCOSFrame
   void sharedMemoryCreated(String sharedMemoryId, MemoryReturn memoryReturn,
       Memory memory)
   {
-
-    System.out.println("Shm created: " + sharedMemoryId);
-    System.out.println("Shm created: " + memoryReturn.getPID());
-    System.out.println("Shm created: " + memory.toString());
-
     if (shmOption.getItemCount() == 1)
     {
       shmOption.removeAll();
@@ -607,6 +602,22 @@ public class IPCManagerFrame extends RCOSFrame
     if (tmpGraphic != null)
     {
       tmpGraphic.removeProcess(pid);
+
+      // Remove the last graphic.
+      if (tmpGraphic.attachedProcesses() == 0)
+      {
+        shmOption.remove(sharedMemoryId);
+        if (shmOption.getItemCount() == 1)
+        {
+          shmOption.removeAll();
+          shmOption.add(NONE);
+          selectedSharedMemoryName = NONE;
+        }
+        else
+        {
+          selectedSharedMemoryName = SOME;
+        }
+      }
     }
     updateSharedMemoryQueue();
   }
@@ -631,9 +642,6 @@ public class IPCManagerFrame extends RCOSFrame
    */
   void sharedMemoryWrote(String sharedMemoryId, Memory memory)
   {
-    System.out.println("Shm wrote: " + sharedMemoryId);
-    System.out.println("Shm wrote: " + memory.toString());
-
     SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
         sharedMemoryMap.get(sharedMemoryId);
 
@@ -688,61 +696,61 @@ public class IPCManagerFrame extends RCOSFrame
   /**
    * Description of the Method
    *
-   * @param iID Description of Parameter
-   * @param bType Description of Parameter
+   * @param pid Description of Parameter
+   * @param memoryType Description of Parameter
    */
-  void readingMemory(int iID, byte bType)
+  void readingMemory(int pid, byte memoryType)
   {
-    colourMemory(MemoryGraphic.readingColour, iID, bType);
+    colourMemory(MemoryGraphic.readingColour, pid, memoryType);
   }
 
   /**
    * Description of the Method
    *
-   * @param iID Description of Parameter
-   * @param bType Description of Parameter
+   * @param pid Description of Parameter
+   * @param memoryType Description of Parameter
    */
-  void writingMemory(int iID, byte bType)
+  void writingMemory(int pid, byte memoryType)
   {
-    colourMemory(MemoryGraphic.writingColour, iID, bType);
+    colourMemory(MemoryGraphic.writingColour, pid, memoryType);
   }
 
   /**
    * Description of the Method
    *
-   * @param iID Description of Parameter
-   * @param bType Description of Parameter
+   * @param pid Description of Parameter
+   * @param memoryType Description of Parameter
    */
-  void finishedReadingMemory(int iID, byte bType)
+  void finishedReadingMemory(int pid, byte memoryType)
   {
-    colourMemory(MemoryGraphic.allocatedColour, iID, bType);
+    colourMemory(MemoryGraphic.allocatedColour, pid, memoryType);
   }
 
   /**
    * Description of the Method
    *
-   * @param iID Description of Parameter
-   * @param bType Description of Parameter
+   * @param pid Description of Parameter
+   * @param memoryType Description of Parameter
    */
-  void finishedWritingMemory(int iID, byte bType)
+  void finishedWritingMemory(int pid, byte memoryType)
   {
-    colourMemory(MemoryGraphic.allocatedColour, iID, bType);
+    colourMemory(MemoryGraphic.allocatedColour, pid, memoryType);
   }
 
   /**
    * Description of the Method
    *
    * @param cColor Description of Parameter
-   * @param iID Description of Parameter
+   * @param pid Description of Parameter
    * @param bMemoryType Description of Parameter
    */
-  private void colourMemory(Color cColor, int iID, byte bMemoryType)
+  private void colourMemory(Color color, int pid, byte memoryType)
   {
     for (int count = 0; count < MemoryManager.MAX_PAGES; count++)
     {
-      if (memoryGraphics[count].isMemory(iID, bMemoryType))
+      if (memoryGraphics[count].isMemory(pid, memoryType))
       {
-        memoryGraphics[count].setCurrentColour(cColor);
+        memoryGraphics[count].setCurrentColour(color);
       }
     }
   }
@@ -781,17 +789,15 @@ public class IPCManagerFrame extends RCOSFrame
   {
     //Reset values
     shmQueue.removeAllFromQueue();
-
     shmList.removeAll();
+
     //Check that it's a real semaphore
     if (!selectedSharedMemoryName.startsWith(NONE) &&
         !selectedSharedMemoryName.startsWith(SOME))
     {
-      System.out.println("Got: " + selectedSharedMemoryName);
       SemaphoreSharedMemoryGraphic tmpGraphic = (SemaphoreSharedMemoryGraphic)
           sharedMemoryMap.get(selectedSharedMemoryName);
 
-      System.out.println("Got: " + tmpGraphic.getValue().getClass());
       shmList.add((String) tmpGraphic.getValue());
 
       Iterator tmpIter = tmpGraphic.getAttachedProcesses();
@@ -801,7 +807,7 @@ public class IPCManagerFrame extends RCOSFrame
         shmQueue.addToQueue("P" + ((Integer) tmpIter.next()).toString());
       }
     }
-    semQueue.repaint();
+    shmQueue.repaint();
   }
 
   /**
