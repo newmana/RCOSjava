@@ -49,6 +49,7 @@ public class Semaphore implements Serializable
     name = newName;
     creatorId = newCreatorId;
     value = newValue;
+    attachProcess(newCreatorId);
   }
 
   /**
@@ -130,5 +131,25 @@ public class Semaphore implements Serializable
   public int getValue()
   {
     return value;
+  }
+
+  /**
+   * Returns the attached process list.
+   *
+   * @return the attached process list.
+   */
+  public List getAttachedProcesses()
+  {
+    return attachedProcesses;
+  }
+
+  /**
+   * Returns the waiting process list.
+   *
+   * @return the waiting process list.
+   */
+  public List getWaitingProcesses()
+  {
+    return waitingProcesses;
   }
 }
