@@ -36,6 +36,14 @@ public class Array extends Symbol
     size = arraySize;
   }
 
+  public void handleIntLiteral(StatementCompiler compiler,
+    String varValue)
+  {
+    short varIntValue = Short.parseShort(varValue.trim());
+    compiler.writePCode(new Instruction(OpCode.LITERAL.getValue(), (byte) 0,
+      varIntValue));
+  }
+
   public void handleCharLiteral(StatementCompiler compiler, String newVarValue)
   {
     varValue = newVarValue;
