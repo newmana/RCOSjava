@@ -102,7 +102,7 @@ public class FileServer
    *
    * @param directory Description of Parameter
    */
-  public void handleCreateDir(String directory)
+  public synchronized void handleCreateDir(String directory)
   {
     boolean success = false;
     File tmpDirectory = new File(directory);
