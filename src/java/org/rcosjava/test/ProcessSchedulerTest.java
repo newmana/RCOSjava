@@ -4,7 +4,10 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.messaging.postoffices.os.OSOffice;
+import org.rcosjava.messaging.messages.universal.NewProcess;
+import org.rcosjava.software.process.ProgramManager;
 import org.rcosjava.software.process.ProcessQueue;
 import org.rcosjava.software.process.RCOSProcess;
 import org.rcosjava.software.process.ProcessScheduler;
@@ -78,7 +81,9 @@ public class ProcessSchedulerTest extends TestCase
     try
     {
       scheduler = new ProcessScheduler(new OSOffice("test"));
-      tmpProcess1 = new RCOSProcess(1, "test.pll", 123, 1, 1);
+      scheduler.newProcess(new NewProcess(scheduler, "test.pll", new Memory(),
+          10));
+      tmpProcess1 = (RCOSProcess) scheduler.getAllProcesses().get(new Integer(1));
 
       // Schedule any processes running
       scheduler.schedule();
@@ -158,7 +163,9 @@ public class ProcessSchedulerTest extends TestCase
     try
     {
       scheduler = new ProcessScheduler(new OSOffice("test"));
-      tmpProcess1 = new RCOSProcess(1, "test.pll", 123, 1, 1);
+      scheduler.newProcess(new NewProcess(scheduler, "test.pll", new Memory(),
+          10));
+      tmpProcess1 = (RCOSProcess) scheduler.getAllProcesses().get(new Integer(1));
 
       // Schedule any processes running
       scheduler.schedule();
@@ -279,7 +286,9 @@ public class ProcessSchedulerTest extends TestCase
     try
     {
       scheduler = new ProcessScheduler(new OSOffice("test"));
-      tmpProcess1 = new RCOSProcess(1, "test.pll", 123, 1, 1);
+      scheduler.newProcess(new NewProcess(scheduler, "test.pll", new Memory(),
+          10));
+      tmpProcess1 = (RCOSProcess) scheduler.getAllProcesses().get(new Integer(1));
 
       // Schedule any processes running
       scheduler.schedule();
