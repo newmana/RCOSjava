@@ -4,8 +4,8 @@ import java.awt.*;
 import java.awt.event.*;
 import org.rcosjava.hardware.cpu.Interrupt;
 import org.rcosjava.hardware.terminal.HardwareTerminal;
+import org.rcosjava.messaging.messages.os.AddInterrupt;
 import org.rcosjava.messaging.messages.os.BlockCurrentProcess;
-import org.rcosjava.messaging.messages.os.HandleInterrupt;
 import org.rcosjava.messaging.messages.os.RegisterInterruptHandler;
 import org.rcosjava.messaging.messages.os.ReturnValue;
 import org.rcosjava.messaging.messages.universal.BlockedToReady;
@@ -94,12 +94,9 @@ public class SoftwareTerminal extends OSMessageHandler
     softwareBuffer = new LIFOQueue(10, 10);
 
     // create and register a terminal Interrupt handler
-    terminalIH = new TerminalInterruptHandler(getId(), aPostOffice,
-        getId() + "KeyPress");
-
+    terminalIH = new TerminalInterruptHandler(this, getId() + "KeyPress");
     RegisterInterruptHandler msg = new
-        RegisterInterruptHandler((InterruptHandler) terminalIH);
-
+        RegisterInterruptHandler(this, terminalIH);
     sendMessage(msg);
   }
 
@@ -291,7 +288,7 @@ public class SoftwareTerminal extends OSMessageHandler
    */
   public void sendInterrupt(Interrupt newInterrupt)
   {
-    HandleInterrupt msg = new HandleInterrupt(this, newInterrupt);
+    AddInterrupt msg = new AddInterrupt(this, newInterrupt);
     sendMessage(msg);
   }
 
