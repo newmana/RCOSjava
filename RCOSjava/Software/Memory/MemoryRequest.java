@@ -11,11 +11,10 @@
 
 package Software.Memory;
 
-import java.lang.Integer;
+import java.io.Serializable;
 import Hardware.Memory.Memory;
-import MessageSystem.* ;
 
-public class MemoryRequest
+public class MemoryRequest implements Serializable
 {
   private int iProcessID;
   private byte bMemoryType;

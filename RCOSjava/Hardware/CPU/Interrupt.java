@@ -1,6 +1,6 @@
 //*******************************************************************/
 // FILE     : Interrupt.java
-// PURPOSE  : Used by CPU to maintain a queue of Interrupts and 
+// PURPOSE  : Used by CPU to maintain a queue of Interrupts and
 //            when they should occur.
 //
 // AUTHOR   : David Jones
@@ -12,7 +12,9 @@
 
 package Hardware.CPU;
 
-public class Interrupt
+import java.io.Serializable;
+
+public class Interrupt implements Serializable
 {
   private int iTime;
   private String sType;
@@ -22,22 +24,22 @@ public class Interrupt
     iTime = aTime;
     sType = aType;
   }
-  
+
   public int getTime()
-  { 
+  {
     return iTime;
   }
-  
+
   public String getType()
-  { 
+  {
     return sType;
   }
-  
+
   public void setTime(int aTime)
   {
     iTime = aTime;
   }
-  
+
   public void setType(String aType)
   {
     sType = aType;

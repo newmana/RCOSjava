@@ -180,6 +180,7 @@ public class FileClient
   public void writeRecFile(String sFileName, Object object)
     throws Exception
   {
+    System.out.println("Serializing: " + object.getClass());
     KOMLSerializer serializer = null;
     ByteArrayOutputStream tmpBuffer = new ByteArrayOutputStream();
     try

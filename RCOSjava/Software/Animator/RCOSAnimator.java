@@ -1,13 +1,3 @@
-//***************************************************************************
-// FILE     : RCOSAnimator.java
-// PACKAGE  : Animator
-// PURPOSE  : Root Animator class.
-// AUTHOR   : Andrew Newman
-// MODIFIED :
-// HISTORY  : 10/1/97  Created.
-//
-//***************************************************************************/
-
 package Software.Animator;
 
 import java.awt.*;
@@ -17,6 +7,15 @@ import MessageSystem.PostOffices.Animator.AnimatorMessageHandler;
 import MessageSystem.PostOffices.Animator.AnimatorOffice;
 import MessageSystem.Messages.Universal.UniversalMessageAdapter;
 
+/**
+ * Root Animator class.
+ * <P>
+ * HISTORY:
+ * <P>
+ * @author Andrew Newman.
+ * @created    10th January 1996
+ * @version 1.00 $Date$
+ */
 public abstract class RCOSAnimator extends AnimatorMessageHandler
 {
   //By default registers to the post office.

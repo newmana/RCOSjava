@@ -1,19 +1,3 @@
-//*************************************************************************
-//FILE     : ProgramManagerAnimator.java
-//PACKAGE  : Animator
-//PURPOSE  : To communicate via messages and via awt Events with the main
-//           RCOS frame and other components. It's functions are to set up
-//           and comunicate with a remote server for the loading of
-//           programs.
-//AUTHOR   : Andrew Newman, Brett Carter
-//MODIFIED :
-//HISTORY  : 19/3/96  Created.
-//         : 31/3/96  DJ Added fifoQueue for filenames
-//         : 30/12/96 Rewritten with frame moved to Animators.
-//         : 1/1/97   Section from Program Manager moved here.
-//
-//*************************************************************************
-
 package Software.Animator.Process;
 
 import java.awt.*;
@@ -31,14 +15,25 @@ import MessageSystem.Messages.Universal.UniversalMessageAdapter;
 import MessageSystem.PostOffices.Animator.AnimatorOffice;
 import MessageSystem.Messages.Universal.UpdateList;
 
+/**
+ * Communicates via messages and via awt Events with the main RCOS frame and
+ * other components. It's functions are to set up and comunicate with a
+ * remote server for the loading of programs.
+ * <P>
+ * HISTORY: 31/3/96  DJ Added fifoQueue for filenames.<BR>
+ *          30/12/96 Rewritten with frame moved to Animators.<BR>
+ *          1/1/97   Section from Program Manager moved here.<BR>
+ * <P>
+ * @author Andrew Newman.
+ * @created 19th March 1996
+ * @version 1.00 $Date$
+ */
 public class ProgramManagerAnimator extends RCOSAnimator
 {
   private ProgramManagerFrame pmFrame;
-  private boolean fDone = false;
-  private String sCurrentFile = "";
-  private String sCurrentDirectory = "/";
-  private int iCounter;
-	private static final String MESSENGING_ID = "ProgramManagerAnimator";
+  private String currentFile = "";
+  private String currentDirectory = "/";
+  private static final String MESSENGING_ID = "ProgramManagerAnimator";
 
   public ProgramManagerAnimator (AnimatorOffice aPostOffice,
                                  int x, int y, Image[] pmImages)
@@ -69,22 +64,22 @@ public class ProgramManagerAnimator extends RCOSAnimator
 
   public String getCurrentFile()
   {
-    return sCurrentFile;
+    return currentFile;
   }
 
   public void setCurrentFile(String sNewFile)
   {
-    sCurrentFile = sNewFile;
+    currentFile = sNewFile;
   }
 
   public String getCurrentDirectory()
   {
-    return sCurrentDirectory;
+    return currentDirectory;
   }
 
   public void setCurrentDirectory(String sNewDirectory)
   {
-    sCurrentDirectory = sNewDirectory;
+    currentDirectory = sNewDirectory;
   }
 
   public ProgramManagerFrame getFrame()
@@ -92,9 +87,9 @@ public class ProgramManagerAnimator extends RCOSAnimator
     return pmFrame;
   }
 
-	public synchronized void processMessage(AnimatorMessageAdapter aMsg)
-	{
-	}
+  public synchronized void processMessage(AnimatorMessageAdapter aMsg)
+  {
+  }
 
   public synchronized void processMessage(UniversalMessageAdapter aMsg)
   {
@@ -113,28 +108,28 @@ public class ProgramManagerAnimator extends RCOSAnimator
   {
     // If the box is checked start a terminal before the process
     // is loaded.
-    StartProgram myStartProgram = new StartProgram(this, mhThePostOffice,
-			getCurrentDirectory()+getCurrentFile(), bStartTerminal);
+    StartProgram myStartProgram = new StartProgram(this, postOffice,
+      getCurrentDirectory()+getCurrentFile(), bStartTerminal);
   }
 
   public void upDirectory()
   {
     //Calculate the parent directory.
 
-    if (sCurrentDirectory != "/")
+    if (currentDirectory != "/")
     {
-      String tmp = sCurrentDirectory;
+      String tmp = currentDirectory;
       int location;
 
       location = tmp.lastIndexOf('/',(tmp.length()-2));
       if (location == -1)
       {
-        sCurrentDirectory = "/";
+        currentDirectory = "/";
       }
       else
       {
         tmp = tmp.substring(0, location+1);
-        sCurrentDirectory = tmp.substring(0,location+1);
+        currentDirectory = tmp.substring(0,location+1);
       }
     }
     updateList();
@@ -150,6 +145,9 @@ public class ProgramManagerAnimator extends RCOSAnimator
     pmFrame.updateDirectoryList(data);
   }
 
+  /**
+   * Handle updating the list.  Send the @see UpdateList message.
+   */
   public void updateList()
   {
     UpdateList newMsg = new UpdateList(this,

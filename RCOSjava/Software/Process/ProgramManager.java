@@ -1,20 +1,3 @@
-// *************************************************************************
-// FILE     : ProgramManager.java
-// PACKAGE  : Process
-// PURPOSE  : To communicate via messages and via awt Events with the main
-//            RCOS frame and other components. It's functions are to set up
-//            and comunicate with a remote server for the loading of
-//            programs.
-// AUTHOR   : Brett Carter
-// MODIFIED : David Jones, Andrew Newman
-// HISTORY  : 19/03/96 Created. BC
-//          : 31/03/96 Added fifoQueue for filenames. DJ
-//          : 30/12/96 Rewrote manager with frame moved to Animators. AN
-//          : 01/01/97 Changed it to be a client.  No tracking here at all. AN
-//          : 15/01/97 Added ability to kill processes, step and run. AN
-//
-// *************************************************************************
-
 package Software.Process;
 
 import java.awt.*;
@@ -40,7 +23,24 @@ import Software.Memory.*;
 import Software.Util.*;
 import RCOS;
 
-public class ProgramManager extends OSMessageHandler
+/**
+ * To communicate via messages and via awt Events with the main RCOS frame
+ * and other components. It's functions are to set up and comunicate with a
+ * remote server for the loading of programs.
+ * <P>
+ * HISTORY: 31/03/96 Added fifoQueue for filenames. DJ<BR>
+ *          30/12/96 Rewrote manager with frame moved to Animators. AN<BR>
+ *          01/01/97 Changed it to be a client.  No tracking here at all. AN<BR>
+ *          15/01/97 Added ability to kill processes, step and run. AN<BR>
+ * <P>
+ *
+ * @author Andrew Newman
+ * @author Brett Carter
+ * @author David Jones
+ * @created 19th March 1996
+ * @version 1.00 $Date$
+ */
+ public class ProgramManager extends OSMessageHandler
 {
   // Variables
   private FileClient theFileClient;
@@ -51,17 +51,20 @@ public class ProgramManager extends OSMessageHandler
   private String sNewFilename;
   private static final String MESSENGING_ID = "ProgramManager";
 
-  // Parameters  : String myid - the ID of this object as registered with
-  //                             the PO.
-  //               MessageHandler aPostOffice - the Post Office object.
-  //               String host  - The URL.
-  // Return Type : none
-  // Description : Sets up internal data and registers with the PostOffice.
-  public ProgramManager(OSOffice aPostOffice, String host,
-                        int port, RCOS thisRCOS)
+  /**
+   * Sets up internal data and registers with the PostOffice.
+   *
+   * @param newPostOffice the post office to register to.
+   * @param host the host that this should connect to.
+   * @param port the port to connect to.
+   * @param newRCOS link to RCOS to control some of the threading stuff
+   * directly.
+   */
+  public ProgramManager(OSOffice newPostOffice, String host, int port,
+    RCOS newRCOS)
   {
-    super(MESSENGING_ID, aPostOffice);
-    myRCOS = thisRCOS;
+    super(MESSENGING_ID, newPostOffice);
+    myRCOS = newRCOS;
 
     // Create a new client to get files and directory
     // information from the server.
@@ -69,8 +72,8 @@ public class ProgramManager extends OSMessageHandler
     theFileClient = new FileClient(host, port);
 
     // create and register InterruptHandler
-    theIH = new ProgManInterruptHandler("ProgManInterruptHandler", aPostOffice,
-      "NewProcess", getId());
+    theIH = new ProgManInterruptHandler("ProgManInterruptHandler",
+      newPostOffice, "NewProcess", getId());
     RegisterInterruptHandler newMsg = new
       RegisterInterruptHandler(this, (InterruptHandler) theIH);
     sendMessage(newMsg);

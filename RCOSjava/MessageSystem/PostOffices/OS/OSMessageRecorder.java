@@ -14,7 +14,7 @@ import MessageSystem.PostOffices.Universal.UniversalMessageRecorder;
 public class OSMessageRecorder extends OSMessageHandler
 {
   /**
-   *
+   * The recorder object that all messages are sent.
    */
   private UniversalMessageRecorder recorder;
 
@@ -48,16 +48,7 @@ public class OSMessageRecorder extends OSMessageHandler
   public void processMessage(OSMessageAdapter newMessage)
   {
     System.out.println("OS Got OS Message: " + newMessage);
-/*    myClient = new FileClient("localhost", 4242);
-    myClient.openConnection();
-    try
-    {
-      myClient.writeRecFile("/test.xml" + counter++, newMessage);
-    }
-    catch (Exception e)
-    {
-    }
-    myClient.closeConnection();*/
+    recorder.processOSMessage(newMessage);
   }
 
   /**
@@ -69,15 +60,6 @@ public class OSMessageRecorder extends OSMessageHandler
   public void processMessage(UniversalMessageAdapter newMessage)
   {
     System.out.println("OS Got Universal Message: " + newMessage);
-/*    myClient = new FileClient("localhost", 4242);
-    myClient.openConnection();
-    try
-    {
-      myClient.writeRecFile("/test" + (counter++) + ".xml", mMessage);
-    }
-    catch (Exception e)
-    {
-    }
-    myClient.closeConnection();*/
+    recorder.processOSUniversalMessage(newMessage);
   }
 }

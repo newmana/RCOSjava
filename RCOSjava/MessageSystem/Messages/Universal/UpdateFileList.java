@@ -13,8 +13,10 @@ import Software.Animator.Process.ProgramManagerAnimator;
 import Software.Process.ProgramManager;
 import Software.Util.FIFOQueue;
 import MessageSystem.PostOffices.OS.OSMessageHandler;
+import java.io.Serializable;
 
 public class UpdateFileList extends UniversalMessageAdapter
+  //implements Serializable
 {
   private FIFOQueue fifoQFileList;
   private FIFOQueue fifoQDirectoryList;

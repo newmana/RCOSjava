@@ -40,14 +40,14 @@ import MessageSystem.PostOffices.Universal.UniversalMessageRecorder;
 /**
  * Main startup file for RCOS.java Version 1.00
  * <P>
- * HISTORY  : 22/01/96  Will execute any given PCD file that<BR>
- *                      uses output only, output appears a bit buggy<BR>
- *            30/03/96  Animators combined with OS<BR>
- *            01/01/97  Problem with loading images in Netscape fixed.<BR>
- *                      All files are case sensitive even in<BR>
- *                      Windows 95/NT.<BR>
- *            13/10/98  Started converting to Java 1.1.  Version<BR>
- *                      set to 1.00<BR>
+ * HISTORY: 22/01/96  Will execute any given PCD file that<BR>
+ *                    uses output only, output appears a bit buggy<BR>
+ *          30/03/96  Animators combined with OS<BR>
+ *          01/01/97  Problem with loading images in Netscape fixed.<BR>
+ *                    All files are case sensitive even in<BR>
+ *                    Windows 95/NT.<BR>
+ *          13/10/98  Started converting to Java 1.1.  Version<BR>
+ *                    set to 1.00<BR>
  *
  * @author Andrew Newman
  * @created 21st January 1996

@@ -16,7 +16,9 @@
 
 package Hardware.CPU;
 
-public class Instruction implements Cloneable
+import java.io.Serializable;
+
+public class Instruction implements Cloneable, Serializable
 {
   /** Constant for LITeral call */
   public static final int OPCODE_LIT = 0x0;

@@ -1,21 +1,3 @@
-// *************************************************************************
-// FILE     : ProgramManagerFrame.java
-// PACKAGE  : Animator
-// PURPOSE  : To communicate via messages and via awt Events with the main
-//            RCOS frame and other components. It's functions are to set up
-//            and comunicate with a remote server for the loading of
-//            programs.
-// AUTHOR   : Brett Carter
-// MODIFIED : David Jones, Andrew Newman
-// HISTORY  : 19/3/96  Created.
-//          : 31/3/96  DJ Added fifoQueue for filenames
-//          : 30/12/96 Rewritten with frame moved to Animators.
-//          : 1/1/97   Section from Program Manager moved here.
-//          : 2/1/97   New layout (GridBagLayout).
-//                     Option to automatically start terminal added.
-//
-// *************************************************************************
-
 package Software.Animator.Process;
 
 import java.awt.*;
@@ -30,7 +12,24 @@ import Software.Animator.Support.Positions.Position;
 import MessageSystem.PostOffices.MessageHandler;
 import Software.Util.FIFOQueue;
 
-public class ProgramManagerFrame extends RCOSFrame
+/**
+ * Communicates via messages and via awt Events with the main RCOS frame and
+ * other components. It's functions are to set up and comunicate with a
+ * remote server for the loading of programs.
+ * <P>
+ * HISTORY: 31/03/96 DJ Added fifoQueue for filenames.<BR>
+ *          30/12/96 Rewritten with frame moved to Animators.<BR>
+ *          01/01/97 Section from Program Manager moved here.<BR>
+ *          02/01/97 New layout (GridBagLayout). Option to automatically
+ *                   start terminal added.<BR>
+ * <P>
+ * @author Andrew Newman.
+ * @author Brett Carter.
+ * @author David Jones.
+ * @created 19th March 1996
+ * @version 1.00 $Date$
+ */
+ public class ProgramManagerFrame extends RCOSFrame
 {
   private ProgramManagerAnimator myProgramManager;
   private Image myImages[];
@@ -41,7 +40,7 @@ public class ProgramManagerFrame extends RCOSFrame
   private Checkbox cbStartTerminal = new Checkbox();
 
   public ProgramManagerFrame (int x, int y, Image[] pmImages,
-                              ProgramManagerAnimator thisProgramManager)
+    ProgramManagerAnimator thisProgramManager)
   {
     super();
     setTitle("Program Manager");

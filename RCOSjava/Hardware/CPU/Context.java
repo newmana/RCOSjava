@@ -1,3 +1,7 @@
+package Hardware.CPU;
+
+import java.io.Serializable;
+
 /**
  * Implements Context for simple PCODE CPU.  Models the context of current CPU.
  *
@@ -11,11 +15,8 @@
  * @version 1.00 $Date$
  * @author Andrew Newman.
  * @author David Jones
- **/
-
-package Hardware.CPU;
-
-public class Context implements Cloneable
+ */
+public class Context implements Cloneable, Serializable
 {
   /**
    * The currently executing instruction.
@@ -209,6 +210,10 @@ public class Context implements Cloneable
     return false;
   }
 
+  /**
+   * Returns the string value of the context in the form:
+   * Instruction Register, Program Counter, Stack Pointer, Base Pointer.
+   */
   public String toString()
   {
     return instructionRegister + ", " + programCounter + ", " + stackPointer +

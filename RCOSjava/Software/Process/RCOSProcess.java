@@ -15,8 +15,9 @@ package Software.Process;
 import Hardware.CPU.Context;
 import Hardware.Memory.Memory;
 import MessageSystem.Messages.Universal.NewProcess;
+import java.io.Serializable;
 
-public class RCOSProcess
+public class RCOSProcess implements Serializable
 {
   public static final byte MINIMUM_PRIORITY = 1;
   public static final byte DEFAULT_PRIORITY = 50;

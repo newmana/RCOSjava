@@ -1,6 +1,5 @@
 package MessageSystem.Messages.Universal;
 
-import java.lang.Object;
 import Software.Animator.CPU.CPUAnimator;
 import Software.Animator.Disk.DiskSchedulerAnimator;
 import Software.Animator.FileSystem.FileSystemAnimator;
@@ -27,6 +26,7 @@ import MessageSystem.PostOffices.OS.OSMessageHandler;
 import MessageSystem.PostOffices.Animator.AnimatorMessageHandler;
 import MessageSystem.PostOffices.SimpleMessageHandler;
 import MessageSystem.PostOffices.PostOffice;
+import java.io.Serializable;
 
 /**
  * Adapter for OSMessage and AnimatorMessage for messages bound to both OS
@@ -39,7 +39,7 @@ import MessageSystem.PostOffices.PostOffice;
  * @version 1.00 $Date$
  */
 public class UniversalMessageAdapter extends MessageAdapter
-  implements OSMessage, AnimatorMessage
+  implements OSMessage, AnimatorMessage, Serializable
 {
   public UniversalMessageAdapter()
   {

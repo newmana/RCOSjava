@@ -13,6 +13,7 @@ import Hardware.Memory.Memory;
 import MessageSystem.PostOffices.OS.OSMessageHandler;
 import java.io.IOException;
 import java.io.Serializable;
+import fr.dyade.koala.serialization.GeneratorInputStream;
 
 public class InstructionExecution extends UniversalMessageAdapter
 {
@@ -43,7 +44,7 @@ public class InstructionExecution extends UniversalMessageAdapter
   }
 
   // Koala XML serialization requirements
-  public static void readObject(fr.dyade.koala.serialization.GeneratorInputStream in)
+  public static void readObject(GeneratorInputStream in)
     throws IOException, ClassNotFoundException
   {
     in.readObject();

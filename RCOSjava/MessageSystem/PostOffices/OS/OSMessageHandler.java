@@ -10,7 +10,8 @@ import MessageSystem.Messages.AddHandler;
 /**
  *  Provide sending and receiving facilities for all classes.
  *
- * @author Bruce Jamieson, Andrew Newman
+ * @author Andrew Newman
+ * @author Bruce Jamieson
  * @created 21 October 2000
  * @version 1.00 $Date$
  */

@@ -8,16 +8,16 @@ import MessageSystem.PostOffices.PostOffice;
 /**
  * Basic message class.
  * <P>
- * HISTORY: 03/07/98  Used double dispatch<BR>
- *          05/05/98  Removed usage of destination<BR>
- *          06/05/98  Removed usage of string based sender.<BR>
+ * HISTORY: 03/07/98 Used double dispatch<BR>
+ *          05/05/98 Removed usage of destination<BR>
+ *          06/05/98 Removed usage of string based sender.<BR>
  * <P>
  * @author Andrew Newman
  * @authro Bruce Jamieson
  * @created 24th March 1996
  * @version 1.00 $Date$
  */
-public abstract class MessageAdapter implements Message, Serializable
+public abstract class MessageAdapter implements Message
 {
   /**
    * Where there message was originally sent from

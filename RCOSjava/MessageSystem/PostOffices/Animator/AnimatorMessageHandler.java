@@ -1,23 +1,28 @@
 package MessageSystem.PostOffices.Animator;
 
-import MessageSystem.PostOffices.SimpleMessageHandler;
-import MessageSystem.Messages.Animator.AnimatorMessageAdapter;
-import MessageSystem.Messages.Universal.UniversalMessageAdapter;
 import MessageSystem.Messages.AddHandler;
 import MessageSystem.Messages.MessageAdapter;
+import MessageSystem.Messages.Animator.AnimatorMessageAdapter;
+import MessageSystem.Messages.Universal.UniversalMessageAdapter;
+import MessageSystem.PostOffices.SimpleMessageHandler;
+import java.io.Serializable;
 
 /**
- *  Provide sending and receiving facilities for all classes.
+ * Provide sending and receiving facilities for all classes.
  *
- * @author     Bruce Jamieson, Andrew Newman
- * @created    21 October 2000
+ * HISTORY:    25/02/2001   Added serialization handlers.
+ *
+ * @author Andrew Newman
+ * @author Bruce Jamieson
+ * @version 1.00 $Date$
+ * @created 21 October 2000
  */
 public abstract class AnimatorMessageHandler extends SimpleMessageHandler
 {
   /**
    *  Description of the Field
    */
-  protected AnimatorOffice mhThePostOffice;
+  protected AnimatorOffice postOffice;
 
   /**
    *  Constructor for the AnimatorMessageHandler object
@@ -27,85 +32,81 @@ public abstract class AnimatorMessageHandler extends SimpleMessageHandler
   }
 
   /**
-   *  Constructor for the AnimatorMessageHandler object
+   * Constructor for the AnimatorMessageHandler object
    *
-   * @param  newID            Description of Parameter
-   * @param  mhNewPostOffice  Description of Parameter
+   * @param newID
+   * @param mhNewPostOffice
    */
-  public AnimatorMessageHandler(String newID, AnimatorOffice mhNewPostOffice)
+  public AnimatorMessageHandler(String newId, AnimatorOffice newPostOffice)
   {
-    id = newID;
+    id = newId;
     // Save myId and a pointer the PostOffice
-    mhThePostOffice = mhNewPostOffice;
+    postOffice = newPostOffice;
     // Tell the PostOffice that I'm alive
-    AddHandler newMessage = new AddHandler(this, newID, this);
-    mhNewPostOffice.processMessage(newMessage);
+    AddHandler newMessage = new AddHandler(this, newId, this);
+    postOffice.processMessage(newMessage);
   }
 
   /**
-   *  Description of the Method
    *
-   * @param  aMessage  Description of Parameter
+   *
+   * @param message the message to send
    */
-  public void sendMessage(MessageAdapter aMessage)
+  public void sendMessage(MessageAdapter message)
   {
-    mhThePostOffice.sendMessage(aMessage);
+    postOffice.sendMessage(message);
   }
 
   /**
-   *  Description of the Method
    *
-   * @param  aMessage  Description of Parameter
+   *
+   * @param message
    */
-  public void sendMessage(AnimatorMessageAdapter aMessage)
+  public void sendMessage(AnimatorMessageAdapter message)
   {
-    //System.out.println( "simpleMsgHdlr: sending message from " +
-    //                   aMessage.source + " to " + aMessage.dest );
-    localSendMessage(aMessage);
+    localSendMessage(message);
   }
 
   /**
-   *  Description of the Method
    *
-   * @param  aMessage  Description of Parameter
+   *
+   * @param message
    */
-  public void sendMessage(UniversalMessageAdapter aMessage)
+  public void sendMessage(UniversalMessageAdapter message)
   {
-    mhThePostOffice.sendMessage(aMessage);
+    postOffice.sendMessage(message);
   }
 
   /**
-   *  Description of the Method
    *
-   * @param  aMessage  Description of Parameter
+   *
+   * @param message
    */
-  public void localSendMessage(MessageAdapter aMessage)
+  public void localSendMessage(MessageAdapter message)
   {
-    mhThePostOffice.localSendMessage(aMessage);
+    postOffice.localSendMessage(message);
   }
 
   /**
-   *  Description of the Method
    *
-   * @param  aMessage  Description of Parameter
+   *
+   * @param message
    */
-  public void localSendMessage(AnimatorMessageAdapter aMessage)
+  public void localSendMessage(AnimatorMessageAdapter message)
   {
-    //System.out.println( "simpleMsgHdlr: sending message from " +
-    //                   aMessage.source + " to " + aMessage.dest );
-    mhThePostOffice.localSendMessage(aMessage);
+    postOffice.localSendMessage(message);
   }
 
   /**
-   *  Description of the Method
    *
-   * @param  mMessage  Description of Parameter
+   *
+   * @param message
    */
-  public void processMessage(MessageAdapter mMessage)
+  public void processMessage(MessageAdapter message)
   {
     try
     {
-      processMessage((UniversalMessageAdapter) mMessage);
+      processMessage((UniversalMessageAdapter) message);
     }
     catch (Exception e)
     {
@@ -114,16 +115,16 @@ public abstract class AnimatorMessageHandler extends SimpleMessageHandler
   }
 
   /**
-   *  Description of the Method
    *
-   * @param  mMessage  Description of Parameter
+   *
+   * @param message
    */
-  public abstract void processMessage(AnimatorMessageAdapter mMessage);
+  public abstract void processMessage(AnimatorMessageAdapter message);
 
   /**
-   *  Description of the Method
    *
-   * @param  mMessage  Description of Parameter
+   *
+   * @param message
    */
-  public abstract void processMessage(UniversalMessageAdapter mMessage);
+  public abstract void processMessage(UniversalMessageAdapter message);
 }

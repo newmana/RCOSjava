@@ -28,8 +28,10 @@ import MessageSystem.PostOffices.SimpleMessageHandler;
 import MessageSystem.PostOffices.OS.OSMessageHandler;
 import MessageSystem.PostOffices.PostOffice;
 import Software.Animator.Process.StartProgram;
+import java.io.Serializable;
 
-public class OSMessageAdapter extends MessageAdapter implements OSMessage
+public class OSMessageAdapter extends MessageAdapter
+  implements OSMessage, Serializable
 {
   public OSMessageAdapter(OSMessageHandler theSource)
   {
