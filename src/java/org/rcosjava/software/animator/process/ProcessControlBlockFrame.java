@@ -21,7 +21,7 @@ import org.rcosjava.software.process.ProcessPriority;
 import org.rcosjava.software.process.RCOSProcess;
 
 /**
- * It is the interface which allows users to display the current process control
+ * It is the interface which allows users to see the current process control
  * block of a selected process.
  * <P>
  * <DT> <B>History:</B>
@@ -29,54 +29,147 @@ import org.rcosjava.software.process.RCOSProcess;
  * <DD> 23/11/98 Converted to Java 1.1. AN </DD> </DT>
  * <P>
  * @author Andrew Newman
- * @created 14th January 1996
+ * @created 15th November 2002
  * @version 1.00 $Date$
  */
 public class ProcessControlBlockFrame extends RCOSFrame
 {
+  /**
+   * The tree node to display the ID of the process.
+   */
   private DefaultMutableTreeNode idNode;
+
+  /**
+   * The tree node to display the priority of the process.
+   */
   private DefaultMutableTreeNode priorityNode;
+
+  /**
+   * The tree node to display the state of the process.
+   */
   private DefaultMutableTreeNode stateNode;
+
+  /**
+   * The tree node to display the file name of the process.
+   */
   private DefaultMutableTreeNode fileNameNode;
+
+  /**
+   * The tree node to display the file size of the process.
+   */
   private DefaultMutableTreeNode fileSizeNode;
+
+  /**
+   * The tree node to display the terminal ID of the process.
+   */
   private DefaultMutableTreeNode terminalIdNode;
+
+  /**
+   * The tree node to display the number of code pages of the process.
+   */
   private DefaultMutableTreeNode codePagesNode;
+
+  /**
+   * The tree node to display the number of stack pages of the process.
+   */
   private DefaultMutableTreeNode stackPagesNode;
+
+  /**
+   * The tree node to display the number of CPU ticks of the process.
+   */
   private DefaultMutableTreeNode cpuTicksNode;
+
+  /**
+   * The tree node to display the process' context, its program counter.
+   */
   private DefaultMutableTreeNode pcNode;
+
+  /**
+   * The tree node to display the process' context, its stack pointer.
+   */
   private DefaultMutableTreeNode spNode;
+
+  /**
+   * The tree node to display the process' context, its base pointer.
+   */
   private DefaultMutableTreeNode bpNode;
 
+  /**
+   * The string to display before the id value.
+   */
   private static final String ID = "ID: ";
+
+  /**
+   * The string to display before the priority value.
+   */
   private static final String PRIORITY = "Priority: ";
+
+  /**
+   * The string to display before the state value.
+   */
   private static final String STATE = "State: ";
+
+  /**
+   * The string to display before the file name value.
+   */
   private static final String FILE_NAME = "Filename: ";
+
+  /**
+   * The string to display before the file size value.
+   */
   private static final String FILE_SIZE = "File Size: ";
+
+  /**
+   * The string to display before the terminal id value.
+   */
   private static final String TERMINAL_ID = "Terminal ID: ";
+
+  /**
+   * The string to display before the code pages value.
+   */
   private static final String CODE_PAGES = "Code Pages: ";
+
+  /**
+   * The string to display before the stack pages value.
+   */
   private static final String STACK_PAGES = "Stack Pages: ";
+
+  /**
+   * The string to display before the cpu ticks value.
+   */
   private static final String CPU_TICKS = "CPU Ticks: ";
+
+  /**
+   * The string to display before the program counter value.
+   */
   private static final String PROGRAM_COUNTER = "Program Counter: ";
+
+  /**
+   * The string to display before the stack pointer value.
+   */
   private static final String STACK_POINTER = "Stack Pointer: ";
+
+  /**
+   * The string to display before the base pointer value.
+   */
   private static final String BASE_POINTER = "Base Pointer: ";
 
   /**
-   * Constructor for the ProcessManagerFrame object
+   * Create a new ProcessControlBlock with the given dimensions.
    *
-   * @param x Description of Parameter
-   * @param y Description of Parameter
-   * @param newProcessScheduler Description of Parameter
+   * @param x The width of the frame.
+   * @param y The height of the frame.
+   * @param newProcessScheduler not used.
    */
   public ProcessControlBlockFrame(int x, int y,
       ProcessSchedulerAnimator newProcessScheduler)
   {
     setTitle("Process Control Block");
-//    myProcessManager = thisProcessManager;
     setSize(x, y);
   }
 
   /**
-   * Description of the Method
+   * Create a simple tree view to display all of a process details.
    *
    * @param c Description of Parameter
    */
@@ -90,6 +183,7 @@ public class ProcessControlBlockFrame extends RCOSFrame
     DefaultMutableTreeNode top = new DefaultMutableTreeNode(
         "Process Control Block");
 
+    // Add the standard values of the process its id, priority and state.
     details = new DefaultMutableTreeNode("Details");
     top.add(details);
 
@@ -100,6 +194,7 @@ public class ProcessControlBlockFrame extends RCOSFrame
     stateNode = new DefaultMutableTreeNode(STATE);
     details.add(stateNode);
 
+    // Add the I/O details such as file details and terminal details
     details = new DefaultMutableTreeNode("I/O");
     top.add(details);
 
@@ -110,6 +205,7 @@ public class ProcessControlBlockFrame extends RCOSFrame
     terminalIdNode = new DefaultMutableTreeNode(TERMINAL_ID);
     details.add(terminalIdNode);
 
+    // Add the number of code and stack pages.
     details = new DefaultMutableTreeNode("Memory");
     top.add(details);
 
@@ -118,12 +214,15 @@ public class ProcessControlBlockFrame extends RCOSFrame
     stackPagesNode = new DefaultMutableTreeNode(STACK_PAGES);
     details.add(stackPagesNode);
 
+    // Add the accounting details i.e. CPU ticks.
     details = new DefaultMutableTreeNode("Accounting");
     top.add(details);
 
     cpuTicksNode = new DefaultMutableTreeNode(CPU_TICKS);
     details.add(cpuTicksNode);
 
+    // Add the context details of program counter, stack pointer and base
+    // pointer
     details = new DefaultMutableTreeNode("Context");
     top.add(details);
 
@@ -136,6 +235,8 @@ public class ProcessControlBlockFrame extends RCOSFrame
 
     //Create a tree that allows one selection at a time.
     DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
+
+    // Make the cells black background and white text at all times.
     renderer.setBackground(defaultBgColour);
     renderer.setForeground(defaultFgColour);
     renderer.setTextNonSelectionColor(defaultFgColour);
@@ -143,10 +244,22 @@ public class ProcessControlBlockFrame extends RCOSFrame
     renderer.setBackgroundNonSelectionColor(defaultBgColour);
     renderer.setBackgroundSelectionColor(defaultBgColour);
     renderer.setBorderSelectionColor(defaultBgColour);
+    renderer.setFont(defaultFont);
+
+    // Remove all icons.
     renderer.setOpenIcon(null);
     renderer.setClosedIcon(null);
     renderer.setLeafIcon(null);
 
+    // Set the size of the leaf so that it always has room to display values.
+    // 40 characters should be enough.
+    FontMetrics fm = getFontMetrics(defaultFont);
+    renderer.setSize(fm.charWidth('X')*40, fm.getHeight());
+    renderer.setPreferredSize(new Dimension(fm.charWidth('X')*40,
+        fm.getHeight()));
+
+    // Finally create the tree with lines between each node and the normal
+    // colours
     final JTree tree = new JTree(top);
     tree.putClientProperty("JTree.lineStyle", "Angled");
     tree.setBackground(defaultBgColour);
@@ -155,28 +268,13 @@ public class ProcessControlBlockFrame extends RCOSFrame
     tree.getSelectionModel().setSelectionMode(
         TreeSelectionModel.SINGLE_TREE_SELECTION);
 
-    //Listen for when the selection changes.
-    tree.addTreeSelectionListener(new TreeSelectionListener() {
-      public void valueChanged(TreeSelectionEvent e) {
-//        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-//                                      tree.getLastSelectedPathComponent();
-//
-//        if (node == null) return;
-//
-//        Object nodeInfo = node.getUserObject();
-//        if (node.isLeaf()) {
-//        }
-//        else {
-//        }
-      }
-    });
-
     //Create the scroll pane and add the tree to it.
     JScrollPane treeView = new JScrollPane(tree);
     treeView.setBackground(defaultBgColour);
     treeView.setForeground(defaultFgColour);
     treeView.setBorder(new EmptyBorder(3,3,3,3));
 
+    // Create the ok panel and the ok button.
     JPanel okPanel = new JPanel();
     okPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
     okPanel.setBackground(defaultBgColour);
@@ -220,13 +318,14 @@ public class ProcessControlBlockFrame extends RCOSFrame
   }
 
   /**
+   * A mouse adapter that will listen is added to the ok button.
    */
   class OkPCB extends MouseAdapter
   {
     /**
-     * Description of the Method
+     * When a mouse is click hide this frame.
      *
-     * @param e Description of Parameter
+     * @param e the event that occurred.
      */
     public void mouseClicked(MouseEvent e)
     {
