@@ -159,7 +159,6 @@ Tokens
     fork = 'fork';
     exec = 'exec';
     rand = 'rand';
-    sleep = 'sleep';
 
     identifier = nondigit (digit | nondigit)*;
     floating_constant = fractional_constant exponent_part? floating_suffix? |
@@ -437,7 +436,6 @@ Productions
         {exec1}        exec l_par [file_name]:value r_par semicolon |
         {exec2}        exec l_par [file_name]:arrayref r_par semicolon |
         {rand}         varname equal rand l_par [id]:value r_par semicolon |
-        {sleep}        sleep l_par [id]:value r_par semicolon;
 
     printf_control_strings =
         {str_control}  string_control_string |
