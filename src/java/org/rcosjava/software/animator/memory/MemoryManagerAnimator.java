@@ -2,6 +2,10 @@ package org.rcosjava.software.animator.memory;
 
 import java.awt.*;
 import javax.swing.ImageIcon;
+import java.io.*;
+import java.util.*;
+
+import org.rcosjava.RCOS;
 import org.rcosjava.messaging.postoffices.animator.AnimatorOffice;
 import org.rcosjava.hardware.memory.Memory;
 import org.rcosjava.software.animator.RCOSAnimator;
@@ -23,6 +27,16 @@ public class MemoryManagerAnimator extends RCOSAnimator
    * Unique identifier to register to the animator post office.
    */
   private final static String MESSENGING_ID = "MemoryManagerAnimator";
+
+  /**
+   * Array that register allocated and deallocated memory.
+   */
+  private static ArrayList allocatedList = new ArrayList();
+
+  /**
+   * Array that registers reading and writing memory.
+   */
+  private static ArrayList readingWritingList = new ArrayList();
 
   /**
    * The panel in which to display all of the results to.
@@ -68,6 +82,10 @@ public class MemoryManagerAnimator extends RCOSAnimator
    */
   public void allocatedPages(MemoryReturn returnedMemory)
   {
+    for (int count = 0; count < returnedMemory.getSize(); count++)
+    {
+      allocatedList.add(returnedMemory.getPage(count), new Boolean(true));
+    }
     panel.allocatedPages(returnedMemory);
   }
 
@@ -78,6 +96,10 @@ public class MemoryManagerAnimator extends RCOSAnimator
    */
   public void deallocatedPages(MemoryReturn returnedMemory)
   {
+    for (int count = 0; count < returnedMemory.getSize(); count++)
+    {
+      allocatedList.add(returnedMemory.getPage(count), new Boolean(false));
+    }
     panel.deallocatedPages(returnedMemory);
   }
 
@@ -126,5 +148,25 @@ public class MemoryManagerAnimator extends RCOSAnimator
   {
     panel.finishedWritingMemory(requestedMemory.getPID(),
         requestedMemory.getMemoryType());
+  }
+
+  /**
+   * Handle the serialization of the contents.
+   */
+  private void writeObject(ObjectOutputStream os) throws IOException
+  {
+
+  }
+
+  /**
+   * Handle deserialization of the contents.  Ensures non-serializable
+   * components correctly created.
+   *
+   * @param is stream that is being read.
+   */
+  private void readObject(ObjectInputStream is) throws IOException,
+      ClassNotFoundException
+  {
+    register(MESSENGING_ID, RCOS.getAnimatorPostOffice());
   }
 }

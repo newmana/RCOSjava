@@ -208,31 +208,6 @@ public class MemoryManagerPanel extends RCOSPanel
   /**
    * Description of the Method
    *
-   * @param g Description of Parameter
-   */
-//  public void paint(Graphics g)
-//  {
-//    update(g);
-//  }
-
-  /**
-   * Description of the Method
-   *
-   * @param g Description of Parameter
-   */
-//  public void update(Graphics g)
-//  {
-//    super.update(g);
-//    for (int count = 0; count < MemoryManager.MAX_PAGES; count++)
-//    {
-//      memoryGraphics[count].repaint();
-//    }
-//    notify();
-//  }
-
-  /**
-   * Description of the Method
-   *
    * @param memoryReturn Description of Parameter
    */
   void allocatedPages(MemoryReturn memoryReturn)
