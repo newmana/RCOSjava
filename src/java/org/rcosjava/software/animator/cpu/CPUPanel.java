@@ -263,8 +263,11 @@ public class CPUPanel extends RCOSPanel
         short loc = (short) ((256 * (instr1 & 255)) + (instr2 & 255));
 
         Instruction theInstruction = new Instruction(
-            (processMemory.getOneMemorySegment(count * 8) & 0xff),
-            ((byte) processMemory.getOneMemorySegment(count * 8 + 4)), loc);
+          OpCode.getOpCodesByValue(
+            processMemory.getOneMemorySegment(count * 8) & 0xff));
+        theInstruction.setByteParameter((byte)
+          processMemory.getOneMemorySegment(count * 8 + 4));
+        theInstruction.setWordParameter(loc);
 
         codeListModel.addElement(theInstruction.toString());
       }
