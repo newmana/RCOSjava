@@ -1018,8 +1018,8 @@ public class RCOS extends javax.swing.JApplet implements Runnable
 
       try
       {
-        show = animator.getMethod("showFrame", null);
-        show.invoke(parent, null);
+        show = animator.getMethod("showFrame", (Class) null);
+        show.invoke(parent, (Class) null);
       }
       catch (Exception e)
       {
