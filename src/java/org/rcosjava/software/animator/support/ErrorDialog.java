@@ -46,7 +46,7 @@ public class ErrorDialog extends JDialog
     getContentPane().setBackground(RCOS.DEFAULT_BG_COLOUR);
     getContentPane().setForeground(RCOS.DEFAULT_FG_COLOUR);
     getContentPane().setFont(RCOS.defaultFont);
-    setSize(new Dimension(310, 150));
+    setSize(new Dimension(310, 200));
 
     // Create centered title panel
     JPanel titlePanel = new JPanel();
